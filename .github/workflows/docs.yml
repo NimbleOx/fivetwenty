@@ -20,6 +20,7 @@ permissions:
   contents: write
   pages: write
   id-token: write
+  actions: write
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -114,7 +115,17 @@ jobs:
           git config --global user.name 'github-actions[bot]'
           git config --global user.email 'github-actions[bot]@users.noreply.github.com'
 
-      - name: Build and deploy documentation
-        run: |
-          uv run mkdocs build --strict --clean
-          uv run mkdocs gh-deploy --force --clean --message "Deploy documentation from {sha} [ci skip]"
+      - name: Build documentation
+        run: uv run mkdocs build --strict --clean
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v3
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./site
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v2
