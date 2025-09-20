@@ -58,8 +58,8 @@ theme:
 nav:
   - Home: index.md
 
-  # 🎓 TUTORIALS - Learning-oriented content for skill building
-  - "🎓 Tutorials":
+  # TUTORIALS - Learning-oriented content for skill building
+  - "Tutorials":
       - Overview: tutorials/index.md
       - Getting Started:
           - Installation & Setup: tutorials/getting-started/installation.md
@@ -73,12 +73,12 @@ nav:
           - Portfolio Analysis Basics: tutorials/portfolio-analysis.md
           - Working with Streaming Data: tutorials/streaming-data.md
       - Interactive Examples:
-          - "📁 Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
-          - "🐍 Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/scripts"
-          - "📓 Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/notebooks"
+          - "Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
+          - "Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/scripts"
+          - "Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/notebooks"
 
-  # 🔧 HOW-TO GUIDES - Problem-oriented solutions
-  - "🔧 How-to Guides":
+  # HOW-TO GUIDES - Problem-oriented solutions
+  - "How-to Guides":
       - Overview: how-to-guides/index.md
       - Getting Started:
           - Set Up Live Trading: how-to-guides/setup-live-trading.md
@@ -90,8 +90,8 @@ nav:
           - Optimize High-Frequency Trading: how-to-guides/optimize-high-frequency-trading.md
           - Deploy SDK to Production: how-to-guides/deploy-sdk-to-production.md
           - Integrate External Data Sources: how-to-guides/integrate-external-data-sources.md
-  # 📚 REFERENCE - Information-oriented quick lookup
-  - "📚 API Reference":
+  # REFERENCE - Information-oriented quick lookup
+  - "API Reference":
       - Overview: api-reference/index.md
       - Core Components:
           - Client API: api-reference/client.md
@@ -118,8 +118,8 @@ nav:
           - Transactions: api-reference/endpoints/transactions.md
       - OANDA API Specification:
           - OpenAPI Spec: api-reference/oanda-openapi-spec.md
-  # 💡 EXPLANATIONS - Understanding-oriented deep dives
-  - "💡 Explanations":
+  # EXPLANATIONS - Understanding-oriented deep dives
+  - "Explanations":
       - Overview: explanation/index.md
       - Architecture & Design:
           - SDK Architecture: explanation/sdk-architecture.md
@@ -131,11 +131,11 @@ nav:
           - Market Data & Streaming: explanation/streaming.md
           - Best Practices & Patterns: explanation/best-practices.md
 
-  # 💻 EXAMPLES - Practical demonstrations
-  - "💻 Examples": examples.md
+  # EXAMPLES - Practical demonstrations
+  - "Examples": examples.md
 
-  # 🤝 CONTRIBUTING - Contributor guidance
-  - "🤝 Contributing":
+  # CONTRIBUTING - Contributor guidance
+  - "Contributing":
       - Overview: contributing/index.md
       - Development Setup: contributing/development-setup.md
       - Code Style & Patterns: contributing/code-style.md
