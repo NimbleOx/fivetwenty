@@ -8,7 +8,10 @@ Position monitoring and management.
 
 ## list
 ```python
-positions.list(account_id: AccountID) -> dict[str, Any]
+# positions.list(account_id: AccountID) -> dict[str, Any]
+
+# Example usage:
+positions = await client.positions.list(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/positions`
 
@@ -32,7 +35,10 @@ Get a list of all positions for an account.
 
 ## list_open
 ```python
-positions.list_open(account_id: AccountID) -> dict[str, Any]
+# positions.list_open(account_id: AccountID) -> dict[str, Any]
+
+# Example usage:
+open_positions = await client.positions.list_open(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openPositions`
 
@@ -56,7 +62,13 @@ Get a list of all open positions for an account.
 
 ## get
 ```python
-positions.get(account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]
+# positions.get(account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]
+
+# Example usage:
+position = await client.positions.get(
+    account_id="123-456-789",
+    instrument="EUR_USD"
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/positions/{instrument}`
 
@@ -81,7 +93,18 @@ Get the position for a specific instrument in an account.
 
 ## close
 ```python
-positions.close(account_id: AccountID, instrument: InstrumentName, long_units: str | Decimal | None = None, short_units: str | Decimal | None = None, long_client_extensions: ClientExtensions | dict[str, str] | None = None, short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> dict[str, Any]
+# positions.close(account_id: AccountID, instrument: InstrumentName,
+#                long_units: str | Decimal | None = None,
+#                short_units: str | Decimal | None = None,
+#                long_client_extensions: ClientExtensions | dict[str, str] | None = None,
+#                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> dict[str, Any]
+
+# Example usage:
+result = await client.positions.close(
+    account_id="123-456-789",
+    instrument="EUR_USD",
+    long_units="ALL"
+)
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/positions/{instrument}/close`
 

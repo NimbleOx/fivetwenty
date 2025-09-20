@@ -6,57 +6,67 @@ Welcome to **FiveTwenty** - the modern, secure Python SDK for OANDA's v20 REST A
 
 Get trading in minutes with FiveTwenty's flexible configuration system:
 
-```python
-from fivetwenty import AsyncClient, Environment
-
+```bash
 # Zero-config with environment variables (recommended)
 export FIVETWENTY_OANDA_TOKEN="your-practice-token"
 export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
 export FIVETWENTY_OANDA_ENVIRONMENT="practice"
+```
+
+```python
+from fivetwenty import AsyncClient, Environment
 
 # Start trading immediately
-async with AsyncClient() as client:
-    print(f"Connected: {client.config.summary()}")
+async def main():
+    async with AsyncClient() as client:
+        print(f"Connected: {client.config.summary()}")
 
-    # Check account balance
-    account = await client.accounts.get(client.account_id)
-    print(f"Balance: {account.balance} {account.currency}")
+        # Check account balance
+        account = await client.accounts.get(client.account_id)
+        print(f"Balance: {account.balance} {account.currency}")
 
-    # Place your first trade
-    order = await client.orders.post_market_order(
-        account_id=client.account_id,
-        instrument="EUR_USD",
-        units=1000
-    )
+        # Place your first trade
+        order = await client.orders.post_market_order(
+            account_id=client.account_id,
+            instrument="EUR_USD",
+            units=1000
+        )
 
-    if order.order_fill_transaction:
-        print(f"Trade executed at {order.order_fill_transaction.price}")
+        if order.order_fill_transaction:
+            print(f"Trade executed at {order.order_fill_transaction.price}")
+
+# Run the async function
+import asyncio
+asyncio.run(main())
 ```
 
 ### Alternative Configuration Patterns
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
+from fivetwenty import AsyncClient, Environment, AccountConfig
 
-# Direct parameters (simple scripts)
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE
-) as client:
-    pass
+async def main():
+    # Direct parameters (simple scripts)
+    async with AsyncClient(
+        token="your-token",
+        environment=Environment.PRACTICE
+    ) as client:
+        pass
 
-# Configuration objects (structured applications)
-from fivetwenty import AccountConfig
+    # Configuration objects (structured applications)
+    config = AccountConfig(
+        token="your-token",
+        account_id="your-account-id",
+        environment=Environment.PRACTICE,
+        alias="my_trading_bot"
+    )
 
-config = AccountConfig(
-    token="your-token",
-    account_id="your-account-id",
-    environment=Environment.PRACTICE,
-    alias="my_trading_bot"
-)
+    async with AsyncClient(config=config) as client:
+        print(f"Trading with: {client.config.summary()}")
 
-async with AsyncClient(config=config) as client:
-    print(f"Trading with: {client.config.summary()}")
+# Run the async function
+asyncio.run(main())
 ```
 
 ## Key Features

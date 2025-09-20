@@ -8,7 +8,10 @@ Account management and information retrieval.
 
 ## list
 ```python
-accounts.list() -> list[AccountProperties]
+# accounts.list() -> list[AccountProperties]
+
+# Example usage:
+accounts = await client.accounts.list()
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts`
 
@@ -30,7 +33,10 @@ Get list of all accounts for the authenticated user.
 
 ## get
 ```python
-accounts.get(account_id: AccountID) -> Account
+# accounts.get(account_id: AccountID) -> Account
+
+# Example usage:
+account = await client.accounts.get(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}`
 
@@ -54,7 +60,10 @@ Get detailed information for specific account.
 
 ## summary
 ```python
-accounts.summary(account_id: AccountID) -> AccountSummary
+# accounts.summary(account_id: AccountID) -> AccountSummary
+
+# Example usage:
+summary = await client.accounts.summary(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/summary`
 
@@ -78,7 +87,13 @@ Get condensed account information.
 
 ## instruments
 ```python
-accounts.instruments(account_id: AccountID, instruments: list[str] | None = None) -> list[Instrument]
+# accounts.instruments(account_id: AccountID, instruments: list[str] | None = None) -> list[Instrument]
+
+# Example usage:
+instruments = await client.accounts.instruments(
+    account_id="123-456-789",
+    instruments=["EUR_USD", "GBP_USD"]
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/instruments`
 
@@ -103,7 +118,14 @@ Get all tradeable instruments for account.
 
 ## configure
 ```python
-accounts.configure(account_id: AccountID, alias: str | None = None, margin_rate: str | None = None) -> dict[str, Any]
+# accounts.configure(account_id: AccountID, alias: str | None = None,
+#                   margin_rate: str | None = None) -> dict[str, Any]
+
+# Example usage:
+result = await client.accounts.configure(
+    account_id="123-456-789",
+    alias="My Trading Account"
+)
 ```
 🔗 **OANDA Endpoint**: `PATCH /v3/accounts/{accountID}/configuration`
 
@@ -129,7 +151,13 @@ Update account configuration settings.
 
 ## changes
 ```python
-accounts.changes(account_id: AccountID, since_transaction_id: str) -> dict[str, Any]
+# accounts.changes(account_id: AccountID, since_transaction_id: str) -> dict[str, Any]
+
+# Example usage:
+changes = await client.accounts.changes(
+    account_id="123-456-789",
+    since_transaction_id="100"
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/changes`
 
