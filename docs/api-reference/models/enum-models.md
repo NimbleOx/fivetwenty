@@ -424,10 +424,10 @@ Filter for trade queries by state.
 
 ```python
 from fivetwenty.models.enums import (
+    CandlestickGranularity,
+    Direction,
     InstrumentName,
     OrderType,
-    CandlestickGranularity,
-    Direction
 )
 
 # Using instrument names
