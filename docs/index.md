@@ -30,7 +30,7 @@ async with AsyncClient() as client:
     )
 
     if order.order_fill_transaction:
-        print(f"🎉 Trade executed at {order.order_fill_transaction.price}")
+        print(f"Trade executed at {order.order_fill_transaction.price}")
 ```
 
 ### Alternative Configuration Patterns
@@ -61,17 +61,12 @@ async with AsyncClient(config=config) as client:
 
 ## Key Features
 
-### **Security First**
-- **Automatic credential masking** - Never accidentally log API tokens
-- **Structured secret management** - Built-in SecretStr protection
-- **Environment variable support** - Secure deployment patterns
-- **Configuration validation** - Prevent mis-configurations before they happen
-
 ### **Modern Python Design**
 - **Async & sync clients** - Choose the right tool for your application
 - **Type-safe APIs** - Complete type hints with modern Python syntax
 - **Pydantic models** - Reliable data validation and serialization
 - **Context managers** - Automatic resource cleanup
+- **Environment variable support** - Secure deployment patterns
 
 ### **Production Ready**
 - **Real-time streaming** - Live price feeds with automatic reconnection
@@ -89,25 +84,25 @@ async with AsyncClient(config=config) as client:
 
 Our documentation follows the **[Diátaxis framework](https://diataxis.fr/)** to serve different user needs effectively:
 
-=== "🎓 Learn (Tutorials)"
-    **When you want to build skills through guided practice**
+### Learn (Tutorials)
+**When you want to build skills through guided practice**
 
-    Start with [Tutorials](tutorials/index.md) for hands-on learning that builds your confidence with the FiveTwenty step by step.
+Start with [Tutorials](tutorials/index.md) for hands-on learning that builds your confidence with the FiveTwenty step by step.
 
-=== "🔧 Solve (How-to Guides)"
-    **When you have a specific problem to solve**
+### Solve (How-to Guides)
+**When you have a specific problem to solve**
 
-    Use [How-to Guides](how-to-guides/index.md) for direct, practical solutions to specific trading tasks and challenges.
+Use [How-to Guides](how-to-guides/index.md) for direct, practical solutions to specific trading tasks and challenges.
 
-=== "📚 Reference (API Docs)"
-    **When you need to look up specific details**
+### Reference (API Docs)
+**When you need to look up specific details**
 
-    Check [API Reference](api-reference/index.md) for comprehensive method signatures, parameters, and return values.
+Check [API Reference](api-reference/index.md) for comprehensive method signatures, parameters, and return values.
 
-=== "💡 Understand (Explanations)"
-    **When you want to understand concepts and design decisions**
+### Understand (Explanations)
+**When you want to understand concepts and design decisions**
 
-    Explore [Explanations](explanation/index.md) for background knowledge and deeper understanding of trading concepts.
+Explore [Explanations](explanation/index.md) for background knowledge and deeper understanding of trading concepts.
 
 ## Architecture Overview
 
@@ -126,10 +121,9 @@ FiveTwenty provides a robust architecture for trading applications:
 - **Configurable timeouts** - Fine-tune performance for your use case
 
 ### **Data Models**
-- **75+ Pydantic models** - Complete coverage of OANDA API responses
+- **75+ Pydantic models** - Complete coverage of OANDA API request and response objects
 - **Decimal precision** - Financial-grade decimal arithmetic throughout
 - **Type validation** - Catch errors at runtime with meaningful messages
-- **Serialization support** - JSON export for logging and storage
 
 ## Getting Started Paths
 
@@ -141,15 +135,9 @@ Choose your learning journey based on your experience level:
 3. [Understand environments](tutorials/getting-started/environments.md)
 4. [Place your first trade](tutorials/getting-started/first-trade.md)
 
-### **Migrating from fivetwentypyV20**
-FiveTwenty provides modern alternatives with backward compatibility:
-- **Async-first design** - Better performance for concurrent operations
-- **Secure configuration** - No more hard-coded tokens
-- **Type safety** - Catch errors before they reach production
-- **Reliable streaming** - Automatic reconnection and back-off
-
 ### **Production Applications**
 Build production trading systems with confidence:
+
 - [Configuration patterns](explanation/configuration.md) - Multi-account, multi-environment setup
 - [Best practices](explanation/best-practices.md) - Security, performance, and reliability
 - [Error handling](explanation/error-handling.md) - Robust production error management
@@ -157,11 +145,10 @@ Build production trading systems with confidence:
 
 ## Support & Community
 
-- 📖 **Documentation**: Complete guides and references here
-- 🐛 **Issues**: [GitHub Issues](#) for bug reports
-- 💬 **Discussions**: [GitHub Discussions](#) for questions
-- 🔐 **Security**: security@fivetwenty.dev for security concerns
+- **Documentation**: Complete guides and references here
+- **Issues**: [GitHub Issues](#) for bug reports
+- **Discussions**: [GitHub Discussions](#) for questions
 
 ---
 
-**Ready to start?** Let's [install FiveTwenty](tutorials/getting-started/installation.md) and get you trading! 🚀
+**Ready to start?** Let's [install FiveTwenty](tutorials/getting-started/installation.md) and get you trading!
