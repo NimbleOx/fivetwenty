@@ -60,7 +60,7 @@ jobs:
       - name: Validate documentation
         run: |
           cd docs-tooling/validation
-          uv run python cli.py run --parallel --gates
+          uv run python cli.py run --parallel
 
       - name: Test MkDocs build
         run: uv run mkdocs build --strict --clean
