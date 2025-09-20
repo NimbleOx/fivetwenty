@@ -2,13 +2,13 @@
 
 This page provides access to comprehensive examples and code samples for FiveTwenty. All examples are included with your FiveTwenty installation in the `examples/` directory and are maintained to stay up-to-date with the latest SDK features.
 
-## 📁 Browse Examples Locally
+## Browse Examples Locally
 
 All examples are organized into two categories in your FiveTwenty installation:
 
-### 🐍 Python Scripts
+### Python Scripts
 
-**📂 `examples/scripts/`**
+**`examples/scripts/`**
 
 Complete, runnable Python scripts demonstrating specific functionality:
 
@@ -24,9 +24,9 @@ Complete, runnable Python scripts demonstrating specific functionality:
 - **`enhanced_error_handling.py`** - Robust error handling patterns
 - **`advanced_features_demo.py`** - Advanced SDK features showcase
 
-### 📓 Jupyter Notebooks
+### Jupyter Notebooks
 
-**📂 `examples/notebooks/`**
+**`examples/notebooks/`**
 
 Interactive Jupyter notebooks for learning and experimentation:
 
@@ -37,7 +37,7 @@ Interactive Jupyter notebooks for learning and experimentation:
 - **`data-analysis.ipynb`** - Market data analysis and visualization
 - **`backtesting.ipynb`** - Strategy backtesting framework
 
-## 🚀 Getting Started
+## Getting Started
 
 ### Prerequisites
 
@@ -93,16 +93,16 @@ Before running any examples, make sure you have:
 
 4. **Open any notebook** and follow the interactive instructions
 
-## 📚 Documentation Integration
+## Documentation Integration
 
 Examples complement our structured documentation:
 
-- **[🎓 Tutorials](tutorials/index.md)** - Step-by-step learning paths
-- **[🔧 How-to Guides](how-to-guides/index.md)** - Problem-solving solutions
-- **[📚 API Reference](api-reference/index.md)** - Complete API documentation
-- **[💡 Explanations](explanation/index.md)** - Deep-dive concepts
+- **[Tutorials](tutorials/index.md)** - Step-by-step learning paths
+- **[How-to Guides](how-to-guides/index.md)** - Problem-solving solutions
+- **[API Reference](api-reference/index.md)** - Complete API documentation
+- **[Explanations](explanation/index.md)** - Deep-dive concepts
 
-## 🤝 Contributing Examples
+## Contributing Examples
 
 Found a bug or want to add an example?
 
@@ -110,7 +110,7 @@ Found a bug or want to add an example?
 2. **Contribute examples**: [Contributing Guide](contributing/index.md)
 3. **Suggest improvements**: [Contributing Guide](contributing/index.md)
 
-## 📋 Example Categories
+## Example Categories
 
 ### By Skill Level
 
@@ -128,4 +128,4 @@ Found a bug or want to add an example?
 
 ---
 
-**📌 Remember**: All examples use the practice environment by default for safe learning and testing!
+**Remember**: All examples use the practice environment by default for safe learning and testing!
