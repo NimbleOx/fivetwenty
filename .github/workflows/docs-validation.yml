@@ -1,0 +1,49 @@
+name: Documentation Validation
+
+on:
+  push:
+    branches: [ main, docs-update ]
+    paths: [ 'docs/**', 'README.md', 'docs-tooling/**' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'docs/**', 'README.md', 'docs-tooling/**' ]
+
+jobs:
+  validate-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+
+      - name: Install uv
+        run: |
+          curl -LsSf https://astral.sh/uv/install.sh | sh
+          echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Install dependencies
+        run: |
+          uv sync
+
+      - name: Validate SDK Method Names
+        run: |
+          uv run python docs-tooling/validation/cli.py run sdk-methods --gates
+
+      - name: Run Core Documentation Validation
+        run: |
+          uv run python docs-tooling/validation/cli.py run syntax security --gates
+
+      - name: Check for Validation Report
+        if: failure()
+        run: |
+          echo "Documentation validation failed. Please check the output above."
+          echo "Common issues:"
+          echo "  - Deprecated method names (create_market → post_market_order)"
+          echo "  - Syntax errors in markdown"
+          echo "  - Security issues in documentation"
+          exit 1

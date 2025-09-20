@@ -1,0 +1,217 @@
+site_name: FiveTwenty Documentation
+site_description: Comprehensive Python client for OANDA v20 REST API
+site_author: FiveTwenty Team
+site_url: https://nimbleox.github.io/fivetwenty
+
+repo_name: NimbleOx/fivetwenty
+repo_url: https://github.com/NimbleOx/fivetwenty
+
+theme:
+  name: material
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.prune
+    - navigation.sections
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.path
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: assets/favicon.png
+  icon:
+    logo: logo
+
+nav:
+  - Home: index.md
+
+  # 🎓 TUTORIALS - Learning-oriented content for skill building
+  - "🎓 Tutorials":
+      - Overview: tutorials/index.md
+      - Getting Started:
+          - Installation & Setup: tutorials/getting-started/installation.md
+          - Authentication Basics: tutorials/getting-started/authentication.md
+          - Your First Trade: tutorials/getting-started/first-trade.md
+          - Understanding Environments: tutorials/getting-started/environments.md
+      - Guided Learning:
+          - Basic Trading Concepts: tutorials/basic-trading.md
+          - Advanced Order Types: tutorials/advanced-orders.md
+          - Risk Management Fundamentals: tutorials/risk-management.md
+          - Portfolio Analysis Basics: tutorials/portfolio-analysis.md
+          - Working with Streaming Data: tutorials/streaming-data.md
+      - Interactive Examples:
+          - "📁 Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
+          - "🐍 Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/scripts"
+          - "📓 Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/notebooks"
+
+  # 🔧 HOW-TO GUIDES - Problem-oriented solutions
+  - "🔧 How-to Guides":
+      - Overview: how-to-guides/index.md
+      - Getting Started:
+          - Set Up Live Trading: how-to-guides/setup-live-trading.md
+          - Handle Connection Failures: how-to-guides/handle-connection-failures.md
+          - Close Positions: how-to-guides/close-positions.md
+          - Manage Orders Effectively: how-to-guides/manage-orders-effectively.md
+      - Advanced Operations:
+          - Implement Stop-Loss Strategies: how-to-guides/implement-stop-loss-strategies.md
+          - Optimize High-Frequency Trading: how-to-guides/optimize-high-frequency-trading.md
+          - Deploy SDK to Production: how-to-guides/deploy-sdk-to-production.md
+          - Integrate External Data Sources: how-to-guides/integrate-external-data-sources.md
+  # 📚 REFERENCE - Information-oriented quick lookup
+  - "📚 API Reference":
+      - Overview: api-reference/index.md
+      - Core Components:
+          - Client API: api-reference/client.md
+          - Models & Data Types: api-reference/models/index.md
+          - Configuration: api-reference/configuration.md
+          - Exceptions & Error Handling: api-reference/exceptions.md
+      - Data Models:
+          - Overview: api-reference/models/index.md
+          - Account Models: api-reference/models/account-models.md
+          - Trading Models: api-reference/models/trading-models.md
+          - Order Models: api-reference/models/order-models.md
+          - Market Data Models: api-reference/models/market-data-models.md
+          - Transaction Models: api-reference/models/transaction-models.md
+          - System Models: api-reference/models/system-models.md
+          - Enum Models: api-reference/models/enum-models.md
+      - API Endpoints:
+          - Overview: api-reference/endpoints/index.md
+          - Accounts: api-reference/endpoints/accounts.md
+          - Orders: api-reference/endpoints/orders.md
+          - Trades: api-reference/endpoints/trades.md
+          - Positions: api-reference/endpoints/positions.md
+          - Pricing: api-reference/endpoints/pricing.md
+          - Instruments: api-reference/endpoints/instruments.md
+          - Transactions: api-reference/endpoints/transactions.md
+      - OANDA API Specification:
+          - OpenAPI Spec: api-reference/oanda-openapi-spec.md
+  # 💡 EXPLANATIONS - Understanding-oriented deep dives
+  - "💡 Explanations":
+      - Overview: explanation/index.md
+      - Architecture & Design:
+          - SDK Architecture: explanation/sdk-architecture.md
+          - Async vs Sync Design: explanation/async-vs-sync.md
+          - Error Handling Philosophy: explanation/error-handling.md
+          - Configuration Patterns: explanation/configuration.md
+      - Domain Knowledge:
+          - Forex Trading Concepts: explanation/forex-trading-concepts.md
+          - Market Data & Streaming: explanation/streaming.md
+          - Best Practices & Patterns: explanation/best-practices.md
+
+  # 💻 EXAMPLES - Practical demonstrations
+  - "💻 Examples": examples.md
+
+  # 🤝 CONTRIBUTING - Contributor guidance
+  - "🤝 Contributing":
+      - Overview: contributing/index.md
+      - Development Setup: contributing/development-setup.md
+      - Code Style & Patterns: contributing/code-style.md
+      - Testing Guide: contributing/testing-guide.md
+      - Pull Request Template: contributing/pull-request-template.md
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+            show_submodules: true
+  # Note: mkdocs-jupyter plugin disabled since examples moved to GitHub
+  # - mkdocs-jupyter:
+  #     execute: false
+  #     kernel_name: python3
+  #     include_source: true
+  #     ignore_h1_titles: true
+  #     allow_errors: true
+
+extra:
+  # analytics:
+  #   provider: google
+  #   property: !ENV GOOGLE_ANALYTICS_KEY
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/NimbleOx/fivetwenty
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/fivetwenty/
+
+copyright: |
+  &copy; 2024 <a href="https://github.com/NimbleOx" target="_blank" rel="noopener">FiveTwenty Team</a>

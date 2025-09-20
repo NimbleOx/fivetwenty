@@ -1,0 +1,245 @@
+# FiveTwenty SDK Model Validation Rules
+# Codifies all lessons learned from manual model documentation work
+
+# NEW: Explanation Documentation Specific Rules
+explanation_docs:
+  # Code accuracy in explanation docs (critical for examples)
+  code_accuracy: 100.0              # All Python code examples must be syntactically correct
+  import_accuracy: 100.0            # All imports must be valid and present
+  financial_precision: 100.0        # No float usage in financial examples (must use Decimal)
+  cross_reference_accuracy: 95.0    # Internal links should resolve correctly
+
+  # Error code accuracy (learned from recent fixes)
+  error_code_compliance: 100.0      # Must use FiveTwentyErrorCode, not ErrorCode
+  placeholder_elimination: 100.0    # No placeholder functions like refresh_token()
+
+  # Forex trading examples
+  forex_precision_compliance: 90.0  # Forex prices should have appropriate decimal places
+  realistic_values: 85.0            # Financial examples should use realistic market values
+
+  # ASCII diagram quality
+  diagram_consistency: 95.0         # ASCII diagrams should be well-formed and aligned
+
+validation_rules:
+
+  # Financial Precision Rules
+  financial_precision:
+    description: "Ensure proper decimal types for financial data"
+    severity: ERROR
+    rules:
+      - pattern: ".*price.*|.*amount.*|.*units.*|.*margin.*|.*pl$|.*_pl$"
+        required_types: ["AccountUnits", "PriceValue", "Decimal"]
+        forbidden_types: ["float", "int"]
+        message: "Financial fields must use Decimal, AccountUnits, or PriceValue for precision"
+
+      - pattern: ".*price.*"
+        preferred_type: "PriceValue"
+        message: "Price fields should use PriceValue type"
+
+      - pattern: ".*amount.*|.*units.*|.*margin.*|.*balance.*"
+        preferred_type: "AccountUnits"
+        message: "Amount/unit fields should use AccountUnits type"
+
+  # Field Naming Conventions
+  naming_conventions:
+    description: "OANDA API v20 field naming standards"
+    severity: WARNING
+    rules:
+      - pattern: ".*_id$|^id$"
+        required_type: "str"
+        message: "ID fields should be string type"
+
+      - pattern: ".*time$|.*_time$"
+        required_type: "datetime"
+        message: "Time fields should use datetime type"
+
+      - pattern: ".*state$"
+        required_pattern: ".*State|.*Enum"
+        message: "State fields should use appropriate enum types"
+
+      - field_alias_format: "camelCase"
+        message: "Field aliases must follow camelCase convention for OANDA API"
+
+  # Lifecycle Field Completeness
+  lifecycle_fields:
+    description: "Order and trade lifecycle tracking completeness"
+    severity: WARNING
+    applicable_models:
+      - ".*Order$"
+      - "MarketOrder|LimitOrder|StopOrder|TakeProfitOrder|StopLossOrder|GuaranteedStopLossOrder|TrailingStopLossOrder"
+
+    required_fields:
+      order_lifecycle:
+        - name: "filling_transaction_id"
+          type: "TransactionID"
+          required: false
+          description: "Fill transaction ID (when FILLED)"
+
+        - name: "filled_time"
+          type: "DateTime"
+          required: false
+          description: "Fill timestamp (when FILLED)"
+
+        - name: "trade_opened_id"
+          type: "TradeID"
+          required: false
+          description: "Opened trade ID (when FILLED)"
+
+        - name: "trade_reduced_id"
+          type: "TradeID"
+          required: false
+          description: "Reduced trade ID (when FILLED)"
+
+        - name: "trade_closed_ids"
+          type: "list[TradeID]"
+          required: true
+          description: "Closed trade IDs (when FILLED)"
+
+        - name: "cancelling_transaction_id"
+          type: "TransactionID"
+          required: false
+          description: "Cancel transaction ID (when CANCELLED)"
+
+        - name: "cancelled_time"
+          type: "DateTime"
+          required: false
+          description: "Cancel timestamp (when CANCELLED)"
+
+  # Required Status Rules
+  required_status:
+    description: "Field required status based on Field() definitions"
+    severity: ERROR
+    rules:
+      - condition: "has_default_value"
+        required_status: false
+        message: "Fields with default values should be marked as optional (➖)"
+
+      - condition: "has_default_factory"
+        required_status: false
+        message: "Fields with default_factory should be marked as optional (➖)"
+
+      - condition: "optional_type_annotation"
+        pattern: ".*\\|.*None|Optional\\[.*\\]"
+        required_status: false
+        message: "Optional type annotations should be marked as optional (➖)"
+
+      - condition: "no_default_and_required_type"
+        required_status: true
+        message: "Fields without defaults and non-optional types should be required (✅)"
+
+  # Type Consistency Rules
+  type_consistency:
+    description: "Consistent types for same field names across models"
+    severity: WARNING
+    rules:
+      - field_name: "id"
+        consistent_type: "str"
+        message: "All 'id' fields should be string type"
+
+      - field_name: "instrument"
+        consistent_type: "InstrumentName"
+        message: "All 'instrument' fields should use InstrumentName type"
+
+      - field_name: "state"
+        consistent_pattern: ".*State$"
+        message: "All 'state' fields should use appropriate State enum"
+
+  # Documentation Quality Rules
+  documentation_quality:
+    description: "Documentation completeness and quality standards"
+    severity: INFO
+    rules:
+      - require_field_descriptions: true
+        min_description_length: 10
+        message: "All fields should have meaningful descriptions"
+
+      - require_oanda_links: true
+        pattern: "🔗 \\*\\*OANDA Definition\\*\\*"
+        message: "Models should include OANDA API reference links"
+
+      - require_table_format: true
+        headers: ["Field", "Type", "Required", "Description"]
+        message: "Documentation should use standard table format"
+
+  # Cross-Model Validation Rules
+  cross_model:
+    description: "Validation rules across multiple models"
+    severity: WARNING
+    rules:
+      - inheritance_consistency: true
+        message: "Models inheriting from same base should have consistent fields"
+
+      - relationship_consistency: true
+        message: "Related models should have consistent field types"
+
+# Auto-Fix Rules
+auto_fix_rules:
+
+  financial_precision:
+    - pattern: "price"
+      replacement_type: "PriceValue"
+      template: "| `{field_name}` | PriceValue | {required} | {description} |"
+
+    - pattern: "amount|units|margin|balance"
+      replacement_type: "AccountUnits"
+      template: "| `{field_name}` | AccountUnits | {required} | {description} |"
+
+  lifecycle_fields:
+    - missing_field: "filling_transaction_id"
+      template: "| `filling_transaction_id` | TransactionID | ➖ | Fill transaction ID (when FILLED) |"
+
+    - missing_field: "filled_time"
+      template: "| `filled_time` | DateTime | ➖ | Fill timestamp (when FILLED) |"
+
+    - missing_field: "trade_closed_ids"
+      template: "| `trade_closed_ids` | list[TradeID] | ✅ | Closed trade IDs (when FILLED) |"
+
+  required_status:
+    - condition: "has_default"
+      fix: "change_to_optional"
+      symbol: "➖"
+
+    - condition: "no_default_required_type"
+      fix: "change_to_required"
+      symbol: "✅"
+
+# Quality Gates
+quality_gates:
+
+  minimum_accuracy: 95.0  # Percentage
+  maximum_errors: 5
+  maximum_warnings: 20
+
+  block_on:
+    - FINANCIAL_PRECISION_ERROR
+    - REQUIRED_STATUS_ERROR
+    - TYPE_CONSISTENCY_ERROR
+
+  warn_on:
+    - LIFECYCLE_FIELD_MISSING
+    - NAMING_CONVENTION_VIOLATION
+    - DOCUMENTATION_QUALITY_ISSUE
+
+# Reporting Configuration
+reporting:
+
+  output_formats:
+    - console
+    - json
+    - html
+    - markdown
+
+  include_metrics:
+    - accuracy_percentage
+    - error_count_by_type
+    - auto_fixable_count
+    - model_coverage
+    - field_coverage
+
+  trend_tracking:
+    enabled: true
+    history_file: "docs-tooling/validation-history.json"
+
+  dashboard:
+    enabled: true
+    output_file: "docs-tooling/validation-dashboard.html"

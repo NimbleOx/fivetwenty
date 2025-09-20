@@ -1,0 +1,167 @@
+# Trades Endpoint
+
+📖 **OANDA Reference**: [Trade Endpoints](https://developer.oanda.com/rest-live-v20/trade-ep/)
+
+Trade monitoring and management.
+
+---
+
+## list
+```python
+trades.list(account_id: AccountID, ids: list[TradeID] | None = None, state: TradeStateFilter = TradeStateFilter.OPEN, instrument: InstrumentName | None = None, count: int = 50, before_id: TradeID | None = None) -> dict[str, Any]
+```
+🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades`
+
+📖 **OANDA Documentation**: [Get Trades](https://developer.oanda.com/rest-live-v20/trade-ep/#get-trades)
+
+Get a list of trades for an account.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `account_id` | AccountID | ✅ | Account identifier |
+| `ids` | list[TradeID] | ➖ | List of trade IDs to retrieve |
+| `state` | TradeStateFilter | ➖ | Filter trades by state (default: OPEN) |
+| `instrument` | InstrumentName | ➖ | Filter trades by instrument |
+| `count` | int | ➖ | Maximum number of trades to return (default: 50, max: 500) |
+| `before_id` | TradeID | ➖ | Maximum trade ID to return |
+
+**Returns:** Dictionary containing list of trades and last transaction ID
+
+**Raises:**
+
+- `FiveTwentyError` - API errors
+
+---
+
+## list_open
+```python
+trades.list_open(account_id: AccountID) -> dict[str, Any]
+```
+🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openTrades`
+
+📖 **OANDA Documentation**: [Get Open Trades](https://developer.oanda.com/rest-live-v20/trade-ep/#get-open-trades)
+
+Get all open trades for account.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `account_id` | AccountID | ✅ | Target account identifier |
+
+**Returns:** Dictionary containing list of open trades and last transaction ID
+
+**Raises:**
+
+- `FiveTwentyError` - API errors
+
+---
+
+## get
+```python
+trades.get(account_id: AccountID, trade_specifier: str) -> dict[str, Any]
+```
+🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades/{tradeSpecifier}`
+
+📖 **OANDA Documentation**: [Get Trade Details](https://developer.oanda.com/rest-live-v20/trade-ep/#get-trade-details)
+
+Get specific trade details.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `account_id` | AccountID | ✅ | Target account identifier |
+| `trade_specifier` | str | ✅ | Trade ID or @clientID |
+
+**Returns:** Dictionary containing trade details and last transaction ID
+
+**Raises:**
+
+- `FiveTwentyError` - API errors or invalid trade ID
+
+---
+
+## close
+```python
+trades.close(account_id: AccountID, trade_specifier: str, units: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]
+```
+🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/close`
+
+📖 **OANDA Documentation**: [Close Trade](https://developer.oanda.com/rest-live-v20/trade-ep/#close-trade)
+
+Close a trade (fully or partially).
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `account_id` | AccountID | ✅ | Account identifier |
+| `trade_specifier` | str | ✅ | Trade ID or @clientID |
+| `units` | str | ➖ | Number of units to close (default: ALL for full closure) |
+| `idempotency_key` | str | ➖ | Idempotency key for duplicate prevention |
+
+**Returns:** Dictionary containing closure transaction details
+
+**Raises:**
+
+- `FiveTwentyError` - API errors
+
+---
+
+## modify_client_extensions
+```python
+trades.modify_client_extensions(account_id: AccountID, trade_specifier: str, client_extensions: dict[str, Any] | None = None, idempotency_key: str | None = None) -> dict[str, Any]
+```
+🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/clientExtensions`
+
+📖 **OANDA Documentation**: [Update Trade Client Extensions](https://developer.oanda.com/rest-live-v20/trade-ep/#update-trade-client-extensions)
+
+Modify client extensions for existing trade.
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `account_id` | AccountID | ✅ | Target account identifier |
+| `trade_specifier` | str | ✅ | Trade identifier to modify |
+| `client_extensions` | dict[str, Any] | ➖ | New trade client extensions |
+| `idempotency_key` | str | ➖ | Idempotency key for safe retries |
+
+**Returns:** Dictionary containing modification transaction details
+
+**Raises:**
+
+- `FiveTwentyError` - API errors, trade not found, or modification failed
+
+---
+
+## modify
+```python
+trades.modify(account_id: AccountID, trade_specifier: str, take_profit: dict[str, Any] | None = None, stop_loss: dict[str, Any] | None = None, trailing_stop_loss: dict[str, Any] | None = None, guaranteed_stop_loss: dict[str, Any] | None = None, idempotency_key: str | None = None) -> dict[str, Any]
+```
+🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/orders`
+
+📖 **OANDA Documentation**: [Update Trade Dependent Orders](https://developer.oanda.com/rest-live-v20/trade-ep/#update-trade-dependent-orders)
+
+Update trade-dependent orders (take profit, stop loss, etc.).
+
+**Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `account_id` | AccountID | ✅ | Target account identifier |
+| `trade_specifier` | str | ✅ | Trade identifier to modify |
+| `take_profit` | dict[str, Any] | ➖ | Take profit order specification |
+| `stop_loss` | dict[str, Any] | ➖ | Stop loss order specification |
+| `trailing_stop_loss` | dict[str, Any] | ➖ | Trailing stop loss order specification |
+| `guaranteed_stop_loss` | dict[str, Any] | ➖ | Guaranteed stop loss order specification |
+| `idempotency_key` | str | ➖ | Idempotency key for safe retries |
+
+**Returns:** Dictionary containing order update transaction details
+
+**Raises:**
+
+- `FiveTwentyError` - API errors, trade not found, or update failed

@@ -1,0 +1,13 @@
+extends: existence
+message: ""
+level: suggestion
+tokens:
+  - OANDA
+  - "OANDA's"
+  - forex
+  - Forex
+  - async
+  - Async
+  - APIs
+  - API
+  - Pydantic

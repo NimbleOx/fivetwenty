@@ -1,0 +1,69 @@
+# FiveTwenty Documentation Validation Configuration
+# This file allows customization of validation behavior
+
+# Quality thresholds for validation gates
+quality_standards:
+  minimum_thresholds:
+    link_validation: 95.0      # Require 95% of links to be valid
+    syntax_score: 90.0         # Require 90% syntax compliance
+    terminology_score: 85.0    # Require 85% terminology consistency
+    security_score: 100.0      # Require 100% security compliance (no issues)
+    prose_score: 75.0          # Require 75% prose quality (Vale allows many style issues)
+    sdk_method_accuracy: 100.0 # Require 100% current SDK method names
+    code_example_success: 95.0 # Require 95% of code examples to execute (future)
+
+  # Blocking thresholds - these will fail the validation immediately
+  blocking_thresholds:
+    critical_security_issues: 0
+    build_failures: 0
+    broken_links_critical: 0
+    deprecated_methods: 0       # Zero tolerance for deprecated methods
+
+# Cache settings for performance optimization
+cache_settings:
+  ttl_seconds: 1800           # Cache external link checks for 30 minutes
+  max_entries: 10000          # Maximum cache entries
+
+# Validation scheduling (for automated runs)
+validation_schedule:
+  on_commit:                     # New: immediate validation for PRs
+    enabled: true
+    tasks:
+      - "SDK method validation"
+      - "Syntax checking"
+      - "Security scanning"
+
+  daily:
+    enabled: true
+    time: "08:00"
+    timezone: "UTC"
+    tasks:
+      - "SDK method validation"   # Ensure no regressions
+      - "Link validation"
+      - "Security scanning"
+      - "Syntax checking"
+
+  weekly:
+    enabled: true
+    day: "Monday"
+    time: "09:00"
+    timezone: "UTC"
+    tasks:
+      - "SDK method validation"
+      - "Terminology validation"
+      - "Full documentation review"
+      - "Comprehensive link check"
+
+# Notification settings (future feature)
+notification_settings:
+  email_alerts:
+    enabled: false
+    recipients: []
+    threshold_breaches: true
+    daily_summary: false
+
+  slack_integration:
+    enabled: false
+    webhook_url: ""
+    channel: "#documentation"
+    mention_on_failures: true
