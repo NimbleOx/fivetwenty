@@ -256,6 +256,46 @@ class ValidationRunner:
 
                 content += "\n"
 
+        # Handle code linting validator details
+        elif validator_name == "code_linting_validator" and "linting_issues" in details:
+            linting_issues = details["linting_issues"]
+            if linting_issues:
+                content += "#### 🔧 Code Linting Issues Found\n\n"
+
+                # Group by file for better organization
+                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                for issue in linting_issues:
+                    file_path = issue.get("file", "Unknown")
+                    if file_path not in files_with_issues:
+                        files_with_issues[file_path] = []
+                    files_with_issues[file_path].append(issue)
+
+                for file_path, file_issues in sorted(files_with_issues.items()):
+                    content += f"**{file_path}**\n"
+                    for issue in file_issues:
+                        line = issue.get("line", "?")
+                        issue_type = issue.get("type", "unknown")
+                        message = issue.get("message", "unknown issue")
+                        severity = issue.get("severity", "info")
+                        suggestion = issue.get("suggestion", "")
+
+                        severity_emoji = "🔴" if severity == "error" else "🟡" if severity == "warning" else "🔵"
+                        content += f"- Line {line}: {severity_emoji} [{issue_type}] {message}\n"
+                        if suggestion:
+                            content += f"  💡 Suggestion: {suggestion}\n"
+                    content += "\n"
+
+                # Add summary by issue type
+                content += "#### 📊 Issue Summary\n\n"
+                issue_types = {}
+                for issue in linting_issues:
+                    issue_type = issue.get("type", "unknown")
+                    issue_types[issue_type] = issue_types.get(issue_type, 0) + 1
+
+                for issue_type, count in sorted(issue_types.items()):
+                    content += f"- **{issue_type}**: {count} issues\n"
+                content += "\n"
+
         # Add other validator-specific details here as needed
         elif "files_checked" in details:
             content += "#### 📁 Files Processed\n\n"

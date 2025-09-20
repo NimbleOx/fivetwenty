@@ -13,12 +13,25 @@ We manually fixed 469 Python code blocks across 56 markdown files, addressing sy
 **Problem**: Code blocks labeled as `python` containing shell commands mixed with Python code.
 
 **Example**:
-```python
-# BAD: Mixed shell and Python
+```bash
+# BAD: Mixed shell and Python - Shell command
 export FIVETWENTY_OANDA_TOKEN="token"
+```
+
+```python
+# BAD: Async context outside function
+import asyncio
+
 from fivetwenty import AsyncClient
-async with AsyncClient() as client:
-    pass
+
+
+async def main():
+    async with AsyncClient() as _:
+        pass
+
+
+asyncio.run(main())
+
 ```
 
 **Solution**: Separate into distinct code blocks:
@@ -28,13 +41,17 @@ export FIVETWENTY_OANDA_TOKEN="token"
 
 ```python
 import asyncio
+
 from fivetwenty import AsyncClient
 
+
 async def main():
-    async with AsyncClient() as client:
+    async with AsyncClient() as _:
         pass
 
+
 asyncio.run(main())
+
 ```
 
 **Files Affected**: `docs/index.md` primarily, but pattern found in tutorials.
@@ -69,20 +86,34 @@ order = await client.orders.create(
 **Example**:
 ```python
 # BAD: async with outside async function
-async with AsyncClient() as client:
-    account = await client.accounts.get("123")
+import asyncio
+
+from fivetwenty import AsyncClient
+
+
+async def main():
+    async with AsyncClient() as client:
+        await client.accounts.get("123")
+
+
+asyncio.run(main())
+
 ```
 
 **Solution**: Wrap in proper async function:
 ```python
 import asyncio
+
 from fivetwenty import AsyncClient
+
 
 async def main():
     async with AsyncClient() as client:
-        account = await client.accounts.get("123")
+        await client.accounts.get("123")
+
 
 asyncio.run(main())
+
 ```
 
 **Files Affected**: Throughout tutorials and guides, especially getting-started documentation.
@@ -95,11 +126,12 @@ asyncio.run(main())
 ```python
 # BAD: Unsorted imports
 from fivetwenty.models.enums import (
+    CandlestickGranularity,
+    Direction,
     InstrumentName,
     OrderType,
-    CandlestickGranularity,
-    Direction
 )
+
 ```
 
 **Solution**: Alphabetically sorted imports:
@@ -110,6 +142,7 @@ from fivetwenty.models.enums import (
     InstrumentName,
     OrderType,
 )
+
 ```
 
 **Files Affected**: `docs/api-reference/models/enum-models.md` and scattered throughout.
