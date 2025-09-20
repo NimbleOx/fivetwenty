@@ -57,12 +57,6 @@ jobs:
       - name: Install dependencies
         run: uv sync
 
-      - name: Validate documentation
-        run: |
-          echo "Skipping validation for now to allow deployment"
-          # cd docs-tooling/validation
-          # uv run python cli.py run --parallel
-
       - name: Test MkDocs build
         run: uv run mkdocs build --strict --clean
 
