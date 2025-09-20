@@ -1306,7 +1306,7 @@ Continue your education:
 
 - **[Portfolio Analysis](portfolio-analysis.md)** - Multi-instrument optimization
 - **[Streaming Data](streaming-data.md)** - Real-time risk monitoring
-- **[Data Analysis](examples/notebooks/data-analysis.ipynb)** - Historical risk analysis
+- **[Data Analysis](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/data-analysis.ipynb)** - Historical risk analysis
 - **[Advanced Orders](advanced-orders.md)** - Sophisticated order management
 
 ### Remember

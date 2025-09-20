@@ -1457,7 +1457,7 @@ You've mastered comprehensive portfolio analysis and optimization:
 Continue your learning:
 
 - **[Streaming Data](streaming-data.md)** - Real-time portfolio monitoring
-- **[Data Analysis](examples/notebooks/data-analysis.ipynb)** - Historical strategy validation
+- **[Data Analysis](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/data-analysis.ipynb)** - Historical strategy validation
 - **[Advanced Orders](advanced-orders.md)** - Sophisticated execution
 - **[Risk Management](risk-management.md)** - Advanced risk controls
 

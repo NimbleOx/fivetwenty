@@ -1285,7 +1285,7 @@ Congratulations! You've successfully completed the comprehensive FiveTwenty trad
 
 !!! tip "🚀 Ready for Advanced Learning?"
     **For Strategy Development:**
-    - Explore our [Strategy Backtesting Notebook](examples/notebooks/backtesting.ipynb)
+    - Explore our [Strategy Backtesting Notebook](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/backtesting.ipynb)
     - Read [Advanced Stop-Loss Strategies](../how-to-guides/implement-stop-loss-strategies.md)
     - Study [High-Frequency Trading Optimization](../how-to-guides/optimize-high-frequency-trading.md)
 
@@ -1313,7 +1313,7 @@ Congratulations! You've successfully completed the comprehensive FiveTwenty trad
 - 📖 **Documentation**: Complete [API Reference](../api-reference/index.md)
 - 🐛 **Issues**: [GitHub Issues](#)
 - 💬 **Discussions**: [GitHub Discussions](#)
-- 📚 **Examples**: [Jupyter Notebooks](examples/notebooks/quick-start.ipynb)
+- 📚 **Examples**: [Jupyter Notebooks](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/quick-start.ipynb)
 
 ---
 

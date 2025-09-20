@@ -53,12 +53,12 @@ Deep-dive tutorials for specific areas of trading and SDK usage.
 ### 💻 **Interactive Notebooks** (Hands-On Practice)
 Apply your knowledge with Jupyter notebooks that combine code, explanation, and exercises.
 
-1. **[Quick Start Guide](examples/notebooks/quick-start.ipynb)** - Interactive SDK introduction
-2. **[Trading Strategy Development](examples/notebooks/trading-strategies.ipynb)** - Build your first strategy
-3. **[Risk Management in Practice](examples/notebooks/risk-management.ipynb)** - Apply risk controls
-4. **[Data Analysis Techniques](examples/notebooks/data-analysis.ipynb)** - Analyze market data
-5. **[Real-time Data Processing](examples/notebooks/streaming-data.ipynb)** - Work with live feeds
-6. **[Strategy Backtesting](examples/notebooks/backtesting.ipynb)** - Test strategies on historical data
+1. **[Quick Start Guide](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/quick-start.ipynb)** - Interactive SDK introduction
+2. **[Trading Strategy Development](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/trading-strategies.ipynb)** - Build your first strategy
+3. **[Risk Management in Practice](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/risk-management.ipynb)** - Apply risk controls
+4. **[Data Analysis Techniques](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/data-analysis.ipynb)** - Analyze market data
+5. **[Real-time Data Processing](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/streaming-data.ipynb)** - Work with live feeds
+6. **[Strategy Backtesting](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/backtesting.ipynb)** - Test strategies on historical data
 
 ## Tutorial Principles
 

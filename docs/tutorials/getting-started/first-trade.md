@@ -845,7 +845,7 @@ Ready to build more sophisticated systems:
 
 - **[API Reference](../../api-reference/client.md)** - Complete client documentation
 - **[Models Reference](../../api-reference/models/index.md)** - All available data models
-- **[Examples](examples/notebooks/quick-start.ipynb)** - Real-world implementation examples
+- **[Examples](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/quick-start.ipynb)** - Real-world implementation examples
 
 ### Important Reminders
 

@@ -1279,13 +1279,13 @@ Continue your learning journey:
 - **[Risk Management](risk-management.md)** - Advanced risk control techniques
 - **[Portfolio Analysis](portfolio-analysis.md)** - Multi-instrument strategies
 - **[Streaming Data](streaming-data.md)** - Real-time order management
-- **Data Analysis** (`examples/notebooks/data-analysis.ipynb`) - Test order strategies with historical data
+- **Data Analysis** (`https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/data-analysis.ipynb`) - Test order strategies with historical data
 
 ### Resources
 
 - 📚 [Order Types Reference](../api-reference/endpoints/orders.md)
 - 🎯 [Best Practices Guide](../explanation/best-practices.md)
-- 📊 Interactive Examples (`examples/notebooks/trading-strategies.ipynb`)
+- 📊 Interactive Examples (`https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/trading-strategies.ipynb`)
 
 ---
 

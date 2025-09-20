@@ -1421,7 +1421,7 @@ You've mastered comprehensive real-time streaming data capabilities:
 
 Continue your education:
 
-- **[Data Analysis](examples/notebooks/data-analysis.ipynb)** - Historical validation of streaming strategies
+- **[Data Analysis](https://github.com/NimbleOx/fivetwenty/blob/main/examples/notebooks/data-analysis.ipynb)** - Historical validation of streaming strategies
 - **[Portfolio Analysis](portfolio-analysis.md)** - Real-time portfolio monitoring
 - **[Risk Management](risk-management.md)** - Live risk control systems
 - **[Advanced Orders](advanced-orders.md)** - Sophisticated execution strategies
