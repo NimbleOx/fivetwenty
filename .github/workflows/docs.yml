@@ -49,14 +49,12 @@ jobs:
           path: |
             ~/.cache/uv
             .venv
-          key: ${{ runner.os }}-docs-${{ hashFiles('**/pyproject.toml', '**/docs/requirements.txt') }}
+          key: ${{ runner.os }}-docs-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-docs-
 
       - name: Install dependencies
-        run: |
-          uv sync
-          uv pip install -r docs/requirements.txt
+        run: uv sync
 
       - name: Validate documentation
         run: |
@@ -104,14 +102,12 @@ jobs:
           path: |
             ~/.cache/uv
             .venv
-          key: ${{ runner.os }}-docs-${{ hashFiles('**/pyproject.toml', '**/docs/requirements.txt') }}
+          key: ${{ runner.os }}-docs-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-docs-
 
       - name: Install dependencies
-        run: |
-          uv sync
-          uv pip install -r docs/requirements.txt
+        run: uv sync
 
       - name: Configure Git
         run: |
