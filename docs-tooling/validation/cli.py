@@ -23,6 +23,7 @@ try:
     from validators.syntax import SyntaxValidator  # type: ignore[import-not-found]
     from validators.terminology import TerminologyValidator  # type: ignore[import-not-found]
     from validators.code_examples import CodeExampleValidator  # type: ignore[import-not-found]
+    from validators.code_linting import CodeLintingValidator  # type: ignore[import-not-found]
     from validators.cross_references import CrossReferenceValidator  # type: ignore[import-not-found]
     from validators.financial_precision import FinancialPrecisionValidator  # type: ignore[import-not-found]
     from validators.tutorial_structure import TutorialStructureValidator  # type: ignore[import-not-found]
@@ -50,6 +51,7 @@ def setup_registry() -> ValidatorRegistry:
 
     # Register explanation documentation validators (NEW)
     registry.register("code-examples", CodeExampleValidator, "Validates Python code examples for syntax and best practices")
+    registry.register("code-linting", CodeLintingValidator, "Validates Python code blocks with comprehensive ruff linting")
     registry.register("cross-references", CrossReferenceValidator, "Validates internal documentation links and cross-references")
     registry.register("financial-precision", FinancialPrecisionValidator, "Validates financial examples follow precision and type safety best practices")
 

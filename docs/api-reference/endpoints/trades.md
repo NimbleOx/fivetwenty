@@ -8,7 +8,17 @@ Trade monitoring and management.
 
 ## list
 ```python
-trades.list(account_id: AccountID, ids: list[TradeID] | None = None, state: TradeStateFilter = TradeStateFilter.OPEN, instrument: InstrumentName | None = None, count: int = 50, before_id: TradeID | None = None) -> dict[str, Any]
+# trades.list(account_id: AccountID, ids: list[TradeID] | None = None,
+#            state: TradeStateFilter = TradeStateFilter.OPEN,
+#            instrument: InstrumentName | None = None, count: int = 50,
+#            before_id: TradeID | None = None) -> dict[str, Any]
+
+# Example usage:
+trades = await client.trades.list(
+    account_id="123-456-789",
+    state=TradeStateFilter.OPEN,
+    count=20
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades`
 
@@ -37,7 +47,10 @@ Get a list of trades for an account.
 
 ## list_open
 ```python
-trades.list_open(account_id: AccountID) -> dict[str, Any]
+# trades.list_open(account_id: AccountID) -> dict[str, Any]
+
+# Example usage:
+open_trades = await client.trades.list_open(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openTrades`
 
@@ -61,7 +74,13 @@ Get all open trades for account.
 
 ## get
 ```python
-trades.get(account_id: AccountID, trade_specifier: str) -> dict[str, Any]
+# trades.get(account_id: AccountID, trade_specifier: str) -> dict[str, Any]
+
+# Example usage:
+trade = await client.trades.get(
+    account_id="123-456-789",
+    trade_specifier="12345"
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades/{tradeSpecifier}`
 
@@ -86,7 +105,15 @@ Get specific trade details.
 
 ## close
 ```python
-trades.close(account_id: AccountID, trade_specifier: str, units: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]
+# trades.close(account_id: AccountID, trade_specifier: str,
+#             units: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]
+
+# Example usage:
+result = await client.trades.close(
+    account_id="123-456-789",
+    trade_specifier="12345",
+    units="1000"
+)
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/close`
 
@@ -113,7 +140,16 @@ Close a trade (fully or partially).
 
 ## modify_client_extensions
 ```python
-trades.modify_client_extensions(account_id: AccountID, trade_specifier: str, client_extensions: dict[str, Any] | None = None, idempotency_key: str | None = None) -> dict[str, Any]
+# trades.modify_client_extensions(account_id: AccountID, trade_specifier: str,
+#                                client_extensions: dict[str, Any] | None = None,
+#                                idempotency_key: str | None = None) -> dict[str, Any]
+
+# Example usage:
+result = await client.trades.modify_client_extensions(
+    account_id="123-456-789",
+    trade_specifier="12345",
+    client_extensions={"comment": "Updated comment"}
+)
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/clientExtensions`
 
@@ -140,7 +176,20 @@ Modify client extensions for existing trade.
 
 ## modify
 ```python
-trades.modify(account_id: AccountID, trade_specifier: str, take_profit: dict[str, Any] | None = None, stop_loss: dict[str, Any] | None = None, trailing_stop_loss: dict[str, Any] | None = None, guaranteed_stop_loss: dict[str, Any] | None = None, idempotency_key: str | None = None) -> dict[str, Any]
+# trades.modify(account_id: AccountID, trade_specifier: str,
+#              take_profit: dict[str, Any] | None = None,
+#              stop_loss: dict[str, Any] | None = None,
+#              trailing_stop_loss: dict[str, Any] | None = None,
+#              guaranteed_stop_loss: dict[str, Any] | None = None,
+#              idempotency_key: str | None = None) -> dict[str, Any]
+
+# Example usage:
+result = await client.trades.modify(
+    account_id="123-456-789",
+    trade_specifier="12345",
+    take_profit={"price": "1.1500"},
+    stop_loss={"price": "1.1200"}
+)
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/orders`
 

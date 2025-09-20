@@ -8,7 +8,16 @@ Transaction history and monitoring.
 
 ## list
 ```python
-transactions.list(account_id: AccountID, from_time: str | None = None, to_time: str | None = None, page_size: int = 100, transaction_type: list[str] | None = None) -> dict[str, Any]
+# transactions.list(account_id: AccountID, from_time: str | None = None,
+#                   to_time: str | None = None, page_size: int = 100,
+#                   transaction_type: list[str] | None = None) -> dict[str, Any]
+
+# Example usage:
+transactions = await client.transactions.list(
+    account_id="123-456-789",
+    page_size=50,
+    transaction_type=["ORDER_FILL", "MARKET_ORDER"]
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions`
 
@@ -36,7 +45,13 @@ Get transaction history for account.
 
 ## get
 ```python
-transactions.get(account_id: AccountID, transaction_id: str) -> dict[str, Any]
+# transactions.get(account_id: AccountID, transaction_id: str) -> dict[str, Any]
+
+# Example usage:
+transaction = await client.transactions.get(
+    account_id="123-456-789",
+    transaction_id="12345"
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/{transactionID}`
 
@@ -61,7 +76,15 @@ Get specific transaction details.
 
 ## list_since
 ```python
-transactions.list_since(account_id: AccountID, transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
+# transactions.list_since(account_id: AccountID, transaction_id: str,
+#                        transaction_type: list[str] | None = None) -> dict[str, Any]
+
+# Example usage:
+transactions = await client.transactions.list_since(
+    account_id="123-456-789",
+    transaction_id="100",
+    transaction_type=["ORDER_FILL"]
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/sinceid`
 
@@ -87,7 +110,14 @@ Get transactions since specific transaction ID.
 
 ## stream
 ```python
-transactions.stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
+# transactions.stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
+
+# Example usage:
+async for transaction in client.transactions.stream(
+    account_id="123-456-789",
+    stall_timeout=60.0
+):
+    print(f"Transaction: {transaction}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/stream`
 
@@ -113,7 +143,15 @@ Stream real-time transactions.
 
 ## get_range
 ```python
-transactions.get_range(account_id: AccountID, from_transaction_id: str, to_transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
+# transactions.get_range(account_id: AccountID, from_transaction_id: str,
+#                       to_transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
+
+# Example usage:
+transactions = await client.transactions.get_range(
+    account_id="123-456-789",
+    from_transaction_id="100",
+    to_transaction_id="200"
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/idrange`
 
@@ -140,7 +178,15 @@ Get transactions in ID range.
 
 ## get_all
 ```python
-transactions.get_all(account_id: AccountID, count: int = 500, transaction_type: list[str] | None = None) -> dict[str, Any]
+# transactions.get_all(account_id: AccountID, count: int = 500,
+#                     transaction_type: list[str] | None = None) -> dict[str, Any]
+
+# Example usage:
+all_transactions = await client.transactions.get_all(
+    account_id="123-456-789",
+    count=100,
+    transaction_type=["ORDER_FILL", "MARKET_ORDER"]
+)
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions`
 

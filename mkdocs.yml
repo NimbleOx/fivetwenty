@@ -6,6 +6,7 @@ site_url: https://nimbleox.github.io/fivetwenty
 repo_name: NimbleOx/fivetwenty
 repo_url: https://github.com/NimbleOx/fivetwenty
 
+
 theme:
   name: material
   features:
@@ -23,8 +24,6 @@ theme:
     - navigation.instant
     - navigation.instant.prefetch
     - navigation.instant.progress
-    - navigation.prune
-    - navigation.sections
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.path
@@ -58,8 +57,8 @@ theme:
 nav:
   - Home: index.md
 
-  # 🎓 TUTORIALS - Learning-oriented content for skill building
-  - "🎓 Tutorials":
+  # TUTORIALS - Learning-oriented content for skill building
+  - "Tutorials":
       - Overview: tutorials/index.md
       - Getting Started:
           - Installation & Setup: tutorials/getting-started/installation.md
@@ -72,13 +71,14 @@ nav:
           - Risk Management Fundamentals: tutorials/risk-management.md
           - Portfolio Analysis Basics: tutorials/portfolio-analysis.md
           - Working with Streaming Data: tutorials/streaming-data.md
+          - Decimal Best Practices: tutorials/decimal-best-practices.md
       - Interactive Examples:
-          - "📁 Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
-          - "🐍 Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/scripts"
-          - "📓 Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/notebooks"
+          - "Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
+          - "Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/scripts"
+          - "Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/notebooks"
 
-  # 🔧 HOW-TO GUIDES - Problem-oriented solutions
-  - "🔧 How-to Guides":
+  # HOW-TO GUIDES - Problem-oriented solutions
+  - "How-to Guides":
       - Overview: how-to-guides/index.md
       - Getting Started:
           - Set Up Live Trading: how-to-guides/setup-live-trading.md
@@ -90,8 +90,8 @@ nav:
           - Optimize High-Frequency Trading: how-to-guides/optimize-high-frequency-trading.md
           - Deploy SDK to Production: how-to-guides/deploy-sdk-to-production.md
           - Integrate External Data Sources: how-to-guides/integrate-external-data-sources.md
-  # 📚 REFERENCE - Information-oriented quick lookup
-  - "📚 API Reference":
+  # REFERENCE - Information-oriented quick lookup
+  - "API Reference":
       - Overview: api-reference/index.md
       - Core Components:
           - Client API: api-reference/client.md
@@ -118,8 +118,8 @@ nav:
           - Transactions: api-reference/endpoints/transactions.md
       - OANDA API Specification:
           - OpenAPI Spec: api-reference/oanda-openapi-spec.md
-  # 💡 EXPLANATIONS - Understanding-oriented deep dives
-  - "💡 Explanations":
+  # EXPLANATIONS - Understanding-oriented deep dives
+  - "Explanations":
       - Overview: explanation/index.md
       - Architecture & Design:
           - SDK Architecture: explanation/sdk-architecture.md
@@ -131,16 +131,9 @@ nav:
           - Market Data & Streaming: explanation/streaming.md
           - Best Practices & Patterns: explanation/best-practices.md
 
-  # 💻 EXAMPLES - Practical demonstrations
-  - "💻 Examples": examples.md
+  # EXAMPLES - Practical demonstrations
+  - "Examples": examples.md
 
-  # 🤝 CONTRIBUTING - Contributor guidance
-  - "🤝 Contributing":
-      - Overview: contributing/index.md
-      - Development Setup: contributing/development-setup.md
-      - Code Style & Patterns: contributing/code-style.md
-      - Testing Guide: contributing/testing-guide.md
-      - Pull Request Template: contributing/pull-request-template.md
 
 markdown_extensions:
   - abbr
@@ -203,10 +196,14 @@ plugins:
   #     ignore_h1_titles: true
   #     allow_errors: true
 
+extra_css:
+  - stylesheets/footer.css
+
 extra:
   # analytics:
   #   provider: google
   #   property: !ENV GOOGLE_ANALYTICS_KEY
+  generator: false  # Remove "Made with Material for MkDocs"
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/NimbleOx/fivetwenty
@@ -214,4 +211,41 @@ extra:
       link: https://pypi.org/project/fivetwenty/
 
 copyright: |
-  &copy; 2024 <a href="https://github.com/NimbleOx" target="_blank" rel="noopener">FiveTwenty Team</a>
+  <div class="footer-links">
+    <div class="footer-column">
+      <h4>Documentation</h4>
+      <ul>
+        <li><a href="tutorials/getting-started/installation/">Getting Started</a></li>
+        <li><a href="tutorials/">Tutorials</a></li>
+        <li><a href="how-to-guides/">How-to Guides</a></li>
+        <li><a href="api-reference/">API Reference</a></li>
+        <li><a href="examples/">Examples</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="https://github.com/NimbleOx/fivetwenty">GitHub Repository</a></li>
+        <li><a href="https://github.com/NimbleOx/fivetwenty/issues">Issues & Bug Reports</a></li>
+        <li><a href="https://github.com/NimbleOx/fivetwenty/discussions">Discussions</a></li>
+        <li><a href="https://pypi.org/project/fivetwenty/">PyPI Package</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h4>Contributing</h4>
+      <ul>
+        <li><a href="contributing/">Contributing Guide</a></li>
+        <li><a href="contributing/development-setup/">Development Setup</a></li>
+        <li><a href="contributing/testing-guide/">Testing Guide</a></li>
+        <li><a href="contributing/code-style/">Code Style</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h4>Legal & Support</h4>
+      <ul>
+        <li><a href="https://github.com/NimbleOx/fivetwenty/security/policy">Security Policy</a></li>
+        <li><a href="https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE">License (MIT)</a></li>
+        <li><a href="https://github.com/NimbleOx">Contact</a></li>
+      </ul>
+    </div>
+  </div>

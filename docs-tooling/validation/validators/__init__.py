@@ -11,6 +11,7 @@ from .prose import ProseValidator
 from .security import SecurityValidator
 from .terminology import TerminologyValidator
 from .code_examples import CodeExampleValidator
+from .code_linting import CodeLintingValidator
 from .cross_references import CrossReferenceValidator
 from .financial_precision import FinancialPrecisionValidator
 
@@ -22,6 +23,7 @@ __all__ = [
     "SecurityValidator",
     "TerminologyValidator",
     "CodeExampleValidator",
+    "CodeLintingValidator",
     "CrossReferenceValidator",
     "FinancialPrecisionValidator",
 ]
