@@ -40,6 +40,8 @@ live_client = AsyncClient(
 The environments use different base URLs:
 
 ```python
+from fivetwenty import Environment
+
 # Check environment URLs
 print(Environment.PRACTICE.base_url)
 # Output: https://api-fxpractice.oanda.com/v3
@@ -249,6 +251,7 @@ client = create_client()
 ### Environment-Specific Tests
 
 ```python
+import os
 import pytest
 from fivetwenty import AsyncClient, Environment
 
@@ -276,6 +279,8 @@ async def test_live_systems():
 ### Environment-Aware Monitoring
 
 ```python
+from fivetwenty import Environment
+
 class TradingMonitor:
     def __init__(self, environment: Environment):
         self.environment = environment
@@ -302,6 +307,8 @@ class TradingMonitor:
 Never test new code directly in live:
 
 ```python
+from fivetwenty import Environment
+
 def validate_strategy(strategy):
     """Always validate in practice first."""
     # Run in practice for minimum period
@@ -318,6 +325,8 @@ def validate_strategy(strategy):
 Control features per environment:
 
 ```python
+from fivetwenty import Environment
+
 class FeatureFlags:
     def __init__(self, environment: Environment):
         self.is_live = environment == Environment.LIVE
@@ -432,6 +441,8 @@ Before moving from Practice to Live:
 If you get unexpected behavior:
 
 ```python
+from fivetwenty import Environment
+
 # Always log the environment
 print(f"Environment: {client._environment}")
 print(f"Base URL: {client._environment.base_url}")
@@ -442,6 +453,8 @@ print(f"Base URL: {client._environment.base_url}")
 Practice and live tokens are different:
 
 ```python
+from fivetwenty import Environment
+
 def validate_token_environment(token: str, environment: Environment):
     """Ensure token matches environment."""
     # Practice tokens often start with different prefixes

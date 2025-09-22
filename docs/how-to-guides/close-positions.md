@@ -265,7 +265,7 @@ async def emergency_close_all(account_id: str):
 ### Best Practices
 
 - Always verify position exists before attempting to close
-- Handle partial fills - not all market orders execute completely
+- Handle partial fills - not all market orders execute in full
 - Log all close operations for audit trail
 - Use practice environment for testing close logic
 - Consider using stop-loss orders instead of manual closes for risk management

@@ -4,7 +4,7 @@ import fnmatch
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from pathlib import Path
 
-from docs_validation.validation.core.config import ValidationConfig
+from validation.core.config import ValidationConfig
 
 
 class FileFinder:

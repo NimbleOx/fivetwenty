@@ -67,6 +67,9 @@ async def place_market_order():
 - Scaling into/out of positions
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def place_limit_order():
     async with AsyncClient() as client:
         # Buy EUR/USD only if price drops to 1.0850 or lower
@@ -99,6 +102,9 @@ async def place_limit_order():
 - Risk management automation
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def place_stop_order():
     async with AsyncClient() as client:
         # Sell EUR/USD if price falls to 1.0800 (stop loss)
@@ -131,6 +137,9 @@ async def place_stop_order():
 - Automated profit-taking
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def place_mit_order():
     async with AsyncClient() as client:
         # Take profit when EUR/USD rises to 1.0950
@@ -179,6 +188,7 @@ async def place_mit_order():
 All orders require these fundamental parameters:
 
 ```python
+from decimal import Decimal
 from fivetwenty.models import OrderRequest
 
 # Common order parameters
@@ -201,6 +211,9 @@ Control how long orders remain active:
 - **IOC** (Immediate or Cancel): Fill partial amount, cancel remainder
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def order_with_time_controls():
     from datetime import datetime, timedelta
 
@@ -234,6 +247,8 @@ Orders progress through predictable states:
 ### Monitoring Order Status
 
 ```python
+from fivetwenty import AsyncClient
+
 async def monitor_order_status(order_id: str):
     async with AsyncClient() as client:
         # Check current order status
@@ -257,6 +272,9 @@ async def monitor_order_status(order_id: str):
 ### Modifying Pending Orders
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def modify_pending_order(order_id: str, new_price: Decimal):
     async with AsyncClient() as client:
         # Update order price
@@ -302,6 +320,8 @@ async def modify_pending_order(order_id: str, new_price: Decimal):
 ### Common Order Errors
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import VeeTwentyError
 
 async def robust_order_placement():
@@ -335,6 +355,8 @@ async def robust_order_placement():
 Always validate parameters before submission:
 
 ```python
+from decimal import Decimal
+
 def validate_order_params(instrument: str, units: int, price: Decimal):
     # Check minimum/maximum units
     if abs(units) < 1:
@@ -352,6 +374,8 @@ def validate_order_params(instrument: str, units: int, price: Decimal):
 ### Position Size Management
 
 ```python
+from decimal import Decimal
+
 async def calculate_position_size(risk_amount: Decimal, stop_distance: Decimal) -> int:
     """Calculate position size based on risk management rules."""
 

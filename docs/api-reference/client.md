@@ -63,7 +63,7 @@ AsyncClient(
 1. **Configuration Object** (recommended for applications):
    - `config` (AccountConfig) - Pre-configured account settings
 
-2. **Direct Parameters** (simple scripts):
+2. **Direct Parameters** (basic scripts):
    - `token` (str) - OANDA API token
    - `account_id` (str, optional) - OANDA account ID for convenience
    - `environment` (Environment) - `Environment.PRACTICE` or `Environment.LIVE`
@@ -91,7 +91,7 @@ from fivetwenty import AsyncClient, Environment
 async with AsyncClient() as client:
     accounts = await client.accounts.list()
 
-# Direct parameters (simple scripts)
+# Direct parameters (basic scripts)
 async with AsyncClient(
     token="your-token",
     environment=Environment.PRACTICE

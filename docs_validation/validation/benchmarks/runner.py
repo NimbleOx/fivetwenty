@@ -12,9 +12,9 @@ from typing import Any
 
 import psutil
 
-from docs_validation.validation.core.config import ValidationConfig
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.validators.registry import default_registry
+from validation.core.config import ValidationConfig
+from validation.core.context import ValidationContext
+from validation.validators.registry import default_registry
 
 
 @dataclass

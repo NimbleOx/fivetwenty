@@ -783,6 +783,8 @@ Create comprehensive documentation for your risk management system.
 ### Documentation Framework
 
 ```python
+from datetime import datetime
+
 class RiskDocumentationTemplate:
     """Template for comprehensive risk management documentation."""
     
@@ -1177,7 +1179,7 @@ Throughout this risk management tutorial series, you've mastered:
 - [Advanced Orders](../advanced-orders/index.md) - Sophisticated order management
 
 **For Production Trading:**
-- [Deploy SDK to Production](../../how-to-guides/deploy-sdk-to-production.md) - Live trading setup
+- [Deploy SDK to Production](../../how-to-guides/production-deployment/index.md) - Live trading setup
 - [HFT Optimization](../../how-to-guides/hft-optimization/index.md) - Performance optimization
 - [Data Integration](../../how-to-guides/data-integration/index.md) - External data sources
 

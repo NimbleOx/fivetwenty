@@ -20,7 +20,7 @@ Exception
 
 ## Basic Error Handling
 
-### Simple Try-Catch
+### Basic Try-Catch
 
 ```python
 import os

@@ -10,9 +10,9 @@ from enum import Enum
 from pathlib import Path
 from typing import Any
 
-from docs_validation.validation.checks.base import BaseCheck
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.core.results import ValidationResult, ValidationStatus, ValidationSummary
+from validation.checks.base import BaseCheck
+from validation.core.context import ValidationContext
+from validation.core.results import ValidationResult, ValidationStatus, ValidationSummary
 
 
 class ExecutionMode(str, Enum):

@@ -100,6 +100,9 @@ Price fields remain strings for OANDA precision:
 
 ### 1. Position Sizing with Decimal Precision
 ```python
+from fivetwenty.models import InstrumentName
+from fivetwenty.models import MarketOrderRequest
+from fivetwenty.models import TimeInForce
 from decimal import Decimal
 
 async def calculate_position_size(
@@ -285,27 +288,33 @@ def calculate_stop_levels(
     )
 
 # Usage with a trade
-trade = await client.trades.get(account_id=account_id, trade_id=trade_id)
-direction = "long" if trade.initial_units > 0 else "short"
+async def demo_stop_loss_calculation():
+    trade = await client.trades.get(account_id=account_id, trade_id=trade_id)
+    direction = "long" if trade.initial_units > 0 else "short"
 
-stop_price, target_price = calculate_stop_levels(
-    entry_price=trade.price,
-    direction=direction,
-    stop_pips=20,
-    target_pips=40,
-    pip_location=5  # EUR/USD uses 5 decimal places
-)
+    stop_price, target_price = calculate_stop_levels(
+        entry_price=trade.price,
+        direction=direction,
+        stop_pips=20,
+        target_pips=40,
+        pip_location=5  # EUR/USD uses 5 decimal places
+    )
 
-# Create stop loss order
-# Create stop loss using post_order with StopLossOrderRequest
-from fivetwenty.models import StopLossOrderRequest
+    # Create stop loss order
+    # Create stop loss using post_order with StopLossOrderRequest
+    from fivetwenty.models import StopLossOrderRequest
 
-sl_request = StopLossOrderRequest(
-    tradeID=trade_id,
-    price=str(stop_price),
-    timeInForce="GTC"
-)
-stop_order = await client.orders.post_order(account_id, sl_request)
+    sl_request = StopLossOrderRequest(
+        tradeID=trade_id,
+        price=str(stop_price),
+        timeInForce="GTC"
+    )
+    stop_order = await client.orders.post_order(account_id, sl_request)
+    return stop_order
+
+# Run the example
+import asyncio
+asyncio.run(demo_stop_loss_calculation())
 ```
 
 ## Advanced Decimal Patterns
@@ -438,12 +447,14 @@ display_result = result.quantize(Decimal('0.01'))  # 3.33
 ### ❌ Don't: Convert unnecessarily
 ```python
 # Unnecessary conversion
+
 order = MarketOrderRequest(units=1000, ...)
 units_float = float(order.units)  # Why convert to less precise type?
 ```
 
 ### ✅ Do: Work with native Decimal
 ```python
+from fivetwenty.models import MarketOrderRequest
 from decimal import Decimal
 
 order = MarketOrderRequest(units=1000, ...)
@@ -465,5 +476,5 @@ Use Decimal types for all financial calculations to ensure your trading algorith
 ## Additional Resources
 
 - [Python Decimal Documentation](https://docs.python.org/3/library/decimal.html)
-- [Risk Management Tutorial](risk-management.md)
-- [Advanced Order Management](advanced-orders.md)
+- [Risk Management Tutorial](risk-management/index.md)
+- [Advanced Order Management](advanced-orders/index.md)

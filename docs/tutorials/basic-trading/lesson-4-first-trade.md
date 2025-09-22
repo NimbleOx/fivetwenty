@@ -94,6 +94,7 @@ trade_id = await place_first_trade_safely(account_id)
 Now let's monitor your position in real-time:
 
 ```python
+from datetime import datetime
 from fivetwenty import AsyncClient, Environment
 
 async def monitor_position_realtime(account_id: str, trade_id: str, duration_minutes: int = 5):

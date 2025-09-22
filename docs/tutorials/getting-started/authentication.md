@@ -163,6 +163,8 @@ async with AsyncClient(config=config) as client:
 #### HashiCorp Vault
 
 ```python
+from fivetwenty import Client
+import os
 import hvac
 from fivetwenty import AccountConfig, Environment
 
@@ -222,6 +224,7 @@ spec:
 ### Different Environments
 
 ```python
+import os
 from fivetwenty import AsyncClient, Environment
 
 from fivetwenty import AccountConfig, AsyncClient, Environment
@@ -296,6 +299,9 @@ async with AsyncClient(config=momentum_config) as momentum_client:
 The library automatically protects sensitive information:
 
 ```python
+from fivetwenty import AccountConfig
+from fivetwenty import Environment
+
 config = AccountConfig(
     token = 'your-api-token-here',
     account_id="secret-account-123",
@@ -317,6 +323,8 @@ print(config.summary())
 The library validates all configuration values:
 
 ```python
+from fivetwenty import AccountConfig
+from fivetwenty import Environment
 from pydantic import ValidationError
 
 try:
@@ -345,6 +353,7 @@ except ValidationError as e:
 ### Verify Configuration
 
 ```python
+import os
 import asyncio
 from fivetwenty import AsyncClient, Environment
 
@@ -378,6 +387,7 @@ asyncio.run(test_authentication())
 ### Validate Configuration
 
 ```python
+import os
 from fivetwenty import ConfigValidator, AccountConfig, Environment
 
 # Create configuration
@@ -431,6 +441,7 @@ async with AsyncClient(
 For corporate environments:
 
 ```python
+from fivetwenty import Client
 from fivetwenty import AsyncClient, Environment
 
 # Custom CA bundle

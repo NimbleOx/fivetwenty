@@ -3,9 +3,9 @@
 import time
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-from docs_validation.validation.checks.base import BaseCheck
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.core.results import ValidationResult, ValidationStatus, ValidationSummary
+from validation.checks.base import BaseCheck
+from validation.core.context import ValidationContext
+from validation.core.results import ValidationResult, ValidationStatus, ValidationSummary
 
 
 class ValidatorRegistry:
@@ -172,18 +172,18 @@ default_registry = ValidatorRegistry()
 # Register built-in checks
 def register_builtin_checks() -> None:
     """Register all built-in validation checks."""
-    from docs_validation.validation.checks.code.executability import CodeExecutabilityCheck
-    from docs_validation.validation.checks.code.python import PythonStyleCheck, PythonSyntaxCheck
-    from docs_validation.validation.checks.content.cross_references import CrossReferenceCheck
-    from docs_validation.validation.checks.content.educational_progression import EducationalProgressionCheck
-    from docs_validation.validation.checks.content.financial import FinancialPrecisionCheck, FinancialTerminologyCheck
-    from docs_validation.validation.checks.content.sdk_methods import SDKMethodsCheck
-    from docs_validation.validation.checks.content.terminology import TerminologyCheck
-    from docs_validation.validation.checks.content.tutorial_structure import TutorialStructureCheck
-    from docs_validation.validation.checks.links.validator import LinkValidationCheck
-    from docs_validation.validation.checks.prose.validator import ProseCheck
-    from docs_validation.validation.checks.security.scanner import SecurityCheck
-    from docs_validation.validation.checks.syntax.markdown import MarkdownSyntaxCheck
+    from validation.checks.code.executability import CodeExecutabilityCheck
+    from validation.checks.code.python import PythonStyleCheck, PythonSyntaxCheck
+    from validation.checks.content.cross_references import CrossReferenceCheck
+    from validation.checks.content.educational_progression import EducationalProgressionCheck
+    from validation.checks.content.financial import FinancialPrecisionCheck, FinancialTerminologyCheck
+    from validation.checks.content.sdk_methods import SDKMethodsCheck
+    from validation.checks.content.terminology import TerminologyCheck
+    from validation.checks.content.tutorial_structure import TutorialStructureCheck
+    from validation.checks.links.validator import LinkValidationCheck
+    from validation.checks.prose.validator import ProseCheck
+    from validation.checks.security.scanner import SecurityCheck
+    from validation.checks.syntax.markdown import MarkdownSyntaxCheck
 
     # Syntax checks
     default_registry.register("markdown_syntax", MarkdownSyntaxCheck)

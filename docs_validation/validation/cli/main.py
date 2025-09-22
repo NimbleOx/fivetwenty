@@ -7,9 +7,9 @@ import click
 from rich.console import Console
 from rich.table import Table
 
-from docs_validation.validation.core.config import ValidationConfig, set_config
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.validators.registry import default_registry
+from validation.core.config import ValidationConfig, set_config
+from validation.core.context import ValidationContext
+from validation.validators.registry import default_registry
 
 console = Console()
 

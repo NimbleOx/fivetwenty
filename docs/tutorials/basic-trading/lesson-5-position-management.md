@@ -10,6 +10,7 @@
 Position management is the art of maximizing profits while controlling risk after entering a trade.
 
 ```python
+from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 async def demonstrate_position_management(account_id: str, trade_id: str):
@@ -111,7 +112,7 @@ class StopLossStrategy:
             return level + buffer  # Above resistance
 
 # Example usage
-entry_price = 1.1000
+entry_price = Decimal("1.1000")
 is_long_position = True
 
 print("🛡️ Stop Loss Strategy Examples:")
@@ -135,6 +136,8 @@ print(f"2x ATR stop: {atr_stop:.5f}")
 Maximize profits with intelligent take profit placement:
 
 ```python
+from decimal import Decimal
+
 class TakeProfitStrategy:
     """Advanced take profit strategies."""
 
@@ -174,8 +177,8 @@ class TakeProfitStrategy:
         return take_profits
 
 # Example usage
-entry_price = 1.1000
-stop_loss = 1.0980
+entry_price = Decimal("1.1000")
+stop_loss = Decimal("1.0980")
 is_long_position = True
 
 print("\n🎯 Take Profit Strategy Examples:")
@@ -197,6 +200,8 @@ print(f"Multiple targets: {[f'{tp:.5f}' for tp in multiple_tps]}")
 Capture more profit with trailing stops:
 
 ```python
+from fivetwenty import AsyncClient
+
 class TrailingStopManager:
     """Manage trailing stop loss orders."""
 
@@ -272,6 +277,8 @@ async def demonstrate_trailing_stop(account_id: str, trade_id: str):
 Advanced position sizing based on volatility and risk:
 
 ```python
+from decimal import Decimal
+
 class AdvancedPositionSizing:
     """Advanced position sizing strategies."""
 
@@ -307,8 +314,8 @@ class AdvancedPositionSizing:
 # Example position sizing
 account_balance = 10000
 risk_percent = 1.0  # 1% risk
-entry_price = 1.1000
-stop_loss = 1.0980
+entry_price = Decimal("1.1000")
+stop_loss = Decimal("1.0980")
 
 position_size = AdvancedPositionSizing.fixed_risk_sizing(
     account_balance, risk_percent, entry_price, stop_loss

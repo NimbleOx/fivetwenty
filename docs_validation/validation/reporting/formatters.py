@@ -13,7 +13,7 @@ from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn
 from rich.table import Table
 from rich.tree import Tree
 
-from docs_validation.validation.core.results import IssueSeverity, ValidationIssue, ValidationResult, ValidationSummary
+from validation.core.results import IssueSeverity, ValidationIssue, ValidationResult, ValidationSummary
 
 
 class BaseFormatter(ABC):
@@ -553,7 +553,7 @@ class CSVFormatter(BaseFormatter):
     def format_result(self, result: ValidationResult) -> str:
         """Format result as CSV (single check)."""
         # Create a mini-summary for this result
-        from docs_validation.validation.core.results import ValidationSummary
+        from validation.core.results import ValidationSummary
 
         mini_summary = ValidationSummary(results=[result])
         return self.format_summary(mini_summary)

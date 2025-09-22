@@ -89,6 +89,9 @@ class RuleBasedOrderManager:
 Implement rules based on market conditions:
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+
 class SpreadThresholdRule(OrderRule):
     """Cancel orders when spread becomes too wide."""
 
@@ -213,6 +216,8 @@ class MarketSessionRule(OrderRule):
 ### Position Management Rules
 
 ```python
+from decimal import Decimal
+
 class MaxPositionRule(OrderRule):
     """Enforce maximum position size limits."""
 
@@ -358,6 +363,10 @@ Create comprehensive monitoring for order and position management.
 ### Real-Time Monitoring Engine
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class OrderMonitoringEngine:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -495,6 +504,8 @@ class OrderMonitoringEngine:
 ### Alert System Implementation
 
 ```python
+from datetime import datetime
+
 class BaseAlertHandler(ABC):
     """Base class for alert handlers."""
 
@@ -555,6 +566,8 @@ Build systems that respond to market events and order state changes.
 ### Event-Driven Architecture
 
 ```python
+from datetime import datetime
+from fivetwenty import AsyncClient
 from enum import Enum
 from dataclasses import dataclass
 from typing import Callable
@@ -668,6 +681,10 @@ Build systems that handle errors gracefully and recover automatically.
 ### Error Recovery Manager
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class ErrorRecoveryManager:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -716,7 +733,7 @@ async def insufficient_margin_recovery(error: Exception, context: Dict[str, Any]
     """Recover from insufficient margin errors."""
     # Reduce position size and retry
     original_units = context.get("units", 0)
-    reduced_units = int(original_units * 0.7)  # Reduce by 30%
+    reduced_units = int(original_units * Decimal("0.7"))  # Reduce by 30%
 
     context["units"] = reduced_units
 
@@ -770,6 +787,7 @@ Implement detailed logging for compliance and analysis.
 ### Advanced Logging System
 
 ```python
+from datetime import datetime
 import logging
 import json
 from pathlib import Path

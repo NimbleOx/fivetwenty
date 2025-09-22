@@ -245,6 +245,7 @@ Understand how different currency pairs move together to avoid overexposure.
 ### Correlation Matrix Implementation
 
 ```python
+from fivetwenty import AsyncClient
 import numpy as np
 from datetime import datetime, timedelta
 from fivetwenty.models import CandlestickGranularity

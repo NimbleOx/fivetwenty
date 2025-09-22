@@ -269,7 +269,7 @@ class FastPrice(NamedTuple):
         return self.ask - self.bid
 
 # Store as FastPrice instead of dict
-price_data = FastPrice(1.1234, 1.1236, time.perf_counter())
+price_data = FastPrice(Decimal("1.1234"), Decimal("1.1236"), time.perf_counter())
 ```
 
 ### Batch Processing

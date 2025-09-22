@@ -35,3 +35,8 @@ mental
 terminate
 minimize
 multiple
+FOK
+IOC
+GTD
+GTC
+GFD

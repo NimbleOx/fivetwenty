@@ -364,6 +364,8 @@ Adjust position sizes based on recent performance and market conditions.
 ### Performance-Based Adjustments
 
 ```python
+from decimal import Decimal
+
 class AdaptivePositionSizer:
     """Position sizer that adapts based on recent performance."""
 
@@ -448,8 +450,8 @@ def demo_adaptive_sizing():
     # Calculate position size
     position_size = sizer.get_position_size(
         account_balance=10000,
-        entry_price=1.1000,
-        stop_loss=1.0950
+        entry_price=Decimal("1.1000"),
+        stop_loss=Decimal("1.0950")
     )
     
     print(f"   Recommended Position Size: {position_size:,} units")
@@ -536,6 +538,8 @@ Test your understanding of position sizing strategies:
 ### Position Sizing Checklist
 
 ```python
+from decimal import Decimal
+
 def validate_position_size_decision(account_balance: float, position_size: int,
                                    entry_price: float, stop_loss: float,
                                    instrument: str) -> dict:
@@ -583,8 +587,8 @@ def validate_position_size_decision(account_balance: float, position_size: int,
 result = validate_position_size_decision(
     account_balance=10000,
     position_size=2000,
-    entry_price=1.1000,
-    stop_loss=1.0950,
+    entry_price=Decimal("1.1000"),
+    stop_loss=Decimal("1.0950"),
     instrument="EUR_USD"
 )
 

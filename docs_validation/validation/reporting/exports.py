@@ -6,9 +6,9 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from docs_validation.validation.core.results import ValidationSummary
-from docs_validation.validation.reporting.aggregators import ResultAggregator, TrendAnalyzer
-from docs_validation.validation.reporting.formatters import (
+from validation.core.results import ValidationSummary
+from validation.reporting.aggregators import ResultAggregator, TrendAnalyzer
+from validation.reporting.formatters import (
     CSVFormatter,
     HTMLFormatter,
     JSONFormatter,

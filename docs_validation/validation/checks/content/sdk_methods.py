@@ -4,9 +4,9 @@ import re
 from pathlib import Path
 from typing import Any
 
-from docs_validation.validation.checks.base import ContentCheck
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.core.results import IssueSeverity, ValidationIssue, ValidationResult
+from validation.checks.base import ContentCheck
+from validation.core.context import ValidationContext
+from validation.core.results import IssueSeverity, ValidationIssue, ValidationResult
 
 
 class SDKMethodsCheck(ContentCheck):

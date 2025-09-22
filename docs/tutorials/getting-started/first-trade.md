@@ -575,6 +575,7 @@ if __name__ == "__main__":
 | Maximum performance | Simplicity preferred |
 
 ```python
+from fivetwenty import Client
 from fivetwenty import AsyncClient, Environment
 
 # Async: Better for multiple concurrent operations
@@ -655,6 +656,10 @@ except FiveTwentyError as e:
 - **Use structured logging** for monitoring
 
 ```python
+from fivetwenty import AccountConfig
+from fivetwenty import Environment
+import os
+
 # Good configuration practice
 config = AccountConfig(
     token=os.environ["PRACTICE_TOKEN"],

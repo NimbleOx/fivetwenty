@@ -154,6 +154,8 @@ class OrderValidationFramework:
 #### Risk-Based Validators
 
 ```python
+from decimal import Decimal
+
 class MaxPositionSizeValidator(OrderValidator):
     """Validate order doesn't exceed maximum position size limits."""
 
@@ -317,6 +319,9 @@ class RiskPerTradeValidator(OrderValidator):
 #### Market Condition Validators
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+
 class SpreadValidator(OrderValidator):
     """Validate spread isn't too wide for order execution."""
 
@@ -416,6 +421,8 @@ class MarketHoursValidator(OrderValidator):
 #### Technical Validators
 
 ```python
+from decimal import Decimal
+
 class PriceValidityValidator(OrderValidator):
     """Validate order price is reasonable relative to current market."""
 
@@ -557,6 +564,8 @@ Build robust error handling systems for production trading.
 ### Comprehensive Error Handler
 
 ```python
+from datetime import datetime
+from fivetwenty import AsyncClient
 from enum import Enum
 from typing import Callable, Optional
 import traceback
@@ -755,6 +764,10 @@ Implement comprehensive risk controls for trading operations.
 ### Real-Time Risk Monitor
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class RealTimeRiskMonitor:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -1092,6 +1105,10 @@ Establish comprehensive monitoring for production trading systems.
 ### Production Monitoring System
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class ProductionMonitoringSystem:
     """Comprehensive monitoring system for production trading."""
 

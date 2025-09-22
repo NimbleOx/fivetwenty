@@ -27,6 +27,7 @@ Automatically halt trading when predefined risk thresholds are exceeded.
 ### Implementation
 
 ```python
+from datetime import datetime
 from decimal import Decimal
 
 from fivetwenty import AsyncClient, Environment
@@ -252,6 +253,9 @@ Automatically verify and adjust position sizes before order execution.
 ### Implementation
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class PositionSizeEnforcer:
     """Automatically enforce position sizing rules."""
     
@@ -457,9 +461,9 @@ async def demo_position_enforcer(account_id: str):
         result = await enforcer.execute_validated_order(
             instrument="EUR_USD",
             requested_units=50000,  # Very large position
-            entry_price=1.1000,
-            stop_loss=1.0950,
-            take_profit=1.1050
+            entry_price=Decimal("1.1000"),
+            stop_loss=Decimal("1.0950"),
+            take_profit=Decimal("1.1050")
         )
         
         return enforcer
@@ -474,6 +478,7 @@ Continuously monitor risk metrics and take action when thresholds are exceeded.
 ### Implementation
 
 ```python
+from fivetwenty import AsyncClient
 import asyncio
 from datetime import datetime, timedelta
 

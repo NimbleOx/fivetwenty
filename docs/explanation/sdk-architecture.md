@@ -353,7 +353,7 @@ client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], ...)
 
 ### Environment Separation
 
-Practice and live environments are completely isolated:
+Practice and live environments are fully isolated:
 
 ```python
 from fivetwenty import AsyncClient, Environment

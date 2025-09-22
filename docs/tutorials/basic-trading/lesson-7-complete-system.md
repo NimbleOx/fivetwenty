@@ -10,6 +10,7 @@
 Let's build a comprehensive automated trading system:
 
 ```python
+from datetime import datetime
 from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
@@ -174,6 +175,7 @@ def print_strategy_performance(strategy: SimpleMovingAverageCrossover):
 Here's an enhanced version with additional capabilities:
 
 ```python
+from fivetwenty import AsyncClient
 from decimal import Decimal
 
 # Enhanced strategy concepts (for further learning)
@@ -295,6 +297,8 @@ Before deploying your strategy to live trading:
 Monitor your strategy's real-time performance:
 
 ```python
+from datetime import datetime
+
 class StrategyMonitor:
     """Monitor strategy performance in real-time."""
 
@@ -447,7 +451,7 @@ Congratulations! You've successfully completed the comprehensive FiveTwenty trad
 - Learn [HFT Optimization](../../how-to-guides/hft-optimization/index.md)
 
 **For Production Trading:**
-- Follow [Deploy SDK to Production](../../how-to-guides/deploy-sdk-to-production.md)
+- Follow [Deploy SDK to Production](../../how-to-guides/production-deployment/index.md)
 - Set up [Live Trading Safely](../../how-to-guides/setup-live-trading.md)
 - Master [External Data Integration](../../how-to-guides/data-integration/index.md)
 

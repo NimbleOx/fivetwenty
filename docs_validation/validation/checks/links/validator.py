@@ -6,9 +6,9 @@ from urllib.parse import urlparse
 
 import requests
 
-from docs_validation.validation.checks.base import ContentCheck
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.core.results import IssueSeverity, ValidationResult
+from validation.checks.base import ContentCheck
+from validation.core.context import ValidationContext
+from validation.core.results import IssueSeverity, ValidationResult
 
 
 class LinkValidationCheck(ContentCheck):

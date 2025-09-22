@@ -47,7 +47,7 @@ import asyncio
 from fivetwenty import AsyncClient, Environment, AccountConfig
 
 async def main():
-    # Direct parameters (simple scripts)
+    # Direct parameters (basic scripts)
     async with AsyncClient(
         token="your-token",
         environment=Environment.PRACTICE

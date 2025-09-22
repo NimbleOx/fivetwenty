@@ -7,7 +7,7 @@ from datetime import datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from docs_validation.validation.core.results import IssueSeverity, ValidationIssue, ValidationResult, ValidationSummary
+from validation.core.results import IssueSeverity, ValidationIssue, ValidationResult, ValidationSummary
 
 
 @dataclass

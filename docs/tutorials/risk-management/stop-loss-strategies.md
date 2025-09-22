@@ -495,6 +495,8 @@ Place stops based on key technical levels rather than arbitrary distances.
 ### Implementation
 
 ```python
+from fivetwenty import AsyncClient
+
 class TechnicalStopCalculator:
     """Calculate stops based on support/resistance levels."""
     
@@ -737,13 +739,15 @@ position_with_stop = {
 
 #### ❌ **Stops Too Tight**
 ```python
+from decimal import Decimal
+
 # WRONG: Stop tighter than normal market noise
-entry_price = 1.1000
-too_tight_stop = 1.0995  # Only 5 pips - likely to be hit by noise
+entry_price = Decimal("1.1000")
+too_tight_stop = Decimal("1.0995")  # Only 5 pips - likely to be hit by noise
 
 # RIGHT: Consider normal market movement
-entry_price = 1.1000
-appropriate_stop = 1.0975  # 25 pips - allows for normal volatility
+entry_price = Decimal("1.1000")
+appropriate_stop = Decimal("1.0975")  # 25 pips - allows for normal volatility
 ```
 
 ---

@@ -12,6 +12,7 @@ import numpy as np
 from typing import Dict, List, Optional, Callable
 from datetime import datetime, timedelta
 from dataclasses import dataclass
+from decimal import Decimal
 from enum import Enum
 
 class SignalType(Enum):
@@ -216,7 +217,7 @@ async def live_signal_generation_example():
     for i in range(100):
         for instrument in instruments:
             # Simulate price movement
-            base_price = 1.1000 if instrument == "EUR_USD" else 1.3000
+            base_price = Decimal("1.1000") if instrument == "EUR_USD" else Decimal("1.3000")
             price_change = np.random.normal(0, 0.0001)
             bid = base_price + price_change
             ask = bid + 0.0002

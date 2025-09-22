@@ -251,9 +251,9 @@ docs-build = "python -m mkdocs build --clean"
 docs-deploy = "python -m mkdocs gh-deploy --force"
 
 # Documentation validation tasks
-docs-validate = {shell = "cd docs_validation && python -m validation.cli.main run --parallel"}
-docs-validate-report = {shell = "cd docs_validation && python -m validation.cli.main run --parallel --report"}
-docs-validate-list = {shell = "cd docs_validation && python -m validation.cli.main list-checks"}
+docs-validate = {shell = "PYTHONPATH=docs_validation python -m validation.cli.main run --parallel"}
+docs-validate-report = {shell = "PYTHONPATH=docs_validation python -m validation.cli.main run --parallel --report"}
+docs-validate-list = {shell = "PYTHONPATH=docs_validation python -m validation.cli.main list-checks"}
 
 # Markdown tasks
 markdown-format = "mdformat docs/ README.md"
@@ -263,7 +263,7 @@ markdown-check = "mdformat --check docs/ README.md"
 yaml-lint = "yamllint mkdocs.yml docs-tooling/validation-config.yml .pre-commit-config-docs.yaml .github/workflows/ docs/api-reference/openapi.yaml"
 
 # Workflow tasks
-quality = ["format", "lint-core", "typecheck"]
-check = ["format", "lint-core", "typecheck", "test", "docs-validate"]
+quality = ["format", "lint", "typecheck"]
+check = ["format", "lint", "typecheck", "test", "docs-validate"]
 
 # YAML linting configuration is in .yamllint.yml

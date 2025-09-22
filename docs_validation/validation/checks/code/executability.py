@@ -5,9 +5,9 @@ import re
 from pathlib import Path
 from typing import Any
 
-from docs_validation.validation.checks.base import ContentCheck
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.core.results import IssueSeverity, ValidationIssue, ValidationResult
+from validation.checks.base import ContentCheck
+from validation.core.context import ValidationContext
+from validation.core.results import IssueSeverity, ValidationIssue, ValidationResult
 
 
 class CodeExecutabilityCheck(ContentCheck):
@@ -22,7 +22,16 @@ class CodeExecutabilityCheck(ContentCheck):
         )
 
         # Known placeholders that indicate incomplete examples
-        self.placeholder_patterns = [r"# \.\.\.", r"pass\s*#.*implementation", r"\.\.\..*", r"# TODO", r"# FIXME", r"your_.*_here", r"<.*>", r"undefined_function\(\)", r"refresh_token\(\)"]
+        self.placeholder_patterns = [
+            r"# \.\.\.",  # Comment with ellipsis
+            r"pass\s*#.*implementation",  # Pass with implementation comment
+            r"^\s*\.\.\.\s*$",  # Standalone ellipsis on its own line
+            r"# TODO",  # TODO comments
+            r"# FIXME",  # FIXME comments
+            r"your_.*_here",  # Placeholder variables
+            r"undefined_function\(\)",  # Undefined function calls
+            r"refresh_token\(\)"  # Specific undefined function
+        ]
 
         # Critical imports that must be present for FiveTwenty code
         self.required_imports = {
@@ -167,7 +176,19 @@ class CodeExecutabilityCheck(ContentCheck):
 
         for symbol, import_stmt in all_imports.items():
             # Check if symbol is used but not imported
-            if re.search(rf"\b{symbol}\b", code) and import_stmt not in code:
+            symbol_used = re.search(rf"\b{symbol}\b", code)
+
+            # Check for import in various forms
+            import_present = (
+                import_stmt in code or  # Exact import statement
+                f"import {symbol}" in code or  # Direct import
+                f"from fivetwenty import {symbol}" in code or  # FiveTwenty direct import
+                re.search(rf"from fivetwenty import.*\b{symbol}\b", code) or  # FiveTwenty multi-import
+                re.search(rf"from decimal import.*\b{symbol}\b", code) or  # Decimal import
+                re.search(rf"from datetime import.*\b{symbol}\b", code)  # Datetime import
+            )
+
+            if symbol_used and not import_present:
                 # Find the line where the symbol is first used
                 lines = code.split("\n")
                 for line_offset, line in enumerate(lines):

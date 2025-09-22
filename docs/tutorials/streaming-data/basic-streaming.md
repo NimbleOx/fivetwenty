@@ -111,6 +111,9 @@ async def basic_streaming_example():
 ## Account Stream Monitoring
 
 ```python
+from fivetwenty import AsyncClient
+from fivetwenty import Environment
+
 class AccountStreamer:
     """Stream account changes and transactions."""
 

@@ -5,8 +5,8 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.core.results import IssueSeverity, ValidationResult, ValidationStatus
+from validation.core.context import ValidationContext
+from validation.core.results import IssueSeverity, ValidationResult, ValidationStatus
 
 
 class BaseCheck(ABC):

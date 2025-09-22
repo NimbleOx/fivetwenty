@@ -190,6 +190,8 @@ Different market conditions require different trading approaches:
 - Risk: Prices may gap or move erratically
 
 ```python
+from fivetwenty import AsyncClient
+
 async def assess_market_conditions(account_id: str, instrument: str):
     """Assess current market conditions for trading suitability."""
 
@@ -238,6 +240,8 @@ print(f"Market suitable for trading: {market_conditions['suitable']}")
 Understanding how prices move helps with entry and exit decisions:
 
 ```python
+from fivetwenty import AsyncClient
+
 async def analyze_price_movements(instrument: str, periods: int = 20):
     """Analyze recent price movements for trading insights."""
 

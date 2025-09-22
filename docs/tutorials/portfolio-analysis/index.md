@@ -6,7 +6,7 @@ Learn how to analyze and optimize your trading portfolio using advanced statisti
 
 ## Prerequisites
 
-- Completed [Basic Trading](../basic-trading.md) and [Risk Management](../risk-management.md) tutorials
+- Completed [Basic Trading](../basic-trading/index.md) and [Risk Management](../risk-management/index.md) tutorials
 - Understanding of portfolio theory concepts
 - FiveTwenty setup with historical data access
 - Python knowledge with pandas, numpy, and matplotlib

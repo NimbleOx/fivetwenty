@@ -234,6 +234,8 @@ class RiskManagementFramework:
 ### Performance Monitoring
 
 ```python
+from datetime import datetime
+
 class PerformanceMonitor:
     """Real-time performance monitoring and reporting."""
 
@@ -438,6 +440,6 @@ You now have a comprehensive framework for implementing professional portfolio a
 
 ## Related Resources
 
-- [Risk Management Tutorial](../risk-management.md) - Risk management principles
-- [Advanced Orders Tutorial](../advanced-orders.md) - Order management
-- [Production Deployment Guide](../../how-to-guides/deploy-sdk-to-production.md) - Deployment guidance
+- [Risk Management Tutorial](../risk-management/index.md) - Risk management principles
+- [Advanced Orders Tutorial](../advanced-orders/index.md) - Order management
+- [Production Deployment Guide](../../how-to-guides/production-deployment/index.md) - Deployment guidance

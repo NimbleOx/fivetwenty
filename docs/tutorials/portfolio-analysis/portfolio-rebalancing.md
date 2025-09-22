@@ -112,7 +112,7 @@ class PortfolioRebalancer:
         executed_trades = []
 
         for instrument, trade_value in trades.items():
-            if abs(trade_value) < 100:  # Skip very small trades
+            if abs(trade_value) < 100:  # Skip minimal trades
                 continue
 
             try:

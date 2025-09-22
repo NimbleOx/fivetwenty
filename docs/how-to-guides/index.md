@@ -36,9 +36,9 @@ Solve common setup and initial configuration challenges.
 Tackle complex trading scenarios and production challenges.
 
 - **[Implement Stop-Loss Strategies](implement-stop-loss-strategies.md)** - Protect capital with automated risk controls
-- **[Optimize High-Frequency Trading](optimize-high-frequency-trading.md)** - Maximize performance for rapid trading
-- **[Deploy SDK to Production](deploy-sdk-to-production.md)** - Configure robust production environments
-- **[Integrate External Data Sources](integrate-external-data-sources.md)** - Combine OANDA data with external feeds
+- **[Optimize High-Frequency Trading](hft-optimization/index.md)** - Maximize performance for rapid trading
+- **[Deploy SDK to Production](production-deployment/index.md)** - Configure robust production environments
+- **[Integrate External Data Sources](data-integration/index.md)** - Combine OANDA data with external feeds
 
 ## How-to Guide Structure
 
@@ -109,16 +109,16 @@ Our how-to guides are designed with these principles:
 
 **Performance:**
 
-- [Optimize High-Frequency Trading](optimize-high-frequency-trading.md)
+- [Optimize High-Frequency Trading](hft-optimization/index.md)
 
 **Production:**
 
 - [Set Up Live Trading](setup-live-trading.md)
-- [Deploy SDK to Production](deploy-sdk-to-production.md)
+- [Deploy SDK to Production](production-deployment/index.md)
 
 **Data Integration:**
 
-- [Integrate External Data Sources](integrate-external-data-sources.md)
+- [Integrate External Data Sources](data-integration/index.md)
 
 ## Need More Context?
 

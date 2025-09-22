@@ -12,6 +12,7 @@ import logging
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
+from decimal import Decimal
 from contextlib import asynccontextmanager
 from fivetwenty import AsyncClient, Environment
 
@@ -408,7 +409,7 @@ async def production_deployment_example():
         environment=Environment.LIVE,  # Use LIVE for production
         max_concurrent_streams=3,
         position_limits={"EUR_USD": 10000, "GBP_USD": 8000},
-        daily_loss_limit=500.0,
+        daily_loss_limit=Decimal("500.0"),
         enable_metrics=True,
         log_level="INFO"
     )
@@ -438,6 +439,8 @@ async def production_deployment_example():
 ### API Token Management
 
 ```python
+from fivetwenty import AsyncClient
+from fivetwenty import Environment
 import os
 from typing import Optional
 
@@ -490,6 +493,7 @@ def create_secure_client() -> AsyncClient:
 ### Network Security
 
 ```python
+from fivetwenty import Environment
 import ssl
 import httpx
 from fivetwenty import AsyncClient
@@ -523,6 +527,7 @@ def create_secure_client_with_tls() -> AsyncClient:
 ### Memory Management
 
 ```python
+from datetime import datetime
 import gc
 import psutil
 from typing import Dict, Any

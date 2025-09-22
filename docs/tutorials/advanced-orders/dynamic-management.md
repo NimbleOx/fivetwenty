@@ -135,6 +135,9 @@ class TrailingStopManager:
 Adjust trail distance based on market volatility:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def volatility_adjusted_trailing():
     """Implement trailing stops that adapt to market volatility."""
     async with AsyncClient() as client:
@@ -174,6 +177,9 @@ async def volatility_adjusted_trailing():
 Tighten trail distance as profits increase:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class AcceleratedTrailing:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -236,6 +242,9 @@ Build and reduce positions systematically based on market conditions.
 ### Scale-In Strategy Implementation
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class ScaleInStrategy:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -338,6 +347,9 @@ class ScaleInStrategy:
 ### Scale-Out Strategy Implementation
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class ScaleOutStrategy:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -435,6 +447,9 @@ Create systems that respond intelligently to changing market conditions.
 ### Market Condition Adaptive System
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class AdaptivePositionManager:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -522,6 +537,9 @@ class AdaptivePositionManager:
 Adjust risk parameters based on account performance:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class DynamicRiskManager:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -599,6 +617,9 @@ class DynamicRiskManager:
 ### Order Performance Analytics
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class OrderPerformanceAnalyzer:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client

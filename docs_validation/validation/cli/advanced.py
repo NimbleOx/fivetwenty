@@ -11,11 +11,11 @@ from rich.table import Table
 # Add the src directory to Python path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from docs_validation.validation.config.loader import default_config_loader
-from docs_validation.validation.config.profiles import default_profile_manager
-from docs_validation.validation.config.quality_gates import QualityGateManager
-from docs_validation.validation.core.config import ValidationConfig, set_config
-from docs_validation.validation.core.context import ValidationContext
+from validation.config.loader import default_config_loader
+from validation.config.profiles import default_profile_manager
+from validation.config.quality_gates import QualityGateManager
+from validation.core.config import ValidationConfig, set_config
+from validation.core.context import ValidationContext
 
 console = Console()
 
@@ -381,7 +381,7 @@ def _display_validation_summary(summary):
 def _export_reports(summary, output_format, output_dir, project_root):
     """Export validation reports."""
     try:
-        from docs_validation.validation.reporting.exports import ReportExporter
+        from validation.reporting.exports import ReportExporter
 
         if output_dir:
             export_dir = Path(output_dir)

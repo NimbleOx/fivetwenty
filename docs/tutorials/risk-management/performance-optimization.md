@@ -27,6 +27,8 @@ The mathematically optimal approach to position sizing based on your edge.
 ### Kelly Formula Implementation
 
 ```python
+from decimal import Decimal
+
 class KellyOptimizer:
     """Implement Kelly Criterion for optimal position sizing."""
     
@@ -222,8 +224,8 @@ def demo_kelly_optimization():
         # Calculate optimal position size
         position_size = optimizer.calculate_position_size(
             account_balance=10000,
-            entry_price=1.1000,
-            stop_loss=1.0950
+            entry_price=Decimal("1.1000"),
+            stop_loss=Decimal("1.0950")
         )
         
         # Run simulation

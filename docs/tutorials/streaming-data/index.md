@@ -6,7 +6,7 @@ Master real-time market data streams, implement live trading systems, and build 
 
 ## Prerequisites
 
-- Completed [Basic Trading Tutorial](../basic-trading.md)
+- Completed [Basic Trading Tutorial](../basic-trading/index.md)
 - Understanding of async programming in Python
 - FiveTwenty setup with live data access
 - Knowledge of real-time system concepts

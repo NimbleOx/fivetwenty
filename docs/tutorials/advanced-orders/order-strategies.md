@@ -260,6 +260,9 @@ class BracketOrderManager:
 #### Scaling Bracket Orders
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def scaling_bracket_strategy():
     """Implement scaling bracket orders with multiple entry and exit levels."""
     async with AsyncClient() as client:
@@ -307,6 +310,8 @@ async def scaling_bracket_strategy():
 #### Trailing Bracket System
 
 ```python
+from decimal import Decimal
+
 class TrailingBracketManager(BracketOrderManager):
     """Bracket manager with trailing stop functionality."""
 
@@ -400,6 +405,10 @@ Create sophisticated order sequences and conditional strategies.
 ### Conditional Order Chains
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class ConditionalOrderChain:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -603,6 +612,9 @@ class ConditionalOrderChain:
 ### OCO (One-Cancels-Other) Orders
 
 ```python
+from datetime import datetime
+from fivetwenty import AsyncClient
+
 class OCOOrderManager:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -707,6 +719,10 @@ Implement sophisticated multi-instrument strategies.
 ### Pairs Trading System
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class PairsTradingStrategy:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -868,6 +884,9 @@ class PairsTradingStrategy:
 ### Portfolio Hedging System
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class PortfolioHedgeManager:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client

@@ -4,7 +4,7 @@ Basic FiveTwenty Usage Example
 
 This script demonstrates the fundamental operations with the FiveTwenty SDK.
 
-TODO: Complete implementation
+Implementation coming soon
 """
 
 import asyncio
@@ -16,7 +16,7 @@ async def main():
     """Basic usage example - placeholder."""
     print("Basic usage example coming soon!")
 
-    # TODO: Add complete example implementation
+    # Implementation coming soon:
     # - Client initialization
     # - Account information retrieval
     # - Basic market data access

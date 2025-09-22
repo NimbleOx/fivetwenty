@@ -2,11 +2,11 @@
 
 from typing import Any
 
-from docs_validation.validation.config.loader import ConfigLoader, ValidationProfile
-from docs_validation.validation.config.quality_gates import QualityGateManager
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.core.results import ValidationSummary
-from docs_validation.validation.validators.registry import default_registry
+from validation.config.loader import ConfigLoader, ValidationProfile
+from validation.config.quality_gates import QualityGateManager
+from validation.core.context import ValidationContext
+from validation.core.results import ValidationSummary
+from validation.validators.registry import default_registry
 
 
 class ProfileManager:
@@ -238,7 +238,7 @@ class ProfileManager:
         base_profile: str | None = None,
     ) -> ValidationProfile:
         """Create a custom validation profile programmatically."""
-        from docs_validation.validation.config.loader import CheckConfig, QualityGateConfig
+        from validation.config.loader import CheckConfig, QualityGateConfig
 
         profile = ValidationProfile(name=name, description=description)
 

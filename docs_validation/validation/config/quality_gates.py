@@ -4,7 +4,7 @@ from dataclasses import dataclass
 from enum import Enum
 from typing import Any
 
-from docs_validation.validation.core.results import IssueSeverity, ValidationSummary
+from validation.core.results import IssueSeverity, ValidationSummary
 
 
 class GateStatus(str, Enum):

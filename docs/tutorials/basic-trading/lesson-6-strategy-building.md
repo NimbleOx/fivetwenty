@@ -10,6 +10,8 @@
 Let's build a simple but complete moving average crossover strategy:
 
 ```python
+from fivetwenty import AsyncClient
+
 class SimpleMovingAverageCrossover:
     """A complete trading strategy with risk management."""
 
@@ -102,6 +104,7 @@ strategy = SimpleMovingAverageCrossover(account_id, "EUR_USD")
 Test your strategy on historical data:
 
 ```python
+from fivetwenty import AsyncClient
 import pandas as pd
 from datetime import datetime, timedelta
 
@@ -318,6 +321,8 @@ class StrategyBacktester:
 Improve your strategy through parameter optimization:
 
 ```python
+from fivetwenty import AsyncClient
+
 class StrategyOptimizer:
     """Optimize strategy parameters through systematic testing."""
 

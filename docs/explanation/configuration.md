@@ -6,7 +6,7 @@ The FiveTwenty library provides flexible configuration options to manage your OA
 
 The library supports three main configuration approaches:
 
-1. **Direct parameters** - Simple and explicit
+1. **Direct parameters** - Straightforward and explicit
 2. **Configuration objects** - Structured and reusable
 3. **Environment variables** - Zero-config deployment
 
@@ -75,7 +75,7 @@ async with AsyncClient() as client:
 
 ### 1. Direct Parameters Pattern
 
-Best for: Simple scripts, getting started, testing
+Best for: Basic scripts, getting started, testing
 
 ```python
 from fivetwenty import AsyncClient, Environment

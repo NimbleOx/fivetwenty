@@ -27,6 +27,8 @@ from fivetwenty.exceptions import FiveTwentyError
 ## Secure Configuration Setup
 
 ```python
+from fivetwenty import Environment
+
 # Configuration - Replace with your actual values
 TOKEN = "your-api-token-here"  # Get this from your OANDA account
 ENVIRONMENT = Environment.PRACTICE  # ALWAYS start with PRACTICE!

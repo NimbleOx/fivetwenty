@@ -65,6 +65,9 @@ async def breakout_stop_strategy():
 Adapt breakout levels based on market volatility:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def dynamic_breakout_levels():
     """Calculate breakout levels based on recent price action."""
     async with AsyncClient() as client:
@@ -117,6 +120,9 @@ async def dynamic_breakout_levels():
 Combine multiple timeframe signals for robust breakouts:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class MultiTimeframeBreakout:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -192,6 +198,9 @@ Market-If-Touched orders are ideal for mean reversion strategies where you expec
 ### Basic Mean Reversion Setup
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def mean_reversion_mit_strategy():
     """Implement mean reversion using MIT orders."""
     async with AsyncClient() as client:
@@ -236,6 +245,9 @@ async def mean_reversion_mit_strategy():
 Use Bollinger Bands for systematic mean reversion:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def bollinger_band_reversion():
     """Mean reversion strategy using Bollinger Band levels."""
     async with AsyncClient() as client:
@@ -281,6 +293,9 @@ async def bollinger_band_reversion():
 Combine MIT orders with RSI signals for enhanced mean reversion:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class RSIMeanReversion:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -347,6 +362,9 @@ class RSIMeanReversion:
 Adjust trigger distances based on market volatility:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def volatility_adjusted_triggers():
     """Adjust order triggers based on current market volatility."""
     async with AsyncClient() as client:
@@ -402,6 +420,9 @@ async def volatility_adjusted_triggers():
 Modify trigger sensitivity based on time of day:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def time_based_trigger_strategy():
     """Adjust trigger sensitivity based on trading session."""
     from datetime import datetime, timezone
@@ -461,6 +482,9 @@ async def time_based_trigger_strategy():
 Wait for momentum confirmation before triggering breakouts:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 class MomentumBreakout:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
@@ -543,6 +567,9 @@ class MomentumBreakout:
 Combine stop and MIT orders for comprehensive market coverage:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def stop_mit_combination_strategy():
     """Use both stop and MIT orders for complete market approach."""
     async with AsyncClient() as client:
@@ -613,6 +640,10 @@ async def stop_mit_combination_strategy():
 Cancel orders based on changing market conditions:
 
 ```python
+from datetime import datetime
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def intelligent_order_management():
     """Manage order lifecycle based on market conditions."""
     async with AsyncClient() as client:
@@ -667,6 +698,9 @@ async def intelligent_order_management():
 Optimize order placement for fast trigger response:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 async def efficient_trigger_placement():
     """Optimize order placement for fast market response."""
     async with AsyncClient() as client:

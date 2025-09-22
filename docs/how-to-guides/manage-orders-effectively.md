@@ -222,7 +222,7 @@ async def robust_post_trade_setup(client, account_id, trade_id):
 
 **Not Recommended for:**
 
-- **Simple Strategies**: OnFill pattern is more efficient
+- **Basic Strategies**: OnFill pattern is more efficient
 - **High-Frequency Trading**: Additional API calls add latency
 - **Basic Risk Management**: OnFill covers most use cases
 
@@ -237,7 +237,7 @@ from fivetwenty.models import AccountID, InstrumentName
 
 async def place_market_order():
     async with AsyncClient() as client:
-        # Simple market order
+        # Basic market order
         response = await client.orders.post_market_order(
             account_id=AccountID("101-004-12345678"),
             instrument=InstrumentName("EUR_USD"),

@@ -30,7 +30,7 @@ async def validate_credentials(token: str, environment: Environment):
 
     try:
         async with AsyncClient(token=token, environment=environment) as client:
-            # Test connection with simple API call
+            # Test connection with basic API call
             accounts = await client.accounts.list()
 
             if accounts:
@@ -78,7 +78,7 @@ async def robust_connection(token: str, timeout: float = 30.0):
             timeout=timeout
         ) as client:
 
-            # Test with simple request
+            # Test with basic request
             accounts = await client.accounts.list()
             print("✅ Connection established successfully")
             return client

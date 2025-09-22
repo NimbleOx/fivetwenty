@@ -173,7 +173,7 @@ Skip to [Lesson 2: Connection & Setup](lesson-2-connection-setup.md) and focus o
 Upon completing this tutorial series, you'll be ready for:
 
 - **Advanced Trading Guides**: [Risk Management](../risk-management/index.md), [Advanced Orders](../advanced-orders/index.md)
-- **Production Deployment**: [Deploy SDK to Production](../../how-to-guides/deploy-sdk-to-production.md)
+- **Production Deployment**: [Deploy SDK to Production](../../how-to-guides/production-deployment/index.md)
 - **Performance Optimization**: [HFT Optimization](../../how-to-guides/hft-optimization/index.md)
 - **External Integrations**: [Data Integration](../../how-to-guides/data-integration/index.md)
 

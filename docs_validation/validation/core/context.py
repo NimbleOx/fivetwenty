@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from docs_validation.validation.core.config import ValidationConfig, get_config
+from validation.core.config import ValidationConfig, get_config
 
 
 class FileCache:

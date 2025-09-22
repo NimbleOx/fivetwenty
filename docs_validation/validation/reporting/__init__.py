@@ -1,8 +1,8 @@
 """Validation reporting and result aggregation."""
 
-from docs_validation.validation.reporting.aggregators import ResultAggregator, TrendAnalyzer
-from docs_validation.validation.reporting.exports import ReportExporter
-from docs_validation.validation.reporting.formatters import (
+from validation.reporting.aggregators import ResultAggregator, TrendAnalyzer
+from validation.reporting.exports import ReportExporter
+from validation.reporting.formatters import (
     ConsoleFormatter,
     CSVFormatter,
     HTMLFormatter,

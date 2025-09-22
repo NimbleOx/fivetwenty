@@ -5,9 +5,9 @@ from pathlib import Path
 from typing import Any
 from urllib.parse import unquote
 
-from docs_validation.validation.checks.base import FileCheck
-from docs_validation.validation.core.context import ValidationContext
-from docs_validation.validation.core.results import IssueSeverity, ValidationResult, ValidationStatus
+from validation.checks.base import FileCheck
+from validation.core.context import ValidationContext
+from validation.core.results import IssueSeverity, ValidationResult, ValidationStatus
 
 
 class CrossReferenceCheck(FileCheck):

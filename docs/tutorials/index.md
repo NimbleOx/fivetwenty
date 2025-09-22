@@ -25,7 +25,7 @@ Tutorials are **learning-oriented** content designed to teach you how to use the
 Our tutorials are designed to build on each other progressively:
 
 ### **Getting Started** (New to FiveTwenty)
-Start here if you're completely new to the FiveTwenty or trading APIs.
+Start here if you're new to the FiveTwenty or trading APIs.
 
 1. **[Installation & Setup](getting-started/installation.md)** - Set up your development environment
 2. **[Authentication Basics](getting-started/authentication.md)** - Connect to OANDA safely
@@ -35,20 +35,20 @@ Start here if you're completely new to the FiveTwenty or trading APIs.
 ### **Guided Learning** (Building Core Skills)
 Continue here once you've completed the getting started section.
 
-1. **[Basic Trading Concepts](basic-trading.md)** - Learn fundamental trading operations
-2. **[Advanced Order Types](advanced-orders.md)** - Master sophisticated order management
-3. **[Risk Management Fundamentals](risk-management.md)** - Protect your capital effectively
-4. **[Portfolio Analysis Basics](portfolio-analysis.md)** - Monitor and analyze your trading
-5. **[Working with Streaming Data](streaming-data.md)** - Handle real-time market data
+1. **[Basic Trading Concepts](basic-trading/index.md)** - Learn fundamental trading operations
+2. **[Advanced Order Types](advanced-orders/index.md)** - Learn sophisticated order management
+3. **[Risk Management Fundamentals](risk-management/index.md)** - Protect your capital effectively
+4. **[Portfolio Analysis Basics](portfolio-analysis/index.md)** - Monitor and analyze your trading
+5. **[Working with Streaming Data](streaming-data/index.md)** - Handle real-time market data
 
 ### **Specialized Learning** (Advanced Topics)
 Deep-dive tutorials for specific areas of trading and SDK usage.
 
-1. **[Decimal Best Practices](decimal-best-practices.md)** - Master financial precision
-2. **[Risk Management](risk-management.md)** - Protect your trading capital
-3. **[Portfolio Analysis](portfolio-analysis.md)** - Monitor and analyze performance
-4. **[Streaming Data](streaming-data.md)** - Handle real-time market feeds
-5. **[Advanced Orders](advanced-orders.md)** - Master complex order types
+1. **[Decimal Best Practices](decimal-best-practices.md)** - Learn financial precision
+2. **[Risk Management](risk-management/index.md)** - Protect your trading capital
+3. **[Portfolio Analysis](portfolio-analysis/index.md)** - Monitor and analyze performance
+4. **[Streaming Data](streaming-data/index.md)** - Handle real-time market feeds
+5. **[Advanced Orders](advanced-orders/index.md)** - Learn complex order types
 
 ### **Interactive Notebooks** (Hands-On Practice)
 Apply your knowledge with Jupyter notebooks that combine code, explanation, and exercises.
@@ -68,7 +68,7 @@ Our tutorials follow these principles to ensure effective learning:
 - Focus on teaching concepts and building skills
 - Provide guided practice with clear steps
 - Build confidence through successful completion
-- Progress from simple to complex topics
+- Progress from basic to complex topics
 
 ### **Safe Learning Environment**
 - Use practice accounts by default
@@ -80,7 +80,7 @@ Our tutorials follow these principles to ensure effective learning:
 - Each tutorial builds on previous knowledge
 - Skills are developed incrementally
 - Complex topics are broken into manageable steps
-- Prerequisites are clearly stated
+- Prerequisites are explicitly stated
 
 ### **Success-Oriented**
 - Every tutorial has a clear, achievable outcome
@@ -110,7 +110,7 @@ After completing our tutorials, you will be able to:
 - Understand the differences between practice and live trading
 
 ### Core Trading Skills
-- Master all major order types: market, limit, stop, and MIT orders
+- Learn all major order types: market, limit, stop, and MIT orders
 - Implement comprehensive risk management with stop losses and take profits
 - Calculate position sizes based on account risk and market conditions
 - Monitor and manage positions in real-time

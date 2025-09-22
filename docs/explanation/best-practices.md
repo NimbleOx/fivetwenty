@@ -1267,7 +1267,7 @@ Following these best practices will help you build robust, production-ready trad
 
 After implementing these best practices:
 
-- **Deploy to production**: Follow [How-to Deploy SDK to Production](../how-to-guides/deploy-sdk-to-production.md)
+- **Deploy to production**: Follow [How-to Deploy SDK to Production](../how-to-guides/production-deployment/index.md)
 - **Monitor your system**: Set up comprehensive logging and alerting
 - **Scale your operations**: Consider horizontal scaling patterns
 - **Continuous improvement**: Regular performance and risk reviews

@@ -7,7 +7,7 @@ The FiveTwenty provides both asynchronous and synchronous clients. This guide he
 | Feature | AsyncClient | Client (Sync) |
 |---------|------------|---------------|
 | **Performance** | High (concurrent requests) | Lower (sequential) |
-| **Complexity** | Moderate | Simple |
+| **Complexity** | Moderate | Straightforward |
 | **Use Case** | Production, high-frequency | Scripts, notebooks |
 | **Streaming** | Native support | Thread-based |
 | **Python Version** | 3.9+ with asyncio | 3.9+ |
@@ -110,7 +110,7 @@ The synchronous `Client` wraps `AsyncClient` for simpler usage.
 ### When to Use Sync
 
 Use `Client` when you have:
-- ✅ Simple scripts
+- ✅ Straightforward scripts
 - ✅ Jupyter notebooks
 - ✅ Quick analysis tasks
 - ✅ Legacy synchronous code
@@ -328,7 +328,7 @@ Both work in Jupyter, but sync is simpler:
 ```python
 from fivetwenty import AsyncClient, Environment
 
-# Sync - Simple for notebooks
+# Sync - Straightforward for notebooks
 from fivetwenty import Client, Environment
 
 client = Client(token=token, environment=Environment.PRACTICE)
@@ -489,7 +489,7 @@ def efficient_sync(client, instruments):
 ## Summary
 
 - **Use async client** for production systems and when performance matters
-- **Use Client** for simple scripts and learning
+- **Use Client** for straightforward scripts and learning
 - **Don't mix** async and sync patterns unnecessarily
 - **Always use** context managers for proper cleanup
 - **Consider your use case** when choosing between async and sync

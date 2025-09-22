@@ -102,6 +102,7 @@ class StreamConsumer:
 
 ### Event-Driven Architecture
 ```python
+from datetime import datetime
 from typing import Dict, List, Any
 from dataclasses import dataclass
 from enum import Enum
@@ -290,6 +291,8 @@ class StallDetector:
 
 ### Stream Multiplexing
 ```python
+from datetime import datetime
+
 class StreamMultiplexer:
     """Multiplex multiple streams into single output."""
 

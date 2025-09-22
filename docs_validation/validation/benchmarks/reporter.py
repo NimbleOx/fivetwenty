@@ -5,7 +5,7 @@ from datetime import datetime
 from pathlib import Path
 from typing import Any
 
-from docs_validation.validation.benchmarks.runner import BenchmarkResults
+from validation.benchmarks.runner import BenchmarkResults
 
 
 class BenchmarkReporter:

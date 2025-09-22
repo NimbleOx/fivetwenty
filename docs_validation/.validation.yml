@@ -21,6 +21,13 @@ profiles:
       - ".pytest_cache/**"
       - "validation/styles/**"
       - "**/styles/**"
+      - "**/.mypy_cache/**"
+      - "**/__pycache__/**"
+      - "**/.ruff_cache/**"
+      - "**/.pytest_cache/**"
+      - "**/build/**"
+      - "**/dist/**"
+      - "**/*.egg-info/**"
     parallel_execution: true
     max_workers: 4
     timeout_seconds: 300
@@ -61,6 +68,9 @@ profiles:
         enabled: true
         options:
           check_imports: true
+
+      code_executability:
+        enabled: true
 
       prose:
         enabled: false  # Disabled - false positives in external libraries
