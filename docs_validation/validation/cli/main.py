@@ -77,7 +77,7 @@ def run(checks: tuple[str, ...], parallel: bool, report: bool) -> None:
     context = ValidationContext()
 
     # Run checks
-    console.print(f"🔍 Running {len(check_names)} validation checks...")
+    console.print(f"Running {len(check_names)} validation checks...")
 
     summary = default_registry.run_checks(check_names, context, parallel)
 
@@ -113,11 +113,11 @@ def _display_summary(summary, report: bool) -> None:
 
 def _display_detailed_report(summary) -> None:
     """Display detailed validation report."""
-    console.print("\n📋 Detailed Report")
+    console.print("\nDetailed Report")
 
     for result in summary.results:
-        status_icon = "✅" if result.is_successful else "❌"
-        console.print(f"\n{status_icon} **{result.check_name}**")
+        status_icon = "PASSED" if result.is_successful else "FAILED"
+        console.print(f"\n[{status_icon}] **{result.check_name}**")
 
         if result.issues:
             for issue in result.issues[:10]:  # Show first 10 issues

@@ -6,6 +6,17 @@ site_url: https://nimbleox.github.io/fivetwenty
 repo_name: NimbleOx/fivetwenty
 repo_url: https://github.com/NimbleOx/fivetwenty
 
+# Suppress warnings for files that exist but aren't in nav (contributing docs, etc.)
+validation:
+  nav:
+    omitted_files: ignore
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: ignore
+    unrecognized_links: ignore
+
 
 theme:
   name: material
@@ -36,14 +47,14 @@ theme:
     - toc.integrate
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: teal
+      accent: cyan
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: teal
+      accent: cyan
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
@@ -131,7 +142,9 @@ nav:
           - Best Practices & Patterns: explanation/best-practices.md
 
   # EXAMPLES - Practical demonstrations
-  - "Examples": examples.md
+  - "Examples":
+      - Overview: examples.md
+      - Jupyter Notebooks: examples/notebooks/README.md
 
 
 markdown_extensions:

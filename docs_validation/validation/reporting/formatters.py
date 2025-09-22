@@ -42,7 +42,7 @@ class ConsoleFormatter(BaseFormatter):
     def format_summary(self, summary: ValidationSummary) -> str:
         """Format validation summary with rich formatting."""
         # Create summary table
-        table = Table(title="🔍 Validation Summary", show_header=True, header_style="bold blue")
+        table = Table(title="Validation Summary", show_header=True, header_style="bold blue")
         table.add_column("Metric", style="cyan", no_wrap=True)
         table.add_column("Value", style="green", justify="right")
 
@@ -64,10 +64,10 @@ class ConsoleFormatter(BaseFormatter):
         """Format a single validation result."""
         # Status icon and color
         if result.is_successful:
-            status_icon = "✅"
+            status_icon = "PASSED"
             status_color = "green"
         else:
-            status_icon = "❌"
+            status_icon = "FAILED"
             status_color = "red"
 
         # Create result panel
@@ -83,7 +83,7 @@ class ConsoleFormatter(BaseFormatter):
             content.append("")
             content.append("Issues:")
             for issue in result.issues[:5]:  # Show first 5 issues
-                content.append(f"  • {self._format_issue_inline(issue)}")
+                content.append(f"  - {self._format_issue_inline(issue)}")
 
             if len(result.issues) > 5:
                 content.append(f"  ... and {len(result.issues) - 5} more issues")
@@ -118,13 +118,13 @@ class ConsoleFormatter(BaseFormatter):
                 location += f":{issue.line}"
                 if hasattr(issue, "column") and issue.column:
                     location += f":{issue.column}"
-            lines.append(f"  📁 {location}")
+            lines.append(f"  Location: {location}")
 
         if issue.context:
-            lines.append(f"  📝 Context: {issue.context}")
+            lines.append(f"  Context: {issue.context}")
 
         if issue.suggestion:
-            lines.append(f"  💡 Suggestion: {issue.suggestion}")
+            lines.append(f"  Suggestion: {issue.suggestion}")
 
         return "\\n".join(lines)
 
@@ -152,10 +152,10 @@ class ConsoleFormatter(BaseFormatter):
 
     def format_check_tree(self, summary: ValidationSummary) -> str:
         """Format results as a tree structure."""
-        tree = Tree("🔍 Validation Results")
+        tree = Tree("Validation Results")
 
         for result in summary.results:
-            status_icon = "✅" if result.is_successful else "❌"
+            status_icon = "PASSED" if result.is_successful else "FAILED"
             branch = tree.add(f"{status_icon} {result.check_name} ({result.issues_found} issues)")
 
             if result.issues:
@@ -273,7 +273,7 @@ class HTMLFormatter(BaseFormatter):
             </style>
         </head>
         <body>
-            <h1>🔍 Validation Report</h1>
+            <h1>Validation Report</h1>
 
             <div class="summary">
                 <div class="metric">
@@ -330,7 +330,7 @@ class HTMLFormatter(BaseFormatter):
     def _format_result_html(self, result: ValidationResult) -> str:
         """Format a validation result as HTML."""
         status_class = "success" if result.is_successful else "error"
-        status_text = "✅ PASSED" if result.is_successful else "❌ FAILED"
+        status_text = "PASSED" if result.is_successful else "FAILED"
 
         html = f"""
         <div class="check-result">
@@ -370,13 +370,13 @@ class HTMLFormatter(BaseFormatter):
         """
 
         if location:
-            html += f"<br><small>📁 {location}</small>"
+            html += f"<br><small>Location: {location}</small>"
 
         if issue.context:
-            html += f"<br><small>📝 Context: {issue.context}</small>"
+            html += f"<br><small>Context: {issue.context}</small>"
 
         if issue.suggestion:
-            html += f"<br><small>💡 Suggestion: {issue.suggestion}</small>"
+            html += f"<br><small>Suggestion: {issue.suggestion}</small>"
 
         html += "</div>"
         return html
@@ -393,15 +393,15 @@ class MarkdownFormatter(BaseFormatter):
             for issue in result.issues:
                 severity_counts[issue.severity.value] += 1
 
-        md = f"""# 🔍 Validation Report
+        md = f"""# Validation Report
 
 ## Summary
 
 | Metric | Value |
 |--------|-------|
 | Total Checks | {len(summary.results)} |
-| Passed | ✅ {summary.passed_checks} |
-| Failed | ❌ {summary.failed_checks} |
+| Passed | {summary.passed_checks} |
+| Failed | {summary.failed_checks} |
 | Success Rate | {summary.overall_success_rate:.1f}% |
 | Total Issues | {summary.total_issues} |
 | Files Checked | {summary.total_files_checked} |
@@ -411,9 +411,9 @@ class MarkdownFormatter(BaseFormatter):
 
 | Severity | Count |
 |----------|-------|
-| Errors | 🔴 {severity_counts["error"]} |
-| Warnings | 🟡 {severity_counts["warning"]} |
-| Info | 🔵 {severity_counts["info"]} |
+| Errors | {severity_counts["error"]} |
+| Warnings | {severity_counts["warning"]} |
+| Info | {severity_counts["info"]} |
 
 ## Check Results
 
@@ -434,7 +434,7 @@ class MarkdownFormatter(BaseFormatter):
 
     def _format_result_markdown(self, result: ValidationResult) -> str:
         """Format a validation result as Markdown."""
-        status_icon = "✅" if result.is_successful else "❌"
+        status_icon = "PASSED" if result.is_successful else "FAILED"
 
         md = f"""### {status_icon} {result.check_name}
 
@@ -455,12 +455,12 @@ class MarkdownFormatter(BaseFormatter):
     def _format_issue_markdown(self, issue: ValidationIssue) -> str:
         """Format a validation issue as Markdown."""
         severity_icons = {
-            IssueSeverity.ERROR: "🔴",
-            IssueSeverity.WARNING: "🟡",
-            IssueSeverity.INFO: "🔵",
+            IssueSeverity.ERROR: "ERROR",
+            IssueSeverity.WARNING: "WARNING",
+            IssueSeverity.INFO: "INFO",
         }
 
-        icon = severity_icons.get(issue.severity, "⚪")
+        icon = severity_icons.get(issue.severity, "UNKNOWN")
 
         md = f"- {icon} **{issue.severity.value.upper()}:** {issue.message}"
 
@@ -472,13 +472,13 @@ class MarkdownFormatter(BaseFormatter):
                 location += f":{line_num}"
                 if col_num:
                     location += f":{col_num}"
-            md += f"\\n  - 📁 Location: `{location}`"
+            md += f"\\n  - Location: `{location}`"
 
         if issue.context:
-            md += f"\\n  - 📝 Context: {issue.context}"
+            md += f"\\n  - Context: {issue.context}"
 
         if issue.suggestion:
-            md += f"\\n  - 💡 Suggestion: {issue.suggestion}"
+            md += f"\\n  - Suggestion: {issue.suggestion}"
 
         return md
 

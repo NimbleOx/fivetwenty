@@ -93,13 +93,13 @@ class BenchmarkRunner:
         warmup_runs: int = 1,
     ) -> BenchmarkResults:
         """Run a performance benchmark with multiple iterations."""
-        print(f"🏃 Running benchmark: {benchmark_name}")
-        print(f"📝 Description: {description}")
-        print(f"🔄 Warmup runs: {warmup_runs}, Test runs: {runs}")
+        print(f"Running benchmark: {benchmark_name}")
+        print(f"Description: {description}")
+        print(f"Warmup runs: {warmup_runs}, Test runs: {runs}")
 
         # Warmup runs to stabilize performance
         for i in range(warmup_runs):
-            print(f"  🔥 Warmup {i + 1}/{warmup_runs}")
+            print(f"  Warmup {i + 1}/{warmup_runs}")
             gc.collect()  # Force garbage collection
             test_function()
 
@@ -110,7 +110,7 @@ class BenchmarkRunner:
 
         # Actual benchmark runs
         for run_number in range(runs):
-            print(f"  ⏱️  Run {run_number + 1}/{runs}")
+            print(f"  Run {run_number + 1}/{runs}")
 
             # Force garbage collection before each run
             gc.collect()
@@ -288,7 +288,7 @@ class BenchmarkRunner:
         comparison_results = {}
 
         for test_size in test_sizes:
-            print(f"\n🔍 Testing with {test_size} dataset...")
+            print(f"\nTesting with {test_size} dataset...")
 
             size_results = {}
 
@@ -331,7 +331,7 @@ class BenchmarkRunner:
                 size_results["old_system"] = old_results
 
             except Exception as e:
-                print(f"⚠️  Could not benchmark old system: {e}")
+                print(f"Warning: Could not benchmark old system: {e}")
                 # Create placeholder results
                 size_results["old_system"] = BenchmarkResults(
                     f"old_system_{test_size}",
@@ -349,11 +349,11 @@ class BenchmarkRunner:
         runs_per_test: int = 3,
     ) -> dict[int, BenchmarkResults]:
         """Test scalability with different worker counts."""
-        print("\n📈 Running scalability tests...")
+        print("\nRunning scalability tests...")
         scalability_results = {}
 
         for worker_count in worker_counts:
-            print(f"\n🔧 Testing with {worker_count} workers...")
+            print(f"\nTesting with {worker_count} workers...")
 
             def run_with_workers():
                 config = ValidationConfig(project_root=self.project_root)
@@ -380,7 +380,7 @@ class BenchmarkRunner:
         monitor_interval: float = 0.1,
     ) -> dict[str, Any]:
         """Run memory stress test to detect leaks."""
-        print("\n🧠 Running memory stress test...")
+        print("\nRunning memory stress test...")
 
         config = ValidationConfig(project_root=self.project_root)
         context = ValidationContext(config)

@@ -118,12 +118,12 @@ class BenchmarkReporter:
 </head>
 <body>
     <div class="container">
-        <h1>🚀 Validation System Performance Benchmark</h1>
+        <h1>Validation System Performance Benchmark</h1>
         <p style="text-align: center; color: #7f8c8d;">
             Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}
         </p>
 
-        <h2>📊 Executive Summary</h2>
+        <h2>Executive Summary</h2>
         <div class="summary-grid">
         """
 
@@ -154,18 +154,18 @@ class BenchmarkReporter:
         html_content += """
         </div>
 
-        <h2>📈 Performance Comparison</h2>
+        <h2>Performance Comparison</h2>
         <div class="chart-container">
             <canvas id="performanceChart"></canvas>
         </div>
 
-        <h2>📋 Detailed Results</h2>
+        <h2>Detailed Results</h2>
         """
 
         # Generate detailed tables
         for test_size, results in comparison_results.items():
             html_content += f"""
-            <h3>🔍 {test_size.title()} Dataset Results</h3>
+            <h3>{test_size.title()} Dataset Results</h3>
             <table>
                 <thead>
                     <tr>
@@ -301,11 +301,11 @@ class BenchmarkReporter:
         output_path = self.output_dir / f"benchmark_report_{timestamp}.md"
 
         md_lines = [
-            "# 🚀 Validation System Performance Benchmark",
+            "# Validation System Performance Benchmark",
             "",
             f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}",
             "",
-            "## 📊 Executive Summary",
+            "## Executive Summary",
             "",
         ]
 
@@ -318,7 +318,7 @@ class BenchmarkReporter:
                 f"- **Memory Usage Change:** {summary_data.get('memory_change', 0):+.1f}%",
                 f"- **Parallel Processing Benefit:** {summary_data.get('parallel_benefit', 0):.1f}%",
                 "",
-                "## 📈 Detailed Results",
+                "## Detailed Results",
                 "",
             ]
         )
@@ -327,7 +327,7 @@ class BenchmarkReporter:
         for test_size, results in comparison_results.items():
             md_lines.extend(
                 [
-                    f"### 🔍 {test_size.title()} Dataset Results",
+                    f"### {test_size.title()} Dataset Results",
                     "",
                     "| System | Avg Duration (s) | Throughput (files/s) | Peak Memory (MB) | Files Processed | Success Rate (%) |",
                     "|--------|------------------|---------------------|------------------|-----------------|------------------|",
@@ -462,14 +462,14 @@ class BenchmarkReporter:
     </style>
 </head>
 <body>
-    <h1>📈 Scalability Analysis Report</h1>
+    <h1>Scalability Analysis Report</h1>
     <p>Generated on {datetime.now().strftime("%Y-%m-%d %H:%M:%S")}</p>
 
     <div class="chart-container">
         <canvas id="scalabilityChart"></canvas>
     </div>
 
-    <h2>📊 Scalability Data</h2>
+    <h2>Scalability Data</h2>
     <table>
         <thead>
             <tr>

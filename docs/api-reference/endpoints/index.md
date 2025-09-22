@@ -1,6 +1,6 @@
 # API Endpoints Reference
 
-📖 **OANDA Reference**: [OANDA v20 REST API](https://developer.oanda.com/rest-live-v20/introduction/)
+**OANDA Reference**: [OANDA v20 REST API](https://developer.oanda.com/rest-live-v20/introduction/)
 
 Complete reference for all FiveTwenty endpoint implementations covering 100% of the OANDA v20 API.
 
@@ -23,19 +23,19 @@ Complete reference for all FiveTwenty endpoint implementations covering 100% of 
 
 ## Endpoint Organization
 
-### 🔧 **Account Management**
+### **Account Management**
 - **[Accounts Endpoint](accounts.md)** - Account information, configuration, and instruments
 
-### 📈 **Trading Operations**
+### **Trading Operations**
 - **[Orders Endpoint](orders.md)** - Order placement, modification, and cancellation
 - **[Trades Endpoint](trades.md)** - Trade management and monitoring
 - **[Positions Endpoint](positions.md)** - Position tracking and management
 
-### 📊 **Market Data**
+### **Market Data**
 - **[Pricing Endpoint](pricing.md)** - Real-time prices and account-specific candlesticks
 - **[Instruments Endpoint](instruments.md)** - Instrument specifications and historical data
 
-### 📋 **History & Monitoring**
+### **History & Monitoring**
 - **[Transactions Endpoint](transactions.md)** - Transaction history and real-time streaming
 
 ---
@@ -81,8 +81,8 @@ with Client() as client:
 
 ## Need More Context?
 
-- 🎓 **Learn with [Tutorials](../../tutorials/index.md)** for hands-on guidance
-- 🔧 **Solve problems with [How-to Guides](../../how-to-guides/index.md)** for specific solutions
-- 💡 **Understand with [Explanations](../../explanation/index.md)** for background knowledge
+- **Learn with [Tutorials](../../tutorials/index.md)** for hands-on guidance
+- **Solve problems with [How-to Guides](../../how-to-guides/index.md)** for specific solutions
+- **Understand with [Explanations](../../explanation/index.md)** for background knowledge
 
 **Ready to explore?** Choose an endpoint above or browse the complete [Client API Reference](../client.md) for setup and configuration details.

@@ -6,4 +6,4 @@ TODO: Complete implementation
 """
 
 # Placeholder - implementation coming soon
-print("🚧 Configuration patterns example coming soon!")
+print("Configuration patterns example coming soon!")

@@ -216,7 +216,7 @@ class ValidationExecutor:
         if self.profile.enable_progress:
             self.progress_tracker = ProgressTracker(len(checks), file_count * len(checks))
 
-        print(f"🚀 Executing {len(checks)} checks on {file_count} files...")
+        print(f"Executing {len(checks)} checks on {file_count} files...")
 
         if not parallel or len(checks) == 1:
             results = self._execute_sequential(checks, context)
@@ -225,7 +225,7 @@ class ValidationExecutor:
             execution_plan = self.scheduler.get_optimal_execution_plan(check_names, file_count)
             estimated_time = self.scheduler.estimate_execution_time(check_names, file_count)
 
-            print(f"⏱️  Estimated execution time: {estimated_time:.1f}s")
+            print(f"Estimated execution time: {estimated_time:.1f}s")
             results = self._execute_parallel_optimized(checks, context, execution_plan)
 
         total_duration = time.time() - start_time
@@ -248,7 +248,7 @@ class ValidationExecutor:
         results = []
 
         for check_name, check in checks.items():
-            print(f"  ▶️  Running {check_name}...")
+            print(f"  Running {check_name}...")
 
             try:
                 result = check.run(context)
@@ -257,7 +257,7 @@ class ValidationExecutor:
                 if self.progress_tracker:
                     self.progress_tracker.update_check_progress(result.files_checked)
 
-                status_icon = "✅" if result.is_successful else "❌"
+                status_icon = "PASSED" if result.is_successful else "FAILED"
                 print(f"  {status_icon} {check_name}: {result.issues_found} issues found")
 
             except Exception as e:
@@ -270,7 +270,7 @@ class ValidationExecutor:
                     file_path="<execution>",
                 )
                 results.append(error_result)
-                print(f"  ❌ {check_name}: execution failed ({e})")
+                print(f"  FAILED {check_name}: execution failed ({e})")
 
         return results
 
@@ -288,7 +288,7 @@ class ValidationExecutor:
             if not plan["checks"]:
                 continue
 
-            print(f"🔧 Executing {category} checks: {plan['checks']}")
+            print(f"Executing {category} checks: {plan['checks']}")
 
             category_checks = {name: checks[name] for name in plan["checks"] if name in checks}
 
@@ -323,7 +323,7 @@ class ValidationExecutor:
                     result = future.result(timeout=self.profile.timeout_seconds)
                     results.append(result)
 
-                    status_icon = "✅" if result.is_successful else "❌"
+                    status_icon = "PASSED" if result.is_successful else "FAILED"
                     print(f"  {status_icon} {check_name}: {result.issues_found} issues found")
 
                 except Exception as e:
@@ -336,7 +336,7 @@ class ValidationExecutor:
                         file_path="<execution>",
                     )
                     results.append(error_result)
-                    print(f"  ❌ {check_name}: execution failed ({e})")
+                    print(f"  FAILED {check_name}: execution failed ({e})")
 
         return results
 
@@ -371,12 +371,12 @@ class ValidationExecutor:
         if self.progress_tracker:
             progress = self.progress_tracker.get_progress_info()
 
-            print("\n📊 Execution Summary:")
-            print(f"  ⏱️  Total time: {summary.total_duration:.2f}s")
-            print(f"  🚀 Processing speed: {progress['files_per_second']:.1f} files/second")
-            print(f"  📁 Files processed: {progress['completed_files']}")
-            print(f"  ✅ Success rate: {summary.overall_success_rate:.1f}%")
-            print(f"  🐛 Total issues: {summary.total_issues}")
+            print("\nExecution Summary:")
+            print(f"  Total time: {summary.total_duration:.2f}s")
+            print(f"  Processing speed: {progress['files_per_second']:.1f} files/second")
+            print(f"  Files processed: {progress['completed_files']}")
+            print(f"  Success rate: {summary.overall_success_rate:.1f}%")
+            print(f"  Total issues: {summary.total_issues}")
 
 
 class BatchProcessor:

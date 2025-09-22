@@ -1,6 +1,6 @@
 # Data Models Reference
 
-!!! note "📚 Reference - Information-oriented content"
+!!! note "Reference - Information-oriented content"
     **Use this reference when:** You need to look up specific model structures, field types, and validation rules
 
     **Content type:** Complete technical specifications for FiveTwenty data models

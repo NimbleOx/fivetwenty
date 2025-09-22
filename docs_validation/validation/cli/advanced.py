@@ -61,8 +61,8 @@ def config_init(ctx, config_format, profile):
 
     try:
         default_config_loader.create_sample_config(config_file, config_format)
-        console.print(f"✅ Created configuration file: {config_file}")
-        console.print("📝 Edit this file to customize validation settings for your project")
+        console.print(f"Created configuration file: {config_file}")
+        console.print("Edit this file to customize validation settings for your project")
 
         # Show quick start info
         panel = Panel(
@@ -78,7 +78,7 @@ def config_init(ctx, config_format, profile):
         console.print(panel)
 
     except Exception as e:
-        console.print(f"❌ Error creating configuration: {e}", style="red")
+        console.print(f"Error creating configuration: {e}", style="red")
 
 
 @config.command("validate")
@@ -91,14 +91,14 @@ def config_validate(ctx):
         config_file = default_config_loader.find_config_file()
 
         if not config_file:
-            console.print("⚠️  No configuration file found", style="yellow")
+            console.print("No configuration file found", style="yellow")
             console.print("Run [cyan]validation config init[/cyan] to create one")
             return
 
         # Try to load the configuration
         config_data = default_config_loader.load_config_file(config_file)
 
-        console.print(f"✅ Configuration file is valid: {config_file}")
+        console.print(f"Configuration file is valid: {config_file}")
 
         # Show summary
         profiles = config_data.get("profiles", {})
@@ -117,15 +117,15 @@ def config_validate(ctx):
 
         # List profiles
         if profiles:
-            console.print("\n📋 Available Profiles:")
+            console.print("\nAvailable Profiles:")
             for name, profile_config in profiles.items():
                 description = profile_config.get("description", "No description")
                 extends = profile_config.get("extends")
                 extends_info = f" (extends {extends})" if extends else ""
-                console.print(f"  • [cyan]{name}[/cyan]: {description}{extends_info}")
+                console.print(f"  - [cyan]{name}[/cyan]: {description}{extends_info}")
 
     except Exception as e:
-        console.print(f"❌ Configuration validation failed: {e}", style="red")
+        console.print(f"Configuration validation failed: {e}", style="red")
 
 
 @cli.group()
@@ -140,7 +140,7 @@ def profiles_list(ctx):
     try:
         available_profiles = default_profile_manager.list_available_profiles()
 
-        table = Table(title="🔍 Available Validation Profiles")
+        table = Table(title="Available Validation Profiles")
         table.add_column("Profile Name", style="cyan", no_wrap=True)
         table.add_column("Description", style="white")
         table.add_column("Type", style="yellow")
@@ -175,7 +175,7 @@ def profiles_list(ctx):
         console.print(panel)
 
     except Exception as e:
-        console.print(f"❌ Error listing profiles: {e}", style="red")
+        console.print(f"Error listing profiles: {e}", style="red")
 
 
 @profiles.command("info")
@@ -188,7 +188,7 @@ def profiles_info(ctx, profile_name):
         console.print(report)
 
     except Exception as e:
-        console.print(f"❌ Error getting profile info: {e}", style="red")
+        console.print(f"Error getting profile info: {e}", style="red")
 
 
 @profiles.command("compare")
@@ -200,7 +200,7 @@ def profiles_compare(ctx, profile_names):
         comparison = default_profile_manager.create_profile_comparison(list(profile_names))
 
         # Create comparison table
-        table = Table(title="🔍 Profile Comparison")
+        table = Table(title="Profile Comparison")
         table.add_column("Check", style="cyan")
 
         for profile_name in profile_names:
@@ -211,11 +211,11 @@ def profiles_compare(ctx, profile_names):
             for profile_name in profile_names:
                 enabled = profile_data.get(profile_name, False)
                 if enabled is True:
-                    row.append("✅")
+                    row.append("ENABLED")
                 elif enabled is False:
-                    row.append("❌")
+                    row.append("DISABLED")
                 else:
-                    row.append("❓")
+                    row.append("UNKNOWN")
             table.add_row(*row)
 
         console.print(table)
@@ -224,7 +224,7 @@ def profiles_compare(ctx, profile_names):
         for profile_name in profile_names:
             profile_data = comparison["profiles"].get(profile_name, {})
             if "error" not in profile_data:
-                console.print(f"\n📋 {profile_name}: {profile_data.get('description', 'No description')}")
+                console.print(f"\n{profile_name}: {profile_data.get('description', 'No description')}")
                 console.print(f"   Quality Gates: {profile_data.get('quality_gates', {})}")
 
     except Exception as e:
@@ -250,7 +250,7 @@ def gates_test(ctx, profile, max_errors, max_warnings, min_success_rate):
     try:
         context = ValidationContext(config)
 
-        console.print(f"🚦 Testing quality gates with profile: {profile}")
+        console.print(f"Testing quality gates with profile: {profile}")
 
         # Execute validation with quality gates
         result = default_profile_manager.validate_with_quality_gates(
@@ -262,7 +262,7 @@ def gates_test(ctx, profile, max_errors, max_warnings, min_success_rate):
         gate_report = result["quality_gate_report"]
 
         # Print validation summary
-        console.print("\n📊 Validation Summary:")
+        console.print("\nValidation Summary:")
         console.print(f"   Total Checks: {len(summary.results)}")
         console.print(f"   Total Issues: {summary.total_issues}")
         console.print(f"   Success Rate: {summary.overall_success_rate:.1f}%")
@@ -276,14 +276,14 @@ def gates_test(ctx, profile, max_errors, max_warnings, min_success_rate):
 
         # Exit with appropriate code
         if result["overall_passed"]:
-            console.print("\n✅ All quality gates passed!", style="green")
+            console.print("\nAll quality gates passed!", style="green")
             sys.exit(0)
         else:
-            console.print("\n❌ Quality gates failed!", style="red")
+            console.print("\nQuality gates failed!", style="red")
             sys.exit(1)
 
     except Exception as e:
-        console.print(f"❌ Error testing quality gates: {e}", style="red")
+        console.print(f"Error testing quality gates: {e}", style="red")
         sys.exit(1)
 
 
@@ -307,7 +307,7 @@ def run(ctx, profile, checks, gates, output_format, output_dir):
         if checks:
             specific_checks = [check.strip() for check in checks.split(",")]
 
-        console.print(f"🚀 Running validation with profile: [cyan]{profile}[/cyan]")
+        console.print(f"Running validation with profile: [cyan]{profile}[/cyan]")
 
         if gates:
             # Run with quality gates
@@ -335,10 +335,10 @@ def run(ctx, profile, checks, gates, output_format, output_dir):
 
             # Exit with appropriate code
             if result["overall_passed"]:
-                console.print("\n✅ Validation completed successfully!", style="green")
+                console.print("\nValidation completed successfully!", style="green")
                 sys.exit(0)
             else:
-                console.print("\n❌ Validation failed quality gates!", style="red")
+                console.print("\nValidation failed quality gates!", style="red")
                 sys.exit(1)
         else:
             # Run without quality gates
@@ -354,16 +354,16 @@ def run(ctx, profile, checks, gates, output_format, output_dir):
             if output_format != "console" or output_dir:
                 _export_reports(summary, output_format, output_dir, project_root)
 
-            console.print("\n✅ Validation completed!", style="green")
+            console.print("\nValidation completed!", style="green")
 
     except Exception as e:
-        console.print(f"❌ Validation failed: {e}", style="red")
+        console.print(f"Validation failed: {e}", style="red")
         sys.exit(1)
 
 
 def _display_validation_summary(summary):
     """Display validation summary in console."""
-    console.print("\n📊 Validation Results:")
+    console.print("\nValidation Results:")
     console.print(f"   Total Checks: {len(summary.results)}")
     console.print(f"   Passed: {summary.passed_checks}")
     console.print(f"   Failed: {summary.failed_checks}")
@@ -374,8 +374,8 @@ def _display_validation_summary(summary):
 
     # Show check details
     for result in summary.results:
-        status_icon = "✅" if result.is_successful else "❌"
-        console.print(f"   {status_icon} {result.check_name}: {result.issues_found} issues")
+        status_icon = "PASSED" if result.is_successful else "FAILED"
+        console.print(f"   [{status_icon}] {result.check_name}: {result.issues_found} issues")
 
 
 def _export_reports(summary, output_format, output_dir, project_root):
@@ -397,12 +397,12 @@ def _export_reports(summary, output_format, output_dir, project_root):
 
         exported_files = exporter.export_summary(summary, formats)
 
-        console.print("\n📤 Reports exported:")
+        console.print("\nReports exported:")
         for format_name, file_path in exported_files.items():
             console.print(f"   {format_name.upper()}: {file_path}")
 
     except Exception as e:
-        console.print(f"⚠️  Error exporting reports: {e}", style="yellow")
+        console.print(f"Warning: Error exporting reports: {e}", style="yellow")
 
 
 if __name__ == "__main__":

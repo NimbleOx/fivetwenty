@@ -14,7 +14,7 @@ from fivetwenty import AsyncClient, Environment
 # Example placeholder - implementation coming soon
 async def main():
     """Basic usage example - placeholder."""
-    print("🚧 Basic usage example coming soon!")
+    print("Basic usage example coming soon!")
 
     # TODO: Add complete example implementation
     # - Client initialization
