@@ -578,6 +578,71 @@ class ValidationRunner:
                     content += f"- **{issue_type}**: {count} issues\n"
                 content += "\n"
 
+        # Handle security validator details
+        elif validator_name == "security_validator" and "security_issues" in details:
+            security_issues = details["security_issues"]
+            if security_issues:
+                content += "#### 🔒 Security Issues Found\n\n"
+
+                # Group by severity first, then by file
+                severity_order = ["critical", "high", "medium", "low"]
+                issues_by_severity: dict[str, list[dict[str, Any]]] = {}
+                for issue in security_issues:
+                    severity = issue.get("severity", "unknown")
+                    if severity not in issues_by_severity:
+                        issues_by_severity[severity] = []
+                    issues_by_severity[severity].append(issue)
+
+                for severity in severity_order:
+                    if severity in issues_by_severity:
+                        severity_icon = {"critical": "🚨", "high": "❌", "medium": "⚠️", "low": "ℹ️"}.get(severity, "•")
+                        content += f"**{severity_icon} {severity.upper()} SEVERITY**\n\n"
+
+                        # Group by file within severity
+                        files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                        for issue in issues_by_severity[severity]:
+                            file_path = issue.get("file", "Unknown")
+                            if file_path not in files_with_issues:
+                                files_with_issues[file_path] = []
+                            files_with_issues[file_path].append(issue)
+
+                        for file_path, file_issues in sorted(files_with_issues.items()):
+                            content += f"**{file_path}**\n"
+                            for issue in file_issues:
+                                line = issue.get("line", "")
+                                description = issue.get("description", "Security issue")
+                                matched_text = issue.get("matched_text", "")
+                                context = issue.get("context", "")
+
+                                line_info = f" (Line {line})" if line else ""
+                                content += f"- {severity_icon} [{description}]{line_info}\n"
+                                if matched_text:
+                                    content += f"  - **Match**: `{matched_text}`\n"
+                                if context:
+                                    content += f"  - **Context**: `{context[:100]}{'...' if len(context) > 100 else ''}`\n"
+                            content += "\n"
+
+                # Add summary by severity and type
+                content += "#### 📊 Security Summary\n\n"
+                severity_counts = {}
+                type_counts = {}
+                for issue in security_issues:
+                    severity = issue.get("severity", "unknown")
+                    issue_type = issue.get("description", "unknown")
+                    severity_counts[severity] = severity_counts.get(severity, 0) + 1
+                    type_counts[issue_type] = type_counts.get(issue_type, 0) + 1
+
+                content += "**By Severity:**\n"
+                for severity in severity_order:
+                    if severity in severity_counts:
+                        severity_icon = {"critical": "🚨", "high": "❌", "medium": "⚠️", "low": "ℹ️"}.get(severity, "•")
+                        content += f"- {severity_icon} **{severity}**: {severity_counts[severity]} issues\n"
+
+                content += "\n**By Type:**\n"
+                for issue_type, count in sorted(type_counts.items()):
+                    content += f"- **{issue_type}**: {count} issues\n"
+                content += "\n"
+
         # Add other validator-specific details here as needed
         elif "files_checked" in details:
             content += "#### 📁 Files Processed\n\n"
