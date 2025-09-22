@@ -6,6 +6,7 @@ Simple script to find code validation issues in tutorial files.
 import ast
 import re
 from pathlib import Path
+from typing import Any
 
 
 def extract_python_code_blocks(content: str) -> list[tuple[str, int]]:
@@ -13,7 +14,7 @@ def extract_python_code_blocks(content: str) -> list[tuple[str, int]]:
     blocks = []
     lines = content.split('\n')
     in_python_block = False
-    current_block = []
+    current_block: list[str] = []
     block_start_line = 0
 
     for line_num, line in enumerate(lines, 1):
@@ -89,7 +90,7 @@ def check_financial_precision(code: str) -> list[str]:
 
     return issues
 
-def scan_file(file_path: Path) -> dict:
+def scan_file(file_path: Path) -> dict[str, Any]:
     """Scan a single file for code issues."""
     print(f"\n📁 Scanning: {file_path}")
 
@@ -159,7 +160,7 @@ def scan_file(file_path: Path) -> dict:
             'issues': [{'type': 'file_error', 'message': f"Could not read file: {e}"}]
         }
 
-def main():
+def main() -> None:
     """Main function to scan tutorial files."""
     print("🔍 Scanning tutorial files for code validation issues...")
 

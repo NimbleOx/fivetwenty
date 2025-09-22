@@ -16,7 +16,7 @@ from core.base import BaseValidator, ValidationResult
 class TutorialStructureValidator(BaseValidator):
     """Validate tutorial structure and educational content standards."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("tutorial_structure", "Validates tutorial content follows educational best practices and proper structure")
         self.validator_name = "tutorial_structure"
         self.file_patterns = ["docs/tutorials/**/*.md"]
@@ -76,7 +76,7 @@ class TutorialStructureValidator(BaseValidator):
 
     def _find_tutorial_files(self) -> list[Path]:
         """Find all tutorial files to validate."""
-        tutorial_files = []
+        tutorial_files: list[Path] = []
 
         for pattern in self.file_patterns:
             tutorial_files.extend(Path().glob(pattern))
@@ -267,7 +267,7 @@ class TutorialStructureValidator(BaseValidator):
 
         return issues
 
-    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]):
+    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]) -> None:
         """Log issues found in a file."""
         if not issues:
             return

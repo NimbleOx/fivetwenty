@@ -13,10 +13,10 @@ validation_root = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_root))
 
 # Import after path manipulation
-from core.base import FileValidator, ValidationResult  # type: ignore[import-not-found] # noqa: E402
+from core.base import FileValidator, ValidationResult  # noqa: E402
 
 
-class SyntaxValidator(FileValidator):  # type: ignore[misc]
+class SyntaxValidator(FileValidator):
     """Validates syntax in markdown files."""
 
     def __init__(self) -> None:
@@ -176,7 +176,7 @@ class SyntaxValidator(FileValidator):  # type: ignore[misc]
     def _check_box_alignment(self, file_path: Path, diagram_lines: list[str], start_line: int) -> None:
         """Check alignment of box drawing characters."""
         # Find vertical lines and check they align
-        vertical_positions = {}  # position -> line_numbers
+        vertical_positions: dict[int, list[int]] = {}  # position -> line_numbers
 
         for i, line in enumerate(diagram_lines):
             for pos, char in enumerate(line):

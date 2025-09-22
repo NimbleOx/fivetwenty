@@ -16,10 +16,10 @@ validation_root = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_root))
 
 # Import after path manipulation
-from core.base import FileValidator, ValidationResult  # type: ignore[import-not-found] # noqa: E402
+from core.base import FileValidator, ValidationResult  # noqa: E402
 
 
-class CodeExampleValidator(FileValidator):  # type: ignore[misc]
+class CodeExampleValidator(FileValidator):
     """Validates code examples in documentation."""
 
     def __init__(self) -> None:
@@ -77,7 +77,7 @@ class CodeExampleValidator(FileValidator):  # type: ignore[misc]
         blocks = []
         lines = content.split('\n')
         in_python_block = False
-        current_block = []
+        current_block: list[str] = []
         block_start_line = 0
 
         for line_num, line in enumerate(lines, 1):

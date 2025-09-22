@@ -91,7 +91,7 @@ class MarkdownTableParser:
 class DocumentationExtractor:
     """High-level documentation content extractor."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.table_parser = MarkdownTableParser()
 
     def extract_endpoint_docs(self, file_path: Path) -> list[dict[str, Any]]:

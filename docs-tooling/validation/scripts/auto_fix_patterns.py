@@ -22,7 +22,7 @@ class DocumentationAutoFixer:
 
     def __init__(self, dry_run: bool = True):
         self.dry_run = dry_run
-        self.fixes_applied = []
+        self.fixes_applied: list[dict[str, Any]] = []
         self.backup_suffix = ".bak"
 
     def fix_directory(self, target_dir: str, patterns: list[str] | None = None) -> dict[str, Any]:
@@ -95,7 +95,7 @@ class DocumentationAutoFixer:
                 fixes_applied.extend(pattern_fixes)
 
         # Count fixes by pattern
-        fixes_by_pattern = {}
+        fixes_by_pattern: dict[str, int] = {}
         for fix in fixes_applied:
             pattern = fix["pattern"]
             fixes_by_pattern[pattern] = fixes_by_pattern.get(pattern, 0) + 1
@@ -126,7 +126,7 @@ class DocumentationAutoFixer:
         # Pattern 1: Float literals in financial contexts
         financial_float_pattern = r'(price|amount|balance|stop_loss|take_profit|daily_loss_limit|spread|margin|units)\s*=\s*(\d+\.\d+)(?!["\'])'
 
-        def replace_financial_float(match):
+        def replace_financial_float(match: Any) -> str:
             var_name = match.group(1)
             value = match.group(2)
             fixes.append({
@@ -143,7 +143,7 @@ class DocumentationAutoFixer:
         # Pattern 2: Float arithmetic in financial calculations
         float_arithmetic_pattern = r'(\w+)\s*\*\s*(\d+\.\d+)(?!["\'])'
 
-        def replace_float_arithmetic(match):
+        def replace_float_arithmetic(match: Any) -> str:
             var_name = match.group(1)
             value = match.group(2)
             fixes.append({
@@ -249,7 +249,7 @@ class DocumentationAutoFixer:
         blocks = []
         lines = content.split('\n')
         in_python_block = False
-        current_block = []
+        current_block: list[str] = []
         block_start = 0
 
         for line_num, line in enumerate(lines):
@@ -310,7 +310,7 @@ class DocumentationAutoFixer:
         return '\n'.join(report)
 
 
-def main():
+def main() -> int:
     """Main entry point for the auto-fix script."""
     parser = argparse.ArgumentParser(description="Auto-fix common documentation validation issues")
     parser.add_argument("directory", help="Directory to process")

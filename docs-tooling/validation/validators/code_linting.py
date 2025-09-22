@@ -17,10 +17,10 @@ validation_root = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_root))
 
 # Import after path manipulation
-from core.base import FileValidator, ValidationResult  # type: ignore[import-not-found] # noqa: E402
+from core.base import FileValidator, ValidationResult  # noqa: E402
 
 
-class CodeLintingValidator(FileValidator):  # type: ignore[misc]
+class CodeLintingValidator(FileValidator):
     """Validates Python code blocks using ruff linting."""
 
     def __init__(self) -> None:
@@ -82,7 +82,7 @@ class CodeLintingValidator(FileValidator):  # type: ignore[misc]
         blocks = []
         lines = content.split('\n')
         in_python_block = False
-        current_block = []
+        current_block: list[str] = []
         block_start_line = 0
 
         for line_num, line in enumerate(lines, 1):
@@ -276,7 +276,7 @@ class CodeLintingValidator(FileValidator):  # type: ignore[misc]
             except (OSError, PermissionError):
                 pass
 
-    def _should_skip_ruff_issue(self, issue: dict, code: str) -> bool:
+    def _should_skip_ruff_issue(self, issue: dict[str, Any], code: str) -> bool:
         """Check if this ruff issue should be skipped for documentation."""
         issue_code = issue.get('code', '')
         message = issue.get('message', '')

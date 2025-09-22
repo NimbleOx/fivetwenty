@@ -212,14 +212,14 @@ class ValidationRunner:
                 content += "#### 🔗 Broken Links Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                links_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for link in broken_links:
                     file_path = link.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(link)
+                    if file_path not in links_files_with_issues:
+                        links_files_with_issues[file_path] = []
+                    links_files_with_issues[file_path].append(link)
 
-                for file_path, file_links in sorted(files_with_issues.items()):
+                for file_path, file_links in sorted(links_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for link in file_links:
                         line = link.get("line", "?")
@@ -263,14 +263,14 @@ class ValidationRunner:
                 content += "#### 🔧 Code Linting Issues Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                prose_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for issue in linting_issues:
                     file_path = issue.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(issue)
+                    if file_path not in prose_files_with_issues:
+                        prose_files_with_issues[file_path] = []
+                    prose_files_with_issues[file_path].append(issue)
 
-                for file_path, file_issues in sorted(files_with_issues.items()):
+                for file_path, file_issues in sorted(prose_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for issue in file_issues:
                         line = issue.get("line", "?")
@@ -287,7 +287,7 @@ class ValidationRunner:
 
                 # Add summary by issue type
                 content += "#### 📊 Issue Summary\n\n"
-                issue_types = {}
+                issue_types: dict[str, int] = {}
                 for issue in linting_issues:
                     issue_type = issue.get("type", "unknown")
                     issue_types[issue_type] = issue_types.get(issue_type, 0) + 1
@@ -303,14 +303,14 @@ class ValidationRunner:
                 content += "#### 📝 Terminology Issues Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                terminology_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for issue in terminology_issues:
                     file_path = issue.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(issue)
+                    if file_path not in terminology_files_with_issues:
+                        terminology_files_with_issues[file_path] = []
+                    terminology_files_with_issues[file_path].append(issue)
 
-                for file_path, file_issues in sorted(files_with_issues.items()):
+                for file_path, file_issues in sorted(terminology_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for issue in file_issues:
                         line = issue.get("line", "?")
@@ -332,14 +332,14 @@ class ValidationRunner:
                 content += "#### 🐍 Code Example Issues Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                code_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for issue in code_issues:
                     file_path = issue.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(issue)
+                    if file_path not in code_files_with_issues:
+                        code_files_with_issues[file_path] = []
+                    code_files_with_issues[file_path].append(issue)
 
-                for file_path, file_issues in sorted(files_with_issues.items()):
+                for file_path, file_issues in sorted(code_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for issue in file_issues:
                         line = issue.get("line", "?")
@@ -375,14 +375,14 @@ class ValidationRunner:
                 content += "#### 🔗 Cross-Reference Issues Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                reference_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for issue in reference_issues:
                     file_path = issue.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(issue)
+                    if file_path not in reference_files_with_issues:
+                        reference_files_with_issues[file_path] = []
+                    reference_files_with_issues[file_path].append(issue)
 
-                for file_path, file_issues in sorted(files_with_issues.items()):
+                for file_path, file_issues in sorted(reference_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for issue in file_issues:
                         line = issue.get("line", "?")
@@ -429,14 +429,14 @@ class ValidationRunner:
                 content += "#### 📚 Tutorial Structure Issues Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                tutorial_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for issue in tutorial_issues:
                     file_path = issue.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(issue)
+                    if file_path not in tutorial_files_with_issues:
+                        tutorial_files_with_issues[file_path] = []
+                    tutorial_files_with_issues[file_path].append(issue)
 
-                for file_path, file_issues in sorted(files_with_issues.items()):
+                for file_path, file_issues in sorted(tutorial_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for issue in file_issues:
                         issue_type = issue.get("type", "unknown")
@@ -468,14 +468,14 @@ class ValidationRunner:
                 content += "#### 🎓 Educational Progression Issues Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                progression_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for issue in progression_issues:
                     file_path = issue.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(issue)
+                    if file_path not in progression_files_with_issues:
+                        progression_files_with_issues[file_path] = []
+                    progression_files_with_issues[file_path].append(issue)
 
-                for file_path, file_issues in sorted(files_with_issues.items()):
+                for file_path, file_issues in sorted(progression_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for issue in file_issues:
                         issue_type = issue.get("type", "unknown")
@@ -507,14 +507,14 @@ class ValidationRunner:
                 content += "#### ⚡ Code Executability Issues Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                executability_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for issue in executability_issues:
                     file_path = issue.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(issue)
+                    if file_path not in executability_files_with_issues:
+                        executability_files_with_issues[file_path] = []
+                    executability_files_with_issues[file_path].append(issue)
 
-                for file_path, file_issues in sorted(files_with_issues.items()):
+                for file_path, file_issues in sorted(executability_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for issue in file_issues:
                         issue_type = issue.get("type", "unknown")
@@ -549,14 +549,14 @@ class ValidationRunner:
                 content += "#### 📝 Syntax Issues Found\n\n"
 
                 # Group by file for better organization
-                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                syntax_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                 for issue in syntax_issues:
                     file_path = issue.get("file", "Unknown")
-                    if file_path not in files_with_issues:
-                        files_with_issues[file_path] = []
-                    files_with_issues[file_path].append(issue)
+                    if file_path not in syntax_files_with_issues:
+                        syntax_files_with_issues[file_path] = []
+                    syntax_files_with_issues[file_path].append(issue)
 
-                for file_path, file_issues in sorted(files_with_issues.items()):
+                for file_path, file_issues in sorted(syntax_files_with_issues.items()):
                     content += f"**{file_path}**\n"
                     for issue in file_issues:
                         line = issue.get("line", "")
@@ -599,14 +599,14 @@ class ValidationRunner:
                         content += f"**{severity_icon} {severity.upper()} SEVERITY**\n\n"
 
                         # Group by file within severity
-                        files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                        security_files_with_issues: dict[str, list[dict[str, Any]]] = {}
                         for issue in issues_by_severity[severity]:
                             file_path = issue.get("file", "Unknown")
-                            if file_path not in files_with_issues:
-                                files_with_issues[file_path] = []
-                            files_with_issues[file_path].append(issue)
+                            if file_path not in security_files_with_issues:
+                                security_files_with_issues[file_path] = []
+                            security_files_with_issues[file_path].append(issue)
 
-                        for file_path, file_issues in sorted(files_with_issues.items()):
+                        for file_path, file_issues in sorted(security_files_with_issues.items()):
                             content += f"**{file_path}**\n"
                             for issue in file_issues:
                                 line = issue.get("line", "")
@@ -624,8 +624,8 @@ class ValidationRunner:
 
                 # Add summary by severity and type
                 content += "#### 📊 Security Summary\n\n"
-                severity_counts = {}
-                type_counts = {}
+                severity_counts: dict[str, int] = {}
+                type_counts: dict[str, int] = {}
                 for issue in security_issues:
                     severity = issue.get("severity", "unknown")
                     issue_type = issue.get("description", "unknown")
@@ -653,27 +653,27 @@ class ValidationRunner:
 
                 # Group by severity first, then by file
                 severity_order = ["error", "warning", "suggestion"]
-                issues_by_severity: dict[str, list[dict[str, Any]]] = {}
+                prose_issues_by_severity: dict[str, list[dict[str, Any]]] = {}
                 for issue in prose_issues:
                     severity = issue.get("severity", "unknown")
-                    if severity not in issues_by_severity:
-                        issues_by_severity[severity] = []
-                    issues_by_severity[severity].append(issue)
+                    if severity not in prose_issues_by_severity:
+                        prose_issues_by_severity[severity] = []
+                    prose_issues_by_severity[severity].append(issue)
 
                 for severity in severity_order:
-                    if severity in issues_by_severity:
+                    if severity in prose_issues_by_severity:
                         severity_icon = {"error": "❌", "warning": "⚠️", "suggestion": "💡"}.get(severity, "•")
                         content += f"**{severity_icon} {severity.upper()} ISSUES**\n\n"
 
                         # Group by file within severity
-                        files_with_issues: dict[str, list[dict[str, Any]]] = {}
-                        for issue in issues_by_severity[severity]:
+                        prose_severity_files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                        for issue in prose_issues_by_severity[severity]:
                             file_path = issue.get("file", "Unknown")
-                            if file_path not in files_with_issues:
-                                files_with_issues[file_path] = []
-                            files_with_issues[file_path].append(issue)
+                            if file_path not in prose_severity_files_with_issues:
+                                prose_severity_files_with_issues[file_path] = []
+                            prose_severity_files_with_issues[file_path].append(issue)
 
-                        for file_path, file_issues in sorted(files_with_issues.items()):
+                        for file_path, file_issues in sorted(prose_severity_files_with_issues.items()):
                             content += f"**{file_path}**\n"
                             for issue in file_issues:
                                 line = issue.get("line", "")
@@ -695,7 +695,7 @@ class ValidationRunner:
                 # Add summary
                 content += "#### 📊 Prose Summary\n\n"
                 severity_counts = {}
-                check_counts = {}
+                check_counts: dict[str, int] = {}
                 for issue in prose_issues:
                     severity = issue.get("severity", "unknown")
                     check = issue.get("check", "unknown")

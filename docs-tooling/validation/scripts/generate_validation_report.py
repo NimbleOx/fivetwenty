@@ -18,6 +18,7 @@ validation_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_dir))
 
 try:
+    from core.base import ValidationResult
     from core.config import ValidationConfig
     from core.runner import ValidationRunner, ValidatorRegistry
     from validators.code_examples import CodeExampleValidator
@@ -52,7 +53,7 @@ class ValidationReportGenerator:
             "docs/api-reference"
         ]
 
-        report_data = {
+        report_data: dict[str, Any] = {
             "metadata": {
                 "timestamp": datetime.now(timezone.utc).isoformat(),
                 "generator_version": "1.0.0",
@@ -110,7 +111,7 @@ class ValidationReportGenerator:
                     runner.register_validator(validator)
 
             # Run validation
-            results = runner.run_validation(parallel=True)
+            results = runner.run_parallel(max_workers=4)
 
             return {
                 "path": section_path,
@@ -147,7 +148,7 @@ class ValidationReportGenerator:
 
         return registry
 
-    def _format_result(self, result) -> dict[str, Any]:
+    def _format_result(self, result: ValidationResult) -> dict[str, Any]:
         """Format validation result for reporting."""
         return {
             "validator": result.validator_name,
@@ -322,7 +323,7 @@ class ValidationReportGenerator:
                 ])
 
 
-def main():
+def main() -> int:
     """Main entry point for the validation report generator."""
     parser = argparse.ArgumentParser(description="Generate comprehensive validation report")
     parser.add_argument("--output-dir", type=str, help="Output directory for reports")

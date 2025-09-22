@@ -19,6 +19,7 @@ validation_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_dir))
 
 try:
+    from core.base import ValidationResult
     from core.config import ValidationConfig
     from core.runner import ValidationRunner, ValidatorRegistry
     from validators.code_examples import CodeExampleValidator
@@ -71,7 +72,7 @@ class ValidationDashboard:
     def _run_validation_cycle(self, sections: list[str]) -> None:
         """Run one validation cycle and update dashboard."""
 
-        cycle_data = {
+        cycle_data: dict[str, Any] = {
             "timestamp": datetime.now(timezone.utc).isoformat(),
             "sections": {},
             "summary": {}
@@ -145,7 +146,7 @@ class ValidationDashboard:
                     runner.register_validator(validator)
 
             # Run validation
-            results = runner.run_validation(parallel=True)
+            results = runner.run_parallel(max_workers=4)
 
             # Count critical issues (financial precision and missing imports)
             critical_count = 0
@@ -191,7 +192,7 @@ class ValidationDashboard:
 
         return registry
 
-    def _format_result(self, result) -> dict[str, Any]:
+    def _format_result(self, result: ValidationResult) -> dict[str, Any]:
         """Format validation result for dashboard."""
         return {
             "validator": result.validator_name,
@@ -420,7 +421,7 @@ class ValidationDashboard:
                 ])
 
 
-def main():
+def main() -> int:
     """Main entry point for the validation dashboard."""
     parser = argparse.ArgumentParser(description="FiveTwenty Documentation Validation Dashboard")
     parser.add_argument("--watch", action="store_true", help="Run in watch mode (continuous monitoring)")
@@ -439,7 +440,7 @@ def main():
             report = dashboard.generate_report(days=args.report)
             print(report)
         elif args.export:
-            export_path = dashboard.export_metrics(format=args.export)
+            export_path = dashboard.export_metrics(output_format=args.export)
             print(f"📄 Metrics exported to: {export_path}")
         else:
             dashboard.run_dashboard(watch_mode=args.watch, sections=args.sections)

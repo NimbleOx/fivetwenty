@@ -5,6 +5,7 @@ Debug script to find the remaining 6 code example validation issues in tutorials
 
 import sys
 from pathlib import Path
+from typing import Any
 
 # Add the validation directory to the path for imports
 validation_dir = Path(__file__).parent.parent
@@ -17,7 +18,7 @@ except ImportError as e:
     sys.exit(1)
 
 
-def main():
+def main() -> None:
     """Run code examples validator and show detailed issues in tutorials."""
     print("🔍 Running code examples validator on tutorials directory...")
 
@@ -41,7 +42,7 @@ def main():
         print("=" * 80)
 
         # Group issues by file for better organization
-        issues_by_file = {}
+        issues_by_file: dict[str, list[Any]] = {}
         for issue in validator.code_issues:
             file_path = issue['file']
             if file_path not in issues_by_file:

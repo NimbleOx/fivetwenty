@@ -13,16 +13,16 @@ import requests
 
 # Setup imports - must be done before importing core modules
 sys.path.insert(0, str(Path(__file__).parent.parent))
-from core.imports import setup_validation_imports  # type: ignore[import-not-found]
+from core.imports import setup_validation_imports
 
 setup_validation_imports()
 
 # Import after path setup
-from core.base import FileValidator, ValidationResult  # type: ignore[import-not-found] # noqa: E402
-from core.cache import EXTERNAL_LINK_CACHE  # type: ignore[import-not-found] # noqa: E402
+from core.base import FileValidator, ValidationResult  # noqa: E402
+from core.cache import EXTERNAL_LINK_CACHE  # noqa: E402
 
 
-class LinkValidator(FileValidator):  # type: ignore[misc]
+class LinkValidator(FileValidator):
     """Validates links in markdown files."""
 
     # Pre-compile regex patterns for better performance
@@ -43,7 +43,7 @@ class LinkValidator(FileValidator):  # type: ignore[misc]
             total_links += len(file_links)
 
         return ValidationResult(
-            validator_name=self.name, status="passed" if len(self.broken_links) == 0 else "failed", issues_found=len(self.broken_links), total_checked=total_links, details={"broken_links": self.broken_links, "files_checked": len(files)}, timestamp=self.start_time.isoformat(), duration_seconds=self.get_elapsed_time()
+            validator_name=self.name, status="passed" if len(self.broken_links) == 0 else "failed", issues_found=len(self.broken_links), total_checked=total_links, details={"broken_links": self.broken_links, "files_checked": len(files)}, timestamp=self.start_time.isoformat() if self.start_time else "", duration_seconds=self.get_elapsed_time()
         )
 
     def _check_file_links(self, file_path: Path) -> list[dict[str, Any]]:

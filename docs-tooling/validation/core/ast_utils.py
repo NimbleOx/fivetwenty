@@ -58,7 +58,7 @@ class ASTTypeParser:
 class MethodExtractor:
     """Extracts method information from Python AST."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.type_parser = ASTTypeParser()
 
     def extract_method_info(self, method_node: ast.FunctionDef, content: str, file_path: str) -> dict[str, Any]:
@@ -97,7 +97,7 @@ class MethodExtractor:
         required = True
 
         # Get defaults from method signature
-        defaults = method_node.defaults
+        defaults = method_node.args.defaults
         args = method_node.args.args
 
         # Calculate if this parameter has a default
@@ -122,7 +122,7 @@ class MethodExtractor:
 class ModelExtractor:
     """Extracts model information from Python AST."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.type_parser = ASTTypeParser()
 
     def extract_model_info(self, class_node: ast.ClassDef, content: str, file_path: str) -> dict[str, Any]:
@@ -136,7 +136,10 @@ class ModelExtractor:
             if isinstance(base, ast.Name):
                 base_classes.append(base.id)
             elif isinstance(base, ast.Attribute):
-                base_classes.append(f"{base.value.id}.{base.attr}")
+                if hasattr(base.value, 'id'):
+                    base_classes.append(f"{base.value.id}.{base.attr}")
+                else:
+                    base_classes.append(f"{base.attr}")
 
         # Extract fields
         fields = {}
@@ -150,6 +153,8 @@ class ModelExtractor:
 
     def _extract_field_info(self, ann_assign: ast.AnnAssign, content: str) -> dict[str, Any]:
         """Extract field information including type, alias, default."""
+        if not isinstance(ann_assign.target, ast.Name):
+            return {"name": "", "type_annotation": "Any", "alias": None, "default": None, "required": True, "description": None}
         field_name = ann_assign.target.id
         type_annotation = self.type_parser.get_type_string(ann_assign.annotation)
 
@@ -197,7 +202,7 @@ class ModelExtractor:
 class PythonCodeAnalyzer:
     """High-level analyzer for Python code using AST."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.method_extractor = MethodExtractor()
         self.model_extractor = ModelExtractor()
 

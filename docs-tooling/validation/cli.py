@@ -14,23 +14,23 @@ validation_dir = Path(__file__).parent
 sys.path.insert(0, str(validation_dir))
 
 try:
-    from core.config import ValidationConfig  # type: ignore[import-not-found]
-    from core.runner import ValidationRunner, ValidatorRegistry  # type: ignore[import-not-found]
-    from validators.code_examples import CodeExampleValidator  # type: ignore[import-not-found]
-    from validators.code_executability import CodeExecutabilityValidator  # type: ignore[import-not-found]
-    from validators.code_linting import CodeLintingValidator  # type: ignore[import-not-found]
-    from validators.cross_references import CrossReferenceValidator  # type: ignore[import-not-found]
-    from validators.educational_progression import EducationalProgressionValidator  # type: ignore[import-not-found]
-    from validators.financial_precision import FinancialPrecisionValidator  # type: ignore[import-not-found]
-    from validators.links import LinkValidator  # type: ignore[import-not-found]
-    from validators.prose import ProseValidator  # type: ignore[import-not-found]
-    from validators.sdk_methods import SDKMethodValidator  # type: ignore[import-not-found]
-    from validators.security import SecurityValidator  # type: ignore[import-not-found]
-    from validators.syntax import SyntaxValidator  # type: ignore[import-not-found]
-    from validators.terminology import TerminologyValidator  # type: ignore[import-not-found]
-    from validators.tutorial_structure import TutorialStructureValidator  # type: ignore[import-not-found]
-    # from validators.endpoint_accuracy import EndpointAccuracyValidator  # type: ignore[import-not-found]
-    # from validators.model_accuracy import ModelAccuracyValidator  # type: ignore[import-not-found]
+    from core.config import ValidationConfig
+    from core.runner import ValidationRunner, ValidatorRegistry
+    from validators.code_examples import CodeExampleValidator
+    from validators.code_executability import CodeExecutabilityValidator
+    from validators.code_linting import CodeLintingValidator
+    from validators.cross_references import CrossReferenceValidator
+    from validators.educational_progression import EducationalProgressionValidator
+    from validators.financial_precision import FinancialPrecisionValidator
+    from validators.links import LinkValidator
+    from validators.prose import ProseValidator
+    from validators.sdk_methods import SDKMethodValidator
+    from validators.security import SecurityValidator
+    from validators.syntax import SyntaxValidator
+    from validators.terminology import TerminologyValidator
+    from validators.tutorial_structure import TutorialStructureValidator
+    # from validators.endpoint_accuracy import EndpointAccuracyValidator
+    # from validators.model_accuracy import ModelAccuracyValidator
 except ImportError as e:
     print(f"Import error: {e}")
     print("Make sure you're running from the validation directory")
@@ -271,10 +271,18 @@ Examples:
         return 0
 
     # Dispatch to command handlers
+    def list_wrapper(args: argparse.Namespace) -> int:
+        cmd_list(args)
+        return 0
+
+    def config_wrapper(args: argparse.Namespace) -> int:
+        cmd_config(args)
+        return 0
+
     command_handlers = {
-        "list": lambda args: (cmd_list(args), 0)[1],
+        "list": list_wrapper,
         "run": cmd_run,
-        "config": lambda args: (cmd_config(args), 0)[1],
+        "config": config_wrapper,
         "dashboard": cmd_dashboard,
         "autofix": cmd_autofix,
         "report": cmd_report,

@@ -15,10 +15,10 @@ validation_root = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_root))
 
 # Import after path manipulation
-from core.base import FileValidator, ValidationResult  # type: ignore[import-not-found] # noqa: E402
+from core.base import FileValidator, ValidationResult  # noqa: E402
 
 
-class SDKMethodValidator(FileValidator):  # type: ignore[misc]
+class SDKMethodValidator(FileValidator):
     """Validates SDK method usage in documentation."""
 
     def __init__(self) -> None:
@@ -155,7 +155,7 @@ class SDKMethodValidator(FileValidator):  # type: ignore[misc]
         print(f"\n🔍 DETAILED SDK METHOD VALIDATION RESULTS ({len(self.method_issues)} issues)")
         print("=" * 80)
 
-        by_category = {}
+        by_category: dict[str, list[Any]] = {}
         for issue in self.method_issues:
             category = issue.get("category", "unknown")
             if category not in by_category:

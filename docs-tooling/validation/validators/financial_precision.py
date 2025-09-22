@@ -15,10 +15,10 @@ validation_root = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_root))
 
 # Import after path manipulation
-from core.base import FileValidator, ValidationResult  # type: ignore[import-not-found] # noqa: E402
+from core.base import FileValidator, ValidationResult  # noqa: E402
 
 
-class FinancialPrecisionValidator(FileValidator):  # type: ignore[misc]
+class FinancialPrecisionValidator(FileValidator):
     """Validates financial precision in documentation."""
 
     def __init__(self) -> None:
@@ -123,7 +123,7 @@ class FinancialPrecisionValidator(FileValidator):  # type: ignore[misc]
 
         code_lower = code.lower()
         return (any(keyword in code_lower for keyword in financial_keywords) or
-                re.search(decimal_pattern, code))
+                bool(re.search(decimal_pattern, code)))
 
     def _validate_financial_code(self, file_path: Path, code: str, line_start: int, is_block: bool) -> None:
         """Validate financial precision in code."""

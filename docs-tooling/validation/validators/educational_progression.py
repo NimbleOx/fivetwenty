@@ -17,7 +17,7 @@ from core.base import BaseValidator, ValidationResult
 class EducationalProgressionValidator(BaseValidator):
     """Validate educational progression and complexity building in tutorials."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("educational_progression", "Validates progressive learning patterns and complexity building")
         self.validator_name = "educational_progression"
         self.file_patterns = ["docs/tutorials/**/*.md"]
@@ -78,7 +78,7 @@ class EducationalProgressionValidator(BaseValidator):
 
     def _find_tutorial_files(self) -> list[Path]:
         """Find all tutorial files to validate."""
-        tutorial_files = []
+        tutorial_files: list[Path] = []
 
         for pattern in self.file_patterns:
             tutorial_files.extend(Path().glob(pattern))
@@ -147,7 +147,9 @@ class EducationalProgressionValidator(BaseValidator):
                 imports = len(re.findall(r'^(from|import)\s+', block, re.MULTILINE))
 
                 # Check if complexity exceeds level expectations
-                if lines > complexity_config["max_code_lines"]:
+                max_lines = complexity_config["max_code_lines"]
+                assert isinstance(max_lines, int)
+                if lines > max_lines:
                     issues.append({
                         "type": "excessive_complexity",
                         "severity": "warning",
@@ -156,7 +158,9 @@ class EducationalProgressionValidator(BaseValidator):
                         "file": str(file_path)
                     })
 
-                if imports > complexity_config["max_imports"]:
+                max_imports = complexity_config["max_imports"]
+                assert isinstance(max_imports, int)
+                if imports > max_imports:
                     issues.append({
                         "type": "excessive_imports",
                         "severity": "info",
@@ -280,7 +284,7 @@ class EducationalProgressionValidator(BaseValidator):
 
         return issues
 
-    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]):
+    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]) -> None:
         """Log issues found in a file."""
         if not issues:
             return

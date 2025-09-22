@@ -16,10 +16,10 @@ validation_root = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_root))
 
 # Import after path manipulation
-from core.base import FileValidator, ValidationResult  # type: ignore[import-not-found] # noqa: E402
+from core.base import FileValidator, ValidationResult  # noqa: E402
 
 
-class CrossReferenceValidator(FileValidator):  # type: ignore[misc]
+class CrossReferenceValidator(FileValidator):
     """Validates cross-references in documentation."""
 
     def __init__(self) -> None:
@@ -78,7 +78,7 @@ class CrossReferenceValidator(FileValidator):  # type: ignore[misc]
 
             # Store relative path as key for cross-referencing
             try:
-                relative_path = file_path.relative_to(Path.cwd())
+                relative_path = str(file_path.relative_to(Path.cwd()))
             except ValueError:
                 # If file is not in a subpath of cwd, just use the filename
                 relative_path = file_path.name

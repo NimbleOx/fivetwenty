@@ -18,7 +18,7 @@ from core.base import BaseValidator, ValidationResult
 class CodeExecutabilityValidator(BaseValidator):
     """Validate that tutorial code examples are executable."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("code_executability", "Validates that code examples are executable and complete")
         self.validator_name = "code_executability"
         self.file_patterns = ["docs/tutorials/**/*.md"]
@@ -87,7 +87,7 @@ class CodeExecutabilityValidator(BaseValidator):
 
     def _find_tutorial_files(self) -> list[Path]:
         """Find all tutorial files to validate."""
-        tutorial_files = []
+        tutorial_files: list[Path] = []
 
         for pattern in self.file_patterns:
             tutorial_files.extend(Path().glob(pattern))
@@ -150,7 +150,7 @@ class CodeExecutabilityValidator(BaseValidator):
         blocks = []
         lines = content.split('\n')
         in_python_block = False
-        current_block = []
+        current_block: list[str] = []
         block_start_line = 0
         indent_level = 0
 
@@ -345,7 +345,7 @@ class CodeExecutabilityValidator(BaseValidator):
 
         return issues
 
-    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]):
+    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]) -> None:
         """Log issues found in a file."""
         if not issues:
             return

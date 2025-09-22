@@ -14,10 +14,10 @@ validation_root = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_root))
 
 # Import after path manipulation
-from core.base import FileValidator, ValidationResult  # type: ignore[import-not-found] # noqa: E402
+from core.base import FileValidator, ValidationResult  # noqa: E402
 
 
-class SecurityValidator(FileValidator):  # type: ignore[misc]
+class SecurityValidator(FileValidator):
     """Validates security aspects of documentation files."""
 
     def __init__(self) -> None:
