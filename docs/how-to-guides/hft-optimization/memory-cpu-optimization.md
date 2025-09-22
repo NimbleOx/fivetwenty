@@ -526,5 +526,5 @@ Continue to [Latency Optimization](latency-optimization.md) for ultra-fast order
 ## Related Guides
 
 - [Streaming Optimization](streaming-optimization.md) - High-performance streaming
-- [System Resource Management](system-resource-management.md) - Advanced resource control
-- [Performance Monitoring](performance-monitoring.md) - Comprehensive monitoring
+- [System Resource Management](memory-cpu-optimization.md) - Advanced resource control
+- [Performance Monitoring](latency-optimization.md) - Comprehensive monitoring

@@ -122,9 +122,9 @@ async def demo_position_sizing(account_id: str):
 ```
 
 ### Advantages
-- **Simple to understand** and implement
+- **Straightforward to understand** and implement
 - **Consistent risk** across all trades
-- **Easy to track** and manage
+- **Practical to track** and manage
 
 ### Disadvantages
 - **Doesn't account for volatility** differences
@@ -606,7 +606,7 @@ print(f"   Approved: {'Yes' if result['approved'] else 'No'}")
 
 ## What You've Learned
 
-✅ **Fixed Dollar Strategy**: Simple, consistent approach for beginners
+✅ **Fixed Dollar Strategy**: Basic, consistent approach for beginners
 
 ✅ **Volatility-Based Sizing**: ATR-based adjustments for market conditions
 

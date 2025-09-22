@@ -92,9 +92,9 @@ async def place_order_with_fixed_stop(account_id: str, instrument: str, units: i
 | JPY Pairs | 15-30 pips (150-300 points) | Adjust for JPY decimal places |
 
 ### Advantages
-- **Simple to implement** and understand
+- **Straightforward to implement** and understand
 - **Consistent across** all trades
-- **Easy to backtest** and optimize
+- **Practical to backtest** and optimize
 
 ### Disadvantages
 - **Ignores market volatility** changes
@@ -296,7 +296,7 @@ async def place_order_with_atr_stop(account_id: str, instrument: str, units: int
 | Trending Strong | 2.5-3.0 | Wider | Avoid getting stopped by normal retracements |
 | Trending Weak | 2.0-2.5 | Moderate | Balance protection and trend participation |
 | Ranging Market | 1.5-2.0 | Tighter | Quick exits from failed breakouts |
-| High Volatility | 3.0+ | Very Wide | Account for volatility expansion |
+| High Volatility | 3.0+ | Extremely Wide | Account for volatility expansion |
 
 ---
 
@@ -470,7 +470,7 @@ async def demo_trailing_stops(account_id: str):
 
 #### 1. Fixed Distance Trailing
 **Maintains constant pip distance from best price**
-- Simple to implement
+- Straightforward to implement
 - Consistent protection level
 - May be too mechanical for all conditions
 
@@ -632,7 +632,7 @@ async def demo_technical_stops(account_id: str, instrument: str = "EUR_USD"):
 
 | Strategy | Adaptability | Complexity | Best For | Drawdown Risk |
 |----------|-------------|------------|----------|---------------|
-| Fixed Pip | Low | Very Low | Beginners, Scalping | Medium |
+| Fixed Pip | Low | Minimal | Beginners, Scalping | Medium |
 | Percentage | Medium | Low | Swing Trading | Medium |
 | ATR-Based | High | Medium | All Timeframes | Low |
 | Trailing | High | High | Trending Markets | Low |
@@ -843,7 +843,7 @@ time_manager.set_time_stop("trade_456", max_hours=48)  # 2-day maximum
 
 ## What You've Learned
 
-✅ **Fixed Pip Stops**: Simple, consistent approach for all experience levels
+✅ **Fixed Pip Stops**: Basic, consistent approach for all experience levels
 
 ✅ **Percentage Stops**: Adaptable to different price levels and instruments
 

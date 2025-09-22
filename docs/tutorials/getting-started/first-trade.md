@@ -50,8 +50,6 @@ async with AsyncClient(
 
 Use structured configuration (best for applications):
 ```python
-from fivetwenty import AsyncClient, Environment
-
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Create configuration
@@ -59,8 +57,7 @@ config = AccountConfig(
     token="your-practice-token",
     account_id="your-account-id",
     environment=Environment.PRACTICE,
-    alias="first_trade_account",
-
+    alias="first_trade_account"
 )
 
 # Use configuration
@@ -569,14 +566,14 @@ if __name__ == "__main__":
 | Use Async Client When: | Use Sync Client When: |
 |----------------------|---------------------|
 | Building web applications | Writing scripts or tools |
-| High-frequency trading | Simple automation |
+| High-frequency trading | Basic automation |
 | Concurrent operations | Sequential operations |
 | Modern async frameworks | Legacy codebases |
 | Maximum performance | Simplicity preferred |
 
 ```python
-from fivetwenty import Client
-from fivetwenty import AsyncClient, Environment
+import asyncio
+from fivetwenty import Client, AsyncClient, Environment
 
 # Async: Better for multiple concurrent operations
 async def async_advantage():
@@ -612,7 +609,7 @@ def sync_advantage():
 from fivetwenty import AsyncClient, Environment
 
 # ❌ Bad - Never do this
-client = AsyncClient(token="abc123def456", ...)
+client = AsyncClient(token="abc123def456", environment=Environment.PRACTICE)
 
 # ✅ Good - Use environment variables
 client = AsyncClient()  # Loads from FIVETWENTY_* env vars
@@ -626,9 +623,11 @@ client = AsyncClient()  # Loads from FIVETWENTY_* env vars
 
 ```python
 # Calculate position size based on account balance
-account = await client.accounts.get(client.account_id)
-max_risk = float(account.balance) * 0.02  # 2% risk per trade
-position_size = min(1000, int(max_risk / expected_loss_per_unit))
+async def calculate_position_size(client, expected_loss_per_unit):
+    account = await client.accounts.get(client.account_id)
+    max_risk = float(account.balance) * 0.02  # 2% risk per trade
+    position_size = min(1000, int(max_risk / expected_loss_per_unit))
+    return position_size
 ```
 
 ### 3. **Order Management**
@@ -656,17 +655,15 @@ except FiveTwentyError as e:
 - **Use structured logging** for monitoring
 
 ```python
-from fivetwenty import AccountConfig
-from fivetwenty import Environment
 import os
+from fivetwenty import AccountConfig, Environment
 
 # Good configuration practice
 config = AccountConfig(
     token=os.environ["PRACTICE_TOKEN"],
     account_id=os.environ["PRACTICE_ACCOUNT"],
     environment=Environment.PRACTICE,
-    alias="strategy_testing",
-
+    alias="strategy_testing"
 )
 ```
 
@@ -725,9 +722,10 @@ async def check_margin_requirements(client, units, instrument="EUR_USD"):
 
     return True
 
-# Use before placing orders
-if await check_margin_requirements(client, 10000):
-    order = await client.orders.post_market_order(...)
+# Use before placing orders (inside an async function)
+async def trading_example(client):
+    if await check_margin_requirements(client, 10000):
+        order = await client.orders.post_market_order(...)
 ```
 
 **Market Closed:**
@@ -800,11 +798,13 @@ async def robust_api_call(client, operation):
 
     raise Exception(f"Failed after {max_retries} attempts")
 
-# Usage
-accounts = await robust_api_call(
-    client,
-    lambda: client.accounts.list()
-)
+# Usage (inside an async function)
+async def api_example(client):
+    accounts = await robust_api_call(
+        client,
+        lambda: client.accounts.list()
+    )
+    return accounts
 ```
 
 **Connection Issues:**

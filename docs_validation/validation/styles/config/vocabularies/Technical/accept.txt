@@ -40,3 +40,8 @@ IOC
 GTD
 GTC
 GFD
+# Geographic and technical terms flagged as false positives
+Australian
+Mexican
+penetration
+premature

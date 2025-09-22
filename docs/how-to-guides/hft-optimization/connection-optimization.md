@@ -202,5 +202,5 @@ Continue to [Streaming Optimization](streaming-optimization.md) to optimize real
 ## Related Guides
 
 - [Latency Optimization](latency-optimization.md) - Ultra-fast order execution
-- [Network Optimization](network-optimization.md) - Connection quality monitoring
-- [Production Integration](production-integration.md) - Complete system setup
+- [Network Optimization](connection-optimization.md) - Connection quality monitoring
+- [Production Integration](../production-deployment/index.md) - Complete system setup

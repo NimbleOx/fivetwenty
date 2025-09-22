@@ -41,20 +41,20 @@ Primary async client for OANDA API operations. Recommended for production use.
 ```python
 from fivetwenty import AsyncClient, Environment
 
-AsyncClient(
-    token: str | None = None,
-    *,
-    account_id: str | None = None,
-    environment: Environment = Environment.PRACTICE,
-    config: AccountConfig | None = None,
-    timeout: float = 30.0,
-    max_retries: int = 3,
-    transport: httpx.AsyncClient | None = None,
-    user_agent: str | None = None,
-    proxies: str | None = None,
-    verify: bool | str = True,
-    cert: str | None = None,
-    logger: Optional[Logger] = None
+# Constructor signature:
+client = AsyncClient(
+    token=str | None,
+    account_id=str | None,
+    environment=Environment.PRACTICE,
+    config=AccountConfig | None,
+    timeout=30.0,
+    max_retries=3,
+    transport=httpx.AsyncClient | None,
+    user_agent=str | None,
+    proxies=str | None,
+    verify=True,
+    cert=str | None,
+    logger=Optional[Logger] | None
 )
 ```
 
@@ -132,7 +132,7 @@ When multiple configuration sources are provided:
 - `transactions` - [TransactionEndpoints](endpoints/transactions.md)
 
 ### Client
-Synchronous wrapper around AsyncClient. Use for scripts and simple applications.
+Synchronous wrapper around AsyncClient. Use for scripts and basic applications.
 
 **Constructor:**
 ```python
@@ -196,11 +196,11 @@ Structured configuration for account credentials and settings.
 
 **Constructor:**
 ```python
-AccountConfig(
-    token: SecretStr | str,
-    account_id: SecretStr | str,
-    environment: Environment,
-    alias: str,
+config = AccountConfig(
+    token="your_token",
+    account_id="your_account_id",
+    environment=Environment.PRACTICE,
+    alias="my_config",
 )
 ```
 
@@ -353,13 +353,13 @@ OANDA API enforces rate limits:
    - Test authentication before starting trading operations
 
 3. **Environment Separation:**
-   - Keep practice and live configurations completely separate
-   - Use different aliases to clearly identify environments
+   - Keep practice and live configurations fully separate
+   - Use different aliases to explicitly identify environments
    - Never use live tokens in development or testing
 
 **Configuration Examples:**
 
-```python
+```bash
 # Production deployment with environment variables
 export FIVETWENTY_OANDA_TOKEN="live-token"
 export FIVETWENTY_OANDA_ACCOUNT="live-account"
@@ -375,7 +375,7 @@ export FIVETWENTY_OANDA_ACCOUNT_ALIAS="development"
 
 **Multi-Account Configuration:**
 
-```python
+```bash
 # Multiple strategies with prefixes
 export STRATEGY_A_OANDA_TOKEN="token-a"
 export STRATEGY_A_OANDA_ACCOUNT="account-a"
@@ -386,7 +386,9 @@ export STRATEGY_B_OANDA_TOKEN="token-b"
 export STRATEGY_B_OANDA_ACCOUNT="account-b"
 export STRATEGY_B_OANDA_ENVIRONMENT="practice"
 export STRATEGY_B_OANDA_ACCOUNT_ALIAS="grid_strategy"
+```
 
+```python
 # Load configurations
 momentum_config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")
 grid_config = AccountConfigLoader.from_env_prefix("STRATEGY_B_")

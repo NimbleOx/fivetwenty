@@ -118,7 +118,7 @@ Each deployment guide includes:
 |----------|------------|-------------|-------------|----------|
 | **Container** | Low | Medium | Low | Small to medium deployments |
 | **Cloud Platform** | Medium | High | Medium | Cloud-native applications |
-| **Kubernetes** | High | Very High | High | Enterprise scalable systems |
+| **Kubernetes** | High | Extremely High | High | Enterprise scalable systems |
 | **Bare Metal** | Medium | Low | High | High-performance requirements |
 
 Choose your deployment approach and follow the corresponding guide for detailed implementation instructions.

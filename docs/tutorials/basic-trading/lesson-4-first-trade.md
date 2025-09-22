@@ -84,7 +84,8 @@ async def place_first_trade_safely(account_id: str, instrument: str = "EUR_USD")
             return None
 
 # Place your first trade
-trade_id = await place_first_trade_safely(account_id)
+if __name__ == "__main__":
+    trade_id = asyncio.run(place_first_trade_safely(account_id))
 ```
 
 ---

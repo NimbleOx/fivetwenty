@@ -938,7 +938,7 @@ def demo_portfolio_optimization():
 Test your understanding of performance optimization:
 
 !!! question "🧠 Test Your Understanding"
-    1. **Why is Sharpe ratio better than simple returns for evaluating performance?**
+    1. **Why is Sharpe ratio better than basic returns for evaluating performance?**
        <details>
        <summary>Click to reveal answer</summary>
        **Sharpe ratio adjusts for risk taken**. A 20% return with 30% volatility (Sharpe 0.6) is worse than 15% return with 10% volatility (Sharpe 1.5). It measures return per unit of risk.
@@ -978,7 +978,7 @@ Test your understanding of performance optimization:
    - Account for strategy performance drift
 
 4. **Avoid Overfitting**
-   - Use simple, robust metrics
+   - Use basic, robust metrics
    - Test on multiple time periods
    - Prefer consistent performance over peak performance
 

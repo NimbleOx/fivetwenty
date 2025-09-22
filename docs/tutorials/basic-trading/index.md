@@ -92,7 +92,7 @@ Place and manage your first trade with comprehensive safety:
 ### 5. [Position Management Mastery](lesson-5-position-management.md)
 **Level 3: Position Management (Advanced)**
 
-Master the art of managing open positions:
+Learn the art of managing open positions:
 - Advanced position monitoring techniques
 - Stop loss and take profit strategies
 - Risk-to-reward ratio optimization

@@ -1,6 +1,6 @@
 # Advanced Order Types Tutorial Series
 
-Master sophisticated order management techniques for professional trading with OANDA's comprehensive order system.
+Learn sophisticated order management techniques for professional trading with OANDA's comprehensive order system.
 
 ## Series Overview
 

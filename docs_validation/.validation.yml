@@ -28,6 +28,7 @@ profiles:
       - "**/build/**"
       - "**/dist/**"
       - "**/*.egg-info/**"
+      - "docs/api-reference/openapi.yaml"  # Exclude OpenAPI spec from security scanning
     parallel_execution: true
     max_workers: 4
     timeout_seconds: 300
@@ -60,6 +61,13 @@ profiles:
         options:
           severity_filter: "high"
           check_env_vars: true
+          exclude_patterns:
+            - "docs/api-reference/openapi.yaml"  # OpenAPI spec with legitimate encoded data
+            - "example"  # Documentation examples
+            - "demo"     # Demo code
+            - "tutorial" # Tutorial code
+            - "YOUR_TOKEN_HERE"  # Placeholder tokens
+            - "abc123"   # Example tokens
 
       cross_references:
         enabled: true

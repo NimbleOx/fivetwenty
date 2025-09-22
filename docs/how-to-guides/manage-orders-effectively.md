@@ -25,28 +25,32 @@ You need to create, monitor, and manage trading orders efficiently using FiveTwe
 
     **🎯 OnFill Pattern (Recommended)**: Set TP/SL when creating orders
     ```python
-    from decimal import Decimal
+from decimal import Decimal
 
-    # Risk management activates automatically when order fills
-    await client.orders.post_market_order(
-        account_id=account_id,
-        instrument="EUR_USD",
-        units=1000,
-        take_profit=Decimal("1.1100"),  # Automatic TP
-        stop_loss=Decimal("1.0900")     # Automatic SL
-    )
+# Risk management activates automatically when order fills
+await client.orders.post_market_order(
+    account_id=account_id,
+    instrument="EUR_USD",
+    units=1000,
+    take_profit=Decimal("1.1100"),  # Automatic TP
+    stop_loss=Decimal("1.0900")     # Automatic SL
+)
     ```
 
     **🛠️ Post-Trade Pattern**: Add TP/SL to existing trades
     ```python
-    # First create trade, then add risk management
-    from fivetwenty.models import TakeProfitOrderRequest
+# First create trade, then add risk management
+from fivetwenty.models import TakeProfitOrderRequest
 
-    market_response = await client.orders.post_market_order(...)
-    trade_id = market_response.order_fill_transaction['tradeOpened']['tradeID']
+market_response = await client.orders.post_market_order(
+    account_id=account_id,
+    instrument="EUR_USD",
+    units=1000
+)
+trade_id = market_response.order_fill_transaction['tradeOpened']['tradeID']
 
-    tp_request = TakeProfitOrderRequest(tradeID=trade_id, price="1.1100")
-    await client.orders.post_order(account_id, tp_request)
+tp_request = TakeProfitOrderRequest(tradeID=trade_id, price="1.1100")
+await client.orders.post_order(account_id, tp_request)
     ```
 
     **When to Use Each:**

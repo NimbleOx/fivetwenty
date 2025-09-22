@@ -28,7 +28,7 @@ Every successful trading strategy is built on three fundamental pillars:
 - Ensures no single event can destroy your account
 
 !!! warning "⚠️ All Three Pillars Required"
-    Neglecting any one of these pillars significantly increases your risk of catastrophic loss. They work together as a comprehensive risk control system.
+    Neglecting any one of these pillars substantially increases your risk of catastrophic loss. They work together as a comprehensive risk control system.
 
 ---
 

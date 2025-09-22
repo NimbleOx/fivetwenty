@@ -2,7 +2,7 @@
 
 ## What is API Reference?
 
-API Reference documentation is **information-oriented** content that provides comprehensive, accurate, and easily scannable information about the FiveTwenty's classes, methods, parameters, and return values. It's designed for quick lookup during development.
+API Reference documentation is **information-oriented** content that provides comprehensive, accurate, and quickly scannable information about the FiveTwenty's classes, methods, parameters, and return values. It's designed for quick lookup during development.
 
 ## When to Use API Reference
 
@@ -55,7 +55,8 @@ async def post_order(
     order: OrderRequest,
     *,
     timeout: Optional[float] = None
-) -> OrderResponse
+) -> OrderResponse:
+    pass
 ```
 
 ### **Parameter Details**

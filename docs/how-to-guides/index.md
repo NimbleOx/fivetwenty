@@ -29,7 +29,7 @@ Solve common setup and initial configuration challenges.
 
 - **[Set Up Live Trading](setup-live-trading.md)** - Transition from practice to live trading safely
 - **[Handle Connection Failures](handle-connection-failures.md)** - Manage network issues and reconnections
-- **[Close Positions](close-positions.md)** - Exit positions with various closing strategies
+- **[Close Positions](close-positions.md)** - Exit positions with multiple closing strategies
 - **[Manage Orders Effectively](manage-orders-effectively.md)** - Create, monitor, and manage trading orders
 
 ### **Advanced Operations**

@@ -424,13 +424,13 @@ async def demo_correlation_analysis(account_id: str):
 
 | Correlation | Relationship | Portfolio Impact |
 |-------------|--------------|------------------|
-| +0.8 to +1.0 | Very Strong Positive | Positions move together - increases risk |
+| +0.8 to +1.0 | Extremely Strong Positive | Positions move together - increases risk |
 | +0.5 to +0.8 | Strong Positive | Significant co-movement |
 | +0.2 to +0.5 | Moderate Positive | Some co-movement |
 | -0.2 to +0.2 | Weak/No Correlation | Independent movement |
 | -0.5 to -0.2 | Moderate Negative | Opposite movement |
 | -0.8 to -0.5 | Strong Negative | Strong opposite movement |
-| -1.0 to -0.8 | Very Strong Negative | Perfect hedge potential |
+| -1.0 to -0.8 | Extremely Strong Negative | Perfect hedge potential |
 
 ---
 

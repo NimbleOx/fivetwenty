@@ -210,7 +210,7 @@ The financing mode of an Account.
 |-------|-------------|
 | `NO_FINANCING` | No financing is paid/charged for open trades |
 | `SECOND_BY_SECOND` | Second-by-second financing for open trades |
-| `DAILY` | Daily financing at 5pm New York time |
+| `DAILY` | Daily financing at 5 p.m. New York time |
 
 #### GuaranteedStopLossOrderMode
 Account behavior regarding guaranteed Stop Loss orders.

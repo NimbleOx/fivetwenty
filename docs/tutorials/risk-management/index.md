@@ -1,7 +1,7 @@
 # Risk Management Tutorial Series
 
 !!! tip "🎯 Series Goal"
-    Master comprehensive risk management techniques to protect capital and optimize trading performance across all market conditions.
+    Learn comprehensive risk management techniques to protect capital and optimize trading performance across all market conditions.
 
 ---
 

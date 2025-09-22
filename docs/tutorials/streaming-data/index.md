@@ -1,6 +1,6 @@
 # Real-time Streaming Data Tutorial Series
 
-Master real-time market data streams, implement live trading systems, and build sophisticated market monitoring applications through this comprehensive tutorial series.
+Learn real-time market data streams, implement live trading systems, and build sophisticated market monitoring applications through this comprehensive tutorial series.
 
 ---
 

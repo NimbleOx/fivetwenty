@@ -10,6 +10,7 @@
 Before placing any trade, you need to understand current market conditions:
 
 ```python
+import asyncio
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
@@ -43,9 +44,10 @@ async def get_current_prices(account_id: str, instruments: list):
             return None
 
 # Get prices for major pairs
-instruments = ["EUR_USD", "GBP_USD", "USD_JPY"]
-if account_id:
-    current_prices = await get_current_prices(account_id, instruments)
+if __name__ == "__main__":
+    instruments = ["EUR_USD", "GBP_USD", "USD_JPY"]
+    if account_id:
+        current_prices = asyncio.run(get_current_prices(account_id, instruments))
 ```
 
 ---
@@ -165,7 +167,8 @@ async def analyze_market_before_trading(account_id: str, instrument: str = "EUR_
         return price if pricing.prices else None
 
 # Analyze the market before trading
-current_price = await analyze_market_before_trading(account_id, "EUR_USD")
+if __name__ == "__main__":
+    current_price = asyncio.run(analyze_market_before_trading(account_id, "EUR_USD"))
 ```
 
 ---
@@ -229,8 +232,9 @@ async def assess_market_conditions(account_id: str, instrument: str):
         return conditions
 
 # Check trading conditions
-market_conditions = await assess_market_conditions(account_id, "EUR_USD")
-print(f"Market suitable for trading: {market_conditions['suitable']}")
+if __name__ == "__main__":
+    market_conditions = asyncio.run(assess_market_conditions(account_id, "EUR_USD"))
+    print(f"Market suitable for trading: {market_conditions['suitable']}")
 ```
 
 ---
@@ -305,7 +309,8 @@ async def analyze_price_movements(instrument: str, periods: int = 20):
             return None
 
 # Analyze price movements
-price_analysis = await analyze_price_movements("EUR_USD")
+if __name__ == "__main__":
+    price_analysis = asyncio.run(analyze_price_movements("EUR_USD"))
 ```
 
 ---

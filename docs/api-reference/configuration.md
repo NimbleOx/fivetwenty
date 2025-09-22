@@ -42,12 +42,15 @@ class AccountConfig(BaseModel):
 ### Constructor
 
 ```python
-AccountConfig(
-    token: SecretStr | str,
-    account_id: SecretStr | str,
-    environment: Environment,
-    alias: str,
-)
+class AccountConfig:
+    def __init__(
+        self,
+        token: SecretStr | str,
+        account_id: SecretStr | str,
+        environment: Environment,
+        alias: str,
+    ):
+        pass
 ```
 
 **Parameters:**
@@ -126,7 +129,7 @@ else:
 User-friendly identifier for the account configuration.
 
 ```python
-config = AccountConfig(alias="my_bot", ...)
+config = AccountConfig(alias="my_bot", token="token", account_id="account_id", environment=Environment.PRACTICE)
 print(f"Bot name: {config.alias}")  # Safe to log
 ```
 
@@ -143,7 +146,8 @@ Returns safe summary string suitable for logging.
 config = AccountConfig(
     alias="my_trader",
     environment=Environment.PRACTICE,
-    ...
+    token="token",
+    account_id="account_id"
 )
 print(config.summary())  # "my_trader (practice)"
 
@@ -394,12 +398,16 @@ from fivetwenty import Environment
 # Create configurations for different environments
 practice_config = AccountConfig(
     environment=Environment.PRACTICE,
-    ...
+    token="practice_token",
+    account_id="practice_account_id",
+    alias="practice"
 )
 
 live_config = AccountConfig(
     environment=Environment.LIVE,
-    ...
+    token="live_token",
+    account_id="live_account_id",
+    alias="live"
 )
 
 # Check environment in code

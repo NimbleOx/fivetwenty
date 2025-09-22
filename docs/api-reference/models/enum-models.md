@@ -1,6 +1,6 @@
 # Enum Models
 
-This page documents all enumeration types used throughout FiveTwenty. These enums provide type-safe constants for various OANDA API parameters and values.
+This page documents all enumeration types used throughout FiveTwenty. These enums provide type-safe constants for OANDA API parameters and values.
 
 ## Core Trading Enums
 

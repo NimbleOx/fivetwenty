@@ -668,12 +668,12 @@ async def monitored_order_execution(client: AsyncClient, account_id: str,
 
 ## Next Steps
 
-Continue to [System Resource Management](system-resource-management.md) for advanced resource optimization.
+Continue to [System Resource Management](memory-cpu-optimization.md) for advanced resource optimization.
 
 ---
 
 ## Related Guides
 
 - [Connection Optimization](connection-optimization.md) - Connection pooling strategies
-- [Performance Monitoring](performance-monitoring.md) - Comprehensive monitoring
-- [Production Integration](production-integration.md) - Complete system integration
+- [Performance Monitoring](latency-optimization.md) - Comprehensive monitoring
+- [Production Integration](../production-deployment/index.md) - Complete system integration

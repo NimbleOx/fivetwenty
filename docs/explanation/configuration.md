@@ -208,7 +208,7 @@ When multiple configuration methods are used, the priority is:
 from fivetwenty import AsyncClient, Environment
 
 # Config object takes priority over direct parameters
-config = AccountConfig(token="config-token", ...)
+config = AccountConfig(token="config-token", account_id="account-id")
 client = AsyncClient(
     token="direct-token",  # Ignored
     config=config  # Used

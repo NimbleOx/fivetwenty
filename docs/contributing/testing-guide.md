@@ -121,6 +121,7 @@ tests/
 Tests are organized with pytest markers:
 
 ```python
+# Example test markers:
 @pytest.mark.unit          # Fast unit tests (default)
 @pytest.mark.integration   # Integration tests (requires API credentials)
 @pytest.mark.streaming     # Streaming-related tests
@@ -129,6 +130,8 @@ Tests are organized with pytest markers:
 @pytest.mark.edge_cases    # Edge case and error condition tests
 @pytest.mark.slow          # Slower running tests
 @pytest.mark.compliance    # OANDA API compliance tests
+def test_example():
+    pass
 ```
 
 ---

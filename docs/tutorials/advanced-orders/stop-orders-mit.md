@@ -1,6 +1,6 @@
 # Stop Orders & Market-If-Touched
 
-Master breakout and mean reversion strategies using stop orders and market-if-touched (MIT) orders for systematic trading approaches.
+Learn breakout and mean reversion strategies using stop orders and market-if-touched (MIT) orders for systematic trading approaches.
 
 ## Learning Objectives
 

@@ -100,7 +100,8 @@ async def connect_with_detailed_feedback():
         return None
 
 # Test your connection
-account_id = await connect_with_detailed_feedback()
+if __name__ == "__main__":
+    account_id = asyncio.run(connect_with_detailed_feedback())
 ```
 
 ---
@@ -150,8 +151,9 @@ async def explore_account_details(account_id: str):
                 print("   ✅ Low margin usage - room for new positions")
 
 # Explore your account
-if account_id:
-    await explore_account_details(account_id)
+if __name__ == "__main__":
+    if account_id:
+        asyncio.run(explore_account_details(account_id))
 ```
 
 ---
@@ -185,8 +187,9 @@ async def check_account_status(account_id: str):
             return None
 
 # Check account
-if account_id:
-    account_info = await check_account_status(account_id)
+if __name__ == "__main__":
+    if account_id:
+        account_info = asyncio.run(check_account_status(account_id))
 ```
 
 ---

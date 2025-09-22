@@ -48,7 +48,8 @@ FiveTwenty automatically handles Decimal conversion for financial fields:
 
 ```python
 from decimal import Decimal
-from fivetwenty import AsyncClient, MarketOrderRequest, InstrumentName, TimeInForce
+from fivetwenty import AsyncClient
+from fivetwenty.models import MarketOrderRequest, InstrumentName, TimeInForce
 
 # ✅ All these inputs work seamlessly
 order1 = MarketOrderRequest(
@@ -119,20 +120,22 @@ async def calculate_position_size(
     position_size = risk_amount / risk_per_unit
     return position_size.quantize(Decimal('1'))  # Round to whole units
 
-# Usage
-account = await client.accounts.get(account_id)
-position_size = await calculate_position_size(
-    account_balance=account.balance,
-    risk_percentage=Decimal('2'),     # 2% risk
-    stop_loss_pips=20,
-    pip_value=Decimal('0.10')         # For EUR/USD standard lot
-)
+# Usage example
+async def position_sizing_example():
+    account = await client.accounts.get(account_id)
+    position_size = await calculate_position_size(
+        account_balance=account.balance,
+        risk_percentage=Decimal('2'),     # 2% risk
+        stop_loss_pips=20,
+        pip_value=Decimal('0.10')         # For EUR/USD standard lot
+    )
 
-order = MarketOrderRequest(
-    instrument=InstrumentName.EUR_USD,
-    units=position_size,              # Exact Decimal units
-    time_in_force=TimeInForce.GTC,
-)
+    order = MarketOrderRequest(
+        instrument=InstrumentName.EUR_USD,
+        units=position_size,              # Exact Decimal units
+        time_in_force=TimeInForce.GTC,
+    )
+    return order
 ```
 
 ### 2. Precise P&L Calculations
@@ -448,7 +451,7 @@ display_result = result.quantize(Decimal('0.01'))  # 3.33
 ```python
 # Unnecessary conversion
 
-order = MarketOrderRequest(units=1000, ...)
+order = MarketOrderRequest(units=1000, instrument="EUR_USD")
 units_float = float(order.units)  # Why convert to less precise type?
 ```
 
@@ -457,7 +460,7 @@ units_float = float(order.units)  # Why convert to less precise type?
 from fivetwenty.models import MarketOrderRequest
 from decimal import Decimal
 
-order = MarketOrderRequest(units=1000, ...)
+order = MarketOrderRequest(units=1000, instrument="EUR_USD")
 calculation = order.units * Decimal('1.5')  # Direct Decimal arithmetic
 ```
 

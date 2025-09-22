@@ -43,8 +43,6 @@ async with AsyncClient(
 For production applications with multiple accounts:
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Create secure configuration
@@ -52,8 +50,7 @@ config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
     environment=Environment.PRACTICE,
-    alias="my_trading_account",
-
+    alias="my_trading_account"
 )
 
 # Use configuration
@@ -133,9 +130,8 @@ For production deployments:
 #### AWS Secrets Manager
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
 import boto3
+import json
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 def get_fivetwenty_config():
@@ -143,8 +139,6 @@ def get_fivetwenty_config():
 
     client = boto3.client('secretsmanager')
     response = client.get_secret_value(SecretId='OANDA/api-credentials')
-
-    import json
     secrets = json.loads(response['SecretString'])
 
     return AccountConfig(
@@ -163,7 +157,6 @@ async with AsyncClient(config=config) as client:
 #### HashiCorp Vault
 
 ```python
-from fivetwenty import Client
 import os
 import hvac
 from fivetwenty import AccountConfig, Environment
@@ -225,8 +218,6 @@ spec:
 
 ```python
 import os
-from fivetwenty import AsyncClient, Environment
-
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Practice account for testing
@@ -234,8 +225,7 @@ practice_config = AccountConfig(
     token=os.environ["PRACTICE_TOKEN"],
     account_id=os.environ["PRACTICE_ACCOUNT"],
     environment=Environment.PRACTICE,
-    alias="practice_testing",
-
+    alias="practice_testing"
 )
 
 # Live account for production
@@ -243,8 +233,7 @@ live_config = AccountConfig(
     token=os.environ["LIVE_TOKEN"],
     account_id=os.environ["LIVE_ACCOUNT"],
     environment=Environment.LIVE,
-    alias="live_trading",
-
+    alias="live_trading"
 )
 
 # Test strategy on practice first
@@ -275,8 +264,7 @@ export GRID_OANDA_ACCOUNT_ALIAS="grid_strategy"
 ```
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
+import asyncio
 from fivetwenty import AccountConfigLoader, AsyncClient
 
 # Load configurations with custom prefixes
@@ -299,11 +287,10 @@ async with AsyncClient(config=momentum_config) as momentum_client:
 The library automatically protects sensitive information:
 
 ```python
-from fivetwenty import AccountConfig
-from fivetwenty import Environment
+from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token = 'your-api-token-here',
+    token='your-api-token-here',
     account_id="secret-account-123",
     environment=Environment.PRACTICE,
     alias="my_account"
@@ -323,8 +310,7 @@ print(config.summary())
 The library validates all configuration values:
 
 ```python
-from fivetwenty import AccountConfig
-from fivetwenty import Environment
+from fivetwenty import AccountConfig, Environment
 from pydantic import ValidationError
 
 try:
@@ -441,7 +427,6 @@ async with AsyncClient(
 For corporate environments:
 
 ```python
-from fivetwenty import Client
 from fivetwenty import AsyncClient, Environment
 
 # Custom CA bundle
@@ -474,9 +459,8 @@ async with AsyncClient(
 For advanced HTTP configuration:
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
 import httpx
+from fivetwenty import AsyncClient, Environment
 
 # Create custom HTTP client
 transport = httpx.AsyncClient(

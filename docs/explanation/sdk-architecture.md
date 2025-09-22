@@ -47,7 +47,7 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 
 **Why Pydantic?**
 - **Runtime Validation**: Catches data errors immediately rather than failing silently
-- **Type Safety**: Provides excellent IDE support and static analysis
+- **Type Safety**: Provides comprehensive IDE support and static analysis
 - **Automatic Serialization**: Handles JSON conversion and API communication seamlessly
 - **Documentation**: Self-documenting models with field descriptions
 
@@ -81,8 +81,8 @@ The SDK provides two client types addressing different use cases:
 from fivetwenty import AsyncClient, Environment
 
 class Client:
-    def __init__(self, ...):
-        self._async_client = AsyncClient(...)
+    def __init__(self, token: str):
+        self._async_client = AsyncClient(token=token)
         self._executor = ThreadPoolExecutor(max_workers=1)
 
     def accounts_list(self):
@@ -152,7 +152,7 @@ All endpoints follow consistent patterns:
 
 Models follow a clear inheritance hierarchy:
 
-```python
+```text
 ApiModel (base)
 ├── Account Models
 │   ├── Account (full details)
@@ -255,7 +255,9 @@ Follows Python exception conventions:
 
 ```python
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+```
 
+```text
 Exception
 └── FiveTwentyError (base OANDA error)
     ├── ValidationError (parameter validation)
@@ -343,7 +345,7 @@ account = Account.model_validate(data)  # Validation only when needed
 from fivetwenty import AsyncClient, Environment
 
 # SDK requires explicit token for each client
-client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], ...)
+client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], environment=Environment.PRACTICE)
 ```
 
 **Benefits**:
@@ -375,8 +377,9 @@ All network operations go through a single `_request` method:
 
 ```python
 class AsyncClient:
-    async def _request(self, method: str, path: str, ...) -> Response:
+    async def _request(self, method: str, path: str, **kwargs) -> Response:
         # Single point for all HTTP operations
+        pass
 ```
 
 **Testing Benefit**: Mock one method to control all network behavior
@@ -390,6 +393,7 @@ Integration tests use recorded HTTP interactions:
 async def test_account_retrieval():
     # Uses pre-recorded HTTP responses
     # Tests real API integration without live requests
+    pass
 ```
 
 ---
@@ -414,8 +418,8 @@ Clients can be extended with custom endpoints:
 
 ```python
 class ExtendedClient(AsyncClient):
-    def __init__(self, ...):
-        super().__init__(...)
+    def __init__(self, token: str, **kwargs):
+        super().__init__(token=token, **kwargs)
         self.analytics = CustomAnalyticsEndpoint(self)
 ```
 

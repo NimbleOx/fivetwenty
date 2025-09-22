@@ -24,19 +24,19 @@ This guide series provides specialized optimization techniques for HFT applicati
 **Problem**: Minimize order execution latency for competitive advantage
 **Solution**: Low-latency order management and ultra-fast execution techniques
 
-### 5. [System Resource Management](system-resource-management.md)
+### 5. [System Resource Management](memory-cpu-optimization.md)
 **Problem**: Optimize system resources for maximum HFT performance
 **Solution**: Memory pool management, garbage collection control, and process optimization
 
-### 6. [Network Optimization](network-optimization.md)
+### 6. [Network Optimization](connection-optimization.md)
 **Problem**: Optimize network connectivity for consistent low latency
 **Solution**: Connection quality monitoring, latency measurement, and network tuning
 
-### 7. [Performance Monitoring](performance-monitoring.md)
+### 7. [Performance Monitoring](latency-optimization.md)
 **Problem**: Monitor and maintain optimal HFT system performance
 **Solution**: Real-time monitoring, alerting, and performance analysis
 
-### 8. [Production Integration](production-integration.md)
+### 8. [Production Integration](../production-deployment/index.md)
 **Problem**: Integrate all optimizations into a complete production-ready system
 **Solution**: Complete HFT framework with comprehensive optimization integration
 
@@ -71,7 +71,7 @@ For immediate HFT optimization:
 1. **Start with [Connection Optimization](connection-optimization.md)** - Set up persistent connection pooling
 2. **Move to [Latency Optimization](latency-optimization.md)** - Implement low-latency order execution
 3. **Add [Streaming Optimization](streaming-optimization.md)** - Optimize real-time data processing
-4. **Complete with [Production Integration](production-integration.md)** - Deploy the full system
+4. **Complete with [Production Integration](../production-deployment/index.md)** - Deploy the full system
 
 ---
 

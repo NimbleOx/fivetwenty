@@ -122,7 +122,9 @@ async def explore_currency_concepts():
             print(f"   Pip Value (10K units): ${pip_value_10k:.2f}")
 
 # Run the exploration
-await explore_currency_concepts()
+if __name__ == "__main__":
+    import asyncio
+    asyncio.run(explore_currency_concepts())
 ```
 
 ---
