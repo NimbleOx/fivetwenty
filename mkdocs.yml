@@ -73,8 +73,8 @@ nav:
           - Decimal Best Practices: tutorials/decimal-best-practices.md
       - Interactive Examples:
           - "Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
-          - "Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/scripts"
-          - "Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/notebooks"
+          - "Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/scripts"
+          - "Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/notebooks"
 
   # HOW-TO GUIDES - Problem-oriented solutions
   - "How-to Guides":

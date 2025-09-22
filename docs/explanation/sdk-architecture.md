@@ -534,17 +534,17 @@ The project enforces strict quality standards:
 #### 4. Documentation Workflow
 
 ```bash
-# Navigate to docs-tooling directory
-cd docs-tooling
+# Navigate to docs-validation directory
+cd docs-validation
 
 # Quick documentation validation
-uv run python validation/cli.py run links syntax
+uv run python -m validation.cli.main run link_validation markdown_syntax
 
 # Full accuracy validation
-uv run python validation/cli.py run endpoint-accuracy model-accuracy
+uv run python -m validation.cli.main run sdk_methods financial_precision
 
 # Complete validation suite
-uv run python validation/cli.py run --parallel --gates --report
+uv run python -m validation.cli.main run --parallel --report
 ```
 
 #### 5. Integration Testing

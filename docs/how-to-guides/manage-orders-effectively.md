@@ -441,7 +441,7 @@ async def place_validated_order(
             available_balance = Decimal(account.nav)
 
             # Validate instrument is tradeable
-            instruments = await client.accounts.get_account_instruments(
+            instruments = await client.accounts.get_instruments(
                 account_id,
                 instruments=[instrument]
             )
@@ -652,7 +652,7 @@ if Decimal(account.margin_available) < required_margin:
 **"INSTRUMENT_NOT_TRADEABLE" Error:**
 ```python
 # Verify instrument is currently tradeable
-instruments = await client.accounts.get_account_instruments(account_id)
+instruments = await client.accounts.get_instruments(account_id)
 tradeable_instruments = [i for i in instruments if i.tradeable]
 ```
 
@@ -662,7 +662,7 @@ tradeable_instruments = [i for i in instruments if i.tradeable]
 from fivetwenty._internal.utils import quantize_price
 
 # Get instrument precision
-instrument_info = await client.accounts.get_account_instruments(
+instrument_info = await client.accounts.get_instruments(
     account_id,
     instruments=[instrument]
 )

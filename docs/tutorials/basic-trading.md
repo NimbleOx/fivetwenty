@@ -757,17 +757,17 @@ async def demonstrate_position_management(account_id: str, trade_id: str):
         # Demonstrate different exit strategies
         print(f"\n🎯 Exit Strategy Options:")
 
-        entry_price = float(trade.price)
+        entry_price = Decimal(str(trade.price))
         is_long = int(trade.current_units) > 0
 
         if is_long:
-            stop_loss_price = entry_price - 0.0020  # 20 pips stop
-            take_profit_price = entry_price + 0.0030  # 30 pips profit
+            stop_loss_price = entry_price - Decimal("0.0020")  # 20 pips stop
+            take_profit_price = entry_price + Decimal("0.0030")  # 30 pips profit
             print(f"   Stop Loss: {stop_loss_price:.5f} (20 pips below entry)")
             print(f"   Take Profit: {take_profit_price:.5f} (30 pips above entry)")
         else:
-            stop_loss_price = entry_price + 0.0020  # 20 pips stop
-            take_profit_price = entry_price - 0.0030  # 30 pips profit
+            stop_loss_price = entry_price + Decimal("0.0020")  # 20 pips stop
+            take_profit_price = entry_price - Decimal("0.0030")  # 30 pips profit
             print(f"   Stop Loss: {stop_loss_price:.5f} (20 pips above entry)")
             print(f"   Take Profit: {take_profit_price:.5f} (30 pips below entry)")
 

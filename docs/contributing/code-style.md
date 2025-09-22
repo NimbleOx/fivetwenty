@@ -184,7 +184,7 @@ def parse_order_response(data: dict) -> Order:
 
 ```python
 # ✅ Good - Clear, descriptive names
-async def get_account_summary(self, account_id: str) -> AccountSummary:
+async def get_accounts(self, account_id: str) -> AccountSummary:
     pass
 
 async def post_market_order(
@@ -477,7 +477,7 @@ class TestAccountsEndpoint:
         return AsyncClient(token="test-token", environment="practice")
 
     @pytest.mark.asyncio
-    async def test_get_account_summary_success(self, client):
+    async def test_get_accounts_success(self, client):
         """Test successful account summary retrieval."""
         # Arrange
         expected_response = {
@@ -494,7 +494,7 @@ class TestAccountsEndpoint:
             mock_request.return_value = mock_response
 
             # Act
-            result = await client.accounts.get_account_summary("123-456-789")
+            result = await client.accounts.get_accounts("123-456-789")
 
             # Assert
             assert result.id == "123-456-789"
@@ -503,7 +503,7 @@ class TestAccountsEndpoint:
             mock_request.assert_called_once_with("GET", "/accounts/123-456-789")
 
     @pytest.mark.asyncio
-    async def test_get_account_summary_not_found(self, client):
+    async def test_get_accounts_not_found(self, client):
         """Test account not found error handling."""
         with patch.object(client, '_request') as mock_request:
             mock_request.side_effect = httpx.HTTPStatusError(
@@ -513,7 +513,7 @@ class TestAccountsEndpoint:
             )
 
             with pytest.raises(FiveTwentyError) as exc_info:
-                await client.accounts.get_account_summary("invalid-id")
+                await client.accounts.get_accounts("invalid-id")
 
             assert "Account invalid-id not found" in str(exc_info.value)
             assert exc_info.value.error_code == "ACCOUNT_NOT_EXIST"
@@ -541,12 +541,12 @@ class TestAccountsIntegration:
         )
 
     @pytest.mark.asyncio
-    async def test_get_account_summary_real_api(self, client, vcr):
+    async def test_get_accounts_real_api(self, client, vcr):
         """Test against real OANDA API (recorded with VCR)."""
         account_id = os.environ["TEST_OANDA_ACCOUNT"]
 
         async with client:
-            summary = await client.accounts.get_account_summary(account_id)
+            summary = await client.accounts.get_accounts(account_id)
 
             # Verify response structure
             assert summary.id == account_id
@@ -586,7 +586,7 @@ async def get_multiple_accounts(
     """Fetch multiple accounts concurrently."""
 
     tasks = [
-        client.accounts.get_account_summary(account_id)
+        client.accounts.get_accounts(account_id)
         for account_id in account_ids
     ]
 
