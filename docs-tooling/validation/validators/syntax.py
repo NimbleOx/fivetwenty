@@ -94,21 +94,32 @@ class SyntaxValidator(FileValidator):  # type: ignore[misc]
 
             # Check for malformed bullet lists
             if stripped.startswith(("-", "*", "+")):
+                # Skip markdown formatting (bold/italic) - these start with multiple * or _
+                if stripped.startswith("**") or stripped.startswith("__"):
+                    continue
+
+                # Skip horizontal rules (---, ***, +++)
+                if stripped in ("---", "***", "+++") or len(set(stripped)) == 1:
+                    continue
+
                 # Should have space after bullet
                 if len(stripped) > 1 and stripped[1] != " ":
                     issue = {"file": str(file_path), "line": line_num, "type": "malformed_list_item", "message": "List item should have space after bullet"}
                     self.syntax_issues.append(issue)
                     self.add_issue("List item should have space after bullet", str(file_path), line_num)
 
-            # Check for malformed numbered lists
+            # Check for malformed numbered lists - only match patterns like "1.text" or "2.text"
             if stripped and stripped[0].isdigit():
-                dot_pos = stripped.find(".")
-                if dot_pos > 0:
-                    # Should have space after number and dot
-                    if dot_pos + 1 < len(stripped) and stripped[dot_pos + 1] != " ":
-                        issue = {"file": str(file_path), "line": line_num, "type": "malformed_numbered_list", "message": "Numbered list item should have space after dot"}
-                        self.syntax_issues.append(issue)
-                        self.add_issue("Numbered list item should have space after dot", str(file_path), line_num)
+                # Look for dot immediately after number sequence (with possible whitespace)
+                import re
+                numbered_list_pattern = r"^(\d+)\.(\S)"  # number, dot, non-space character
+                match = re.match(numbered_list_pattern, stripped)
+
+                if match:
+                    # This looks like a numbered list item without space after dot
+                    issue = {"file": str(file_path), "line": line_num, "type": "malformed_numbered_list", "message": "Numbered list item should have space after dot"}
+                    self.syntax_issues.append(issue)
+                    self.add_issue("Numbered list item should have space after dot", str(file_path), line_num)
 
     def _check_ascii_diagrams(self, content: str, file_path: Path) -> None:
         """Check ASCII diagrams for consistency and alignment."""
