@@ -131,6 +131,7 @@ async def demo_time_limited_order(account_id: str):
 ```python
 from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import TimeInForce, OrderType
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 async def limit_order_with_protection(account_id: str, instrument: str, units: int,
@@ -191,6 +192,7 @@ async def demo_protected_limit_order(account_id: str):
 
 ```python
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import TimeInForce, OrderType
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 async def place_stop_order(account_id: str, instrument: str, units: int,
@@ -284,6 +286,7 @@ async def breakout_strategy(account_id: str, instrument: str):
 
 ```python
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import TimeInForce, OrderType
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 async def place_mit_order(account_id: str, instrument: str, units: int, price: float):
@@ -373,6 +376,7 @@ async def mean_reversion_strategy(account_id: str, instrument: str):
 
 ```python
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import OrderType
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 async def set_trailing_stop(account_id: str, trade_id: str, trail_distance_pips: float):
@@ -477,6 +481,7 @@ async def advanced_trailing_stop(account_id: str, trade_id: str,
 
 ```python
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import OrderType
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 class DynamicOrderManager:

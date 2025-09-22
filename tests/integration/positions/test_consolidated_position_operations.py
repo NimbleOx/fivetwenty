@@ -100,7 +100,7 @@ class TestConsolidatedPositionOperations:
                     partial_close_response = await sandbox_client.trades.close_trade(
                         test_account_id,
                         trade_id,
-                        units="5"  # Close half
+                        units="5",  # Close half
                     )
 
                     if partial_close_response and partial_close_response.order_fill_transaction:
@@ -118,7 +118,7 @@ class TestConsolidatedPositionOperations:
                                 break
 
                         if updated_position:
-                            print(f"✓ Position updated after partial closure")
+                            print("✓ Position updated after partial closure")
                             print(f"  Updated P&L: {updated_position.get('pl', 'N/A')}")
                             print(f"  Updated unrealized P&L: {updated_position.get('unrealizedPL', 'N/A')}")
 

@@ -50,9 +50,8 @@ theme:
   font:
     text: Roboto
     code: Roboto Mono
-  favicon: assets/favicon.png
-  icon:
-    logo: logo
+  favicon: assets/520logo.svg
+  logo: assets/520logo.svg
 
 nav:
   - Home: index.md
@@ -74,8 +73,8 @@ nav:
           - Decimal Best Practices: tutorials/decimal-best-practices.md
       - Interactive Examples:
           - "Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
-          - "Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/scripts"
-          - "Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/examples/notebooks"
+          - "Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/scripts"
+          - "Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/notebooks"
 
   # HOW-TO GUIDES - Problem-oriented solutions
   - "How-to Guides":

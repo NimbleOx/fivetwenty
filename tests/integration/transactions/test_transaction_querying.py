@@ -40,10 +40,7 @@ class TestTransactionQuerying:
                 since_id = max(1, current_id - 10)  # Get last 10 transactions
                 print(f"\n✓ Test 1: Getting transactions since ID {since_id}")
 
-                since_response = await sandbox_client.transactions.get_transactions_since_id(
-                    account_id=test_account_id,
-                    transaction_id=str(since_id)
-                )
+                since_response = await sandbox_client.transactions.get_transactions_since_id(account_id=test_account_id, transaction_id=str(since_id))
 
                 assert since_response is not None, "Since ID response should not be None"
 
@@ -63,13 +60,9 @@ class TestTransactionQuerying:
                     print("  ✓ Since ID response structure validated")
 
                 # Test 2: Transaction type filtering
-                print(f"\n✓ Test 2: Transaction type filtering")
+                print("\n✓ Test 2: Transaction type filtering")
 
-                filtered_response = await sandbox_client.transactions.get_transactions_since_id(
-                    account_id=test_account_id,
-                    transaction_id=str(since_id),
-                    transaction_type=["CREATE", "DAILY_FINANCING"]
-                )
+                filtered_response = await sandbox_client.transactions.get_transactions_since_id(account_id=test_account_id, transaction_id=str(since_id), transaction_type=["CREATE", "DAILY_FINANCING"])
 
                 assert filtered_response is not None, "Filtered response should not be None"
 
@@ -88,15 +81,12 @@ class TestTransactionQuerying:
                     print("  ✓ Filtered response structure validated")
 
                 # Test 3: Invalid transaction ID error handling
-                print(f"\n✓ Test 3: Invalid transaction ID handling")
+                print("\n✓ Test 3: Invalid transaction ID handling")
 
                 # Test with non-numeric ID
                 try:
                     with pytest.raises(FiveTwentyError) as exc_info:
-                        await sandbox_client.transactions.get_transactions_since_id(
-                            account_id=test_account_id,
-                            transaction_id="invalid-id"
-                        )
+                        await sandbox_client.transactions.get_transactions_since_id(account_id=test_account_id, transaction_id="invalid-id")
 
                     error = exc_info.value
                     assert error.status == 400, f"Expected 400 for invalid ID, got {error.status}"
@@ -142,11 +132,7 @@ class TestTransactionQuerying:
                 to_id = current_id
                 print(f"\n✓ Test 1: Getting transactions from {from_id} to {to_id}")
 
-                range_response = await sandbox_client.transactions.get_transactions_range(
-                    account_id=test_account_id,
-                    from_transaction_id=str(from_id),
-                    to_transaction_id=str(to_id)
-                )
+                range_response = await sandbox_client.transactions.get_transactions_range(account_id=test_account_id, from_transaction_id=str(from_id), to_transaction_id=str(to_id))
 
                 assert range_response is not None, "Range response should not be None"
 
@@ -166,14 +152,9 @@ class TestTransactionQuerying:
                     print("  ✓ Range response structure validated")
 
                 # Test 2: Range with transaction type filtering
-                print(f"\n✓ Test 2: Range query with transaction type filtering")
+                print("\n✓ Test 2: Range query with transaction type filtering")
 
-                filtered_range_response = await sandbox_client.transactions.get_transactions_range(
-                    account_id=test_account_id,
-                    from_transaction_id=str(from_id),
-                    to_transaction_id=str(to_id),
-                    transaction_type=["CREATE", "DAILY_FINANCING", "ORDER_FILL"]
-                )
+                filtered_range_response = await sandbox_client.transactions.get_transactions_range(account_id=test_account_id, from_transaction_id=str(from_id), to_transaction_id=str(to_id), transaction_type=["CREATE", "DAILY_FINANCING", "ORDER_FILL"])
 
                 assert filtered_range_response is not None, "Filtered range response should not be None"
 
@@ -193,7 +174,7 @@ class TestTransactionQuerying:
                     print("  ✓ Filtered range response structure validated")
 
                 # Test 3: Invalid range error handling
-                print(f"\n✓ Test 3: Invalid range handling")
+                print("\n✓ Test 3: Invalid range handling")
 
                 # Test invalid range (from > to)
                 try:
@@ -201,7 +182,7 @@ class TestTransactionQuerying:
                         await sandbox_client.transactions.get_transactions_range(
                             account_id=test_account_id,
                             from_transaction_id=str(current_id),
-                            to_transaction_id=str(current_id - 1)  # Invalid: from > to
+                            to_transaction_id=str(current_id - 1),  # Invalid: from > to
                         )
                     print("  ✓ Invalid range (from > to) correctly rejected")
                 except AssertionError:
@@ -212,11 +193,7 @@ class TestTransactionQuerying:
                 # Test non-numeric IDs
                 try:
                     with pytest.raises((ValueError, FiveTwentyError)):
-                        await sandbox_client.transactions.get_transactions_range(
-                            account_id=test_account_id,
-                            from_transaction_id="abc",
-                            to_transaction_id="def"
-                        )
+                        await sandbox_client.transactions.get_transactions_range(account_id=test_account_id, from_transaction_id="abc", to_transaction_id="def")
                     print("  ✓ Non-numeric transaction IDs correctly rejected")
                 except Exception as e:
                     print(f"  ✓ Non-numeric IDs rejected: {type(e).__name__}")
@@ -246,10 +223,7 @@ class TestTransactionQuerying:
             # Test 1: Basic recent transactions retrieval
             print("\n✓ Test 1: Basic recent transactions retrieval")
 
-            recent_response = await sandbox_client.transactions.get_recent_transactions(
-                account_id=test_account_id,
-                count=10
-            )
+            recent_response = await sandbox_client.transactions.get_recent_transactions(account_id=test_account_id, count=10)
 
             assert recent_response is not None, "Recent transactions response should not be None"
 
@@ -276,10 +250,7 @@ class TestTransactionQuerying:
             # Test 2: Large count request
             print("\n✓ Test 2: Large count request")
 
-            large_response = await sandbox_client.transactions.get_recent_transactions(
-                account_id=test_account_id,
-                count=100
-            )
+            large_response = await sandbox_client.transactions.get_recent_transactions(account_id=test_account_id, count=100)
 
             assert large_response is not None, "Large count response should not be None"
 
@@ -288,18 +259,14 @@ class TestTransactionQuerying:
                 print(f"  ✓ Retrieved {len(large_transactions)} transactions with count=100")
 
                 # Should not exceed 100
-                assert len(large_transactions) <= 100, f"Should not exceed requested count of 100"
+                assert len(large_transactions) <= 100, "Should not exceed requested count of 100"
             else:
                 print("  ✓ Large count response structure validated")
 
             # Test 3: Transaction type filtering
             print("\n✓ Test 3: Recent transactions with type filtering")
 
-            filtered_recent_response = await sandbox_client.transactions.get_recent_transactions(
-                account_id=test_account_id,
-                count=20,
-                transaction_type=["CREATE", "DAILY_FINANCING"]
-            )
+            filtered_recent_response = await sandbox_client.transactions.get_recent_transactions(account_id=test_account_id, count=20, transaction_type=["CREATE", "DAILY_FINANCING"])
 
             assert filtered_recent_response is not None, "Filtered recent response should not be None"
 
@@ -324,10 +291,7 @@ class TestTransactionQuerying:
             # Test with invalid account ID
             try:
                 with pytest.raises(FiveTwentyError) as exc_info:
-                    await sandbox_client.transactions.get_recent_transactions(
-                        account_id="invalid-account-123",
-                        count=10
-                    )
+                    await sandbox_client.transactions.get_recent_transactions(account_id="invalid-account-123", count=10)
 
                 error = exc_info.value
                 assert error.status in [400, 404], f"Expected 400/404 for invalid account, got {error.status}"

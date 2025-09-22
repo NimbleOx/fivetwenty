@@ -4,7 +4,6 @@ This module combines the most common order testing scenarios into efficient test
 that validate multiple aspects with fewer API calls.
 """
 
-import asyncio
 from decimal import Decimal
 
 import pytest
@@ -36,9 +35,7 @@ class TestConsolidatedOrderOperations:
 
         # Get available instruments once for all tests
         test_instrument = test_instruments["major_pairs"][0]  # EUR_USD
-        available_instruments_response = await sandbox_client.accounts.get_account_instruments(
-            test_account_id, instruments=[test_instrument]
-        )
+        available_instruments_response = await sandbox_client.accounts.get_account_instruments(test_account_id, instruments=[test_instrument])
         available_instruments = available_instruments_response["instruments"]
         assert len(available_instruments) > 0, f"Test instrument {test_instrument} not available"
         instrument_details = available_instruments[0]
@@ -74,10 +71,7 @@ class TestConsolidatedOrderOperations:
         print("\n✓ Test 2: Limit order creation")
 
         # Get current pricing to set limit order away from market
-        pricing_response = await sandbox_client.pricing.get_pricing(
-            account_id=test_account_id,
-            instruments=[test_instrument]
-        )
+        pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
         prices = pricing_response.get("prices", [])
         assert len(prices) > 0, "Should have pricing data"
 
@@ -125,7 +119,7 @@ class TestConsolidatedOrderOperations:
                 # Order might be filled, cancelled, or pending - just validate it exists
                 if order_state == "PENDING":
                     assert order.get("instrument") == test_instrument, "Order should be for correct instrument"
-                    print(f"✓ Order is pending as expected")
+                    print("✓ Order is pending as expected")
                 else:
                     print(f"✓ Order found but in state: {order_state} (not pending)")
                 break
@@ -163,7 +157,7 @@ class TestConsolidatedOrderOperations:
                     assert cancel_tx.get("type") == "ORDER_CANCEL", "Should be order cancel transaction"
                     print(f"✓ Order cancelled: {cancel_tx.get('id')}")
                 else:
-                    print(f"✓ Cancel response received, but no cancel transaction (order may already be filled/cancelled)")
+                    print("✓ Cancel response received, but no cancel transaction (order may already be filled/cancelled)")
 
             except Exception as e:
                 print(f"⚠ Order cancellation failed (order may already be filled/cancelled): {e}")
@@ -186,7 +180,7 @@ class TestConsolidatedOrderOperations:
             try:
                 close_response = await sandbox_client.trades.close_trade(test_account_id, market_trade_id)
                 if close_response and close_response.order_fill_transaction:
-                    print(f"✓ Trade closed successfully")
+                    print("✓ Trade closed successfully")
             except Exception as e:
                 print(f"⚠ Could not close trade (this is okay for sandbox): {e}")
 
@@ -213,7 +207,7 @@ class TestConsolidatedOrderOperations:
                 instrument="INVALID_INSTRUMENT",
                 units=1,
             )
-            assert False, "Should have raised an error for invalid instrument"
+            raise AssertionError("Should have raised an error for invalid instrument")
         except Exception as e:
             print(f"✓ Correctly caught invalid instrument error: {type(e).__name__}")
 
@@ -225,7 +219,7 @@ class TestConsolidatedOrderOperations:
                 instrument=test_instrument,
                 units=0,
             )
-            assert False, "Should have raised an error for zero units"
+            raise AssertionError("Should have raised an error for zero units")
         except Exception as e:
             print(f"✓ Correctly caught zero units error: {type(e).__name__}")
 
@@ -238,7 +232,7 @@ class TestConsolidatedOrderOperations:
                 units=1,
                 price="0",
             )
-            assert False, "Should have raised an error for zero price"
+            raise AssertionError("Should have raised an error for zero price")
         except Exception as e:
             print(f"✓ Correctly caught invalid price error: {type(e).__name__}")
 
