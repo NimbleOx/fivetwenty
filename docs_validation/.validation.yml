@@ -82,6 +82,9 @@ profiles:
       code_executability:
         enabled: true
 
+      sdk_methods:
+        enabled: true
+
       prose:
         enabled: false  # Disabled - false positives in external libraries
 

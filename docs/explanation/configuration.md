@@ -332,7 +332,7 @@ import httpx
 
 # Create custom transport
 transport = httpx.AsyncClient(
-    base_url="https://api-fxpractice.oanda.com/v3",
+    base_url=Environment.PRACTICE.base_url,
     timeout=httpx.Timeout(
         connect=5.0,
         read=60.0,

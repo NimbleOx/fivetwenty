@@ -59,8 +59,8 @@ class SDKMethodsCheck(ContentCheck):
             # Position management
             (r"\.get_position\s*\(", ".get_positions(", "get_position() → get_positions()"),
             (r"\.close_position\s*\(", ".close_positions(", "close_position() → close_positions()"),
-            # Account methods
-            (r"\.get_account_summary\s*\(", ".get_accounts(", "get_account_summary() → get_accounts()"),
+            # Account methods - get_account_summary() is actually preferred (more efficient)
+            # (r"\.get_account_summary\s*\(", ".get_account(", "get_account_summary() → get_account()"),
             (r"\.get_account_instruments\s*\(", ".get_instruments(", "get_account_instruments() → get_instruments()"),
             # Pricing methods
             (r"\.get_latest_candles\s*\(", ".get_candles(", "get_latest_candles() → get_candles()"),
