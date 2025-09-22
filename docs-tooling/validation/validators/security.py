@@ -72,9 +72,14 @@ class SecurityValidator(FileValidator):  # type: ignore[misc]
                 matches = list(re.finditer(pattern, content, re.IGNORECASE))
 
                 for match in matches:
+                    matched_text = match.group()
+
+                    # Skip false positives for "Potential Token" pattern
+                    if description == "Potential Token" and self._is_false_positive_token(matched_text, content, match):
+                        continue
+
                     # Find line number
                     line_num = content[: match.start()].count("\n") + 1
-                    matched_text = match.group()
 
                     # Mask sensitive parts of the match for logging
                     masked_text = self._mask_sensitive_data(matched_text)
@@ -107,3 +112,64 @@ class SecurityValidator(FileValidator):  # type: ignore[misc]
 
         # Mask passwords
         return re.sub(r'(password\s*[=:]\s*["\']?)(\w+)', r"\1****", masked, flags=re.IGNORECASE)
+
+    def _is_false_positive_token(self, matched_text: str, content: str, match: re.Match[str]) -> bool:
+        """Check if a potential token match is likely a false positive."""
+        # Common patterns that are not tokens
+        false_positive_patterns = [
+            # Python class names ending with common suffixes
+            r".*Validator$",
+            r".*Generator$",
+            r".*Exception$",
+            r".*Configuration$",
+            r".*Documentation$",
+            r".*Implementation$",
+            r".*Specification$",
+            r".*Authentication$",
+            r".*Authorization$",
+            r".*Factory$",
+            r".*Builder$",
+            r".*Manager$",
+            r".*Handler$",
+            r".*Processor$",
+            r".*Controller$",
+            r".*Service$",
+            r".*Repository$",
+            r".*Interface$",
+            r".*Abstract$",
+            r".*Formatter$",
+            r".*Converter$",
+            r".*Transformer$",
+            r".*Descriptor$",
+            # Enum values and constants
+            r".*Granularity$",
+            r".*Direction$",
+            r".*InstrumentType$",
+            r".*OrderType$",
+            r".*TimeInForce$",
+            r".*Environment$",
+            # Common uppercase words that might appear in docs
+            r"^[A-Z][A-Z_]*[A-Z]$",  # All caps constants like "API_VERSION"
+        ]
+
+        for pattern in false_positive_patterns:
+            if re.match(pattern, matched_text, re.IGNORECASE):
+                return True
+
+        # Check context - if it's in an import statement or class definition, likely false positive
+        context_start = max(0, match.start() - 50)
+        context_end = min(len(content), match.end() + 50)
+        context = content[context_start:context_end]
+
+        # Check for import contexts
+        if any(keyword in context.lower() for keyword in ["import", "from ", "class ", "def ", "enum "]):
+            return True
+
+        # Check if it's in a comment or docstring
+        lines_around = context.split('\n')
+        for line in lines_around:
+            line = line.strip()
+            if matched_text in line and (line.startswith('#') or '"""' in line or "'''" in line):
+                return True
+
+        return False

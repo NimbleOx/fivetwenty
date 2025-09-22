@@ -643,6 +643,81 @@ class ValidationRunner:
                     content += f"- **{issue_type}**: {count} issues\n"
                 content += "\n"
 
+        # Handle prose validator details
+        elif validator_name == "prose" and "prose_issues" in details:
+            prose_issues = details["prose_issues"]
+            total_issues = details.get("total_issues", len(prose_issues))
+
+            if prose_issues:
+                content += "#### 📝 Prose Quality Issues\n\n"
+
+                # Group by severity first, then by file
+                severity_order = ["error", "warning", "suggestion"]
+                issues_by_severity: dict[str, list[dict[str, Any]]] = {}
+                for issue in prose_issues:
+                    severity = issue.get("severity", "unknown")
+                    if severity not in issues_by_severity:
+                        issues_by_severity[severity] = []
+                    issues_by_severity[severity].append(issue)
+
+                for severity in severity_order:
+                    if severity in issues_by_severity:
+                        severity_icon = {"error": "❌", "warning": "⚠️", "suggestion": "💡"}.get(severity, "•")
+                        content += f"**{severity_icon} {severity.upper()} ISSUES**\n\n"
+
+                        # Group by file within severity
+                        files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                        for issue in issues_by_severity[severity]:
+                            file_path = issue.get("file", "Unknown")
+                            if file_path not in files_with_issues:
+                                files_with_issues[file_path] = []
+                            files_with_issues[file_path].append(issue)
+
+                        for file_path, file_issues in sorted(files_with_issues.items()):
+                            content += f"**{file_path}**\n"
+                            for issue in file_issues:
+                                line = issue.get("line", "")
+                                message = issue.get("message", "Prose issue")
+                                check = issue.get("check", "Vale")
+
+                                line_info = f" (Line {line})" if line else ""
+                                # Clean up message - remove severity prefix if already shown
+                                clean_message = message
+                                for prefix in ["[ERROR]", "[WARNING]", "[INFO]"]:
+                                    if clean_message.startswith(prefix):
+                                        clean_message = clean_message[len(prefix):].strip()
+
+                                content += f"- {severity_icon} {clean_message}{line_info}\n"
+                                if check and check != "Vale":
+                                    content += f"  - **Rule**: {check}\n"
+                            content += "\n"
+
+                # Add summary
+                content += "#### 📊 Prose Summary\n\n"
+                severity_counts = {}
+                check_counts = {}
+                for issue in prose_issues:
+                    severity = issue.get("severity", "unknown")
+                    check = issue.get("check", "unknown")
+                    severity_counts[severity] = severity_counts.get(severity, 0) + 1
+                    check_counts[check] = check_counts.get(check, 0) + 1
+
+                content += "**By Severity:**\n"
+                for severity in severity_order:
+                    if severity in severity_counts:
+                        severity_icon = {"error": "❌", "warning": "⚠️", "suggestion": "💡"}.get(severity, "•")
+                        content += f"- {severity_icon} **{severity}**: {severity_counts[severity]} issues\n"
+
+                content += "\n**Top Rule Categories:**\n"
+                # Show top 10 most common rules
+                sorted_checks = sorted(check_counts.items(), key=lambda x: x[1], reverse=True)[:10]
+                for check, count in sorted_checks:
+                    content += f"- **{check}**: {count} issues\n"
+
+                if total_issues > len(prose_issues):
+                    content += f"\n*Showing {len(prose_issues)} of {total_issues} total issues*\n"
+                content += "\n"
+
         # Add other validator-specific details here as needed
         elif "files_checked" in details:
             content += "#### 📁 Files Processed\n\n"
