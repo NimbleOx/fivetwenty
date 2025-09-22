@@ -99,7 +99,13 @@ nav:
           - Implement Stop-Loss Strategies: how-to-guides/implement-stop-loss-strategies.md
           - Optimize High-Frequency Trading: how-to-guides/optimize-high-frequency-trading.md
           - Deploy SDK to Production: how-to-guides/deploy-sdk-to-production.md
-          - Integrate External Data Sources: how-to-guides/integrate-external-data-sources.md
+          - Data Integration:
+              - Overview: how-to-guides/data-integration/index.md
+              - Economic Calendar: how-to-guides/data-integration/economic-calendar.md
+              - Financial News: how-to-guides/data-integration/financial-news.md
+              - Technical Indicators: how-to-guides/data-integration/technical-indicators.md
+              - Social Sentiment: how-to-guides/data-integration/social-sentiment.md
+              - Unified Pipeline: how-to-guides/data-integration/unified-pipeline.md
   # REFERENCE - Information-oriented quick lookup
   - "API Reference":
       - Overview: api-reference/index.md
