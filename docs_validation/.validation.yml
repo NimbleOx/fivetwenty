@@ -28,6 +28,8 @@ profiles:
       - "**/build/**"
       - "**/dist/**"
       - "**/*.egg-info/**"
+      - "**/*.meta.json"  # Exclude all mypy cache metadata files
+      - "**/*.pyc"        # Exclude compiled Python files
       - "docs/api-reference/openapi.yaml"  # Exclude OpenAPI spec from security scanning
     parallel_execution: true
     max_workers: 4
