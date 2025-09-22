@@ -27,12 +27,10 @@ dependencies = [
     "pydantic>=2.5.0",
 ]
 
-
-
 [project.urls]
-Homepage = "https://github.com/NimbleOx/fivetwenty"
+Homepage = "https://nimbleox.github.io/fivetwenty/"
 Repository = "https://github.com/NimbleOx/fivetwenty"
-Documentation = "https://github.com/NimbleOx/fivetwenty"
+Documentation = "https://nimbleox.github.io/fivetwenty/"
 "Bug Reports" = "https://github.com/NimbleOx/fivetwenty/issues"
 
 [tool.setuptools.packages.find]
@@ -233,16 +231,12 @@ dev = [
 
 [tool.poe.tasks]
 # Testing tasks
-test = "python -m pytest"
-test-unit = "python -m pytest tests/unit/"
+test = "python -m pytest tests/unit/"
 test-integration = "python -m pytest tests/integration/"
-test-verbose = "python -m pytest -v"
-test-cov = "python -m pytest --cov=fivetwenty --cov-report=term-missing --cov-report=html"
 
 # Code quality tasks
 lint = "ruff check ."
 lint-fix = "ruff check --fix ."
-lint-core = "ruff check fivetwenty/ tests/"
 format = "ruff format ."
 typecheck = "uv run mypy fivetwenty/"
 
@@ -259,7 +253,6 @@ docs-deploy = "python -m mkdocs gh-deploy --force"
 # Documentation validation tasks
 docs-validate = {shell = "cd docs_validation && python -m validation.cli.main run --parallel"}
 docs-validate-report = {shell = "cd docs_validation && python -m validation.cli.main run --parallel --report"}
-docs-validate-core = {shell = "cd docs_validation && python -m validation.cli.main run markdown_syntax financial_precision financial_terminology cross_references python_syntax python_style sdk_methods link_validation"}
 docs-validate-list = {shell = "cd docs_validation && python -m validation.cli.main list-checks"}
 
 # Markdown tasks
@@ -271,35 +264,6 @@ yaml-lint = "yamllint mkdocs.yml docs-tooling/validation-config.yml .pre-commit-
 
 # Workflow tasks
 quality = ["format", "lint-core", "typecheck"]
-check = ["format", "lint-core", "typecheck", "test", "docs-validate-core"]
-pre-commit = ["format", "lint", "typecheck"]
-ci = ["format", "lint-core", "typecheck", "test-cov", "docs-build", "docs-validate-core"]
-
-[tool.poe.tasks.dev]
-help = "Run development checks (format, typecheck, test) - ignores lint failures"
-sequence = [
-    "format",
-    "typecheck",
-    "test"
-]
-
-[tool.poe.tasks.clean]
-help = "Clean up build artifacts and caches"
-shell = """
-rm -rf build/ dist/ .eggs/ *.egg-info/
-rm -rf .coverage htmlcov/ .pytest_cache/ .mypy_cache/
-rm -rf docs/site/
-find . -type d -name __pycache__ -delete
-find . -name "*.pyc" -delete
-"""
-
-[tool.poe.tasks.setup]
-help = "Initial project setup for new developers"
-sequence = [
-    {shell = "uv sync"},
-    {shell = "uv pip install -e ."},
-    "typecheck",
-    "test",
-]
+check = ["format", "lint-core", "typecheck", "test", "docs-validate"]
 
 # YAML linting configuration is in .yamllint.yml
