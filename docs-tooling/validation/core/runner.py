@@ -296,6 +296,252 @@ class ValidationRunner:
                     content += f"- **{issue_type}**: {count} issues\n"
                 content += "\n"
 
+        # Handle terminology validator details
+        elif validator_name == "terminology_validator" and "terminology_issues" in details:
+            terminology_issues = details["terminology_issues"]
+            if terminology_issues:
+                content += "#### 📝 Terminology Issues Found\n\n"
+
+                # Group by file for better organization
+                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                for issue in terminology_issues:
+                    file_path = issue.get("file", "Unknown")
+                    if file_path not in files_with_issues:
+                        files_with_issues[file_path] = []
+                    files_with_issues[file_path].append(issue)
+
+                for file_path, file_issues in sorted(files_with_issues.items()):
+                    content += f"**{file_path}**\n"
+                    for issue in file_issues:
+                        line = issue.get("line", "?")
+                        message = issue.get("message", "unknown issue")
+                        matched_text = issue.get("matched_text", "")
+                        context = issue.get("context", "")
+
+                        content += f"- Line {line}: 🔤 {message}\n"
+                        if matched_text:
+                            content += f"  📍 Found: `{matched_text}`\n"
+                        if context:
+                            content += f"  📖 Context: `...{context}...`\n"
+                    content += "\n"
+
+        # Handle code example validator details
+        elif validator_name == "code_example_validator" and "code_issues" in details:
+            code_issues = details["code_issues"]
+            if code_issues:
+                content += "#### 🐍 Code Example Issues Found\n\n"
+
+                # Group by file for better organization
+                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                for issue in code_issues:
+                    file_path = issue.get("file", "Unknown")
+                    if file_path not in files_with_issues:
+                        files_with_issues[file_path] = []
+                    files_with_issues[file_path].append(issue)
+
+                for file_path, file_issues in sorted(files_with_issues.items()):
+                    content += f"**{file_path}**\n"
+                    for issue in file_issues:
+                        line = issue.get("line", "?")
+                        issue_type = issue.get("type", "unknown")
+                        message = issue.get("message", "unknown issue")
+                        severity = issue.get("severity", "info")
+                        suggestion = issue.get("suggestion", "")
+                        code_snippet = issue.get("code_snippet", "")
+
+                        severity_emoji = "🔴" if severity == "critical" else "🟡" if severity == "error" else "🔵" if severity == "warning" else "ℹ️"
+                        content += f"- Line {line}: {severity_emoji} [{issue_type}] {message}\n"
+                        if suggestion:
+                            content += f"  💡 Suggestion: {suggestion}\n"
+                        if code_snippet:
+                            content += f"  📝 Code: `{code_snippet}`\n"
+                    content += "\n"
+
+                # Add summary by issue type
+                content += "#### 📊 Issue Summary\n\n"
+                issue_types = {}
+                for issue in code_issues:
+                    issue_type = issue.get("type", "unknown")
+                    issue_types[issue_type] = issue_types.get(issue_type, 0) + 1
+
+                for issue_type, count in sorted(issue_types.items()):
+                    content += f"- **{issue_type}**: {count} issues\n"
+                content += "\n"
+
+        # Handle cross reference validator details
+        elif validator_name == "cross_reference_validator" and "reference_issues" in details:
+            reference_issues = details["reference_issues"]
+            if reference_issues:
+                content += "#### 🔗 Cross-Reference Issues Found\n\n"
+
+                # Group by file for better organization
+                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                for issue in reference_issues:
+                    file_path = issue.get("file", "Unknown")
+                    if file_path not in files_with_issues:
+                        files_with_issues[file_path] = []
+                    files_with_issues[file_path].append(issue)
+
+                for file_path, file_issues in sorted(files_with_issues.items()):
+                    content += f"**{file_path}**\n"
+                    for issue in file_issues:
+                        line = issue.get("line", "?")
+                        issue_type = issue.get("type", "unknown")
+                        message = issue.get("message", "unknown issue")
+                        severity = issue.get("severity", "info")
+                        link_text = issue.get("link_text", "")
+                        target_file = issue.get("target_file", "")
+                        target_anchor = issue.get("target_anchor", "")
+
+                        severity_emoji = "🔴" if severity == "error" else "🟡" if severity == "warning" else "ℹ️"
+                        content += f"- Line {line}: {severity_emoji} [{issue_type}] {message}\n"
+                        if link_text:
+                            content += f"  📝 Link text: `{link_text}`\n"
+                        if target_file:
+                            content += f"  📂 Target file: `{target_file}`\n"
+                        if target_anchor:
+                            content += f"  🏷️ Target anchor: `#{target_anchor}`\n"
+
+                        # Show available anchors for missing_anchor errors
+                        if issue_type == "missing_anchor" and "available_anchors" in issue:
+                            available = issue["available_anchors"]
+                            if available:
+                                content += f"  💡 Available anchors: {', '.join(f'`#{anchor}`' for anchor in available[:5])}\n"
+                                if len(available) > 5:
+                                    content += f"    (and {len(available) - 5} more...)\n"
+                    content += "\n"
+
+                # Add summary by issue type
+                content += "#### 📊 Issue Summary\n\n"
+                issue_types = {}
+                for issue in reference_issues:
+                    issue_type = issue.get("type", "unknown")
+                    issue_types[issue_type] = issue_types.get(issue_type, 0) + 1
+
+                for issue_type, count in sorted(issue_types.items()):
+                    content += f"- **{issue_type}**: {count} issues\n"
+                content += "\n"
+
+        # Handle tutorial structure validator details
+        elif validator_name == "tutorial_structure" and "tutorial_issues" in details:
+            tutorial_issues = details["tutorial_issues"]
+            if tutorial_issues:
+                content += "#### 📚 Tutorial Structure Issues Found\n\n"
+
+                # Group by file for better organization
+                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                for issue in tutorial_issues:
+                    file_path = issue.get("file", "Unknown")
+                    if file_path not in files_with_issues:
+                        files_with_issues[file_path] = []
+                    files_with_issues[file_path].append(issue)
+
+                for file_path, file_issues in sorted(files_with_issues.items()):
+                    content += f"**{file_path}**\n"
+                    for issue in file_issues:
+                        issue_type = issue.get("type", "unknown")
+                        message = issue.get("message", "unknown issue")
+                        severity = issue.get("severity", "info")
+                        suggestion = issue.get("suggestion", "")
+
+                        severity_emoji = "🔴" if severity == "error" else "🟡" if severity == "warning" else "💡"
+                        content += f"- {severity_emoji} [{issue_type}] {message}\n"
+                        if suggestion:
+                            content += f"  💡 Suggestion: {suggestion}\n"
+                    content += "\n"
+
+                # Add summary by issue type
+                content += "#### 📊 Issue Summary\n\n"
+                issue_types = {}
+                for issue in tutorial_issues:
+                    issue_type = issue.get("type", "unknown")
+                    issue_types[issue_type] = issue_types.get(issue_type, 0) + 1
+
+                for issue_type, count in sorted(issue_types.items()):
+                    content += f"- **{issue_type}**: {count} issues\n"
+                content += "\n"
+
+        # Handle educational progression validator details
+        elif validator_name == "educational_progression" and "progression_issues" in details:
+            progression_issues = details["progression_issues"]
+            if progression_issues:
+                content += "#### 🎓 Educational Progression Issues Found\n\n"
+
+                # Group by file for better organization
+                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                for issue in progression_issues:
+                    file_path = issue.get("file", "Unknown")
+                    if file_path not in files_with_issues:
+                        files_with_issues[file_path] = []
+                    files_with_issues[file_path].append(issue)
+
+                for file_path, file_issues in sorted(files_with_issues.items()):
+                    content += f"**{file_path}**\n"
+                    for issue in file_issues:
+                        issue_type = issue.get("type", "unknown")
+                        message = issue.get("message", "unknown issue")
+                        severity = issue.get("severity", "info")
+                        suggestion = issue.get("suggestion", "")
+
+                        severity_emoji = "🔴" if severity == "error" else "🟡" if severity == "warning" else "💡"
+                        content += f"- {severity_emoji} [{issue_type}] {message}\n"
+                        if suggestion:
+                            content += f"  💡 Suggestion: {suggestion}\n"
+                    content += "\n"
+
+                # Add summary by issue type
+                content += "#### 📊 Issue Summary\n\n"
+                issue_types = {}
+                for issue in progression_issues:
+                    issue_type = issue.get("type", "unknown")
+                    issue_types[issue_type] = issue_types.get(issue_type, 0) + 1
+
+                for issue_type, count in sorted(issue_types.items()):
+                    content += f"- **{issue_type}**: {count} issues\n"
+                content += "\n"
+
+        # Handle code executability validator details
+        elif validator_name == "code_executability" and "executability_issues" in details:
+            executability_issues = details["executability_issues"]
+            if executability_issues:
+                content += "#### ⚡ Code Executability Issues Found\n\n"
+
+                # Group by file for better organization
+                files_with_issues: dict[str, list[dict[str, Any]]] = {}
+                for issue in executability_issues:
+                    file_path = issue.get("file", "Unknown")
+                    if file_path not in files_with_issues:
+                        files_with_issues[file_path] = []
+                    files_with_issues[file_path].append(issue)
+
+                for file_path, file_issues in sorted(files_with_issues.items()):
+                    content += f"**{file_path}**\n"
+                    for issue in file_issues:
+                        issue_type = issue.get("type", "unknown")
+                        message = issue.get("message", "unknown issue")
+                        severity = issue.get("severity", "info")
+                        suggestion = issue.get("suggestion", "")
+                        code_snippet = issue.get("code_snippet", "")
+
+                        severity_emoji = "🔴" if severity == "error" else "🟡" if severity == "warning" else "💡"
+                        content += f"- {severity_emoji} [{issue_type}] {message}\n"
+                        if suggestion:
+                            content += f"  💡 Suggestion: {suggestion}\n"
+                        if code_snippet:
+                            content += f"  📝 Code: `{code_snippet}`\n"
+                    content += "\n"
+
+                # Add summary by issue type
+                content += "#### 📊 Issue Summary\n\n"
+                issue_types = {}
+                for issue in executability_issues:
+                    issue_type = issue.get("type", "unknown")
+                    issue_types[issue_type] = issue_types.get(issue_type, 0) + 1
+
+                for issue_type, count in sorted(issue_types.items()):
+                    content += f"- **{issue_type}**: {count} issues\n"
+                content += "\n"
+
         # Add other validator-specific details here as needed
         elif "files_checked" in details:
             content += "#### 📁 Files Processed\n\n"

@@ -19,8 +19,9 @@ class EducationalProgressionValidator(BaseValidator):
 
     def __init__(self):
         super().__init__("educational_progression", "Validates progressive learning patterns and complexity building")
-        self.validator_name = "educational_progression_validator"
+        self.validator_name = "educational_progression"
         self.file_patterns = ["docs/tutorials/**/*.md"]
+        self.progression_issues: list[dict[str, Any]] = []
 
         # Complexity indicators for different skill levels
         self.complexity_patterns = {
@@ -52,30 +53,27 @@ class EducationalProgressionValidator(BaseValidator):
 
     def validate(self) -> ValidationResult:
         """Run educational progression validation."""
-
         tutorial_files = self._find_tutorial_files()
-        issues_found = 0
         total_checked = len(tutorial_files)
 
         for file_path in tutorial_files:
             file_issues = self._validate_tutorial_progression(file_path)
-            issues_found += len(file_issues)
+            self.progression_issues.extend(file_issues)
 
-            if file_issues:
-                self._log_issues(file_path, file_issues)
-
-        status = "passed" if issues_found == 0 else "failed"
+        status = "passed" if len(self.progression_issues) == 0 else "failed"
 
         return ValidationResult(
             validator_name=self.validator_name,
             status=status,
-            issues_found=issues_found,
+            issues_found=len(self.progression_issues),
             total_checked=total_checked,
             details={
                 "files_checked": total_checked,
-                "progression_issues": issues_found,
+                "progression_issues": self.progression_issues,
                 "validation_focus": "Educational progression and complexity building"
-            }
+            },
+            timestamp=self.start_time.isoformat() if self.start_time else "",
+            duration_seconds=self.get_elapsed_time(),
         )
 
     def _find_tutorial_files(self) -> List[Path]:

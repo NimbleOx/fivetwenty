@@ -124,11 +124,25 @@ class CodeExampleValidator(FileValidator):  # type: ignore[misc]
             "...", "# ... more code"
         ]
 
+        # Skip examples marked as BAD or showing incorrect syntax
+        bad_example_markers = [
+            "# BAD:", "# BAD ", "# WRONG:", "# INCORRECT:",
+            "# This is wrong", "# Don't do this"
+        ]
+
         # Also skip very short code snippets
         if len(code.strip()) < 10:
             return True
 
-        return any(marker in code for marker in incomplete_markers)
+        # Skip incomplete examples
+        if any(marker in code for marker in incomplete_markers):
+            return True
+
+        # Skip bad examples (they're meant to show what NOT to do)
+        if any(marker in code for marker in bad_example_markers):
+            return True
+
+        return False
 
     def _check_syntax(self, file_path: Path, code: str, line_start: int, block_num: int) -> None:
         """Check Python syntax of code block."""
@@ -190,17 +204,28 @@ class CodeExampleValidator(FileValidator):  # type: ignore[misc]
         ]
 
         for pattern, required_import in fivetwenty_patterns:
-            if re.search(pattern, code) and required_import not in code:
-                # Only flag if this looks like it should have the import
-                if not self._is_import_example(code):
-                    self._add_code_issue(
-                        file_path=file_path,
-                        issue_type="missing_import",
-                        message=f"Code block {block_num} may be missing: {required_import}",
-                        line=line_start,
-                        severity="warning",
-                        suggestion=f"Consider adding: {required_import}"
-                    )
+            if re.search(pattern, code):
+                # Check if the import is present (more flexible matching)
+                import_base = required_import.split(' import ')[1]  # Get the class name after "import"
+                import_patterns = [
+                    required_import,  # Exact match
+                    f"from fivetwenty import.*{import_base}",  # Multi-import line
+                    f"import fivetwenty.*{import_base}",  # Alternative import style
+                ]
+
+                has_import = any(re.search(pattern_check, code) for pattern_check in import_patterns)
+
+                if not has_import:
+                    # Only flag if this looks like it should have the import
+                    if not self._is_import_example(code):
+                        self._add_code_issue(
+                            file_path=file_path,
+                            issue_type="missing_import",
+                            message=f"Code block {block_num} may be missing: {required_import}",
+                            line=line_start,
+                            severity="warning",
+                            suggestion=f"Consider adding: {required_import}"
+                        )
 
     def _is_import_example(self, code: str) -> bool:
         """Check if this code block is showing import examples."""
@@ -301,8 +326,15 @@ class CodeExampleValidator(FileValidator):  # type: ignore[misc]
 
     def _add_code_issue(self, file_path: Path, issue_type: str, message: str, line: int, severity: str, **kwargs: Any) -> None:
         """Add a code issue to the results."""
+        # Try to make path relative to current working directory, fall back to just the filename
+        try:
+            display_path = str(file_path.relative_to(Path.cwd()))
+        except ValueError:
+            # If file is not in a subpath of cwd, just use the filename
+            display_path = file_path.name
+
         issue = {
-            "file": str(file_path.relative_to(Path.cwd())),
+            "file": display_path,
             "line": line,
             "type": issue_type,
             "message": message,

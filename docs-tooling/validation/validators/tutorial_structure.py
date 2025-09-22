@@ -18,8 +18,9 @@ class TutorialStructureValidator(BaseValidator):
 
     def __init__(self):
         super().__init__("tutorial_structure", "Validates tutorial content follows educational best practices and proper structure")
-        self.validator_name = "tutorial_structure_validator"
+        self.validator_name = "tutorial_structure"
         self.file_patterns = ["docs/tutorials/**/*.md"]
+        self.tutorial_issues: list[dict[str, Any]] = []
 
         # Tutorial structure requirements based on our analysis
         self.required_sections = {
@@ -50,30 +51,27 @@ class TutorialStructureValidator(BaseValidator):
 
     def validate(self) -> ValidationResult:
         """Run tutorial structure validation."""
-
         tutorial_files = self._find_tutorial_files()
-        issues_found = 0
         total_checked = len(tutorial_files)
 
         for file_path in tutorial_files:
             file_issues = self._validate_tutorial_file(file_path)
-            issues_found += len(file_issues)
+            self.tutorial_issues.extend(file_issues)
 
-            if file_issues:
-                self._log_issues(file_path, file_issues)
-
-        status = "passed" if issues_found == 0 else "failed"
+        status = "passed" if len(self.tutorial_issues) == 0 else "failed"
 
         return ValidationResult(
             validator_name=self.validator_name,
             status=status,
-            issues_found=issues_found,
+            issues_found=len(self.tutorial_issues),
             total_checked=total_checked,
             details={
                 "files_checked": total_checked,
-                "tutorial_structure_issues": issues_found,
+                "tutorial_issues": self.tutorial_issues,
                 "validation_focus": "Educational content structure and learning progression"
-            }
+            },
+            timestamp=self.start_time.isoformat() if self.start_time else "",
+            duration_seconds=self.get_elapsed_time(),
         )
 
     def _find_tutorial_files(self) -> List[Path]:

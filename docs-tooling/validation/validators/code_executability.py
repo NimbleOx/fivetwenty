@@ -22,8 +22,9 @@ class CodeExecutabilityValidator(BaseValidator):
 
     def __init__(self):
         super().__init__("code_executability", "Validates that code examples are executable and complete")
-        self.validator_name = "code_executability_validator"
+        self.validator_name = "code_executability"
         self.file_patterns = ["docs/tutorials/**/*.md"]
+        self.executability_issues: list[dict[str, Any]] = []
 
         # Known placeholders that indicate incomplete examples
         self.placeholder_patterns = [
@@ -61,32 +62,29 @@ class CodeExecutabilityValidator(BaseValidator):
 
     def validate(self) -> ValidationResult:
         """Run code executability validation."""
-
         tutorial_files = self._find_tutorial_files()
-        issues_found = 0
         total_checked = 0
 
         for file_path in tutorial_files:
             file_issues, blocks_checked = self._validate_file_executability(file_path)
-            issues_found += len(file_issues)
+            self.executability_issues.extend(file_issues)
             total_checked += blocks_checked
 
-            if file_issues:
-                self._log_issues(file_path, file_issues)
-
-        status = "passed" if issues_found == 0 else "failed"
+        status = "passed" if len(self.executability_issues) == 0 else "failed"
 
         return ValidationResult(
             validator_name=self.validator_name,
             status=status,
-            issues_found=issues_found,
+            issues_found=len(self.executability_issues),
             total_checked=total_checked,
             details={
                 "files_checked": len(tutorial_files),
                 "code_blocks_checked": total_checked,
-                "executability_issues": issues_found,
+                "executability_issues": self.executability_issues,
                 "validation_focus": "Code example executability and completeness"
-            }
+            },
+            timestamp=self.start_time.isoformat() if self.start_time else "",
+            duration_seconds=self.get_elapsed_time(),
         )
 
     def _find_tutorial_files(self) -> List[Path]:

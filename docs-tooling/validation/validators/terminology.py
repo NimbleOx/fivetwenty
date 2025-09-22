@@ -49,7 +49,7 @@ class TerminologyValidator(FileValidator):  # type: ignore[misc]
             (r"\bFiveTwenty SDK\b", 'Use "FiveTwenty" instead of "FiveTwenty SDK"'),
             (r"pip install FiveTwenty", 'Use "pip install fivetwenty" (lowercase package name)'),
             # Additional terminology rules can be added here
-            (r"\bOANDA api\b", 'Use "OANDA API" (capitalize API)'),
+            (r"\bOANDA\s+api\b", 'Use "OANDA API" (capitalize API)'),
             (r"\bapi key\b", 'Use "API key" (capitalize API)'),
             (r"\brest api\b", 'Use "REST API" (capitalize REST API)'),
             (r"\bwebsocket\b", 'Use "WebSocket" (proper capitalization)'),
@@ -67,7 +67,11 @@ class TerminologyValidator(FileValidator):  # type: ignore[misc]
             terminology_rules = self._get_terminology_rules()
 
             for pattern, message in terminology_rules:
-                matches = list(re.finditer(pattern, content, re.IGNORECASE))
+                # For API-related patterns, use case-sensitive matching to avoid false positives
+                if "api" in pattern.lower() and "API" in message:
+                    matches = list(re.finditer(pattern, content))  # Case-sensitive
+                else:
+                    matches = list(re.finditer(pattern, content, re.IGNORECASE))
 
                 for match in matches:
                     # Find line number

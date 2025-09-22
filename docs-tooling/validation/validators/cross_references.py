@@ -77,7 +77,11 @@ class CrossReferenceValidator(FileValidator):  # type: ignore[misc]
                 sections.add(anchor)
 
             # Store relative path as key for cross-referencing
-            relative_path = file_path.relative_to(Path.cwd())
+            try:
+                relative_path = file_path.relative_to(Path.cwd())
+            except ValueError:
+                # If file is not in a subpath of cwd, just use the filename
+                relative_path = file_path.name
             self.doc_sections[str(relative_path)] = sections
 
         except Exception as e:
@@ -261,8 +265,15 @@ class CrossReferenceValidator(FileValidator):  # type: ignore[misc]
 
     def _add_reference_issue(self, file_path: Path, issue_type: str, message: str, line: int, severity: str, **kwargs: Any) -> None:
         """Add a reference issue to the results."""
+        # Try to make path relative to current working directory, fall back to just the filename
+        try:
+            display_path = str(file_path.relative_to(Path.cwd()))
+        except ValueError:
+            # If file is not in a subpath of cwd, just use the filename
+            display_path = file_path.name
+
         issue = {
-            "file": str(file_path.relative_to(Path.cwd())),
+            "file": display_path,
             "line": line,
             "type": issue_type,
             "message": message,

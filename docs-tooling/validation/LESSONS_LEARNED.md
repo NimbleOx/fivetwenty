@@ -63,7 +63,7 @@ asyncio.run(main())
 **Example**:
 ```python
 # BAD: Invalid Python syntax
-orders.create(account_id: AccountID, order_request: OrderRequest) -> OrderResponse
+# orders.create(account_id: AccountID, order_request: OrderRequest) -> OrderResponse
 ```
 
 **Solution**: Convert to comments with usage examples:
