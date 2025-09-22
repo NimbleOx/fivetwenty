@@ -271,7 +271,7 @@ class TestTradeOrderManagement:
         """
         print("✓ Starting trade order management error handling test...")
 
-        test_instrument = test_instruments["major_pairs"][0]
+        test_instruments["major_pairs"][0]
 
         # Test 1: Invalid trade ID
         print("\n✓ Test 1: Invalid trade ID handling")
@@ -378,7 +378,7 @@ class TestTradeOrderManagement:
         """
         print("✓ Starting trade client extensions management test...")
 
-        test_instrument = test_instruments["major_pairs"][0]
+        test_instruments["major_pairs"][0]
 
         try:
             # Check for existing trades

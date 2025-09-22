@@ -107,7 +107,7 @@ class TestAccountConfiguration:
                 # Try to set a reasonable margin rate
                 test_margin_rate = "0.02"  # 2%
 
-                margin_response = await sandbox_client.accounts.patch_account_configuration(
+                await sandbox_client.accounts.patch_account_configuration(
                     account_id=test_account_id,
                     margin_rate=test_margin_rate
                 )

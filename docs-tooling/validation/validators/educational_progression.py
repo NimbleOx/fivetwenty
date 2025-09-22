@@ -196,15 +196,17 @@ class EducationalProgressionValidator(BaseValidator):
                 complexity = len(block.split('\n')) + len(re.findall(r'(\w+)\(', block))
                 block_complexities.append(complexity)
 
-            for i in range(1, len(block_complexities)):
-                if block_complexities[i] > block_complexities[i-1] * 2:
-                    issues.append({
-                        "type": "complexity_jump",
-                        "severity": "warning",
-                        "message": f"Abrupt complexity increase between code examples {i} and {i+1}",
-                        "suggestion": "Add intermediate examples to bridge complexity gaps",
-                        "file": str(file_path)
-                    })
+            issues.extend([
+                {
+                    "type": "complexity_jump",
+                    "severity": "warning",
+                    "message": f"Abrupt complexity increase between code examples {i} and {i+1}",
+                    "suggestion": "Add intermediate examples to bridge complexity gaps",
+                    "file": str(file_path)
+                }
+                for i in range(1, len(block_complexities))
+                if block_complexities[i] > block_complexities[i-1] * 2
+            ])
 
         return issues
 
@@ -220,15 +222,17 @@ class EducationalProgressionValidator(BaseValidator):
         ]
 
         if skill_level == "beginner":
-            for concept in advanced_concepts:
-                if concept in content_lower and "prerequisite" not in content_lower:
-                    issues.append({
-                        "type": "inappropriate_concept",
-                        "severity": "warning",
-                        "message": f"Advanced concept '{concept}' used in beginner tutorial without prerequisite note",
-                        "suggestion": "Either add prerequisite requirements or move to intermediate/advanced tutorial",
-                        "file": str(file_path)
-                    })
+            issues.extend([
+                {
+                    "type": "inappropriate_concept",
+                    "severity": "warning",
+                    "message": f"Advanced concept '{concept}' used in beginner tutorial without prerequisite note",
+                    "suggestion": "Either add prerequisite requirements or move to intermediate/advanced tutorial",
+                    "file": str(file_path)
+                }
+                for concept in advanced_concepts
+                if concept in content_lower and "prerequisite" not in content_lower
+            ])
 
         return issues
 

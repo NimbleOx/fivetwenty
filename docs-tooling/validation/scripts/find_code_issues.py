@@ -81,9 +81,11 @@ def check_financial_precision(code: str) -> list[str]:
 
     for pattern in financial_patterns:
         matches = re.finditer(pattern, code, re.IGNORECASE)
-        for match in matches:
-            if "Decimal" not in match.group():
-                issues.append(f"Financial value should use Decimal: {match.group()}")
+        issues.extend([
+            f"Financial value should use Decimal: {match.group()}"
+            for match in matches
+            if "Decimal" not in match.group()
+        ])
 
     return issues
 
@@ -109,34 +111,40 @@ def scan_file(file_path: Path) -> dict:
 
             # Check syntax
             syntax_issues = check_syntax(code)
-            for issue in syntax_issues:
-                file_issues.append({
+            file_issues.extend([
+                {
                     'block': block_num,
                     'line': line_start,
                     'type': 'syntax_error',
                     'message': issue,
                     'code_snippet': code[:100] + "..." if len(code) > 100 else code
-                })
+                }
+                for issue in syntax_issues
+            ])
 
             # Check imports
             import_issues = check_imports(code)
-            for issue in import_issues:
-                file_issues.append({
+            file_issues.extend([
+                {
                     'block': block_num,
                     'line': line_start,
                     'type': 'missing_import',
                     'message': issue
-                })
+                }
+                for issue in import_issues
+            ])
 
             # Check financial precision
             precision_issues = check_financial_precision(code)
-            for issue in precision_issues:
-                file_issues.append({
+            file_issues.extend([
+                {
                     'block': block_num,
                     'line': line_start,
                     'type': 'financial_precision',
                     'message': issue
-                })
+                }
+                for issue in precision_issues
+            ])
 
         return {
             'file': str(file_path),

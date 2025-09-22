@@ -45,26 +45,34 @@ class DocumentationAutoFixer:
         print(f"🔧 {'DRY RUN: ' if self.dry_run else ''}Auto-fixing documentation in {target_dir}")
         print(f"📋 Patterns to fix: {', '.join(patterns_to_fix)}")
 
-        for md_file in target_path.glob("**/*.md"):
-            try:
-                file_fixes = self._fix_file(md_file, patterns_to_fix)
-                results["files_processed"] += 1
-
-                if file_fixes["total_fixes"] > 0:
-                    results["files_modified"] += 1
-                    results["total_fixes"] += file_fixes["total_fixes"]
-
-                    for pattern, count in file_fixes["fixes_by_pattern"].items():
-                        results["fixes_by_pattern"][pattern] = results["fixes_by_pattern"].get(pattern, 0) + count
-
-                    print(f"  📄 {md_file.relative_to(target_path)}: {file_fixes['total_fixes']} fixes")
-
-            except Exception as e:
-                error_msg = f"Error processing {md_file}: {e}"
-                results["errors"].append(error_msg)
-                print(f"  ❌ {error_msg}")
+        # Process files in batch to reduce try-except overhead
+        md_files = list(target_path.glob("**/*.md"))
+        for md_file in md_files:
+            self._process_single_file(md_file, patterns_to_fix, target_path, results)
 
         return results
+
+    def _process_single_file(self, md_file: Path, patterns_to_fix: list[str], target_path: Path, results: dict[str, Any]) -> dict[str, Any]:
+        """Process a single file with error handling."""
+        try:
+            file_fixes = self._fix_file(md_file, patterns_to_fix)
+            results["files_processed"] += 1
+
+            if file_fixes["total_fixes"] > 0:
+                results["files_modified"] += 1
+                results["total_fixes"] += file_fixes["total_fixes"]
+
+                for pattern, count in file_fixes["fixes_by_pattern"].items():
+                    results["fixes_by_pattern"][pattern] = results["fixes_by_pattern"].get(pattern, 0) + count
+
+                print(f"  📄 {md_file.relative_to(target_path)}: {file_fixes['total_fixes']} fixes")
+
+            return file_fixes
+        except Exception as e:
+            error_msg = f"Error processing {md_file}: {e}"
+            results["errors"].append(error_msg)
+            print(f"  ❌ {error_msg}")
+            return {"total_fixes": 0, "fixes_by_pattern": {}}
 
     def _fix_file(self, file_path: Path, patterns: list[str]) -> dict[str, Any]:
         """Fix issues in a single markdown file."""
@@ -180,10 +188,10 @@ class DocumentationAutoFixer:
                 code.split('\n')
 
                 # Insert imports at the beginning
-                imports_to_add = []
-                for import_stmt in needed_imports:
-                    if import_stmt not in code:
-                        imports_to_add.append(import_stmt)
+                imports_to_add = [
+                    import_stmt for import_stmt in needed_imports
+                    if import_stmt not in code
+                ]
 
                 if imports_to_add:
                     # Add imports at the beginning of the code block
@@ -285,8 +293,7 @@ class DocumentationAutoFixer:
         # Errors
         if results["errors"]:
             report.append("## Errors")
-            for error in results["errors"]:
-                report.append(f"- {error}")
+            report.extend([f"- {error}" for error in results["errors"]])
             report.append("")
 
         # Recommendations

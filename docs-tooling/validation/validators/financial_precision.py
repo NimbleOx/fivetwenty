@@ -231,21 +231,24 @@ class FinancialPrecisionValidator(FileValidator):  # type: ignore[misc]
         ]
 
         for pattern, pair, (min_val, max_val) in unrealistic_patterns:
-            for match in re.finditer(pattern, code, re.IGNORECASE):
-                try:
-                    value = float(match.group(1))
-                    if value < min_val or value > max_val:
-                        line_offset = code[:match.start()].count('\n')
-                        self._add_precision_issue(
-                            file_path=file_path,
-                            issue_type="unrealistic_value",
-                            message=f"Unrealistic {pair} price: {value} (typical range: {min_val}-{max_val})",
-                            line=line_start + line_offset,
-                            severity="info",
-                            code_type="block" if is_block else "inline"
-                        )
-                except ValueError:
+            matches = re.finditer(pattern, code, re.IGNORECASE)
+            for match in matches:
+                # Pre-filter to avoid ValueError in loop
+                value_str = match.group(1)
+                if not value_str or not value_str.replace('.', '').replace('-', '').isdigit():
                     continue
+
+                value = float(value_str)
+                if value < min_val or value > max_val:
+                    line_offset = code[:match.start()].count('\n')
+                    self._add_precision_issue(
+                        file_path=file_path,
+                        issue_type="unrealistic_value",
+                        message=f"Unrealistic {pair} price: {value} (typical range: {min_val}-{max_val})",
+                        line=line_start + line_offset,
+                        severity="info",
+                        code_type="block" if is_block else "inline"
+                    )
 
     def _check_financial_text_examples(self, file_path: Path, content: str) -> int:
         """Check financial examples in regular text (not code blocks)."""

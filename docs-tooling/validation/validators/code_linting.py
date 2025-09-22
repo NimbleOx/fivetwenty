@@ -273,7 +273,7 @@ class CodeLintingValidator(FileValidator):  # type: ignore[misc]
             # Clean up temporary file
             try:
                 Path(temp_path).unlink(missing_ok=True)
-            except:
+            except (OSError, PermissionError):
                 pass
 
     def _should_skip_ruff_issue(self, issue: dict, code: str) -> bool:

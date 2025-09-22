@@ -168,8 +168,8 @@ class SecurityValidator(FileValidator):  # type: ignore[misc]
         # Check if it's in a comment or docstring
         lines_around = context.split('\n')
         for line in lines_around:
-            line = line.strip()
-            if matched_text in line and (line.startswith('#') or '"""' in line or "'''" in line):
+            stripped_line = line.strip()
+            if matched_text in stripped_line and (stripped_line.startswith('#') or '"""' in stripped_line or "'''" in stripped_line):
                 return True
 
         return False

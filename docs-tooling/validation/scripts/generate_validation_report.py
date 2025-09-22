@@ -9,7 +9,7 @@ Based on lessons learned from explanation and how-to-guides validation.
 import argparse
 import json
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
@@ -21,9 +21,7 @@ try:
     from core.config import ValidationConfig
     from core.runner import ValidationRunner, ValidatorRegistry
     from validators.code_examples import CodeExampleValidator
-    from validators.code_executability import CodeExecutabilityValidator
     from validators.cross_references import CrossReferenceValidator
-    from validators.educational_progression import EducationalProgressionValidator
     from validators.financial_precision import FinancialPrecisionValidator
     from validators.links import LinkValidator
     from validators.prose import ProseValidator
@@ -31,7 +29,6 @@ try:
     from validators.security import SecurityValidator
     from validators.syntax import SyntaxValidator
     from validators.terminology import TerminologyValidator
-    from validators.tutorial_structure import TutorialStructureValidator
 except ImportError as e:
     print(f"Import error: {e}")
     sys.exit(1)
@@ -43,7 +40,7 @@ class ValidationReportGenerator:
     def __init__(self, output_dir: Path | None = None):
         self.output_dir = output_dir or Path("docs-tooling/validation/reports")
         self.output_dir.mkdir(parents=True, exist_ok=True)
-        self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        self.timestamp = datetime.now(timezone.utc).strftime("%Y%m%d_%H%M%S")
 
     def generate_comprehensive_report(self, target_dirs: list[str] | None = None) -> str:
         """Generate a comprehensive validation report for all documentation sections."""
@@ -57,7 +54,7 @@ class ValidationReportGenerator:
 
         report_data = {
             "metadata": {
-                "timestamp": datetime.now().isoformat(),
+                "timestamp": datetime.now(timezone.utc).isoformat(),
                 "generator_version": "1.0.0",
                 "target_directories": target_dirs
             },
@@ -189,21 +186,20 @@ class ValidationReportGenerator:
 
     def _identify_critical_issues(self, section_reports: dict[str, Any]) -> list[dict[str, Any]]:
         """Identify critical issues requiring immediate attention."""
-        critical_issues = []
-
         critical_validators = ["financial-precision", "code-examples", "sdk-methods"]
 
-        for section, report in section_reports.items():
-            if report.get("validation_results"):
-                for result in report["validation_results"]:
-                    if (result["validator"] in critical_validators and
-                        result["issues_found"] > 0):
-                        critical_issues.append({
-                            "section": section,
-                            "validator": result["validator"],
-                            "issues_count": result["issues_found"],
-                            "severity": "critical" if result["validator"] == "financial-precision" else "high"
-                        })
+        critical_issues = [
+            {
+                "section": section,
+                "validator": result["validator"],
+                "issues_count": result["issues_found"],
+                "severity": "critical" if result["validator"] == "financial-precision" else "high"
+            }
+            for section, report in section_reports.items()
+            if report.get("validation_results")
+            for result in report["validation_results"]
+            if (result["validator"] in critical_validators and result["issues_found"] > 0)
+        ]
 
         return sorted(critical_issues, key=lambda x: x["issues_count"], reverse=True)
 
@@ -243,12 +239,12 @@ class ValidationReportGenerator:
 
         # Save JSON report
         json_path = self.output_dir / f"{base_filename}.json"
-        with open(json_path, 'w') as f:
+        with json_path.open('w') as f:
             json.dump(report_data, f, indent=2)
 
         # Save human-readable report
         md_path = self.output_dir / f"{base_filename}.md"
-        with open(md_path, 'w') as f:
+        with md_path.open('w') as f:
             f.write(self._generate_markdown_report(report_data))
 
         # Save CSV summary for spreadsheet analysis
@@ -280,14 +276,15 @@ class ValidationReportGenerator:
         # Critical Issues
         if report_data["critical_issues"]:
             md.append("## 🚨 Critical Issues")
-            for issue in report_data["critical_issues"]:
-                md.append(f"- **{issue['section']}** - {issue['validator']}: {issue['issues_count']} issues ({issue['severity']} priority)")
+            md.extend([
+                f"- **{issue['section']}** - {issue['validator']}: {issue['issues_count']} issues ({issue['severity']} priority)"
+                for issue in report_data["critical_issues"]
+            ])
             md.append("")
 
         # Recommendations
         md.append("## 💡 Recommendations")
-        for rec in report_data["recommendations"]:
-            md.append(f"- {rec}")
+        md.extend([f"- {rec}" for rec in report_data["recommendations"]])
         md.append("")
 
         # Section Details
@@ -311,7 +308,7 @@ class ValidationReportGenerator:
         """Generate CSV summary for analysis."""
         import csv
 
-        with open(csv_path, 'w', newline='') as csvfile:
+        with csv_path.open('w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['Section', 'Status', 'Total Issues', 'Files Checked', 'Validators'])
 

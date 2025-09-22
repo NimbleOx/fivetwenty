@@ -148,7 +148,8 @@ class TestConsolidatedAccountOperations:
 
         # Comprehensive instrument validation
         assert eur_usd.name == "EUR_USD"
-        assert eur_usd.display_name is not None and len(eur_usd.display_name) > 0
+        assert eur_usd.display_name is not None
+        assert len(eur_usd.display_name) > 0
         assert eur_usd.type is not None
 
         # Precision and pip location validation

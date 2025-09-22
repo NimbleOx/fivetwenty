@@ -212,7 +212,7 @@ class TestConsolidatedOrderOperations:
                 instrument="INVALID_INSTRUMENT",
                 units=1,
             )
-            assert False, "Should have raised an error for invalid instrument"
+            raise AssertionError("Should have raised an error for invalid instrument")
         except Exception as e:
             print(f"✓ Correctly caught invalid instrument error: {type(e).__name__}")
 
@@ -224,7 +224,7 @@ class TestConsolidatedOrderOperations:
                 instrument=test_instrument,
                 units=0,
             )
-            assert False, "Should have raised an error for zero units"
+            raise AssertionError("Should have raised an error for zero units")
         except Exception as e:
             print(f"✓ Correctly caught zero units error: {type(e).__name__}")
 
@@ -237,7 +237,7 @@ class TestConsolidatedOrderOperations:
                 units=1,
                 price="0",
             )
-            assert False, "Should have raised an error for zero price"
+            raise AssertionError("Should have raised an error for zero price")
         except Exception as e:
             print(f"✓ Correctly caught invalid price error: {type(e).__name__}")
 

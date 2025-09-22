@@ -251,7 +251,7 @@ class TestAdvancedPricingFeatures:
         try:
             # Common parameters for both endpoints
             end_time = datetime.now(timezone.utc)
-            start_time = end_time - timedelta(hours=2)
+            end_time - timedelta(hours=2)
             candle_count = 5
 
             # Test 1: Account-specific instrument candles

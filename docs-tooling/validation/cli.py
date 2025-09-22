@@ -271,22 +271,17 @@ Examples:
         return 0
 
     # Dispatch to command handlers
-    if args.command == "list":
-        cmd_list(args)
-        return 0
-    if args.command == "run":
-        return cmd_run(args)
-    if args.command == "config":
-        cmd_config(args)
-        return 0
-    if args.command == "dashboard":
-        return cmd_dashboard(args)
-    if args.command == "autofix":
-        return cmd_autofix(args)
-    if args.command == "report":
-        return cmd_report(args)
+    command_handlers = {
+        "list": lambda args: (cmd_list(args), 0)[1],
+        "run": cmd_run,
+        "config": lambda args: (cmd_config(args), 0)[1],
+        "dashboard": cmd_dashboard,
+        "autofix": cmd_autofix,
+        "report": cmd_report,
+    }
 
-    return 0
+    handler = command_handlers.get(args.command)
+    return handler(args) if handler else 0
 
 
 if __name__ == "__main__":

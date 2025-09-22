@@ -130,7 +130,7 @@ class TestPositionManagement:
 
                     try:
                         if long_units != 0:
-                            all_close_response = await sandbox_client.positions.close_position(
+                            await sandbox_client.positions.close_position(
                                 account_id=test_account_id,
                                 instrument=test_instrument,
                                 long_units="ALL"
@@ -138,7 +138,7 @@ class TestPositionManagement:
                             print("  ✓ Closed all long units using 'ALL'")
 
                         if short_units != 0:
-                            all_close_response = await sandbox_client.positions.close_position(
+                            await sandbox_client.positions.close_position(
                                 account_id=test_account_id,
                                 instrument=test_instrument,
                                 short_units="ALL"
@@ -192,7 +192,7 @@ class TestPositionManagement:
                             print(f"  ✓ Created test position with {min_trade_size} units")
 
                             # Now test closing this new position
-                            close_response = await sandbox_client.positions.close_position(
+                            await sandbox_client.positions.close_position(
                                 account_id=test_account_id,
                                 instrument=test_instrument,
                                 long_units="ALL"

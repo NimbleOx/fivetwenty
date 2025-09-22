@@ -10,7 +10,11 @@ from pathlib import Path
 validation_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_dir))
 
-from validators.code_examples import CodeExampleValidator
+try:
+    from validators.code_examples import CodeExampleValidator
+except ImportError as e:
+    print(f"Import error: {e}")
+    sys.exit(1)
 
 
 def main():

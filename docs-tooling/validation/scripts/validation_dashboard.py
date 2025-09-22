@@ -10,7 +10,7 @@ import argparse
 import json
 import sys
 import time
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Any
 
@@ -22,9 +22,7 @@ try:
     from core.config import ValidationConfig
     from core.runner import ValidationRunner, ValidatorRegistry
     from validators.code_examples import CodeExampleValidator
-    from validators.code_executability import CodeExecutabilityValidator
     from validators.cross_references import CrossReferenceValidator
-    from validators.educational_progression import EducationalProgressionValidator
     from validators.financial_precision import FinancialPrecisionValidator
     from validators.links import LinkValidator
     from validators.prose import ProseValidator
@@ -32,7 +30,6 @@ try:
     from validators.security import SecurityValidator
     from validators.syntax import SyntaxValidator
     from validators.terminology import TerminologyValidator
-    from validators.tutorial_structure import TutorialStructureValidator
 except ImportError as e:
     print(f"Import error: {e}")
     sys.exit(1)
@@ -75,12 +72,12 @@ class ValidationDashboard:
         """Run one validation cycle and update dashboard."""
 
         cycle_data = {
-            "timestamp": datetime.now().isoformat(),
+            "timestamp": datetime.now(timezone.utc).isoformat(),
             "sections": {},
             "summary": {}
         }
 
-        print(f"\n📊 Validation Cycle - {datetime.now().strftime('%H:%M:%S')}")
+        print(f"\n📊 Validation Cycle - {datetime.now(timezone.utc).strftime('%H:%M:%S')}")
         print("-" * 40)
 
         total_issues = 0
@@ -209,7 +206,7 @@ class ValidationDashboard:
 
         # Load existing metrics
         if self.metrics_file.exists():
-            with open(self.metrics_file) as f:
+            with self.metrics_file.open() as f:
                 history = json.load(f)
         else:
             history = {"cycles": []}
@@ -222,7 +219,7 @@ class ValidationDashboard:
             history["cycles"] = history["cycles"][-100:]
 
         # Save updated history
-        with open(self.metrics_file, 'w') as f:
+        with self.metrics_file.open('w') as f:
             json.dump(history, f, indent=2)
 
     def _display_trends(self) -> None:
@@ -231,7 +228,7 @@ class ValidationDashboard:
         if not self.metrics_file.exists():
             return
 
-        with open(self.metrics_file) as f:
+        with self.metrics_file.open() as f:
             history = json.load(f)
 
         cycles = history.get("cycles", [])
@@ -309,7 +306,7 @@ class ValidationDashboard:
         if not self.metrics_file.exists():
             return "No historical data available."
 
-        with open(self.metrics_file) as f:
+        with self.metrics_file.open() as f:
             history = json.load(f)
 
         cycles = history.get("cycles", [])
@@ -317,7 +314,7 @@ class ValidationDashboard:
             return "No validation cycles found."
 
         # Filter cycles within time period
-        cutoff_date = datetime.now() - timedelta(days=days)
+        cutoff_date = datetime.now(timezone.utc) - timedelta(days=days)
         recent_cycles = []
 
         for cycle in cycles:
@@ -331,7 +328,7 @@ class ValidationDashboard:
         # Generate report
         report = []
         report.append(f"# Validation Trend Report ({days} days)")
-        report.append(f"**Generated:** {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}")
+        report.append(f"**Generated:** {datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S')}")
         report.append(f"**Cycles Analyzed:** {len(recent_cycles)}")
         report.append("")
 
@@ -385,15 +382,15 @@ class ValidationDashboard:
 
         return '\n'.join(report)
 
-    def export_metrics(self, format: str = "json") -> str:
+    def export_metrics(self, output_format: str = "json") -> str:
         """Export metrics in specified format."""
 
         if not self.metrics_file.exists():
             return "No metrics data available."
 
-        if format == "json":
+        if output_format == "json":
             return str(self.metrics_file)
-        if format == "csv":
+        if output_format == "csv":
             csv_path = self.data_dir / "metrics_export.csv"
             self._export_to_csv(csv_path)
             return str(csv_path)
@@ -403,12 +400,12 @@ class ValidationDashboard:
         """Export metrics to CSV format."""
         import csv
 
-        with open(self.metrics_file) as f:
+        with self.metrics_file.open() as f:
             history = json.load(f)
 
         cycles = history.get("cycles", [])
 
-        with open(csv_path, 'w', newline='') as csvfile:
+        with csv_path.open('w', newline='') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(['Timestamp', 'Total Issues', 'Critical Issues', 'Total Files', 'Overall Status'])
 
