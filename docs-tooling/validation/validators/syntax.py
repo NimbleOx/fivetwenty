@@ -230,10 +230,14 @@ class SyntaxValidator(FileValidator):  # type: ignore[misc]
                     # Corner characters should have 2 connecting sides
                     if char in corner_chars:
                         expected_connections = 2
-                        if char in "┌╔": expected_connections = self._count_connections(neighbors, ["right", "down"])
-                        elif char in "┐╗": expected_connections = self._count_connections(neighbors, ["left", "down"])
-                        elif char in "└╚": expected_connections = self._count_connections(neighbors, ["right", "up"])
-                        elif char in "┘╝": expected_connections = self._count_connections(neighbors, ["left", "up"])
+                        if char in "┌╔":
+                            expected_connections = self._count_connections(neighbors, ["right", "down"])
+                        elif char in "┐╗":
+                            expected_connections = self._count_connections(neighbors, ["left", "down"])
+                        elif char in "└╚":
+                            expected_connections = self._count_connections(neighbors, ["right", "up"])
+                        elif char in "┘╝":
+                            expected_connections = self._count_connections(neighbors, ["left", "up"])
 
                         if expected_connections < 1:  # At least one connection expected
                             issue = {

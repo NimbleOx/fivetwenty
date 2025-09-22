@@ -63,7 +63,7 @@ class TestTransactionQuerying:
                     print("  ✓ Since ID response structure validated")
 
                 # Test 2: Transaction type filtering
-                print(f"\n✓ Test 2: Transaction type filtering")
+                print("\n✓ Test 2: Transaction type filtering")
 
                 filtered_response = await sandbox_client.transactions.get_transactions_since_id(
                     account_id=test_account_id,
@@ -88,7 +88,7 @@ class TestTransactionQuerying:
                     print("  ✓ Filtered response structure validated")
 
                 # Test 3: Invalid transaction ID error handling
-                print(f"\n✓ Test 3: Invalid transaction ID handling")
+                print("\n✓ Test 3: Invalid transaction ID handling")
 
                 # Test with non-numeric ID
                 try:
@@ -166,7 +166,7 @@ class TestTransactionQuerying:
                     print("  ✓ Range response structure validated")
 
                 # Test 2: Range with transaction type filtering
-                print(f"\n✓ Test 2: Range query with transaction type filtering")
+                print("\n✓ Test 2: Range query with transaction type filtering")
 
                 filtered_range_response = await sandbox_client.transactions.get_transactions_range(
                     account_id=test_account_id,
@@ -193,7 +193,7 @@ class TestTransactionQuerying:
                     print("  ✓ Filtered range response structure validated")
 
                 # Test 3: Invalid range error handling
-                print(f"\n✓ Test 3: Invalid range handling")
+                print("\n✓ Test 3: Invalid range handling")
 
                 # Test invalid range (from > to)
                 try:
@@ -288,7 +288,7 @@ class TestTransactionQuerying:
                 print(f"  ✓ Retrieved {len(large_transactions)} transactions with count=100")
 
                 # Should not exceed 100
-                assert len(large_transactions) <= 100, f"Should not exceed requested count of 100"
+                assert len(large_transactions) <= 100, "Should not exceed requested count of 100"
             else:
                 print("  ✓ Large count response structure validated")
 

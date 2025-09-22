@@ -68,7 +68,7 @@ class DocumentationAutoFixer:
 
     def _fix_file(self, file_path: Path, patterns: list[str]) -> dict[str, Any]:
         """Fix issues in a single markdown file."""
-        with open(file_path, encoding='utf-8') as f:
+        with file_path.open(encoding='utf-8') as f:
             original_content = f.read()
 
         content = original_content
@@ -335,7 +335,7 @@ def main():
 
         # Save report if requested
         if args.report:
-            with open(args.report, 'w') as f:
+            with Path(args.report).open('w') as f:
                 f.write(report)
             print(f"\n📄 Report saved to: {args.report}")
 

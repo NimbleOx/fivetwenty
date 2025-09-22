@@ -85,7 +85,7 @@ class TestTradeOrderManagement:
                 current_price = Decimal("1.1000")  # Default fallback
                 if pricing_response.get("prices"):
                     price_data = pricing_response["prices"][0]
-                    if "asks" in price_data and price_data["asks"]:
+                    if price_data.get("asks"):
                         current_price = Decimal(price_data["asks"][0]["price"])
 
                 print(f"  Current price for {test_instrument}: {current_price}")
@@ -159,7 +159,7 @@ class TestTradeOrderManagement:
                     print(f"  ⚠ Unexpected error adding take profit: {type(e).__name__}")
 
                 # Test 3: Modify existing stop loss order
-                print(f"\n✓ Test 3: Modifying existing stop loss order")
+                print("\n✓ Test 3: Modifying existing stop loss order")
 
                 new_stop_loss_price = current_price * Decimal("0.985")  # 1.5% below current price
 
@@ -184,7 +184,7 @@ class TestTradeOrderManagement:
                     print(f"  ⚠ Unexpected error modifying stop loss: {type(e).__name__}")
 
                 # Test 4: Add both stop loss and take profit in single request
-                print(f"\n✓ Test 4: Adding both SL and TP in single request")
+                print("\n✓ Test 4: Adding both SL and TP in single request")
 
                 combined_sl_price = current_price * Decimal("0.98")
                 combined_tp_price = current_price * Decimal("1.02")
@@ -216,7 +216,7 @@ class TestTradeOrderManagement:
                     print(f"  ⚠ Unexpected error adding combined orders: {type(e).__name__}")
 
                 # Test 5: Cancel dependent orders (pass None to cancel)
-                print(f"\n✓ Test 5: Canceling dependent orders")
+                print("\n✓ Test 5: Canceling dependent orders")
 
                 try:
                     cancel_response = await sandbox_client.trades.put_trade_orders(
@@ -227,7 +227,7 @@ class TestTradeOrderManagement:
                     )
 
                     assert cancel_response is not None, "Cancel response should not be None"
-                    print(f"  ✓ Stop loss and take profit orders canceled")
+                    print("  ✓ Stop loss and take profit orders canceled")
 
                     # Verify cancellation
                     final_trade_response = await sandbox_client.trades.get_trade(test_account_id, test_trade_id)
@@ -248,7 +248,7 @@ class TestTradeOrderManagement:
                 try:
                     close_response = await sandbox_client.trades.close_trade(test_account_id, test_trade_id)
                     if close_response:
-                        print(f"  ✓ Test trade closed successfully")
+                        print("  ✓ Test trade closed successfully")
                 except Exception as e:
                     print(f"  ⚠ Could not close test trade (this is okay): {type(e).__name__}")
 

@@ -195,4 +195,4 @@ class TestConsolidatedAccountOperations:
         print(f"  Filtering validation passed - Got {filtered_names}")
         print(f"  Available instrument types: {sorted(instrument_types)}")
 
-        print(f"✓ Account instruments and configuration test completed")
+        print("✓ Account instruments and configuration test completed")

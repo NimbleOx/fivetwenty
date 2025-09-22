@@ -4,7 +4,6 @@ This module tests position closing functionality that was previously
 missing comprehensive integration test coverage.
 """
 
-from decimal import Decimal
 
 import pytest
 
@@ -52,7 +51,7 @@ class TestPositionManagement:
                 print(f"  Found existing open position for {test_instrument}")
 
                 # Test 1: Get specific position details
-                print(f"\n✓ Test 1: Position details retrieval")
+                print("\n✓ Test 1: Position details retrieval")
 
                 position_response = await sandbox_client.positions.get_position(test_account_id, test_instrument)
                 assert position_response is not None, "Position response should not be None"
@@ -75,7 +74,7 @@ class TestPositionManagement:
 
                     # Test 2: Partial position closure (if position is large enough)
                     if long_units > 1:
-                        print(f"\n✓ Test 2: Partial long position closure")
+                        print("\n✓ Test 2: Partial long position closure")
 
                         partial_units = min(long_units // 2, 500)  # Close half or max 500 units
 
@@ -104,7 +103,7 @@ class TestPositionManagement:
                             print(f"  ⚠ Unexpected error during partial closure: {type(e).__name__}")
 
                     elif short_units > 1:
-                        print(f"\n✓ Test 2: Partial short position closure")
+                        print("\n✓ Test 2: Partial short position closure")
 
                         partial_units = min(abs(short_units) // 2, 500)
 
@@ -124,10 +123,10 @@ class TestPositionManagement:
                             print(f"  ⚠ Unexpected error during partial closure: {type(e).__name__}")
 
                     else:
-                        print(f"\n✓ Test 2: Skipped - position too small for partial closure")
+                        print("\n✓ Test 2: Skipped - position too small for partial closure")
 
                     # Test 3: Complete position closure using "ALL"
-                    print(f"\n✓ Test 3: Complete position closure")
+                    print("\n✓ Test 3: Complete position closure")
 
                     try:
                         if long_units != 0:
@@ -136,7 +135,7 @@ class TestPositionManagement:
                                 instrument=test_instrument,
                                 long_units="ALL"
                             )
-                            print(f"  ✓ Closed all long units using 'ALL'")
+                            print("  ✓ Closed all long units using 'ALL'")
 
                         if short_units != 0:
                             all_close_response = await sandbox_client.positions.close_position(
@@ -144,7 +143,7 @@ class TestPositionManagement:
                                 instrument=test_instrument,
                                 short_units="ALL"
                             )
-                            print(f"  ✓ Closed all short units using 'ALL'")
+                            print("  ✓ Closed all short units using 'ALL'")
 
                         # Verify complete closure
                         final_position_response = await sandbox_client.positions.get_position(test_account_id, test_instrument)
@@ -199,7 +198,7 @@ class TestPositionManagement:
                                 long_units="ALL"
                             )
 
-                            print(f"  ✓ Successfully closed test position")
+                            print("  ✓ Successfully closed test position")
 
                 except Exception as e:
                     print(f"  ⚠ Could not create test position: {type(e).__name__}")
@@ -210,7 +209,7 @@ class TestPositionManagement:
             print(f"  ⚠ Unexpected error during position test: {type(e).__name__}: {e}")
 
         # Test 4: Error handling for invalid position closure parameters
-        print(f"\n✓ Test 4: Invalid parameter error handling")
+        print("\n✓ Test 4: Invalid parameter error handling")
 
         # Test with no parameters
         try:
@@ -292,7 +291,7 @@ class TestPositionManagement:
                         break
 
             if test_position:
-                print(f"  Found position for client extensions test")
+                print("  Found position for client extensions test")
 
                 # Test client extensions for position closure
                 client_extensions = {
@@ -316,7 +315,7 @@ class TestPositionManagement:
                             )
 
                             assert close_response is not None, "Close response should not be None"
-                            print(f"  ✓ Position closed with long client extensions")
+                            print("  ✓ Position closed with long client extensions")
 
                         except FiveTwentyError as e:
                             print(f"  ⚠ Client extensions closure failed: {e.status} - {e.code}")
@@ -335,7 +334,7 @@ class TestPositionManagement:
                             )
 
                             assert close_response is not None, "Close response should not be None"
-                            print(f"  ✓ Position closed with short client extensions")
+                            print("  ✓ Position closed with short client extensions")
 
                         except FiveTwentyError as e:
                             print(f"  ⚠ Client extensions closure failed: {e.status} - {e.code}")

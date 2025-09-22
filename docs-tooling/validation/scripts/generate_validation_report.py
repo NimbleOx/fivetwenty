@@ -20,7 +20,18 @@ sys.path.insert(0, str(validation_dir))
 try:
     from core.config import ValidationConfig
     from core.runner import ValidationRunner, ValidatorRegistry
-    from validators import *
+    from validators.code_examples import CodeExampleValidator
+    from validators.code_executability import CodeExecutabilityValidator
+    from validators.cross_references import CrossReferenceValidator
+    from validators.educational_progression import EducationalProgressionValidator
+    from validators.financial_precision import FinancialPrecisionValidator
+    from validators.links import LinkValidator
+    from validators.prose import ProseValidator
+    from validators.sdk_methods import SDKMethodValidator
+    from validators.security import SecurityValidator
+    from validators.syntax import SyntaxValidator
+    from validators.terminology import TerminologyValidator
+    from validators.tutorial_structure import TutorialStructureValidator
 except ImportError as e:
     print(f"Import error: {e}")
     sys.exit(1)

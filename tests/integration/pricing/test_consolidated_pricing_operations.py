@@ -224,7 +224,7 @@ class TestConsolidatedPricingOperations:
                         for i in range(1, min(len(candles), 3)):
                             current_time = candles[i].time
                             previous_time = candles[i - 1].time
-                            assert current_time > previous_time, f"Candles should be chronological"
+                            assert current_time > previous_time, "Candles should be chronological"
 
                         print(f"  ✓ Time series consistency verified for {granularity.value}")
 

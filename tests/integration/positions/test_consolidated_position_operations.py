@@ -118,7 +118,7 @@ class TestConsolidatedPositionOperations:
                                 break
 
                         if updated_position:
-                            print(f"✓ Position updated after partial closure")
+                            print("✓ Position updated after partial closure")
                             print(f"  Updated P&L: {updated_position.get('pl', 'N/A')}")
                             print(f"  Updated unrealized P&L: {updated_position.get('unrealizedPL', 'N/A')}")
 

@@ -48,7 +48,7 @@ class TestAccountConfiguration:
             )
 
             assert config_response is not None, "Configuration response should not be None"
-            print(f"  ✓ Alias update response received")
+            print("  ✓ Alias update response received")
 
             # Verify the change took effect
             updated_account_response = await sandbox_client.accounts.get_account_summary(test_account_id)
@@ -112,7 +112,7 @@ class TestAccountConfiguration:
                     margin_rate=test_margin_rate
                 )
 
-                print(f"  ✓ Margin rate update attempted")
+                print("  ✓ Margin rate update attempted")
 
                 # Verify the change
                 margin_check_response = await sandbox_client.accounts.get_account_summary(test_account_id)

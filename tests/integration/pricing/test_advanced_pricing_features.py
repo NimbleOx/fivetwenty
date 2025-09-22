@@ -10,7 +10,6 @@ import pytest
 
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
-from fivetwenty.models import CandlestickGranularity
 
 
 @pytest.mark.asyncio
