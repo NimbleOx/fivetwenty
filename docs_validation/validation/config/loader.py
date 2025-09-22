@@ -11,6 +11,7 @@ import yaml
 @dataclass
 class CheckConfig:
     """Configuration for individual validation checks."""
+
     enabled: bool = True
     severity_override: str | None = None
     custom_patterns: list[str] = field(default_factory=list)
@@ -21,6 +22,7 @@ class CheckConfig:
 @dataclass
 class QualityGateConfig:
     """Configuration for quality gates."""
+
     max_errors: int = 0
     max_warnings: int = 50
     max_issues_per_file: int = 10
@@ -33,6 +35,7 @@ class QualityGateConfig:
 @dataclass
 class ReportingConfig:
     """Configuration for reporting and output."""
+
     formats: list[str] = field(default_factory=lambda: ["console", "json"])
     output_dir: str = "validation_reports"
     include_passed: bool = False
@@ -44,6 +47,7 @@ class ReportingConfig:
 @dataclass
 class ValidationProfile:
     """Complete validation profile configuration."""
+
     name: str
     description: str = ""
     checks: dict[str, CheckConfig] = field(default_factory=dict)
@@ -338,14 +342,16 @@ class ConfigLoader:
         )
 
         # Store all profiles
-        self._profiles.update({
-            "default": default_profile,
-            "strict": strict_profile,
-            "fast": fast_profile,
-            "ci": ci_profile,
-            "dev": dev_profile,
-            "security": security_profile,
-        })
+        self._profiles.update(
+            {
+                "default": default_profile,
+                "strict": strict_profile,
+                "fast": fast_profile,
+                "ci": ci_profile,
+                "dev": dev_profile,
+                "security": security_profile,
+            }
+        )
 
     def list_profiles(self) -> list[str]:
         """List all available profiles."""
@@ -435,6 +441,7 @@ class ConfigLoader:
             content = json.dumps(sample_config, indent=2)
 
         output_path.write_text(content, encoding="utf-8")
+
 
 # Global config loader instance
 default_config_loader = ConfigLoader()

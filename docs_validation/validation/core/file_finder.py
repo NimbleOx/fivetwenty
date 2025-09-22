@@ -85,10 +85,7 @@ class FileFinder:
         all_files: set[Path] = set()
 
         with ThreadPoolExecutor(max_workers=4) as executor:
-            futures = [
-                executor.submit(self.find_files, patterns, base_path)
-                for patterns in pattern_groups
-            ]
+            futures = [executor.submit(self.find_files, patterns, base_path) for patterns in pattern_groups]
 
             for future in as_completed(futures):
                 try:

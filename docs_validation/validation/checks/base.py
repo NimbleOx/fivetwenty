@@ -106,10 +106,7 @@ class FileCheck(BaseCheck):
 
         # Filter by required extensions if specified
         if self.required_extensions:
-            files = [
-                f for f in files
-                if any(f.suffix.lower() == ext.lower() for ext in self.required_extensions)
-            ]
+            files = [f for f in files if any(f.suffix.lower() == ext.lower() for ext in self.required_extensions)]
 
         return files
 

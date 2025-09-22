@@ -116,6 +116,7 @@ class ValidationContext:
         """Check if external tool is available (cached)."""
         if tool_name not in self._external_tools:
             import shutil
+
             self._external_tools[tool_name] = shutil.which(tool_name) is not None
 
         return self._external_tools[tool_name]

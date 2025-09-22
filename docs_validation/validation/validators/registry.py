@@ -128,10 +128,7 @@ class ValidatorRegistry:
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Submit all checks
-            future_to_name = {
-                executor.submit(self.run_check, check_name, context): check_name
-                for check_name in check_names
-            }
+            future_to_name = {executor.submit(self.run_check, check_name, context): check_name for check_name in check_names}
 
             # Collect results as they complete
             for future in as_completed(future_to_name):
@@ -170,6 +167,7 @@ class ValidatorRegistry:
 
 # Default registry instance
 default_registry = ValidatorRegistry()
+
 
 # Register built-in checks
 def register_builtin_checks() -> None:

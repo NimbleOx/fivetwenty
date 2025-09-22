@@ -178,9 +178,7 @@ class TestConsolidatedAccountOperations:
         print(f"  EUR_USD validation passed - Min trade: {eur_usd.minimum_trade_size}, Margin rate: {eur_usd.margin_rate}")
 
         # Single API call to test filtering functionality
-        filtered_instruments_response = await sandbox_client.accounts.get_account_instruments(
-            test_account_id, instruments=["EUR_USD", "GBP_USD"]
-        )
+        filtered_instruments_response = await sandbox_client.accounts.get_account_instruments(test_account_id, instruments=["EUR_USD", "GBP_USD"])
 
         filtered_instruments = filtered_instruments_response["instruments"]
         assert len(filtered_instruments) == 2, f"Expected 2 instruments, got {len(filtered_instruments)}"

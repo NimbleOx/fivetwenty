@@ -2,7 +2,7 @@ Based on [Joblint](https://github.com/rowanmanning/joblint).
 
 > Test tech job posts for issues with sexism, culture, expectations, and recruiter fails.
 
-```
+```text
 Copyright (c) 2015, Rowan Manning
 
 Permission is hereby granted, free of charge, to any person obtaining a copy

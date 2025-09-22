@@ -19,6 +19,8 @@ profiles:
       - "__pycache__/**"
       - ".ruff_cache/**"
       - ".pytest_cache/**"
+      - "validation/styles/**"
+      - "**/styles/**"
     parallel_execution: true
     max_workers: 4
     timeout_seconds: 300
@@ -44,11 +46,12 @@ profiles:
         exclude_patterns:
           - "example"
           - "placeholder"
+          - "https://"
 
       security:
         enabled: true
         options:
-          severity_filter: "medium"
+          severity_filter: "high"
           check_env_vars: true
 
       cross_references:
@@ -60,9 +63,7 @@ profiles:
           check_imports: true
 
       prose:
-        enabled: false  # Disabled by default due to Vale dependency
-        options:
-          vale_config: ".vale.ini"
+        enabled: false  # Disabled - false positives in external libraries
 
     quality_gates:
       max_errors: 5

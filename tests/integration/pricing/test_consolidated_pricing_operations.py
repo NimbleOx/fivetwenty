@@ -86,10 +86,7 @@ class TestConsolidatedPricingOperations:
         print(f"✓ Testing pricing for instruments: {test_instrument_list}")
 
         # Single API call to get pricing for multiple instruments
-        pricing_response = await sandbox_client.pricing.get_pricing(
-            account_id=test_account_id,
-            instruments=test_instrument_list
-        )
+        pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=test_instrument_list)
 
         assert pricing_response is not None, "Pricing response should not be None"
         prices = pricing_response.get("prices", [])
@@ -100,7 +97,7 @@ class TestConsolidatedPricingOperations:
         # Validate each price comprehensively
         for i, price in enumerate(prices):
             instrument = price.get("instrument")
-            print(f"\n✓ Validating price data for {instrument} ({i+1}/{len(prices)}):")
+            print(f"\n✓ Validating price data for {instrument} ({i + 1}/{len(prices)}):")
 
             # Basic structure validation
             assert price.get("type") == "PRICE", f"Type should be PRICE for {instrument}"
@@ -132,7 +129,7 @@ class TestConsolidatedPricingOperations:
                 assert spread >= 0, f"Spread should be non-negative for {instrument}"
                 assert spread < ask_decimal * Decimal("0.1"), f"Spread should be reasonable for {instrument}"
 
-                spread_pct = (spread / ask_decimal * 100)
+                spread_pct = spread / ask_decimal * 100
                 print(f"  Spread: {spread} ({spread_pct:.4f}%)")
 
             # Market status validation
@@ -184,7 +181,7 @@ class TestConsolidatedPricingOperations:
                     granularity=granularity,
                     from_time=start_time,
                     to_time=end_time,
-                    count=10  # Limit to reduce test time
+                    count=10,  # Limit to reduce test time
                 )
 
                 assert candles_response is not None, f"Should have candlestick response for {granularity.value}"
@@ -251,10 +248,7 @@ class TestConsolidatedPricingOperations:
         # Test 1: Invalid instrument
         print("\n✓ Test 1: Invalid instrument handling")
         try:
-            await sandbox_client.pricing.get_pricing(
-                account_id=test_account_id,
-                instruments=["INVALID_INSTRUMENT"]
-            )
+            await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=["INVALID_INSTRUMENT"])
             print("  ⚠ Invalid instrument request did not raise error (this may be normal in sandbox)")
         except Exception as e:
             print(f"  ✓ Correctly caught invalid instrument error: {type(e).__name__}")
@@ -262,10 +256,7 @@ class TestConsolidatedPricingOperations:
         # Test 2: Empty instrument list
         print("\n✓ Test 2: Empty instrument list handling")
         try:
-            await sandbox_client.pricing.get_pricing(
-                account_id=test_account_id,
-                instruments=[]
-            )
+            await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[])
             print("  ⚠ Empty instrument list did not raise error (this may be normal)")
         except Exception as e:
             print(f"  ✓ Correctly caught empty instrument list error: {type(e).__name__}")
@@ -277,16 +268,13 @@ class TestConsolidatedPricingOperations:
         prices = []
         for i in range(3):
             try:
-                response = await sandbox_client.pricing.get_pricing(
-                    account_id=test_account_id,
-                    instruments=[test_instrument]
-                )
+                response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
                 price_data = response.get("prices", [])
                 if price_data:
                     prices.append(price_data[0])
                 await asyncio.sleep(0.1)  # Small delay between requests
             except Exception as e:
-                print(f"  Request {i+1} failed: {type(e).__name__}")
+                print(f"  Request {i + 1} failed: {type(e).__name__}")
 
         if len(prices) >= 2:
             first_price = prices[0]

@@ -10,6 +10,7 @@ TODO: Complete implementation
 import asyncio
 from fivetwenty import AsyncClient, Environment
 
+
 # Example placeholder - implementation coming soon
 async def main():
     """Basic usage example - placeholder."""
@@ -20,6 +21,7 @@ async def main():
     # - Account information retrieval
     # - Basic market data access
     pass
+
 
 if __name__ == "__main__":
     asyncio.run(main())

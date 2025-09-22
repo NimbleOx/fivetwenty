@@ -20,6 +20,7 @@ from docs_validation.validation.validators.registry import default_registry
 @dataclass
 class SystemMetrics:
     """System resource metrics."""
+
     cpu_percent: float
     memory_mb: float
     memory_percent: float
@@ -30,6 +31,7 @@ class SystemMetrics:
 @dataclass
 class BenchmarkMetrics:
     """Performance metrics for a single benchmark run."""
+
     duration_seconds: float
     peak_memory_mb: float
     avg_memory_mb: float
@@ -45,6 +47,7 @@ class BenchmarkMetrics:
 @dataclass
 class BenchmarkResults:
     """Results from multiple benchmark runs."""
+
     benchmark_name: str
     test_description: str
     runs: list[BenchmarkMetrics] = field(default_factory=list)
@@ -96,7 +99,7 @@ class BenchmarkRunner:
 
         # Warmup runs to stabilize performance
         for i in range(warmup_runs):
-            print(f"  🔥 Warmup {i+1}/{warmup_runs}")
+            print(f"  🔥 Warmup {i + 1}/{warmup_runs}")
             gc.collect()  # Force garbage collection
             test_function()
 
@@ -116,9 +119,7 @@ class BenchmarkRunner:
             metrics = self._run_single_benchmark(test_function)
             results.runs.append(metrics)
 
-            print(f"    Duration: {metrics.duration_seconds:.2f}s, "
-                  f"Throughput: {metrics.throughput_files_per_second:.1f} files/s, "
-                  f"Memory: {metrics.peak_memory_mb:.1f}MB")
+            print(f"    Duration: {metrics.duration_seconds:.2f}s, Throughput: {metrics.throughput_files_per_second:.1f} files/s, Memory: {metrics.peak_memory_mb:.1f}MB")
 
         self.results[benchmark_name] = results
         return results
@@ -237,7 +238,8 @@ class BenchmarkRunner:
             # Run the old validation system
             result = subprocess.run(
                 [sys.executable, str(old_cli_path), "run", validation_type],
-                check=False, cwd=str(self.project_root.parent / "validation"),
+                check=False,
+                cwd=str(self.project_root.parent / "validation"),
                 capture_output=True,
                 text=True,
                 timeout=600,  # 10 minute timeout
@@ -316,6 +318,7 @@ class BenchmarkRunner:
 
             # Try to benchmark old system if available
             try:
+
                 def run_old_system():
                     return self.benchmark_old_system("all")
 
@@ -386,7 +389,7 @@ class BenchmarkRunner:
         process = psutil.Process()
 
         for i in range(iterations):
-            print(f"  Iteration {i+1}/{iterations}")
+            print(f"  Iteration {i + 1}/{iterations}")
 
             # Record memory before
             memory_before = process.memory_info().rss / (1024 * 1024)
@@ -400,14 +403,16 @@ class BenchmarkRunner:
             # Record memory after
             memory_after = process.memory_info().rss / (1024 * 1024)
 
-            memory_samples.append({
-                "iteration": i + 1,
-                "memory_before_mb": memory_before,
-                "memory_after_mb": memory_after,
-                "memory_delta_mb": memory_after - memory_before,
-                "files_processed": summary.total_files_checked,
-                "issues_found": summary.total_issues,
-            })
+            memory_samples.append(
+                {
+                    "iteration": i + 1,
+                    "memory_before_mb": memory_before,
+                    "memory_after_mb": memory_after,
+                    "memory_delta_mb": memory_after - memory_before,
+                    "files_processed": summary.total_files_checked,
+                    "issues_found": summary.total_issues,
+                }
+            )
 
         # Analyze memory trend
         memory_deltas = [s["memory_delta_mb"] for s in memory_samples]

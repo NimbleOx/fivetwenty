@@ -13,6 +13,7 @@ from docs_validation.validation.core.results import IssueSeverity, ValidationIss
 @dataclass
 class TrendPoint:
     """A point in time for trend analysis."""
+
     timestamp: datetime
     total_checks: int
     passed_checks: int
@@ -25,6 +26,7 @@ class TrendPoint:
 @dataclass
 class CheckTrend:
     """Trend data for a specific check."""
+
     check_name: str
     points: list[TrendPoint]
     average_duration: float
@@ -226,10 +228,7 @@ class TrendAnalyzer:
     def get_overall_trend(self, days: int = 30) -> list[TrendPoint]:
         """Get overall validation trend for the last N days."""
         cutoff_date = datetime.now() - timedelta(days=days)
-        recent_history = [
-            entry for entry in self.history
-            if datetime.fromisoformat(entry["timestamp"]) >= cutoff_date
-        ]
+        recent_history = [entry for entry in self.history if datetime.fromisoformat(entry["timestamp"]) >= cutoff_date]
 
         trend_points = []
         for entry in recent_history:
@@ -249,10 +248,7 @@ class TrendAnalyzer:
     def get_check_trends(self, days: int = 30) -> dict[str, CheckTrend]:
         """Get trends for individual checks."""
         cutoff_date = datetime.now() - timedelta(days=days)
-        recent_history = [
-            entry for entry in self.history
-            if datetime.fromisoformat(entry["timestamp"]) >= cutoff_date
-        ]
+        recent_history = [entry for entry in self.history if datetime.fromisoformat(entry["timestamp"]) >= cutoff_date]
 
         check_trends = {}
         check_data = defaultdict(list)
@@ -261,11 +257,13 @@ class TrendAnalyzer:
         for entry in recent_history:
             timestamp = datetime.fromisoformat(entry["timestamp"])
             for check_name, check_info in entry.get("checks", {}).items():
-                check_data[check_name].append({
-                    "timestamp": timestamp,
-                    "issues_found": check_info["issues_found"],
-                    "duration": check_info.get("duration", 0.0),
-                })
+                check_data[check_name].append(
+                    {
+                        "timestamp": timestamp,
+                        "issues_found": check_info["issues_found"],
+                        "duration": check_info.get("duration", 0.0),
+                    }
+                )
 
         # Analyze trends for each check
         for check_name, data_points in check_data.items():

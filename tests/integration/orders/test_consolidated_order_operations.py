@@ -35,9 +35,7 @@ class TestConsolidatedOrderOperations:
 
         # Get available instruments once for all tests
         test_instrument = test_instruments["major_pairs"][0]  # EUR_USD
-        available_instruments_response = await sandbox_client.accounts.get_account_instruments(
-            test_account_id, instruments=[test_instrument]
-        )
+        available_instruments_response = await sandbox_client.accounts.get_account_instruments(test_account_id, instruments=[test_instrument])
         available_instruments = available_instruments_response["instruments"]
         assert len(available_instruments) > 0, f"Test instrument {test_instrument} not available"
         instrument_details = available_instruments[0]
@@ -73,10 +71,7 @@ class TestConsolidatedOrderOperations:
         print("\n✓ Test 2: Limit order creation")
 
         # Get current pricing to set limit order away from market
-        pricing_response = await sandbox_client.pricing.get_pricing(
-            account_id=test_account_id,
-            instruments=[test_instrument]
-        )
+        pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
         prices = pricing_response.get("prices", [])
         assert len(prices) > 0, "Should have pricing data"
 

@@ -51,12 +51,14 @@ class PythonSyntaxCheck(ContentCheck):
                 block_start_line = line_num
             elif line.strip() == "```" and in_python_block:
                 if current_block_lines:
-                    blocks.append({
-                        "code": "\n".join(current_block_lines),
-                        "start_line": block_start_line,
-                        "end_line": line_num,
-                        "line_count": len(current_block_lines),
-                    })
+                    blocks.append(
+                        {
+                            "code": "\n".join(current_block_lines),
+                            "start_line": block_start_line,
+                            "end_line": line_num,
+                            "line_count": len(current_block_lines),
+                        }
+                    )
                 in_python_block = False
             elif in_python_block:
                 current_block_lines.append(line)
@@ -97,6 +99,12 @@ class PythonSyntaxCheck(ContentCheck):
         # Check for common issues
         self._check_common_issues(file_path, code, start_line, result)
 
+    def _is_documentation_file(self, file_path: Path) -> bool:
+        """Check if file is documentation where print() is appropriate."""
+        doc_patterns = ["/docs/", "/tutorials/", "/examples/", "/guides/", "README", ".md"]
+        path_str = str(file_path)
+        return any(pattern in path_str for pattern in doc_patterns)
+
     def _check_common_issues(
         self,
         file_path: Path,
@@ -130,8 +138,8 @@ class PythonSyntaxCheck(ContentCheck):
                     rule="dangerous_exec",
                 )
 
-            # Check for print statements (should use logging in production)
-            if re.match(r"^\s*print\s*\(", line):
+            # Check for print statements (skip in documentation/tutorial files)
+            if re.match(r"^\s*print\s*\(", line) and not self._is_documentation_file(file_path):
                 result.add_issue(
                     message="Consider using logging instead of print()",
                     file_path=str(file_path),
@@ -198,12 +206,14 @@ class PythonStyleCheck(ExternalToolCheck):
                 block_start_line = line_num
             elif line.strip() == "```" and in_python_block:
                 if current_block_lines:
-                    blocks.append({
-                        "code": "\n".join(current_block_lines),
-                        "start_line": block_start_line,
-                        "end_line": line_num,
-                        "line_count": len(current_block_lines),
-                    })
+                    blocks.append(
+                        {
+                            "code": "\n".join(current_block_lines),
+                            "start_line": block_start_line,
+                            "end_line": line_num,
+                            "line_count": len(current_block_lines),
+                        }
+                    )
                 in_python_block = False
             elif in_python_block:
                 current_block_lines.append(line)
@@ -233,7 +243,8 @@ class PythonStyleCheck(ExternalToolCheck):
             # Run ruff
             ruff_result = subprocess.run(
                 ["ruff", "check", "--output-format=json", tmp_path],
-                check=False, capture_output=True,
+                check=False,
+                capture_output=True,
                 text=True,
                 timeout=30,
             )
@@ -242,6 +253,7 @@ class PythonStyleCheck(ExternalToolCheck):
                 # Parse ruff JSON output
                 try:
                     import json
+
                     ruff_issues = json.loads(ruff_result.stdout)
 
                     for issue in ruff_issues:

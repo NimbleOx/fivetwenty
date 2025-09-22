@@ -45,17 +45,19 @@ class TestAdvancedPricingFeatures:
             candle_specs = []
             for instrument in test_instrument_list:
                 # Create specifications for different granularities
-                candle_specs.extend([
-                    f"{instrument}:M1:M",  # 1-minute mid prices
-                    f"{instrument}:H1:M",  # 1-hour mid prices
-                ])
+                candle_specs.extend(
+                    [
+                        f"{instrument}:M1:M",  # 1-minute mid prices
+                        f"{instrument}:H1:M",  # 1-hour mid prices
+                    ]
+                )
 
             print(f"  Candle specifications: {candle_specs}")
 
             latest_response = await sandbox_client.pricing.get_latest_candles(
                 account_id=test_account_id,
                 candle_specifications=candle_specs,
-                units=5  # Get 5 latest candles for each spec
+                units=5,  # Get 5 latest candles for each spec
             )
 
             assert latest_response is not None, "Latest candles response should not be None"
@@ -97,11 +99,7 @@ class TestAdvancedPricingFeatures:
                 f"{test_instrument_list[0]}:M5:M",  # Mid prices
             ]
 
-            price_types_response = await sandbox_client.pricing.get_latest_candles(
-                account_id=test_account_id,
-                candle_specifications=price_type_specs,
-                units=3
-            )
+            price_types_response = await sandbox_client.pricing.get_latest_candles(account_id=test_account_id, candle_specifications=price_type_specs, units=3)
 
             assert price_types_response is not None, "Price types response should not be None"
 
@@ -125,15 +123,7 @@ class TestAdvancedPricingFeatures:
 
             smooth_specs = [f"{test_instrument_list[0]}:H1:M"]
 
-            smooth_response = await sandbox_client.pricing.get_latest_candles(
-                account_id=test_account_id,
-                candle_specifications=smooth_specs,
-                units=2,
-                smooth=True,
-                daily_alignment=17,
-                alignment_timezone="America/New_York",
-                weekly_alignment="Friday"
-            )
+            smooth_response = await sandbox_client.pricing.get_latest_candles(account_id=test_account_id, candle_specifications=smooth_specs, units=2, smooth=True, daily_alignment=17, alignment_timezone="America/New_York", weekly_alignment="Friday")
 
             assert smooth_response is not None, "Smoothed response should not be None"
             print("  ✓ Smoothing and alignment parameters accepted")
@@ -163,7 +153,7 @@ class TestAdvancedPricingFeatures:
             with pytest.raises((ValueError, FiveTwentyError)):
                 await sandbox_client.pricing.get_latest_candles(
                     account_id=test_account_id,
-                    candle_specifications=[]  # Empty list should raise ValueError
+                    candle_specifications=[],  # Empty list should raise ValueError
                 )
             print("  ✓ Empty specifications correctly rejected")
         except Exception as e:
@@ -176,7 +166,7 @@ class TestAdvancedPricingFeatures:
             with pytest.raises(FiveTwentyError) as exc_info:
                 await sandbox_client.pricing.get_latest_candles(
                     account_id=test_account_id,
-                    candle_specifications=["INVALID_FORMAT"]  # Missing colons
+                    candle_specifications=["INVALID_FORMAT"],  # Missing colons
                 )
 
             error = exc_info.value
@@ -196,7 +186,7 @@ class TestAdvancedPricingFeatures:
                 await sandbox_client.pricing.get_latest_candles(
                     account_id=test_account_id,
                     candle_specifications=["EUR_USD:M1:M"],
-                    units=0  # Invalid: units must be >= 1
+                    units=0,  # Invalid: units must be >= 1
                 )
             print("  ✓ Invalid units (0) correctly rejected")
         except Exception as e:
@@ -207,7 +197,7 @@ class TestAdvancedPricingFeatures:
                 await sandbox_client.pricing.get_latest_candles(
                     account_id=test_account_id,
                     candle_specifications=["EUR_USD:M1:M"],
-                    units=6000  # Invalid: units must be <= 5000
+                    units=6000,  # Invalid: units must be <= 5000
                 )
             print("  ✓ Invalid units (6000) correctly rejected")
         except Exception as e:
@@ -218,10 +208,7 @@ class TestAdvancedPricingFeatures:
 
         try:
             with pytest.raises(FiveTwentyError) as exc_info:
-                await sandbox_client.pricing.get_latest_candles(
-                    account_id="invalid-account-123",
-                    candle_specifications=["EUR_USD:M1:M"]
-                )
+                await sandbox_client.pricing.get_latest_candles(account_id="invalid-account-123", candle_specifications=["EUR_USD:M1:M"])
 
             error = exc_info.value
             assert error.status in [400, 404], f"Expected 400/404 for invalid account, got {error.status}"
@@ -261,7 +248,7 @@ class TestAdvancedPricingFeatures:
                 account_id=test_account_id,
                 instrument=test_instrument,
                 granularity="H1",  # Use H1 which is more commonly supported
-                count=candle_count
+                count=candle_count,
             )
 
             assert account_candles_response is not None, "Account candles response should not be None"
@@ -283,7 +270,7 @@ class TestAdvancedPricingFeatures:
             general_candles_response = await sandbox_client.instruments.get_instrument_candles(
                 instrument=test_instrument,
                 granularity="H1",  # Use H1 which is more commonly supported
-                count=candle_count
+                count=candle_count,
             )
 
             assert general_candles_response is not None, "General candles response should not be None"
@@ -333,7 +320,7 @@ class TestAdvancedPricingFeatures:
                     instrument=test_instrument,
                     granularity="H1",
                     count=2,
-                    price="BA"  # Bid and Ask prices
+                    price="BA",  # Bid and Ask prices
                 )
 
                 if account_candles_bid_ask and "candles" in account_candles_bid_ask:
@@ -377,12 +364,7 @@ class TestAdvancedPricingFeatures:
 
             for alignment in weekly_alignments:
                 try:
-                    weekly_response = await sandbox_client.pricing.get_latest_candles(
-                        account_id=test_account_id,
-                        candle_specifications=[f"{test_instrument}:W:M"],
-                        units=1,
-                        weekly_alignment=alignment
-                    )
+                    weekly_response = await sandbox_client.pricing.get_latest_candles(account_id=test_account_id, candle_specifications=[f"{test_instrument}:W:M"], units=1, weekly_alignment=alignment)
 
                     assert weekly_response is not None, f"Weekly alignment {alignment} should work"
                     print(f"    ✓ Weekly alignment '{alignment}' accepted")
@@ -397,12 +379,7 @@ class TestAdvancedPricingFeatures:
 
             for hour in alignment_hours:
                 try:
-                    daily_response = await sandbox_client.pricing.get_latest_candles(
-                        account_id=test_account_id,
-                        candle_specifications=[f"{test_instrument}:D:M"],
-                        units=1,
-                        daily_alignment=hour
-                    )
+                    daily_response = await sandbox_client.pricing.get_latest_candles(account_id=test_account_id, candle_specifications=[f"{test_instrument}:D:M"], units=1, daily_alignment=hour)
 
                     assert daily_response is not None, f"Daily alignment hour {hour} should work"
                     print(f"    ✓ Daily alignment hour {hour} accepted")
@@ -417,12 +394,7 @@ class TestAdvancedPricingFeatures:
 
             for tz in timezones:
                 try:
-                    tz_response = await sandbox_client.pricing.get_latest_candles(
-                        account_id=test_account_id,
-                        candle_specifications=[f"{test_instrument}:H4:M"],
-                        units=1,
-                        alignment_timezone=tz
-                    )
+                    tz_response = await sandbox_client.pricing.get_latest_candles(account_id=test_account_id, candle_specifications=[f"{test_instrument}:H4:M"], units=1, alignment_timezone=tz)
 
                     assert tz_response is not None, f"Timezone {tz} should work"
                     print(f"    ✓ Timezone '{tz}' accepted")
@@ -435,12 +407,7 @@ class TestAdvancedPricingFeatures:
 
             for smooth in [True, False]:
                 try:
-                    smooth_response = await sandbox_client.pricing.get_latest_candles(
-                        account_id=test_account_id,
-                        candle_specifications=[f"{test_instrument}:M5:M"],
-                        units=2,
-                        smooth=smooth
-                    )
+                    smooth_response = await sandbox_client.pricing.get_latest_candles(account_id=test_account_id, candle_specifications=[f"{test_instrument}:M5:M"], units=2, smooth=smooth)
 
                     assert smooth_response is not None, f"Smoothing {smooth} should work"
                     print(f"    ✓ Smoothing {smooth} accepted")

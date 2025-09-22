@@ -29,10 +29,7 @@ class ProfileManager:
         if not profile:
             raise ValueError("No profile loaded")
 
-        return [
-            check_name for check_name, check_config in profile.checks.items()
-            if check_config.enabled
-        ]
+        return [check_name for check_name, check_config in profile.checks.items() if check_config.enabled]
 
     def apply_check_config(self, check_name: str, profile: ValidationProfile | None = None) -> dict[str, Any]:
         """Apply profile configuration to a specific check."""
@@ -89,10 +86,7 @@ class ProfileManager:
         # Get checks to run
         if specific_checks:
             # Filter specific checks through profile configuration
-            checks_to_run = [
-                check for check in specific_checks
-                if check in profile.checks and profile.checks[check].enabled
-            ]
+            checks_to_run = [check for check in specific_checks if check in profile.checks and profile.checks[check].enabled]
         else:
             checks_to_run = self.get_enabled_checks(profile)
 

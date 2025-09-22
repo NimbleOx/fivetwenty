@@ -28,8 +28,6 @@ dependencies = [
 ]
 
 
-[project.scripts]
-validate-docs = "docs_validation.validation.cli.main:cli"
 
 [project.urls]
 Homepage = "https://github.com/NimbleOx/fivetwenty"
@@ -246,7 +244,7 @@ lint = "ruff check ."
 lint-fix = "ruff check --fix ."
 lint-core = "ruff check fivetwenty/ tests/"
 format = "ruff format ."
-typecheck = "mypy fivetwenty/"
+typecheck = "uv run mypy fivetwenty/"
 
 # Development tasks
 dev-install = "uv sync --group dev"
@@ -258,6 +256,12 @@ docs-serve = "python -m mkdocs serve"
 docs-build = "python -m mkdocs build --clean"
 docs-deploy = "python -m mkdocs gh-deploy --force"
 
+# Documentation validation tasks
+docs-validate = {shell = "cd docs_validation && python -m validation.cli.main run --parallel"}
+docs-validate-report = {shell = "cd docs_validation && python -m validation.cli.main run --parallel --report"}
+docs-validate-core = {shell = "cd docs_validation && python -m validation.cli.main run markdown_syntax financial_precision financial_terminology cross_references python_syntax python_style sdk_methods link_validation"}
+docs-validate-list = {shell = "cd docs_validation && python -m validation.cli.main list-checks"}
+
 # Markdown tasks
 markdown-format = "mdformat docs/ README.md"
 markdown-check = "mdformat --check docs/ README.md"
@@ -267,9 +271,9 @@ yaml-lint = "yamllint mkdocs.yml docs-tooling/validation-config.yml .pre-commit-
 
 # Workflow tasks
 quality = ["format", "lint-core", "typecheck"]
-check = ["format", "lint-core", "typecheck", "test"]
+check = ["format", "lint-core", "typecheck", "test", "docs-validate-core"]
 pre-commit = ["format", "lint", "typecheck"]
-ci = ["format", "lint-core", "typecheck", "test-cov", "docs-build"]
+ci = ["format", "lint-core", "typecheck", "test-cov", "docs-build", "docs-validate-core"]
 
 [tool.poe.tasks.dev]
 help = "Run development checks (format, typecheck, test) - ignores lint failures"

@@ -134,19 +134,19 @@ class BenchmarkReporter:
 
             html_content += f"""
             <div class="metric-card">
-                <div class="metric-value improvement">{total_improvement_data.get('avg_speedup', 0):.1f}x</div>
+                <div class="metric-value improvement">{total_improvement_data.get("avg_speedup", 0):.1f}x</div>
                 <div class="metric-label">Average Speedup</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value improvement">{total_improvement_data.get('throughput_improvement', 0):.1f}%</div>
+                <div class="metric-value improvement">{total_improvement_data.get("throughput_improvement", 0):.1f}%</div>
                 <div class="metric-label">Throughput Improvement</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value neutral">{total_improvement_data.get('memory_change', 0):.1f}%</div>
+                <div class="metric-value neutral">{total_improvement_data.get("memory_change", 0):.1f}%</div>
                 <div class="metric-label">Memory Usage Change</div>
             </div>
             <div class="metric-card">
-                <div class="metric-value improvement">{total_improvement_data.get('parallel_benefit', 0):.1f}%</div>
+                <div class="metric-value improvement">{total_improvement_data.get("parallel_benefit", 0):.1f}%</div>
                 <div class="metric-label">Parallel Processing Benefit</div>
             </div>
             """
@@ -185,7 +185,7 @@ class BenchmarkReporter:
                     improvement_class = self._get_improvement_class(system_name, result, results)
                     html_content += f"""
                     <tr class="{improvement_class}">
-                        <td>{system_name.replace('_', ' ').title()}</td>
+                        <td>{system_name.replace("_", " ").title()}</td>
                         <td>{result.avg_duration:.2f}</td>
                         <td>{result.avg_throughput:.1f}</td>
                         <td>{result.peak_memory:.1f}</td>
@@ -311,34 +311,33 @@ class BenchmarkReporter:
 
         # Add summary
         summary_data = self._calculate_improvements(comparison_results)
-        md_lines.extend([
-            f"- **Average Speedup:** {summary_data.get('avg_speedup', 0):.1f}x",
-            f"- **Throughput Improvement:** {summary_data.get('throughput_improvement', 0):.1f}%",
-            f"- **Memory Usage Change:** {summary_data.get('memory_change', 0):+.1f}%",
-            f"- **Parallel Processing Benefit:** {summary_data.get('parallel_benefit', 0):.1f}%",
-            "",
-            "## 📈 Detailed Results",
-            "",
-        ])
+        md_lines.extend(
+            [
+                f"- **Average Speedup:** {summary_data.get('avg_speedup', 0):.1f}x",
+                f"- **Throughput Improvement:** {summary_data.get('throughput_improvement', 0):.1f}%",
+                f"- **Memory Usage Change:** {summary_data.get('memory_change', 0):+.1f}%",
+                f"- **Parallel Processing Benefit:** {summary_data.get('parallel_benefit', 0):.1f}%",
+                "",
+                "## 📈 Detailed Results",
+                "",
+            ]
+        )
 
         # Add detailed results
         for test_size, results in comparison_results.items():
-            md_lines.extend([
-                f"### 🔍 {test_size.title()} Dataset Results",
-                "",
-                "| System | Avg Duration (s) | Throughput (files/s) | Peak Memory (MB) | Files Processed | Success Rate (%) |",
-                "|--------|------------------|---------------------|------------------|-----------------|------------------|",
-            ])
+            md_lines.extend(
+                [
+                    f"### 🔍 {test_size.title()} Dataset Results",
+                    "",
+                    "| System | Avg Duration (s) | Throughput (files/s) | Peak Memory (MB) | Files Processed | Success Rate (%) |",
+                    "|--------|------------------|---------------------|------------------|-----------------|------------------|",
+                ]
+            )
 
             for system_name, result in results.items():
                 if result.runs:
                     md_lines.append(
-                        f"| {system_name.replace('_', ' ').title()} | "
-                        f"{result.avg_duration:.2f} | "
-                        f"{result.avg_throughput:.1f} | "
-                        f"{result.peak_memory:.1f} | "
-                        f"{result.runs[0].files_processed} | "
-                        f"{result.runs[0].success_rate:.1f} |",
+                        f"| {system_name.replace('_', ' ').title()} | {result.avg_duration:.2f} | {result.avg_throughput:.1f} | {result.peak_memory:.1f} | {result.runs[0].files_processed} | {result.runs[0].success_rate:.1f} |",
                     )
 
             md_lines.append("")
@@ -364,19 +363,16 @@ class BenchmarkReporter:
                 total_speedups.append(speedup)
 
                 # Calculate throughput improvement
-                throughput_improvement = ((new_system.avg_throughput - old_system.avg_throughput) /
-                                        old_system.avg_throughput) * 100
+                throughput_improvement = ((new_system.avg_throughput - old_system.avg_throughput) / old_system.avg_throughput) * 100
                 total_throughput_improvements.append(throughput_improvement)
 
                 # Calculate memory change
-                memory_change = ((new_system.peak_memory - old_system.peak_memory) /
-                               old_system.peak_memory) * 100
+                memory_change = ((new_system.peak_memory - old_system.peak_memory) / old_system.peak_memory) * 100
                 total_memory_changes.append(memory_change)
 
             # Calculate parallel benefit
             if new_system and new_sequential and new_system.runs and new_sequential.runs:
-                parallel_benefit = ((new_sequential.avg_duration - new_system.avg_duration) /
-                                  new_sequential.avg_duration) * 100
+                parallel_benefit = ((new_sequential.avg_duration - new_system.avg_duration) / new_sequential.avg_duration) * 100
                 parallel_benefits.append(parallel_benefit)
 
         return {

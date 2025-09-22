@@ -21,9 +21,21 @@ class FinancialPrecisionCheck(ContentCheck):
 
         # Patterns for financial contexts
         self.financial_contexts = [
-            "price", "amount", "balance", "stop_loss", "take_profit",
-            "daily_loss_limit", "spread", "margin", "units", "quantity",
-            "cost", "fee", "commission", "profit", "loss",
+            "price",
+            "amount",
+            "balance",
+            "stop_loss",
+            "take_profit",
+            "daily_loss_limit",
+            "spread",
+            "margin",
+            "units",
+            "quantity",
+            "cost",
+            "fee",
+            "commission",
+            "profit",
+            "loss",
         ]
 
         # Pattern for detecting float usage in financial contexts

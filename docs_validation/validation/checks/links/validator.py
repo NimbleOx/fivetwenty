@@ -48,7 +48,11 @@ class LinkValidationCheck(ContentCheck):
 
         # Check reference links
         self._validate_reference_links(
-            file_path, reference_links, reference_definitions, result, context,
+            file_path,
+            reference_links,
+            reference_definitions,
+            result,
+            context,
         )
 
     def _extract_inline_links(self, content: str) -> list[tuple[str, str, int]]:

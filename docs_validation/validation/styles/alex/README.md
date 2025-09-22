@@ -2,7 +2,7 @@ Based on [alex](https://github.com/get-alex/alex).
 
 > Catch insensitive, inconsiderate writing
 
-```
+```text
 (The MIT License)
 
 Copyright (c) 2015 Titus Wormer <tituswormer@gmail.com>

@@ -22,50 +22,25 @@ class EducationalProgressionCheck(ContentCheck):
 
         # Complexity indicators for different skill levels
         self.complexity_patterns = {
-            "beginner": {
-                "concepts": ["account", "client", "environment", "basic", "simple", "first", "getting started"],
-                "methods": ["get_accounts", "get_instruments", "get_pricing"],
-                "max_code_lines": 20,
-                "max_imports": 3,
-                "forbidden_concepts": ["strategy", "portfolio", "optimization", "complex", "advanced"]
-            },
-            "intermediate": {
-                "concepts": ["order", "position", "streaming", "async", "error handling"],
-                "methods": ["post_order", "stream_pricing", "get_positions"],
-                "max_code_lines": 50,
-                "max_imports": 6,
-                "forbidden_concepts": ["enterprise", "production", "sophisticated"]
-            },
+            "beginner": {"concepts": ["account", "client", "environment", "basic", "simple", "first", "getting started"], "methods": ["get_accounts", "get_instruments", "get_pricing"], "max_code_lines": 20, "max_imports": 3, "forbidden_concepts": ["strategy", "portfolio", "optimization", "complex", "advanced"]},
+            "intermediate": {"concepts": ["order", "position", "streaming", "async", "error handling"], "methods": ["post_order", "stream_pricing", "get_positions"], "max_code_lines": 50, "max_imports": 6, "forbidden_concepts": ["enterprise", "production", "sophisticated"]},
             "advanced": {
                 "concepts": ["portfolio", "risk management", "strategy", "optimization"],
                 "methods": ["multiple orders", "complex strategies", "custom classes"],
                 "max_code_lines": 100,
                 "max_imports": 10,
-                "forbidden_concepts": []  # Advanced can use anything
-            }
+                "forbidden_concepts": [],  # Advanced can use anything
+            },
         }
 
         # Learning pathway progression
-        self.expected_progression = [
-            "installation", "authentication", "first", "basic",
-            "account", "instruments", "pricing", "orders",
-            "positions", "streaming", "async", "strategies"
-        ]
+        self.expected_progression = ["installation", "authentication", "first", "basic", "account", "instruments", "pricing", "orders", "positions", "streaming", "async", "strategies"]
 
         # Tutorial quality indicators
         self.quality_patterns = {
-            "learning_outcomes": [
-                "you will learn", "by the end", "after completing",
-                "learning objective", "skills you'll gain"
-            ],
-            "checkpoints": [
-                "checkpoint", "test your understanding", "verify",
-                "skill check", "practice"
-            ],
-            "progressive_examples": [
-                "building on", "next step", "now that you know",
-                "extending", "advanced version"
-            ]
+            "learning_outcomes": ["you will learn", "by the end", "after completing", "learning objective", "skills you'll gain"],
+            "checkpoints": ["checkpoint", "test your understanding", "verify", "skill check", "practice"],
+            "progressive_examples": ["building on", "next step", "now that you know", "extending", "advanced version"],
         }
 
     def check_content(
@@ -100,12 +75,9 @@ class EducationalProgressionCheck(ContentCheck):
             return "advanced"
 
         # Check content for difficulty indicators
-        beginner_score = sum(1 for concept in self.complexity_patterns["beginner"]["concepts"]
-                           if concept in content_lower)
-        intermediate_score = sum(1 for concept in self.complexity_patterns["intermediate"]["concepts"]
-                               if concept in content_lower)
-        advanced_score = sum(1 for concept in self.complexity_patterns["advanced"]["concepts"]
-                           if concept in content_lower)
+        beginner_score = sum(1 for concept in self.complexity_patterns["beginner"]["concepts"] if concept in content_lower)
+        intermediate_score = sum(1 for concept in self.complexity_patterns["intermediate"]["concepts"] if concept in content_lower)
+        advanced_score = sum(1 for concept in self.complexity_patterns["advanced"]["concepts"] if concept in content_lower)
 
         if advanced_score > intermediate_score and advanced_score > beginner_score:
             return "advanced"
@@ -128,31 +100,27 @@ class EducationalProgressionCheck(ContentCheck):
         code_blocks = self._extract_python_code_blocks(content)
         for block_info in code_blocks:
             code = block_info["content"]
-            line_count = len([line for line in code.split('\n') if line.strip()])
-            import_count = len([line for line in code.split('\n') if 'import' in line])
+            line_count = len([line for line in code.split("\n") if line.strip()])
+            import_count = len([line for line in code.split("\n") if "import" in line])
 
             if line_count > patterns["max_code_lines"]:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=block_info["start_line"],
-                        severity=IssueSeverity.WARNING,
-                        message=f"Code block too complex for {difficulty} level ({line_count} lines > {patterns['max_code_lines']})",
-                        suggestion=f"Break into smaller examples or move to higher difficulty level",
-                        context_line="",
-                    )
+                    message=f"Code block too complex for {difficulty} level ({line_count} lines > {patterns['max_code_lines']})",
+                    file_path=str(file_path),
+                    line=block_info["start_line"],
+                    severity=IssueSeverity.WARNING,
+                    suggestion=f"Break into smaller examples or move to higher difficulty level",
+                    context={"line": ""},
                 )
 
             if import_count > patterns["max_imports"]:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=block_info["start_line"],
-                        severity=IssueSeverity.WARNING,
-                        message=f"Too many imports for {difficulty} level ({import_count} > {patterns['max_imports']})",
-                        suggestion="Simplify the example or move to higher difficulty level",
-                        context_line="",
-                    )
+                    message=f"Too many imports for {difficulty} level ({import_count} > {patterns['max_imports']})",
+                    file_path=str(file_path),
+                    line=block_info["start_line"],
+                    severity=IssueSeverity.WARNING,
+                    suggestion="Simplify the example or move to higher difficulty level",
+                    context={"line": ""},
                 )
 
         # Check for forbidden concepts
@@ -160,14 +128,12 @@ class EducationalProgressionCheck(ContentCheck):
         for forbidden_concept in patterns["forbidden_concepts"]:
             if forbidden_concept in content_lower:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=1,
-                        severity=IssueSeverity.WARNING,
-                        message=f"Concept '{forbidden_concept}' may be too advanced for {difficulty} level",
-                        suggestion=f"Consider moving to higher difficulty level or simplifying",
-                        context_line="",
-                    )
+                    message=f"Concept '{forbidden_concept}' may be too advanced for {difficulty} level",
+                    file_path=str(file_path),
+                    line=1,
+                    severity=IssueSeverity.WARNING,
+                    suggestion=f"Consider moving to higher difficulty level or simplifying",
+                    context={"line": ""},
                 )
 
     def _check_learning_structure(
@@ -180,39 +146,29 @@ class EducationalProgressionCheck(ContentCheck):
         content_lower = content.lower()
 
         # Check for learning outcomes
-        has_learning_outcomes = any(
-            pattern in content_lower
-            for pattern in self.quality_patterns["learning_outcomes"]
-        )
+        has_learning_outcomes = any(pattern in content_lower for pattern in self.quality_patterns["learning_outcomes"])
 
         if not has_learning_outcomes:
             result.add_issue(
-                ValidationIssue(
-                    file_path=file_path,
-                    line_number=1,
-                    severity=IssueSeverity.WARNING,
-                    message="Tutorial lacks clear learning outcomes",
-                    suggestion="Add section explaining what learners will achieve",
-                    context_line="",
-                )
+                message="Tutorial lacks clear learning outcomes",
+                file_path=str(file_path),
+                line=1,
+                severity=IssueSeverity.WARNING,
+                suggestion="Add section explaining what learners will achieve",
+                context={"line": ""},
             )
 
         # Check for checkpoints
-        has_checkpoints = any(
-            pattern in content_lower
-            for pattern in self.quality_patterns["checkpoints"]
-        )
+        has_checkpoints = any(pattern in content_lower for pattern in self.quality_patterns["checkpoints"])
 
         if not has_checkpoints and len(content) > 1000:  # Only for longer tutorials
             result.add_issue(
-                ValidationIssue(
-                    file_path=file_path,
-                    line_number=1,
-                    severity=IssueSeverity.INFO,
-                    message="Long tutorial lacks learning checkpoints",
-                    suggestion="Add checkpoints to help learners verify understanding",
-                    context_line="",
-                )
+                message="Long tutorial lacks learning checkpoints",
+                file_path=str(file_path),
+                line=1,
+                severity=IssueSeverity.INFO,
+                suggestion="Add checkpoints to help learners verify understanding",
+                context={"line": ""},
             )
 
     def _check_progressive_building(
@@ -225,41 +181,34 @@ class EducationalProgressionCheck(ContentCheck):
         content_lower = content.lower()
 
         # Check for progressive building language
-        has_progressive_building = any(
-            pattern in content_lower
-            for pattern in self.quality_patterns["progressive_examples"]
-        )
+        has_progressive_building = any(pattern in content_lower for pattern in self.quality_patterns["progressive_examples"])
 
         # For multi-part tutorials, progressive building is more important
         if ("part" in str(file_path).lower() or "chapter" in content_lower) and not has_progressive_building:
             result.add_issue(
-                ValidationIssue(
-                    file_path=file_path,
-                    line_number=1,
-                    severity=IssueSeverity.INFO,
-                    message="Multi-part tutorial lacks progressive building language",
-                    suggestion="Use phrases like 'building on', 'next step', 'now that you know'",
-                    context_line="",
-                )
+                message="Multi-part tutorial lacks progressive building language",
+                file_path=str(file_path),
+                line=1,
+                severity=IssueSeverity.INFO,
+                suggestion="Use phrases like 'building on', 'next step', 'now that you know'",
+                context={"line": ""},
             )
 
         # Check for concept progression
         code_blocks = self._extract_python_code_blocks(content)
         if len(code_blocks) > 1:
             # Simple heuristic: later code blocks should generally be longer or more complex
-            first_block_lines = len([line for line in code_blocks[0]["content"].split('\n') if line.strip()])
-            last_block_lines = len([line for line in code_blocks[-1]["content"].split('\n') if line.strip()])
+            first_block_lines = len([line for line in code_blocks[0]["content"].split("\n") if line.strip()])
+            last_block_lines = len([line for line in code_blocks[-1]["content"].split("\n") if line.strip()])
 
             if last_block_lines < first_block_lines and len(code_blocks) > 2:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=code_blocks[-1]["start_line"],
-                        severity=IssueSeverity.INFO,
-                        message="Tutorial may not build complexity progressively",
-                        suggestion="Consider ordering examples from simple to complex",
-                        context_line="",
-                    )
+                    message="Tutorial may not build complexity progressively",
+                    file_path=str(file_path),
+                    line=code_blocks[-1]["start_line"],
+                    severity=IssueSeverity.INFO,
+                    suggestion="Consider ordering examples from simple to complex",
+                    context={"line": ""},
                 )
 
     def _extract_python_code_blocks(self, content: str) -> list[dict[str, Any]]:
@@ -277,12 +226,7 @@ class EducationalProgressionCheck(ContentCheck):
                 block_start_line = line_num + 1
             elif line.strip() == "```" and in_python_block:
                 if current_block_lines:
-                    blocks.append({
-                        "content": "\n".join(current_block_lines),
-                        "start_line": block_start_line,
-                        "end_line": line_num - 1,
-                        "lines": current_block_lines
-                    })
+                    blocks.append({"content": "\n".join(current_block_lines), "start_line": block_start_line, "end_line": line_num - 1, "lines": current_block_lines})
                 in_python_block = False
             elif in_python_block:
                 current_block_lines.append(line)

@@ -9,6 +9,7 @@ from docs_validation.validation.core.results import IssueSeverity, ValidationSum
 
 class GateStatus(str, Enum):
     """Quality gate status."""
+
     PASSED = "passed"
     FAILED = "failed"
     WARNING = "warning"
@@ -18,6 +19,7 @@ class GateStatus(str, Enum):
 @dataclass
 class GateResult:
     """Result of a quality gate check."""
+
     gate_name: str
     status: GateStatus
     message: str
@@ -29,6 +31,7 @@ class GateResult:
 @dataclass
 class QualityGateReport:
     """Complete quality gate report."""
+
     overall_status: GateStatus
     gate_results: list[GateResult]
     summary: dict[str, Any]
@@ -236,15 +239,11 @@ class QualityGateManager:
                     warning_count += 1
 
                 # Check if this is a security-related issue
-                if any(keyword in issue.message.lower() for keyword in
-                       ["security", "secret", "password", "token", "key", "credential"]):
+                if any(keyword in issue.message.lower() for keyword in ["security", "secret", "password", "token", "key", "credential"]):
                     security_issue_count += 1
 
         # Calculate average issues per file
-        avg_issues_per_file = (
-            summary.total_issues / summary.total_files_checked
-            if summary.total_files_checked > 0 else 0
-        )
+        avg_issues_per_file = summary.total_issues / summary.total_files_checked if summary.total_files_checked > 0 else 0
 
         # Get list of executed checks
         executed_checks = set(result.check_name for result in summary.results)

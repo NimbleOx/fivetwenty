@@ -22,34 +22,15 @@ class TutorialStructureCheck(ContentCheck):
 
         # Tutorial structure requirements based on educational best practices
         self.required_sections = {
-            "learning_outcomes": [
-                "learning objective", "learning outcome", "you will learn",
-                "by the end", "after completing", "skills you'll gain"
-            ],
-            "prerequisites": [
-                "prerequisite", "before starting", "requirements", "what you need",
-                "you should know", "familiarity with"
-            ],
-            "time_estimate": [
-                "time commitment", "duration", "estimated time", "time required",
-                "approximately", "takes about", "expect to spend"
-            ],
-            "hands_on_exercises": [
-                "hands-on", "exercise", "try this", "practice", "tutorial",
-                "let's build", "follow along"
-            ],
-            "checkpoints": [
-                "checkpoint", "test your understanding", "verify", "skill check",
-                "recap", "summary", "what we covered"
-            ]
+            "learning_outcomes": ["learning objective", "learning outcome", "you will learn", "by the end", "after completing", "skills you'll gain"],
+            "prerequisites": ["prerequisite", "before starting", "requirements", "what you need", "you should know", "familiarity with"],
+            "time_estimate": ["time commitment", "duration", "estimated time", "time required", "approximately", "takes about", "expect to spend"],
+            "hands_on_exercises": ["hands-on", "exercise", "try this", "practice", "tutorial", "let's build", "follow along"],
+            "checkpoints": ["checkpoint", "test your understanding", "verify", "skill check", "recap", "summary", "what we covered"],
         }
 
         # Progressive difficulty indicators
-        self.difficulty_indicators = {
-            "beginner": ["getting started", "first", "basic", "introduction", "simple"],
-            "intermediate": ["advanced", "complex", "comprehensive", "in-depth"],
-            "advanced": ["expert", "production", "sophisticated", "enterprise"]
-        }
+        self.difficulty_indicators = {"beginner": ["getting started", "first", "basic", "introduction", "simple"], "intermediate": ["advanced", "complex", "comprehensive", "in-depth"], "advanced": ["expert", "production", "sophisticated", "enterprise"]}
 
         # Educational structure patterns
         self.structure_patterns = {
@@ -57,7 +38,7 @@ class TutorialStructureCheck(ContentCheck):
             "motivation": ["why", "benefits", "use case", "real-world"],
             "step_by_step": ["step 1", "step 2", "first", "next", "then", "finally"],
             "explanation": ["how it works", "under the hood", "explanation", "details"],
-            "troubleshooting": ["troubleshooting", "common issues", "problems", "errors"]
+            "troubleshooting": ["troubleshooting", "common issues", "problems", "errors"],
         }
 
     def check_content(
@@ -100,14 +81,12 @@ class TutorialStructureCheck(ContentCheck):
             # Only require learning outcomes for short tutorials
             if "learning_outcomes" in missing_sections:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=1,
-                        severity=IssueSeverity.WARNING,
-                        message="Tutorial lacks clear learning outcomes",
-                        suggestion="Add section explaining what learners will achieve",
-                        context_line="",
-                    )
+                    message="Tutorial lacks clear learning outcomes",
+                    file_path=str(file_path),
+                    line=1,
+                    severity=IssueSeverity.WARNING,
+                    suggestion="Add section explaining what learners will achieve",
+                    context={"line": ""},
                 )
         else:
             # Longer tutorials should have more structure
@@ -118,14 +97,12 @@ class TutorialStructureCheck(ContentCheck):
                     severity = IssueSeverity.INFO
 
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=1,
-                        severity=severity,
-                        message=f"Tutorial missing recommended section: {section}",
-                        suggestion=f"Consider adding {section.replace('_', ' ')} section",
-                        context_line="",
-                    )
+                    message=f"Tutorial missing recommended section: {section}",
+                    file_path=str(file_path),
+                    line=1,
+                    severity=severity,
+                    suggestion=f"Consider adding {section.replace('_', ' ')} section",
+                    context={"line": ""},
                 )
 
     def _check_tutorial_structure(
@@ -147,26 +124,22 @@ class TutorialStructureCheck(ContentCheck):
         if len(content) > 1000:
             if not has_steps:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=1,
-                        severity=IssueSeverity.INFO,
-                        message="Tutorial lacks clear step-by-step structure",
-                        suggestion="Consider organizing content with numbered steps or clear progression",
-                        context_line="",
-                    )
+                    message="Tutorial lacks clear step-by-step structure",
+                    file_path=str(file_path),
+                    line=1,
+                    severity=IssueSeverity.INFO,
+                    suggestion="Consider organizing content with numbered steps or clear progression",
+                    context={"line": ""},
                 )
 
             if not has_motivation:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=1,
-                        severity=IssueSeverity.INFO,
-                        message="Tutorial lacks motivation or 'why' section",
-                        suggestion="Explain why this tutorial is useful or what problems it solves",
-                        context_line="",
-                    )
+                    message="Tutorial lacks motivation or 'why' section",
+                    file_path=str(file_path),
+                    line=1,
+                    severity=IssueSeverity.INFO,
+                    suggestion="Explain why this tutorial is useful or what problems it solves",
+                    context={"line": ""},
                 )
 
     def _check_heading_hierarchy(
@@ -176,42 +149,36 @@ class TutorialStructureCheck(ContentCheck):
         result: ValidationResult,
     ) -> None:
         """Check heading hierarchy for logical structure."""
-        lines = content.split('\n')
+        lines = content.split("\n")
         headings = []
 
         # Extract headings with their levels and line numbers
         for line_num, line in enumerate(lines, 1):
             line = line.strip()
-            if line.startswith('#'):
-                level = len(line) - len(line.lstrip('#'))
-                heading_text = line.lstrip('#').strip()
-                headings.append({
-                    'level': level,
-                    'text': heading_text,
-                    'line_number': line_num
-                })
+            if line.startswith("#"):
+                level = len(line) - len(line.lstrip("#"))
+                heading_text = line.lstrip("#").strip()
+                headings.append({"level": level, "text": heading_text, "line_number": line_num})
 
         # Check for skipped heading levels
         if len(headings) > 1:
             for i in range(1, len(headings)):
-                current_level = headings[i]['level']
-                previous_level = headings[i-1]['level']
+                current_level = headings[i]["level"]
+                previous_level = headings[i - 1]["level"]
 
                 # Skip from h1 to h3+ is problematic
                 if current_level - previous_level > 1:
                     result.add_issue(
-                        ValidationIssue(
-                            file_path=file_path,
-                            line_number=headings[i]['line_number'],
-                            severity=IssueSeverity.WARNING,
-                            message=f"Heading hierarchy skip: h{previous_level} to h{current_level}",
-                            suggestion="Use consecutive heading levels for better structure",
-                            context_line=f"{'#' * current_level} {headings[i]['text']}",
-                        )
+                        message=f"Heading hierarchy skip: h{previous_level} to h{current_level}",
+                        file_path=str(file_path),
+                        line=headings[i]["line_number"],
+                        severity=IssueSeverity.WARNING,
+                        suggestion="Use consecutive heading levels for better structure",
+                        context={"line": f"{'#' * current_level} {headings[i]['text']}"},
                     )
 
         # Check for single h1 rule
-        h1_count = sum(1 for h in headings if h['level'] == 1)
+        h1_count = sum(1 for h in headings if h["level"] == 1)
         if h1_count > 1:
             result.add_issue(
                 ValidationIssue(
@@ -233,15 +200,15 @@ class TutorialStructureCheck(ContentCheck):
         """Check balance between code examples and explanatory text."""
         # Extract code blocks
         code_blocks = self._extract_code_blocks(content)
-        total_code_lines = sum(len(block['content'].split('\n')) for block in code_blocks)
+        total_code_lines = sum(len(block["content"].split("\n")) for block in code_blocks)
 
         # Calculate text lines (excluding code blocks and empty lines)
-        lines = content.split('\n')
+        lines = content.split("\n")
         text_lines = 0
         in_code_block = False
 
         for line in lines:
-            if line.strip().startswith('```'):
+            if line.strip().startswith("```"):
                 in_code_block = not in_code_block
             elif not in_code_block and line.strip():
                 text_lines += 1
@@ -253,48 +220,39 @@ class TutorialStructureCheck(ContentCheck):
             # Too much code (>70%) might be overwhelming
             if code_ratio > 0.7:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=1,
-                        severity=IssueSeverity.INFO,
-                        message=f"High code-to-text ratio ({code_ratio:.1%})",
-                        suggestion="Consider adding more explanatory text between code examples",
-                        context_line="",
-                    )
+                    message=f"High code-to-text ratio ({code_ratio:.1%})",
+                    file_path=str(file_path),
+                    line=1,
+                    severity=IssueSeverity.INFO,
+                    suggestion="Consider adding more explanatory text between code examples",
+                    context={"line": ""},
                 )
 
             # Too little code (<10%) might not be practical enough
             elif code_ratio < 0.1:
                 result.add_issue(
-                    ValidationIssue(
-                        file_path=file_path,
-                        line_number=1,
-                        severity=IssueSeverity.INFO,
-                        message=f"Low code-to-text ratio ({code_ratio:.1%})",
-                        suggestion="Consider adding more practical code examples",
-                        context_line="",
-                    )
+                    message=f"Low code-to-text ratio ({code_ratio:.1%})",
+                    file_path=str(file_path),
+                    line=1,
+                    severity=IssueSeverity.INFO,
+                    suggestion="Consider adding more practical code examples",
+                    context={"line": ""},
                 )
 
     def _extract_code_blocks(self, content: str) -> list[dict[str, Any]]:
         """Extract all code blocks from content."""
         blocks = []
-        lines = content.split('\n')
+        lines = content.split("\n")
         in_code_block = False
         current_block_lines = []
         block_start_line = 0
         block_language = ""
 
         for line_num, line in enumerate(lines, 1):
-            if line.strip().startswith('```'):
+            if line.strip().startswith("```"):
                 if in_code_block:
                     # End of code block
-                    blocks.append({
-                        'content': '\n'.join(current_block_lines),
-                        'start_line': block_start_line,
-                        'end_line': line_num,
-                        'language': block_language
-                    })
+                    blocks.append({"content": "\n".join(current_block_lines), "start_line": block_start_line, "end_line": line_num, "language": block_language})
                     in_code_block = False
                     current_block_lines = []
                 else:

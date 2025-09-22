@@ -107,9 +107,7 @@ class ValidationResult:
 
     def get_issues_by_severity(self) -> dict[IssueSeverity, list[ValidationIssue]]:
         """Group issues by severity."""
-        by_severity: dict[IssueSeverity, list[ValidationIssue]] = {
-            severity: [] for severity in IssueSeverity
-        }
+        by_severity: dict[IssueSeverity, list[ValidationIssue]] = {severity: [] for severity in IssueSeverity}
         for issue in self.issues:
             by_severity[issue.severity].append(issue)
         return by_severity
@@ -171,10 +169,7 @@ class ValidationSummary:
         if not self.results:
             return 100.0
 
-        total_successful_files = sum(
-            int(r.files_checked * (r.success_rate / 100.0))
-            for r in self.results
-        )
+        total_successful_files = sum(int(r.files_checked * (r.success_rate / 100.0)) for r in self.results)
 
         if self.total_files_checked == 0:
             return 100.0
@@ -188,9 +183,7 @@ class ValidationSummary:
 
     def get_issues_by_severity(self) -> dict[IssueSeverity, list[ValidationIssue]]:
         """Get all issues grouped by severity."""
-        by_severity: dict[IssueSeverity, list[ValidationIssue]] = {
-            severity: [] for severity in IssueSeverity
-        }
+        by_severity: dict[IssueSeverity, list[ValidationIssue]] = {severity: [] for severity in IssueSeverity}
 
         for result in self.results:
             for issue in result.issues:
@@ -200,9 +193,7 @@ class ValidationSummary:
 
     def get_results_by_status(self) -> dict[ValidationStatus, list[ValidationResult]]:
         """Group results by status."""
-        by_status: dict[ValidationStatus, list[ValidationResult]] = {
-            status: [] for status in ValidationStatus
-        }
+        by_status: dict[ValidationStatus, list[ValidationResult]] = {status: [] for status in ValidationStatus}
 
         for result in self.results:
             by_status[result.status].append(result)

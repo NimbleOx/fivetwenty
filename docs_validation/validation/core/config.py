@@ -66,24 +66,28 @@ class ValidationConfig(BaseModel):
     generate_reports: bool = True
 
     # Excluded paths
-    exclude_patterns: list[str] = Field(default_factory=lambda: [
-        "**/__pycache__/**",
-        "**/.git/**",
-        "**/node_modules/**",
-        "**/.venv/**",
-        "**/build/**",
-        "**/dist/**",
-    ])
+    exclude_patterns: list[str] = Field(
+        default_factory=lambda: [
+            "**/__pycache__/**",
+            "**/.git/**",
+            "**/node_modules/**",
+            "**/.venv/**",
+            "**/build/**",
+            "**/dist/**",
+        ]
+    )
 
     @classmethod
     def from_file(cls, config_path: Path) -> "ValidationConfig":
         """Load configuration from file."""
         if config_path.suffix == ".json":
             import json
+
             with config_path.open() as f:
                 data = json.load(f)
         elif config_path.suffix in [".yaml", ".yml"]:
             import yaml
+
             with config_path.open() as f:
                 data = yaml.safe_load(f)
         else:
@@ -109,10 +113,7 @@ class ValidationConfig(BaseModel):
         for pattern in patterns:
             pattern_files = list(self.project_root.glob(pattern))
             # Filter out excluded files
-            filtered_files = [
-                f for f in pattern_files
-                if f.is_file() and not exclude_spec.match_file(str(f.relative_to(self.project_root)))
-            ]
+            filtered_files = [f for f in pattern_files if f.is_file() and not exclude_spec.match_file(str(f.relative_to(self.project_root)))]
             files.extend(filtered_files)
 
         return sorted(set(files))

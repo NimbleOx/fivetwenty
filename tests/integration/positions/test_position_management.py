@@ -4,7 +4,6 @@ This module tests position closing functionality that was previously
 missing comprehensive integration test coverage.
 """
 
-
 import pytest
 
 from fivetwenty import AsyncClient
@@ -42,8 +41,7 @@ class TestPositionManagement:
             open_position = None
             for pos in initial_positions:
                 if hasattr(pos, "instrument") and pos.instrument == test_instrument:
-                    if (hasattr(pos, "long") and pos.long and hasattr(pos.long, "units") and int(pos.long.units) != 0) or \
-                       (hasattr(pos, "short") and pos.short and hasattr(pos.short, "units") and int(pos.short.units) != 0):
+                    if (hasattr(pos, "long") and pos.long and hasattr(pos.long, "units") and int(pos.long.units) != 0) or (hasattr(pos, "short") and pos.short and hasattr(pos.short, "units") and int(pos.short.units) != 0):
                         open_position = pos
                         break
 
@@ -79,11 +77,7 @@ class TestPositionManagement:
                         partial_units = min(long_units // 2, 500)  # Close half or max 500 units
 
                         try:
-                            partial_close_response = await sandbox_client.positions.close_position(
-                                account_id=test_account_id,
-                                instrument=test_instrument,
-                                long_units=str(partial_units)
-                            )
+                            partial_close_response = await sandbox_client.positions.close_position(account_id=test_account_id, instrument=test_instrument, long_units=str(partial_units))
 
                             assert partial_close_response is not None, "Partial close response should not be None"
                             print(f"  ✓ Partially closed {partial_units} long units")
@@ -108,11 +102,7 @@ class TestPositionManagement:
                         partial_units = min(abs(short_units) // 2, 500)
 
                         try:
-                            partial_close_response = await sandbox_client.positions.close_position(
-                                account_id=test_account_id,
-                                instrument=test_instrument,
-                                short_units=str(partial_units)
-                            )
+                            partial_close_response = await sandbox_client.positions.close_position(account_id=test_account_id, instrument=test_instrument, short_units=str(partial_units))
 
                             assert partial_close_response is not None, "Partial close response should not be None"
                             print(f"  ✓ Partially closed {partial_units} short units")
@@ -130,19 +120,11 @@ class TestPositionManagement:
 
                     try:
                         if long_units != 0:
-                            await sandbox_client.positions.close_position(
-                                account_id=test_account_id,
-                                instrument=test_instrument,
-                                long_units="ALL"
-                            )
+                            await sandbox_client.positions.close_position(account_id=test_account_id, instrument=test_instrument, long_units="ALL")
                             print("  ✓ Closed all long units using 'ALL'")
 
                         if short_units != 0:
-                            await sandbox_client.positions.close_position(
-                                account_id=test_account_id,
-                                instrument=test_instrument,
-                                short_units="ALL"
-                            )
+                            await sandbox_client.positions.close_position(account_id=test_account_id, instrument=test_instrument, short_units="ALL")
                             print("  ✓ Closed all short units using 'ALL'")
 
                         # Verify complete closure
@@ -173,9 +155,7 @@ class TestPositionManagement:
                 # Create a small test position first
                 try:
                     # Get minimum trade size for the instrument
-                    instruments_response = await sandbox_client.accounts.get_account_instruments(
-                        test_account_id, instruments=[test_instrument]
-                    )
+                    instruments_response = await sandbox_client.accounts.get_account_instruments(test_account_id, instruments=[test_instrument])
 
                     if instruments_response.get("instruments"):
                         instrument_details = instruments_response["instruments"][0]
@@ -192,11 +172,7 @@ class TestPositionManagement:
                             print(f"  ✓ Created test position with {min_trade_size} units")
 
                             # Now test closing this new position
-                            await sandbox_client.positions.close_position(
-                                account_id=test_account_id,
-                                instrument=test_instrument,
-                                long_units="ALL"
-                            )
+                            await sandbox_client.positions.close_position(account_id=test_account_id, instrument=test_instrument, long_units="ALL")
 
                             print("  ✓ Successfully closed test position")
 
@@ -216,7 +192,7 @@ class TestPositionManagement:
             with pytest.raises((ValueError, FiveTwentyError)):
                 await sandbox_client.positions.close_position(
                     account_id=test_account_id,
-                    instrument=test_instrument
+                    instrument=test_instrument,
                     # No long_units or short_units - should raise ValueError
                 )
             print("  ✓ Empty parameters correctly rejected")
@@ -226,11 +202,7 @@ class TestPositionManagement:
         # Test with invalid instrument
         try:
             with pytest.raises(FiveTwentyError) as exc_info:
-                await sandbox_client.positions.close_position(
-                    account_id=test_account_id,
-                    instrument="INVALID_INSTRUMENT",
-                    long_units="ALL"
-                )
+                await sandbox_client.positions.close_position(account_id=test_account_id, instrument="INVALID_INSTRUMENT", long_units="ALL")
 
             error = exc_info.value
             assert error.status == 400, f"Expected 400 for invalid instrument, got {error.status}"
@@ -244,11 +216,7 @@ class TestPositionManagement:
         # Test with invalid account ID
         try:
             with pytest.raises(FiveTwentyError) as exc_info:
-                await sandbox_client.positions.close_position(
-                    account_id="invalid-account-123",
-                    instrument=test_instrument,
-                    long_units="ALL"
-                )
+                await sandbox_client.positions.close_position(account_id="invalid-account-123", instrument=test_instrument, long_units="ALL")
 
             error = exc_info.value
             assert error.status in [400, 404], f"Expected 400/404 for invalid account, got {error.status}"
@@ -294,11 +262,7 @@ class TestPositionManagement:
                 print("  Found position for client extensions test")
 
                 # Test client extensions for position closure
-                client_extensions = {
-                    "id": f"test-close-{test_account_id[-4:]}",
-                    "tag": "integration-test-close",
-                    "comment": "Position closure with client extensions"
-                }
+                client_extensions = {"id": f"test-close-{test_account_id[-4:]}", "tag": "integration-test-close", "comment": "Position closure with client extensions"}
 
                 print(f"  Testing client extensions: {client_extensions}")
 
@@ -307,12 +271,7 @@ class TestPositionManagement:
                     long_units = int(test_position.long.units)
                     if long_units > 0:
                         try:
-                            close_response = await sandbox_client.positions.close_position(
-                                account_id=test_account_id,
-                                instrument=test_instrument,
-                                long_units="ALL",
-                                long_client_extensions=client_extensions
-                            )
+                            close_response = await sandbox_client.positions.close_position(account_id=test_account_id, instrument=test_instrument, long_units="ALL", long_client_extensions=client_extensions)
 
                             assert close_response is not None, "Close response should not be None"
                             print("  ✓ Position closed with long client extensions")
@@ -326,12 +285,7 @@ class TestPositionManagement:
                     short_units = int(test_position.short.units)
                     if short_units != 0:
                         try:
-                            close_response = await sandbox_client.positions.close_position(
-                                account_id=test_account_id,
-                                instrument=test_instrument,
-                                short_units="ALL",
-                                short_client_extensions=client_extensions
-                            )
+                            close_response = await sandbox_client.positions.close_position(account_id=test_account_id, instrument=test_instrument, short_units="ALL", short_client_extensions=client_extensions)
 
                             assert close_response is not None, "Close response should not be None"
                             print("  ✓ Position closed with short client extensions")

@@ -254,7 +254,8 @@ def gates_test(ctx, profile, max_errors, max_warnings, min_success_rate):
 
         # Execute validation with quality gates
         result = default_profile_manager.validate_with_quality_gates(
-            profile, context,
+            profile,
+            context,
         )
 
         summary = result["validation_summary"]
@@ -268,7 +269,7 @@ def gates_test(ctx, profile, max_errors, max_warnings, min_success_rate):
         console.print(f"   Duration: {summary.total_duration:.2f}s")
 
         # Print quality gate results
-        console.print("\n" + "="*50)
+        console.print("\n" + "=" * 50)
         gate_manager = QualityGateManager()
         formatted_report = gate_manager.format_report(gate_report)
         console.print(formatted_report)
@@ -311,7 +312,9 @@ def run(ctx, profile, checks, gates, output_format, output_dir):
         if gates:
             # Run with quality gates
             result = default_profile_manager.validate_with_quality_gates(
-                profile, context, specific_checks,
+                profile,
+                context,
+                specific_checks,
             )
 
             summary = result["validation_summary"]
@@ -321,7 +324,7 @@ def run(ctx, profile, checks, gates, output_format, output_dir):
             _display_validation_summary(summary)
 
             # Show quality gate results
-            console.print("\n" + "="*50)
+            console.print("\n" + "=" * 50)
             gate_manager = QualityGateManager()
             formatted_report = gate_manager.format_report(gate_report)
             console.print(formatted_report)
@@ -340,7 +343,9 @@ def run(ctx, profile, checks, gates, output_format, output_dir):
         else:
             # Run without quality gates
             summary = default_profile_manager.execute_profile(
-                profile, context, specific_checks,
+                profile,
+                context,
+                specific_checks,
             )
 
             _display_validation_summary(summary)

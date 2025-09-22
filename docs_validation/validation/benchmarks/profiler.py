@@ -15,6 +15,7 @@ import psutil
 @dataclass
 class FunctionProfile:
     """Profile data for a single function."""
+
     function_name: str
     call_count: int
     total_time: float
@@ -26,6 +27,7 @@ class FunctionProfile:
 @dataclass
 class CheckProfile:
     """Profile data for a validation check."""
+
     check_name: str
     total_time: float
     setup_time: float
@@ -39,6 +41,7 @@ class CheckProfile:
 @dataclass
 class ProfileReport:
     """Comprehensive profiling report."""
+
     total_execution_time: float
     total_memory_usage_mb: float
     check_profiles: list[CheckProfile] = field(default_factory=list)
@@ -97,6 +100,7 @@ class PerformanceProfiler:
 
     def profile_check(self, check_name: str) -> Callable:
         """Decorator to profile individual validation checks."""
+
         def decorator(func: Callable) -> Callable:
             @functools.wraps(func)
             def wrapper(*args, **kwargs):
@@ -134,6 +138,7 @@ class PerformanceProfiler:
                     raise
 
             return wrapper
+
         return decorator
 
     def _analyze_function_profiles(self) -> list[FunctionProfile]:
@@ -229,10 +234,7 @@ class PerformanceProfiler:
         recommendations = []
 
         # Analyze function call patterns
-        high_call_count_functions = [
-            f for f in report.function_profiles
-            if f.call_count > 10000 and f.avg_time_per_call > 0.001
-        ]
+        high_call_count_functions = [f for f in report.function_profiles if f.call_count > 10000 and f.avg_time_per_call > 0.001]
 
         if high_call_count_functions:
             recommendations.append(
@@ -253,10 +255,7 @@ class PerformanceProfiler:
             )
 
         # Parallel processing recommendations
-        io_bound_checks = [
-            c for c in report.check_profiles
-            if "link" in c.check_name.lower() or "file" in c.check_name.lower()
-        ]
+        io_bound_checks = [c for c in report.check_profiles if "link" in c.check_name.lower() or "file" in c.check_name.lower()]
         if len(io_bound_checks) > 2:
             recommendations.append(
                 "I/O-bound checks could benefit from increased parallelization",

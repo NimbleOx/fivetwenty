@@ -43,16 +43,7 @@ if TYPE_CHECKING:
     from .trades import TradeSummary
 
 # Union type for all possible order types in an account
-Order = (
-    MarketOrder
-    | LimitOrder
-    | StopOrder
-    | MarketIfTouchedOrder
-    | TakeProfitOrder
-    | StopLossOrder
-    | GuaranteedStopLossOrder
-    | TrailingStopLossOrder
-)
+Order = MarketOrder | LimitOrder | StopOrder | MarketIfTouchedOrder | TakeProfitOrder | StopLossOrder | GuaranteedStopLossOrder | TrailingStopLossOrder
 
 
 class AccountProperties(ApiModel):

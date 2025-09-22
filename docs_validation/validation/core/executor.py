@@ -27,10 +27,10 @@ class ExecutionMode(str, Enum):
 class CheckType(str, Enum):
     """Types of validation checks for execution optimization."""
 
-    IO_BOUND = "io_bound"      # File reading, network requests
-    CPU_BOUND = "cpu_bound"    # Heavy computation, parsing
-    EXTERNAL = "external"      # External tool execution
-    MIXED = "mixed"            # Combination
+    IO_BOUND = "io_bound"  # File reading, network requests
+    CPU_BOUND = "cpu_bound"  # Heavy computation, parsing
+    EXTERNAL = "external"  # External tool execution
+    MIXED = "mixed"  # Combination
 
 
 @dataclass
@@ -314,10 +314,7 @@ class ValidationExecutor:
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
             # Submit all checks
-            future_to_name = {
-                executor.submit(self._run_check_with_progress, check, context, name): name
-                for name, check in checks.items()
-            }
+            future_to_name = {executor.submit(self._run_check_with_progress, check, context, name): name for name, check in checks.items()}
 
             # Collect results
             for future in as_completed(future_to_name):
@@ -399,7 +396,7 @@ class BatchProcessor:
         total_batches = (len(files) + self.batch_size - 1) // self.batch_size
 
         for i in range(0, len(files), self.batch_size):
-            batch = files[i:i + self.batch_size]
+            batch = files[i : i + self.batch_size]
             batch_num = i // self.batch_size + 1
 
             if progress_callback:

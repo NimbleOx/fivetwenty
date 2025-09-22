@@ -54,9 +54,7 @@ class TestTradeOrderManagement:
                 print("  No existing trade found - creating test trade first")
 
                 # Get minimum trade size and current pricing
-                instruments_response = await sandbox_client.accounts.get_account_instruments(
-                    test_account_id, instruments=[test_instrument]
-                )
+                instruments_response = await sandbox_client.accounts.get_account_instruments(test_account_id, instruments=[test_instrument])
 
                 if instruments_response.get("instruments"):
                     instrument_details = instruments_response["instruments"][0]
@@ -77,10 +75,7 @@ class TestTradeOrderManagement:
 
             if test_trade_id:
                 # Get current pricing to set realistic SL/TP levels
-                pricing_response = await sandbox_client.pricing.get_pricing(
-                    account_id=test_account_id,
-                    instruments=[test_instrument]
-                )
+                pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
 
                 current_price = Decimal("1.1000")  # Default fallback
                 if pricing_response.get("prices"):
@@ -96,16 +91,9 @@ class TestTradeOrderManagement:
                 stop_loss_price = current_price * Decimal("0.99")  # 1% below current price
 
                 try:
-                    stop_loss_spec = {
-                        "price": str(stop_loss_price),
-                        "timeInForce": "GTC"
-                    }
+                    stop_loss_spec = {"price": str(stop_loss_price), "timeInForce": "GTC"}
 
-                    sl_response = await sandbox_client.trades.put_trade_orders(
-                        account_id=test_account_id,
-                        trade_specifier=test_trade_id,
-                        stop_loss=stop_loss_spec
-                    )
+                    sl_response = await sandbox_client.trades.put_trade_orders(account_id=test_account_id, trade_specifier=test_trade_id, stop_loss=stop_loss_spec)
 
                     assert sl_response is not None, "Stop loss response should not be None"
                     print(f"  ✓ Stop loss order added at price {stop_loss_price}")
@@ -130,16 +118,9 @@ class TestTradeOrderManagement:
                 take_profit_price = current_price * Decimal("1.01")  # 1% above current price
 
                 try:
-                    take_profit_spec = {
-                        "price": str(take_profit_price),
-                        "timeInForce": "GTC"
-                    }
+                    take_profit_spec = {"price": str(take_profit_price), "timeInForce": "GTC"}
 
-                    tp_response = await sandbox_client.trades.put_trade_orders(
-                        account_id=test_account_id,
-                        trade_specifier=test_trade_id,
-                        take_profit=take_profit_spec
-                    )
+                    tp_response = await sandbox_client.trades.put_trade_orders(account_id=test_account_id, trade_specifier=test_trade_id, take_profit=take_profit_spec)
 
                     assert tp_response is not None, "Take profit response should not be None"
                     print(f"  ✓ Take profit order added at price {take_profit_price}")
@@ -164,16 +145,9 @@ class TestTradeOrderManagement:
                 new_stop_loss_price = current_price * Decimal("0.985")  # 1.5% below current price
 
                 try:
-                    modified_stop_loss_spec = {
-                        "price": str(new_stop_loss_price),
-                        "timeInForce": "GTC"
-                    }
+                    modified_stop_loss_spec = {"price": str(new_stop_loss_price), "timeInForce": "GTC"}
 
-                    modify_sl_response = await sandbox_client.trades.put_trade_orders(
-                        account_id=test_account_id,
-                        trade_specifier=test_trade_id,
-                        stop_loss=modified_stop_loss_spec
-                    )
+                    modify_sl_response = await sandbox_client.trades.put_trade_orders(account_id=test_account_id, trade_specifier=test_trade_id, stop_loss=modified_stop_loss_spec)
 
                     assert modify_sl_response is not None, "Modified stop loss response should not be None"
                     print(f"  ✓ Stop loss order modified to price {new_stop_loss_price}")
@@ -190,22 +164,11 @@ class TestTradeOrderManagement:
                 combined_tp_price = current_price * Decimal("1.02")
 
                 try:
-                    combined_sl_spec = {
-                        "price": str(combined_sl_price),
-                        "timeInForce": "GTC"
-                    }
+                    combined_sl_spec = {"price": str(combined_sl_price), "timeInForce": "GTC"}
 
-                    combined_tp_spec = {
-                        "price": str(combined_tp_price),
-                        "timeInForce": "GTC"
-                    }
+                    combined_tp_spec = {"price": str(combined_tp_price), "timeInForce": "GTC"}
 
-                    combined_response = await sandbox_client.trades.put_trade_orders(
-                        account_id=test_account_id,
-                        trade_specifier=test_trade_id,
-                        stop_loss=combined_sl_spec,
-                        take_profit=combined_tp_spec
-                    )
+                    combined_response = await sandbox_client.trades.put_trade_orders(account_id=test_account_id, trade_specifier=test_trade_id, stop_loss=combined_sl_spec, take_profit=combined_tp_spec)
 
                     assert combined_response is not None, "Combined SL/TP response should not be None"
                     print(f"  ✓ Both stop loss ({combined_sl_price}) and take profit ({combined_tp_price}) added")
@@ -223,7 +186,7 @@ class TestTradeOrderManagement:
                         account_id=test_account_id,
                         trade_specifier=test_trade_id,
                         stop_loss=None,  # Cancel stop loss
-                        take_profit=None  # Cancel take profit
+                        take_profit=None,  # Cancel take profit
                     )
 
                     assert cancel_response is not None, "Cancel response should not be None"
@@ -278,11 +241,7 @@ class TestTradeOrderManagement:
 
         try:
             with pytest.raises(FiveTwentyError) as exc_info:
-                await sandbox_client.trades.put_trade_orders(
-                    account_id=test_account_id,
-                    trade_specifier="invalid-trade-123",
-                    stop_loss={"price": "1.0000", "timeInForce": "GTC"}
-                )
+                await sandbox_client.trades.put_trade_orders(account_id=test_account_id, trade_specifier="invalid-trade-123", stop_loss={"price": "1.0000", "timeInForce": "GTC"})
 
             error = exc_info.value
             assert error.status == 404, f"Expected 404 for invalid trade ID, got {error.status}"
@@ -298,11 +257,7 @@ class TestTradeOrderManagement:
 
         try:
             with pytest.raises(FiveTwentyError) as exc_info:
-                await sandbox_client.trades.put_trade_orders(
-                    account_id="invalid-account-123",
-                    trade_specifier="1",
-                    stop_loss={"price": "1.0000", "timeInForce": "GTC"}
-                )
+                await sandbox_client.trades.put_trade_orders(account_id="invalid-account-123", trade_specifier="1", stop_loss={"price": "1.0000", "timeInForce": "GTC"})
 
             error = exc_info.value
             assert error.status in [400, 404], f"Expected 400/404 for invalid account, got {error.status}"
@@ -327,11 +282,7 @@ class TestTradeOrderManagement:
                 # Test invalid price format
                 try:
                     with pytest.raises(FiveTwentyError) as exc_info:
-                        await sandbox_client.trades.put_trade_orders(
-                            account_id=test_account_id,
-                            trade_specifier=test_trade_id,
-                            stop_loss={"price": "invalid-price", "timeInForce": "GTC"}
-                        )
+                        await sandbox_client.trades.put_trade_orders(account_id=test_account_id, trade_specifier=test_trade_id, stop_loss={"price": "invalid-price", "timeInForce": "GTC"})
 
                     error = exc_info.value
                     assert error.status == 400, f"Expected 400 for invalid price, got {error.status}"
@@ -345,11 +296,7 @@ class TestTradeOrderManagement:
                 # Test negative price
                 try:
                     with pytest.raises(FiveTwentyError) as exc_info:
-                        await sandbox_client.trades.put_trade_orders(
-                            account_id=test_account_id,
-                            trade_specifier=test_trade_id,
-                            stop_loss={"price": "-1.0000", "timeInForce": "GTC"}
-                        )
+                        await sandbox_client.trades.put_trade_orders(account_id=test_account_id, trade_specifier=test_trade_id, stop_loss={"price": "-1.0000", "timeInForce": "GTC"})
 
                     error = exc_info.value
                     assert error.status == 400, f"Expected 400 for negative price, got {error.status}"
@@ -390,20 +337,12 @@ class TestTradeOrderManagement:
                 print(f"  Using existing trade: {test_trade_id}")
 
                 # Test client extensions
-                client_extensions = {
-                    "id": f"test-ext-{test_account_id[-4:]}",
-                    "tag": "integration-test-trade",
-                    "comment": "Trade with client extensions"
-                }
+                client_extensions = {"id": f"test-ext-{test_account_id[-4:]}", "tag": "integration-test-trade", "comment": "Trade with client extensions"}
 
                 print(f"  Testing client extensions: {client_extensions}")
 
                 try:
-                    extensions_response = await sandbox_client.trades.put_trade_client_extensions(
-                        account_id=test_account_id,
-                        trade_specifier=test_trade_id,
-                        client_extensions=client_extensions
-                    )
+                    extensions_response = await sandbox_client.trades.put_trade_client_extensions(account_id=test_account_id, trade_specifier=test_trade_id, client_extensions=client_extensions)
 
                     assert extensions_response is not None, "Extensions response should not be None"
                     print("  ✓ Trade client extensions added successfully")

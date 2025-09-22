@@ -22,11 +22,7 @@ class CodeExecutabilityCheck(ContentCheck):
         )
 
         # Known placeholders that indicate incomplete examples
-        self.placeholder_patterns = [
-            r"# \.\.\.", r"pass\s*#.*implementation", r"\.\.\..*",
-            r"# TODO", r"# FIXME", r"your_.*_here", r"<.*>",
-            r"undefined_function\(\)", r"refresh_token\(\)"
-        ]
+        self.placeholder_patterns = [r"# \.\.\.", r"pass\s*#.*implementation", r"\.\.\..*", r"# TODO", r"# FIXME", r"your_.*_here", r"<.*>", r"undefined_function\(\)", r"refresh_token\(\)"]
 
         # Critical imports that must be present for FiveTwenty code
         self.required_imports = {
@@ -36,7 +32,7 @@ class CodeExecutabilityCheck(ContentCheck):
             "AccountConfig": "from fivetwenty import AccountConfig",
             "Decimal": "from decimal import Decimal",
             "datetime": "from datetime import datetime",
-            "os.environ": "import os"
+            "os.environ": "import os",
         }
 
         # Model imports
@@ -51,10 +47,7 @@ class CodeExecutabilityCheck(ContentCheck):
         }
 
         # Common undefined functions we've found in tutorials
-        self.undefined_functions = [
-            "refresh_token", "get_new_token", "setup_client", "initialize_trading",
-            "custom_strategy", "your_function_here", "placeholder_function"
-        ]
+        self.undefined_functions = ["refresh_token", "get_new_token", "setup_client", "initialize_trading", "custom_strategy", "your_function_here", "placeholder_function"]
 
     def check_content(
         self,
@@ -84,12 +77,7 @@ class CodeExecutabilityCheck(ContentCheck):
                 block_start_line = line_num + 1
             elif line.strip() == "```" and in_python_block:
                 if current_block_lines:
-                    blocks.append({
-                        "content": "\n".join(current_block_lines),
-                        "start_line": block_start_line,
-                        "end_line": line_num - 1,
-                        "lines": current_block_lines
-                    })
+                    blocks.append({"content": "\n".join(current_block_lines), "start_line": block_start_line, "end_line": line_num - 1, "lines": current_block_lines})
                 in_python_block = False
             elif in_python_block:
                 current_block_lines.append(line)
@@ -129,7 +117,7 @@ class CodeExecutabilityCheck(ContentCheck):
         result: ValidationResult,
     ) -> None:
         """Check for placeholder patterns that indicate incomplete code."""
-        lines = code.split('\n')
+        lines = code.split("\n")
 
         for line_offset, line in enumerate(lines):
             for pattern in self.placeholder_patterns:
@@ -151,7 +139,7 @@ class CodeExecutabilityCheck(ContentCheck):
         result: ValidationResult,
     ) -> None:
         """Check for calls to undefined functions."""
-        lines = code.split('\n')
+        lines = code.split("\n")
 
         for line_offset, line in enumerate(lines):
             for func_name in self.undefined_functions:
@@ -181,7 +169,7 @@ class CodeExecutabilityCheck(ContentCheck):
             # Check if symbol is used but not imported
             if re.search(rf"\b{symbol}\b", code) and import_stmt not in code:
                 # Find the line where the symbol is first used
-                lines = code.split('\n')
+                lines = code.split("\n")
                 for line_offset, line in enumerate(lines):
                     if re.search(rf"\b{symbol}\b", line):
                         result.add_issue(
@@ -222,7 +210,7 @@ class CodeExecutabilityCheck(ContentCheck):
         result: ValidationResult,
     ) -> None:
         """Check for incomplete async patterns."""
-        lines = code.split('\n')
+        lines = code.split("\n")
 
         # Check for async client usage without proper context or await
         if "AsyncClient" in code:

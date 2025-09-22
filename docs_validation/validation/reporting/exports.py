@@ -173,7 +173,10 @@ class ReportExporter:
                     "duration": summary.total_duration,
                 },
                 "included_files": [
-                    "summary.json", "summary.html", "summary.md", "summary.csv",
+                    "summary.json",
+                    "summary.html",
+                    "summary.md",
+                    "summary.csv",
                 ],
             }
 
@@ -218,7 +221,7 @@ class ReportExporter:
         </head>
         <body>
             <h1>📊 Aggregated Validation Report</h1>
-            <p>Generated on: {data['timestamp']}</p>
+            <p>Generated on: {data["timestamp"]}</p>
 
             <div class="section">
                 <h2>📈 Check Statistics</h2>
@@ -241,12 +244,12 @@ class ReportExporter:
             html += f"""
                         <tr>
                             <td>{check_name}</td>
-                            <td>{stats['total_runs']}</td>
-                            <td>{stats['success_rate']:.1f}%</td>
-                            <td>{stats['average_issues_per_run']:.1f}</td>
-                            <td>{stats['average_duration']:.2f}s</td>
-                            <td class="error">{stats['errors']}</td>
-                            <td class="warning">{stats['warnings']}</td>
+                            <td>{stats["total_runs"]}</td>
+                            <td>{stats["success_rate"]:.1f}%</td>
+                            <td>{stats["average_issues_per_run"]:.1f}</td>
+                            <td>{stats["average_duration"]:.2f}s</td>
+                            <td class="error">{stats["errors"]}</td>
+                            <td class="warning">{stats["warnings"]}</td>
                         </tr>
             """
 
@@ -279,9 +282,9 @@ class ReportExporter:
                         <tr>
                             <td><code>{file_path}</code></td>
                             <td>{total_issues}</td>
-                            <td class="error">{severity_breakdown.get('error', 0)}</td>
-                            <td class="warning">{severity_breakdown.get('warning', 0)}</td>
-                            <td class="info">{severity_breakdown.get('info', 0)}</td>
+                            <td class="error">{severity_breakdown.get("error", 0)}</td>
+                            <td class="warning">{severity_breakdown.get("warning", 0)}</td>
+                            <td class="info">{severity_breakdown.get("info", 0)}</td>
                         </tr>
             """
 
@@ -394,7 +397,7 @@ class ReportExporter:
         """Generate Markdown for aggregated report."""
         md = f"""# 📊 Aggregated Validation Report
 
-Generated on: {data['timestamp']}
+Generated on: {data["timestamp"]}
 
 ## 📈 Check Statistics
 
@@ -452,18 +455,18 @@ Generated on: {data['timestamp']}
                 recent = perf_metrics["recent_metrics"]
                 md += f"""
 **Recent Performance** (last 5 runs):
-- Success Rate: {recent['success_rate']:.1f}%
-- Average Duration: {recent['average_duration']:.2f}s
-- Average Issues: {recent['average_issues']:.1f}
+- Success Rate: {recent["success_rate"]:.1f}%
+- Average Duration: {recent["average_duration"]:.2f}s
+- Average Issues: {recent["average_issues"]:.1f}
 """
 
             if "trends" in perf_metrics:
                 trend_data = perf_metrics["trends"]
                 md += f"""
 **Trends**:
-- Success Rate: {'+' if trend_data['success_rate_change'] >= 0 else ''}{trend_data['success_rate_change']:.1f}%
-- Duration: {'+' if trend_data['duration_change'] >= 0 else ''}{trend_data['duration_change']:.2f}s
-- Issues: {'+' if trend_data['issues_change'] >= 0 else ''}{trend_data['issues_change']:.1f}
+- Success Rate: {"+" if trend_data["success_rate_change"] >= 0 else ""}{trend_data["success_rate_change"]:.1f}%
+- Duration: {"+" if trend_data["duration_change"] >= 0 else ""}{trend_data["duration_change"]:.2f}s
+- Issues: {"+" if trend_data["issues_change"] >= 0 else ""}{trend_data["issues_change"]:.1f}
 """
 
         return md

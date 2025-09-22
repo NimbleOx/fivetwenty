@@ -293,11 +293,11 @@ class HTMLFormatter(BaseFormatter):
                     <div class="metric-label">Success Rate</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-value error">{severity_counts['error']}</div>
+                    <div class="metric-value error">{severity_counts["error"]}</div>
                     <div class="metric-label">Errors</div>
                 </div>
                 <div class="metric">
-                    <div class="metric-value warning">{severity_counts['warning']}</div>
+                    <div class="metric-value warning">{severity_counts["warning"]}</div>
                     <div class="metric-label">Warnings</div>
                 </div>
                 <div class="metric">
@@ -411,9 +411,9 @@ class MarkdownFormatter(BaseFormatter):
 
 | Severity | Count |
 |----------|-------|
-| Errors | 🔴 {severity_counts['error']} |
-| Warnings | 🟡 {severity_counts['warning']} |
-| Info | 🔵 {severity_counts['info']} |
+| Errors | 🔴 {severity_counts["error"]} |
+| Warnings | 🟡 {severity_counts["warning"]} |
+| Info | 🔵 {severity_counts["info"]} |
 
 ## Check Results
 
@@ -492,40 +492,61 @@ class CSVFormatter(BaseFormatter):
         writer = csv.writer(output)
 
         # Write header
-        writer.writerow([
-            "check_name", "status", "files_checked", "issues_found",
-            "duration_seconds", "severity", "message", "file_path",
-            "line_number", "column_number", "context", "suggestion",
-        ])
+        writer.writerow(
+            [
+                "check_name",
+                "status",
+                "files_checked",
+                "issues_found",
+                "duration_seconds",
+                "severity",
+                "message",
+                "file_path",
+                "line_number",
+                "column_number",
+                "context",
+                "suggestion",
+            ]
+        )
 
         # Write data
         for result in summary.results:
             if result.issues:
                 for issue in result.issues:
-                    writer.writerow([
+                    writer.writerow(
+                        [
+                            result.check_name,
+                            result.status.value,
+                            result.files_checked,
+                            result.issues_found,
+                            result.duration_seconds,
+                            issue.severity.value,
+                            issue.message,
+                            str(issue.file_path) if issue.file_path else "",
+                            getattr(issue, "line_number", None) or getattr(issue, "line", None) or "",
+                            getattr(issue, "column_number", None) or getattr(issue, "column", None) or "",
+                            issue.context or "",
+                            issue.suggestion or "",
+                        ]
+                    )
+            else:
+                # Write row for checks with no issues
+                writer.writerow(
+                    [
                         result.check_name,
                         result.status.value,
                         result.files_checked,
                         result.issues_found,
                         result.duration_seconds,
-                        issue.severity.value,
-                        issue.message,
-                        str(issue.file_path) if issue.file_path else "",
-                        getattr(issue, "line_number", None) or getattr(issue, "line", None) or "",
-                        getattr(issue, "column_number", None) or getattr(issue, "column", None) or "",
-                        issue.context or "",
-                        issue.suggestion or "",
-                    ])
-            else:
-                # Write row for checks with no issues
-                writer.writerow([
-                    result.check_name,
-                    result.status.value,
-                    result.files_checked,
-                    result.issues_found,
-                    result.duration_seconds,
-                    "", "", "", "", "", "", "",
-                ])
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                        "",
+                    ]
+                )
 
         return output.getvalue()
 
@@ -533,6 +554,7 @@ class CSVFormatter(BaseFormatter):
         """Format result as CSV (single check)."""
         # Create a mini-summary for this result
         from docs_validation.validation.core.results import ValidationSummary
+
         mini_summary = ValidationSummary(results=[result])
         return self.format_summary(mini_summary)
 
@@ -541,18 +563,27 @@ class CSVFormatter(BaseFormatter):
         output = StringIO()
         writer = csv.writer(output)
 
-        writer.writerow([
-            "severity", "message", "file_path", "line_number",
-            "column_number", "context", "suggestion",
-        ])
-        writer.writerow([
-            issue.severity.value,
-            issue.message,
-            str(issue.file_path) if issue.file_path else "",
-            getattr(issue, "line_number", None) or getattr(issue, "line", None) or "",
-            getattr(issue, "column_number", None) or getattr(issue, "column", None) or "",
-            issue.context or "",
-            issue.suggestion or "",
-        ])
+        writer.writerow(
+            [
+                "severity",
+                "message",
+                "file_path",
+                "line_number",
+                "column_number",
+                "context",
+                "suggestion",
+            ]
+        )
+        writer.writerow(
+            [
+                issue.severity.value,
+                issue.message,
+                str(issue.file_path) if issue.file_path else "",
+                getattr(issue, "line_number", None) or getattr(issue, "line", None) or "",
+                getattr(issue, "column_number", None) or getattr(issue, "column", None) or "",
+                issue.context or "",
+                issue.suggestion or "",
+            ]
+        )
 
         return output.getvalue()

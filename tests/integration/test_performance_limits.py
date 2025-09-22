@@ -223,10 +223,7 @@ class TestPerformanceAndLoad:
         for i in range(num_requests):
             try:
                 # Add timeout to each request
-                await asyncio.wait_for(
-                    sandbox_client.accounts.get_account_summary(test_account_id),
-                    timeout=10.0
-                )
+                await asyncio.wait_for(sandbox_client.accounts.get_account_summary(test_account_id), timeout=10.0)
                 if i % 5 == 0:  # Report more frequently
                     print(f"  Completed {i + 1} requests")
             except asyncio.TimeoutError:
@@ -247,10 +244,7 @@ class TestPerformanceAndLoad:
 
         # Add timeout to concurrent requests as well
         try:
-            concurrent_results = await asyncio.wait_for(
-                asyncio.gather(*concurrent_tasks, return_exceptions=True),
-                timeout=30.0
-            )
+            concurrent_results = await asyncio.wait_for(asyncio.gather(*concurrent_tasks, return_exceptions=True), timeout=30.0)
         except asyncio.TimeoutError:
             print("Concurrent requests timed out")
             concurrent_results = [Exception("Timeout") for _ in range(num_requests)]

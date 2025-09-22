@@ -100,7 +100,7 @@ class TestConsolidatedPositionOperations:
                     partial_close_response = await sandbox_client.trades.close_trade(
                         test_account_id,
                         trade_id,
-                        units="5"  # Close half
+                        units="5",  # Close half
                     )
 
                     if partial_close_response and partial_close_response.order_fill_transaction:

@@ -24,7 +24,6 @@ class TestPositionModels:
         assert position.margin_used == Decimal("100.00")
         assert position.resettable_pl == Decimal("5.00")
 
-
     def test_position_side(self) -> None:
         """Test PositionSide model."""
         position_side = PositionSide(units="1000", average_price="1.1000", pl="10.00", unrealized_pl="5.00", resettable_pl="10.00", trade_ids=["123", "124"])
@@ -32,7 +31,6 @@ class TestPositionModels:
         assert position_side.average_price == Decimal("1.1000")
         assert position_side.pl == Decimal("10.00")
         assert position_side.trade_ids == ["123", "124"]
-
 
     def test_calculated_position_state(self) -> None:
         """Test CalculatedPositionState model."""
@@ -42,4 +40,3 @@ class TestPositionModels:
         assert calc_state.long_unrealized_pl == Decimal("20.00")
         assert calc_state.short_unrealized_pl == Decimal("-5.00")
         assert calc_state.margin_used == Decimal("75.00")
-
