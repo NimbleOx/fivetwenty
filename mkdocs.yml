@@ -86,7 +86,15 @@ nav:
               - Strategy Building: tutorials/basic-trading/lesson-6-strategy-building.md
               - Complete System: tutorials/basic-trading/lesson-7-complete-system.md
           - Advanced Order Types: tutorials/advanced-orders.md
-          - Risk Management Fundamentals: tutorials/risk-management.md
+          - Risk Management:
+              - Overview: tutorials/risk-management/index.md
+              - Risk Management Fundamentals: tutorials/risk-management/fundamentals.md
+              - Position Sizing Strategies: tutorials/risk-management/position-sizing.md
+              - Stop Loss Strategies: tutorials/risk-management/stop-loss-strategies.md
+              - Portfolio Risk Management: tutorials/risk-management/portfolio-risk.md
+              - Automated Risk Controls: tutorials/risk-management/automated-controls.md
+              - Performance Optimization: tutorials/risk-management/performance-optimization.md
+              - Best Practices & Validation: tutorials/risk-management/best-practices.md
           - Portfolio Analysis:
               - Overview: tutorials/portfolio-analysis/index.md
               - Portfolio Theory: tutorials/portfolio-analysis/portfolio-theory.md
