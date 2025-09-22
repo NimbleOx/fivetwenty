@@ -1,26 +1,18 @@
-# How to Deploy SDK to Production
+# Container Deployment
 
-**Problem**: You need to deploy FiveTwenty applications to production with proper security, monitoring, and reliability.
+Deploy FiveTwenty applications using Docker containers with comprehensive monitoring and production-ready configuration.
 
-**Solution**: Implement production deployment best practices including containerization, environment management, monitoring, and failover strategies.
+## Overview
 
----
+Container deployment provides a lightweight, portable solution for running FiveTwenty trading applications in production. This approach uses Docker containers with supporting services for monitoring, data persistence, and security.
 
-## Prerequisites
+**Best for**: Small to medium trading operations, development teams familiar with containers, hybrid cloud deployments.
 
-- Working FiveTwenty application tested in practice environment
-- Live OANDA trading account with API access
-- Production server infrastructure (cloud or on-premises)
-- Understanding of containerization and deployment concepts
-- SSL certificates and domain setup (if applicable)
+## Environment Configuration
 
----
+### Production Configuration Management
 
-## Production Environment Setup
-
-### Environment Configuration
-
-Set up secure environment management:
+Create secure configuration management for containerized deployment:
 
 ```python
 # config/production.py
@@ -108,7 +100,7 @@ class ProductionConfig:
             validation_errors.append("SSL must be enabled for live trading")
 
         # Risk management validations
-        if self.daily_loss_limit <= 0:
+        if float(self.daily_loss_limit) <= 0:
             validation_errors.append("Daily loss limit must be positive")
 
         if self.max_position_size <= 0:
@@ -136,9 +128,38 @@ except Exception as e:
     exit(1)
 ```
 
-### Dockerfile for Production
+### Environment Variables File
 
-Create optimized Docker container:
+Create secure environment file:
+
+```bash
+# .env.production
+FIVETWENTY_LIVE_TOKEN=your_live_oanda_token_here
+FIVETWENTY_OANDA_ACCOUNT=your_account_id_here
+FIVETWENTY_OANDA_ENVIRONMENT=LIVE
+
+# Database Configuration
+POSTGRES_PASSWORD=secure_password_here
+DATABASE_URL=postgresql://trading:secure_password_here@postgres:5432/trading_prod
+
+# Redis Configuration
+REDIS_PASSWORD=secure_redis_password
+REDIS_URL=redis://:secure_redis_password@redis:6379
+
+# Monitoring
+SENTRY_DSN=your_sentry_dsn_here
+SLACK_WEBHOOK_URL=your_slack_webhook_here
+GRAFANA_PASSWORD=secure_grafana_password
+
+# Application Settings
+LOG_LEVEL=INFO
+MAX_POSITION_SIZE=100000
+DAILY_LOSS_LIMIT=1000.0000
+```
+
+## Dockerfile Configuration
+
+### Optimized Production Dockerfile
 
 ```dockerfile
 # Dockerfile
@@ -208,7 +229,24 @@ EXPOSE 8080 8081
 CMD ["python", "-m", "src.main"]
 ```
 
-### Docker Compose for Production Stack
+### Requirements File
+
+```txt
+# requirements.txt
+fivetwenty>=1.0.0
+asyncio>=3.4.3
+aiohttp>=3.8.0
+prometheus-client>=0.16.0
+sentry-sdk>=1.20.0
+uvloop>=0.17.0
+redis>=4.5.0
+psycopg2-binary>=2.9.0
+python-dotenv>=1.0.0
+```
+
+## Docker Compose Production Stack
+
+### Complete Production Stack
 
 ```yaml
 # docker-compose.prod.yml
@@ -226,7 +264,7 @@ services:
       - FIVETWENTY_OANDA_ACCOUNT=${FIVETWENTY_OANDA_ACCOUNT}
       - FIVETWENTY_OANDA_ENVIRONMENT=LIVE
       - DATABASE_URL=postgresql://trading:${POSTGRES_PASSWORD}@postgres:5432/trading_prod
-      - REDIS_URL=redis://redis:6379
+      - REDIS_URL=redis://:${REDIS_PASSWORD}@redis:6379
       - LOG_LEVEL=INFO
       - SENTRY_DSN=${SENTRY_DSN}
       - SLACK_WEBHOOK_URL=${SLACK_WEBHOOK_URL}
@@ -323,11 +361,9 @@ networks:
     driver: bridge
 ```
 
----
+## Production Application Code
 
-## Application Production Code
-
-### Production-Ready Main Application
+### Main Application with Health Checks
 
 ```python
 # src/main.py
@@ -335,7 +371,7 @@ import asyncio
 import logging
 import signal
 import sys
-from typing import Dict, List, Optional
+from typing import Optional
 from datetime import datetime
 import aiohttp
 from prometheus_client import Counter, Histogram, Gauge, start_http_server
@@ -407,16 +443,13 @@ class ProductionTradingSystem:
             await self.client.__aenter__()
 
             # Validate connection and account
-            accounts = await self.client.accounts.list()
-            if not accounts:
-                raise RuntimeError("No accounts found")
-
-            account_found = any(acc.id == self.config.account_id for acc in accounts)
-            if not account_found:
-                raise RuntimeError(f"Account {self.config.account_id} not found")
+            account = await self.client.accounts.get_account(
+                account_id=self.config.account_id
+            )
 
             self.logger.info(f"Connected to OANDA {self.config.fivetwenty_environment.value}")
             self.logger.info(f"Trading account: {self.config.account_id}")
+            self.logger.info(f"Account balance: {account.balance}")
 
             # Start monitoring servers
             await self._start_monitoring_servers()
@@ -457,7 +490,7 @@ class ProductionTradingSystem:
             if self.client and self.running:
                 # Simple API connectivity test
                 await asyncio.wait_for(
-                    self.client.accounts.list(),
+                    self.client.accounts.get_account(account_id=self.config.account_id),
                     timeout=5.0
                 )
 
@@ -482,7 +515,7 @@ class ProductionTradingSystem:
             )
 
     async def _readiness_check_handler(self, request):
-        """Readiness check for Kubernetes deployments."""
+        """Readiness check for container orchestration."""
 
         if self.running and self.client:
             return aiohttp.web.json_response({"status": "ready"}, status=200)
@@ -525,7 +558,9 @@ class ProductionTradingSystem:
 
         try:
             # Get account information
-            account = await self.client.accounts.get(self.config.account_id)
+            account = await self.client.accounts.get_account(
+                account_id=self.config.account_id
+            )
 
             # Update metrics
             ACCOUNT_BALANCE.set(float(account.balance))
@@ -538,22 +573,24 @@ class ProductionTradingSystem:
             self.logger.error(f"Metrics update error: {e}")
 
     async def _trading_cycle(self):
-        """Execute one trading cycle."""
-
-        # Placeholder for your trading strategy
-        # This is where you would implement your actual trading logic
+        """Execute one trading cycle - implement your strategy here."""
 
         try:
-            # Example: Check positions and manage risk
-            positions = await self.client.positions.list_open(self.config.account_id)
+            # Get current positions
+            positions = await self.client.positions.get_positions(
+                account_id=self.config.account_id
+            )
 
-            for position in positions:
-                # Risk management logic
-                unrealized_pl = float(position.unrealized_pl)
-                if unrealized_pl < -self.config.daily_loss_limit:
-                    await self._emergency_stop("Daily loss limit exceeded")
+            # Risk management check
+            total_unrealized_pl = sum(
+                float(pos.unrealized_pl or "0") for pos in positions.positions
+                if pos.unrealized_pl
+            )
 
-            self.logger.debug(f"Trading cycle completed - {len(positions)} positions")
+            if abs(total_unrealized_pl) > float(self.config.daily_loss_limit):
+                await self._emergency_stop("Daily loss limit exceeded")
+
+            self.logger.debug(f"Trading cycle completed - {len(positions.positions)} positions")
 
         except Exception as e:
             self.logger.error(f"Trading cycle error: {e}")
@@ -563,29 +600,10 @@ class ProductionTradingSystem:
         """Emergency stop all trading activities."""
 
         self.logger.critical(f"EMERGENCY STOP: {reason}")
+        await self._send_alert(f"EMERGENCY STOP EXECUTED: {reason}")
 
-        try:
-            # Close all positions
-            positions = await self.client.positions.list_open(self.config.account_id)
-
-            for position in positions:
-                await self.client.positions.close(
-                    self.config.account_id,
-                    position.instrument,
-                    long_units="ALL",
-                    short_units="ALL"
-                )
-
-            # Cancel all pending orders
-            orders = await self.client.orders.list_pending(self.config.account_id)
-            for order in orders:
-                await self.client.orders.cancel(self.config.account_id, order.id)
-
-            await self._send_alert(f"EMERGENCY STOP EXECUTED: {reason}")
-
-        except Exception as e:
-            self.logger.error(f"Emergency stop error: {e}")
-            await self._send_alert(f"EMERGENCY STOP FAILED: {e}")
+        # Stop main loop
+        self.running = False
 
     async def _send_alert(self, message: str):
         """Send alert notifications."""
@@ -595,7 +613,6 @@ class ProductionTradingSystem:
         # Send Slack notification if configured
         if self.config.slack_webhook_url:
             try:
-                import aiohttp
                 async with aiohttp.ClientSession() as session:
                     payload = {
                         "text": f"🚨 Trading Alert: {message}",
@@ -663,25 +680,22 @@ if __name__ == "__main__":
     sys.exit(exit_code)
 ```
 
----
-
 ## Deployment Scripts
 
 ### Production Deployment Script
 
 ```bash
 #!/bin/bash
-# deploy.sh - Production deployment script
+# deploy.sh - Container production deployment script
 
 set -e  # Exit on any error
 
 # Configuration
-APP_NAME="FiveTwenty-trading-system"
+APP_NAME="fivetwenty-trading-system"
 DEPLOY_ENV="production"
-DOCKER_REGISTRY="your-registry.com"
 VERSION=${1:-latest}
 
-echo "🚀 Starting production deployment of $APP_NAME:$VERSION"
+echo "🚀 Starting container deployment of $APP_NAME:$VERSION"
 
 # Pre-deployment checks
 echo "📋 Running pre-deployment checks..."
@@ -704,23 +718,18 @@ done
 
 echo "✅ Environment variables validated"
 
-# Build and tag Docker image
+# Build Docker image
 echo "🏗️ Building Docker image..."
-docker build -t $DOCKER_REGISTRY/$APP_NAME:$VERSION .
-docker tag $DOCKER_REGISTRY/$APP_NAME:$VERSION $DOCKER_REGISTRY/$APP_NAME:latest
+docker build -t $APP_NAME:$VERSION .
+docker tag $APP_NAME:$VERSION $APP_NAME:latest
 
-# Push to registry
-echo "📤 Pushing to registry..."
-docker push $DOCKER_REGISTRY/$APP_NAME:$VERSION
-docker push $DOCKER_REGISTRY/$APP_NAME:latest
+# Stop existing containers gracefully
+echo "🛑 Stopping existing containers..."
+docker-compose -f docker-compose.prod.yml down --timeout 30
 
-# Database migrations
-echo "🗃️ Running database migrations..."
-docker-compose -f docker-compose.prod.yml run --rm trading-app python -m alembic upgrade head
-
-# Deploy with zero-downtime
-echo "🔄 Deploying with rolling update..."
-docker-compose -f docker-compose.prod.yml up -d --no-deps --scale trading-app=2 trading-app
+# Start new deployment
+echo "🔄 Starting new deployment..."
+docker-compose -f docker-compose.prod.yml up -d
 
 # Wait for health check
 echo "🏥 Waiting for health check..."
@@ -733,120 +742,54 @@ for i in {1..30}; do
     sleep 10
 done
 
-# Scale down old instances
-docker-compose -f docker-compose.prod.yml up -d --scale trading-app=1
+if [ $i -eq 30 ]; then
+    echo "❌ Health check failed after 5 minutes"
+    exit 1
+fi
 
-echo "✅ Deployment completed successfully"
+# Verify deployment
+echo "🔍 Verifying deployment..."
+docker-compose -f docker-compose.prod.yml ps
 
-# Post-deployment verification
-echo "🔍 Running post-deployment tests..."
-python scripts/deployment_tests.py --env production
-
-echo "🎉 Production deployment of $APP_NAME:$VERSION completed!"
+echo "✅ Container deployment completed successfully"
+echo "📊 Access monitoring at:"
+echo "   - Metrics: http://localhost:9090"
+echo "   - Grafana: http://localhost:3000"
+echo "   - Health: http://localhost:8081/health"
 ```
 
-### Kubernetes Deployment
+### Backup Script
 
-```yaml
-# k8s/deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: FiveTwenty-trading-system
-  labels:
-    app: FiveTwenty-trading-system
-spec:
-  replicas: 2
-  selector:
-    matchLabels:
-      app: FiveTwenty-trading-system
-  template:
-    metadata:
-      labels:
-        app: FiveTwenty-trading-system
-    spec:
-      containers:
-      - name: trading-app
-        image: your-registry.com/FiveTwenty-trading-system:latest
-        ports:
-        - containerPort: 8080
-          name: metrics
-        - containerPort: 8081
-          name: health
-        env:
-        - name: FIVETWENTY_LIVE_TOKEN
-          valueFrom:
-            secretKeyRef:
-              name: OANDA-secrets
-              key: live-token
-        - name: FIVETWENTY_OANDA_ACCOUNT
-          valueFrom:
-            secretKeyRef:
-              name: OANDA-secrets
-              key: account-id
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: db-secrets
-              key: url
-        resources:
-          requests:
-            memory: "1Gi"
-            cpu: "500m"
-          limits:
-            memory: "2Gi"
-            cpu: "1000m"
-        livenessProbe:
-          httpGet:
-            path: /health
-            port: 8081
-          initialDelaySeconds: 30
-          periodSeconds: 10
-        readinessProbe:
-          httpGet:
-            path: /ready
-            port: 8081
-          initialDelaySeconds: 5
-          periodSeconds: 5
-        volumeMounts:
-        - name: logs
-          mountPath: /app/logs
-      volumes:
-      - name: logs
-        persistentVolumeClaim:
-          claimName: trading-logs-pvc
-      restartPolicy: Always
+```bash
+#!/bin/bash
+# backup.sh - Database and configuration backup
 
----
-apiVersion: v1
-kind: Service
-metadata:
-  name: OANDA-trading-service
-spec:
-  selector:
-    app: FiveTwenty-trading-system
-  ports:
-  - name: metrics
-    port: 8080
-    targetPort: 8080
-  - name: health
-    port: 8081
-    targetPort: 8081
+BACKUP_DIR="/backups/$(date +%Y-%m-%d)"
+DB_NAME="trading_prod"
 
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: OANDA-secrets
-type: Opaque
-data:
-  live-token: <base64-encoded-token>
-  account-id: <base64-encoded-account-id>
+mkdir -p $BACKUP_DIR
+
+# Create database backup
+echo "📁 Creating database backup..."
+docker-compose -f docker-compose.prod.yml exec -T postgres pg_dump -U trading $DB_NAME | gzip > $BACKUP_DIR/db_backup_$(date +%H%M%S).sql.gz
+
+# Backup configuration files
+echo "📋 Backing up configuration..."
+cp -r config $BACKUP_DIR/
+cp docker-compose.prod.yml $BACKUP_DIR/
+cp .env.production $BACKUP_DIR/
+
+# Backup logs
+echo "📝 Backing up logs..."
+cp -r logs $BACKUP_DIR/
+
+echo "✅ Backup completed successfully to $BACKUP_DIR"
+
+# Cleanup old backups (keep 7 days)
+find /backups -type d -mtime +7 -exec rm -rf {} \;
 ```
 
----
-
-## Monitoring and Observability
+## Monitoring Configuration
 
 ### Prometheus Configuration
 
@@ -860,7 +803,7 @@ rule_files:
   - "trading_alerts.yml"
 
 scrape_configs:
-  - job_name: 'FiveTwenty-trading-system'
+  - job_name: 'fivetwenty-trading-system'
     static_configs:
       - targets: ['trading-app:8080']
     metrics_path: /metrics
@@ -881,418 +824,129 @@ alerting:
           - alertmanager:9093
 ```
 
-### Grafana Dashboard Configuration
+### Alert Rules
 
-```json
-{
-  "dashboard": {
-    "title": "OANDA Trading System",
-    "panels": [
-      {
-        "title": "Account Balance",
-        "type": "stat",
-        "targets": [
-          {
-            "expr": "account_balance",
-            "legendFormat": "Balance"
-          }
-        ]
-      },
-      {
-        "title": "Active Positions",
-        "type": "stat",
-        "targets": [
-          {
-            "expr": "active_positions_total",
-            "legendFormat": "Positions"
-          }
-        ]
-      },
-      {
-        "title": "API Request Rate",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "rate(oanda_requests_total[5m])",
-            "legendFormat": "Requests/sec"
-          }
-        ]
-      },
-      {
-        "title": "Request Latency",
-        "type": "graph",
-        "targets": [
-          {
-            "expr": "histogram_quantile(0.95, rate(oanda_request_duration_seconds_bucket[5m]))",
-            "legendFormat": "95th percentile"
-          }
-        ]
-      }
-    ]
-  }
-}
+```yaml
+# monitoring/trading_alerts.yml
+groups:
+  - name: trading_alerts
+    rules:
+      - alert: AccountBalanceLow
+        expr: account_balance < 5000
+        for: 1m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Account balance is low"
+          description: "Account balance is {{ $value }}"
+
+      - alert: TradingSystemDown
+        expr: up{job="fivetwenty-trading-system"} == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Trading system is down"
+          description: "Trading system has been down for more than 30 seconds"
+
+      - alert: HighErrorRate
+        expr: rate(oanda_requests_total{status="error"}[5m]) > 0.1
+        for: 2m
+        labels:
+          severity: warning
+        annotations:
+          summary: "High API error rate"
+          description: "Error rate is {{ $value }} errors per second"
 ```
 
----
+## Security Considerations
 
-## Security Best Practices
+### Container Security Best Practices
 
-### Secrets Management
+1. **Non-root User**: Always run containers as non-root user
+2. **Minimal Base Image**: Use slim or alpine base images
+3. **Security Scanning**: Scan images for vulnerabilities
+4. **Secrets Management**: Never include secrets in images
+5. **Network Isolation**: Use custom networks for service isolation
 
-```python
-from fivetwenty import AsyncClient, Environment
+### SSL/TLS Configuration
 
-# src/security/secrets.py
-import os
-import boto3
-from typing import Dict, Optional
-import logging
+```yaml
+# docker-compose.ssl.yml
+services:
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "443:443"
+      - "80:80"
+    volumes:
+      - ./ssl:/etc/nginx/ssl
+      - ./nginx.conf:/etc/nginx/nginx.conf
+    depends_on:
+      - trading-app
+    networks:
+      - trading-network
 
-class SecretsManager:
-    """Secure secrets management for production."""
-
-    def __init__(self, provider: str = "env"):
-        self.provider = provider
-        self.logger = logging.getLogger(__name__)
-
-        if provider == "aws":
-            self.secrets_client = boto3.client('secretsmanager')
-        elif provider == "vault":
-            # HashiCorp Vault integration
-            pass
-
-    def get_secret(self, secret_name: str) -> Optional[str]:
-        """Retrieve secret securely."""
-
-        try:
-            if self.provider == "env":
-                return os.getenv(secret_name)
-
-            elif self.provider == "aws":
-                response = self.secrets_client.get_secret_value(SecretId=secret_name)
-                return response['SecretString']
-
-            elif self.provider == "vault":
-                # Implement Vault retrieval
-                pass
-
-        except Exception as e:
-            self.logger.error(f"Failed to retrieve secret {secret_name}: {e}")
-            return None
-
-    def rotate_token(self, old_token: str, new_token: str) -> bool:
-        """Implement token rotation."""
-
-        try:
-            # Validate new token
-            test_client = AsyncClient(token=new_token, environment=Environment.PRACTICE)
-            accounts = await test_client.accounts.list()
-
-            if accounts:
-                # Update secret store
-                if self.provider == "aws":
-                    self.secrets_client.update_secret(
-                        SecretId="FIVETWENTY_LIVE_TOKEN",
-                        SecretString=new_token
-                    )
-
-                self.logger.info("Token rotation successful")
-                return True
-            else:
-                self.logger.error("New token validation failed")
-                return False
-
-        except Exception as e:
-            self.logger.error(f"Token rotation failed: {e}")
-            return False
-
-# Network security
-def configure_ssl_context():
-    """Configure secure SSL context."""
-
-    import ssl
-
-    context = ssl.create_default_context()
-    context.minimum_version = ssl.TLSVersion.TLSv1_2
-    context.set_ciphers('ECDHE+AESGCM:ECDHE+CHACHA20:DHE+AESGCM:DHE+CHACHA20:!aNULL:!MD5:!DSS')
-
-    return context
+  trading-app:
+    # Remove port exposure - access through nginx only
+    ports: []
+    # ... rest of configuration
 ```
 
----
+## Troubleshooting
 
-## Backup and Disaster Recovery
+### Common Container Issues
 
-### Database Backup Strategy
-
+**Health Check Failures**:
 ```bash
-#!/bin/bash
-# backup.sh - Database backup script
+# Check application logs
+docker-compose -f docker-compose.prod.yml logs trading-app
 
-BACKUP_DIR="/backups/$(date +%Y-%m-%d)"
-DB_NAME="trading_prod"
-S3_BUCKET="your-backup-bucket"
-
-mkdir -p $BACKUP_DIR
-
-# Create database backup
-echo "📁 Creating database backup..."
-pg_dump -h postgres -U trading $DB_NAME | gzip > $BACKUP_DIR/db_backup_$(date +%H%M%S).sql.gz
-
-# Backup configuration files
-echo "📋 Backing up configuration..."
-cp -r /app/config $BACKUP_DIR/
-cp docker-compose.prod.yml $BACKUP_DIR/
-
-# Upload to S3
-echo "☁️ Uploading to S3..."
-aws s3 sync $BACKUP_DIR s3://$S3_BUCKET/$(date +%Y-%m-%d)/
-
-# Cleanup old backups (keep 30 days)
-find /backups -type d -mtime +30 -exec rm -rf {} \;
-
-echo "✅ Backup completed successfully"
+# Check health endpoint directly
+curl -v http://localhost:8081/health
 ```
 
-### Disaster Recovery Plan
-
-```python
-# scripts/disaster_recovery.py
-import asyncio
-import logging
-from typing import List, Dict
-from fivetwenty import AsyncClient, Environment
-
-class DisasterRecoveryManager:
-    """Manage disaster recovery procedures."""
-
-    def __init__(self, primary_config: dict, backup_config: dict):
-        self.primary_config = primary_config
-        self.backup_config = backup_config
-        self.logger = logging.getLogger(__name__)
-
-    async def check_system_health(self) -> bool:
-        """Check if primary system is healthy."""
-
-        try:
-            async with AsyncClient(
-                token=self.primary_config['token'],
-                environment=Environment.LIVE
-            ) as client:
-                accounts = await client.accounts.list()
-                return len(accounts) > 0
-
-        except Exception as e:
-            self.logger.error(f"Health check failed: {e}")
-            return False
-
-    async def initiate_failover(self) -> bool:
-        """Initiate failover to backup system."""
-
-        self.logger.critical("INITIATING DISASTER RECOVERY FAILOVER")
-
-        try:
-            # 1. Stop primary system
-            await self._stop_primary_system()
-
-            # 2. Start backup system
-            await self._start_backup_system()
-
-            # 3. Verify backup system
-            if await self._verify_backup_system():
-                self.logger.info("Failover completed successfully")
-                return True
-            else:
-                self.logger.error("Backup system verification failed")
-                return False
-
-        except Exception as e:
-            self.logger.error(f"Failover failed: {e}")
-            return False
-
-    async def _stop_primary_system(self):
-        """Emergency stop primary system."""
-
-        # Close all positions
-        async with AsyncClient(
-            token=self.primary_config['token'],
-            environment=Environment.LIVE
-        ) as client:
-
-            positions = await client.positions.list_open(self.primary_config['account_id'])
-            for position in positions:
-                await client.positions.close(
-                    self.primary_config['account_id'],
-                    position.instrument,
-                    long_units="ALL",
-                    short_units="ALL"
-                )
-
-    async def _start_backup_system(self):
-        """Start backup trading system."""
-
-        # Implementation depends on your backup infrastructure
-        # This could involve starting backup containers, switching DNS, etc.
-        pass
-
-    async def _verify_backup_system(self) -> bool:
-        """Verify backup system is operational."""
-
-        try:
-            async with AsyncClient(
-                token=self.backup_config['token'],
-                environment=Environment.LIVE
-            ) as client:
-
-                account = await client.accounts.get(self.backup_config['account_id'])
-                return float(account.balance) > 0
-
-        except Exception:
-            return False
-
-# Monitoring script for automated failover
-async def disaster_recovery_monitor():
-    """Monitor system and trigger failover if needed."""
-
-    dr_manager = DisasterRecoveryManager(primary_config, backup_config)
-
-    consecutive_failures = 0
-    max_failures = 3
-
-    while True:
-        try:
-            if await dr_manager.check_system_health():
-                consecutive_failures = 0
-                print("✅ System healthy")
-            else:
-                consecutive_failures += 1
-                print(f"❌ Health check failed ({consecutive_failures}/{max_failures})")
-
-                if consecutive_failures >= max_failures:
-                    print("🚨 Initiating disaster recovery failover...")
-                    await dr_manager.initiate_failover()
-                    break
-
-        except Exception as e:
-            print(f"Monitoring error: {e}")
-
-        await asyncio.sleep(30)  # Check every 30 seconds
-```
-
----
-
-## Performance Optimization
-
-### Production Performance Tuning
-
-```python
-# src/performance/optimization.py
-import asyncio
-import uvloop  # High-performance event loop
-import gc
-from typing import Dict, Any
-
-class ProductionOptimizer:
-    """Production performance optimizations."""
-
-    @staticmethod
-    def optimize_event_loop():
-        """Install high-performance event loop."""
-
-        try:
-            # Use uvloop for better performance on Linux
-            import uvloop
-            asyncio.set_event_loop_policy(uvloop.EventLoopPolicy())
-            print("✅ uvloop installed for better performance")
-        except ImportError:
-            print("⚠️ uvloop not available, using default event loop")
-
-    @staticmethod
-    def optimize_garbage_collection():
-        """Optimize garbage collection for production."""
-
-        # Disable automatic GC for predictable latency
-        gc.disable()
-
-        # Set more aggressive thresholds
-        gc.set_threshold(700, 10, 10)
-        print("✅ Garbage collection optimized")
-
-    @staticmethod
-    def optimize_process_settings():
-        """Optimize process settings for trading."""
-
-        import os
-        import resource
-
-        # Increase file descriptor limit
-        try:
-            resource.setrlimit(resource.RLIMIT_NOFILE, (65536, 65536))
-            print("✅ File descriptor limit increased")
-        except Exception as e:
-            print(f"⚠️ Could not set file descriptor limit: {e}")
-
-        # Set process priority
-        try:
-            os.nice(-10)  # Higher priority
-            print("✅ Process priority increased")
-        except Exception as e:
-            print(f"⚠️ Could not set process priority: {e}")
-
-    @classmethod
-    def apply_all_optimizations(cls):
-        """Apply all production optimizations."""
-
-        print("🚀 Applying production optimizations...")
-        cls.optimize_event_loop()
-        cls.optimize_garbage_collection()
-        cls.optimize_process_settings()
-        print("✅ All optimizations applied")
-
-# Apply optimizations at startup
-ProductionOptimizer.apply_all_optimizations()
-```
-
----
-
-## Final Production Checklist
-
-### Pre-Deployment Checklist
-
+**Database Connection Issues**:
 ```bash
-#!/bin/bash
-# production_checklist.sh
+# Check PostgreSQL logs
+docker-compose -f docker-compose.prod.yml logs postgres
 
-echo "📋 Production Deployment Checklist"
-echo "=================================="
-
-checks=(
-    "Environment variables configured"
-    "SSL certificates installed"
-    "Database migrations completed"
-    "Backup strategy implemented"
-    "Monitoring configured"
-    "Alert notifications setup"
-    "Security scans passed"
-    "Load testing completed"
-    "Disaster recovery tested"
-    "Documentation updated"
-)
-
-for check in "${checks[@]}"; do
-    echo "☐ $check"
-done
-
-echo ""
-echo "⚠️ IMPORTANT REMINDERS:"
-echo "• Verify you're using LIVE tokens for production"
-echo "• Confirm risk management limits are appropriate"
-echo "• Ensure emergency stop procedures are tested"
-echo "• Validate all alert channels are working"
-echo "• Double-check account permissions and balances"
-echo ""
-echo "🚨 This system will trade with REAL MONEY"
-echo "   Ensure all safety measures are in place!"
+# Test database connection
+docker-compose -f docker-compose.prod.yml exec postgres psql -U trading -d trading_prod -c "SELECT 1;"
 ```
 
-**Task Complete**: Production deployment guide provides comprehensive infrastructure, security, monitoring, and reliability strategies for deploying FiveTwenty applications to production environments.
+**Memory Issues**:
+```bash
+# Monitor container resource usage
+docker stats
+
+# Check application metrics
+curl http://localhost:8080/metrics | grep memory
+```
+
+### Performance Optimization
+
+1. **Resource Limits**: Set appropriate CPU and memory limits
+2. **Volume Mounts**: Use volumes for persistent data
+3. **Network Optimization**: Use custom networks for better performance
+4. **Log Management**: Implement log rotation and cleanup
+
+## Maintenance Procedures
+
+### Regular Maintenance Tasks
+
+1. **Daily**: Check health status and logs
+2. **Weekly**: Review metrics and performance
+3. **Monthly**: Update base images and dependencies
+4. **Quarterly**: Security audit and penetration testing
+
+### Scaling Considerations
+
+For higher throughput requirements:
+
+1. **Horizontal Scaling**: Run multiple container instances
+2. **Load Balancing**: Use nginx or HAProxy
+3. **Database Optimization**: Consider read replicas
+4. **Caching**: Implement Redis caching strategies
+
+Container deployment provides a robust, portable solution for production FiveTwenty trading applications with comprehensive monitoring and security features.

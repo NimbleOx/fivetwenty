@@ -143,7 +143,14 @@ nav:
               - Streaming Optimization: how-to-guides/hft-optimization/streaming-optimization.md
               - Memory & CPU Optimization: how-to-guides/hft-optimization/memory-cpu-optimization.md
               - Latency Optimization: how-to-guides/hft-optimization/latency-optimization.md
-          - Deploy SDK to Production: how-to-guides/deploy-sdk-to-production.md
+          - Production Deployment:
+              - Overview: how-to-guides/production-deployment/index.md
+              - Container Deployment: how-to-guides/production-deployment/container-deployment.md
+              - Cloud Deployment: how-to-guides/production-deployment/cloud-deployment.md
+              - Kubernetes Deployment: how-to-guides/production-deployment/kubernetes-deployment.md
+              - Bare Metal Deployment: how-to-guides/production-deployment/bare-metal-deployment.md
+              - Security & Compliance: how-to-guides/production-deployment/security-compliance.md
+              - Monitoring & Observability: how-to-guides/production-deployment/monitoring-observability.md
           - Data Integration:
               - Overview: how-to-guides/data-integration/index.md
               - Economic Calendar: how-to-guides/data-integration/economic-calendar.md
