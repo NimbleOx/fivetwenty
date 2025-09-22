@@ -69,10 +69,10 @@ The SDK provides two client types addressing different use cases:
 #### AsyncClient (Primary)
 - **Target Users**: Production applications, web services, algorithmic trading
 - **Advantages**: High performance, natural streaming, concurrent operations
-- **Trade-offs**: Requires async/await knowledge, more complex for simple scripts
+- **Trade-offs**: Requires async/await knowledge, more complex for basic scripts
 
 #### Client (Convenience Wrapper)
-- **Target Users**: Scripts, notebooks, simple applications, learning
+- **Target Users**: Scripts, notebooks, basic applications, learning
 - **Advantages**: Familiar synchronous interface, easier for beginners
 - **Trade-offs**: Lower performance, threading overhead, no native streaming
 
@@ -349,7 +349,7 @@ client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], ...)
 **Benefits**:
 - **No Accidental Commits**: Tokens never in source code
 - **Explicit**: Clear where credentials are used
-- **Rotation**: Easy to change tokens without code changes
+- **Rotation**: Straightforward to change tokens without code changes
 
 ### Environment Separation
 
@@ -426,7 +426,7 @@ class ExtendedClient(AsyncClient):
 ### Performance vs. Simplicity
 - **Choice**: Async-first for performance
 - **Trade-off**: More complex for beginners
-- **Mitigation**: Synchronous wrapper for simple use cases
+- **Mitigation**: Synchronous wrapper for basic use cases
 
 ### Type Safety vs. Flexibility
 - **Choice**: Strong typing with Pydantic
