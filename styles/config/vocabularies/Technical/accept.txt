@@ -25,3 +25,13 @@ backoff
 back-off
 mis-configurations
 pre-commit
+# Technical terms often flagged as false positives
+dive
+execution
+destroy
+pool
+illegal
+mental
+terminate
+minimize
+multiple
