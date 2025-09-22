@@ -47,7 +47,7 @@ market_response = await client.orders.post_market_order(
     instrument="EUR_USD",
     units=1000
 )
-trade_id = market_response.order_fill_transaction['tradeOpened']['tradeID']
+trade_id = market_response.order_fill_transaction['tradeOpened']["tradeID"]
 
 tp_request = TakeProfitOrderRequest(tradeID=trade_id, price="1.1100")
 await client.orders.post_order(account_id, tp_request)
@@ -90,7 +90,7 @@ async def implement_post_trade_risk_management():
         # Extract trade ID from response
         if (market_response.order_fill_transaction and
             'tradeOpened' in market_response.order_fill_transaction):
-            trade_id = market_response.order_fill_transaction['tradeOpened']['tradeID']
+            trade_id = market_response.order_fill_transaction['tradeOpened']["tradeID"]
             print(f"Trade created: {trade_id}")
 
             # Step 2: Add take profit order
