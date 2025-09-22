@@ -9,10 +9,8 @@ Based on lessons learned from fixing 169 validation issues in tutorials.
 
 import ast
 import re
-import sys
-import importlib.util
 from pathlib import Path
-from typing import List, Dict, Any, Set
+from typing import Any
 
 from core.base import BaseValidator, ValidationResult
 
@@ -87,16 +85,16 @@ class CodeExecutabilityValidator(BaseValidator):
             duration_seconds=self.get_elapsed_time(),
         )
 
-    def _find_tutorial_files(self) -> List[Path]:
+    def _find_tutorial_files(self) -> list[Path]:
         """Find all tutorial files to validate."""
         tutorial_files = []
 
         for pattern in self.file_patterns:
-            tutorial_files.extend(Path(".").glob(pattern))
+            tutorial_files.extend(Path().glob(pattern))
 
         return [f for f in tutorial_files if f.is_file()]
 
-    def _validate_file_executability(self, file_path: Path) -> tuple[List[Dict[str, Any]], int]:
+    def _validate_file_executability(self, file_path: Path) -> tuple[list[dict[str, Any]], int]:
         """Validate executability of code blocks in a single file."""
         issues = []
         blocks_checked = 0
@@ -147,7 +145,7 @@ class CodeExecutabilityValidator(BaseValidator):
 
         return issues, blocks_checked
 
-    def _extract_code_blocks(self, content: str) -> List[tuple[str, int]]:
+    def _extract_code_blocks(self, content: str) -> list[tuple[str, int]]:
         """Extract Python code blocks with line numbers."""
         blocks = []
         lines = content.split('\n')
@@ -176,7 +174,7 @@ class CodeExecutabilityValidator(BaseValidator):
 
         return blocks
 
-    def _clean_indentation(self, lines: List[str], base_indent: int) -> List[str]:
+    def _clean_indentation(self, lines: list[str], base_indent: int) -> list[str]:
         """Clean up indentation from markdown admonition blocks."""
         cleaned = []
         for line in lines:
@@ -197,12 +195,9 @@ class CodeExecutabilityValidator(BaseValidator):
                 return True
 
         # Very short examples (likely incomplete)
-        if len(code.strip()) < 10:
-            return True
+        return len(code.strip()) < 10
 
-        return False
-
-    def _check_syntax(self, code: str, block_num: int, line_start: int) -> List[Dict[str, Any]]:
+    def _check_syntax(self, code: str, block_num: int, line_start: int) -> list[dict[str, Any]]:
         """Check Python syntax."""
         issues = []
 
@@ -228,7 +223,7 @@ class CodeExecutabilityValidator(BaseValidator):
 
         return issues
 
-    def _check_undefined_references(self, code: str, block_num: int, line_start: int) -> List[Dict[str, Any]]:
+    def _check_undefined_references(self, code: str, block_num: int, line_start: int) -> list[dict[str, Any]]:
         """Check for undefined functions and variables."""
         issues = []
 
@@ -236,19 +231,16 @@ class CodeExecutabilityValidator(BaseValidator):
             tree = ast.parse(code)
 
             # Extract defined names (functions, variables, imports)
-            defined_names: Set[str] = set()
-            used_names: Set[str] = set()
+            defined_names: set[str] = set()
+            used_names: set[str] = set()
 
             for node in ast.walk(tree):
                 # Track definitions
-                if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                if isinstance(node, ast.FunctionDef | ast.ClassDef):
                     defined_names.add(node.name)
                 elif isinstance(node, ast.Name) and isinstance(node.ctx, ast.Store):
                     defined_names.add(node.id)
-                elif isinstance(node, ast.Import):
-                    for alias in node.names:
-                        defined_names.add(alias.asname or alias.name)
-                elif isinstance(node, ast.ImportFrom):
+                elif isinstance(node, ast.Import | ast.ImportFrom):
                     for alias in node.names:
                         defined_names.add(alias.asname or alias.name)
 
@@ -297,7 +289,7 @@ class CodeExecutabilityValidator(BaseValidator):
 
         return issues
 
-    def _check_import_completeness(self, code: str, block_num: int, line_start: int) -> List[Dict[str, Any]]:
+    def _check_import_completeness(self, code: str, block_num: int, line_start: int) -> list[dict[str, Any]]:
         """Check that all required imports are present."""
         issues = []
 
@@ -321,7 +313,7 @@ class CodeExecutabilityValidator(BaseValidator):
 
         return issues
 
-    def _check_async_consistency(self, code: str, block_num: int, line_start: int) -> List[Dict[str, Any]]:
+    def _check_async_consistency(self, code: str, block_num: int, line_start: int) -> list[dict[str, Any]]:
         """Check async/await consistency."""
         issues = []
 
@@ -353,7 +345,7 @@ class CodeExecutabilityValidator(BaseValidator):
 
         return issues
 
-    def _log_issues(self, file_path: Path, issues: List[Dict[str, Any]]):
+    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]):
         """Log issues found in a file."""
         if not issues:
             return

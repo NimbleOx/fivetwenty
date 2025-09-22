@@ -7,6 +7,7 @@ import ast
 import re
 from pathlib import Path
 
+
 def extract_python_code_blocks(content: str) -> list[tuple[str, int]]:
     """Extract Python code blocks from markdown content."""
     blocks = []
@@ -184,7 +185,7 @@ def main():
                 if 'line' in issue:
                     print(f"      Line {issue['line']}, Block {issue.get('block', '?')}")
         else:
-            print(f"  ✅ No issues found")
+            print("  ✅ No issues found")
 
         total_issues += len(result['issues'])
 

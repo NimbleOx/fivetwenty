@@ -139,10 +139,7 @@ class CodeExampleValidator(FileValidator):  # type: ignore[misc]
             return True
 
         # Skip bad examples (they're meant to show what NOT to do)
-        if any(marker in code for marker in bad_example_markers):
-            return True
-
-        return False
+        return bool(any(marker in code for marker in bad_example_markers))
 
     def _check_syntax(self, file_path: Path, code: str, line_start: int, block_num: int) -> None:
         """Check Python syntax of code block."""
@@ -299,7 +296,6 @@ class CodeExampleValidator(FileValidator):  # type: ignore[misc]
             r"client\.pricing\.\w+\(",
         ]
 
-        has_await_keyword = "await" in code
         has_async_def = "async def" in code
 
         for pattern in async_methods:

@@ -6,20 +6,20 @@ Generates comprehensive validation reports with metrics, trends, and actionable 
 Based on lessons learned from explanation and how-to-guides validation.
 """
 
+import argparse
 import json
 import sys
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Dict, List
-import argparse
+from typing import Any
 
 # Add the validation directory to the path for imports
 validation_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_dir))
 
 try:
-    from core.runner import ValidationRunner, ValidatorRegistry
     from core.config import ValidationConfig
+    from core.runner import ValidationRunner, ValidatorRegistry
     from validators import *
 except ImportError as e:
     print(f"Import error: {e}")
@@ -29,12 +29,12 @@ except ImportError as e:
 class ValidationReportGenerator:
     """Generate comprehensive validation reports."""
 
-    def __init__(self, output_dir: Path = None):
+    def __init__(self, output_dir: Path | None = None):
         self.output_dir = output_dir or Path("docs-tooling/validation/reports")
         self.output_dir.mkdir(parents=True, exist_ok=True)
         self.timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
 
-    def generate_comprehensive_report(self, target_dirs: List[str] = None) -> str:
+    def generate_comprehensive_report(self, target_dirs: list[str] | None = None) -> str:
         """Generate a comprehensive validation report for all documentation sections."""
 
         target_dirs = target_dirs or [
@@ -57,7 +57,7 @@ class ValidationReportGenerator:
             "trends": {}
         }
 
-        print(f"🔍 Generating comprehensive validation report...")
+        print("🔍 Generating comprehensive validation report...")
         print(f"📂 Target directories: {', '.join(target_dirs)}")
 
         # Run validation for each section
@@ -77,7 +77,7 @@ class ValidationReportGenerator:
         print(f"\n✅ Validation report generated: {report_path}")
         return report_path
 
-    def _validate_section(self, section_path: str) -> Dict[str, Any]:
+    def _validate_section(self, section_path: str) -> dict[str, Any]:
         """Validate a specific documentation section."""
 
         # Define section-specific validator sets based on our lessons learned
@@ -139,7 +139,7 @@ class ValidationReportGenerator:
 
         return registry
 
-    def _format_result(self, result) -> Dict[str, Any]:
+    def _format_result(self, result) -> dict[str, Any]:
         """Format validation result for reporting."""
         return {
             "validator": result.validator_name,
@@ -150,14 +150,14 @@ class ValidationReportGenerator:
             "details": result.details
         }
 
-    def _generate_summary(self, section_reports: Dict[str, Any]) -> Dict[str, Any]:
+    def _generate_summary(self, section_reports: dict[str, Any]) -> dict[str, Any]:
         """Generate overall summary statistics."""
         total_issues = 0
         total_files = 0
         sections_passed = 0
         sections_failed = 0
 
-        for section, report in section_reports.items():
+        for report in section_reports.values():
             if report.get("status") == "passed":
                 sections_passed += 1
             else:
@@ -176,7 +176,7 @@ class ValidationReportGenerator:
             "success_rate": round((sections_passed / len(section_reports)) * 100, 2) if section_reports else 0
         }
 
-    def _identify_critical_issues(self, section_reports: Dict[str, Any]) -> List[Dict[str, Any]]:
+    def _identify_critical_issues(self, section_reports: dict[str, Any]) -> list[dict[str, Any]]:
         """Identify critical issues requiring immediate attention."""
         critical_issues = []
 
@@ -196,7 +196,7 @@ class ValidationReportGenerator:
 
         return sorted(critical_issues, key=lambda x: x["issues_count"], reverse=True)
 
-    def _generate_recommendations(self, report_data: Dict[str, Any]) -> List[str]:
+    def _generate_recommendations(self, report_data: dict[str, Any]) -> list[str]:
         """Generate actionable recommendations based on validation results."""
         recommendations = []
 
@@ -226,7 +226,7 @@ class ValidationReportGenerator:
 
         return recommendations
 
-    def _save_reports(self, report_data: Dict[str, Any]) -> str:
+    def _save_reports(self, report_data: dict[str, Any]) -> str:
         """Save reports in multiple formats."""
         base_filename = f"validation_report_{self.timestamp}"
 
@@ -246,12 +246,12 @@ class ValidationReportGenerator:
 
         return str(md_path)
 
-    def _generate_markdown_report(self, report_data: Dict[str, Any]) -> str:
+    def _generate_markdown_report(self, report_data: dict[str, Any]) -> str:
         """Generate human-readable markdown report."""
         md = []
 
         # Header
-        md.append(f"# FiveTwenty Documentation Validation Report")
+        md.append("# FiveTwenty Documentation Validation Report")
         md.append(f"**Generated:** {report_data['metadata']['timestamp']}")
         md.append(f"**Directories:** {', '.join(report_data['metadata']['target_directories'])}")
         md.append("")
@@ -296,7 +296,7 @@ class ValidationReportGenerator:
 
         return '\n'.join(md)
 
-    def _generate_csv_summary(self, report_data: Dict[str, Any], csv_path: Path) -> None:
+    def _generate_csv_summary(self, report_data: dict[str, Any], csv_path: Path) -> None:
         """Generate CSV summary for analysis."""
         import csv
 

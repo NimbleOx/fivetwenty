@@ -232,7 +232,7 @@ class CodeLintingValidator(FileValidator):  # type: ignore[misc]
             # Run ruff check
             result = subprocess.run(
                 ['ruff', 'check', temp_path, '--output-format', 'json'],
-                capture_output=True,
+                check=False, capture_output=True,
                 text=True
             )
 
@@ -266,7 +266,7 @@ class CodeLintingValidator(FileValidator):  # type: ignore[misc]
                             suggestion="Review code formatting and style"
                         )
 
-        except Exception as e:
+        except Exception:
             # Don't fail validation if ruff isn't available
             pass
         finally:
@@ -306,10 +306,7 @@ class CodeLintingValidator(FileValidator):  # type: ignore[misc]
             'S101',    # Use of assert detected
         ]
 
-        if issue_code in style_codes_to_skip:
-            return True
-
-        return False
+        return issue_code in style_codes_to_skip
 
     def _add_linting_issue(self, file_path: Path, issue_type: str, message: str,
                           line: int, severity: str, suggestion: str = "", code: str = "") -> None:

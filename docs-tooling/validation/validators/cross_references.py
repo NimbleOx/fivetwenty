@@ -100,8 +100,7 @@ class CrossReferenceValidator(FileValidator):  # type: ignore[misc]
         anchor = re.sub(r'[^\w\s-]', '', heading_text.lower())
         anchor = re.sub(r'[\s_]+', '-', anchor)
         # Remove leading/trailing hyphens
-        anchor = anchor.strip('-')
-        return anchor
+        return anchor.strip('-')
 
     def _check_file_references(self, file_path: Path) -> int:
         """Check cross-references in a single file. Returns number of references checked."""
@@ -178,10 +177,7 @@ class CrossReferenceValidator(FileValidator):  # type: ignore[misc]
             return True
 
         # Check for relative paths
-        if url.startswith(('./', '../')) or not url.startswith('/'):
-            return True
-
-        return False
+        return bool(url.startswith(('./', '../')) or not url.startswith('/'))
 
     def _validate_internal_link(self, file_path: Path, link_text: str, link_url: str, line_num: int) -> None:
         """Validate an internal link."""

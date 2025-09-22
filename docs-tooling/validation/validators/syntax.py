@@ -95,7 +95,7 @@ class SyntaxValidator(FileValidator):  # type: ignore[misc]
             # Check for malformed bullet lists
             if stripped.startswith(("-", "*", "+")):
                 # Skip markdown formatting (bold/italic) - these start with multiple * or _
-                if stripped.startswith("**") or stripped.startswith("__"):
+                if stripped.startswith(("**", "__")):
                     continue
 
                 # Skip horizontal rules (---, ***, +++)

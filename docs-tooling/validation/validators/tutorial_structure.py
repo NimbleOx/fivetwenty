@@ -8,7 +8,7 @@ for progressive learning. Based on lessons learned from comprehensive tutorial v
 
 import re
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 from core.base import BaseValidator, ValidationResult
 
@@ -74,16 +74,16 @@ class TutorialStructureValidator(BaseValidator):
             duration_seconds=self.get_elapsed_time(),
         )
 
-    def _find_tutorial_files(self) -> List[Path]:
+    def _find_tutorial_files(self) -> list[Path]:
         """Find all tutorial files to validate."""
         tutorial_files = []
 
         for pattern in self.file_patterns:
-            tutorial_files.extend(Path(".").glob(pattern))
+            tutorial_files.extend(Path().glob(pattern))
 
         return [f for f in tutorial_files if f.is_file()]
 
-    def _validate_tutorial_file(self, file_path: Path) -> List[Dict[str, Any]]:
+    def _validate_tutorial_file(self, file_path: Path) -> list[dict[str, Any]]:
         """Validate structure of a single tutorial file."""
         issues = []
 
@@ -116,7 +116,7 @@ class TutorialStructureValidator(BaseValidator):
 
         return issues
 
-    def _check_educational_structure(self, content: str, file_path: Path) -> List[Dict[str, Any]]:
+    def _check_educational_structure(self, content: str, file_path: Path) -> list[dict[str, Any]]:
         """Check for required educational content structure."""
         issues = []
         content_lower = content.lower()
@@ -153,7 +153,7 @@ class TutorialStructureValidator(BaseValidator):
 
         return issues
 
-    def _check_learning_progression(self, content: str, file_path: Path) -> List[Dict[str, Any]]:
+    def _check_learning_progression(self, content: str, file_path: Path) -> list[dict[str, Any]]:
         """Check for proper learning progression indicators."""
         issues = []
 
@@ -189,7 +189,7 @@ class TutorialStructureValidator(BaseValidator):
 
         return issues
 
-    def _check_tutorial_formatting(self, content: str, file_path: Path) -> List[Dict[str, Any]]:
+    def _check_tutorial_formatting(self, content: str, file_path: Path) -> list[dict[str, Any]]:
         """Check for proper tutorial-specific formatting."""
         issues = []
 
@@ -225,7 +225,7 @@ class TutorialStructureValidator(BaseValidator):
 
         return issues
 
-    def _check_code_progression(self, content: str, file_path: Path) -> List[Dict[str, Any]]:
+    def _check_code_progression(self, content: str, file_path: Path) -> list[dict[str, Any]]:
         """Check for proper code example progression in tutorials."""
         issues = []
 
@@ -267,7 +267,7 @@ class TutorialStructureValidator(BaseValidator):
 
         return issues
 
-    def _log_issues(self, file_path: Path, issues: List[Dict[str, Any]]):
+    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]):
         """Log issues found in a file."""
         if not issues:
             return

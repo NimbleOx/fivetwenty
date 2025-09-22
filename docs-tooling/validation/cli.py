@@ -16,19 +16,19 @@ sys.path.insert(0, str(validation_dir))
 try:
     from core.config import ValidationConfig  # type: ignore[import-not-found]
     from core.runner import ValidationRunner, ValidatorRegistry  # type: ignore[import-not-found]
+    from validators.code_examples import CodeExampleValidator  # type: ignore[import-not-found]
+    from validators.code_executability import CodeExecutabilityValidator  # type: ignore[import-not-found]
+    from validators.code_linting import CodeLintingValidator  # type: ignore[import-not-found]
+    from validators.cross_references import CrossReferenceValidator  # type: ignore[import-not-found]
+    from validators.educational_progression import EducationalProgressionValidator  # type: ignore[import-not-found]
+    from validators.financial_precision import FinancialPrecisionValidator  # type: ignore[import-not-found]
     from validators.links import LinkValidator  # type: ignore[import-not-found]
     from validators.prose import ProseValidator  # type: ignore[import-not-found]
     from validators.sdk_methods import SDKMethodValidator  # type: ignore[import-not-found]
     from validators.security import SecurityValidator  # type: ignore[import-not-found]
     from validators.syntax import SyntaxValidator  # type: ignore[import-not-found]
     from validators.terminology import TerminologyValidator  # type: ignore[import-not-found]
-    from validators.code_examples import CodeExampleValidator  # type: ignore[import-not-found]
-    from validators.code_linting import CodeLintingValidator  # type: ignore[import-not-found]
-    from validators.cross_references import CrossReferenceValidator  # type: ignore[import-not-found]
-    from validators.financial_precision import FinancialPrecisionValidator  # type: ignore[import-not-found]
     from validators.tutorial_structure import TutorialStructureValidator  # type: ignore[import-not-found]
-    from validators.educational_progression import EducationalProgressionValidator  # type: ignore[import-not-found]
-    from validators.code_executability import CodeExecutabilityValidator  # type: ignore[import-not-found]
     # from validators.endpoint_accuracy import EndpointAccuracyValidator  # type: ignore[import-not-found]
     # from validators.model_accuracy import ModelAccuracyValidator  # type: ignore[import-not-found]
 except ImportError as e:
@@ -144,7 +144,7 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
     if args.watch:
         cmd.append("--watch")
     if args.sections:
-        cmd.extend(["--sections"] + args.sections)
+        cmd.extend(["--sections", *args.sections])
     if args.data_dir:
         cmd.extend(["--data-dir", args.data_dir])
     if args.report:
@@ -153,7 +153,7 @@ def cmd_dashboard(args: argparse.Namespace) -> int:
         cmd.extend(["--export", args.export])
 
     try:
-        result = subprocess.run(cmd)
+        result = subprocess.run(cmd, check=False)
         return result.returncode
     except Exception as e:
         print(f"❌ Dashboard error: {e}")
@@ -171,12 +171,12 @@ def cmd_autofix(args: argparse.Namespace) -> int:
     if args.apply:
         cmd.append("--apply")
     if args.patterns:
-        cmd.extend(["--patterns"] + args.patterns)
+        cmd.extend(["--patterns", *args.patterns])
     if args.report:
         cmd.extend(["--report", args.report])
 
     try:
-        result = subprocess.run(cmd)
+        result = subprocess.run(cmd, check=False)
         return result.returncode
     except Exception as e:
         print(f"❌ Auto-fix error: {e}")
@@ -193,12 +193,12 @@ def cmd_report(args: argparse.Namespace) -> int:
     if args.output_dir:
         cmd.extend(["--output-dir", args.output_dir])
     if args.sections:
-        cmd.extend(["--sections"] + args.sections)
+        cmd.extend(["--sections", *args.sections])
     if args.format:
         cmd.extend(["--format", args.format])
 
     try:
-        result = subprocess.run(cmd)
+        result = subprocess.run(cmd, check=False)
         return result.returncode
     except Exception as e:
         print(f"❌ Report generation error: {e}")

@@ -6,12 +6,11 @@ Automatically fixes common validation issues based on patterns discovered
 during explanation and how-to-guides validation.
 """
 
+import argparse
 import re
 import sys
 from pathlib import Path
-from typing import List, Dict, Tuple, Any
-import argparse
-import ast
+from typing import Any
 
 # Add the validation directory to the path for imports
 validation_dir = Path(__file__).parent.parent
@@ -26,7 +25,7 @@ class DocumentationAutoFixer:
         self.fixes_applied = []
         self.backup_suffix = ".bak"
 
-    def fix_directory(self, target_dir: str, patterns: List[str] = None) -> Dict[str, Any]:
+    def fix_directory(self, target_dir: str, patterns: list[str] | None = None) -> dict[str, Any]:
         """Fix all markdown files in a directory."""
         target_path = Path(target_dir)
         if not target_path.exists():
@@ -67,9 +66,9 @@ class DocumentationAutoFixer:
 
         return results
 
-    def _fix_file(self, file_path: Path, patterns: List[str]) -> Dict[str, Any]:
+    def _fix_file(self, file_path: Path, patterns: list[str]) -> dict[str, Any]:
         """Fix issues in a single markdown file."""
-        with open(file_path, 'r', encoding='utf-8') as f:
+        with open(file_path, encoding='utf-8') as f:
             original_content = f.read()
 
         content = original_content
@@ -112,7 +111,7 @@ class DocumentationAutoFixer:
             "fixes_applied": fixes_applied
         }
 
-    def _fix_financial_precision(self, content: str) -> Tuple[str, List[Dict[str, Any]]]:
+    def _fix_financial_precision(self, content: str) -> tuple[str, list[dict[str, Any]]]:
         """Fix financial precision issues."""
         fixes = []
 
@@ -144,7 +143,7 @@ class DocumentationAutoFixer:
                 "type": "float_arithmetic_to_decimal",
                 "original": match.group(0),
                 "fixed": f'{var_name} * Decimal("{value}")',
-                "description": f"Converted float arithmetic to use Decimal for precision"
+                "description": "Converted float arithmetic to use Decimal for precision"
             })
             return f'{var_name} * Decimal("{value}")'
 
@@ -152,14 +151,14 @@ class DocumentationAutoFixer:
 
         return content, fixes
 
-    def _fix_missing_imports(self, content: str) -> Tuple[str, List[Dict[str, Any]]]:
+    def _fix_missing_imports(self, content: str) -> tuple[str, list[dict[str, Any]]]:
         """Fix missing import statements in code blocks."""
         fixes = []
 
         # Extract all Python code blocks
         python_blocks = self._extract_python_code_blocks(content)
 
-        for block_start, block_end, code in python_blocks:
+        for _block_start, _block_end, code in python_blocks:
             # Check what imports are needed
             needed_imports = []
 
@@ -178,7 +177,7 @@ class DocumentationAutoFixer:
             # Add missing imports
             if needed_imports:
                 # Find the start of the code block (after ```python)
-                lines = code.split('\n')
+                code.split('\n')
 
                 # Insert imports at the beginning
                 imports_to_add = []
@@ -205,7 +204,7 @@ class DocumentationAutoFixer:
 
         return content, fixes
 
-    def _fix_deprecated_patterns(self, content: str) -> Tuple[str, List[Dict[str, Any]]]:
+    def _fix_deprecated_patterns(self, content: str) -> tuple[str, list[dict[str, Any]]]:
         """Fix deprecated SDK patterns."""
         fixes = []
 
@@ -232,12 +231,12 @@ class DocumentationAutoFixer:
                 fixes.append({
                     "pattern": "deprecated-patterns",
                     "type": "placeholder_function",
-                    "description": f"Replaced placeholder function with implementation note"
+                    "description": "Replaced placeholder function with implementation note"
                 })
 
         return content, fixes
 
-    def _extract_python_code_blocks(self, content: str) -> List[Tuple[int, int, str]]:
+    def _extract_python_code_blocks(self, content: str) -> list[tuple[int, int, str]]:
         """Extract Python code blocks with their positions."""
         blocks = []
         lines = content.split('\n')
@@ -260,7 +259,7 @@ class DocumentationAutoFixer:
 
         return blocks
 
-    def generate_fix_report(self, results: Dict[str, Any]) -> str:
+    def generate_fix_report(self, results: dict[str, Any]) -> str:
         """Generate a summary report of fixes applied."""
         report = []
 
@@ -294,13 +293,12 @@ class DocumentationAutoFixer:
         report.append("## Recommendations")
         if results["total_fixes"] == 0:
             report.append("- ✅ No issues found! Documentation meets validation standards.")
+        elif self.dry_run:
+            report.append("- 🔧 Run again with `--apply` to apply the fixes")
         else:
-            if self.dry_run:
-                report.append("- 🔧 Run again with `--apply` to apply the fixes")
-            else:
-                report.append("- ✅ Fixes have been applied successfully")
-                report.append("- 📋 Run validation again to verify all issues are resolved")
-                report.append("- 🗃️ Backup files created with .bak extension")
+            report.append("- ✅ Fixes have been applied successfully")
+            report.append("- 📋 Run validation again to verify all issues are resolved")
+            report.append("- 🗃️ Backup files created with .bak extension")
 
         return '\n'.join(report)
 
@@ -344,11 +342,10 @@ def main():
         # Return appropriate exit code
         if results["errors"]:
             return 1
-        elif results["total_fixes"] > 0 and not args.apply:
+        if results["total_fixes"] > 0 and not args.apply:
             print(f"\n💡 Found {results['total_fixes']} fixable issues. Run with --apply to fix them.")
             return 0
-        else:
-            return 0
+        return 0
 
     except Exception as e:
         print(f"❌ Error running auto-fix: {e}")

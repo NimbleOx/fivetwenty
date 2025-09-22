@@ -9,7 +9,7 @@ Based on lessons learned from comprehensive tutorial validation.
 
 import re
 from pathlib import Path
-from typing import List, Dict, Any
+from typing import Any
 
 from core.base import BaseValidator, ValidationResult
 
@@ -76,16 +76,16 @@ class EducationalProgressionValidator(BaseValidator):
             duration_seconds=self.get_elapsed_time(),
         )
 
-    def _find_tutorial_files(self) -> List[Path]:
+    def _find_tutorial_files(self) -> list[Path]:
         """Find all tutorial files to validate."""
         tutorial_files = []
 
         for pattern in self.file_patterns:
-            tutorial_files.extend(Path(".").glob(pattern))
+            tutorial_files.extend(Path().glob(pattern))
 
         return [f for f in tutorial_files if f.is_file()]
 
-    def _validate_tutorial_progression(self, file_path: Path) -> List[Dict[str, Any]]:
+    def _validate_tutorial_progression(self, file_path: Path) -> list[dict[str, Any]]:
         """Validate progression of a single tutorial file."""
         issues = []
 
@@ -124,17 +124,16 @@ class EducationalProgressionValidator(BaseValidator):
     def _determine_skill_level(self, file_path: Path, content: str) -> str:
         """Determine the intended skill level of a tutorial."""
         path_str = str(file_path).lower()
-        content_lower = content.lower()
+        content.lower()
 
         # Check path indicators
         if "getting-started" in path_str or "first" in path_str or "installation" in path_str:
             return "beginner"
-        elif "advanced" in path_str or "risk" in path_str or "portfolio" in path_str:
+        if "advanced" in path_str or "risk" in path_str or "portfolio" in path_str:
             return "advanced"
-        else:
-            return "intermediate"
+        return "intermediate"
 
-    def _check_complexity_appropriateness(self, content: str, file_path: Path, skill_level: str) -> List[Dict[str, Any]]:
+    def _check_complexity_appropriateness(self, content: str, file_path: Path, skill_level: str) -> list[dict[str, Any]]:
         """Check if complexity matches intended skill level."""
         issues = []
         complexity_config = self.complexity_patterns[skill_level]
@@ -162,13 +161,13 @@ class EducationalProgressionValidator(BaseValidator):
                         "type": "excessive_imports",
                         "severity": "info",
                         "message": f"Code block {i+1} has {imports} imports, which may overwhelm {skill_level} learners",
-                        "suggestion": f"Consider introducing imports gradually or explaining their purpose",
+                        "suggestion": "Consider introducing imports gradually or explaining their purpose",
                         "file": str(file_path)
                     })
 
         return issues
 
-    def _check_internal_progression(self, content: str, file_path: Path) -> List[Dict[str, Any]]:
+    def _check_internal_progression(self, content: str, file_path: Path) -> list[dict[str, Any]]:
         """Check progression within a single tutorial."""
         issues = []
         code_blocks = re.findall(r'```python\n(.*?)\n```', content, re.DOTALL)
@@ -209,7 +208,7 @@ class EducationalProgressionValidator(BaseValidator):
 
         return issues
 
-    def _check_prerequisite_alignment(self, content: str, file_path: Path, skill_level: str) -> List[Dict[str, Any]]:
+    def _check_prerequisite_alignment(self, content: str, file_path: Path, skill_level: str) -> list[dict[str, Any]]:
         """Check if prerequisites match skill level."""
         issues = []
         content_lower = content.lower()
@@ -233,7 +232,7 @@ class EducationalProgressionValidator(BaseValidator):
 
         return issues
 
-    def _check_learning_scaffolding(self, content: str, file_path: Path) -> List[Dict[str, Any]]:
+    def _check_learning_scaffolding(self, content: str, file_path: Path) -> list[dict[str, Any]]:
         """Check for proper learning scaffolding techniques."""
         issues = []
 
@@ -277,7 +276,7 @@ class EducationalProgressionValidator(BaseValidator):
 
         return issues
 
-    def _log_issues(self, file_path: Path, issues: List[Dict[str, Any]]):
+    def _log_issues(self, file_path: Path, issues: list[dict[str, Any]]):
         """Log issues found in a file."""
         if not issues:
             return

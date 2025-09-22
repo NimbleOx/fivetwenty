@@ -6,21 +6,21 @@ Real-time validation metrics dashboard with trend analysis and quality monitorin
 Based on comprehensive lessons learned from explanation and how-to-guides validation.
 """
 
+import argparse
 import json
 import sys
+import time
 from datetime import datetime, timedelta
 from pathlib import Path
-from typing import Any, Dict, List, Optional
-import argparse
-import time
+from typing import Any
 
 # Add the validation directory to the path for imports
 validation_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(validation_dir))
 
 try:
-    from core.runner import ValidationRunner, ValidatorRegistry
     from core.config import ValidationConfig
+    from core.runner import ValidationRunner, ValidatorRegistry
     from validators import *
 except ImportError as e:
     print(f"Import error: {e}")
@@ -30,12 +30,12 @@ except ImportError as e:
 class ValidationDashboard:
     """Real-time validation metrics dashboard with trend analysis."""
 
-    def __init__(self, data_dir: Path = None):
+    def __init__(self, data_dir: Path | None = None):
         self.data_dir = data_dir or Path("docs-tooling/validation/dashboard-data")
         self.data_dir.mkdir(parents=True, exist_ok=True)
         self.metrics_file = self.data_dir / "metrics_history.json"
 
-    def run_dashboard(self, watch_mode: bool = False, sections: List[str] = None) -> None:
+    def run_dashboard(self, watch_mode: bool = False, sections: list[str] | None = None) -> None:
         """Run the validation dashboard."""
 
         sections = sections or [
@@ -53,14 +53,14 @@ class ValidationDashboard:
             try:
                 while True:
                     self._run_validation_cycle(sections)
-                    print(f"\n⏰ Next check in 30 seconds...")
+                    print("\n⏰ Next check in 30 seconds...")
                     time.sleep(30)
             except KeyboardInterrupt:
                 print("\n👋 Dashboard stopped.")
         else:
             self._run_validation_cycle(sections)
 
-    def _run_validation_cycle(self, sections: List[str]) -> None:
+    def _run_validation_cycle(self, sections: list[str]) -> None:
         """Run one validation cycle and update dashboard."""
 
         cycle_data = {
@@ -112,7 +112,7 @@ class ValidationDashboard:
         # Show quality assessment
         self._display_quality_assessment(cycle_data["summary"])
 
-    def _validate_section(self, section_path: str) -> Dict[str, Any]:
+    def _validate_section(self, section_path: str) -> dict[str, Any]:
         """Validate a specific documentation section with optimized validators."""
 
         # Section-specific validator sets based on lessons learned
@@ -183,7 +183,7 @@ class ValidationDashboard:
 
         return registry
 
-    def _format_result(self, result) -> Dict[str, Any]:
+    def _format_result(self, result) -> dict[str, Any]:
         """Format validation result for dashboard."""
         return {
             "validator": result.validator_name,
@@ -193,12 +193,12 @@ class ValidationDashboard:
             "duration": round(result.duration_seconds, 2)
         }
 
-    def _save_metrics(self, cycle_data: Dict[str, Any]) -> None:
+    def _save_metrics(self, cycle_data: dict[str, Any]) -> None:
         """Save metrics to historical data file."""
 
         # Load existing metrics
         if self.metrics_file.exists():
-            with open(self.metrics_file, 'r') as f:
+            with open(self.metrics_file) as f:
                 history = json.load(f)
         else:
             history = {"cycles": []}
@@ -220,7 +220,7 @@ class ValidationDashboard:
         if not self.metrics_file.exists():
             return
 
-        with open(self.metrics_file, 'r') as f:
+        with open(self.metrics_file) as f:
             history = json.load(f)
 
         cycles = history.get("cycles", [])
@@ -254,10 +254,10 @@ class ValidationDashboard:
             elif current_issues > avg_issues * 1.2:
                 print("   ⚠️  Quality declining (Above 10-cycle average)")
 
-    def _display_quality_assessment(self, summary: Dict[str, Any]) -> None:
+    def _display_quality_assessment(self, summary: dict[str, Any]) -> None:
         """Display overall quality assessment with recommendations."""
 
-        print(f"\n🎯 Quality Assessment:")
+        print("\n🎯 Quality Assessment:")
 
         total_issues = summary["total_issues"]
         critical_issues = summary["critical_issues"]
@@ -298,7 +298,7 @@ class ValidationDashboard:
         if not self.metrics_file.exists():
             return "No historical data available."
 
-        with open(self.metrics_file, 'r') as f:
+        with open(self.metrics_file) as f:
             history = json.load(f)
 
         cycles = history.get("cycles", [])
@@ -354,7 +354,7 @@ class ValidationDashboard:
         # Critical issues analysis
         if any(critical_issues):
             report.append("## Critical Issues Alert")
-            report.append(f"⚠️  Found critical financial/import issues in validation cycles")
+            report.append("⚠️  Found critical financial/import issues in validation cycles")
             report.append("These issues can cause monetary errors or code execution failures.")
             report.append("")
 
@@ -382,18 +382,17 @@ class ValidationDashboard:
 
         if format == "json":
             return str(self.metrics_file)
-        elif format == "csv":
+        if format == "csv":
             csv_path = self.data_dir / "metrics_export.csv"
             self._export_to_csv(csv_path)
             return str(csv_path)
-        else:
-            return "Unsupported format. Use 'json' or 'csv'."
+        return "Unsupported format. Use 'json' or 'csv'."
 
     def _export_to_csv(self, csv_path: Path) -> None:
         """Export metrics to CSV format."""
         import csv
 
-        with open(self.metrics_file, 'r') as f:
+        with open(self.metrics_file) as f:
             history = json.load(f)
 
         cycles = history.get("cycles", [])

@@ -12,6 +12,7 @@ sys.path.insert(0, str(validation_dir))
 
 from validators.code_examples import CodeExampleValidator
 
+
 def main():
     """Run code examples validator and show detailed issues in tutorials."""
     print("🔍 Running code examples validator on tutorials directory...")
@@ -25,7 +26,7 @@ def main():
     # Run validation
     result = validator.validate()
 
-    print(f"\n📊 Validation Results:")
+    print("\n📊 Validation Results:")
     print(f"   Status: {result.status}")
     print(f"   Issues Found: {result.issues_found}")
     print(f"   Total Code Blocks Checked: {result.total_checked}")
