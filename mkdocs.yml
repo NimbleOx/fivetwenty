@@ -79,8 +79,24 @@ nav:
           - Basic Trading Concepts: tutorials/basic-trading.md
           - Advanced Order Types: tutorials/advanced-orders.md
           - Risk Management Fundamentals: tutorials/risk-management.md
-          - Portfolio Analysis Basics: tutorials/portfolio-analysis.md
-          - Working with Streaming Data: tutorials/streaming-data.md
+          - Portfolio Analysis:
+              - Overview: tutorials/portfolio-analysis/index.md
+              - Portfolio Theory: tutorials/portfolio-analysis/portfolio-theory.md
+              - Data Collection: tutorials/portfolio-analysis/data-collection.md
+              - Portfolio Optimization: tutorials/portfolio-analysis/portfolio-optimization.md
+              - Risk Attribution: tutorials/portfolio-analysis/risk-attribution.md
+              - Performance Attribution: tutorials/portfolio-analysis/performance-attribution.md
+              - Portfolio Rebalancing: tutorials/portfolio-analysis/portfolio-rebalancing.md
+              - Best Practices: tutorials/portfolio-analysis/best-practices.md
+          - Streaming Data:
+              - Overview: tutorials/streaming-data/index.md
+              - Streaming Fundamentals: tutorials/streaming-data/streaming-fundamentals.md
+              - Basic Streaming: tutorials/streaming-data/basic-streaming.md
+              - Advanced Data Management: tutorials/streaming-data/advanced-data-management.md
+              - Signal Generation: tutorials/streaming-data/signal-generation.md
+              - Automated Trading: tutorials/streaming-data/automated-trading.md
+              - Advanced Features: tutorials/streaming-data/advanced-features.md
+              - Best Practices: tutorials/streaming-data/best-practices.md
           - Decimal Best Practices: tutorials/decimal-best-practices.md
       - Interactive Examples:
           - "Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
@@ -97,7 +113,12 @@ nav:
           - Manage Orders Effectively: how-to-guides/manage-orders-effectively.md
       - Advanced Operations:
           - Implement Stop-Loss Strategies: how-to-guides/implement-stop-loss-strategies.md
-          - Optimize High-Frequency Trading: how-to-guides/optimize-high-frequency-trading.md
+          - HFT Optimization:
+              - Overview: how-to-guides/hft-optimization/index.md
+              - Connection Optimization: how-to-guides/hft-optimization/connection-optimization.md
+              - Streaming Optimization: how-to-guides/hft-optimization/streaming-optimization.md
+              - Memory & CPU Optimization: how-to-guides/hft-optimization/memory-cpu-optimization.md
+              - Latency Optimization: how-to-guides/hft-optimization/latency-optimization.md
           - Deploy SDK to Production: how-to-guides/deploy-sdk-to-production.md
           - Data Integration:
               - Overview: how-to-guides/data-integration/index.md
