@@ -1,3 +1,10 @@
+/* Logo sizing */
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 1.5rem;
+  width: auto;
+}
+
 /* Multi-column footer styling */
 .footer-links {
   display: grid;
@@ -11,7 +18,7 @@
 .footer-column h4 {
   margin: 0 0 0.5rem 0;
   font-weight: 600;
-  color: var(--md-default-fg-color);
+  color: rgba(255, 255, 255, 0.87);
   font-size: 0.9rem;
 }
 
