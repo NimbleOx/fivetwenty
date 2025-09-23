@@ -57,12 +57,12 @@ async def sandbox_client(integration_config, test_account_id):
         async def track_order_creation(original_method, *args, **kwargs):
             """Wrapper to track order creation."""
             response = await original_method(*args, **kwargs)
-            if response and hasattr(response, "order_create_transaction") and response.order_create_transaction:
+            if response and hasattr(response, 'order_create_transaction') and response.order_create_transaction:
                 order_id = response.order_create_transaction.get("id")
                 if order_id:
                     created_order_ids.append(order_id)
             # Also track trades created from market orders
-            if response and hasattr(response, "order_fill_transaction") and response.order_fill_transaction:
+            if response and hasattr(response, 'order_fill_transaction') and response.order_fill_transaction:
                 fill_tx = response.order_fill_transaction
                 if "tradeOpened" in fill_tx and "tradeID" in fill_tx["tradeOpened"]:
                     trade_id = fill_tx["tradeOpened"]["tradeID"]
@@ -104,7 +104,10 @@ async def sandbox_client(integration_config, test_account_id):
         # Clean up trades
         for trade_id in created_trade_ids:
             try:
-                close_response = await client.trades.close_trade(account_id=test_account_id, trade_specifier=trade_id)
+                close_response = await client.trades.close_trade(
+                    account_id=test_account_id,
+                    trade_specifier=trade_id
+                )
                 if close_response:
                     trade_cleanup_count += 1
             except Exception:
@@ -252,7 +255,10 @@ class CleanupTracker:
         for trade_id in self.created_trades[:]:  # Copy list to avoid modification during iteration
             try:
                 # Try to close the trade
-                close_response = await self.client.trades.close_trade(account_id=self.account_id, trade_specifier=trade_id)
+                close_response = await self.client.trades.close_trade(
+                    account_id=self.account_id,
+                    trade_specifier=trade_id
+                )
                 if close_response:
                     cleanup_count += 1
                 self.created_trades.remove(trade_id)
@@ -299,7 +305,7 @@ async def auto_cleanup_orders(sandbox_client, test_account_id):
     async def track_order_creation(original_method, *args, **kwargs):
         """Wrapper to track order creation."""
         response = await original_method(*args, **kwargs)
-        if response and hasattr(response, "order_create_transaction") and response.order_create_transaction:
+        if response and hasattr(response, 'order_create_transaction') and response.order_create_transaction:
             order_id = response.order_create_transaction.get("id")
             if order_id:
                 created_order_ids.append(order_id)

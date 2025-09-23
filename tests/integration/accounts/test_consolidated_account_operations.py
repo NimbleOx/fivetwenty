@@ -148,8 +148,7 @@ class TestConsolidatedAccountOperations:
 
         # Comprehensive instrument validation
         assert eur_usd.name == "EUR_USD"
-        assert eur_usd.display_name is not None
-        assert len(eur_usd.display_name) > 0
+        assert eur_usd.display_name is not None and len(eur_usd.display_name) > 0
         assert eur_usd.type is not None
 
         # Precision and pip location validation
@@ -178,7 +177,9 @@ class TestConsolidatedAccountOperations:
         print(f"  EUR_USD validation passed - Min trade: {eur_usd.minimum_trade_size}, Margin rate: {eur_usd.margin_rate}")
 
         # Single API call to test filtering functionality
-        filtered_instruments_response = await sandbox_client.accounts.get_account_instruments(test_account_id, instruments=["EUR_USD", "GBP_USD"])
+        filtered_instruments_response = await sandbox_client.accounts.get_account_instruments(
+            test_account_id, instruments=["EUR_USD", "GBP_USD"]
+        )
 
         filtered_instruments = filtered_instruments_response["instruments"]
         assert len(filtered_instruments) == 2, f"Expected 2 instruments, got {len(filtered_instruments)}"
@@ -194,4 +195,4 @@ class TestConsolidatedAccountOperations:
         print(f"  Filtering validation passed - Got {filtered_names}")
         print(f"  Available instrument types: {sorted(instrument_types)}")
 
-        print("✓ Account instruments and configuration test completed")
+        print(f"✓ Account instruments and configuration test completed")

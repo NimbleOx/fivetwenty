@@ -104,6 +104,7 @@ class TestOrderModels:
         assert response.related_transaction_ids == ["456"]
 
 
+
 class TestAdvancedOrderModels:
     """Test advanced order-related models."""
 

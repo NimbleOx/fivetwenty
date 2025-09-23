@@ -56,7 +56,7 @@ class TestComprehensiveEdgeCases:
 
             # Collect trade IDs for cleanup
             for result in results:
-                if hasattr(result, "order_fill_transaction") and result.order_fill_transaction:
+                if hasattr(result, 'order_fill_transaction') and result.order_fill_transaction:
                     fill_tx = result.order_fill_transaction
                     if "tradeOpened" in fill_tx and "tradeID" in fill_tx["tradeOpened"]:
                         trade_ids_to_close.append(fill_tx["tradeOpened"]["tradeID"])

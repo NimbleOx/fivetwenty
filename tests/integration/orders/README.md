@@ -4,7 +4,7 @@ This directory contains focused integration tests extracted from the original mo
 
 ## File Structure
 
-### **Modular Integration Test Files** (12 tests total)
+### 🎯 **Modular Integration Test Files** (12 tests total)
 
 | File | Purpose | Test Count | Key Functionality Tested |
 |------|---------|------------|-------------------------|
@@ -17,37 +17,37 @@ This directory contains focused integration tests extracted from the original mo
 
 ## Test Organization by Functionality
 
-### **Basic Order Operations**
+### **Basic Order Operations** 🔄
 Tests fundamental order creation and execution:
 - **Market Orders**: Immediate execution with price validation
 - **Limit Orders**: Threshold-based execution with TP/SL
 - **Stop Orders**: Stop-loss with price bounds
 - **MIT Orders**: Market-if-touched trigger behavior
 
-### **Order Management**
+### **Order Management** ⚙️
 Tests order lifecycle management:
 - **Order Modification**: PUT operations for order replacement
 - **Order Cancellation**: Single and batch cancellation
 - **Client Extensions**: Custom tags and metadata
 
-### **Data & Bulk Operations**
+### **Data & Bulk Operations** 📊
 Tests data retrieval and performance:
 - **Order Listing**: Filtering by state, instrument, pagination
 - **Bulk Operations**: Sequential and concurrent order creation
 
-### **Advanced Features**
+### **Advanced Features** ⚡
 Tests sophisticated order functionality:
 - **Time-in-Force**: GTD/GFD with timezone handling
 - **Trigger Conditions**: BID/ASK/MID/INVERSE triggers
 
-### **Risk Management**
+### **Risk Management** 🛡️
 Tests post-trade risk management:
 - **Take Profit Orders**: Linked to existing trades
 - **Stop Loss Orders**: Price and distance-based
 - **Trailing Stop Loss**: Dynamic adjustment
 - **Guaranteed Stop Loss**: Premium calculation
 
-### **Error Handling**
+### **Error Handling** ⚠️
 Tests edge cases and error scenarios:
 - **Invalid Parameters**: Malformed requests
 - **Account Validation**: Invalid account IDs
@@ -56,19 +56,19 @@ Tests edge cases and error scenarios:
 
 ## Benefits of Modular Structure
 
-### **Development Workflow**
+### 🚀 **Development Workflow**
 - **Targeted Testing**: Run specific functionality (e.g., `pytest test_basic_order_operations.py`)
 - **Faster Feedback**: Smaller test files execute more quickly
 - **Focused Debugging**: Easier to isolate and fix issues
 - **Parallel Execution**: Different teams can work on different test categories
 
-### **Maintainability**
+### 📈 **Maintainability**
 - **Clear Separation**: Each file has a single responsibility
 - **Easier Navigation**: Find specific tests quickly
 - **Reduced Complexity**: Smaller files are easier to understand
 - **Better Documentation**: Focused test categories with clear purposes
 
-### **Performance**
+### ⚡ **Performance**
 - **Selective Execution**: Run only relevant tests during development
 - **CI/CD Optimization**: Parallel test execution potential
 - **Resource Efficiency**: Load only necessary test code
@@ -95,18 +95,18 @@ pytest tests/integration/orders/ -k "market_order"
 
 ## Test Execution Requirements
 
-### **Prerequisites**
+### 🔧 **Prerequisites**
 - Valid OANDA practice account credentials
 - Network connectivity to OANDA practice API
 - Sufficient account balance for test operations
 
-### **Configuration**
+### ⚙️ **Configuration**
 All tests use the same fixtures as the original:
 - `sandbox_client`: AsyncClient configured for OANDA practice environment
 - `test_account_id`: Valid practice account ID
 - `test_instruments`: Dictionary of available instruments for testing
 
-### **Pytest Markers**
+### 🏷️ **Pytest Markers**
 All integration tests are marked with:
 - `@pytest.mark.asyncio` - Async test execution
 - `@pytest.mark.integration` - Integration test category
@@ -114,9 +114,9 @@ All integration tests are marked with:
 
 ## Migration Status
 
-**Successfully Extracted**: All 12 integration tests modularized
-**Original File**: `tests/integration/test_order_management.py` remains for backward compatibility
-**Full Coverage**: Combined test count matches original (12 tests)
+✅ **Successfully Extracted**: All 12 integration tests modularized  
+📋 **Original File**: `tests/integration/test_order_management.py` remains for backward compatibility  
+🔄 **Full Coverage**: Combined test count matches original (12 tests)
 
 ## Development Guidelines
 

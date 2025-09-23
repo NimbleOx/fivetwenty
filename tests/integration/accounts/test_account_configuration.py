@@ -42,10 +42,13 @@ class TestAccountConfiguration:
 
         try:
             # Update account alias
-            config_response = await sandbox_client.accounts.patch_account_configuration(account_id=test_account_id, alias=test_alias)
+            config_response = await sandbox_client.accounts.patch_account_configuration(
+                account_id=test_account_id,
+                alias=test_alias
+            )
 
             assert config_response is not None, "Configuration response should not be None"
-            print("  ✓ Alias update response received")
+            print(f"  ✓ Alias update response received")
 
             # Verify the change took effect
             updated_account_response = await sandbox_client.accounts.get_account_summary(test_account_id)
@@ -82,7 +85,10 @@ class TestAccountConfiguration:
         # Test invalid account ID
         try:
             with pytest.raises(FiveTwentyError) as exc_info:
-                await sandbox_client.accounts.patch_account_configuration(account_id="invalid-account-123", alias="test-alias")
+                await sandbox_client.accounts.patch_account_configuration(
+                    account_id="invalid-account-123",
+                    alias="test-alias"
+                )
 
             error = exc_info.value
             assert error.status in [400, 404], f"Expected 400/404 for invalid account, got {error.status}"
@@ -101,9 +107,12 @@ class TestAccountConfiguration:
                 # Try to set a reasonable margin rate
                 test_margin_rate = "0.02"  # 2%
 
-                await sandbox_client.accounts.patch_account_configuration(account_id=test_account_id, margin_rate=test_margin_rate)
+                margin_response = await sandbox_client.accounts.patch_account_configuration(
+                    account_id=test_account_id,
+                    margin_rate=test_margin_rate
+                )
 
-                print("  ✓ Margin rate update attempted")
+                print(f"  ✓ Margin rate update attempted")
 
                 # Verify the change
                 margin_check_response = await sandbox_client.accounts.get_account_summary(test_account_id)
@@ -132,7 +141,10 @@ class TestAccountConfiguration:
         for invalid_rate in invalid_margin_rates:
             try:
                 with pytest.raises(FiveTwentyError) as exc_info:
-                    await sandbox_client.accounts.patch_account_configuration(account_id=test_account_id, margin_rate=invalid_rate)
+                    await sandbox_client.accounts.patch_account_configuration(
+                        account_id=test_account_id,
+                        margin_rate=invalid_rate
+                    )
 
                 error = exc_info.value
                 assert error.status == 400, f"Expected 400 for invalid margin rate {invalid_rate}, got {error.status}"
@@ -157,7 +169,10 @@ class TestAccountConfiguration:
                     restore_params["margin_rate"] = str(original_margin_rate)
 
                 if restore_params:
-                    await sandbox_client.accounts.patch_account_configuration(account_id=test_account_id, **restore_params)
+                    await sandbox_client.accounts.patch_account_configuration(
+                        account_id=test_account_id,
+                        **restore_params
+                    )
                     print("  ✓ Original configuration restored")
                 else:
                     print("  ⚠ No original configuration to restore")
@@ -190,7 +205,7 @@ class TestAccountConfiguration:
                 # Test getting changes since current transaction (should be minimal)
                 changes_response = await sandbox_client.accounts.get_account_changes(
                     account_id=test_account_id,
-                    since_transaction_id=str(int(current_transaction_id) - 5),  # Get last 5 transactions
+                    since_transaction_id=str(int(current_transaction_id) - 5)  # Get last 5 transactions
                 )
 
                 assert changes_response is not None, "Changes response should not be None"
@@ -204,7 +219,10 @@ class TestAccountConfiguration:
                 # Test with invalid transaction ID
                 try:
                     with pytest.raises(FiveTwentyError) as exc_info:
-                        await sandbox_client.accounts.get_account_changes(account_id=test_account_id, since_transaction_id="invalid-transaction-id")
+                        await sandbox_client.accounts.get_account_changes(
+                            account_id=test_account_id,
+                            since_transaction_id="invalid-transaction-id"
+                        )
 
                     error = exc_info.value
                     assert error.status == 400, f"Expected 400 for invalid transaction ID, got {error.status}"

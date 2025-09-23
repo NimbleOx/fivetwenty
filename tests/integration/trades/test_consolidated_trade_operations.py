@@ -91,7 +91,10 @@ class TestConsolidatedTradeOperations:
                 print("\n✓ Test 4: Trade dependency management")
                 try:
                     # Get current price for setting dependent orders
-                    pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
+                    pricing_response = await sandbox_client.pricing.get_pricing(
+                        account_id=test_account_id,
+                        instruments=[test_instrument]
+                    )
                     prices = pricing_response.get("prices", [])
 
                     if prices:
@@ -101,7 +104,11 @@ class TestConsolidatedTradeOperations:
                         tp_price = current_price * Decimal("1.01")
 
                         # Update trade with take profit
-                        tp_response = await sandbox_client.trades.put_trade_orders(test_account_id, trade_id, take_profit={"price": str(tp_price)})
+                        tp_response = await sandbox_client.trades.put_trade_orders(
+                            test_account_id,
+                            trade_id,
+                            take_profit={"price": str(tp_price)}
+                        )
 
                         if tp_response:
                             print(f"✓ Take profit set at {tp_price}")
@@ -120,7 +127,11 @@ class TestConsolidatedTradeOperations:
                 print("\n✓ Test 5: Trade modification")
                 try:
                     # Close half the trade
-                    partial_close_response = await sandbox_client.trades.close_trade(test_account_id, trade_id, units="5")
+                    partial_close_response = await sandbox_client.trades.close_trade(
+                        test_account_id,
+                        trade_id,
+                        units="5"
+                    )
 
                     if partial_close_response and partial_close_response.order_fill_transaction:
                         print("✓ Partial trade closure successful")
@@ -205,7 +216,7 @@ class TestConsolidatedTradeOperations:
             await sandbox_client.trades.put_trade_orders(
                 test_account_id,
                 "999999",
-                take_profit={"price": "0"},  # Invalid price
+                take_profit={"price": "0"}  # Invalid price
             )
             print("⚠ Invalid dependent order did not raise error")
         except Exception:

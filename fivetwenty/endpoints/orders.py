@@ -149,13 +149,13 @@ class OrderEndpoints:
         if take_profit is not None:
             precision = await self._get_precision(account_id, instrument)
             quantized_tp = quantize_price(precision, take_profit)
-            request.take_profit_on_fill = TakeProfitDetails(price=quantized_tp)
+            request.take_profit_on_fill = TakeProfitDetails(price=str(quantized_tp))
 
         # Add stop loss if specified
         if stop_loss is not None:
             precision = await self._get_precision(account_id, instrument)
             quantized_sl = quantize_price(precision, stop_loss)
-            request.stop_loss_on_fill = StopLossDetails(price=quantized_sl)
+            request.stop_loss_on_fill = StopLossDetails(price=str(quantized_sl))
 
         return await self.post_order(
             account_id=account_id,
@@ -211,19 +211,19 @@ class OrderEndpoints:
         request = LimitOrderRequest(
             instrument=instrument,
             units=units,  # type: ignore[arg-type]  # Pydantic handles conversion to Decimal
-            price=quantized_price,
+            price=str(quantized_price),
             timeInForce=TimeInForce(time_in_force),
         )
 
         # Add take profit if specified
         if take_profit is not None:
             quantized_tp = quantize_price(precision, take_profit)
-            request.take_profit_on_fill = TakeProfitDetails(price=quantized_tp)
+            request.take_profit_on_fill = TakeProfitDetails(price=str(quantized_tp))
 
         # Add stop loss if specified
         if stop_loss is not None:
             quantized_sl = quantize_price(precision, stop_loss)
-            request.stop_loss_on_fill = StopLossDetails(price=quantized_sl)
+            request.stop_loss_on_fill = StopLossDetails(price=str(quantized_sl))
 
         return await self.post_order(
             account_id=account_id,
@@ -277,24 +277,24 @@ class OrderEndpoints:
         request = StopOrderRequest(
             instrument=instrument,
             units=units,  # type: ignore[arg-type]  # Pydantic handles conversion to Decimal
-            price=quantized_price,
+            price=str(quantized_price),
             timeInForce=TimeInForce(time_in_force),
         )
 
         # Add price bound if specified
         if price_bound is not None:
             quantized_bound = quantize_price(precision, price_bound)
-            request.price_bound = quantized_bound
+            request.price_bound = str(quantized_bound)
 
         # Add take profit if specified
         if take_profit is not None:
             quantized_tp = quantize_price(precision, take_profit)
-            request.take_profit_on_fill = TakeProfitDetails(price=quantized_tp)
+            request.take_profit_on_fill = TakeProfitDetails(price=str(quantized_tp))
 
         # Add stop loss if specified
         if stop_loss is not None:
             quantized_sl = quantize_price(precision, stop_loss)
-            request.stop_loss_on_fill = StopLossDetails(price=quantized_sl)
+            request.stop_loss_on_fill = StopLossDetails(price=str(quantized_sl))
 
         return await self.post_order(
             account_id=account_id,
@@ -348,24 +348,24 @@ class OrderEndpoints:
         request = MarketIfTouchedOrderRequest(
             instrument=instrument,
             units=units,  # type: ignore[arg-type]  # Pydantic handles conversion to Decimal
-            price=quantized_price,
+            price=str(quantized_price),
             timeInForce=TimeInForce(time_in_force),
         )
 
         # Add price bound if specified
         if price_bound is not None:
             quantized_bound = quantize_price(precision, price_bound)
-            request.price_bound = quantized_bound
+            request.price_bound = str(quantized_bound)
 
         # Add take profit if specified
         if take_profit is not None:
             quantized_tp = quantize_price(precision, take_profit)
-            request.take_profit_on_fill = TakeProfitDetails(price=quantized_tp)
+            request.take_profit_on_fill = TakeProfitDetails(price=str(quantized_tp))
 
         # Add stop loss if specified
         if stop_loss is not None:
             quantized_sl = quantize_price(precision, stop_loss)
-            request.stop_loss_on_fill = StopLossDetails(price=quantized_sl)
+            request.stop_loss_on_fill = StopLossDetails(price=str(quantized_sl))
 
         return await self.post_order(
             account_id=account_id,
