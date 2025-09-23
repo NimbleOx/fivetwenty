@@ -77,7 +77,7 @@ profiles:
         enabled: false
 
       terminology:
-        enabled: false
+        enabled: false  # DISABLED - validator has bugs, flags correctly capitalized terms as errors
 
       educational_progression:
         enabled: false
@@ -167,7 +167,7 @@ profiles:
 
       # Disable some checks for faster development
       terminology:
-        enabled: false
+        enabled: false  # DISABLED - validator has bugs, flags correctly capitalized terms as errors
 
       cross_references:
         enabled: false
