@@ -54,8 +54,8 @@ class TerminologyCheck(ContentCheck):
             (r"\bOanda\b", 'Use "OANDA" (all caps) for the company name'),
             (r"\boanda\b", 'Use "OANDA" (all caps) for the company name'),
 
-            # Language names - IMPORTANT
-            (r"\bpython\b", 'Use "Python" (capitalize) when referring to the language'),
+            # Language names - IMPORTANT (but not in commands or code blocks)
+            (r"(?<!```)\bpython\b(?!\s*-m)(?!\s*cli\.py)(?!\s*```)", 'Use "Python" (capitalize) when referring to the language'),
             (r"\bjavascript\b", 'Use "JavaScript" (proper capitalization)'),
             (r"\btypescript\b", 'Use "TypeScript" (proper capitalization)'),
 
