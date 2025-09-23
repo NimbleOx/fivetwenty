@@ -10,7 +10,7 @@ Comprehensive testing is essential for maintaining the reliability and security 
 
 FiveTwenty follows a balanced testing approach:
 
-```
+```text
      /\
     /  \          ← Integration Tests (Live API, VCR recorded)
    /____\
@@ -91,7 +91,7 @@ uv run pytest -n auto
 
 ### **Directory Structure**
 
-```
+```text
 tests/
 ├── conftest.py                 # Shared fixtures and configuration
 ├── unit/                       # Fast, isolated tests

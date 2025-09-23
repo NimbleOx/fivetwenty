@@ -410,7 +410,7 @@ class PriceAggregator:
             ) / 2 if price.bids and price.asks else None
 
             if mid_price:
-                self.price_windows[instrument].append((now, float(mid_price)))
+                self.price_windows[instrument].append((now, mid_price))
 
                 # Remove old prices
                 cutoff = now - self.window

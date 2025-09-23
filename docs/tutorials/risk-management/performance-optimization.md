@@ -148,8 +148,8 @@ class KellyOptimizer:
         
         return position_size
     
-    def simulate_kelly_performance(self, trials: int = 1000, 
-                                 starting_balance: float = 10000) -> dict:
+    def simulate_kelly_performance(self, trials: int = 1000,
+                                 starting_balance: float = 10000) -> dict:  # Example: 1000 trials, $10k balance
         """Simulate Kelly performance over many trials."""
         
         import random
@@ -221,15 +221,15 @@ def demo_kelly_optimization():
         
         optimizer = KellyOptimizer(strategy['win_rate'], strategy['avg_win'], strategy['avg_loss'])
         
-        # Calculate optimal position size
+        # Calculate optimal position size with example values
         position_size = optimizer.calculate_position_size(
-            account_balance=10000,
-            entry_price=Decimal("1.1000"),
-            stop_loss=Decimal("1.0950")
+            account_balance=Decimal("10000"),    # Example: $10,000 account balance
+            entry_price=Decimal("1.1000"),     # Example entry price
+            stop_loss=Decimal("1.0950")        # Example stop loss
         )
         
-        # Run simulation
-        simulation = optimizer.simulate_kelly_performance(trials=1000)
+        # Run simulation with example parameters
+        simulation = optimizer.simulate_kelly_performance(trials=1000)  # Example: 1000 trial simulation
         
         results[strategy['name']] = {
             'position_size': position_size,
@@ -905,12 +905,12 @@ class PortfolioOptimizer:
 def demo_portfolio_optimization():
     """Demonstrate portfolio optimization."""
     
-    # Sample strategy returns (daily)
+    # Sample strategy returns (daily) - replace with your actual historical returns
     strategy_returns = {
-        'trend_following': np.random.normal(0.001, 0.02, 252),  # 252 trading days
-        'mean_reversion': np.random.normal(0.0008, 0.015, 252),
-        'breakout': np.random.normal(0.0012, 0.025, 252),
-        'carry_trade': np.random.normal(0.0005, 0.01, 252)
+        'trend_following': np.random.normal(0.001, 0.02, 252),   # Example: 252 trading days
+        'mean_reversion': np.random.normal(0.0008, 0.015, 252),  # Example returns and volatility
+        'breakout': np.random.normal(0.0012, 0.025, 252),        # Example returns and volatility
+        'carry_trade': np.random.normal(0.0005, 0.01, 252)       # Example returns and volatility
     }
     
     optimizer = PortfolioOptimizer(strategy_returns)

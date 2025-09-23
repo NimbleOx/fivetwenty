@@ -84,6 +84,7 @@ Let's explore real currency pair data to understand these concepts:
 
 ```python
 from fivetwenty import AsyncClient, Environment
+from decimal import Decimal
 
 # This exercise helps you understand currency pair pricing
 async def explore_currency_concepts():
@@ -101,8 +102,8 @@ async def explore_currency_concepts():
 
         for price in pricing.prices:
             instrument = price.instrument
-            bid = float(price.bids[0].price)
-            ask = float(price.asks[0].price)
+            bid = Decimal(str(price.bids[0].price))
+            ask = Decimal(str(price.asks[0].price))
             spread = ask - bid
 
             print(f"\n📊 {instrument}:")

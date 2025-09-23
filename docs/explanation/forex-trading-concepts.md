@@ -90,7 +90,7 @@ print(position.short.units)  # -5000 (negative indicates short)
 
 ### Visual Example: Trades vs Positions
 
-```
+```text
 TRADES (Individual Orders):                    POSITION (Net Exposure):
 
 Trade 1: Buy 10,000 EUR @ 1.1234             ┌─────────────────────────┐
@@ -208,7 +208,7 @@ stop_order = await client.orders.post_stop_order(
 
 Unlike stocks, forex trading uses **leverage** - you can control large positions with small amounts:
 
-```
+```text
                     Leverage & Margin Example
                         (30:1 Leverage)
 
@@ -253,9 +253,11 @@ print(f"Margin Available: {account.margin_available}")  # Available for new trad
 ### SDK Margin Information
 
 ```python
+from decimal import Decimal
+
 # Account-level margin
 account = await client.accounts.get(account_id)
-margin_utilization = float(account.margin_used) / float(account.balance)
+margin_utilization = Decimal(account.margin_used) / Decimal(account.balance)
 
 # Position-level margin
 positions = await client.positions.list_open(account_id)
@@ -327,7 +329,7 @@ position = await client.positions.get(account_id, "GBP_JPY")
 
 Forex markets have two prices:
 
-```
+```text
                 Market Depth & Pricing
 
         SELL ORDERS (Asks)                 BUY ORDERS (Bids)
@@ -394,12 +396,12 @@ from decimal import Decimal
 
 # The 2% rule: Never risk more than 2% on a single trade
 account = await client.accounts.get(account_id)
-account_balance = float(account.balance)
+account_balance = Decimal(account.balance)
 max_risk = account_balance * Decimal("0.02")  # 2% of account
 
 # Calculate position size based on stop loss
 stop_loss_pips = 50  # Stop loss 50 pips away
-pip_value = 1.0      # For EUR_USD, 1 pip = $1 per 10k units
+pip_value = Decimal("1.0")      # For EUR_USD, 1 pip = $1 per 10k units
 
 # Position size = Max Risk / (Stop Loss Pips × Pip Value)
 position_size = int(max_risk / (stop_loss_pips * pip_value))

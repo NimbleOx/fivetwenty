@@ -174,7 +174,7 @@ cd /opt/fivetwenty-trading
 tree -d /opt/fivetwenty-trading/
 ```
 
-```
+```text
 /opt/fivetwenty-trading/
 ├── app/                 # Application code
 ├── config/             # Configuration files

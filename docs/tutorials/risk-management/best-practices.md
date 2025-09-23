@@ -23,7 +23,7 @@ class RiskManagementFramework:
         self.trade_controls = {
             'max_risk_per_trade': 0.01,      # 1% max per trade
             'min_risk_reward_ratio': 1.5,    # 1.5:1 minimum R:R
-            'max_position_size': 10000,      # Units limit
+            'max_position_size': 10000,      # Example: 10,000 units limit
             'mandatory_stop_loss': True      # Every trade must have stop
         }
         
@@ -190,14 +190,14 @@ class RiskManagementFramework:
 def demo_risk_framework():
     """Demonstrate professional risk management framework."""
     
-    framework = RiskManagementFramework("demo_account", 10000)
+    framework = RiskManagementFramework("demo_account", 10000)  # Example: $10,000 account
     
     # Test trade validation
     test_trade = {
-        'position_size': 2000,
-        'entry_price': 1.1000,
-        'stop_loss': 1.0980,
-        'take_profit': 1.1040
+        'position_size': 2000,    # Example: 2,000 units
+        'entry_price': 1.1000,   # Example entry price
+        'stop_loss': 1.0980,     # Example stop loss
+        'take_profit': 1.1040    # Example take profit
     }
     
     print("📋 Testing Trade Validation:")
@@ -503,7 +503,7 @@ from datetime import datetime, timedelta
 class RiskStressTesting:
     """Comprehensive stress testing for risk management systems."""
     
-    def __init__(self, initial_balance: float = 10000):
+    def __init__(self, initial_balance: float = 10000):  # Example: $10,000 initial balance
         self.initial_balance = initial_balance
         self.stress_scenarios = {
             'black_swan': {
@@ -758,15 +758,15 @@ class RiskStressTesting:
 def demo_stress_testing():
     """Demonstrate comprehensive stress testing."""
     
-    # Sample portfolio
+    # Sample portfolio with example positions
     portfolio = {
-        'EUR_USD': {'size': 3000, 'entry_price': 1.1000, 'stop_loss': 1.0950},
-        'GBP_USD': {'size': 2000, 'entry_price': 1.3000, 'stop_loss': 1.2950},
-        'USD_JPY': {'size': -2500, 'entry_price': 110.00, 'stop_loss': 110.50},
-        'AUD_USD': {'size': 1500, 'entry_price': 0.7500, 'stop_loss': 0.7450}
+        'EUR_USD': {'size': 3000, 'entry_price': 1.1000, 'stop_loss': 1.0950},   # Example position
+        'GBP_USD': {'size': 2000, 'entry_price': 1.3000, 'stop_loss': 1.2950},   # Example position
+        'USD_JPY': {'size': -2500, 'entry_price': 110.00, 'stop_loss': 110.50},  # Example short position
+        'AUD_USD': {'size': 1500, 'entry_price': 0.7500, 'stop_loss': 0.7450}    # Example position
     }
     
-    stress_tester = RiskStressTesting(initial_balance=10000)
+    stress_tester = RiskStressTesting(initial_balance=Decimal("10000"))  # Example: $10,000 balance
     
     # Run comprehensive stress tests
     results = stress_tester.run_comprehensive_stress_test(portfolio)

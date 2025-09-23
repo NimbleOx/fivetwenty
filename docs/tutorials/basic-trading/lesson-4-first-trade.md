@@ -25,8 +25,8 @@ async def place_first_trade_safely(account_id: str, instrument: str = "EUR_USD")
         print("1️⃣ Safety Check...")
         account = await client.accounts.get_account_summary(account_id)
 
-        available_margin = float(account.margin_available)
-        if available_margin < 100:  # Need at least $100 available
+        available_margin = Decimal(str(account.margin_available))
+        if available_margin < Decimal("100"):  # Need at least $100 available
             print("❌ Insufficient margin available. Need at least $100.")
             return None
 
@@ -36,9 +36,9 @@ async def place_first_trade_safely(account_id: str, instrument: str = "EUR_USD")
         print("2️⃣ Calculating safe position size...")
 
         # Risk 1% of account balance (conservative for first trade)
-        account_balance = float(account.balance)
+        account_balance = Decimal(str(account.balance))
         risk_amount = account_balance * Decimal("0.01")  # 1% risk
-        safe_units = min(1000, int(risk_amount * 100))  # Small position
+        safe_units = min(1000, int(risk_amount * Decimal("100")))  # Small position
 
         print(f"   Account Balance: ${account_balance:.2f}")
         print(f"   Risk Amount (1%): ${risk_amount:.2f}")
@@ -125,9 +125,9 @@ async def monitor_position_realtime(account_id: str, trade_id: str, duration_min
                 current_price = None
                 if pricing.prices and pricing.prices[0].asks:
                     if int(trade.current_units) > 0:  # Long position
-                        current_price = float(pricing.prices[0].bids[0].price)  # Sell price
+                        current_price = Decimal(str(pricing.prices[0].bids[0].price))  # Sell price
                     else:  # Short position
-                        current_price = float(pricing.prices[0].asks[0].price)  # Buy price
+                        current_price = Decimal(str(pricing.prices[0].asks[0].price))  # Buy price
 
                 print(f"\n⏰ {datetime.now().strftime('%H:%M:%S')} - Position Update:")
                 print(f"   Instrument: {trade.instrument}")
@@ -137,7 +137,7 @@ async def monitor_position_realtime(account_id: str, trade_id: str, duration_min
                     print(f"   Current Price: {current_price:.5f}")
 
                     # Calculate pip movement
-                    price_diff = current_price - float(trade.price)
+                    price_diff = current_price - Decimal(str(trade.price))
                     if int(trade.current_units) < 0:  # Short position
                         price_diff = -price_diff
 
@@ -214,8 +214,8 @@ async def close_position_safely(account_id: str, trade_id: str):
                 print(f"   Close Time: {fill.time}")
 
                 # Calculate performance metrics
-                entry_price = float(trade.price)
-                close_price = float(fill.price)
+                entry_price = Decimal(str(trade.price))
+                close_price = Decimal(str(fill.price))
                 units = int(trade.current_units)
 
                 if units > 0:  # Long position

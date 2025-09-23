@@ -162,7 +162,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
         try:
             # Get account balance
             account = await client.accounts.get(account_id)
-            account_balance = float(account.balance)
+            account_balance = Decimal(str(account.balance))
             max_loss = account_balance * risk_percentage
 
             print(f"💰 Account balance: ${account_balance:,.2f}")
@@ -177,7 +177,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
 
             # Estimate pip value in account currency (simplified)
             # For EUR_USD with 10k units: 1 pip = $1
-            pip_value_per_unit = float(pip_size)
+            pip_value_per_unit = Decimal(str(pip_size))
             total_pip_value = abs(units) * pip_value_per_unit
 
             # Calculate maximum pips to risk

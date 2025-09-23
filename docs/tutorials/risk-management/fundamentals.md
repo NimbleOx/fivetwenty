@@ -76,7 +76,7 @@ Every successful trading strategy is built on three fundamental pillars:
 from decimal import Decimal
 
 # Example: $10,000 account with 1% risk
-account_balance = 10000
+account_balance = Decimal("10000")  # Example account balance
 risk_per_trade = account_balance * Decimal("0.01")  # $100 maximum risk
 
 print(f"Account Balance: ${account_balance:,}")
@@ -127,8 +127,8 @@ Most new traders face this psychological conflict:
 
 ### Step 1: Define Your Risk Tolerance
 ```python
-def calculate_risk_parameters(account_balance: float, monthly_income: float,
-                            emergency_fund: float) -> dict:
+def calculate_risk_parameters(account_balance: Decimal, monthly_income: Decimal,
+                            emergency_fund: Decimal) -> dict:
     """Calculate personalized risk parameters."""
     
     # Never risk money you need for living expenses
@@ -146,11 +146,11 @@ def calculate_risk_parameters(account_balance: float, monthly_income: float,
         'max_monthly_risk': max_monthly_risk
     }
 
-# Example calculation
+# Example calculation with sample financial values
 params = calculate_risk_parameters(
-    account_balance=10000,
-    monthly_income=5000,
-    emergency_fund=15000
+    account_balance=Decimal("10000"),  # Example: $10,000 trading account
+    monthly_income=Decimal("5000"),   # Example: $5,000 monthly income
+    emergency_fund=Decimal("15000")   # Example: $15,000 emergency fund
 )
 
 print("📊 Your Risk Parameters:")
@@ -183,7 +183,7 @@ Create written rules before you start trading:
 class RiskTracker:
     """Track risk metrics in real-time."""
     
-    def __init__(self, account_balance: float):
+    def __init__(self, account_balance: Decimal):
         self.account_balance = account_balance
         self.daily_trades = []
         self.open_risks = {}
@@ -205,8 +205,8 @@ class RiskTracker:
             'within_limits': risk_percentage <= 20  # 20% max portfolio risk
         }
 
-# Example usage
-tracker = RiskTracker(10000)
+# Example usage with sample account balance
+tracker = RiskTracker(Decimal("10000"))  # Example: $10,000 account balance
 tracker.add_trade_risk("trade_1", 100)  # $100 risk
 tracker.add_trade_risk("trade_2", 75)   # $75 risk
 
@@ -266,7 +266,7 @@ Test your understanding of risk management fundamentals:
 Small improvements in risk management compound dramatically:
 
 ```python
-def compare_risk_strategies(initial_balance: float, months: int):
+def compare_risk_strategies(initial_balance: Decimal, months: int):
     """Compare different risk management approaches."""
     
     strategies = {
@@ -296,7 +296,7 @@ def compare_risk_strategies(initial_balance: float, months: int):
         print(f"{name}: ${balance:,.2f} (Return: {(balance/initial_balance-1)*100:+.1f}%)")
 
 # Demonstrate the power of conservative risk management
-compare_risk_strategies(10000, 12)  # 1 year simulation
+compare_risk_strategies(Decimal("10000"), 12)  # Example: $10,000 starting balance, 1 year simulation
 ```
 
 ---

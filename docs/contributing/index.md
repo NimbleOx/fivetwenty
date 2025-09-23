@@ -175,7 +175,7 @@ FIVETWENTY_OANDA_ACCOUNT_ALIAS=test_account
 
 ### **Test Organization**
 
-```
+```text
 tests/
 ├── unit/                 # Fast, isolated tests
 │   ├── test_client.py

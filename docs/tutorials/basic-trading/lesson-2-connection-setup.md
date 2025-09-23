@@ -138,8 +138,8 @@ async def explore_account_details(account_id: str):
         print(f"   Pending Orders:    {account.pending_orders}")
 
         # Calculate some useful metrics
-        if float(account.balance) > 0:
-            margin_usage_pct = float(account.margin_used) / float(account.balance) * 100
+        if Decimal(str(account.balance)) > Decimal("0"):
+            margin_usage_pct = Decimal(str(account.margin_used)) / Decimal(str(account.balance)) * Decimal("100")
             print(f"\n📊 Calculated Metrics:")
             print(f"   Margin Usage:      {margin_usage_pct:.1f}%")
 

@@ -39,9 +39,9 @@ class RiskMonitor:
         self.account_id = account_id
 
         # Risk limits
-        self.max_portfolio_risk = 0.10      # 10% max portfolio risk
-        self.max_single_instrument = 0.05   # 5% max per instrument
-        self.max_correlation_risk = 0.15    # 15% max correlated risk
+        self.max_portfolio_risk = Decimal("0.10")      # 10% max portfolio risk
+        self.max_single_instrument = Decimal("0.05")   # 5% max per instrument
+        self.max_correlation_risk = Decimal("0.15")    # 15% max correlated risk
         self.max_daily_loss = Decimal("0.05")          # 5% max daily loss
 
     async def calculate_portfolio_risk(self) -> dict:
@@ -50,7 +50,7 @@ class RiskMonitor:
         try:
             # Get account info
             account = await self.client.accounts.get(self.account_id)
-            account_balance = float(account.balance)
+            account_balance = Decimal(str(account.balance))
 
             # Get open positions
             positions = await self.client.positions.list_open(self.account_id)
@@ -75,8 +75,8 @@ class RiskMonitor:
                 long_units = int(position.long.units) if position.long.units != "0" else 0
                 short_units = int(position.short.units) if position.short.units != "0" else 0
 
-                long_pl = float(position.long.unrealized_pl) if position.long.unrealized_pl else 0
-                short_pl = float(position.short.unrealized_pl) if position.short.unrealized_pl else 0
+                long_pl = Decimal(str(position.long.unrealized_pl)) if position.long.unrealized_pl else Decimal("0")
+                short_pl = Decimal(str(position.short.unrealized_pl)) if position.short.unrealized_pl else Decimal("0")
 
                 total_unrealized_pl = long_pl + short_pl
                 net_units = long_units + short_units
@@ -133,7 +133,7 @@ class RiskMonitor:
         try:
             positions = await self.client.positions.list_open(self.account_id)
             account = await self.client.accounts.get(self.account_id)
-            account_balance = float(account.balance)
+            account_balance = Decimal(str(account.balance))
 
             correlation_risks = {}
 
@@ -152,7 +152,7 @@ class RiskMonitor:
                         group_exposure += abs(net_units)
 
                         # Add unrealized loss as risk
-                        unrealized_pl = float(position.long.unrealized_pl or 0) + float(position.short.unrealized_pl or 0)
+                        unrealized_pl = Decimal(str(position.long.unrealized_pl or 0)) + Decimal(str(position.short.unrealized_pl or 0))
                         if unrealized_pl < 0:
                             group_risk += abs(unrealized_pl)
 
@@ -815,7 +815,7 @@ Test your understanding of portfolio-level risk management:
 class RiskLimitFramework:
     """Comprehensive risk limit management system."""
     
-    def __init__(self, account_balance: float):
+    def __init__(self, account_balance: Decimal):
         self.account_balance = account_balance
         
         # Multi-level risk limits

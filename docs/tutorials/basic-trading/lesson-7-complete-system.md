@@ -96,7 +96,7 @@ async def run_complete_trading_strategy(strategy: SimpleMovingAverageCrossover, 
         print_strategy_performance(strategy)
 
 async def execute_strategy_trade(client: AsyncClient, strategy: SimpleMovingAverageCrossover,
-                               direction: str, current_price: float):
+                               direction: str, current_price: Decimal):
     """Execute a trade based on strategy signal."""
 
     try:
@@ -210,8 +210,8 @@ class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
 
             if pricing.prices:
                 price = pricing.prices[0]
-                bid = float(price.bids[0].price)
-                ask = float(price.asks[0].price)
+                bid = Decimal(str(price.bids[0].price))
+                ask = Decimal(str(price.asks[0].price))
                 spread = ask - bid
 
                 if spread > 0.0005:  # 5 pips
@@ -229,17 +229,17 @@ class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
 
         return conditions
 
-    def calculate_dynamic_position_size(self, account_balance: float,
-                                      volatility: float) -> int:
+    def calculate_dynamic_position_size(self, account_balance: Decimal,
+                                      volatility: Decimal) -> int:
         """Calculate position size based on account and market conditions."""
 
         # Base position size
         base_size = self.position_size
 
         # Adjust for volatility (reduce size in high volatility)
-        if volatility > 0.002:  # High volatility threshold
+        if volatility > Decimal("0.002"):  # High volatility threshold
             base_size = int(base_size * Decimal("0.5"))
-        elif volatility < 0.001:  # Low volatility
+        elif volatility < Decimal("0.001"):  # Low volatility
             base_size = int(base_size * Decimal("1.2"))
 
         # Ensure we don't exceed risk limits

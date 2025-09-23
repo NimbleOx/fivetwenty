@@ -14,6 +14,13 @@ exclude_patterns:
   - "**/validation_reports/**"
   - "**/validation_old/**"
   - "**/.venv/**"
+  - "fivetwenty/**"
+  - "tests/**"
+  - "examples/**"
+  - "*.py"
+  - "/*.md"  # Root level markdown files only
+  - "docs_validation/**"
+  - "oanda-api-reference/**"
 
 # Execution settings
 parallel_execution: true

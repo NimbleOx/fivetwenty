@@ -77,16 +77,16 @@ class StopLossStrategy:
     """Advanced stop loss calculation strategies."""
 
     @staticmethod
-    def fixed_pip_stop(entry_price: float, is_long: bool, pip_distance: int) -> float:
+    def fixed_pip_stop(entry_price: Decimal, is_long: bool, pip_distance: int) -> Decimal:
         """Fixed pip distance stop loss."""
-        pip_value = 0.0001
+        pip_value = Decimal("0.0001")
         if is_long:
             return entry_price - (pip_distance * pip_value)
         else:
             return entry_price + (pip_distance * pip_value)
 
     @staticmethod
-    def percentage_stop(entry_price: float, is_long: bool, percentage: float) -> float:
+    def percentage_stop(entry_price: Decimal, is_long: bool, percentage: Decimal) -> Decimal:
         """Percentage-based stop loss."""
         if is_long:
             return entry_price * (1 - percentage)
@@ -94,7 +94,7 @@ class StopLossStrategy:
             return entry_price * (1 + percentage)
 
     @staticmethod
-    def atr_stop(entry_price: float, is_long: bool, atr_value: float, multiplier: float = 2.0) -> float:
+    def atr_stop(entry_price: Decimal, is_long: bool, atr_value: Decimal, multiplier: Decimal = Decimal("2.0")) -> Decimal:
         """ATR (Average True Range) based stop loss."""
         stop_distance = atr_value * multiplier
         if is_long:
@@ -103,9 +103,9 @@ class StopLossStrategy:
             return entry_price + stop_distance
 
     @staticmethod
-    def support_resistance_stop(entry_price: float, is_long: bool, level: float, buffer_pips: int = 5) -> float:
+    def support_resistance_stop(entry_price: Decimal, is_long: bool, level: Decimal, buffer_pips: int = 5) -> Decimal:
         """Stop loss based on support/resistance levels."""
-        buffer = buffer_pips * 0.0001
+        buffer = buffer_pips * Decimal("0.0001")
         if is_long:
             return level - buffer  # Below support
         else:
@@ -142,9 +142,9 @@ class TakeProfitStrategy:
     """Advanced take profit strategies."""
 
     @staticmethod
-    def fixed_target(entry_price: float, is_long: bool, target_pips: int) -> float:
+    def fixed_target(entry_price: Decimal, is_long: bool, target_pips: int) -> Decimal:
         """Fixed pip target."""
-        pip_value = 0.0001
+        pip_value = Decimal("0.0001")
         if is_long:
             return entry_price + (target_pips * pip_value)
         else:

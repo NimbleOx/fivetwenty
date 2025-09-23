@@ -11,6 +11,7 @@ Before placing any trade, you need to understand current market conditions:
 
 ```python
 import asyncio
+from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
@@ -27,8 +28,8 @@ async def get_current_prices(account_id: str, instruments: list):
             print("📈 Current Market Prices:")
             for price in prices:
                 if price.bids and price.asks:
-                    bid = float(price.bids[0].price)
-                    ask = float(price.asks[0].price)
+                    bid = Decimal(str(price.bids[0].price))
+                    ask = Decimal(str(price.asks[0].price))
                     spread = ask - bid
 
                     print(f"   {price.instrument}:")
@@ -117,8 +118,8 @@ async def analyze_market_before_trading(account_id: str, instrument: str = "EUR_
 
         if pricing.prices:
             price = pricing.prices[0]
-            bid = float(price.bids[0].price)
-            ask = float(price.asks[0].price)
+            bid = Decimal(str(price.bids[0].price))
+            ask = Decimal(str(price.asks[0].price))
             spread = ask - bid
             mid_price = (bid + ask) / 2
 
@@ -208,8 +209,8 @@ async def assess_market_conditions(account_id: str, instrument: str):
             return {"suitable": False, "reason": "No pricing data available"}
 
         price = pricing.prices[0]
-        bid = float(price.bids[0].price)
-        ask = float(price.asks[0].price)
+        bid = Decimal(str(price.bids[0].price))
+        ask = Decimal(str(price.asks[0].price))
         spread = ask - bid
 
         # Define conditions

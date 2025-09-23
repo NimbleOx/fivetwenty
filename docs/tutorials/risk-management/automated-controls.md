@@ -44,7 +44,7 @@ class CircuitBreaker:
         # Circuit breaker thresholds
         self.max_daily_loss_percent = Decimal("5.0")
         self.max_consecutive_losses = 5
-        self.max_drawdown_percent = 15.0
+        self.max_drawdown_percent = Decimal("15.0")
         self.max_open_positions = 10
 
         # Tracking
@@ -57,7 +57,7 @@ class CircuitBreaker:
 
         try:
             account = await self.client.accounts.get(self.account_id)
-            current_balance = float(account.nav)
+            current_balance = Decimal(str(account.nav))
 
             if self.daily_start_balance is None:
                 self.daily_start_balance = current_balance
@@ -78,7 +78,7 @@ class CircuitBreaker:
 
         try:
             account = await self.client.accounts.get(self.account_id)
-            current_balance = float(account.nav)
+            current_balance = Decimal(str(account.nav))
 
             # Check daily loss limit
             if self.daily_start_balance:
@@ -177,7 +177,7 @@ class CircuitBreaker:
 
         try:
             account = await self.client.accounts.get(self.account_id)
-            current_balance = float(account.nav)
+            current_balance = Decimal(str(account.nav))
 
             status = {
                 'trading_halted': self.trading_halted,
@@ -264,19 +264,19 @@ class PositionSizeEnforcer:
         self.account_id = account_id
         
         # Enforcement rules
-        self.max_risk_per_trade = 0.02  # 2% max per trade
+        self.max_risk_per_trade = Decimal("0.02")  # 2% max per trade
         self.max_position_size = 10000   # 10,000 units max
         self.min_position_size = 100     # 100 units min
         self.risk_enforcement_enabled = True
     
     async def validate_and_adjust_order(self, instrument: str, requested_units: int,
-                                      entry_price: float, stop_loss: float) -> dict:
+                                      entry_price: Decimal, stop_loss: Decimal) -> dict:
         """Validate order and suggest adjustments if needed."""
         
         try:
             # Get current account balance
             account = await self.client.accounts.get(self.account_id)
-            account_balance = float(account.balance)
+            account_balance = Decimal(str(account.balance))
             
             # Calculate risk metrics
             risk_per_unit = abs(entry_price - stop_loss)
@@ -294,7 +294,7 @@ class PositionSizeEnforcer:
             }
             
             # Check risk percentage limit
-            if risk_percentage > self.max_risk_per_trade * 100:
+            if risk_percentage > self.max_risk_per_trade * Decimal("100"):
                 # Calculate maximum allowed units
                 max_risk_amount = account_balance * self.max_risk_per_trade
                 max_units = int(max_risk_amount / risk_per_unit)
@@ -353,12 +353,12 @@ class PositionSizeEnforcer:
         try:
             positions = await self.client.positions.list_open(self.account_id)
             account = await self.client.accounts.get(self.account_id)
-            account_balance = float(account.balance)
-            
+            account_balance = Decimal(str(account.balance))
+
             for position in positions:
                 if position.instrument == instrument:
-                    total_pl = (float(position.long.unrealized_pl or 0) + 
-                              float(position.short.unrealized_pl or 0))
+                    total_pl = (Decimal(str(position.long.unrealized_pl or 0)) +
+                              Decimal(str(position.short.unrealized_pl or 0)))
                     
                     # Simplified risk calculation
                     risk_amount = abs(total_pl) if total_pl < 0 else 0
@@ -377,8 +377,8 @@ class PositionSizeEnforcer:
             return None
     
     async def execute_validated_order(self, instrument: str, requested_units: int,
-                                    entry_price: float, stop_loss: float,
-                                    take_profit: float = None) -> dict:
+                                    entry_price: Decimal, stop_loss: Decimal,
+                                    take_profit: Decimal = None) -> dict:
         """Execute order after validation and adjustment."""
         
         # Validate the order
@@ -561,18 +561,18 @@ class RealTimeRiskMonitor:
     async def _calculate_risk_metrics(self, account, positions) -> dict:
         """Calculate current risk metrics."""
         
-        account_balance = float(account.balance)
-        account_nav = float(account.nav)
-        margin_used = float(account.margin_used)
-        margin_available = float(account.margin_available)
+        account_balance = Decimal(str(account.balance))
+        account_nav = Decimal(str(account.nav))
+        margin_used = Decimal(str(account.margin_used))
+        margin_available = Decimal(str(account.margin_available))
         
         # Portfolio risk calculation
         total_unrealized_pl = 0
         position_risk = 0
         
         for position in positions:
-            long_pl = float(position.long.unrealized_pl or 0)
-            short_pl = float(position.short.unrealized_pl or 0)
+            long_pl = Decimal(str(position.long.unrealized_pl or 0))
+            short_pl = Decimal(str(position.short.unrealized_pl or 0))
             total_pl = long_pl + short_pl
             total_unrealized_pl += total_pl
             
@@ -580,11 +580,11 @@ class RealTimeRiskMonitor:
                 position_risk += abs(total_pl)
         
         # Calculate metrics
-        portfolio_risk_pct = (position_risk / account_balance) * 100
-        margin_usage_pct = (margin_used / (margin_used + margin_available)) * 100
+        portfolio_risk_pct = (position_risk / account_balance) * Decimal("100")
+        margin_usage_pct = (margin_used / (margin_used + margin_available)) * Decimal("100")
         
         # Daily P/L (simplified - would track from start of day)
-        daily_pl_pct = 0  # Would calculate from daily start balance
+        daily_pl_pct = Decimal("0")  # Would calculate from daily start balance
         
         return {
             'account_balance': account_balance,

@@ -13,7 +13,7 @@ Complete reference for FiveTwenty exception types and error handling patterns.
 
 ## Exception Hierarchy
 
-```
+```text
 Exception
 └── FiveTwentyError
     ├── StreamStall

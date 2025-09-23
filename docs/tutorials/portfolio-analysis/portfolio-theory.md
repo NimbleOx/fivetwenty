@@ -38,12 +38,12 @@ By the end of this tutorial, you will understand:
 Modern Portfolio Theory, developed by Harry Markowitz, is based on the principle that investors can construct portfolios to optimize expected return for a given level of risk.
 
 **Expected Portfolio Return:**
-```
+```text
 E(Rp) = Σ(wi × E(Ri))
 ```
 
 **Portfolio Variance:**
-```
+```text
 σ²p = Σ(wi² × σi²) + Σ Σ(wi × wj × σij)
 ```
 

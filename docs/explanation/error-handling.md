@@ -6,7 +6,7 @@ Robust error handling is critical for production trading systems. The FiveTwenty
 
 The SDK uses a hierarchical error system:
 
-```
+```text
 Exception
 └── FiveTwentyError (base for all OANDA errors)
     ├── BadRequest (400 errors)

@@ -27,11 +27,12 @@ The most straightforward approach - set stops at a fixed pip distance.
 ### Implementation
 
 ```python
+from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 async def place_order_with_fixed_stop(account_id: str, instrument: str, units: int,
-                                     stop_pips: float, take_profit_pips: float = None):
+                                     stop_pips: Decimal, take_profit_pips: Decimal = None):
     """Place order with fixed pip-based stop loss."""
 
     async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
@@ -40,13 +41,13 @@ async def place_order_with_fixed_stop(account_id: str, instrument: str, units: i
             prices = await client.pricing.get(account_id=account_id, instruments=[instrument])
 
             if units > 0:  # Buy order
-                entry_price = float(prices[0].asks[0].price)
-                pip_value = 0.01 if instrument.endswith('JPY') else 0.0001
+                entry_price = Decimal(str(prices[0].asks[0].price))
+                pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
                 stop_loss_price = entry_price - (stop_pips * pip_value)
                 take_profit_price = entry_price + (take_profit_pips * pip_value) if take_profit_pips else None
             else:  # Sell order
-                entry_price = float(prices[0].bids[0].price)
-                pip_value = 0.01 if instrument.endswith('JPY') else 0.0001
+                entry_price = Decimal(str(prices[0].bids[0].price))
+                pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
                 stop_loss_price = entry_price + (stop_pips * pip_value)
                 take_profit_price = entry_price - (take_profit_pips * pip_value) if take_profit_pips else None
 
@@ -110,11 +111,12 @@ Set stops as a percentage of entry price - adapts to different price levels.
 ### Implementation
 
 ```python
+from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 async def place_order_with_percentage_stop(account_id: str, instrument: str, units: int,
-                                          stop_percentage: float = 1.0):
+                                          stop_percentage: Decimal = Decimal("1.0")):
     """Place order with percentage-based stop loss."""
 
     async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
@@ -123,14 +125,14 @@ async def place_order_with_percentage_stop(account_id: str, instrument: str, uni
             prices = await client.pricing.get(account_id=account_id, instruments=[instrument])
 
             if units > 0:  # Buy order
-                entry_price = float(prices[0].asks[0].price)
-                stop_loss_price = entry_price * (1 - stop_percentage / 100)
+                entry_price = Decimal(str(prices[0].asks[0].price))
+                stop_loss_price = entry_price * (Decimal("1") - stop_percentage / Decimal("100"))
             else:  # Sell order
-                entry_price = float(prices[0].bids[0].price)
-                stop_loss_price = entry_price * (1 + stop_percentage / 100)
+                entry_price = Decimal(str(prices[0].bids[0].price))
+                stop_loss_price = entry_price * (Decimal("1") + stop_percentage / Decimal("100"))
 
             stop_distance = abs(entry_price - stop_loss_price)
-            pip_value = 0.01 if instrument.endswith('JPY') else 0.0001
+            pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
             stop_pips = stop_distance / pip_value
 
             print(f"📊 Percentage Stop Order:")
@@ -180,7 +182,7 @@ class ATRStopCalculator:
     """Calculate stop losses based on Average True Range."""
     
     async def calculate_atr_stop(self, client: AsyncClient, instrument: str,
-                               atr_multiplier: float = 2.0, periods: int = 14) -> dict:
+                               atr_multiplier: Decimal = Decimal("2.0"), periods: int = 14) -> dict:
         """Calculate ATR-based stop loss level."""
         
         try:
@@ -200,30 +202,30 @@ class ATRStopCalculator:
             for i in range(1, len(candles.candles)):
                 curr = candles.candles[i]
                 prev = candles.candles[i-1]
-                
+
                 if curr.mid and prev.mid:
-                    high = float(curr.mid.h)
-                    low = float(curr.mid.l)
-                    prev_close = float(prev.mid.c)
-                    
+                    high = Decimal(str(curr.mid.h))
+                    low = Decimal(str(curr.mid.l))
+                    prev_close = Decimal(str(prev.mid.c))
+
                     # True Range = max(H-L, |H-Cp|, |L-Cp|)
                     tr1 = high - low
                     tr2 = abs(high - prev_close)
                     tr3 = abs(low - prev_close)
-                    
+
                     true_range = max(tr1, tr2, tr3)
                     true_ranges.append(true_range)
-            
+
             # Calculate ATR (Simple Moving Average of True Range)
-            atr = sum(true_ranges[-periods:]) / periods
-            
+            atr = sum(true_ranges[-periods:]) / Decimal(str(periods))
+
             # Get current price
-            current_price = float(candles.candles[-1].mid.c)
-            
+            current_price = Decimal(str(candles.candles[-1].mid.c))
+
             # Calculate stop distances
             atr_distance = atr * atr_multiplier
-            
-            pip_value = 0.01 if instrument.endswith('JPY') else 0.0001
+
+            pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
             atr_pips = atr_distance / pip_value
             
             result = {
@@ -250,7 +252,7 @@ class ATRStopCalculator:
             return None
 
 async def place_order_with_atr_stop(account_id: str, instrument: str, units: int,
-                                   atr_multiplier: float = 2.0):
+                                   atr_multiplier: Decimal = Decimal("2.0")):
     """Place order with ATR-based stop loss."""
     
     async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
@@ -317,8 +319,8 @@ class TrailingStopManager:
         self.account_id = account_id
         self.active_trails = {}
 
-    async def set_trailing_stop(self, trade_id: str, trail_distance_pips: float,
-                               breakeven_pips: float = None):
+    async def set_trailing_stop(self, trade_id: str, trail_distance_pips: Decimal,
+                               breakeven_pips: Decimal = None):
         """Set trailing stop with optional break-even protection."""
 
         try:
@@ -328,7 +330,7 @@ class TrailingStopManager:
                 print(f"❌ Trade {trade_id} not found")
                 return False
 
-            entry_price = float(trade.price)
+            entry_price = Decimal(str(trade.price))
             current_units = int(trade.current_units)
             instrument = trade.instrument
 
@@ -368,9 +370,9 @@ class TrailingStopManager:
                 )
 
                 if trail_info['units'] > 0:  # Long position
-                    current_price = float(prices[0].bids[0].price)
+                    current_price = Decimal(str(prices[0].bids[0].price))
                 else:  # Short position
-                    current_price = float(prices[0].asks[0].price)
+                    current_price = Decimal(str(prices[0].asks[0].price))
 
                 # Update best price
                 if trail_info['units'] > 0:
@@ -381,7 +383,7 @@ class TrailingStopManager:
                         trail_info['best_price'] = current_price
 
                 # Calculate new stop level
-                pip_value = 0.01 if instrument.endswith('JPY') else 0.0001
+                pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
                 trail_distance = trail_info['trail_distance_pips'] * pip_value
 
                 if trail_info['units'] > 0:  # Long position
@@ -392,7 +394,7 @@ class TrailingStopManager:
                         not trail_info['in_breakeven'] and
                         current_price >= trail_info['entry_price'] + (trail_info['breakeven_pips'] * pip_value)):
 
-                        new_stop = trail_info['entry_price'] + (5 * pip_value)  # 5 pip buffer
+                        new_stop = trail_info['entry_price'] + (Decimal("5") * pip_value)  # 5 pip buffer
                         trail_info['in_breakeven'] = True
                         print(f"🛡️ Trade {trade_id} moved to break-even protection")
 
@@ -403,7 +405,7 @@ class TrailingStopManager:
                         not trail_info['in_breakeven'] and
                         current_price <= trail_info['entry_price'] - (trail_info['breakeven_pips'] * pip_value)):
 
-                        new_stop = trail_info['entry_price'] - (5 * pip_value)
+                        new_stop = trail_info['entry_price'] - (Decimal("5") * pip_value)
                         trail_info['in_breakeven'] = True
                         print(f"🛡️ Trade {trade_id} moved to break-even protection")
 
@@ -416,7 +418,7 @@ class TrailingStopManager:
                     continue
 
                 if trade.stop_loss_order:
-                    current_stop = float(trade.stop_loss_order.price)
+                    current_stop = Decimal(str(trade.stop_loss_order.price))
 
                     # Only update if new stop is better
                     should_update = False
@@ -519,9 +521,9 @@ class TechnicalStopCalculator:
                 return None
             
             # Extract price data
-            highs = [float(c.mid.h) for c in candles.candles if c.mid]
-            lows = [float(c.mid.l) for c in candles.candles if c.mid]
-            closes = [float(c.mid.c) for c in candles.candles if c.mid]
+            highs = [Decimal(str(c.mid.h)) for c in candles.candles if c.mid]
+            lows = [Decimal(str(c.mid.l)) for c in candles.candles if c.mid]
+            closes = [Decimal(str(c.mid.c)) for c in candles.candles if c.mid]
             
             current_price = closes[-1]
             
@@ -540,7 +542,7 @@ class TechnicalStopCalculator:
                 
                 # Count how many times price came close to this level
                 for j in range(max(0, i-10), min(len(closes), i+10)):
-                    if abs(closes[j] - level) < 0.0020:  # Within 20 pips
+                    if abs(closes[j] - level) < Decimal("0.0020"):  # Within 20 pips
                         touches += 1
                 
                 if touches >= 3:  # Level tested at least 3 times
@@ -578,12 +580,12 @@ class TechnicalStopCalculator:
             print(f"❌ S/R calculation error: {e}")
             return None
     
-    def calculate_technical_stop(self, levels_data: dict, is_long: bool, 
-                               instrument: str) -> float:
+    def calculate_technical_stop(self, levels_data: dict, is_long: bool,
+                               instrument: str) -> Decimal:
         """Calculate stop based on technical levels."""
         
-        pip_value = 0.01 if instrument.endswith('JPY') else 0.0001
-        buffer = self.buffer_pips * pip_value
+        pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
+        buffer = Decimal(str(self.buffer_pips)) * pip_value
         
         if is_long:
             # For long positions, place stop below nearest support

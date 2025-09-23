@@ -115,7 +115,7 @@ async with AsyncClient(...) as client:
 
 Endpoints are organized by business domain rather than technical concerns:
 
-```
+```text
 client.accounts.*    # Account management
 client.orders.*      # Order lifecycle
 client.trades.*      # Trade monitoring

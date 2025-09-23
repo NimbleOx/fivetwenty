@@ -10,6 +10,7 @@
 Let's build a simple but complete moving average crossover strategy:
 
 ```python
+from decimal import Decimal
 from fivetwenty import AsyncClient
 
 class SimpleMovingAverageCrossover:
@@ -34,7 +35,7 @@ class SimpleMovingAverageCrossover:
             'total_pnl': 0.0
         }
 
-    def calculate_moving_average(self, prices: list, period: int) -> float:
+    def calculate_moving_average(self, prices: list, period: int) -> Decimal:
         """Calculate simple moving average."""
         if len(prices) < period:
             return None
@@ -87,7 +88,7 @@ class SimpleMovingAverageCrossover:
             )
 
             if candles.candles:
-                self.prices = [float(c.mid.c) for c in candles.candles if c.mid]
+                self.prices = [Decimal(str(c.mid.c)) for c in candles.candles if c.mid]
                 return True
         except Exception as e:
             print(f"⚠️ Error updating prices: {e}")
@@ -111,7 +112,7 @@ from datetime import datetime, timedelta
 class StrategyBacktester:
     """Backtest trading strategies on historical data."""
 
-    def __init__(self, strategy, initial_balance: float = 10000):
+    def __init__(self, strategy, initial_balance: Decimal = Decimal("10000")):
         self.strategy = strategy
         self.initial_balance = initial_balance
         self.current_balance = initial_balance
@@ -144,7 +145,7 @@ class StrategyBacktester:
                 if not candle.mid:
                     continue
 
-                price = float(candle.mid.c)
+                price = Decimal(str(candle.mid.c))
                 timestamp = candle.time
 
                 # Update strategy with new price

@@ -79,12 +79,10 @@ class ValidationConfig(BaseModel):
 
     @classmethod
     def get_default_config(cls) -> ValidationConfig:
-        """Get default configuration for FiveTwenty documentation."""
+        """Get default configuration for FiveTwenty documentation - docs/ directory only."""
         return cls(
             file_patterns=[
                 "docs/**/*.md",
-                "**/*.py",
-                "*.md",
             ],
             exclude_patterns=[
                 "**/.git/**",
@@ -94,6 +92,14 @@ class ValidationConfig(BaseModel):
                 "**/.ruff_cache/**",
                 "**/validation_reports/**",
                 "**/validation_old/**",
+                # Exclude everything outside docs/
+                "fivetwenty/**",
+                "tests/**",
+                "examples/**",
+                "*.py",
+                "/*.md",  # Root level markdown files only
+                "docs_validation/**",
+                "oanda-api-reference/**",
             ],
             validators={
                 "financial_precision": ValidatorConfig(

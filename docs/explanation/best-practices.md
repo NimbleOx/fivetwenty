@@ -8,6 +8,7 @@ This guide provides production-ready best practices for using the FiveTwenty in 
 
 ```python
 from dataclasses import dataclass
+from decimal import Decimal
 from typing import Optional
 import asyncio
 import os
@@ -19,7 +20,7 @@ class TradingSystemConfig:
 
     # Risk limits
     max_position_size: int = 10000
-    max_daily_loss: float = 1000.0
+    max_daily_loss: Decimal = Decimal("1000.0")
     max_open_positions: int = 5
 
     # Performance
@@ -231,12 +232,12 @@ class StopLossManager:
 class DailyLossLimiter:
     """Enforce daily loss limits."""
 
-    def __init__(self, max_daily_loss: float):
+    def __init__(self, max_daily_loss: Decimal):
         self.max_daily_loss = max_daily_loss
-        self.daily_pnl = 0.0
+        self.daily_pnl = Decimal("0.0")
         self.trading_enabled = True
 
-    async def update_pnl(self, pnl: float):
+    async def update_pnl(self, pnl: Decimal):
         """Update daily P&L and check limits."""
 
         self.daily_pnl += pnl

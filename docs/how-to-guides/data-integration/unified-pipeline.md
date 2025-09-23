@@ -31,6 +31,7 @@ from typing import Dict, List, Optional, Any
 import asyncio
 import json
 from datetime import datetime, timedelta, timezone
+from decimal import Decimal
 import numpy as np
 
 @dataclass
@@ -41,12 +42,12 @@ class MarketContext:
     instrument: str
 
     # OANDA price data
-    current_price: float
-    spread: float
+    current_price: Decimal
+    spread: Decimal
 
     # Technical analysis
     technical_signal: str  # BUY, SELL, NEUTRAL
-    technical_strength: float
+    technical_strength: Decimal
     technical_reasons: List[str]
 
     # Economic calendar
@@ -54,17 +55,17 @@ class MarketContext:
     trading_allowed: bool
 
     # News sentiment
-    news_sentiment: float
-    news_confidence: float
+    news_sentiment: Decimal
+    news_confidence: Decimal
     news_count: int
 
     # Social sentiment
-    social_bias: float
-    social_confidence: float
+    social_bias: Decimal
+    social_confidence: Decimal
 
     # Combined analysis
     final_signal: str
-    signal_strength: float
+    signal_strength: Decimal
     risk_level: str
 
 class UnifiedTradingSystem:
@@ -112,8 +113,8 @@ class UnifiedTradingSystem:
         prices = await self.fivetwenty_client.pricing.get("101-001-1234567-001", [instrument])
         current_price_data = prices[0]
 
-        current_price = float(current_price_data.asks[0].price)
-        spread = float(current_price_data.asks[0].price) - float(current_price_data.bids[0].price)
+        current_price = Decimal(str(current_price_data.asks[0].price))
+        spread = Decimal(str(current_price_data.asks[0].price)) - Decimal(str(current_price_data.bids[0].price))
 
         # Get all analysis data concurrently
         analysis_tasks = [
@@ -140,7 +141,7 @@ class UnifiedTradingSystem:
 
             # Technical analysis
             technical_signal=technical_analysis.get('signal', 'NEUTRAL'),
-            technical_strength=technical_analysis.get('strength', 0),
+            technical_strength=Decimal(str(technical_analysis.get('strength', 0))),
             technical_reasons=technical_analysis.get('reasons', []),
 
             # Economic calendar
@@ -148,17 +149,17 @@ class UnifiedTradingSystem:
             trading_allowed=economic_context.get('trading_allowed', True),
 
             # News sentiment
-            news_sentiment=news_context.get('sentiment', 0),
-            news_confidence=news_context.get('confidence', 0),
+            news_sentiment=Decimal(str(news_context.get('sentiment', 0))),
+            news_confidence=Decimal(str(news_context.get('confidence', 0))),
             news_count=news_context.get('news_count', 0),
 
             # Social sentiment
-            social_bias=social_context.get('bias', 0),
-            social_confidence=social_context.get('confidence', 0),
+            social_bias=Decimal(str(social_context.get('bias', 0))),
+            social_confidence=Decimal(str(social_context.get('confidence', 0))),
 
             # Combined analysis (calculated below)
             final_signal='NEUTRAL',
-            signal_strength=0,
+            signal_strength=Decimal('0'),
             risk_level='MEDIUM'
         )
 
@@ -330,7 +331,7 @@ class UnifiedTradingSystem:
                 return {
                     'trade_id': fill.trade_opened.trade_id if fill.trade_opened else None,
                     'units': final_units,
-                    'fill_price': float(fill.price),
+                    'fill_price': Decimal(str(fill.price)),
                     'market_context': context_dict
                 }
             else:
@@ -847,8 +848,8 @@ class ResilientDataPipeline:
         context = MarketContext(
             timestamp=datetime.now(),
             instrument=instrument,
-            current_price=float(current_price_data.asks[0].price),
-            spread=float(current_price_data.asks[0].price) - float(current_price_data.bids[0].price),
+            current_price=Decimal(str(current_price_data.asks[0].price)),
+            spread=Decimal(str(current_price_data.asks[0].price)) - Decimal(str(current_price_data.bids[0].price)),
             technical_signal='NEUTRAL',
             technical_strength=0,
             technical_reasons=[],
