@@ -1,0 +1,228 @@
+"""Markdown syntax validator."""
+
+import re
+from pathlib import Path
+from typing import Any
+
+from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
+from ..base import BaseValidator
+
+
+class MarkdownSyntaxValidator(BaseValidator):
+    """Validates markdown syntax and structure."""
+
+    def __init__(self):
+        super().__init__(
+            name="markdown_syntax",
+            description="Validates markdown syntax and structure"
+        )
+
+    def supports_file(self, file_path: Path) -> bool:
+        """Support markdown files only."""
+        return file_path.suffix.lower() in {'.md', '.markdown'}
+
+    def validate_file(self, file_info: FileInfo, content: str, options: dict[str, Any]) -> ValidationResult:
+        """Validate markdown syntax in file content."""
+        issues: list[ValidationIssue] = []
+
+        lines = content.split('\n')
+
+        for line_num, line in enumerate(lines, 1):
+            # Check for malformed headers
+            issues.extend(self._check_headers(line, line_num, file_info.path))
+
+            # Check for malformed links
+            issues.extend(self._check_links(line, line_num, file_info.path))
+
+            # Check for malformed code blocks
+            issues.extend(self._check_code_blocks(line, line_num, file_info.path, lines, line_num - 1))
+
+            # Check for malformed lists
+            issues.extend(self._check_lists(line, line_num, file_info.path))
+
+        # Check for unclosed code blocks
+        issues.extend(self._check_unclosed_code_blocks(lines, file_info.path))
+
+        return ValidationResult(
+            validator_name=self.name,
+            file_path=file_info.path,
+            passed=len(issues) == 0,
+            issues=issues
+        )
+
+    def _check_headers(self, line: str, line_num: int, file_path: Path) -> list[ValidationIssue]:
+        """Check for malformed markdown headers."""
+        issues: list[ValidationIssue] = []
+
+        # Header pattern: # Title
+        if line.strip().startswith('#'):
+            # Check for space after #
+            if not re.match(r'^#+\s+.+', line.strip()):
+                issues.append(ValidationIssue(
+                    message="Header should have a space after the # symbol",
+                    file_path=file_path,
+                    line=line_num,
+                    severity=IssueSeverity.WARNING,
+                    rule_id="markdown_header_space",
+                    context=line.strip(),
+                    suggestion="Add a space after # (e.g., '# Title' instead of '#Title')"
+                ))
+
+            # Check for empty headers
+            if re.match(r'^#+\s*$', line.strip()):
+                issues.append(ValidationIssue(
+                    message="Empty header found",
+                    file_path=file_path,
+                    line=line_num,
+                    severity=IssueSeverity.ERROR,
+                    rule_id="markdown_empty_header",
+                    context=line.strip(),
+                    suggestion="Add header text after the # symbols"
+                ))
+
+        return issues
+
+    def _check_links(self, line: str, line_num: int, file_path: Path) -> list[ValidationIssue]:
+        """Check for malformed markdown links."""
+        issues: list[ValidationIssue] = []
+
+        # Find markdown links: [text](url)
+        link_pattern = r'\[([^\]]*)\]\(([^)]*)\)'
+        matches = re.finditer(link_pattern, line)
+
+        for match in matches:
+            text, url = match.groups()
+
+            # Check for empty link text
+            if not text.strip():
+                issues.append(ValidationIssue(
+                    message="Link has empty text",
+                    file_path=file_path,
+                    line=line_num,
+                    severity=IssueSeverity.WARNING,
+                    rule_id="markdown_empty_link_text",
+                    context=match.group(0),
+                    suggestion="Add descriptive text between the square brackets"
+                ))
+
+            # Check for empty URL
+            if not url.strip():
+                issues.append(ValidationIssue(
+                    message="Link has empty URL",
+                    file_path=file_path,
+                    line=line_num,
+                    severity=IssueSeverity.ERROR,
+                    rule_id="markdown_empty_link_url",
+                    context=match.group(0),
+                    suggestion="Add a valid URL between the parentheses"
+                ))
+
+        # Check for malformed reference links
+        ref_link_pattern = r'\[([^\]]+)\]\[([^\]]*)\]'
+        ref_matches = re.finditer(ref_link_pattern, line)
+
+        for match in ref_matches:
+            text, ref = match.groups()
+            if not text.strip():
+                issues.append(ValidationIssue(
+                    message="Reference link has empty text",
+                    file_path=file_path,
+                    line=line_num,
+                    severity=IssueSeverity.WARNING,
+                    rule_id="markdown_empty_ref_link",
+                    context=match.group(0),
+                    suggestion="Add descriptive text for the reference link"
+                ))
+
+        return issues
+
+    def _check_code_blocks(self, line: str, line_num: int, file_path: Path, all_lines: list[str], line_index: int) -> list[ValidationIssue]:
+        """Check for malformed code blocks."""
+        issues: list[ValidationIssue] = []
+
+        # Check for indented code blocks with inconsistent indentation
+        if line.startswith('    ') or line.startswith('\t'):
+            # This might be a code block - check if previous/next lines have consistent indentation
+            # This is a simplified check - full implementation would track code block state
+            pass
+
+        # Check for fenced code blocks with missing language
+        if line.strip().startswith('```') and len(line.strip()) == 3:
+            # Check if this starts a code block
+            if line_index + 1 < len(all_lines):
+                next_line = all_lines[line_index + 1] if line_index + 1 < len(all_lines) else ""
+                # If next line looks like code, suggest adding language
+                if next_line.strip() and not next_line.strip().startswith('```'):
+                    issues.append(ValidationIssue(
+                        message="Code block missing language specification",
+                        file_path=file_path,
+                        line=line_num,
+                        severity=IssueSeverity.INFO,
+                        rule_id="markdown_code_block_language",
+                        context=line.strip(),
+                        suggestion="Add language after ``` (e.g., ```python, ```bash, ```yaml)"
+                    ))
+
+        return issues
+
+    def _check_lists(self, line: str, line_num: int, file_path: Path) -> list[ValidationIssue]:
+        """Check for malformed lists."""
+        issues: list[ValidationIssue] = []
+
+        # Check unordered lists
+        if re.match(r'^\s*[-*+]\s*$', line):
+            issues.append(ValidationIssue(
+                message="Empty list item",
+                file_path=file_path,
+                line=line_num,
+                severity=IssueSeverity.WARNING,
+                rule_id="markdown_empty_list_item",
+                context=line.strip(),
+                suggestion="Add content to the list item or remove it"
+            ))
+
+        # Check ordered lists
+        if re.match(r'^\s*\d+\.\s*$', line):
+            issues.append(ValidationIssue(
+                message="Empty numbered list item",
+                file_path=file_path,
+                line=line_num,
+                severity=IssueSeverity.WARNING,
+                rule_id="markdown_empty_numbered_item",
+                context=line.strip(),
+                suggestion="Add content to the list item or remove it"
+            ))
+
+        return issues
+
+    def _check_unclosed_code_blocks(self, lines: list[str], file_path: Path) -> list[ValidationIssue]:
+        """Check for unclosed fenced code blocks."""
+        issues: list[ValidationIssue] = []
+
+        fence_stack: list[int] = []
+        for line_num, line in enumerate(lines, 1):
+            if line.strip().startswith('```'):
+                if fence_stack:
+                    # Closing a code block
+                    fence_stack.pop()
+                else:
+                    # Opening a code block
+                    fence_stack.append(line_num)
+
+        # Any remaining items in stack are unclosed
+        for line_num in fence_stack:
+            issues.append(ValidationIssue(
+                message="Unclosed code block",
+                file_path=file_path,
+                line=line_num,
+                severity=IssueSeverity.ERROR,
+                rule_id="markdown_unclosed_code_block",
+                context=f"Code block opened at line {line_num}",
+                suggestion="Add closing ``` to end the code block"
+            ))
+
+        return issues
+
+    def get_file_patterns(self) -> list[str]:
+        """Get patterns for files this validator handles."""
+        return ["**/*.md", "**/*.markdown"]

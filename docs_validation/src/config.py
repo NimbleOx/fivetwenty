@@ -1,0 +1,132 @@
+"""Configuration management for the validation framework."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from typing import Any
+
+import yaml
+from pydantic import BaseModel, Field
+
+
+class ValidatorConfig(BaseModel):
+    """Configuration for a single validator."""
+
+    enabled: bool = True
+    severity_override: str | None = None
+    options: dict[str, Any] = Field(default_factory=dict)
+    exclude_patterns: list[str] = Field(default_factory=list)
+
+
+class QualityGates(BaseModel):
+    """Quality gate thresholds for validation."""
+
+    max_errors: int = 0
+    max_warnings: int = 50
+    max_issues_per_file: int = 10
+    min_success_rate: float = 95.0
+    fail_on_error: bool = True
+    fail_on_security_issues: bool = True
+    required_validators: list[str] = Field(default_factory=list)
+
+
+class ReportingConfig(BaseModel):
+    """Configuration for validation reporting."""
+
+    formats: list[str] = Field(default_factory=lambda: ["console"])
+    output_dir: str = "validation_reports"
+    include_passed: bool = False
+    include_file_details: bool = True
+    group_by_severity: bool = True
+
+
+class ValidationConfig(BaseModel):
+    """Main validation configuration."""
+
+    # File discovery
+    file_patterns: list[str] = Field(default_factory=lambda: ["docs/**/*.md"])
+    exclude_patterns: list[str] = Field(default_factory=lambda: [
+        "**/.git/**",
+        "**/node_modules/**",
+        "**/__pycache__/**",
+        "**/validation_reports/**",
+    ])
+
+    # Execution settings
+    parallel_execution: bool = True
+    max_workers: int = 4
+    timeout_seconds: float = 30.0
+
+    # Validator configurations
+    validators: dict[str, ValidatorConfig] = Field(default_factory=dict)
+
+    # Quality gates
+    quality_gates: QualityGates = Field(default_factory=QualityGates)
+
+    # Reporting
+    reporting: ReportingConfig = Field(default_factory=ReportingConfig)
+
+    @classmethod
+    def load_from_file(cls, config_path: Path) -> ValidationConfig:
+        """Load configuration from YAML file."""
+        if not config_path.exists():
+            raise FileNotFoundError(f"Configuration file not found: {config_path}")
+
+        with config_path.open(encoding="utf-8") as f:
+            data = yaml.safe_load(f)
+
+        return cls.model_validate(data)
+
+    @classmethod
+    def get_default_config(cls) -> ValidationConfig:
+        """Get default configuration for FiveTwenty documentation."""
+        return cls(
+            file_patterns=[
+                "docs/**/*.md",
+                "**/*.py",
+                "*.md",
+            ],
+            exclude_patterns=[
+                "**/.git/**",
+                "**/node_modules/**",
+                "**/__pycache__/**",
+                "**/.mypy_cache/**",
+                "**/.ruff_cache/**",
+                "**/validation_reports/**",
+                "**/validation_old/**",
+            ],
+            validators={
+                "financial_precision": ValidatorConfig(
+                    enabled=True,
+                    options={"strict_mode": True}
+                ),
+                "security": ValidatorConfig(
+                    enabled=True,
+                    options={
+                        "severity_filter": "high",
+                        "exclude_patterns": ["example", "demo", "tutorial"]
+                    }
+                ),
+                "markdown_syntax": ValidatorConfig(enabled=True),
+                "python_syntax": ValidatorConfig(enabled=True),
+                "cross_references": ValidatorConfig(enabled=True),
+            },
+            quality_gates=QualityGates(
+                max_errors=5,
+                max_warnings=100,
+                min_success_rate=90.0,
+                fail_on_error=True,
+                fail_on_security_issues=True,
+                required_validators=["financial_precision", "security"]
+            )
+        )
+
+    def is_validator_enabled(self, validator_name: str) -> bool:
+        """Check if a validator is enabled."""
+        config = self.validators.get(validator_name)
+        return config.enabled if config else False
+
+    def get_validator_options(self, validator_name: str) -> dict[str, Any]:
+        """Get options for a specific validator."""
+        config = self.validators.get(validator_name)
+        return config.options if config else {}

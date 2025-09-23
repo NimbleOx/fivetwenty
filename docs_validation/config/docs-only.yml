@@ -1,0 +1,73 @@
+# FiveTwenty Documentation Validation - Docs Only Configuration
+
+# File discovery patterns - focused on docs directory only
+file_patterns:
+  - "docs/**/*.md"
+
+exclude_patterns:
+  - "**/.git/**"
+  - "**/node_modules/**"
+  - "**/__pycache__/**"
+  - "**/.mypy_cache/**"
+  - "**/.ruff_cache/**"
+  - "**/.pytest_cache/**"
+  - "**/validation_reports/**"
+  - "**/validation_old/**"
+  - "**/.venv/**"
+
+# Execution settings
+parallel_execution: true
+max_workers: 4
+timeout_seconds: 30.0
+
+# Validator configurations
+validators:
+  financial_precision:
+    enabled: true
+    options:
+      strict_mode: true
+
+  security:
+    enabled: true
+    options:
+      severity_filter: "high"
+      exclude_patterns:
+        - "example"
+        - "demo"
+        - "tutorial"
+        - "YOUR_TOKEN_HERE"
+        - "abc123"
+        - "practice-token"
+        - "live-token"
+        - "your-token"
+        - "your-api-token"
+
+  markdown_syntax:
+    enabled: true
+
+  python_syntax:
+    enabled: true
+
+  cross_references:
+    enabled: true
+
+# Quality gates
+quality_gates:
+  max_errors: 10
+  max_warnings: 100
+  max_issues_per_file: 15
+  min_success_rate: 90.0
+  fail_on_error: true
+  fail_on_security_issues: true
+  required_validators:
+    - "financial_precision"
+    - "security"
+
+# Reporting configuration
+reporting:
+  formats:
+    - "console"
+  output_dir: "validation_reports"
+  include_passed: false
+  include_file_details: true
+  group_by_severity: true
