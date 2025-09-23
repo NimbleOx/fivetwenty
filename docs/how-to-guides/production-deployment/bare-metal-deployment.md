@@ -622,8 +622,9 @@ class BareMetalTradingSystem:
                 account_id=self.config.account_id
             )
 
-            # Update financial metrics
-            ACCOUNT_BALANCE.set(float(account.balance))
+            # Update financial metrics (convert Decimal to float for Prometheus)
+            balance_value = str(account.balance)
+            ACCOUNT_BALANCE.set(float(balance_value))
             ACTIVE_POSITIONS.set(account.open_position_count)
 
             REQUEST_COUNT.labels(endpoint='accounts', status='success').inc()

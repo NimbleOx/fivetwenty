@@ -36,7 +36,7 @@ class RealTimeIndicators:
         self.window_size = window_size
         self.price_windows = {}
 
-    async def update_price(self, instrument: str, price: float):
+    async def update_price(self, instrument: str, price: Decimal):
         """Update price and calculate indicators."""
 
         if instrument not in self.price_windows:
@@ -96,7 +96,7 @@ class LiveSignalGenerator:
         self.signal_history = {}
         self.signal_callbacks = []
 
-    async def process_price_update(self, instrument: str, bid: float, ask: float):
+    async def process_price_update(self, instrument: str, bid: Decimal, ask: Decimal):
         """Process price update and generate signals."""
 
         mid_price = (bid + ask) / 2
@@ -124,7 +124,7 @@ class LiveSignalGenerator:
                     await callback(signal)
 
     async def _generate_signal(self, instrument: str, indicators: Dict[str, float],
-                             current_price: float) -> Optional[TradingSignal]:
+                             current_price: Decimal) -> Optional[TradingSignal]:
         """Generate trading signal from indicators."""
 
         if not indicators:

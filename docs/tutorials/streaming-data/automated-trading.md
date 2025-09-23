@@ -11,6 +11,7 @@ import asyncio
 from typing import Dict, List, Optional
 from datetime import datetime
 from dataclasses import dataclass
+from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 @dataclass
@@ -73,8 +74,8 @@ class LiveTradingEngine:
                 instruments=instruments
             ):
                 if self.is_running:
-                    bid = float(price.bids[0].price)
-                    ask = float(price.asks[0].price)
+                    bid = Decimal(str(price.bids[0].price))
+                    ask = Decimal(str(price.asks[0].price))
 
                     # Process price for signal generation
                     await self.signal_generator.process_price_update(
@@ -129,7 +130,7 @@ class LiveTradingEngine:
 
         # Get account balance
         account = await self.client.accounts.get(self.account_id)
-        balance = float(account.balance)
+        balance = Decimal(str(account.balance))
 
         # Risk-based position sizing
         risk_amount = balance * self.config.risk_per_trade
@@ -175,7 +176,7 @@ class LiveTradingEngine:
                 await self._update_positions()
 
                 # Place stop loss and take profit
-                await self._place_protective_orders(signal.instrument, float(fill.price), units)
+                await self._place_protective_orders(signal.instrument, Decimal(str(fill.price)), units)
 
                 # Update daily trade count
                 self.daily_trades += 1
@@ -186,7 +187,7 @@ class LiveTradingEngine:
         except Exception as e:
             print(f"Trade execution error: {e}")
 
-    async def _place_protective_orders(self, instrument: str, entry_price: float, units: int):
+    async def _place_protective_orders(self, instrument: str, entry_price: Decimal, units: int):
         """Place stop loss and take profit orders."""
 
         try:
@@ -240,9 +241,9 @@ class LiveTradingEngine:
             if hasattr(account, 'positions') and account.positions:
                 for position in account.positions:
                     self.positions[position.instrument] = {
-                        'units': float(position.long.units) - float(position.short.units),
-                        'unrealized_pnl': float(position.unrealized_pl),
-                        'avg_price': float(position.long.average_price) if float(position.long.units) > 0 else float(position.short.average_price)
+                        'units': Decimal(str(position.long.units)) - Decimal(str(position.short.units)),
+                        'unrealized_pnl': Decimal(str(position.unrealized_pl)),
+                        'avg_price': Decimal(str(position.long.average_price)) if Decimal(str(position.long.units)) > 0 else Decimal(str(position.short.average_price))
                     }
 
         except Exception as e:

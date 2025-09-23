@@ -32,7 +32,7 @@ from decimal import Decimal
 class KellyOptimizer:
     """Implement Kelly Criterion for optimal position sizing."""
     
-    def __init__(self, win_rate: float, avg_win: float, avg_loss: float):
+    def __init__(self, win_rate: Decimal, avg_win: Decimal, avg_loss: Decimal):
         self.win_rate = win_rate / 100 if win_rate > 1 else win_rate  # Handle percentage input
         self.lose_rate = 1 - self.win_rate
         self.avg_win = avg_win
@@ -116,8 +116,8 @@ class KellyOptimizer:
         
         return kelly_result
     
-    def calculate_position_size(self, account_balance: float, 
-                              entry_price: float, stop_loss: float,
+    def calculate_position_size(self, account_balance: Decimal,
+                              entry_price: Decimal, stop_loss: Decimal,
                               use_fractional: bool = True) -> int:
         """Calculate optimal position size using Kelly."""
         
@@ -149,7 +149,7 @@ class KellyOptimizer:
         return position_size
     
     def simulate_kelly_performance(self, trials: int = 1000,
-                                 starting_balance: float = 10000) -> dict:  # Example: 1000 trials, $10k balance
+                                 starting_balance: Decimal = Decimal('10000')) -> dict:  # Example: 1000 trials, $10k balance
         """Simulate Kelly performance over many trials."""
         
         import random
@@ -283,7 +283,7 @@ class PerformanceAnalyzer:
                     trade_results.append(float(transaction.pl))
                 
                 if hasattr(transaction, 'account_balance'):
-                    account_values.append(float(transaction.account_balance))
+                    account_values.append(Decimal(str(transaction.account_balance)))
             
             if not trade_results:
                 return {'error': 'No trade data available'}

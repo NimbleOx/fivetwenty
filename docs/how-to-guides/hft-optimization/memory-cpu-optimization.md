@@ -15,6 +15,7 @@ import numpy as np
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import NamedTuple
+from decimal import Decimal
 import array
 
 class FastPrice(NamedTuple):
@@ -124,8 +125,8 @@ price_manager = OptimizedPriceManager(buffer_size=5000)
 async def optimized_price_callback(price: ClientPrice):
     """Optimized callback using efficient data structures."""
 
-    bid = float(price.bids[0].price) if price.bids else 0
-    ask = float(price.asks[0].price) if price.asks else 0
+    bid = Decimal(str(price.bids[0].price)) if price.bids else Decimal('0')
+    ask = Decimal(str(price.asks[0].price)) if price.asks else Decimal('0')
     timestamp = time.perf_counter()
 
     # Ultra-fast update
@@ -200,8 +201,8 @@ async def efficient_price_processing(price: ClientPrice):
 
     try:
         # Populate with current data
-        price_obj['bid'] = float(price.bids[0].price) if price.bids else 0
-        price_obj['ask'] = float(price.asks[0].price) if price.asks else 0
+        price_obj['bid'] = Decimal(str(price.bids[0].price)) if price.bids else Decimal('0')
+        price_obj['ask'] = Decimal(str(price.asks[0].price)) if price.asks else Decimal('0')
         price_obj['timestamp'] = time.perf_counter()
         price_obj['instrument'] = price.instrument
 
@@ -368,8 +369,8 @@ async def store_price_efficiently(price):
     """Store price with automatic memory management."""
     price_data = {
         'instrument': price.instrument,
-        'bid': float(price.bids[0].price) if price.bids else 0,
-        'ask': float(price.asks[0].price) if price.asks else 0,
+        'bid': Decimal(str(price.bids[0].price)) if price.bids else Decimal('0'),
+        'ask': Decimal(str(price.asks[0].price)) if price.asks else Decimal('0'),
         'timestamp': time.perf_counter()
     }
 

@@ -443,7 +443,7 @@ from decimal import Decimal
 
 # Monitor account equity (balance + unrealized P/L)
 account = await client.accounts.get(account_id)
-current_equity = float(account.balance) + float(account.unrealized_pl)
+current_equity = Decimal(str(account.balance)) + Decimal(str(account.unrealized_pl))
 
 # Compare to account high-water mark
 if current_equity < peak_equity * Decimal("0.95"):  # 5% drawdown

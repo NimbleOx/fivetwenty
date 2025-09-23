@@ -11,6 +11,8 @@
 Minimize order execution latency:
 
 ```python
+from decimal import Decimal
+
 class LowLatencyOrderManager:
     """Optimized order execution for HFT."""
 
@@ -301,7 +303,7 @@ class FastPreTradeValidator:
                 'valid': True,
                 'message': "Valid account",
                 'timestamp': current_time,
-                'balance': float(account.balance)
+                'balance': Decimal(str(account.balance))
             }
 
             return True, "Valid account"

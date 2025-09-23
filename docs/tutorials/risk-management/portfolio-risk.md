@@ -248,6 +248,7 @@ Understand how different currency pairs move together to avoid overexposure.
 from fivetwenty import AsyncClient
 import numpy as np
 from datetime import datetime, timedelta
+from decimal import Decimal
 from fivetwenty.models import CandlestickGranularity
 
 class CorrelationAnalyzer:
@@ -278,12 +279,12 @@ class CorrelationAnalyzer:
                 
                 if candles.candles:
                     # Calculate returns (price changes)
-                    closes = [float(c.mid.c) for c in candles.candles if c.mid]
+                    closes = [Decimal(str(c.mid.c)) for c in candles.candles if c.mid]
                     returns = []
-                    
+
                     for i in range(1, len(closes)):
                         ret = (closes[i] - closes[i-1]) / closes[i-1]
-                        returns.append(ret)
+                        returns.append(float(ret))  # Convert to float for numpy correlation calculation
                     
                     price_data[instrument] = returns
             
@@ -332,8 +333,8 @@ class CorrelationAnalyzer:
             print(f"❌ Correlation calculation error: {e}")
             return {}
     
-    def identify_high_correlations(self, correlation_matrix: dict, 
-                                 threshold: float = 0.7) -> list:
+    def identify_high_correlations(self, correlation_matrix: dict,
+                                 threshold: Decimal = Decimal("0.7")) -> list:
         """Identify highly correlated pairs."""
         
         high_correlations = []
@@ -345,7 +346,7 @@ class CorrelationAnalyzer:
                 if inst1 in correlation_matrix and inst2 in correlation_matrix[inst1]:
                     corr = correlation_matrix[inst1][inst2]
                     
-                    if abs(corr) >= threshold:
+                    if abs(corr) >= float(threshold):
                         high_correlations.append({
                             'pair': (inst1, inst2),
                             'correlation': corr,
@@ -355,7 +356,7 @@ class CorrelationAnalyzer:
         # Sort by absolute correlation
         high_correlations.sort(key=lambda x: abs(x['correlation']), reverse=True)
         
-        print(f"\n🔍 High Correlations (|r| >= {threshold}):")
+        print(f"\n🔍 High Correlations (|r| >= {float(threshold)}):")
         for item in high_correlations:
             inst1, inst2 = item['pair']
             corr = item['correlation']
@@ -558,7 +559,7 @@ class PortfolioDiversifier:
         return max(0, min(100, score))
     
     def suggest_optimal_allocation(self, available_instruments: list,
-                                 total_risk_budget: float) -> dict:
+                                 total_risk_budget: Decimal) -> dict:
         """Suggest optimal portfolio allocation."""
         
         # Simplified allocation suggestion
@@ -568,7 +569,7 @@ class PortfolioDiversifier:
             return {}
         
         # Equal weight allocation with adjustments
-        base_allocation = total_risk_budget / num_positions
+        base_allocation = float(total_risk_budget / num_positions)
         
         allocations = {}
         for i, instrument in enumerate(available_instruments[:num_positions]):
@@ -581,7 +582,7 @@ class PortfolioDiversifier:
             
             allocations[instrument] = {
                 'suggested_risk': allocation,
-                'percentage': (allocation / total_risk_budget) * 100,
+                'percentage': (allocation / float(total_risk_budget)) * 100,
                 'rationale': "Equal weight with diversification adjustments"
             }
         
@@ -633,7 +634,7 @@ Systematically allocate risk across different strategies and instruments.
 class RiskBudgetManager:
     """Manage risk allocation across different categories."""
     
-    def __init__(self, total_risk_budget: float):
+    def __init__(self, total_risk_budget: Decimal):
         self.total_risk_budget = total_risk_budget
         self.risk_allocations = {
             'trend_following': 0.40,    # 40% to trend strategies
@@ -643,7 +644,7 @@ class RiskBudgetManager:
         }
         self.allocated_risk = {category: 0 for category in self.risk_allocations}
     
-    def allocate_risk(self, strategy_category: str, risk_amount: float) -> bool:
+    def allocate_risk(self, strategy_category: str, risk_amount: Decimal) -> bool:
         """Allocate risk to a strategy category."""
         
         if strategy_category not in self.risk_allocations:
@@ -651,7 +652,7 @@ class RiskBudgetManager:
             return False
         
         # Check if allocation would exceed budget
-        max_allocation = self.total_risk_budget * self.risk_allocations[strategy_category]
+        max_allocation = float(self.total_risk_budget * Decimal(str(self.risk_allocations[strategy_category])))
         
         if self.allocated_risk[strategy_category] + risk_amount > max_allocation:
             available = max_allocation - self.allocated_risk[strategy_category]
@@ -673,7 +674,7 @@ class RiskBudgetManager:
         total_used = 0
         
         for category, allocation_pct in self.risk_allocations.items():
-            max_budget = self.total_risk_budget * allocation_pct
+            max_budget = float(self.total_risk_budget * Decimal(str(allocation_pct)))
             used = self.allocated_risk[category]
             utilization_pct = (used / max_budget) * 100 if max_budget > 0 else 0
             
@@ -687,9 +688,9 @@ class RiskBudgetManager:
             total_used += used
         
         print(f"📊 Risk Budget Utilization:")
-        print(f"   Total Budget: ${self.total_risk_budget:.2f}")
-        print(f"   Total Used: ${total_used:.2f} ({(total_used/self.total_risk_budget)*100:.1f}%)")
-        print(f"   Available: ${self.total_risk_budget - total_used:.2f}")
+        print(f"   Total Budget: ${float(self.total_risk_budget):.2f}")
+        print(f"   Total Used: ${total_used:.2f} ({(total_used/float(self.total_risk_budget))*100:.1f}%)")
+        print(f"   Available: ${float(self.total_risk_budget) - total_used:.2f}")
         print()
         
         for category, data in utilization.items():
@@ -715,7 +716,7 @@ class RiskBudgetManager:
         
         # Check overall utilization
         total_used = sum(data['used'] for data in utilization.values())
-        overall_utilization = (total_used / self.total_risk_budget) * 100
+        overall_utilization = (total_used / float(self.total_risk_budget)) * 100
         
         if overall_utilization < 50:
             suggestions.append("Overall risk utilization low - consider increasing position sizes")
@@ -734,17 +735,17 @@ def demo_risk_budgeting():
     """Demonstrate risk budgeting system."""
     
     # Create risk budget manager with $1000 total budget
-    risk_manager = RiskBudgetManager(total_risk_budget=1000)
+    risk_manager = RiskBudgetManager(total_risk_budget=Decimal("1000"))
     
     # Simulate some risk allocations
     allocations = [
-        ('trend_following', 150),
-        ('trend_following', 100),
-        ('mean_reversion', 80),
-        ('breakout', 120),
-        ('hedge', 60)
+        ('trend_following', Decimal("150")),
+        ('trend_following', Decimal("100")),
+        ('mean_reversion', Decimal("80")),
+        ('breakout', Decimal("120")),
+        ('hedge', Decimal("60"))
     ]
-    
+
     for category, amount in allocations:
         risk_manager.allocate_risk(category, amount)
     

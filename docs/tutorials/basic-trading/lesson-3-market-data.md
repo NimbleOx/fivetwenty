@@ -262,9 +262,9 @@ async def analyze_price_movements(instrument: str, periods: int = 20):
                 return None
 
             # Extract price data
-            highs = [float(c.mid.h) for c in candles.candles if c.mid]
-            lows = [float(c.mid.l) for c in candles.candles if c.mid]
-            closes = [float(c.mid.c) for c in candles.candles if c.mid]
+            highs = [Decimal(str(c.mid.h)) for c in candles.candles if c.mid]
+            lows = [Decimal(str(c.mid.l)) for c in candles.candles if c.mid]
+            closes = [Decimal(str(c.mid.c)) for c in candles.candles if c.mid]
 
             if len(closes) < 2:
                 return None

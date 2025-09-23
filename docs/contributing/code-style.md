@@ -43,7 +43,7 @@ def calculate_position_value(
     return Decimal(str(units)) * price
 
 # ❌ Bad - Float causes precision errors
-def calculate_position_value(units: int, price: float) -> float:
+def calculate_position_value(units: int, price: Decimal) -> Decimal:
     return units * price  # Precision loss!
 
 # ✅ Good - Accept Decimal or convert from string/int

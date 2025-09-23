@@ -12,10 +12,12 @@ A systematic approach to implementing and maintaining risk management systems.
 ### The Five-Layer Defense System
 
 ```python
+from decimal import Decimal
+
 class RiskManagementFramework:
     """Professional five-layer risk management system."""
     
-    def __init__(self, account_id: str, account_balance: float):
+    def __init__(self, account_id: str, account_balance: Decimal):
         self.account_id = account_id
         self.account_balance = account_balance
         
@@ -503,7 +505,7 @@ from datetime import datetime, timedelta
 class RiskStressTesting:
     """Comprehensive stress testing for risk management systems."""
     
-    def __init__(self, initial_balance: float = 10000):  # Example: $10,000 initial balance
+    def __init__(self, initial_balance: Decimal = Decimal("10000")):  # Example: $10,000 initial balance
         self.initial_balance = initial_balance
         self.stress_scenarios = {
             'black_swan': {
@@ -615,7 +617,7 @@ class RiskStressTesting:
         
         return result
     
-    def run_consecutive_loss_test(self, typical_risk_per_trade: float, 
+    def run_consecutive_loss_test(self, typical_risk_per_trade: Decimal,
                                 num_consecutive_losses: int = 10) -> dict:
         """Test impact of consecutive losses."""
         
@@ -714,7 +716,7 @@ class RiskStressTesting:
         
         # Run individual stress tests
         stress_results['black_swan'] = self.run_black_swan_test(portfolio_positions)
-        stress_results['consecutive_losses'] = self.run_consecutive_loss_test(0.01, 10)
+        stress_results['consecutive_losses'] = self.run_consecutive_loss_test(Decimal("0.01"), 10)
         stress_results['correlation_breakdown'] = self.run_correlation_breakdown_test(portfolio_positions)
         
         # Calculate overall stress resilience

@@ -37,6 +37,7 @@ graph TB
 import time
 import functools
 from typing import Dict, Any, Optional
+from decimal import Decimal
 from prometheus_client import Counter, Histogram, Gauge, Summary, Info
 from prometheus_client import start_http_server, generate_latest
 from datetime import datetime
@@ -133,7 +134,7 @@ class MetricsCollector:
             'python_version': f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
         })
 
-    def track_trade(self, instrument: str, direction: str, volume: float, status: str):
+    def track_trade(self, instrument: str, direction: str, volume: Decimal, status: str):
         """Track trade execution metrics."""
         TRADES_TOTAL.labels(
             instrument=instrument,
@@ -146,7 +147,7 @@ class MetricsCollector:
             direction=direction
         ).observe(abs(volume))
 
-    def update_account_metrics(self, account_id: str, balance: float, currency: str):
+    def update_account_metrics(self, account_id: str, balance: Decimal, currency: str):
         """Update account-related metrics."""
         ACCOUNT_BALANCE.labels(
             account_id=account_id,
@@ -161,8 +162,8 @@ class MetricsCollector:
 
         for position in positions:
             instrument = position.instrument
-            units = float(position.long.units or "0") + float(position.short.units or "0")
-            unrealized_pl = float(position.unrealized_pl or "0")
+            units = float(Decimal(str(position.long.units or "0"))) + float(Decimal(str(position.short.units or "0")))
+            unrealized_pl = float(Decimal(str(position.unrealized_pl or "0")))
 
             if units != 0:
                 ACTIVE_POSITIONS.labels(
@@ -776,8 +777,8 @@ class StructuredLogger:
         self,
         event_type: str,
         instrument: str,
-        units: float,
-        price: Optional[float] = None,
+        units: Decimal,
+        price: Optional[Decimal] = None,
         order_id: Optional[str] = None,
         user_id: Optional[str] = None,
         additional_data: Optional[Dict[str, Any]] = None

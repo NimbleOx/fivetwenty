@@ -17,6 +17,7 @@ Implement your first real-time data streams using FiveTwenty for price feeds and
 ```python
 import asyncio
 from datetime import datetime
+from decimal import Decimal
 from typing import Dict, List, Optional
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import ClientPrice
@@ -55,9 +56,9 @@ class BasicPriceStreamer:
 
         # Cache the latest price
         self.price_cache[price.instrument] = {
-            'bid': float(price.bids[0].price),
-            'ask': float(price.asks[0].price),
-            'spread': float(price.asks[0].price) - float(price.bids[0].price),
+            'bid': Decimal(str(price.bids[0].price)),
+            'ask': Decimal(str(price.asks[0].price)),
+            'spread': Decimal(str(price.asks[0].price)) - Decimal(str(price.bids[0].price)),
             'timestamp': datetime.now()
         }
 
@@ -68,7 +69,7 @@ class BasicPriceStreamer:
         """Basic price movement analysis."""
 
         instrument = price.instrument
-        current_bid = float(price.bids[0].price)
+        current_bid = Decimal(str(price.bids[0].price))
 
         print(f"{instrument}: {current_bid:.5f}")
 

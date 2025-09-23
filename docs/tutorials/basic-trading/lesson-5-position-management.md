@@ -32,7 +32,7 @@ async def demonstrate_position_management(account_id: str, trade_id: str):
         print(f"   Instrument: {trade.instrument}")
         print(f"   Units: {trade.current_units}")
         print(f"   Entry Price: {trade.price}")
-        print(f"   Current P&L: ${float(trade.unrealized_pl):+.2f}")
+        print(f"   Current P&L: ${Decimal(str(trade.unrealized_pl)):+.2f}")
 
         # Demonstrate different exit strategies
         print(f"\n🎯 Exit Strategy Options:")
@@ -151,7 +151,7 @@ class TakeProfitStrategy:
             return entry_price - (target_pips * pip_value)
 
     @staticmethod
-    def risk_reward_ratio(entry_price: float, stop_loss: float, is_long: bool, ratio: float = 2.0) -> float:
+    def risk_reward_ratio(entry_price: Decimal, stop_loss: Decimal, is_long: bool, ratio: Decimal = Decimal("2.0")) -> Decimal:
         """Take profit based on risk-reward ratio."""
         risk = abs(entry_price - stop_loss)
         reward = risk * ratio
@@ -162,16 +162,16 @@ class TakeProfitStrategy:
             return entry_price - reward
 
     @staticmethod
-    def multiple_targets(entry_price: float, is_long: bool, targets: list) -> list:
+    def multiple_targets(entry_price: Decimal, is_long: bool, targets: list) -> list:
         """Multiple take profit levels for scaling out."""
-        pip_value = 0.0001
+        pip_value = Decimal("0.0001")
         take_profits = []
 
         for target_pips in targets:
             if is_long:
-                tp = entry_price + (target_pips * pip_value)
+                tp = entry_price + (Decimal(str(target_pips)) * pip_value)
             else:
-                tp = entry_price - (target_pips * pip_value)
+                tp = entry_price - (Decimal(str(target_pips)) * pip_value)
             take_profits.append(tp)
 
         return take_profits
@@ -186,7 +186,7 @@ print("\n🎯 Take Profit Strategy Examples:")
 fixed_tp = TakeProfitStrategy.fixed_target(entry_price, is_long_position, 30)
 print(f"Fixed 30-pip target: {fixed_tp:.5f}")
 
-rr_tp = TakeProfitStrategy.risk_reward_ratio(entry_price, stop_loss, is_long_position, 2.0)
+rr_tp = TakeProfitStrategy.risk_reward_ratio(entry_price, stop_loss, is_long_position, Decimal("2.0"))
 print(f"2:1 Risk-Reward target: {rr_tp:.5f}")
 
 multiple_tps = TakeProfitStrategy.multiple_targets(entry_price, is_long_position, [15, 30, 50])
@@ -205,12 +205,12 @@ from fivetwenty import AsyncClient
 class TrailingStopManager:
     """Manage trailing stop loss orders."""
 
-    def __init__(self, initial_stop: float, trail_distance_pips: int = 15):
+    def __init__(self, initial_stop: Decimal, trail_distance_pips: int = 15):
         self.current_stop = initial_stop
-        self.trail_distance = trail_distance_pips * 0.0001
+        self.trail_distance = Decimal(str(trail_distance_pips)) * Decimal("0.0001")
         self.best_price = None
 
-    def update_trailing_stop(self, current_price: float, is_long: bool) -> tuple[bool, float]:
+    def update_trailing_stop(self, current_price: Decimal, is_long: bool) -> tuple[bool, Decimal]:
         """Update trailing stop based on current price."""
 
         if self.best_price is None:
@@ -252,7 +252,7 @@ async def demonstrate_trailing_stop(account_id: str, trade_id: str):
         is_long = int(trade.current_units) > 0
 
         # Initialize trailing stop
-        initial_stop = float(trade.price) - (20 * 0.0001) if is_long else float(trade.price) + (20 * 0.0001)
+        initial_stop = Decimal(str(trade.price)) - Decimal('0.0020') if is_long else Decimal(str(trade.price)) + Decimal('0.0020')
         trailing_stop = TrailingStopManager(initial_stop, trail_distance_pips=15)
 
         print("📈 Trailing Stop Demonstration:")
@@ -283,8 +283,8 @@ class AdvancedPositionSizing:
     """Advanced position sizing strategies."""
 
     @staticmethod
-    def fixed_risk_sizing(account_balance: float, risk_percent: float,
-                         entry_price: float, stop_loss: float) -> int:
+    def fixed_risk_sizing(account_balance: Decimal, risk_percent: Decimal,
+                         entry_price: Decimal, stop_loss: Decimal) -> int:
         """Calculate position size based on fixed risk percentage."""
 
         risk_amount = account_balance * (risk_percent / 100)
@@ -294,26 +294,26 @@ class AdvancedPositionSizing:
             return 0
 
         # For forex, 1 pip = $1 per 10,000 units for most pairs
-        pip_risk = price_risk / 0.0001
+        pip_risk = price_risk / Decimal("0.0001")
         risk_per_pip = risk_amount / pip_risk
-        position_size = int(risk_per_pip * 10000)
+        position_size = int(risk_per_pip * Decimal("10000"))
 
         return position_size
 
     @staticmethod
-    def volatility_adjusted_sizing(base_position: int, current_volatility: float,
-                                 average_volatility: float) -> int:
+    def volatility_adjusted_sizing(base_position: int, current_volatility: Decimal,
+                                 average_volatility: Decimal) -> int:
         """Adjust position size based on current volatility."""
 
         volatility_ratio = average_volatility / current_volatility
         adjusted_size = int(base_position * volatility_ratio)
 
         # Cap adjustments to reasonable ranges
-        return max(int(base_position * 0.5), min(adjusted_size, int(base_position * 1.5)))
+        return max(int(base_position * Decimal("0.5")), min(adjusted_size, int(base_position * Decimal("1.5"))))
 
 # Example position sizing
-account_balance = 10000
-risk_percent = 1.0  # 1% risk
+account_balance = Decimal("10000")
+risk_percent = Decimal("1.0")  # 1% risk
 entry_price = Decimal("1.1000")
 stop_loss = Decimal("1.0980")
 
@@ -330,8 +330,8 @@ print(f"Calculated Position Size: {position_size} units")
 
 # Volatility adjustment
 base_position = 5000
-current_vol = 0.0015  # Current volatility
-average_vol = 0.0012  # Average volatility
+current_vol = Decimal("0.0015")  # Current volatility
+average_vol = Decimal("0.0012")  # Average volatility
 
 adjusted_size = AdvancedPositionSizing.volatility_adjusted_sizing(
     base_position, current_vol, average_vol

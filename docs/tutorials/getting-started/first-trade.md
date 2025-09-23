@@ -296,11 +296,11 @@ async def close_position(client, instrument="EUR_USD"):
     units_to_close = 0
     if position.long.units != "0":
         # Close long position (sell)
-        units_to_close = -int(float(position.long.units))
+        units_to_close = -int(Decimal(str(position.long.units)))
         print(f"   📉 Closing LONG position of {position.long.units} units")
     elif position.short.units != "0":
         # Close short position (buy)
-        units_to_close = -int(float(position.short.units))
+        units_to_close = -int(Decimal(str(position.short.units)))
         print(f"   📈 Closing SHORT position of {position.short.units} units")
 
     if units_to_close == 0:
@@ -625,7 +625,7 @@ client = AsyncClient()  # Loads from FIVETWENTY_* env vars
 # Calculate position size based on account balance
 async def calculate_position_size(client, expected_loss_per_unit):
     account = await client.accounts.get(client.account_id)
-    max_risk = float(account.balance) * 0.02  # 2% risk per trade
+    max_risk = Decimal(str(account.balance)) * Decimal('0.02')  # 2% risk per trade
     position_size = min(1000, int(max_risk / expected_loss_per_unit))
     return position_size
 ```

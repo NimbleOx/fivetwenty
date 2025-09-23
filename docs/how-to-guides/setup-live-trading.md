@@ -151,7 +151,7 @@ from decimal import Decimal
 class LiveTradingValidator:
     """Safety validator for live trading operations."""
 
-    def __init__(self, max_position_size: int = 10000, daily_loss_limit: float = 500.0):
+    def __init__(self, max_position_size: int = 10000, daily_loss_limit: Decimal = Decimal("500.0")):
         self.max_position_size = max_position_size
         self.daily_loss_limit = daily_loss_limit
 
@@ -188,7 +188,7 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 async def place_live_order_safely(account_id: str, instrument: str, units: int,
-                                stop_loss: float = None, take_profit: float = None):
+                                stop_loss: Decimal = None, take_profit: Decimal = None):
     """Place order in live environment with safety checks."""
 
     async with AsyncClient(
@@ -271,10 +271,10 @@ async def monitor_live_account(account_id: str, check_interval: int = 30):
                 account = await client.accounts.get(account_id)
 
                 # Key metrics
-                balance = float(account.balance)
-                unrealized_pl = float(account.unrealized_pl)
-                margin_used = float(account.margin_used)
-                margin_available = float(account.margin_available)
+                balance = account.balance
+                unrealized_pl = account.unrealized_pl
+                margin_used = account.margin_used
+                margin_available = account.margin_available
 
                 print(f"\n💰 Live Account Status:")
                 print(f"   Balance: ${balance:,.2f}")
@@ -315,13 +315,13 @@ from decimal import Decimal
 class LiveTradingRiskManager:
     """Comprehensive risk management for live trading."""
 
-    def __init__(self, account_balance: float):
+    def __init__(self, account_balance: Decimal):
         self.account_balance = account_balance
         self.max_risk_per_trade = 0.02  # 2% max risk per trade
         self.max_daily_loss = Decimal("0.05")      # 5% max daily loss
         self.max_position_correlation = 0.7  # Max correlation between positions
 
-    def calculate_position_size(self, stop_loss_pips: int, pip_value: float) -> int:
+    def calculate_position_size(self, stop_loss_pips: int, pip_value: Decimal) -> int:
         """Calculate safe position size based on risk parameters."""
 
         max_loss_amount = self.account_balance * self.max_risk_per_trade
@@ -338,8 +338,8 @@ class LiveTradingRiskManager:
         return position_size
 
 # Usage
-risk_manager = LiveTradingRiskManager(account_balance=10000)
-safe_position_size = risk_manager.calculate_position_size(stop_loss_pips=50, pip_value=1.0)
+risk_manager = LiveTradingRiskManager(account_balance=Decimal("10000"))
+safe_position_size = risk_manager.calculate_position_size(stop_loss_pips=50, pip_value=Decimal("1.0"))
 ```
 
 ---

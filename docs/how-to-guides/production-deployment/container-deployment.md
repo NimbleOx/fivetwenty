@@ -19,6 +19,7 @@ Create secure configuration management for containerized deployment:
 import os
 from typing import Dict, Optional
 from dataclasses import dataclass
+from decimal import Decimal
 from fivetwenty import Environment
 
 @dataclass
@@ -100,7 +101,7 @@ class ProductionConfig:
             validation_errors.append("SSL must be enabled for live trading")
 
         # Risk management validations
-        if float(self.daily_loss_limit) <= 0:
+        if Decimal(self.daily_loss_limit) <= 0:
             validation_errors.append("Daily loss limit must be positive")
 
         if self.max_position_size <= 0:
@@ -562,8 +563,9 @@ class ProductionTradingSystem:
                 account_id=self.config.account_id
             )
 
-            # Update metrics
-            ACCOUNT_BALANCE.set(float(account.balance))
+            # Update metrics (convert Decimal to float for Prometheus)
+            balance_value = str(account.balance)
+            ACCOUNT_BALANCE.set(float(balance_value))
             ACTIVE_POSITIONS.set(account.open_position_count)
 
             REQUEST_COUNT.labels(endpoint='accounts', status='success').inc()
@@ -583,11 +585,11 @@ class ProductionTradingSystem:
 
             # Risk management check
             total_unrealized_pl = sum(
-                float(pos.unrealized_pl or "0") for pos in positions.positions
+                float(Decimal(str(pos.unrealized_pl or "0"))) for pos in positions.positions
                 if pos.unrealized_pl
             )
 
-            if abs(total_unrealized_pl) > float(self.config.daily_loss_limit):
+            if abs(total_unrealized_pl) > float(Decimal(self.config.daily_loss_limit)):
                 await self._emergency_stop("Daily loss limit exceeded")
 
             self.logger.debug(f"Trading cycle completed - {len(positions.positions)} positions")

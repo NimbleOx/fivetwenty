@@ -14,6 +14,7 @@ Optimize streaming for minimal latency:
 import asyncio
 from collections import deque
 from typing import Dict, Callable, Optional
+from decimal import Decimal
 import time
 
 class HighPerformanceStreamer:
@@ -136,12 +137,12 @@ async def hft_price_callback(price: ClientPrice):
     """Ultra-fast price processing callback."""
 
     # Minimal processing for maximum speed
-    bid = float(price.bids[0].price) if price.bids else 0
-    ask = float(price.asks[0].price) if price.asks else 0
+    bid = Decimal(str(price.bids[0].price)) if price.bids else Decimal('0')
+    ask = Decimal(str(price.asks[0].price)) if price.asks else Decimal('0')
     spread = ask - bid
 
     # Only log significant moves (reduce I/O)
-    if spread > 0.0010:  # 1 pip threshold
+    if spread > Decimal('0.0010'):  # 1 pip threshold
         print(f"⚡ {price.instrument}: {bid}/{ask} (spread: {spread:.5f})")
 
 # Usage
@@ -222,7 +223,7 @@ async def _process_price_update(self, price):
 def _should_process_price(self, price):
     # Only process prices with tight spreads
     if price.bids and price.asks:
-        spread = float(price.asks[0].price) - float(price.bids[0].price)
+        spread = Decimal(str(price.asks[0].price)) - Decimal(str(price.bids[0].price))
         return spread < 0.0005  # 0.5 pip threshold
     return False
 ```

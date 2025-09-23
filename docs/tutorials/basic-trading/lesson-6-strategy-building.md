@@ -175,7 +175,7 @@ class StrategyBacktester:
         except Exception as e:
             print(f"❌ Backtest error: {e}")
 
-    async def _execute_backtest_trade(self, direction: str, price: float, timestamp):
+    async def _execute_backtest_trade(self, direction: str, price: Decimal, timestamp):
         """Execute trade in backtest environment."""
 
         units = self.strategy.position_size if direction == "BUY" else -self.strategy.position_size
@@ -199,7 +199,7 @@ class StrategyBacktester:
 
         print(f"📈 Backtest {direction}: {price:.5f} at {timestamp}")
 
-    async def _check_exit_conditions(self, current_price: float, timestamp):
+    async def _check_exit_conditions(self, current_price: Decimal, timestamp):
         """Check if position should be closed."""
 
         if not self.current_position:
@@ -228,7 +228,7 @@ class StrategyBacktester:
         if should_close:
             await self._close_backtest_position(current_price, timestamp, exit_reason)
 
-    async def _close_backtest_position(self, exit_price: float, timestamp, reason: str):
+    async def _close_backtest_position(self, exit_price: Decimal, timestamp, reason: str):
         """Close position in backtest."""
 
         position = self.current_position

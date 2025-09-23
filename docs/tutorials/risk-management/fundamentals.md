@@ -188,7 +188,7 @@ class RiskTracker:
         self.daily_trades = []
         self.open_risks = {}
     
-    def add_trade_risk(self, trade_id: str, risk_amount: float):
+    def add_trade_risk(self, trade_id: str, risk_amount: Decimal):
         """Add new trade risk to tracking."""
         self.open_risks[trade_id] = risk_amount
         self.daily_trades.append(risk_amount)

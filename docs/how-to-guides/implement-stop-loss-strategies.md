@@ -155,7 +155,7 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 async def percentage_based_stop_loss(account_id: str, instrument: str,
-                                   units: int, risk_percentage: float = 0.02):
+                                   units: int, risk_percentage: Decimal = Decimal("0.02")):
     """Implement stop-loss based on account risk percentage."""
 
     async with AsyncClient(token="your-token", environment=Environment.PRACTICE) as client:
@@ -206,7 +206,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
 
             if response.order_fill_transaction:
                 fill = response.order_fill_transaction
-                actual_risk = abs(float(fill.price) - float(stop_loss_price)) * abs(units)
+                actual_risk = abs(Decimal(str(fill.price)) - stop_loss_price) * abs(units)
                 print(f"✅ Order placed - Actual risk: ${actual_risk:.2f}")
 
             return response.order_fill_transaction
@@ -305,7 +305,7 @@ import pandas as pd
 import numpy as np
 
 async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
-                                atr_multiplier: float = 2.0, atr_period: int = 14):
+                                atr_multiplier: Decimal = Decimal("2.0"), atr_period: int = 14):
     """Calculate stop-loss based on Average True Range volatility."""
 
     async with AsyncClient(token="your-token", environment=Environment.PRACTICE) as client:
@@ -322,9 +322,9 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
             for candle in candles_response.candles:
                 if candle.mid:
                     data.append({
-                        'high': float(candle.mid.h),
-                        'low': float(candle.mid.l),
-                        'close': float(candle.mid.c)
+                        'high': float(Decimal(str(candle.mid.h))),
+                        'low': float(Decimal(str(candle.mid.l))),
+                        'close': float(Decimal(str(candle.mid.c)))
                     })
 
             df = pd.DataFrame(data)
@@ -457,9 +457,9 @@ async def move_to_breakeven(account_id: str, trade_id: str, trigger_pips: int = 
             pip_size = Decimal("0.01") if "JPY" in instrument else Decimal("0.0001")
 
             if current_units > 0:  # Long position
-                pip_movement = (float(market_price) - float(entry_price)) / float(pip_size)
+                pip_movement = (Decimal(str(market_price)) - Decimal(str(entry_price))) / pip_size
             else:  # Short position
-                pip_movement = (float(entry_price) - float(market_price)) / float(pip_size)
+                pip_movement = (Decimal(str(entry_price)) - Decimal(str(market_price))) / pip_size
 
             print(f"📊 Current P/L: {pip_movement:.1f} pips")
 
@@ -611,8 +611,8 @@ async def monitor_stop_loss_positions(account_id: str, check_interval: int = 30)
                         print(f"   🛡️ Stop-Loss: {sl_order.price} (ID: {sl_order.id})")
 
                         # Calculate distance to stop
-                        current_price = float(trade.price)  # Simplified - should get current market
-                        stop_price = float(sl_order.price)
+                        current_price = Decimal(str(trade.price))  # Simplified - should get current market
+                        stop_price = Decimal(str(sl_order.price))
                         distance = abs(current_price - stop_price)
 
                         if distance < 0.0050:  # Within 50 pips (adjust for pair)
@@ -662,8 +662,8 @@ class StopLossRules:
 
         # Calculate risk
         pip_size = Decimal("0.01") if "JPY" in instrument else Decimal("0.0001")
-        risk_distance = abs(float(entry_price) - float(stop_price))
-        risk_pips = risk_distance / float(pip_size)
+        risk_distance = abs(Decimal(str(entry_price)) - Decimal(str(stop_price)))
+        risk_pips = risk_distance / pip_size
 
         # Rule 1: Minimum stop distance
         if risk_pips < 10:
@@ -684,7 +684,7 @@ class StopLossRules:
             results['valid'] = False
 
         # Rule 4: Reasonable risk amount
-        position_value = abs(units) * float(entry_price)
+        position_value = abs(units) * Decimal(str(entry_price))
         risk_amount = abs(units) * risk_distance
         risk_percentage = (risk_amount / position_value) * 100
 
@@ -748,7 +748,7 @@ async def troubleshoot_stop_loss_issues(account_id: str):
         try:
             # Check account margin
             account = await client.accounts.get(account_id)
-            margin_utilization = float(account.margin_used) / float(account.balance)
+            margin_utilization = Decimal(str(account.margin_used)) / Decimal(str(account.balance))
 
             if margin_utilization > 0.8:
                 print("⚠️ High margin usage - stops may trigger early")
@@ -765,8 +765,8 @@ async def troubleshoot_stop_loss_issues(account_id: str):
 
                 # Check for wide stops
                 if trade.stop_loss_order:
-                    entry = float(trade.price)
-                    stop = float(trade.stop_loss_order.price)
+                    entry = Decimal(str(trade.price))
+                    stop = Decimal(str(trade.stop_loss_order.price))
                     risk = abs(entry - stop) / 0.0001  # Assuming non-JPY pair
 
                     if risk > 100:

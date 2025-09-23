@@ -29,6 +29,7 @@ import pandas as pd
 from typing import Dict, List, Tuple, Optional
 from datetime import datetime, timedelta
 import asyncio
+from decimal import Decimal
 
 from fivetwenty import AsyncClient, Environment
 
@@ -58,7 +59,7 @@ class PortfolioRebalancer:
                 for position in account.positions:
                     if position.instrument in self.instruments:
                         # Calculate position value
-                        units = float(position.long.units) - float(position.short.units)
+                        units = float(Decimal(str(position.long.units)) - Decimal(str(position.short.units)))
 
                         # Get current price to calculate market value
                         pricing = await self.client.pricing.get(
@@ -66,7 +67,7 @@ class PortfolioRebalancer:
                         )
 
                         if pricing:
-                            current_price = float(pricing[0].closeout_ask)
+                            current_price = Decimal(str(pricing[0].closeout_ask))
                             position_value = abs(units) * current_price
                             weight = position_value / total_value if total_value > 0 else 0
                             positions[position.instrument] = weight
@@ -83,8 +84,8 @@ class PortfolioRebalancer:
             return {inst: 0.0 for inst in self.instruments}
 
     def calculate_rebalancing_trades(self, current_weights: Dict[str, float],
-                                   total_portfolio_value: float,
-                                   tolerance: float = 0.05) -> Dict[str, float]:
+                                   total_portfolio_value: Decimal,
+                                   tolerance: Decimal = Decimal("0.05")) -> Dict[str, float]:
         """Calculate required trades for rebalancing."""
 
         trades = {}
@@ -96,9 +97,9 @@ class PortfolioRebalancer:
             weight_difference = target_weight - current_weight
 
             # Only trade if difference exceeds tolerance
-            if abs(weight_difference) > tolerance:
+            if abs(weight_difference) > float(tolerance):
                 # Calculate trade size in base currency
-                trade_value = weight_difference * total_portfolio_value
+                trade_value = weight_difference * float(total_portfolio_value)
 
                 # Convert to units (simplified - would need actual price conversion)
                 trades[instrument] = trade_value
@@ -106,7 +107,7 @@ class PortfolioRebalancer:
         return trades
 
     async def execute_rebalancing_trades(self, trades: Dict[str, float],
-                                       max_trade_size: float = 10000) -> List[Dict]:
+                                       max_trade_size: Decimal = Decimal("10000")) -> List[Dict]:
         """Execute rebalancing trades with size limits."""
 
         executed_trades = []
@@ -120,7 +121,7 @@ class PortfolioRebalancer:
                 remaining_value = trade_value
                 while abs(remaining_value) > 100:
                     # Determine trade size
-                    trade_size = min(abs(remaining_value), max_trade_size)
+                    trade_size = min(abs(remaining_value), float(max_trade_size))
                     if remaining_value < 0:
                         trade_size = -trade_size
 
@@ -138,7 +139,7 @@ class PortfolioRebalancer:
                         executed_trades.append({
                             'instrument': instrument,
                             'units': units,
-                            'price': float(response.order_fill_transaction.price),
+                            'price': Decimal(str(response.order_fill_transaction.price)),
                             'timestamp': datetime.now(),
                             'trade_id': response.order_fill_transaction.id
                         })
@@ -263,14 +264,14 @@ class TransactionCostOptimizer:
         return costs
 
     def optimize_rebalancing_schedule(self, weight_deviations: Dict[str, float],
-                                    rebalancing_benefit: float) -> Dict[str, bool]:
+                                    rebalancing_benefit: Decimal) -> Dict[str, bool]:
         """Determine which instruments to rebalance based on cost-benefit."""
 
         rebalance_decisions = {}
 
         for instrument, deviation in weight_deviations.items():
             # Estimate benefit from rebalancing (risk reduction)
-            estimated_benefit = abs(deviation) * rebalancing_benefit
+            estimated_benefit = abs(deviation) * float(rebalancing_benefit)
 
             # Calculate transaction cost
             trade_size = deviation * 10000  # Assume $10k portfolio
@@ -289,13 +290,13 @@ class AdaptiveRebalancer:
         self.base_rebalancer = base_rebalancer
         self.market_conditions = {}
 
-    def calculate_adaptive_thresholds(self, market_volatility: float) -> Dict[str, float]:
+    def calculate_adaptive_thresholds(self, market_volatility: Decimal) -> Dict[str, float]:
         """Calculate dynamic rebalancing thresholds based on market conditions."""
 
         base_threshold = 0.05  # 5% base threshold
 
         # Increase threshold during high volatility
-        volatility_adjustment = min(market_volatility * 2, 0.03)  # Max 3% additional
+        volatility_adjustment = min(float(market_volatility * 2), 0.03)  # Max 3% additional
         adaptive_threshold = base_threshold + volatility_adjustment
 
         return {inst: adaptive_threshold for inst in self.base_rebalancer.instruments}

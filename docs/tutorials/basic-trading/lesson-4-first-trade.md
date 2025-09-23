@@ -147,11 +147,11 @@ async def monitor_position_realtime(account_id: str, trade_id: str, duration_min
 
                     print(f"   Price Movement: {pip_movement:+.1f} pips")
 
-                print(f"   Unrealized P&L: ${float(trade.unrealized_pl):+.2f}")
-                print(f"   Margin Used: ${float(trade.margin_used):.2f}")
+                print(f"   Unrealized P&L: ${Decimal(str(trade.unrealized_pl)):+.2f}")
+                print(f"   Margin Used: ${Decimal(str(trade.margin_used)):.2f}")
 
                 # Add some interpretation
-                pnl = float(trade.unrealized_pl)
+                pnl = Decimal(str(trade.unrealized_pl))
                 if pnl > 5:
                     print("   📈 Position is profitable!")
                 elif pnl < -5:
@@ -200,7 +200,7 @@ async def close_position_safely(account_id: str, trade_id: str):
             print(f"   Instrument: {trade.instrument}")
             print(f"   Units: {trade.current_units}")
             print(f"   Entry Price: {trade.price}")
-            print(f"   Current P&L: ${float(trade.unrealized_pl):+.2f}")
+            print(f"   Current P&L: ${Decimal(str(trade.unrealized_pl)):+.2f}")
 
             # Close the position
             response = await client.trades.close_trade(account_id, trade_id)
@@ -210,7 +210,7 @@ async def close_position_safely(account_id: str, trade_id: str):
                 print(f"\n✅ POSITION CLOSED SUCCESSFULLY!")
                 print(f"📊 Closing Details:")
                 print(f"   Close Price: {fill.price}")
-                print(f"   Final P&L: ${float(fill.pl):+.2f}")
+                print(f"   Final P&L: ${Decimal(str(fill.pl)):+.2f}")
                 print(f"   Close Time: {fill.time}")
 
                 # Calculate performance metrics
@@ -230,11 +230,11 @@ async def close_position_safely(account_id: str, trade_id: str):
                 print(f"   Entry Price: {entry_price:.5f}")
                 print(f"   Exit Price: {close_price:.5f}")
                 print(f"   Pip Result: {pip_result:+.1f} pips")
-                print(f"   Dollar Result: ${float(fill.pl):+.2f}")
+                print(f"   Dollar Result: ${Decimal(str(fill.pl)):+.2f}")
 
-                if float(fill.pl) > 0:
+                if Decimal(str(fill.pl)) > 0:
                     print("   🎉 Profitable trade! Well done!")
-                elif float(fill.pl) < 0:
+                elif Decimal(str(fill.pl)) < 0:
                     print("   📚 Learning experience - analyze what happened")
                 else:
                     print("   ➡️ Breakeven trade - no gain or loss")
