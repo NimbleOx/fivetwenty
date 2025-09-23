@@ -155,7 +155,7 @@ class PerformanceProfiler:
         total_time = stats.total_tt
 
         for func_key, (call_count, _, total_time_func, cumulative_time) in stats.stats.items():
-            filename, line_number, function_name = func_key
+            filename, _line_number, function_name = func_key
 
             # Skip system/library functions, focus on validation code
             if "validation" in filename or "test" in filename:

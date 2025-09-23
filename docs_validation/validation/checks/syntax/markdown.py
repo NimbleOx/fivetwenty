@@ -125,7 +125,7 @@ class MarkdownSyntaxCheck(ContentCheck):
 
             # Check reference links
             for match in reference_pattern.finditer(line):
-                link_text, reference = match.groups()
+                link_text, _reference = match.groups()
 
                 if not link_text.strip():
                     result.add_issue(
@@ -175,7 +175,6 @@ class MarkdownSyntaxCheck(ContentCheck):
     def _check_tables(self, file_path: Path, lines: list[str], result: ValidationResult) -> None:
         """Check table syntax."""
         in_table = False
-        table_start = 0
         header_columns = 0
 
         for line_num, line in enumerate(lines, 1):
@@ -185,7 +184,6 @@ class MarkdownSyntaxCheck(ContentCheck):
                 if not in_table:
                     # Start of table
                     in_table = True
-                    table_start = line_num
                     header_columns = stripped.count("|") - 1
 
                     if header_columns == 0:

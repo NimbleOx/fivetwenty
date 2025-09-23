@@ -246,7 +246,7 @@ class QualityGateManager:
         avg_issues_per_file = summary.total_issues / summary.total_files_checked if summary.total_files_checked > 0 else 0
 
         # Get list of executed checks
-        executed_checks = set(result.check_name for result in summary.results)
+        executed_checks = {result.check_name for result in summary.results}
 
         return {
             "max_errors": error_count,

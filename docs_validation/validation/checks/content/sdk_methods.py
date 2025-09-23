@@ -6,7 +6,7 @@ from typing import Any
 
 from validation.checks.base import ContentCheck
 from validation.core.context import ValidationContext
-from validation.core.results import IssueSeverity, ValidationIssue, ValidationResult
+from validation.core.results import IssueSeverity, ValidationResult
 
 
 class SDKMethodsCheck(ContentCheck):

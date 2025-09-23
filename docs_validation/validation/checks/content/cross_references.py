@@ -121,9 +121,8 @@ class CrossReferenceCheck(FileCheck):
         anchor = re.sub(r"\s+", "-", anchor)
 
         # Remove leading/trailing hyphens
-        anchor = anchor.strip("-")
+        return anchor.strip("-")
 
-        return anchor
 
     def _check_file_references(
         self,
@@ -157,7 +156,7 @@ class CrossReferenceCheck(FileCheck):
 
                 for pattern in link_patterns:
                     for match in re.finditer(pattern, line):
-                        link_text = match.group(1)
+                        match.group(1)
                         link_url = match.group(2)
 
                         # Skip external links

@@ -131,10 +131,7 @@ class SecurityCheck(ContentCheck):
             return True
 
         # Skip if in markdown code blocks
-        if "```" in line or "`" in match:
-            return True
-
-        return False
+        return bool("```" in line or "`" in match)
 
     def _map_severity(self, severity_level: str) -> IssueSeverity:
         """Map string severity levels to IssueSeverity enum."""

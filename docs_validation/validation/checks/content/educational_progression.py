@@ -1,12 +1,11 @@
 """Educational progression validation checks."""
 
-import re
 from pathlib import Path
 from typing import Any
 
 from validation.checks.base import ContentCheck
 from validation.core.context import ValidationContext
-from validation.core.results import IssueSeverity, ValidationIssue, ValidationResult
+from validation.core.results import IssueSeverity, ValidationResult
 
 
 class EducationalProgressionCheck(ContentCheck):
@@ -71,7 +70,7 @@ class EducationalProgressionCheck(ContentCheck):
         # Check file path and name for difficulty indicators
         if any(indicator in file_name_lower for indicator in ["beginner", "first", "basic", "getting-started"]):
             return "beginner"
-        elif any(indicator in file_name_lower for indicator in ["advanced", "expert", "production"]):
+        if any(indicator in file_name_lower for indicator in ["advanced", "expert", "production"]):
             return "advanced"
 
         # Check content for difficulty indicators
@@ -81,10 +80,9 @@ class EducationalProgressionCheck(ContentCheck):
 
         if advanced_score > intermediate_score and advanced_score > beginner_score:
             return "advanced"
-        elif intermediate_score > beginner_score:
+        if intermediate_score > beginner_score:
             return "intermediate"
-        else:
-            return "beginner"
+        return "beginner"
 
     def _check_complexity_level(
         self,
@@ -109,7 +107,7 @@ class EducationalProgressionCheck(ContentCheck):
                     file_path=str(file_path),
                     line=block_info["start_line"],
                     severity=IssueSeverity.WARNING,
-                    suggestion=f"Break into smaller examples or move to higher difficulty level",
+                    suggestion="Break into smaller examples or move to higher difficulty level",
                     context={"line": ""},
                 )
 
@@ -132,7 +130,7 @@ class EducationalProgressionCheck(ContentCheck):
                     file_path=str(file_path),
                     line=1,
                     severity=IssueSeverity.WARNING,
-                    suggestion=f"Consider moving to higher difficulty level or simplifying",
+                    suggestion="Consider moving to higher difficulty level or simplifying",
                     context={"line": ""},
                 )
 

@@ -131,7 +131,6 @@ class BenchmarkRunner:
         system_start = self._get_system_metrics(process)
 
         # Memory tracking
-        memory_samples = []
         start_time = time.time()
 
         try:
@@ -281,10 +280,12 @@ class BenchmarkRunner:
     def run_comparison_benchmark(
         self,
         checks: list[str],
-        test_sizes: list[str] = ["small", "medium", "large"],
+        test_sizes: list[str] | None = None,
         runs_per_test: int = 3,
     ) -> dict[str, dict[str, BenchmarkResults]]:
         """Run comprehensive comparison between old and new systems."""
+        if test_sizes is None:
+            test_sizes = ["small", "medium", "large"]
         comparison_results = {}
 
         for test_size in test_sizes:
@@ -345,10 +346,12 @@ class BenchmarkRunner:
     def run_scalability_test(
         self,
         checks: list[str],
-        worker_counts: list[int] = [1, 2, 4, 8],
+        worker_counts: list[int] | None = None,
         runs_per_test: int = 3,
     ) -> dict[int, BenchmarkResults]:
         """Test scalability with different worker counts."""
+        if worker_counts is None:
+            worker_counts = [1, 2, 4, 8]
         print("\nRunning scalability tests...")
         scalability_results = {}
 

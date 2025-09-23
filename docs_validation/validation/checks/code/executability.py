@@ -7,7 +7,7 @@ from typing import Any
 
 from validation.checks.base import ContentCheck
 from validation.core.context import ValidationContext
-from validation.core.results import IssueSeverity, ValidationIssue, ValidationResult
+from validation.core.results import IssueSeverity, ValidationResult
 
 
 class CodeExecutabilityCheck(ContentCheck):
@@ -30,7 +30,7 @@ class CodeExecutabilityCheck(ContentCheck):
             r"# FIXME",  # FIXME comments
             r"your_.*_here",  # Placeholder variables
             r"undefined_function\(\)",  # Undefined function calls
-            r"refresh_token\(\)"  # Specific undefined function
+            r"refresh_token\(\)",  # Specific undefined function
         ]
 
         # Critical imports that must be present for FiveTwenty code
@@ -180,12 +180,12 @@ class CodeExecutabilityCheck(ContentCheck):
 
             # Check for import in various forms
             import_present = (
-                import_stmt in code or  # Exact import statement
-                f"import {symbol}" in code or  # Direct import
-                f"from fivetwenty import {symbol}" in code or  # FiveTwenty direct import
-                re.search(rf"from fivetwenty import.*\b{symbol}\b", code) or  # FiveTwenty multi-import
-                re.search(rf"from decimal import.*\b{symbol}\b", code) or  # Decimal import
-                re.search(rf"from datetime import.*\b{symbol}\b", code)  # Datetime import
+                import_stmt in code  # Exact import statement
+                or f"import {symbol}" in code  # Direct import
+                or f"from fivetwenty import {symbol}" in code  # FiveTwenty direct import
+                or re.search(rf"from fivetwenty import.*\b{symbol}\b", code)  # FiveTwenty multi-import
+                or re.search(rf"from decimal import.*\b{symbol}\b", code)  # Decimal import
+                or re.search(rf"from datetime import.*\b{symbol}\b", code)  # Datetime import
             )
 
             if symbol_used and not import_present:

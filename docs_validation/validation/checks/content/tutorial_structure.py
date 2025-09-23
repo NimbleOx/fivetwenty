@@ -1,6 +1,5 @@
 """Tutorial structure validation checks."""
 
-import re
 from pathlib import Path
 from typing import Any
 

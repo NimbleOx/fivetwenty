@@ -8,7 +8,6 @@ Implementation coming soon
 """
 
 import asyncio
-from fivetwenty import AsyncClient, Environment
 
 
 # Example placeholder - implementation coming soon
@@ -20,7 +19,6 @@ async def main():
     # - Client initialization
     # - Account information retrieval
     # - Basic market data access
-    pass
 
 
 if __name__ == "__main__":

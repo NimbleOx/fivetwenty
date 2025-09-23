@@ -118,7 +118,7 @@ class FinancialPrecisionCheck(ContentCheck):
 
     def _is_safe_usage(self, line: str, match: re.Match) -> bool:
         """Check if the float usage is already safe (in string, Decimal, etc.)."""
-        start, end = match.span()
+        start, _end = match.span()
 
         # Check if inside quotes
         before_match = line[:start]

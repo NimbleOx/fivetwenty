@@ -324,7 +324,6 @@ class PythonStyleCheck(ExternalToolCheck):
         warning_prefixes = ["E", "W", "F"]  # Most style and logical errors
 
         # Info codes
-        info_prefixes = ["N", "D", "UP"]  # Naming, docstring, upgrade suggestions
 
         if any(ruff_code.startswith(prefix) for prefix in error_prefixes):
             return IssueSeverity.ERROR

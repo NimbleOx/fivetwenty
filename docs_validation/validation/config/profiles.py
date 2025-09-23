@@ -105,13 +105,12 @@ class ProfileManager:
 
         try:
             # Execute validation
-            summary = default_registry.run_checks(
+            return default_registry.run_checks(
                 checks_to_run,
                 context,
                 parallel=profile.parallel_execution,
             )
 
-            return summary
 
         finally:
             # Restore original patterns

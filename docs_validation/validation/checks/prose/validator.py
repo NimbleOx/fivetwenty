@@ -132,8 +132,8 @@ class ProseCheck(ContentCheck):
                     output = json.loads(result.stdout) if result.stdout.strip() else {}
 
                     # Vale JSON output format: {file_path: [issues]}
-                    file_key = str(file_path)
-                    issues = list(output.values())[0] if output else []
+                    str(file_path)
+                    issues = next(iter(output.values())) if output else []
 
                     return {"issues": issues}
                 except json.JSONDecodeError:

@@ -352,7 +352,7 @@ class BenchmarkReporter:
         total_memory_changes = []
         parallel_benefits = []
 
-        for test_size, results in comparison_results.items():
+        for results in comparison_results.values():
             new_system = results.get("new_system")
             old_system = results.get("old_system")
             new_sequential = results.get("new_system_sequential")

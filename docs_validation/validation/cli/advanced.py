@@ -85,7 +85,7 @@ def config_init(ctx, config_format, profile):
 @click.pass_context
 def config_validate(ctx):
     """Validate the current configuration file."""
-    project_root = ctx.obj["project_root"]
+    ctx.obj["project_root"]
 
     try:
         config_file = default_config_loader.find_config_file()
@@ -244,7 +244,7 @@ def gates():
 @click.pass_context
 def gates_test(ctx, profile, max_errors, max_warnings, min_success_rate):
     """Test quality gates against current project."""
-    project_root = ctx.obj["project_root"]
+    ctx.obj["project_root"]
     config = ctx.obj["config"]
 
     try:

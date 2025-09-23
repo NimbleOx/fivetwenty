@@ -99,7 +99,7 @@ class ExecutionScheduler:
         # Calculate optimal worker counts
         cpu_count = multiprocessing.cpu_count()
 
-        plan = {
+        return {
             "io_bound": {
                 "checks": io_bound_checks,
                 "workers": min(self.profile.max_workers * 2, 16),  # IO can handle more workers
@@ -120,7 +120,6 @@ class ExecutionScheduler:
             },
         }
 
-        return plan
 
     def estimate_execution_time(self, check_names: list[str], file_count: int) -> float:
         """Estimate total execution time."""
