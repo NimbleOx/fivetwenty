@@ -36,18 +36,18 @@ profiles:
     timeout_seconds: 300
 
     checks:
-      # CORE QUALITY - Critical for trading software
+      # === ENABLED CHECKS - Core Quality Only ===
+
       financial_precision:
         enabled: true
         options:
           strict_mode: true
 
-      # SECURITY - Important but needs better filtering
       security:
         enabled: true
         options:
           severity_filter: "high"
-          check_env_vars: false  # Disable env var scanning - too many false positives
+          check_env_vars: false
           exclude_patterns:
             - "docs/api-reference/openapi.yaml"
             - "example"
@@ -60,34 +60,45 @@ profiles:
             - "your-token"
             - "your-api-token"
 
-      # NAVIGATION - Important for user experience
       cross_references:
         enabled: true
 
-      # SYNTAX - Small number of issues, worth fixing
       python_syntax:
         enabled: true
         options:
           check_imports: true
 
-      # DISABLED - Low value or too many false positives
+      # === DISABLED CHECKS - Explicitly disabled ===
+
       markdown_syntax:
-        enabled: false  # Header level jumps are cosmetic
+        enabled: false
 
       financial_terminology:
-        enabled: false  # Style preferences not critical
+        enabled: false
 
       terminology:
-        enabled: false  # Capitalization nitpicks
+        enabled: false
 
-      code_executability:
-        enabled: false  # Too time-intensive for marginal benefit
+      educational_progression:
+        enabled: false
+
+      tutorial_structure:
+        enabled: false
 
       sdk_methods:
-        enabled: false  # Creates false positives on educational URLs
+        enabled: false
+
+      link_validation:
+        enabled: false
+
+      python_style:
+        enabled: false
+
+      code_executability:
+        enabled: false
 
       prose:
-        enabled: false  # Writing style nitpicks
+        enabled: false
 
     quality_gates:
       max_errors: 5
