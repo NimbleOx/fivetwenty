@@ -252,18 +252,17 @@ docs-build = "python -m mkdocs build --clean"
 docs-deploy = "python -m mkdocs gh-deploy --force"
 
 # Documentation validation tasks
-docs-validate = "python -m docs_validation.src.cli validate --config docs_validation/config/docs-only.yml"
-docs-validate-docs-only = "python -m docs_validation.src.cli validate --config docs_validation/config/docs-only.yml"
-docs-validate-verbose = "python -m docs_validation.src.cli validate --verbose"
-docs-validate-list = "python -m docs_validation.src.cli list-validators"
-docs-check = "python -m docs_validation.src.cli check"
+docs-validate = { cmd = "uv run python -m src.cli validate --project-root ..", cwd = "docs_validation" }
+docs-validate-verbose = { cmd = "uv run python -m src.cli validate --project-root .. --verbose", cwd = "docs_validation" }
+docs-validate-list = { cmd = "uv run python -m src.cli list-validators", cwd = "docs_validation" }
+docs-check = { cmd = "uv run python -m src.cli check", cwd = "docs_validation" }
 
 # Markdown tasks
 markdown-format = "mdformat docs/ README.md"
 markdown-check = "mdformat --check docs/ README.md"
 
 # YAML tasks
-yaml-lint = "yamllint mkdocs.yml docs-tooling/validation-config.yml .pre-commit-config-docs.yaml .github/workflows/ docs/api-reference/openapi.yaml"
+yaml-lint = "yamllint mkdocs.yml docs_validation/validation.yml .pre-commit-config-docs.yaml .github/workflows/ docs/api-reference/openapi.yaml"
 
 # Workflow tasks
 quality = ["format", "lint", "typecheck"]

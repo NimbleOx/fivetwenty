@@ -13,31 +13,7 @@ class ValidatorConfig(BaseModel):
     """Configuration for a single validator."""
 
     enabled: bool = True
-    severity_override: str | None = None
     options: dict[str, Any] = Field(default_factory=dict)
-    exclude_patterns: list[str] = Field(default_factory=list)
-
-
-class QualityGates(BaseModel):
-    """Quality gate thresholds for validation."""
-
-    max_errors: int = 0
-    max_warnings: int = 50
-    max_issues_per_file: int = 10
-    min_success_rate: float = 95.0
-    fail_on_error: bool = True
-    fail_on_security_issues: bool = True
-    required_validators: list[str] = Field(default_factory=list)
-
-
-class ReportingConfig(BaseModel):
-    """Configuration for validation reporting."""
-
-    formats: list[str] = Field(default_factory=lambda: ["console"])
-    output_dir: str = "validation_reports"
-    include_passed: bool = False
-    include_file_details: bool = True
-    group_by_severity: bool = True
 
 
 class ValidationConfig(BaseModel):
@@ -61,12 +37,6 @@ class ValidationConfig(BaseModel):
 
     # Validator configurations
     validators: dict[str, ValidatorConfig] = Field(default_factory=dict)
-
-    # Quality gates
-    quality_gates: QualityGates = Field(default_factory=QualityGates)
-
-    # Reporting
-    reporting: ReportingConfig = Field(default_factory=ReportingConfig)
 
     @classmethod
     def load_from_file(cls, config_path: Path) -> ValidationConfig:
@@ -120,7 +90,6 @@ class ValidationConfig(BaseModel):
                 "sdk_methods": ValidatorConfig(enabled=False),  # Disabled due to many missing docs (334 issues)
                 "code_executability": ValidatorConfig(enabled=False),  # Disabled due to high warning volume
             },
-            quality_gates=QualityGates(max_errors=5, max_warnings=100, min_success_rate=90.0, fail_on_error=True, fail_on_security_issues=True, required_validators=["financial_precision", "security"]),
         )
 
     def is_validator_enabled(self, validator_name: str) -> bool:

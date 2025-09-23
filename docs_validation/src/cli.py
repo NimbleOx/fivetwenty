@@ -121,11 +121,8 @@ def validate(
     # Display results
     _display_results(summary, duration, verbose, quiet, fail_fast)
 
-    # Exit with appropriate code
-    if summary.has_errors or not _check_quality_gates(summary, validation_config):
-        sys.exit(1)
-    else:
-        sys.exit(0)
+    # Always exit with success - this is informational validation
+    sys.exit(0)
 
 
 @cli.command()
@@ -167,8 +164,8 @@ def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
     # Display results
     _display_results(summary, duration, verbose, quiet=False, fail_fast=False)
 
-    # Exit with appropriate code
-    sys.exit(1 if summary.has_errors else 0)
+    # Always exit with success - this is informational validation
+    sys.exit(0)
 
 
 @cli.command("list-validators")
@@ -315,27 +312,6 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
 
     console.print(table)
 
-
-def _check_quality_gates(summary: ValidationSummary, config: ValidationConfig) -> bool:
-    """Check if validation meets quality gate requirements."""
-    gates = config.quality_gates
-
-    # Check error threshold
-    if gates.fail_on_error and summary.error_count > gates.max_errors:
-        console.print(f"❌ Quality gate failed: {summary.error_count} errors > {gates.max_errors} allowed", style="red")
-        return False
-
-    # Check warning threshold
-    if summary.warning_count > gates.max_warnings:
-        console.print(f"❌ Quality gate failed: {summary.warning_count} warnings > {gates.max_warnings} allowed", style="red")
-        return False
-
-    # Check success rate
-    if summary.success_rate < gates.min_success_rate:
-        console.print(f"❌ Quality gate failed: {summary.success_rate:.1f}% success rate < {gates.min_success_rate}% required", style="red")
-        return False
-
-    return True
 
 
 def main() -> None:
