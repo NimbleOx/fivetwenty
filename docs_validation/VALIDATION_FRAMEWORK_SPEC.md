@@ -354,49 +354,6 @@ Comprehensive exclusion system:
 - **SHOULD** integrate with IDE/editor workflows
 - **SHOULD** provide real-time feedback during development
 
-#### FR4: CI/CD Integration (Medium)
-- **MUST** support quality gates with configurable thresholds
-- **MUST** generate machine-readable reports (JSON, JUnit)
-- **SHOULD** support multiple validation profiles
-- **MAY** integrate with GitHub Actions/other CI systems
-
-### Non-Functional Requirements
-
-#### NFR1: Performance
-- **Target**: < 2 seconds for typical validation run (139 files)
-- **Target**: < 500ms for incremental validation (< 10 changed files)
-- **Target**: < 100MB memory usage for largest documentation sets
-- **Constraint**: Must support parallel execution
-
-#### NFR2: Reliability
-- **Target**: Zero false positives on current documentation
-- **Target**: 100% test coverage for validation logic
-- **Constraint**: Must handle malformed input gracefully
-- **Constraint**: Must provide deterministic results
-
-#### NFR3: Maintainability
-- **Target**: New validator implementation in < 50 lines of code
-- **Target**: Zero configuration system bugs
-- **Constraint**: Single configuration format (YAML)
-- **Constraint**: Type-safe configuration validation
-
-### Current Pain Points
-
-#### Critical Issues (Blocking)
-1. **False Positives**: Terminology validator flags correct capitalizations
-2. **Configuration Bugs**: `enabled: false` was ignored until recent fix
-3. **Performance**: 14 validators run unnecessarily, redundant file processing
-
-#### Major Issues (High Impact)
-1. **Developer Experience**: No incremental validation, slow feedback
-2. **Error Messages**: Generic messages without actionable suggestions
-3. **Maintenance Burden**: Complex inheritance logic, dual config systems
-
-#### Minor Issues (Quality of Life)
-1. **CLI UX**: Verbose output, unclear progress indication
-2. **Documentation**: Limited validator documentation
-3. **Testing**: Incomplete test coverage for edge cases
-
 ## Dependencies
 
 ### Runtime Dependencies

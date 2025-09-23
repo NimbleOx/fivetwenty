@@ -27,15 +27,24 @@ class CrossReferenceValidator(BaseValidator):
 
         lines = content.split('\n')
 
+        # Track code block state to avoid false positives
+        in_code_block = False
+
         for line_num, line in enumerate(lines, 1):
-            # Check relative links
-            issues.extend(self._check_relative_links(line, line_num, file_info))
+            # Update code block state
+            if line.strip().startswith('```'):
+                in_code_block = not in_code_block
 
-            # Check anchor links
-            issues.extend(self._check_anchor_links(line, line_num, file_info))
+            # Skip link checking if we're inside a code block
+            if not in_code_block:
+                # Check relative links
+                issues.extend(self._check_relative_links(line, line_num, file_info))
 
-            # Check reference-style links
-            issues.extend(self._check_reference_links(line, line_num, file_info))
+                # Check anchor links
+                issues.extend(self._check_anchor_links(line, line_num, file_info))
+
+                # Check reference-style links
+                issues.extend(self._check_reference_links(line, line_num, file_info))
 
         return ValidationResult(
             validator_name=self.name,

@@ -27,15 +27,22 @@ class MarkdownSyntaxValidator(BaseValidator):
 
         lines = content.split('\n')
 
+        # Track code block state to avoid false positives
+        in_code_block = False
+
         for line_num, line in enumerate(lines, 1):
+            # Check for malformed code blocks first to update state
+            code_block_issues, in_code_block = self._check_code_blocks(
+                line, line_num, file_info.path, lines, line_num - 1, in_code_block
+            )
+            issues.extend(code_block_issues)
+
             # Check for malformed headers
             issues.extend(self._check_headers(line, line_num, file_info.path))
 
-            # Check for malformed links
-            issues.extend(self._check_links(line, line_num, file_info.path))
-
-            # Check for malformed code blocks
-            issues.extend(self._check_code_blocks(line, line_num, file_info.path, lines, line_num - 1))
+            # Check for malformed links (skip if in code block)
+            if not in_code_block:
+                issues.extend(self._check_links(line, line_num, file_info.path))
 
             # Check for malformed lists
             issues.extend(self._check_lists(line, line_num, file_info.path))
@@ -54,8 +61,8 @@ class MarkdownSyntaxValidator(BaseValidator):
         """Check for malformed markdown headers."""
         issues: list[ValidationIssue] = []
 
-        # Header pattern: # Title
-        if line.strip().startswith('#'):
+        # Header pattern: # Title (but not shebang lines like #!/bin/bash)
+        if line.strip().startswith('#') and not line.strip().startswith('#!'):
             # Check for space after #
             if not re.match(r'^#+\s+.+', line.strip()):
                 issues.append(ValidationIssue(
@@ -136,8 +143,8 @@ class MarkdownSyntaxValidator(BaseValidator):
 
         return issues
 
-    def _check_code_blocks(self, line: str, line_num: int, file_path: Path, all_lines: list[str], line_index: int) -> list[ValidationIssue]:
-        """Check for malformed code blocks."""
+    def _check_code_blocks(self, line: str, line_num: int, file_path: Path, all_lines: list[str], line_index: int, in_code_block: bool) -> tuple[list[ValidationIssue], bool]:
+        """Check for malformed code blocks and track state."""
         issues: list[ValidationIssue] = []
 
         # Check for indented code blocks with inconsistent indentation
@@ -146,24 +153,32 @@ class MarkdownSyntaxValidator(BaseValidator):
             # This is a simplified check - full implementation would track code block state
             pass
 
-        # Check for fenced code blocks with missing language
-        if line.strip().startswith('```') and len(line.strip()) == 3:
-            # Check if this starts a code block
-            if line_index + 1 < len(all_lines):
-                next_line = all_lines[line_index + 1] if line_index + 1 < len(all_lines) else ""
-                # If next line looks like code, suggest adding language
-                if next_line.strip() and not next_line.strip().startswith('```'):
-                    issues.append(ValidationIssue(
-                        message="Code block missing language specification",
-                        file_path=file_path,
-                        line=line_num,
-                        severity=IssueSeverity.INFO,
-                        rule_id="markdown_code_block_language",
-                        context=line.strip(),
-                        suggestion="Add language after ``` (e.g., ```python, ```bash, ```yaml)"
-                    ))
+        # Check for fenced code blocks
+        if line.strip().startswith('```'):
+            if not in_code_block:
+                # This is an opening code block
+                if len(line.strip()) == 3:  # No language specified
+                    # Check if this starts a code block (has content after)
+                    if line_index + 1 < len(all_lines):
+                        next_line = all_lines[line_index + 1] if line_index + 1 < len(all_lines) else ""
+                        # If next line looks like code content, suggest adding language
+                        if next_line.strip() and not next_line.strip().startswith('```'):
+                            issues.append(ValidationIssue(
+                                message="Code block missing language specification",
+                                file_path=file_path,
+                                line=line_num,
+                                severity=IssueSeverity.INFO,
+                                rule_id="markdown_code_block_language",
+                                context=line.strip(),
+                                suggestion="Add language after ``` (e.g., ```python, ```bash, ```yaml)"
+                            ))
+                # Enter code block
+                in_code_block = True
+            else:
+                # This is a closing code block
+                in_code_block = False
 
-        return issues
+        return issues, in_code_block
 
     def _check_lists(self, line: str, line_num: int, file_path: Path) -> list[ValidationIssue]:
         """Check for malformed lists."""

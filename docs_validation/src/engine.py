@@ -92,6 +92,7 @@ class ValidationEngine:
                 error_count=0,
                 warning_count=0,
                 duration_ms=0.0,
+                validator_summaries=[],
             )
 
         # Load file contents
@@ -154,6 +155,7 @@ class ValidationEngine:
                 error_count=0,
                 warning_count=0,
                 duration_ms=0.0,
+                validator_summaries=[],
             )
 
         # Load file contents and validate

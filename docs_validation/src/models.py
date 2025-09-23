@@ -52,6 +52,20 @@ class ValidationResult(BaseModel):
         return sum(1 for issue in self.issues if issue.severity == IssueSeverity.WARNING)
 
 
+class ValidatorSummary(BaseModel):
+    """Summary statistics for a single validator."""
+
+    name: str
+    files_checked: int
+    files_passed: int
+    files_failed: int
+    total_issues: int
+    error_count: int
+    warning_count: int
+    duration_ms: float
+    success_rate: float
+
+
 class ValidationSummary(BaseModel):
     """Summary of validation run across all files and validators."""
 
@@ -64,6 +78,7 @@ class ValidationSummary(BaseModel):
     warning_count: int
     duration_ms: float
     results: list[ValidationResult] = Field(default_factory=list)
+    validator_summaries: list[ValidatorSummary] = Field(default_factory=list)
 
     @property
     def success_rate(self) -> float:

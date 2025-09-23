@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pathlib import Path
 
-from .models import FileInfo, ValidationResult, ValidationSummary
+from .models import FileInfo, ValidationResult, ValidationSummary, ValidatorSummary
 
 
 class BaseValidator(ABC):
@@ -135,6 +135,11 @@ class ValidatorRegistry:
             if all(r.passed for r in results)
         )
 
+        # Calculate per-validator summaries
+        validator_summaries = self._calculate_validator_summaries(
+            all_results, enabled_validators
+        )
+
         return ValidationSummary(
             total_files=len(files),
             total_validators=len(enabled_validators),
@@ -145,6 +150,7 @@ class ValidatorRegistry:
             warning_count=warning_count,
             duration_ms=duration_ms,
             results=all_results,
+            validator_summaries=validator_summaries,
         )
 
     def _validate_sequential(
@@ -198,6 +204,71 @@ class ValidatorRegistry:
                     results.append(error_result)
 
         return results
+
+    def _calculate_validator_summaries(
+        self,
+        results: list[ValidationResult],
+        enabled_validators: list[str]
+    ) -> list[ValidatorSummary]:
+        """Calculate per-validator summary statistics."""
+        validator_stats: dict[str, dict[str, Any]] = {}
+
+        # Initialize stats for all enabled validators
+        for validator_name in enabled_validators:
+            validator_stats[validator_name] = {
+                'files_checked': set(),
+                'files_passed': set(),
+                'files_failed': set(),
+                'total_issues': 0,
+                'error_count': 0,
+                'warning_count': 0,
+                'duration_ms': 0.0
+            }
+
+        # Process each result
+        for result in results:
+            if result.validator_name not in validator_stats:
+                continue
+
+            stats = validator_stats[result.validator_name]
+
+            # Track files
+            stats['files_checked'].add(result.file_path)
+            if result.passed:
+                stats['files_passed'].add(result.file_path)
+            else:
+                stats['files_failed'].add(result.file_path)
+
+            # Count issues
+            stats['total_issues'] += len(result.issues)
+            stats['error_count'] += result.error_count
+            stats['warning_count'] += result.warning_count
+            stats['duration_ms'] += result.duration_ms
+
+        # Create ValidatorSummary objects
+        summaries = []
+        for validator_name, stats in validator_stats.items():
+            files_checked = len(stats['files_checked'])
+            files_passed = len(stats['files_passed'])
+            files_failed = len(stats['files_failed'])
+
+            success_rate = (files_passed / files_checked * 100.0) if files_checked > 0 else 100.0
+
+            summary = ValidatorSummary(
+                name=validator_name,
+                files_checked=files_checked,
+                files_passed=files_passed,
+                files_failed=files_failed,
+                total_issues=stats['total_issues'],
+                error_count=stats['error_count'],
+                warning_count=stats['warning_count'],
+                duration_ms=stats['duration_ms'],
+                success_rate=success_rate
+            )
+            summaries.append(summary)
+
+        # Sort by validator name for consistent output
+        return sorted(summaries, key=lambda s: s.name)
 
 
 # Global registry instance

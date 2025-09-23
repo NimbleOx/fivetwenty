@@ -213,6 +213,10 @@ def _display_results(
 
     console.print(table)
 
+    # Show per-validator summary if verbose or if there are issues
+    if verbose or summary.total_issues > 0:
+        _display_validator_summaries(summary)
+
     # Show issues if any
     if summary.total_issues > 0:
         _display_issues(summary, verbose)
@@ -263,6 +267,58 @@ def _display_issues(summary: ValidationSummary, verbose: bool) -> None:
                     console.print(f"     💡 {issue.suggestion}", style="dim green")
                 if issue.rule_id:
                     console.print(f"     Rule: {issue.rule_id}", style="dim")
+
+
+def _display_validator_summaries(summary: ValidationSummary) -> None:
+    """Display per-validator summary statistics."""
+    if not summary.validator_summaries:
+        return
+
+    console.print("\n📊 Per-Validator Summary:")
+
+    # Create table for validator summaries
+    table = Table(show_header=True, header_style="bold magenta")
+    table.add_column("Validator", style="cyan", no_wrap=True)
+    table.add_column("Files", justify="right")
+    table.add_column("Success Rate", justify="right")
+    table.add_column("Issues", justify="right")
+    table.add_column("Errors", justify="right")
+    table.add_column("Warnings", justify="right")
+    table.add_column("Duration", justify="right")
+
+    for validator_summary in summary.validator_summaries:
+        # Format success rate with color
+        success_rate = f"{validator_summary.success_rate:.1f}%"
+        if validator_summary.success_rate == 100.0:
+            success_rate_text = Text(success_rate, style="green")
+        elif validator_summary.success_rate >= 80.0:
+            success_rate_text = Text(success_rate, style="yellow")
+        else:
+            success_rate_text = Text(success_rate, style="red")
+
+        # Format errors and warnings with color
+        errors_text = (
+            Text(str(validator_summary.error_count), style="red")
+            if validator_summary.error_count > 0
+            else str(validator_summary.error_count)
+        )
+        warnings_text = (
+            Text(str(validator_summary.warning_count), style="yellow")
+            if validator_summary.warning_count > 0
+            else str(validator_summary.warning_count)
+        )
+
+        table.add_row(
+            validator_summary.name,
+            str(validator_summary.files_checked),
+            success_rate_text,
+            str(validator_summary.total_issues),
+            errors_text,
+            warnings_text,
+            f"{validator_summary.duration_ms:.0f}ms"
+        )
+
+    console.print(table)
 
 
 def _check_quality_gates(summary: ValidationSummary, config: ValidationConfig) -> bool:
