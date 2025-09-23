@@ -380,7 +380,7 @@ Practice trading environment with virtual money.
 **Properties:**
 
 - `value`: `"practice"`
-- `base_url`: OANDA practice trading API endpoint
+- `base_url`: `"https://api-fxpractice.oanda.com/v3"`
 
 #### `Environment.LIVE`
 Live trading environment with real money.
@@ -388,7 +388,7 @@ Live trading environment with real money.
 **Properties:**
 
 - `value`: `"live"`
-- `base_url`: OANDA live trading API endpoint
+- `base_url`: `"https://api-fxtrade.oanda.com/v3"`
 
 ### Usage
 

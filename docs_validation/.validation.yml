@@ -83,7 +83,7 @@ profiles:
         enabled: true
 
       sdk_methods:
-        enabled: true
+        enabled: false  # Disabled - hardcoded URLs provide educational value in documentation
 
       prose:
         enabled: false  # Disabled - false positives in external libraries
