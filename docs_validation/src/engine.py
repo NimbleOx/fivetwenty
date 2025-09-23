@@ -2,14 +2,14 @@
 
 import hashlib
 import os
+from collections.abc import Generator
 from pathlib import Path
-from typing import Generator
 
 import pathspec
 
+from .base import registry
 from .config import ValidationConfig
 from .models import FileInfo, ValidationSummary
-from .base import registry
 
 
 class ValidationEngine:
@@ -48,7 +48,7 @@ class ValidationEngine:
                     modified_time=stat.st_mtime,
                 )
                 files.append(file_info)
-            except (OSError, IOError):
+            except OSError:
                 # Skip files that can't be read
                 continue
 
@@ -74,7 +74,7 @@ class ValidationEngine:
                 file_info.content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
 
             return content
-        except (OSError, IOError, UnicodeDecodeError) as e:
+        except (OSError, UnicodeDecodeError) as e:
             raise ValueError(f"Failed to read file {file_info.path}: {e}") from e
 
     def validate(self) -> ValidationSummary:
@@ -100,7 +100,7 @@ class ValidationEngine:
             try:
                 content = self.load_file_content(file_info)
                 files_with_content.append((file_info, content))
-            except ValueError:
+            except ValueError:  # noqa: PERF203
                 # Skip files that can't be loaded
                 continue
 
@@ -141,7 +141,7 @@ class ValidationEngine:
                     modified_time=stat.st_mtime,
                 )
                 files.append(file_info)
-            except (OSError, IOError):
+            except OSError:
                 continue
 
         if not files:
@@ -162,7 +162,7 @@ class ValidationEngine:
             try:
                 content = self.load_file_content(file_info)
                 files_with_content.append((file_info, content))
-            except ValueError:
+            except ValueError:  # noqa: PERF203
                 continue
 
         enabled_validators = [

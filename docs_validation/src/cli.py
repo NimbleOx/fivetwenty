@@ -11,6 +11,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, TimeElapsedColumn
 from rich.table import Table
 from rich.text import Text
 
+from .base import registry
 from .config import ValidationConfig
 from .engine import ValidationEngine
 from .models import IssueSeverity, ValidationSummary
@@ -23,7 +24,6 @@ from .validators import (
     PythonSyntaxValidator,
     SecurityValidator,
 )
-from .base import registry
 
 # Register all validators
 registry.register(FinancialPrecisionValidator())
@@ -37,12 +37,11 @@ console = Console()
 
 @click.group()
 @click.version_option(version="2.0.0", prog_name="docs-validate")
-def cli():
+def cli() -> None:
     """FiveTwenty Documentation Validation v2.0
 
     Fast, reliable validation for trading SDK documentation.
     """
-    pass
 
 
 @cli.command()
@@ -70,7 +69,7 @@ def validate(
     verbose: bool,
     quiet: bool,
     fail_fast: bool,
-):
+) -> None:
     """Run validation on documentation files."""
 
     # Load configuration
@@ -128,7 +127,7 @@ def validate(
     help="Path to YAML configuration file",
 )
 @click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
-def check(files: tuple[Path, ...], config: Path | None, verbose: bool):
+def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
     """Run validation on specific files (incremental mode)."""
 
     if not files:
@@ -159,7 +158,7 @@ def check(files: tuple[Path, ...], config: Path | None, verbose: bool):
 
 
 @cli.command("list-validators")
-def list_validators():
+def list_validators() -> None:
     """List all available validators."""
     from .base import registry
 
@@ -180,7 +179,7 @@ def _display_results(
     duration: float,
     verbose: bool,
     quiet: bool,
-    fail_fast: bool,
+    fail_fast: bool,  # noqa: ARG001
 ) -> None:
     """Display validation results."""
 
@@ -297,7 +296,7 @@ def _check_quality_gates(summary: ValidationSummary, config: ValidationConfig) -
     return True
 
 
-def main():
+def main() -> None:
     """Main entry point."""
     cli()
 

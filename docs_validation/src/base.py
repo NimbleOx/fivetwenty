@@ -5,8 +5,10 @@ from __future__ import annotations
 import time
 from abc import ABC, abstractmethod
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 from .models import FileInfo, ValidationResult, ValidationSummary
 
@@ -21,12 +23,10 @@ class BaseValidator(ABC):
     @abstractmethod
     def supports_file(self, file_path: Path) -> bool:
         """Check if this validator can validate the given file."""
-        pass
 
     @abstractmethod
     def validate_file(self, file_info: FileInfo, content: str, options: dict[str, Any]) -> ValidationResult:
         """Validate a single file and return the result."""
-        pass
 
     def get_file_patterns(self) -> list[str]:
         """Get glob patterns for files this validator can handle."""
@@ -36,7 +36,7 @@ class BaseValidator(ABC):
 class ValidatorRegistry:
     """Registry for managing and running validators."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._validators: dict[str, BaseValidator] = {}
 
     def register(self, validator: BaseValidator) -> None:
@@ -124,7 +124,7 @@ class ValidatorRegistry:
             warning_count += result.warning_count
 
         # Count files that passed (have no failing results)
-        file_results = {}
+        file_results: dict[Path, list[ValidationResult]] = {}
         for result in all_results:
             if result.file_path not in file_results:
                 file_results[result.file_path] = []
@@ -186,7 +186,7 @@ class ValidatorRegistry:
                 try:
                     file_results = future.result()
                     results.extend(file_results)
-                except Exception as e:
+                except Exception as e:  # noqa: PERF203
                     file_info = future_to_file[future]
                     # Create error result for completely failed file
                     error_result = ValidationResult(

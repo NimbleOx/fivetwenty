@@ -5,14 +5,14 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 from ..base import BaseValidator
+from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 
 
 class PythonSyntaxValidator(BaseValidator):
     """Validates Python syntax in code examples and Python files."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="python_syntax",
             description="Validates Python syntax in code examples and files"
@@ -79,7 +79,7 @@ class PythonSyntaxValidator(BaseValidator):
             # Try to parse the code block
             try:
                 ast.parse(code_block)
-            except SyntaxError as e:
+            except SyntaxError as e:  # noqa: PERF203
                 # Calculate actual line number in file
                 actual_line = block_start_line + (e.lineno or 1)
                 issues.append(ValidationIssue(

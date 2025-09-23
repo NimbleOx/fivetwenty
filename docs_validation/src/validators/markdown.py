@@ -4,14 +4,14 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 from ..base import BaseValidator
+from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 
 
 class MarkdownSyntaxValidator(BaseValidator):
     """Validates markdown syntax and structure."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="markdown_syntax",
             description="Validates markdown syntax and structure"
@@ -122,7 +122,7 @@ class MarkdownSyntaxValidator(BaseValidator):
         ref_matches = re.finditer(ref_link_pattern, line)
 
         for match in ref_matches:
-            text, ref = match.groups()
+            text, _ref = match.groups()
             if not text.strip():
                 issues.append(ValidationIssue(
                     message="Reference link has empty text",
@@ -141,7 +141,7 @@ class MarkdownSyntaxValidator(BaseValidator):
         issues: list[ValidationIssue] = []
 
         # Check for indented code blocks with inconsistent indentation
-        if line.startswith('    ') or line.startswith('\t'):
+        if line.startswith(('    ', '\t')):
             # This might be a code block - check if previous/next lines have consistent indentation
             # This is a simplified check - full implementation would track code block state
             pass
@@ -211,7 +211,7 @@ class MarkdownSyntaxValidator(BaseValidator):
 
         # Any remaining items in stack are unclosed
         for line_num in fence_stack:
-            issues.append(ValidationIssue(
+            issues.append(ValidationIssue(  # noqa: PERF401
                 message="Unclosed code block",
                 file_path=file_path,
                 line=line_num,

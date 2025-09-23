@@ -4,14 +4,14 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 from ..base import BaseValidator
+from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 
 
 class SecurityValidator(BaseValidator):
     """Validates that no secrets, tokens, or credentials are exposed in documentation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="security",
             description="Scans for exposed API tokens, secrets, and credentials"
@@ -104,10 +104,7 @@ class SecurityValidator(BaseValidator):
 
     def _should_exclude_line(self, line: str, exclude_patterns: list[str]) -> bool:
         """Check if line should be excluded from scanning."""
-        for pattern in exclude_patterns:
-            if re.search(pattern, line, re.IGNORECASE):
-                return True
-        return False
+        return any(re.search(pattern, line, re.IGNORECASE) for pattern in exclude_patterns)
 
     def _is_likely_real_secret(self, matched_text: str, line: str) -> bool:
         """Additional heuristics to reduce false positives."""

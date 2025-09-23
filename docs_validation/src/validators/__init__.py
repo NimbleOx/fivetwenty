@@ -7,9 +7,9 @@ from .python import PythonSyntaxValidator
 from .security import SecurityValidator
 
 __all__ = [
+    "CrossReferenceValidator",
     "FinancialPrecisionValidator",
-    "SecurityValidator",
     "MarkdownSyntaxValidator",
     "PythonSyntaxValidator",
-    "CrossReferenceValidator",
+    "SecurityValidator",
 ]

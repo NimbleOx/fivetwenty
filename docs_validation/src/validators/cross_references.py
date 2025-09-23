@@ -4,14 +4,14 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 from ..base import BaseValidator
+from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 
 
 class CrossReferenceValidator(BaseValidator):
     """Validates internal cross-references and links within documentation."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="cross_references",
             description="Validates internal cross-references and relative links"
@@ -53,7 +53,7 @@ class CrossReferenceValidator(BaseValidator):
         matches = re.finditer(link_pattern, line)
 
         for match in matches:
-            text, url = match.groups()
+            _text, url = match.groups()
 
             # Skip external URLs
             if url.startswith(('http://', 'https://', 'mailto:', '#')):
@@ -114,7 +114,7 @@ class CrossReferenceValidator(BaseValidator):
         matches = re.finditer(anchor_pattern, line)
 
         for match in matches:
-            text, anchor = match.groups()
+            _text, anchor = match.groups()
 
             # Read the current file to check if anchor exists
             # This is a simplified check - full implementation would parse all headers
@@ -124,7 +124,7 @@ class CrossReferenceValidator(BaseValidator):
 
                 # Look for matching header
                 # Convert anchor to expected header format
-                expected_header = anchor.replace('-', ' ').lower()
+                _expected_header = anchor.replace('-', ' ').lower()
 
                 # Find headers in file
                 header_pattern = r'^#+\s+(.+)$'

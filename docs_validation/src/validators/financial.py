@@ -4,14 +4,14 @@ import re
 from pathlib import Path
 from typing import Any
 
-from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 from ..base import BaseValidator
+from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
 
 
 class FinancialPrecisionValidator(BaseValidator):
     """Validates proper use of Decimal types and financial precision in code examples."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             name="financial_precision",
             description="Validates financial values use Decimal type and proper precision"
@@ -72,7 +72,7 @@ class FinancialPrecisionValidator(BaseValidator):
 
         for pattern in financial_float_patterns:
             if re.search(pattern, line, re.IGNORECASE):
-                issues.append(ValidationIssue(
+                issues.append(ValidationIssue(  # noqa: PERF401
                     message="Use Decimal instead of float for financial calculations",
                     file_path=file_path,
                     line=line_num,
