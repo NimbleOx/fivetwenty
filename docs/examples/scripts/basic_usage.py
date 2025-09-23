@@ -4,21 +4,23 @@ Basic FiveTwenty Usage Example
 
 This script demonstrates the fundamental operations with the FiveTwenty SDK.
 
-Implementation coming soon
+TODO: Complete implementation
 """
 
 import asyncio
+from fivetwenty import AsyncClient, Environment
 
 
 # Example placeholder - implementation coming soon
 async def main():
     """Basic usage example - placeholder."""
-    print("Basic usage example coming soon!")
+    print("🚧 Basic usage example coming soon!")
 
-    # Implementation coming soon:
+    # TODO: Add complete example implementation
     # - Client initialization
     # - Account information retrieval
     # - Basic market data access
+    pass
 
 
 if __name__ == "__main__":

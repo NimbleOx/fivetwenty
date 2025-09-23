@@ -37,7 +37,8 @@ class TestSyncClientIntegration:
 
         # Test 2: Basic API functionality (minimal validation)
         accounts = sync_sandbox_client.accounts.get_accounts()
-        assert accounts is not None and len(accounts) > 0
+        assert accounts is not None
+        assert len(accounts) > 0
         print("  - Basic API call successful")
 
         # Test 3: Client creation and cleanup
@@ -91,7 +92,7 @@ class TestSyncClientIntegration:
         # Test concurrent API calls from multiple threads
         def make_api_call(thread_id: int) -> dict[str, Any]:
             try:
-                result = sync_sandbox_client.accounts.get_account_summary(test_account_id)
+                sync_sandbox_client.accounts.get_account_summary(test_account_id)
                 return {"thread_id": thread_id, "success": True}
             except Exception as e:
                 return {"thread_id": thread_id, "success": False, "error": str(e)}

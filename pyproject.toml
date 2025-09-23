@@ -27,6 +27,8 @@ dependencies = [
     "pydantic>=2.5.0",
 ]
 
+
+
 [project.urls]
 Homepage = "https://nimbleox.github.io/fivetwenty/"
 Repository = "https://github.com/NimbleOx/fivetwenty"
@@ -267,5 +269,34 @@ yaml-lint = "yamllint mkdocs.yml docs_validation/validation.yml .pre-commit-conf
 # Workflow tasks
 quality = ["format", "lint", "typecheck"]
 check = ["format", "lint", "typecheck", "test", "docs-validate"]
+pre-commit = ["format", "lint", "typecheck"]
+ci = ["format", "lint", "typecheck", "test", "docs-build", "docs-validate"]
+
+[tool.poe.tasks.dev]
+help = "Run development checks (format, typecheck, test) - ignores lint failures"
+sequence = [
+    "format",
+    "typecheck",
+    "test"
+]
+
+[tool.poe.tasks.clean]
+help = "Clean up build artifacts and caches"
+shell = """
+rm -rf build/ dist/ .eggs/ *.egg-info/
+rm -rf .coverage htmlcov/ .pytest_cache/ .mypy_cache/
+rm -rf docs/site/
+find . -type d -name __pycache__ -delete
+find . -name "*.pyc" -delete
+"""
+
+[tool.poe.tasks.setup]
+help = "Initial project setup for new developers"
+sequence = [
+    {shell = "uv sync"},
+    {shell = "uv pip install -e ."},
+    "typecheck",
+    "test",
+]
 
 # YAML linting configuration is in .yamllint.yml

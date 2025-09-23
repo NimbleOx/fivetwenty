@@ -1,6 +1,6 @@
 # Example Notebooks
 
-Jupyter notebook examples coming soon!
+🚧 Jupyter notebook examples coming soon!
 
 ## Planned Notebooks:
 - Getting Started Tutorial

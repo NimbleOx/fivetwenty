@@ -22,10 +22,7 @@ class TestBasicOrderOperations:
 
         # Get current pricing to set stop order away from market
         try:
-            pricing_response = await sandbox_client.pricing.get_pricing(
-                account_id=test_account_id,
-                instruments=[test_instrument]
-            )
+            pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
             prices = pricing_response.get("prices", [])
 
             if prices:
@@ -68,10 +65,7 @@ class TestBasicOrderOperations:
 
         try:
             # Get current pricing to set MIT order appropriately
-            pricing_response = await sandbox_client.pricing.get_pricing(
-                account_id=test_account_id,
-                instruments=[test_instrument]
-            )
+            pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
             prices = pricing_response.get("prices", [])
 
             if prices:

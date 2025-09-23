@@ -2,8 +2,8 @@
 """
 Account Management Example
 
-Implementation coming soon
+TODO: Complete implementation
 """
 
 # Placeholder - implementation coming soon
-print("Account management example coming soon!")
+print("🚧 Account management example coming soon!")
