@@ -18,10 +18,12 @@ from .models import IssueSeverity, ValidationSummary
 
 # Import and register validators
 from .validators import (
+    CodeExecutabilityValidator,
     CrossReferenceValidator,
     FinancialPrecisionValidator,
     MarkdownSyntaxValidator,
     PythonSyntaxValidator,
+    SDKMethodsValidator,
     SecurityValidator,
 )
 
@@ -31,6 +33,8 @@ registry.register(SecurityValidator())
 registry.register(MarkdownSyntaxValidator())
 registry.register(PythonSyntaxValidator())
 registry.register(CrossReferenceValidator())
+registry.register(SDKMethodsValidator())
+registry.register(CodeExecutabilityValidator())
 
 console = Console()
 
@@ -76,7 +80,12 @@ def validate(
     if config and config.exists():
         validation_config = ValidationConfig.load_from_file(config)
     else:
-        validation_config = ValidationConfig.get_default_config()
+        # Try to find validation.yml in current directory first
+        default_config_path = Path("validation.yml")
+        if default_config_path.exists():
+            validation_config = ValidationConfig.load_from_file(default_config_path)
+        else:
+            validation_config = ValidationConfig.get_default_config()
 
     # Override settings from command line
     if not parallel:
@@ -138,7 +147,12 @@ def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
     if config and config.exists():
         validation_config = ValidationConfig.load_from_file(config)
     else:
-        validation_config = ValidationConfig.get_default_config()
+        # Try to find validation.yml in current directory first
+        default_config_path = Path("validation.yml")
+        if default_config_path.exists():
+            validation_config = ValidationConfig.load_from_file(default_config_path)
+        else:
+            validation_config = ValidationConfig.get_default_config()
 
     # Create engine
     engine = ValidationEngine(validation_config)
@@ -255,10 +269,7 @@ def _display_issues(summary: ValidationSummary, verbose: bool) -> None:
 
             location = f":{issue.line}" if issue.line else ""
 
-            console.print(
-                f"  {severity_icon} {issue.message} {location}",
-                style=severity_style
-            )
+            console.print(f"  {severity_icon} {issue.message} {location}", style=severity_style)
 
             if verbose:
                 if issue.context:
@@ -297,26 +308,10 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
             success_rate_text = Text(success_rate, style="red")
 
         # Format errors and warnings with color
-        errors_text = (
-            Text(str(validator_summary.error_count), style="red")
-            if validator_summary.error_count > 0
-            else str(validator_summary.error_count)
-        )
-        warnings_text = (
-            Text(str(validator_summary.warning_count), style="yellow")
-            if validator_summary.warning_count > 0
-            else str(validator_summary.warning_count)
-        )
+        errors_text = Text(str(validator_summary.error_count), style="red") if validator_summary.error_count > 0 else str(validator_summary.error_count)
+        warnings_text = Text(str(validator_summary.warning_count), style="yellow") if validator_summary.warning_count > 0 else str(validator_summary.warning_count)
 
-        table.add_row(
-            validator_summary.name,
-            str(validator_summary.files_checked),
-            success_rate_text,
-            str(validator_summary.total_issues),
-            errors_text,
-            warnings_text,
-            f"{validator_summary.duration_ms:.0f}ms"
-        )
+        table.add_row(validator_summary.name, str(validator_summary.files_checked), success_rate_text, str(validator_summary.total_issues), errors_text, warnings_text, f"{validator_summary.duration_ms:.0f}ms")
 
     console.print(table)
 
@@ -327,26 +322,17 @@ def _check_quality_gates(summary: ValidationSummary, config: ValidationConfig) -
 
     # Check error threshold
     if gates.fail_on_error and summary.error_count > gates.max_errors:
-        console.print(
-            f"❌ Quality gate failed: {summary.error_count} errors > {gates.max_errors} allowed",
-            style="red"
-        )
+        console.print(f"❌ Quality gate failed: {summary.error_count} errors > {gates.max_errors} allowed", style="red")
         return False
 
     # Check warning threshold
     if summary.warning_count > gates.max_warnings:
-        console.print(
-            f"❌ Quality gate failed: {summary.warning_count} warnings > {gates.max_warnings} allowed",
-            style="red"
-        )
+        console.print(f"❌ Quality gate failed: {summary.warning_count} warnings > {gates.max_warnings} allowed", style="red")
         return False
 
     # Check success rate
     if summary.success_rate < gates.min_success_rate:
-        console.print(
-            f"❌ Quality gate failed: {summary.success_rate:.1f}% success rate < {gates.min_success_rate}% required",
-            style="red"
-        )
+        console.print(f"❌ Quality gate failed: {summary.success_rate:.1f}% success rate < {gates.min_success_rate}% required", style="red")
         return False
 
     return True

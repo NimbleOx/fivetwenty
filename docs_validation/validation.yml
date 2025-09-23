@@ -1,0 +1,111 @@
+# FiveTwenty Documentation Validation Configuration
+#
+# This configuration is optimized for docs-only validation of the FiveTwenty trading SDK.
+# All patterns and settings are focused exclusively on the docs/ directory.
+
+# File discovery - docs directory only
+file_patterns:
+  - "docs/**/*.md"
+
+exclude_patterns:
+  # Version control and caches
+  - "**/.git/**"
+  - "**/__pycache__/**"
+  - "**/.mypy_cache/**"
+  - "**/.ruff_cache/**"
+  - "**/.pytest_cache/**"
+  - "**/.venv/**"
+
+  # Build artifacts
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/*.egg-info/**"
+  - "**/node_modules/**"
+
+  # Validation outputs
+  - "**/validation_reports/**"
+  - "**/validation_old/**"
+
+  # Exclude everything outside docs/
+  - "fivetwenty/**"          # SDK source code
+  - "tests/**"              # Test files
+  - "examples/**"           # Example scripts
+  - "docs_validation/**"    # This validation framework
+  - "oanda-api-reference/**" # External API reference
+  - "*.py"                  # Python files outside docs
+  - "/*.md"                 # Root-level markdown files only
+
+# Execution settings
+parallel_execution: true
+max_workers: 4
+timeout_seconds: 30.0
+
+# Validator configurations
+validators:
+  # Critical financial safety validation
+  financial_precision:
+    enabled: true
+    options:
+      strict_mode: true
+
+  # Security scanning for exposed secrets
+  security:
+    enabled: true
+    options:
+      severity_filter: "high"
+      exclude_patterns:
+        - "example"
+        - "demo"
+        - "tutorial"
+        - "YOUR_TOKEN_HERE"
+        - "abc123"
+        - "practice-token"
+        - "live-token"
+        - "your-token"
+        - "your-api-token"
+
+  # Markdown syntax and structure validation
+  markdown_syntax:
+    enabled: true
+    options: {}
+
+  # Python code syntax in documentation
+  python_syntax:
+    enabled: true
+    options: {}
+
+  # Internal link and cross-reference validation
+  cross_references:
+    enabled: true
+    options: {}
+
+  # SDK API documentation completeness
+  sdk_methods:
+    enabled: false  # Disabled for now due to many missing docs (334 issues found)
+    options: {}
+
+  # Code example executability (currently disabled due to high warning volume)
+  code_executability:
+    enabled: false
+    options: {}
+
+# Quality gates for release validation
+quality_gates:
+  max_errors: 5              # Strict error tolerance
+  max_warnings: 100         # Reasonable warning threshold
+  max_issues_per_file: 15   # Prevent any single file from being too problematic
+  min_success_rate: 90.0    # Require high overall success rate
+  fail_on_error: true       # Block CI/CD on errors
+  fail_on_security_issues: true  # Always fail on security issues
+  required_validators:      # These validators must pass
+    - "financial_precision"
+    - "security"
+
+# Reporting configuration
+reporting:
+  formats:
+    - "console"             # Rich terminal output
+  output_dir: "validation_reports"
+  include_passed: false     # Focus on issues, not successes
+  include_file_details: true
+  group_by_severity: true

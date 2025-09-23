@@ -24,8 +24,8 @@ class ValidationEngine:
         files: list[FileInfo] = []
 
         # Create pathspecs for inclusion and exclusion
-        include_spec = pathspec.PathSpec.from_lines('gitwildmatch', self.config.file_patterns)
-        exclude_spec = pathspec.PathSpec.from_lines('gitwildmatch', self.config.exclude_patterns)
+        include_spec = pathspec.PathSpec.from_lines("gitwildmatch", self.config.file_patterns)
+        exclude_spec = pathspec.PathSpec.from_lines("gitwildmatch", self.config.exclude_patterns)
 
         # Walk through project directory
         for file_path in self._walk_files():
@@ -66,12 +66,12 @@ class ValidationEngine:
     def load_file_content(self, file_info: FileInfo) -> str:
         """Load and return the content of a file."""
         try:
-            with file_info.path.open('r', encoding='utf-8', errors='replace') as f:
+            with file_info.path.open("r", encoding="utf-8", errors="replace") as f:
                 content = f.read()
 
             # Update content hash if needed
             if file_info.content_hash is None:
-                file_info.content_hash = hashlib.md5(content.encode('utf-8')).hexdigest()
+                file_info.content_hash = hashlib.md5(content.encode("utf-8")).hexdigest()
 
             return content
         except (OSError, UnicodeDecodeError) as e:
@@ -106,16 +106,10 @@ class ValidationEngine:
                 continue
 
         # Get enabled validators
-        enabled_validators = [
-            name for name, config in self.config.validators.items()
-            if config.enabled
-        ]
+        enabled_validators = [name for name, config in self.config.validators.items() if config.enabled]
 
         # Get validator options
-        validator_options = {
-            name: config.options
-            for name, config in self.config.validators.items()
-        }
+        validator_options = {name: config.options for name, config in self.config.validators.items()}
 
         # Run validation
         return registry.validate_files(
@@ -167,15 +161,9 @@ class ValidationEngine:
             except ValueError:  # noqa: PERF203
                 continue
 
-        enabled_validators = [
-            name for name, config in self.config.validators.items()
-            if config.enabled
-        ]
+        enabled_validators = [name for name, config in self.config.validators.items() if config.enabled]
 
-        validator_options = {
-            name: config.options
-            for name, config in self.config.validators.items()
-        }
+        validator_options = {name: config.options for name, config in self.config.validators.items()}
 
         return registry.validate_files(
             files=files_with_content,

@@ -77,13 +77,7 @@ class ValidatorRegistry:
                 results.append(result)
             except Exception as e:
                 # Create error result for failed validation
-                error_result = ValidationResult(
-                    validator_name=validator_name,
-                    file_path=file_info.path,
-                    passed=False,
-                    duration_ms=(time.perf_counter() - start_time) * 1000,
-                    metadata={"error": str(e)}
-                )
+                error_result = ValidationResult(validator_name=validator_name, file_path=file_info.path, passed=False, duration_ms=(time.perf_counter() - start_time) * 1000, metadata={"error": str(e)})
                 results.append(error_result)
 
         return results
@@ -101,13 +95,9 @@ class ValidatorRegistry:
         all_results: list[ValidationResult] = []
 
         if parallel and len(files) > 1:
-            all_results = self._validate_parallel(
-                files, enabled_validators, validator_options, max_workers
-            )
+            all_results = self._validate_parallel(files, enabled_validators, validator_options, max_workers)
         else:
-            all_results = self._validate_sequential(
-                files, enabled_validators, validator_options
-            )
+            all_results = self._validate_sequential(files, enabled_validators, validator_options)
 
         duration_ms = (time.perf_counter() - start_time) * 1000
 
@@ -130,15 +120,10 @@ class ValidatorRegistry:
                 file_results[result.file_path] = []
             file_results[result.file_path].append(result)
 
-        passed_files = sum(
-            1 for results in file_results.values()
-            if all(r.passed for r in results)
-        )
+        passed_files = sum(1 for results in file_results.values() if all(r.passed for r in results))
 
         # Calculate per-validator summaries
-        validator_summaries = self._calculate_validator_summaries(
-            all_results, enabled_validators
-        )
+        validator_summaries = self._calculate_validator_summaries(all_results, enabled_validators)
 
         return ValidationSummary(
             total_files=len(files),
@@ -163,9 +148,7 @@ class ValidatorRegistry:
         results: list[ValidationResult] = []
 
         for file_info, content in files:
-            file_results = self.validate_file(
-                file_info, content, enabled_validators, validator_options
-            )
+            file_results = self.validate_file(file_info, content, enabled_validators, validator_options)
             results.extend(file_results)
 
         return results
@@ -181,12 +164,7 @@ class ValidatorRegistry:
         results: list[ValidationResult] = []
 
         with ThreadPoolExecutor(max_workers=max_workers) as executor:
-            future_to_file = {
-                executor.submit(
-                    self.validate_file, file_info, content, enabled_validators, validator_options
-                ): file_info
-                for file_info, content in files
-            }
+            future_to_file = {executor.submit(self.validate_file, file_info, content, enabled_validators, validator_options): file_info for file_info, content in files}
 
             for future in as_completed(future_to_file):
                 try:
@@ -195,35 +173,18 @@ class ValidatorRegistry:
                 except Exception as e:  # noqa: PERF203
                     file_info = future_to_file[future]
                     # Create error result for completely failed file
-                    error_result = ValidationResult(
-                        validator_name="system",
-                        file_path=file_info.path,
-                        passed=False,
-                        metadata={"error": f"Failed to validate file: {e}"}
-                    )
+                    error_result = ValidationResult(validator_name="system", file_path=file_info.path, passed=False, metadata={"error": f"Failed to validate file: {e}"})
                     results.append(error_result)
 
         return results
 
-    def _calculate_validator_summaries(
-        self,
-        results: list[ValidationResult],
-        enabled_validators: list[str]
-    ) -> list[ValidatorSummary]:
+    def _calculate_validator_summaries(self, results: list[ValidationResult], enabled_validators: list[str]) -> list[ValidatorSummary]:
         """Calculate per-validator summary statistics."""
         validator_stats: dict[str, dict[str, Any]] = {}
 
         # Initialize stats for all enabled validators
         for validator_name in enabled_validators:
-            validator_stats[validator_name] = {
-                'files_checked': set(),
-                'files_passed': set(),
-                'files_failed': set(),
-                'total_issues': 0,
-                'error_count': 0,
-                'warning_count': 0,
-                'duration_ms': 0.0
-            }
+            validator_stats[validator_name] = {"files_checked": set(), "files_passed": set(), "files_failed": set(), "total_issues": 0, "error_count": 0, "warning_count": 0, "duration_ms": 0.0}
 
         # Process each result
         for result in results:
@@ -233,38 +194,28 @@ class ValidatorRegistry:
             stats = validator_stats[result.validator_name]
 
             # Track files
-            stats['files_checked'].add(result.file_path)
+            stats["files_checked"].add(result.file_path)
             if result.passed:
-                stats['files_passed'].add(result.file_path)
+                stats["files_passed"].add(result.file_path)
             else:
-                stats['files_failed'].add(result.file_path)
+                stats["files_failed"].add(result.file_path)
 
             # Count issues
-            stats['total_issues'] += len(result.issues)
-            stats['error_count'] += result.error_count
-            stats['warning_count'] += result.warning_count
-            stats['duration_ms'] += result.duration_ms
+            stats["total_issues"] += len(result.issues)
+            stats["error_count"] += result.error_count
+            stats["warning_count"] += result.warning_count
+            stats["duration_ms"] += result.duration_ms
 
         # Create ValidatorSummary objects
         summaries = []
         for validator_name, stats in validator_stats.items():
-            files_checked = len(stats['files_checked'])
-            files_passed = len(stats['files_passed'])
-            files_failed = len(stats['files_failed'])
+            files_checked = len(stats["files_checked"])
+            files_passed = len(stats["files_passed"])
+            files_failed = len(stats["files_failed"])
 
             success_rate = (files_passed / files_checked * 100.0) if files_checked > 0 else 100.0
 
-            summary = ValidatorSummary(
-                name=validator_name,
-                files_checked=files_checked,
-                files_passed=files_passed,
-                files_failed=files_failed,
-                total_issues=stats['total_issues'],
-                error_count=stats['error_count'],
-                warning_count=stats['warning_count'],
-                duration_ms=stats['duration_ms'],
-                success_rate=success_rate
-            )
+            summary = ValidatorSummary(name=validator_name, files_checked=files_checked, files_passed=files_passed, files_failed=files_failed, total_issues=stats["total_issues"], error_count=stats["error_count"], warning_count=stats["warning_count"], duration_ms=stats["duration_ms"], success_rate=success_rate)
             summaries.append(summary)
 
         # Sort by validator name for consistent output
