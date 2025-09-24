@@ -2,7 +2,7 @@
 
 ## Requirements
 
-- Python 3.9 or higher
+- Python 3.10 or higher
 - An OANDA account (practice or live)
 - API access token from OANDA
 
@@ -37,17 +37,15 @@ Test your installation:
 ```python
 import fivetwenty
 print(fivetwenty.__version__)
-# Output: 20.1.0
+# Output: 0.1.1
 ```
 
 ## Dependencies
 
-The SDK automatically installs these core dependencies:
+The SDK automatically installs these minimal core dependencies:
 
-- **httpx** - Modern async HTTP client
-- **pydantic** - Data validation and settings management
-- **python-dateutil** - Date/time handling
-- **typing-extensions** - Enhanced type hints
+- **httpx** - Modern async HTTP client with connection pooling
+- **pydantic** - Data validation and serialization (v2+)
 
 ## Environment Setup
 
@@ -80,32 +78,6 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Create project
 uv venv
 uv pip install fivetwenty
-```
-
-## Troubleshooting
-
-### SSL Certificate Errors
-
-If you encounter SSL errors, update your certificates:
-
-```bash
-pip install --upgrade certifi
-```
-
-### Import Errors
-
-Ensure you're using Python 3.9+:
-
-```bash
-python --version
-```
-
-### Permission Errors
-
-On macOS/Linux, you might need to use sudo or --user:
-
-```bash
-pip install --user fivetwenty
 ```
 
 ## Next Steps

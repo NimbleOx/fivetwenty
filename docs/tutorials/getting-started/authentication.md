@@ -23,24 +23,29 @@ To use the FiveTwenty library, you need an OANDA API access token:
 
 The FiveTwenty library supports three secure authentication approaches:
 
-### 1. Direct Parameters (Simple)
-
-For quick scripts and testing:
+### 1. Direct Parameters
 
 ```python
+import asyncio
+
 from fivetwenty import AsyncClient, Environment
 
-async with AsyncClient(
-    token="your-api-token",
-    environment=Environment.PRACTICE
-) as client:
-    accounts = await client.accounts.list()
-    print(f"Found {len(accounts)} accounts")
+async def main():
+    async with AsyncClient(
+        token="your-api-token",
+        account_id="your-account-id",  # Required parameter
+        environment=Environment.PRACTICE
+    ) as client:
+        accounts = await client.accounts.list()
+        print(f"Found {len(accounts)} accounts")
+
+# Run the async function
+asyncio.run(main())
 ```
 
 ### 2. Configuration Objects (Recommended)
 
-For production applications with multiple accounts:
+Apporpriate for running multiple clients connected to multiple accounts within the same logic (for example a short account and a long account):
 
 ```python
 from fivetwenty import AccountConfig, AsyncClient, Environment
@@ -50,7 +55,6 @@ config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
     environment=Environment.PRACTICE,
-    alias="my_trading_account"
 )
 
 # Use configuration
@@ -64,11 +68,10 @@ async with AsyncClient(config=config) as client:
 For Docker, Kubernetes, and CI/CD:
 
 ```bash
-# Set environment variables
+# Set environment variables (in your shell etc).
 export FIVETWENTY_OANDA_TOKEN="your-api-token"
 export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
 export FIVETWENTY_OANDA_ENVIRONMENT="practice"
-export FIVETWENTY_OANDA_ACCOUNT_ALIAS="my_trading_account"
 ```
 
 ```python
@@ -125,92 +128,8 @@ async with AsyncClient() as client:
 
 ### Secret Management Systems
 
-For production deployments:
+For production deployments, you can use AWS Secrets Manager, HashiCorp Vault, Kubernetes Secrets, etc. to set environment variables as appropriate.
 
-#### AWS Secrets Manager
-
-```python
-import boto3
-import json
-from fivetwenty import AccountConfig, AsyncClient, Environment
-
-def get_fivetwenty_config():
-    """Load OANDA configuration from AWS Secrets Manager."""
-
-    client = boto3.client('secretsmanager')
-    response = client.get_secret_value(SecretId='OANDA/api-credentials')
-    secrets = json.loads(response['SecretString'])
-
-    return AccountConfig(
-        token=secrets['token'],
-        account_id=secrets['account_id'],
-        environment=Environment.LIVE,
-        alias="production_trading"
-    )
-
-# Use in application
-config = get_fivetwenty_config()
-async with AsyncClient(config=config) as client:
-    accounts = await client.accounts.list()
-```
-
-#### HashiCorp Vault
-
-```python
-import os
-import hvac
-from fivetwenty import AccountConfig, Environment
-
-def get_vault_config():
-    """Load configuration from HashiCorp Vault."""
-
-    client = hvac.Client(url='https://vault.example.com')
-    client.token = os.environ['VAULT_TOKEN']
-
-    secret = client.secrets.kv.v2.read_secret_version(
-        path='OANDA/credentials',
-        mount_point='secret'
-    )
-
-    data = secret['data']['data']
-
-    return AccountConfig(
-        token=data['api_token'],
-        account_id=data['account_id'],
-        environment=Environment.LIVE,
-        alias="vault_trading_account"
-    )
-```
-
-#### Kubernetes Secrets
-
-```yaml
-# secret.yaml
-apiVersion: v1
-kind: Secret
-metadata:
-  name: OANDA-credentials
-type: Opaque
-data:
-  FIVETWENTY_OANDA_TOKEN: <base64-encoded-token>
-  FIVETWENTY_OANDA_ACCOUNT: <base64-encoded-account-id>
-stringData:
-  FIVETWENTY_OANDA_ENVIRONMENT: "live"
-  FIVETWENTY_OANDA_ACCOUNT_ALIAS: "kubernetes_trading"
-
----
-# deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-spec:
-  template:
-    spec:
-      containers:
-      - name: trading-app
-        envFrom:
-        - secretRef:
-            name: OANDA-credentials
-```
 
 ## Multiple Account Configuration
 
