@@ -15,93 +15,6 @@ FiveTwenty bridges the gap between OANDA's powerful v20 API and your Python appl
 - **Async-first design** - Built for high-performance applications with sync wrapper available
 - **Robust design** - Comprehensive error handling, automatic retries, and rate limiting
 
-## Quick Start
-
-Get trading in minutes with FiveTwenty's flexible configuration system. By default, the client will look for three environment variables that must be set. The FIVETWENTY_OANDA_TOKEN and FIVETWENTY_OANDA_ACCOUNT environment variables represent your token and account number, needed to authenticate.  FIVETWENTY_OANDA_ENVIRONMENT is needed to know which OANDA url to connect to.
-
-```bash
-# Zero-config with environment variables (recommended)
-
-# Option 1: Set in your shell session (temporary)
-export FIVETWENTY_OANDA_TOKEN="your-practice-token"
-export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
-export FIVETWENTY_OANDA_ENVIRONMENT="practice"
-
-# Option 2: Add to your shell profile (~/.bashrc, ~/.zshrc) for persistence
-echo 'export FIVETWENTY_OANDA_TOKEN="your-practice-token"' >> ~/.bashrc
-echo 'export FIVETWENTY_OANDA_ACCOUNT="your-account-id"' >> ~/.bashrc
-echo 'export FIVETWENTY_OANDA_ENVIRONMENT="practice"' >> ~/.bashrc
-
-# Option 3: Create a .env file in your project directory
-# File: .env
-# FIVETWENTY_OANDA_TOKEN=your-practice-token
-# FIVETWENTY_OANDA_ACCOUNT=your-account-id
-# FIVETWENTY_OANDA_ENVIRONMENT=practice
-# (Use python-dotenv to load: pip install python-dotenv)
-```
-
-**Environment Variable Setup Methods:**
-
-- **Option 1** (temporary): Execute the `export` commands in your terminal. Variables last only for that session.
-- **Option 2** (persistent): Add to your shell configuration file (`.bashrc`, `.zshrc`, etc.) to persist across sessions.
-- **Option 3** (.env file): Create a `.env` file in your project for team sharing and version control (add `.env` to `.gitignore` for security).
-
-```python
-from fivetwenty import AsyncClient, Environment
-
-# Start trading immediately
-async def main():
-    async with AsyncClient() as client:
-        print(f"Connected: {client.config.summary()}")
-
-        # Check account balance
-        account = await client.accounts.get(client.account_id)
-        print(f"Balance: {account.balance} {account.currency}")
-
-        # Place your first trade
-        order = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=1000
-        )
-
-        if order.order_fill_transaction:
-            print(f"Trade executed at {order.order_fill_transaction.price}")
-
-# Run the async function
-import asyncio
-asyncio.run(main())
-```
-
-### Alternative Configuration Patterns
-
-```python
-import asyncio
-from fivetwenty import AsyncClient, Environment, AccountConfig
-
-async def main():
-    # Direct parameters (basic scripts)
-    async with AsyncClient(
-        token="your-token",
-        environment=Environment.PRACTICE
-    ) as client:
-        pass
-
-    # Configuration objects (structured applications)
-    config = AccountConfig(
-        token="your-token",
-        account_id="your-account-id",
-        environment=Environment.PRACTICE,
-        alias="my_trading_bot"
-    )
-
-    async with AsyncClient(config=config) as client:
-        print(f"Trading with: {client.config.summary()}")
-
-# Run the async function
-asyncio.run(main())
-```
-
 ## Key Features
 
 ### **Modern Python Design**
@@ -110,8 +23,6 @@ asyncio.run(main())
 - **Pydantic models** - Reliable data validation and serialization
 - **Context managers** - Automatic resource cleanup
 - **Environment variable support** - Secure deployment patterns
-
-### **Production Ready**
 - **Real-time streaming** - Live price feeds with automatic reconnection
 - **Intelligent retries** - Exponential back-off with jitter
 - **Rate limit handling** - Automatic compliance with OANDA limits
@@ -122,6 +33,60 @@ asyncio.run(main())
 - **Advanced order types** - Market, limit, stop with risk management
 - **Historical data** - Candlestick charts and order book snapshots
 - **Transaction streaming** - Real-time account activity
+
+## Quick Start
+
+Get trading in minutes with FiveTwenty's flexible configuration system. By default, the client will look for three environment variables that must be set. The `FIVETWENTY_OANDA_TOKEN` and `FIVETWENTY_OANDA_ACCOUNT` environment variables represent your token and account number, needed to authenticate.  `FIVETWENTY_OANDA_ENVIRONMENT` is needed to know which OANDA url to connect to.
+
+The example below places environment variables in place using the package `python-dotenv`
+
+```bash
+# Install python-dotenv for .env file support (recommended)
+uv add python-dotenv
+```
+
+Once python-dotenv is installed, you can create a `.env` file in your project root, and the example below will work properly.
+
+```bash
+# File: .env
+FIVETWENTY_OANDA_TOKEN=your-practice-token
+FIVETWENTY_OANDA_ACCOUNT=your-account-id
+FIVETWENTY_OANDA_ENVIRONMENT=practice
+```
+
+Alternatively, you can set the environment varables manually by adding them to your `.bashrc` or `.zshrc`, or by otherwise setting them in your environment as needed.
+
+With `python-dotenv` installed, you can run this minimal example which will print out your account balance and open a trade for 1000 EUR_USD. You do not need to import `load_dotenv`, nor execute `load_dotenv()`
+
+Make sure this is your practice account, obviously.
+
+
+```python
+import asyncio
+
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
+from fivetwenty.models import InstrumentName
+
+load_dotenv()
+
+async def main():
+    async with AsyncClient() as client:
+        result = await client.accounts.get_account_summary(client.account_id)  # No type warnings!
+        account = result["account"]
+        print(f"Balance: {account.balance} {account.currency}")
+
+        # Place your first trade
+        order = await client.orders.post_market_order(
+            account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000
+        )
+
+        if order.order_fill_transaction:
+            fill_price = order.order_fill_transaction.get("price", "N/A")
+            print(f"Trade executed at {fill_price}")
+
+asyncio.run(main())
+```
 
 ## Next Steps
 

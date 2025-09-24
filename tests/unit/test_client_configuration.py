@@ -74,13 +74,10 @@ class TestAsyncClientConfiguration:
             assert client.account_id == "direct-account-id"
             assert client._environment == Environment.PRACTICE
 
-    def test_optional_account_id(self):
-        """Test that account_id is optional for direct parameters."""
-        client = AsyncClient(token="test-token", environment=Environment.PRACTICE)
-
-        assert client._token == "test-token"
-        assert client.account_id == "unknown"  # default value
-        assert client._environment == Environment.PRACTICE
+    def test_required_account_id(self):
+        """Test that account_id is required for direct parameters."""
+        with pytest.raises(ValueError, match="account_id is required when providing token directly"):
+            AsyncClient(token="test-token", environment=Environment.PRACTICE)
 
     def test_account_id_override(self):
         """Test that direct account_id parameter can override config."""
@@ -183,15 +180,13 @@ class TestClientConfigurationEdgeCases:
 
     def test_none_values_handled_properly(self):
         """Test that None values are handled properly."""
-        client = AsyncClient(
-            token="test-token",
-            account_id=None,  # Should use default
-            environment=Environment.PRACTICE,
-        )
-
-        assert client._token == "test-token"
-        assert client.account_id == "unknown"
-        assert client._environment == Environment.PRACTICE
+        # account_id is now required when providing token
+        with pytest.raises(ValueError, match="account_id is required when providing token directly"):
+            AsyncClient(
+                token="test-token",
+                account_id=None,
+                environment=Environment.PRACTICE,
+            )
 
     def test_secret_values_not_logged(self):
         """Test that secret values don't appear in string representations."""

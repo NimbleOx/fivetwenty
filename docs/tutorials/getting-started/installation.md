@@ -49,20 +49,6 @@ The SDK automatically installs these core dependencies:
 - **python-dateutil** - Date/time handling
 - **typing-extensions** - Enhanced type hints
 
-## Optional Dependencies
-
-For development and testing:
-
-```bash
-pip install fivetwenty[dev]
-```
-
-This includes:
-- pytest & pytest-asyncio for testing
-- ruff for linting
-- mypy for type checking
-- mkdocs-material for documentation
-
 ## Environment Setup
 
 ### Virtual Environment (Recommended)

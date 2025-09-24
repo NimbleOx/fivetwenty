@@ -30,7 +30,12 @@ Usage:
         accounts = client.accounts.list()
 """
 
-__version__ = "20.1.0"
+try:
+    from importlib.metadata import version
+    __version__ = version("fivetwenty")
+except ImportError:
+    # Fallback for development installs
+    __version__ = "0.1.1"
 
 from ._internal.environment import Environment
 from .client import AsyncClient, Client
