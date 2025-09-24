@@ -1,0 +1,3342 @@
+openapi: 3.1.0
+info:
+  title: OANDA v20 API
+  description: |
+    The OANDA v20 API provides access to market data, account management, trading, and transaction history.
+
+    This OpenAPI specification covers all endpoints documented in the official OANDA v20 API reference.
+
+    ## Base URLs
+    - **Practice Environment**: https://api-fxpractice.oanda.com
+    - **Live Environment**: https://api-fxtrade.oanda.com
+    - **Practice Streaming**: https://stream-fxpractice.oanda.com
+    - **Live Streaming**: https://stream-fxtrade.oanda.com
+
+    ## Authentication
+    All API requests require a Bearer token in the Authorization header.
+
+    ## Rate Limiting
+    - Default rate limit: 120 requests per second
+    - Streaming connections have separate limits
+
+    ## Data Formats
+    - All monetary values use decimal strings for precision
+    - Timestamps are in RFC3339 format with nanosecond precision
+    - Instrument names use underscore format (e.g., EUR_USD)
+  version: "20"
+  contact:
+    name: OANDA API Support
+    url: https://developer.oanda.com
+  license:
+    name: OANDA Terms of Service
+    url: https://www.oanda.com/legal/
+
+servers:
+  - url: https://api-fxpractice.oanda.com
+    description: Practice environment for testing
+  - url: https://api-fxtrade.oanda.com
+    description: Live trading environment
+  - url: https://stream-fxpractice.oanda.com
+    description: Practice streaming environment
+  - url: https://stream-fxtrade.oanda.com
+    description: Live streaming environment
+
+security:
+  - BearerAuth: []
+
+paths:
+  # Account Endpoints
+  /v3/accounts:
+    get:
+      tags:
+        - Accounts
+      summary: List Accounts
+      description: Get a list of all Accounts authorized for the provided token.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+      responses:
+        '200':
+          description: The list of authorized Accounts has been provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  accounts:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/AccountProperties'
+                required:
+                  - accounts
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}:
+    get:
+      tags:
+        - Accounts
+      summary: Get Account Details
+      description: Get the full details for a single Account that a client has access to. Full pending Order, open Trade and open Position representations are provided.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          description: The full Account details are provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: '#/components/schemas/Account'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - account
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/summary:
+    get:
+      tags:
+        - Accounts
+      summary: Get Account Summary
+      description: Get a summary for a single Account that a client has access to.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          description: The Account summary is provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  account:
+                    $ref: '#/components/schemas/AccountSummary'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - account
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/instruments:
+    get:
+      tags:
+        - Accounts
+      summary: Get Tradeable Instruments
+      description: Get the list of tradeable instruments for the given Account. The list of tradeable instruments is dependent on the regulatory division that the Account is located in, thus should be the same for all Accounts owned by a single user.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AccountID'
+        - name: instruments
+          in: query
+          description: List of instruments to query specifically
+          schema:
+            type: string
+            example: EUR_USD,USD_CAD
+      responses:
+        '200':
+          description: The list of tradeable instruments for the Account has been provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  instruments:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Instrument'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - instruments
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/configuration:
+    patch:
+      tags:
+        - Accounts
+      summary: Update Account Configuration
+      description: Set the client-configurable portions of an Account.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                alias:
+                  type: string
+                  description: Client-assigned alias for the Account
+                  example: "My Trading Account"
+                marginRate:
+                  $ref: '#/components/schemas/DecimalNumber'
+      responses:
+        '200':
+          description: The Account configuration has been updated as requested.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientConfigureTransaction:
+                    $ref: '#/components/schemas/ClientConfigureTransaction'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - clientConfigureTransaction
+                  - lastTransactionID
+        '400':
+          description: The configuration specification provided is invalid.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  clientConfigureRejectTransaction:
+                    $ref: '#/components/schemas/ClientConfigureRejectTransaction'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                  errorCode:
+                    type: string
+                  errorMessage:
+                    type: string
+                required:
+                  - clientConfigureRejectTransaction
+                  - lastTransactionID
+                  - errorMessage
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/changes:
+    get:
+      tags:
+        - Accounts
+      summary: Poll Account Changes
+      description: Endpoint used to poll an Account for its current state and changes since a specified TransactionID.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - name: sinceTransactionID
+          in: query
+          required: true
+          description: ID of the Transaction to get Account changes since
+          schema:
+            $ref: '#/components/schemas/TransactionID'
+      responses:
+        '200':
+          description: The Account state and changes are provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  changes:
+                    $ref: '#/components/schemas/AccountChanges'
+                  state:
+                    $ref: '#/components/schemas/AccountChangesState'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - changes
+                  - state
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '416':
+          $ref: '#/components/responses/RangeNotSatisfiable'
+
+  # Instrument Endpoints
+  /v3/instruments/{instrument}/candles:
+    get:
+      tags:
+        - Instruments
+      summary: Get Candlestick Data
+      description: Fetch candlestick data for a specified Instrument.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/InstrumentPath'
+        - $ref: '#/components/parameters/CandlePriceComponent'
+        - $ref: '#/components/parameters/CandlestickGranularity'
+        - $ref: '#/components/parameters/CandleCount'
+        - $ref: '#/components/parameters/CandleFrom'
+        - $ref: '#/components/parameters/CandleTo'
+        - $ref: '#/components/parameters/CandleSmooth'
+        - $ref: '#/components/parameters/CandleIncludeFirst'
+        - $ref: '#/components/parameters/DailyAlignment'
+        - $ref: '#/components/parameters/AlignmentTimezone'
+        - $ref: '#/components/parameters/WeeklyAlignment'
+      responses:
+        '200':
+          description: Pricing information has been successfully provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandlestickResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  # Order Endpoints
+  /v3/accounts/{accountID}/orders:
+    post:
+      tags:
+        - Orders
+      summary: Create Order
+      description: Create an Order for an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  $ref: '#/components/schemas/OrderRequest'
+              required:
+                - order
+      responses:
+        '201':
+          description: The Order was created as specified.
+          headers:
+            Location:
+              description: A link to the Order that was just created
+              schema:
+                type: string
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderCreateResponse'
+        '400':
+          description: The Order specification was invalid.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRejectResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: The Order or Account specified does not exist.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderRejectResponse'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+    get:
+      tags:
+        - Orders
+      summary: List Orders
+      description: Get a list of Orders for an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/OrderIDs'
+        - $ref: '#/components/parameters/OrderStateFilter'
+        - $ref: '#/components/parameters/InstrumentQuery'
+        - $ref: '#/components/parameters/OrderCount'
+        - $ref: '#/components/parameters/OrderBeforeID'
+      responses:
+        '200':
+          description: The list of Orders requested.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - orders
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/pendingOrders:
+    get:
+      tags:
+        - Orders
+      summary: List Pending Orders
+      description: List all pending Orders in an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          description: List of pending Orders for the Account.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orders:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Order'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - orders
+                  - lastTransactionID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/orders/{orderSpecifier}:
+    get:
+      tags:
+        - Orders
+      summary: Get Order Details
+      description: Get details for a single Order in an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/OrderSpecifier'
+      responses:
+        '200':
+          description: The details of the Order requested.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  order:
+                    $ref: '#/components/schemas/Order'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - order
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+    put:
+      tags:
+        - Orders
+      summary: Replace Order
+      description: Replace an Order in an Account by simultaneously cancelling it and creating a replacement Order
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/OrderSpecifier'
+        - $ref: '#/components/parameters/ClientRequestID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                order:
+                  $ref: '#/components/schemas/OrderRequest'
+              required:
+                - order
+      responses:
+        '201':
+          description: The Order was replaced as specified.
+          headers:
+            Location:
+              description: A link to the Order that was just created
+              schema:
+                type: string
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderReplaceResponse'
+        '400':
+          description: The Order specification was invalid.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: The Order or Account specified does not exist.
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/orders/{orderSpecifier}/cancel:
+    put:
+      tags:
+        - Orders
+      summary: Cancel Order
+      description: Cancel a pending Order in an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/OrderSpecifier'
+        - $ref: '#/components/parameters/ClientRequestID'
+      responses:
+        '200':
+          description: The Order was cancelled as specified.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderCancelTransaction:
+                    $ref: '#/components/schemas/OrderCancelTransaction'
+                  relatedTransactionIDs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionID'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - orderCancelTransaction
+                  - relatedTransactionIDs
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/orders/{orderSpecifier}/clientExtensions:
+    put:
+      tags:
+        - Orders
+      summary: Update Order Client Extensions
+      description: Update the Client Extensions for an Order in an Account. Do not set, modify, or delete clientExtensions if your account is associated with MT4.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/OrderSpecifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientExtensions:
+                  $ref: '#/components/schemas/ClientExtensions'
+                tradeClientExtensions:
+                  $ref: '#/components/schemas/ClientExtensions'
+      responses:
+        '200':
+          description: The Order's Client Extensions were updated as specified.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  orderClientExtensionsModifyTransaction:
+                    $ref: '#/components/schemas/OrderClientExtensionsModifyTransaction'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                  relatedTransactionIDs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionID'
+                required:
+                  - orderClientExtensionsModifyTransaction
+                  - lastTransactionID
+                  - relatedTransactionIDs
+        '400':
+          description: The Order Client Extensions specification was invalid.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: The Order or Account specified does not exist.
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  # Position Endpoints
+  /v3/accounts/{accountID}/positions:
+    get:
+      tags:
+        - Positions
+      summary: List All Positions
+      description: List all Positions for an Account.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          description: The Account's Positions are provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  positions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Position'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - positions
+                  - lastTransactionID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/openPositions:
+    get:
+      tags:
+        - Positions
+      summary: List Open Positions
+      description: List all open Positions for an Account.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          description: The Account's open Positions are provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  positions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Position'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - positions
+                  - lastTransactionID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/positions/{instrument}:
+    get:
+      tags:
+        - Positions
+      summary: Get Position Details
+      description: Get the details of a single Instrument's Position in an Account.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/InstrumentPath'
+      responses:
+        '200':
+          description: The Position details are provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  position:
+                    $ref: '#/components/schemas/Position'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - position
+                  - lastTransactionID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/positions/{instrument}/close:
+    put:
+      tags:
+        - Positions
+      summary: Close Position
+      description: Closeout the open Position for a specific instrument in an Account.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/InstrumentPath'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                longUnits:
+                  type: string
+                  description: Indication of how much of the long Position to closeout
+                  example: "ALL"
+                longClientExtensions:
+                  $ref: '#/components/schemas/ClientExtensions'
+                shortUnits:
+                  type: string
+                  description: Indication of how much of the short Position to closeout
+                  example: "NONE"
+                shortClientExtensions:
+                  $ref: '#/components/schemas/ClientExtensions'
+      responses:
+        '200':
+          description: The Position closeout request has been successfully processed.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PositionCloseResponse'
+        '400':
+          description: The Position closeout request is invalid.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: The Account or Position specified does not exist.
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  # Pricing Endpoints
+  /v3/accounts/{accountID}/pricing:
+    get:
+      tags:
+        - Pricing
+      summary: Get Current Pricing
+      description: Get pricing information for a specified list of Instruments within an Account.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - name: instruments
+          in: query
+          required: true
+          description: List of Instruments to get pricing for
+          schema:
+            type: string
+            example: "EUR_USD,USD_CAD"
+        - name: since
+          in: query
+          description: Date/Time filter to only show pricing newer than this date
+          schema:
+            $ref: '#/components/schemas/DateTime'
+        - name: includeUnitsAvailable
+          in: query
+          description: Flag that enables the inclusion of the unitsAvailable field
+          schema:
+            type: boolean
+            default: true
+        - name: includeHomeConversions
+          in: query
+          description: Flag that enables the inclusion of the homeConversions field
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: Pricing information has been successfully provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  prices:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/ClientPrice'
+                  homeConversions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/HomeConversions'
+                  time:
+                    $ref: '#/components/schemas/DateTime'
+                required:
+                  - prices
+                  - time
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/pricing/stream:
+    get:
+      tags:
+        - Pricing
+      summary: Stream Pricing Data
+      description: Get a stream of Account Prices starting from when the request is made.
+      servers:
+        - url: https://stream-fxpractice.oanda.com
+          description: Practice streaming environment
+        - url: https://stream-fxtrade.oanda.com
+          description: Live streaming environment
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AccountID'
+        - name: instruments
+          in: query
+          required: true
+          description: List of Instruments to stream Prices for
+          schema:
+            type: string
+            example: "EUR_USD,USD_CAD"
+        - name: snapshot
+          in: query
+          description: Flag that enables/disables the sending of a pricing snapshot when initially connecting
+          schema:
+            type: boolean
+            default: true
+        - name: includeHomeConversions
+          in: query
+          description: Flag that enables the inclusion of the homeConversions field
+          schema:
+            type: boolean
+            default: false
+      responses:
+        '200':
+          description: The stream of Pricing information is provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/PriceStreamResponse'
+                  - $ref: '#/components/schemas/HeartbeatResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/instruments/{instrument}/candles:
+    get:
+      tags:
+        - Pricing
+      summary: Get Account-Specific Candlestick Data
+      description: Fetch candlestick data for an instrument within an Account context.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/InstrumentPath'
+        - $ref: '#/components/parameters/CandlePriceComponent'
+        - $ref: '#/components/parameters/CandlestickGranularity'
+        - $ref: '#/components/parameters/CandleCount'
+        - $ref: '#/components/parameters/CandleFrom'
+        - $ref: '#/components/parameters/CandleTo'
+        - $ref: '#/components/parameters/CandleSmooth'
+        - $ref: '#/components/parameters/CandleIncludeFirst'
+        - $ref: '#/components/parameters/DailyAlignment'
+        - $ref: '#/components/parameters/AlignmentTimezone'
+        - $ref: '#/components/parameters/WeeklyAlignment'
+      responses:
+        '200':
+          description: Pricing information has been successfully provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CandlestickResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/candles/latest:
+    get:
+      tags:
+        - Pricing
+      summary: Get Latest Candles
+      description: Get the most recently completed candles within an Account for specified combinations of instrument, granularity, and price component.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - name: candleSpecifications
+          in: query
+          required: true
+          description: List of candle specifications to get pricing for
+          schema:
+            type: string
+            example: "EUR_USD:M:S5,USD_CAD:M:S5"
+        - name: units
+          in: query
+          description: The number of units used to calculate the volume-weighted average bid and ask prices
+          schema:
+            $ref: '#/components/schemas/DecimalNumber'
+            default: "1"
+        - $ref: '#/components/parameters/CandleSmooth'
+        - $ref: '#/components/parameters/DailyAlignment'
+        - $ref: '#/components/parameters/AlignmentTimezone'
+        - $ref: '#/components/parameters/WeeklyAlignment'
+      responses:
+        '200':
+          description: Pricing information has been successfully provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  latestCandles:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/CandlestickResponse'
+                required:
+                  - latestCandles
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  # Trade Endpoints
+  /v3/accounts/{accountID}/trades:
+    get:
+      tags:
+        - Trades
+      summary: List Trades
+      description: Get a list of Trades for an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - name: ids
+          in: query
+          description: List of Trade IDs to retrieve
+          schema:
+            type: string
+        - name: state
+          in: query
+          description: The state to filter the requested Trades by
+          schema:
+            $ref: '#/components/schemas/TradeStateFilter'
+        - $ref: '#/components/parameters/InstrumentQuery'
+        - name: count
+          in: query
+          description: The maximum number of Trades to return
+          schema:
+            type: integer
+            default: 50
+            maximum: 500
+        - name: beforeID
+          in: query
+          description: The maximum Trade ID to return
+          schema:
+            $ref: '#/components/schemas/TradeID'
+      responses:
+        '200':
+          description: The list of Trades requested.
+          headers:
+            Link:
+              description: A link to the next page of Trades if the results were paginated
+              schema:
+                type: string
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trades:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Trade'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - trades
+                  - lastTransactionID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/openTrades:
+    get:
+      tags:
+        - Trades
+      summary: List Open Trades
+      description: Get the list of open Trades for an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          description: The Account's list of open Trades is provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trades:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Trade'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - trades
+                  - lastTransactionID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/trades/{tradeSpecifier}:
+    get:
+      tags:
+        - Trades
+      summary: Get Trade Details
+      description: Get the details of a specific Trade in an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/TradeSpecifier'
+      responses:
+        '200':
+          description: The details of the Trade requested.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  trade:
+                    $ref: '#/components/schemas/Trade'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - trade
+                  - lastTransactionID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/trades/{tradeSpecifier}/close:
+    put:
+      tags:
+        - Trades
+      summary: Close Trade
+      description: Close (partially or fully) a specific open Trade in an Account
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/TradeSpecifier'
+        - $ref: '#/components/parameters/ClientRequestID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                units:
+                  type: string
+                  description: Indication of how much of the Trade to close
+                  example: "ALL"
+              required:
+                - units
+      responses:
+        '200':
+          description: The Trade has been closed as requested.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeCloseResponse'
+        '400':
+          description: The Trade Close request is invalid.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: The Account or Trade specified does not exist.
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/trades/{tradeSpecifier}/clientExtensions:
+    put:
+      tags:
+        - Trades
+      summary: Update Trade Client Extensions
+      description: Update the Client Extensions for a Trade. Do not add, update, or delete the Client Extensions if your account is associated with MT4.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/TradeSpecifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                clientExtensions:
+                  $ref: '#/components/schemas/ClientExtensions'
+              required:
+                - clientExtensions
+      responses:
+        '200':
+          description: The Trade's Client Extensions have been updated as requested.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  tradeClientExtensionsModifyTransaction:
+                    $ref: '#/components/schemas/TradeClientExtensionsModifyTransaction'
+                  relatedTransactionIDs:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionID'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - tradeClientExtensionsModifyTransaction
+                  - relatedTransactionIDs
+                  - lastTransactionID
+        '400':
+          description: The Trade Client Extensions specification was invalid.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: The Account or Trade specified does not exist.
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/trades/{tradeSpecifier}/orders:
+    put:
+      tags:
+        - Trades
+      summary: Manage Trade Dependent Orders
+      description: Create, replace and cancel a Trade's dependent Orders (Take Profit, Stop Loss and Trailing Stop Loss) through the Trade itself
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/TradeSpecifier'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                takeProfit:
+                  $ref: '#/components/schemas/TakeProfitDetails'
+                stopLoss:
+                  $ref: '#/components/schemas/StopLossDetails'
+                trailingStopLoss:
+                  $ref: '#/components/schemas/TrailingStopLossDetails'
+      responses:
+        '200':
+          description: The Trade's dependent Orders have been modified as requested.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TradeDependentOrdersResponse'
+        '400':
+          description: The Trade's dependent Orders cannot be modified as requested.
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          description: The Account or Trade specified does not exist.
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  # Transaction Endpoints
+  /v3/accounts/{accountID}/transactions:
+    get:
+      tags:
+        - Transactions
+      summary: List Transactions
+      description: Get a list of Transactions pages that satisfy a time-based Transaction query.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - name: from
+          in: query
+          description: The starting time (inclusive) of the time range for the Transactions being queried
+          schema:
+            $ref: '#/components/schemas/DateTime'
+        - name: to
+          in: query
+          description: The ending time (inclusive) of the time range for the Transactions being queried
+          schema:
+            $ref: '#/components/schemas/DateTime'
+        - name: pageSize
+          in: query
+          description: The number of Transactions to include in each page of the results
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+        - name: type
+          in: query
+          description: A filter for restricting the types of Transactions to retrieve
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TransactionFilter'
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: The requested time range of Transaction pages are provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  from:
+                    $ref: '#/components/schemas/DateTime'
+                  to:
+                    $ref: '#/components/schemas/DateTime'
+                  pageSize:
+                    type: integer
+                  type:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/TransactionFilter'
+                  count:
+                    type: integer
+                  pages:
+                    type: array
+                    items:
+                      type: string
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - from
+                  - to
+                  - pageSize
+                  - count
+                  - pages
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '416':
+          $ref: '#/components/responses/RangeNotSatisfiable'
+
+  /v3/accounts/{accountID}/transactions/{transactionID}:
+    get:
+      tags:
+        - Transactions
+      summary: Get Transaction Details
+      description: Get the details of a single Account Transaction.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - $ref: '#/components/parameters/TransactionID'
+      responses:
+        '200':
+          description: The details of the Transaction requested.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transaction:
+                    $ref: '#/components/schemas/Transaction'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - transaction
+                  - lastTransactionID
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+  /v3/accounts/{accountID}/transactions/idrange:
+    get:
+      tags:
+        - Transactions
+      summary: Get Transaction Range by ID
+      description: Get a range of Transactions for an Account based on the Transaction IDs.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - name: from
+          in: query
+          required: true
+          description: The starting Transaction ID (inclusive) to fetch
+          schema:
+            $ref: '#/components/schemas/TransactionID'
+        - name: to
+          in: query
+          required: true
+          description: The ending Transaction ID (inclusive) to fetch
+          schema:
+            $ref: '#/components/schemas/TransactionID'
+        - name: type
+          in: query
+          description: The filter that restricts the types of Transactions to retrieve
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TransactionFilter'
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: The requested range of Transactions are provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - transactions
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '416':
+          $ref: '#/components/responses/RangeNotSatisfiable'
+
+  /v3/accounts/{accountID}/transactions/sinceid:
+    get:
+      tags:
+        - Transactions
+      summary: Get Transactions Since ID
+      description: Get a range of Transactions for an Account starting at (but not including) a provided Transaction ID.
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AcceptDatetimeFormat'
+        - $ref: '#/components/parameters/AccountID'
+        - name: id
+          in: query
+          required: true
+          description: The ID of the last Transaction fetched
+          schema:
+            $ref: '#/components/schemas/TransactionID'
+        - name: type
+          in: query
+          description: A filter for restricting the types of Transactions to retrieve
+          schema:
+            type: array
+            items:
+              $ref: '#/components/schemas/TransactionFilter'
+          style: form
+          explode: false
+      responses:
+        '200':
+          description: The requested range of Transactions are provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  transactions:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Transaction'
+                  lastTransactionID:
+                    $ref: '#/components/schemas/TransactionID'
+                required:
+                  - transactions
+                  - lastTransactionID
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+        '416':
+          $ref: '#/components/responses/RangeNotSatisfiable'
+
+  /v3/accounts/{accountID}/transactions/stream:
+    get:
+      tags:
+        - Transactions
+      summary: Stream Transactions
+      description: Get a stream of Transactions for an Account starting from when the request is made.
+      servers:
+        - url: https://stream-fxpractice.oanda.com
+          description: Practice streaming environment
+        - url: https://stream-fxtrade.oanda.com
+          description: Live streaming environment
+      parameters:
+        - $ref: '#/components/parameters/Authorization'
+        - $ref: '#/components/parameters/AccountID'
+      responses:
+        '200':
+          description: The stream of Transactions is provided.
+          headers:
+            RequestID:
+              $ref: '#/components/headers/RequestID'
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: '#/components/schemas/TransactionStreamResponse'
+                  - $ref: '#/components/schemas/TransactionHeartbeatResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '405':
+          $ref: '#/components/responses/MethodNotAllowed'
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      description: Bearer token authentication. Tokens are obtained from the OANDA authentication system.
+
+  parameters:
+    Authorization:
+      name: Authorization
+      in: header
+      required: true
+      description: The authorization bearer token previously obtained by the client
+      schema:
+        type: string
+        example: "Bearer YOUR_ACCESS_TOKEN"
+
+    AcceptDatetimeFormat:
+      name: Accept-Datetime-Format
+      in: header
+      description: Format of DateTime fields in the request and response
+      schema:
+        type: string
+        enum: [UNIX, RFC3339]
+        default: RFC3339
+
+    ClientRequestID:
+      name: ClientRequestID
+      in: header
+      description: Client specified RequestID to be applied to the transaction
+      schema:
+        type: string
+
+    AccountID:
+      name: accountID
+      in: path
+      required: true
+      description: Account Identifier
+      schema:
+        $ref: '#/components/schemas/AccountID'
+
+    InstrumentPath:
+      name: instrument
+      in: path
+      required: true
+      description: Name of the Instrument
+      schema:
+        $ref: '#/components/schemas/InstrumentName'
+
+    InstrumentQuery:
+      name: instrument
+      in: query
+      description: The instrument to filter the requested items by
+      schema:
+        $ref: '#/components/schemas/InstrumentName'
+
+    OrderSpecifier:
+      name: orderSpecifier
+      in: path
+      required: true
+      description: The Order Specifier
+      schema:
+        $ref: '#/components/schemas/OrderSpecifier'
+
+    TradeSpecifier:
+      name: tradeSpecifier
+      in: path
+      required: true
+      description: Specifier for the Trade
+      schema:
+        $ref: '#/components/schemas/TradeSpecifier'
+
+    TransactionID:
+      name: transactionID
+      in: path
+      required: true
+      description: A Transaction ID
+      schema:
+        $ref: '#/components/schemas/TransactionID'
+
+    # Candle-specific parameters
+    CandlePriceComponent:
+      name: price
+      in: query
+      description: The Price component(s) to get candlestick data for
+      schema:
+        type: string
+        enum: [M, B, A, BA, BM, AM, BAM]
+        default: M
+
+    CandlestickGranularity:
+      name: granularity
+      in: query
+      description: The granularity of the candlesticks to fetch
+      schema:
+        $ref: '#/components/schemas/CandlestickGranularity'
+
+    CandleCount:
+      name: count
+      in: query
+      description: The number of candlesticks to return in the response
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 5000
+        default: 500
+
+    CandleFrom:
+      name: from
+      in: query
+      description: The start of the time range to fetch candlesticks for
+      schema:
+        $ref: '#/components/schemas/DateTime'
+
+    CandleTo:
+      name: to
+      in: query
+      description: The end of the time range to fetch candlesticks for
+      schema:
+        $ref: '#/components/schemas/DateTime'
+
+    CandleSmooth:
+      name: smooth
+      in: query
+      description: A flag that controls whether the candlestick is "smoothed" or not
+      schema:
+        type: boolean
+        default: false
+
+    CandleIncludeFirst:
+      name: includeFirst
+      in: query
+      description: A flag that controls whether the candlestick covered by the from time should be included
+      schema:
+        type: boolean
+        default: true
+
+    DailyAlignment:
+      name: dailyAlignment
+      in: query
+      description: The hour of the day to use for granularities that have daily alignments
+      schema:
+        type: integer
+        minimum: 0
+        maximum: 23
+        default: 17
+
+    AlignmentTimezone:
+      name: alignmentTimezone
+      in: query
+      description: The timezone to use for the dailyAlignment parameter
+      schema:
+        type: string
+        default: "America/New_York"
+
+    WeeklyAlignment:
+      name: weeklyAlignment
+      in: query
+      description: The day of the week used for granularities that have weekly alignment
+      schema:
+        $ref: '#/components/schemas/WeeklyAlignment'
+
+    # Order parameters
+    OrderIDs:
+      name: ids
+      in: query
+      description: List of Order IDs to retrieve
+      schema:
+        type: string
+
+    OrderStateFilter:
+      name: state
+      in: query
+      description: The state to filter the requested Orders by
+      schema:
+        $ref: '#/components/schemas/OrderStateFilter'
+
+    OrderCount:
+      name: count
+      in: query
+      description: The maximum number of Orders to return
+      schema:
+        type: integer
+
+    OrderBeforeID:
+      name: beforeID
+      in: query
+      description: The maximum Order ID to return
+      schema:
+        $ref: '#/components/schemas/OrderID'
+
+  headers:
+    RequestID:
+      description: The unique identifier generated for the request
+      schema:
+        type: string
+
+  responses:
+    BadRequest:
+      description: Bad Request
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Unauthorized:
+      description: Unauthorized
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    Forbidden:
+      description: Forbidden
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    NotFound:
+      description: Not Found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    MethodNotAllowed:
+      description: Method Not Allowed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+    RangeNotSatisfiable:
+      description: Range Not Satisfiable
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+
+  schemas:
+    # Basic Types
+    AccountID:
+      type: string
+      description: The Account identifier
+      example: "101-004-1435156-001"
+
+    InstrumentName:
+      type: string
+      description: Name of an instrument
+      example: "EUR_USD"
+      pattern: "^[A-Z]{3}_[A-Z]{3}$"
+
+    TransactionID:
+      type: string
+      description: The unique Transaction identifier
+      example: "6368"
+
+    OrderID:
+      type: string
+      description: The unique Order identifier
+      example: "6372"
+
+    TradeID:
+      type: string
+      description: The unique Trade identifier
+      example: "6368"
+
+    OrderSpecifier:
+      type: string
+      description: Either an Order ID or the Order's client ID prefixed by the '@' symbol
+      example: "6372"
+
+    TradeSpecifier:
+      type: string
+      description: Either a Trade ID or the Trade's client ID prefixed by the '@' symbol
+      example: "6368"
+
+    DateTime:
+      type: string
+      format: date-time
+      description: RFC3339 DateTime format with nanosecond precision
+      example: "2016-06-21T15:00:00.000000000Z"
+
+    DecimalNumber:
+      type: string
+      description: Decimal number as string for precision
+      example: "1.13027"
+
+    PriceValue:
+      type: string
+      description: Price value as string for precision
+      example: "1.13027"
+
+    CandlestickGranularity:
+      type: string
+      description: The granularity of a candlestick
+      enum:
+        - S5
+        - S10
+        - S15
+        - S30
+        - M1
+        - M2
+        - M4
+        - M5
+        - M10
+        - M15
+        - M30
+        - H1
+        - H2
+        - H3
+        - H4
+        - H6
+        - H8
+        - H12
+        - D
+        - W
+        - M
+      default: S5
+
+    WeeklyAlignment:
+      type: string
+      description: The day of the week used for weekly alignment
+      enum:
+        - Monday
+        - Tuesday
+        - Wednesday
+        - Thursday
+        - Friday
+        - Saturday
+        - Sunday
+      default: Friday
+
+    OrderStateFilter:
+      type: string
+      description: The filter for restricting the state of Orders
+      enum:
+        - PENDING
+        - FILLED
+        - TRIGGERED
+        - CANCELLED
+        - ALL
+
+    ErrorResponse:
+      type: object
+      properties:
+        errorCode:
+          type: string
+          description: The code of the error that has occurred
+        errorMessage:
+          type: string
+          description: The human-readable description of the error
+      required:
+        - errorMessage
+
+    # Complex Objects
+    AccountProperties:
+      type: object
+      description: Properties of an Account
+      properties:
+        id:
+          $ref: '#/components/schemas/AccountID'
+        tags:
+          type: array
+          items:
+            type: string
+      required:
+        - id
+        - tags
+
+    ClientExtensions:
+      type: object
+      description: Client-provided extensions for an entity
+      properties:
+        id:
+          type: string
+          description: Client-assigned ID
+        tag:
+          type: string
+          description: Client-assigned tag
+        comment:
+          type: string
+          description: Client-assigned comment
+
+    Account:
+      type: object
+      description: The full specification of an Account
+      properties:
+        id:
+          $ref: '#/components/schemas/AccountID'
+        alias:
+          type: string
+          description: Client-assigned alias for the Account
+        currency:
+          type: string
+          description: The home currency of the Account
+        balance:
+          $ref: '#/components/schemas/DecimalNumber'
+        createdByUserID:
+          type: integer
+          description: ID of the user that created the Account
+        createdTime:
+          $ref: '#/components/schemas/DateTime'
+        guaranteedStopLossOrderMode:
+          type: string
+          enum: [DISABLED, ALLOWED, REQUIRED]
+        pl:
+          $ref: '#/components/schemas/DecimalNumber'
+        resettablePL:
+          $ref: '#/components/schemas/DecimalNumber'
+        resettablePLTime:
+          $ref: '#/components/schemas/DateTime'
+        financing:
+          $ref: '#/components/schemas/DecimalNumber'
+        commission:
+          $ref: '#/components/schemas/DecimalNumber'
+        guaranteedExecutionFees:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginRate:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginAvailable:
+          $ref: '#/components/schemas/DecimalNumber'
+        positionValue:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutUnrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutNAV:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutMarginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutPositionValue:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutPercent:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCallMarginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCallPercent:
+          $ref: '#/components/schemas/DecimalNumber'
+        openTradeCount:
+          type: integer
+        openPositionCount:
+          type: integer
+        pendingOrderCount:
+          type: integer
+        hedgingEnabled:
+          type: boolean
+        unrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        NAV:
+          $ref: '#/components/schemas/DecimalNumber'
+        withdrawalLimit:
+          $ref: '#/components/schemas/DecimalNumber'
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/TradeSummary'
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Position'
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+      required:
+        - id
+        - currency
+        - balance
+        - createdByUserID
+        - createdTime
+        - marginRate
+        - openTradeCount
+        - openPositionCount
+        - pendingOrderCount
+        - hedgingEnabled
+        - lastTransactionID
+        - trades
+        - positions
+        - orders
+
+    AccountSummary:
+      type: object
+      description: A summary representation of a client's Account
+      properties:
+        id:
+          $ref: '#/components/schemas/AccountID'
+        alias:
+          type: string
+        currency:
+          type: string
+        balance:
+          $ref: '#/components/schemas/DecimalNumber'
+        createdByUserID:
+          type: integer
+        createdTime:
+          $ref: '#/components/schemas/DateTime'
+        guaranteedStopLossOrderMode:
+          type: string
+          enum: [DISABLED, ALLOWED, REQUIRED]
+        pl:
+          $ref: '#/components/schemas/DecimalNumber'
+        resettablePL:
+          $ref: '#/components/schemas/DecimalNumber'
+        resettablePLTime:
+          $ref: '#/components/schemas/DateTime'
+        financing:
+          $ref: '#/components/schemas/DecimalNumber'
+        commission:
+          $ref: '#/components/schemas/DecimalNumber'
+        guaranteedExecutionFees:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginRate:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginAvailable:
+          $ref: '#/components/schemas/DecimalNumber'
+        positionValue:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutUnrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutNAV:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutMarginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutPositionValue:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutPercent:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCallMarginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCallPercent:
+          $ref: '#/components/schemas/DecimalNumber'
+        openTradeCount:
+          type: integer
+        openPositionCount:
+          type: integer
+        pendingOrderCount:
+          type: integer
+        hedgingEnabled:
+          type: boolean
+        unrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        NAV:
+          $ref: '#/components/schemas/DecimalNumber'
+        withdrawalLimit:
+          $ref: '#/components/schemas/DecimalNumber'
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+      required:
+        - id
+        - currency
+        - balance
+        - createdByUserID
+        - createdTime
+        - marginRate
+        - openTradeCount
+        - openPositionCount
+        - pendingOrderCount
+        - hedgingEnabled
+        - lastTransactionID
+
+    Instrument:
+      type: object
+      description: Full specification of an Instrument
+      properties:
+        name:
+          $ref: '#/components/schemas/InstrumentName'
+        type:
+          type: string
+          enum: [CURRENCY, CFD, METAL]
+        displayName:
+          type: string
+        pipLocation:
+          type: integer
+        displayPrecision:
+          type: integer
+        tradeUnitsPrecision:
+          type: integer
+        minimumTradeSize:
+          $ref: '#/components/schemas/DecimalNumber'
+        maximumTrailingStopDistance:
+          $ref: '#/components/schemas/DecimalNumber'
+        minimumGuaranteedStopLossDistance:
+          $ref: '#/components/schemas/DecimalNumber'
+        minimumTrailingStopDistance:
+          $ref: '#/components/schemas/DecimalNumber'
+        maximumPositionSize:
+          $ref: '#/components/schemas/DecimalNumber'
+        maximumOrderUnits:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginRate:
+          $ref: '#/components/schemas/DecimalNumber'
+        guaranteedStopLossOrderMode:
+          type: string
+          enum: [DISABLED, ALLOWED, REQUIRED]
+        tags:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+              name:
+                type: string
+        financing:
+          type: object
+          properties:
+            longRate:
+              $ref: '#/components/schemas/DecimalNumber'
+            shortRate:
+              $ref: '#/components/schemas/DecimalNumber'
+            financingDaysOfWeek:
+              type: array
+              items:
+                type: object
+                properties:
+                  dayOfWeek:
+                    type: string
+                    enum: [MONDAY, TUESDAY, WEDNESDAY, THURSDAY, FRIDAY, SATURDAY, SUNDAY]
+                  daysCharged:
+                    type: integer
+      required:
+        - name
+        - type
+        - displayName
+        - pipLocation
+        - displayPrecision
+        - tradeUnitsPrecision
+        - minimumTradeSize
+        - maximumOrderUnits
+        - marginRate
+
+    CandlestickResponse:
+      type: object
+      description: Response containing candlestick data
+      properties:
+        instrument:
+          $ref: '#/components/schemas/InstrumentName'
+        granularity:
+          $ref: '#/components/schemas/CandlestickGranularity'
+        candles:
+          type: array
+          items:
+            $ref: '#/components/schemas/Candlestick'
+      required:
+        - instrument
+        - granularity
+        - candles
+
+    Candlestick:
+      type: object
+      description: The candlestick representation of a price movement
+      properties:
+        time:
+          $ref: '#/components/schemas/DateTime'
+        bid:
+          $ref: '#/components/schemas/CandlestickData'
+        ask:
+          $ref: '#/components/schemas/CandlestickData'
+        mid:
+          $ref: '#/components/schemas/CandlestickData'
+        volume:
+          type: integer
+          description: The number of prices created during the time-range
+        complete:
+          type: boolean
+          description: A flag indicating if the candlestick is complete
+      required:
+        - time
+        - volume
+        - complete
+
+    CandlestickData:
+      type: object
+      description: The OHLC price data
+      properties:
+        o:
+          $ref: '#/components/schemas/PriceValue'
+        h:
+          $ref: '#/components/schemas/PriceValue'
+        l:
+          $ref: '#/components/schemas/PriceValue'
+        c:
+          $ref: '#/components/schemas/PriceValue'
+      required:
+        - o
+        - h
+        - l
+        - c
+
+    # Order-related schemas
+    OrderRequest:
+      type: object
+      description: The base Order specification
+      discriminator:
+        propertyName: type
+      properties:
+        type:
+          type: string
+          enum: [MARKET, LIMIT, STOP, MARKET_IF_TOUCHED, TAKE_PROFIT, STOP_LOSS, TRAILING_STOP_LOSS]
+      required:
+        - type
+
+    Order:
+      type: object
+      description: The specification of an Order
+      properties:
+        id:
+          $ref: '#/components/schemas/OrderID'
+        createTime:
+          $ref: '#/components/schemas/DateTime'
+        state:
+          type: string
+          enum: [PENDING, FILLED, TRIGGERED, CANCELLED]
+        clientExtensions:
+          $ref: '#/components/schemas/ClientExtensions'
+        type:
+          type: string
+          enum: [MARKET, LIMIT, STOP, MARKET_IF_TOUCHED, TAKE_PROFIT, STOP_LOSS, TRAILING_STOP_LOSS]
+        instrument:
+          $ref: '#/components/schemas/InstrumentName'
+        units:
+          $ref: '#/components/schemas/DecimalNumber'
+        timeInForce:
+          type: string
+          enum: [GTC, GTD, GFD, FOK, IOC]
+        positionFill:
+          type: string
+          enum: [OPEN_ONLY, REDUCE_FIRST, REDUCE_ONLY, DEFAULT]
+      required:
+        - id
+        - createTime
+        - state
+        - type
+
+    OrderCreateResponse:
+      type: object
+      description: Response from order creation
+      properties:
+        orderCreateTransaction:
+          $ref: '#/components/schemas/Transaction'
+        orderFillTransaction:
+          $ref: '#/components/schemas/OrderFillTransaction'
+        orderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        orderReissueTransaction:
+          $ref: '#/components/schemas/Transaction'
+        orderReissueRejectTransaction:
+          $ref: '#/components/schemas/Transaction'
+        relatedTransactionIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionID'
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+      required:
+        - relatedTransactionIDs
+        - lastTransactionID
+
+    OrderRejectResponse:
+      type: object
+      description: Response when order is rejected
+      properties:
+        orderRejectTransaction:
+          $ref: '#/components/schemas/Transaction'
+        relatedTransactionIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionID'
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+        errorCode:
+          type: string
+        errorMessage:
+          type: string
+      required:
+        - relatedTransactionIDs
+        - lastTransactionID
+        - errorMessage
+
+    OrderReplaceResponse:
+      type: object
+      description: Response from order replacement
+      properties:
+        orderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        orderCreateTransaction:
+          $ref: '#/components/schemas/Transaction'
+        orderFillTransaction:
+          $ref: '#/components/schemas/OrderFillTransaction'
+        orderReissueTransaction:
+          $ref: '#/components/schemas/Transaction'
+        orderReissueRejectTransaction:
+          $ref: '#/components/schemas/Transaction'
+        replacementOrderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        relatedTransactionIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionID'
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+      required:
+        - relatedTransactionIDs
+        - lastTransactionID
+
+    # Transaction-related schemas
+    Transaction:
+      type: object
+      description: The base Transaction specification
+      properties:
+        id:
+          $ref: '#/components/schemas/TransactionID'
+        time:
+          $ref: '#/components/schemas/DateTime'
+        userID:
+          type: integer
+        accountID:
+          $ref: '#/components/schemas/AccountID'
+        batchID:
+          $ref: '#/components/schemas/TransactionID'
+        requestID:
+          type: string
+        type:
+          type: string
+      required:
+        - id
+        - time
+        - userID
+        - accountID
+        - batchID
+        - type
+
+    OrderFillTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            orderID:
+              $ref: '#/components/schemas/OrderID'
+            instrument:
+              $ref: '#/components/schemas/InstrumentName'
+            units:
+              $ref: '#/components/schemas/DecimalNumber'
+            price:
+              $ref: '#/components/schemas/PriceValue'
+            pl:
+              $ref: '#/components/schemas/DecimalNumber'
+            financing:
+              $ref: '#/components/schemas/DecimalNumber'
+            accountBalance:
+              $ref: '#/components/schemas/DecimalNumber'
+
+    OrderCancelTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            orderID:
+              $ref: '#/components/schemas/OrderID'
+
+    ClientConfigureTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            alias:
+              type: string
+            marginRate:
+              $ref: '#/components/schemas/DecimalNumber'
+
+    ClientConfigureRejectTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            rejectReason:
+              type: string
+
+    OrderClientExtensionsModifyTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            orderID:
+              $ref: '#/components/schemas/OrderID'
+            clientExtensionsModify:
+              $ref: '#/components/schemas/ClientExtensions'
+            tradeClientExtensionsModify:
+              $ref: '#/components/schemas/ClientExtensions'
+
+    # Additional schemas for remaining endpoints would go here...
+    Position:
+      type: object
+      description: The specification of a Position within an Account
+      properties:
+        instrument:
+          $ref: '#/components/schemas/InstrumentName'
+        pl:
+          $ref: '#/components/schemas/DecimalNumber'
+        resettablePL:
+          $ref: '#/components/schemas/DecimalNumber'
+        unrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        long:
+          $ref: '#/components/schemas/PositionSide'
+        short:
+          $ref: '#/components/schemas/PositionSide'
+      required:
+        - instrument
+        - pl
+        - resettablePL
+        - unrealizedPL
+        - long
+        - short
+
+    PositionSide:
+      type: object
+      description: The representation of a position for a single direction
+      properties:
+        units:
+          $ref: '#/components/schemas/DecimalNumber'
+        averagePrice:
+          $ref: '#/components/schemas/PriceValue'
+        tradeIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TradeID'
+        pl:
+          $ref: '#/components/schemas/DecimalNumber'
+        resettablePL:
+          $ref: '#/components/schemas/DecimalNumber'
+        unrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+      required:
+        - units
+        - pl
+        - resettablePL
+        - unrealizedPL
+
+    TradeSummary:
+      type: object
+      description: The summary of a Trade
+      properties:
+        id:
+          $ref: '#/components/schemas/TradeID'
+        instrument:
+          $ref: '#/components/schemas/InstrumentName'
+        price:
+          $ref: '#/components/schemas/PriceValue'
+        openTime:
+          $ref: '#/components/schemas/DateTime'
+        state:
+          type: string
+          enum: [OPEN, CLOSED, CLOSE_WHEN_TRADEABLE]
+        initialUnits:
+          $ref: '#/components/schemas/DecimalNumber'
+        currentUnits:
+          $ref: '#/components/schemas/DecimalNumber'
+        realizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        unrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        averageClosePrice:
+          $ref: '#/components/schemas/PriceValue'
+        closingTransactionIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionID'
+        financing:
+          $ref: '#/components/schemas/DecimalNumber'
+        dividendAdjustment:
+          $ref: '#/components/schemas/DecimalNumber'
+        clientExtensions:
+          $ref: '#/components/schemas/ClientExtensions'
+      required:
+        - id
+        - instrument
+        - price
+        - openTime
+        - state
+        - initialUnits
+        - currentUnits
+        - realizedPL
+        - unrealizedPL
+        - marginUsed
+        - averageClosePrice
+        - closingTransactionIDs
+        - financing
+        - dividendAdjustment
+
+    AccountChanges:
+      type: object
+      description: The changes to an Account's Orders, Trades and Positions
+      properties:
+        ordersCreated:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        ordersCancelled:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        ordersFilled:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        ordersTriggered:
+          type: array
+          items:
+            $ref: '#/components/schemas/Order'
+        tradesOpened:
+          type: array
+          items:
+            $ref: '#/components/schemas/TradeSummary'
+        tradesReduced:
+          type: array
+          items:
+            $ref: '#/components/schemas/TradeSummary'
+        tradesClosed:
+          type: array
+          items:
+            $ref: '#/components/schemas/TradeSummary'
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Position'
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+      required:
+        - ordersCreated
+        - ordersCancelled
+        - ordersFilled
+        - ordersTriggered
+        - tradesOpened
+        - tradesReduced
+        - tradesClosed
+        - positions
+        - transactions
+
+    AccountChangesState:
+      type: object
+      description: An Account's current state
+      properties:
+        unrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        NAV:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginAvailable:
+          $ref: '#/components/schemas/DecimalNumber'
+        positionValue:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutUnrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutNAV:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutMarginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutPositionValue:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCloseoutPercent:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCallMarginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginCallPercent:
+          $ref: '#/components/schemas/DecimalNumber'
+        orders:
+          type: array
+          items:
+            $ref: '#/components/schemas/DynamicOrderState'
+        trades:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalculatedTradeState'
+        positions:
+          type: array
+          items:
+            $ref: '#/components/schemas/CalculatedPositionState'
+      required:
+        - unrealizedPL
+        - NAV
+        - marginUsed
+        - marginAvailable
+        - positionValue
+        - marginCloseoutUnrealizedPL
+        - marginCloseoutNAV
+        - marginCloseoutMarginUsed
+        - marginCloseoutPositionValue
+        - marginCloseoutPercent
+        - marginCallMarginUsed
+        - marginCallPercent
+        - orders
+        - trades
+        - positions
+
+    DynamicOrderState:
+      type: object
+      description: The dynamic state of an Order
+      properties:
+        id:
+          $ref: '#/components/schemas/OrderID'
+        trailingStopValue:
+          $ref: '#/components/schemas/PriceValue'
+        triggerDistance:
+          $ref: '#/components/schemas/PriceValue'
+        isTriggerDistanceExact:
+          type: boolean
+      required:
+        - id
+
+    CalculatedTradeState:
+      type: object
+      description: The dynamic calculated state of a Trade
+      properties:
+        id:
+          $ref: '#/components/schemas/TradeID'
+        unrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+      required:
+        - id
+        - unrealizedPL
+        - marginUsed
+
+    CalculatedPositionState:
+      type: object
+      description: The dynamic calculated state of a Position
+      properties:
+        instrument:
+          $ref: '#/components/schemas/InstrumentName'
+        netUnrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        longUnrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        shortUnrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+      required:
+        - instrument
+        - netUnrealizedPL
+        - longUnrealizedPL
+        - shortUnrealizedPL
+
+    # Additional schemas for missing components
+    Trade:
+      type: object
+      description: The specification of a Trade
+      properties:
+        id:
+          $ref: '#/components/schemas/TradeID'
+        instrument:
+          $ref: '#/components/schemas/InstrumentName'
+        price:
+          $ref: '#/components/schemas/PriceValue'
+        openTime:
+          $ref: '#/components/schemas/DateTime'
+        state:
+          type: string
+          enum: [OPEN, CLOSED, CLOSE_WHEN_TRADEABLE]
+        initialUnits:
+          $ref: '#/components/schemas/DecimalNumber'
+        currentUnits:
+          $ref: '#/components/schemas/DecimalNumber'
+        realizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        unrealizedPL:
+          $ref: '#/components/schemas/DecimalNumber'
+        marginUsed:
+          $ref: '#/components/schemas/DecimalNumber'
+        averageClosePrice:
+          $ref: '#/components/schemas/PriceValue'
+        closingTransactionIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionID'
+        financing:
+          $ref: '#/components/schemas/DecimalNumber'
+        dividendAdjustment:
+          $ref: '#/components/schemas/DecimalNumber'
+        clientExtensions:
+          $ref: '#/components/schemas/ClientExtensions'
+        takeProfitOrder:
+          $ref: '#/components/schemas/TakeProfitOrder'
+        stopLossOrder:
+          $ref: '#/components/schemas/StopLossOrder'
+        trailingStopLossOrder:
+          $ref: '#/components/schemas/TrailingStopLossOrder'
+      required:
+        - id
+        - instrument
+        - price
+        - openTime
+        - state
+        - initialUnits
+        - currentUnits
+        - realizedPL
+        - unrealizedPL
+        - marginUsed
+        - averageClosePrice
+        - closingTransactionIDs
+        - financing
+        - dividendAdjustment
+
+    TradeStateFilter:
+      type: string
+      description: The filter for restricting the state of Trades
+      enum:
+        - OPEN
+        - CLOSED
+        - CLOSE_WHEN_TRADEABLE
+        - ALL
+      default: OPEN
+
+    TransactionFilter:
+      type: string
+      description: Transaction type filters
+      enum:
+        - CREATE
+        - CLOSE
+        - REOPEN
+        - CLIENT_CONFIGURE
+        - CLIENT_CONFIGURE_REJECT
+        - TRANSFER_FUNDS
+        - TRANSFER_FUNDS_REJECT
+        - MARKET_ORDER
+        - MARKET_ORDER_REJECT
+        - FIXED_PRICE_ORDER
+        - LIMIT_ORDER
+        - LIMIT_ORDER_REJECT
+        - STOP_ORDER
+        - STOP_ORDER_REJECT
+        - MARKET_IF_TOUCHED_ORDER
+        - MARKET_IF_TOUCHED_ORDER_REJECT
+        - TAKE_PROFIT_ORDER
+        - TAKE_PROFIT_ORDER_REJECT
+        - STOP_LOSS_ORDER
+        - STOP_LOSS_ORDER_REJECT
+        - TRAILING_STOP_LOSS_ORDER
+        - TRAILING_STOP_LOSS_ORDER_REJECT
+        - ORDER_FILL
+        - ORDER_CANCEL
+        - ORDER_CANCEL_REJECT
+        - ORDER_CLIENT_EXTENSIONS_MODIFY
+        - ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT
+        - TRADE_CLIENT_EXTENSIONS_MODIFY
+        - TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT
+        - MARGIN_CLOSEOUT
+        - DELAYED_TRADE_CLOSURE
+        - DAILY_FINANCING
+        - DIVIDEND_ADJUSTMENT
+
+    ClientPrice:
+      type: object
+      description: Client-side representation of pricing information
+      properties:
+        type:
+          type: string
+          enum: [PRICE]
+        instrument:
+          $ref: '#/components/schemas/InstrumentName'
+        time:
+          $ref: '#/components/schemas/DateTime'
+        status:
+          type: string
+          enum: [tradeable, non-tradeable, invalid]
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceBucket'
+        asks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceBucket'
+        closeoutBid:
+          $ref: '#/components/schemas/PriceValue'
+        closeoutAsk:
+          $ref: '#/components/schemas/PriceValue'
+        quoteHomeConversionFactors:
+          $ref: '#/components/schemas/QuoteHomeConversionFactors'
+        unitsAvailable:
+          $ref: '#/components/schemas/UnitsAvailable'
+      required:
+        - type
+        - instrument
+        - time
+        - status
+        - bids
+        - asks
+        - closeoutBid
+        - closeoutAsk
+
+    PriceBucket:
+      type: object
+      description: A price value and its associated liquidity
+      properties:
+        price:
+          $ref: '#/components/schemas/PriceValue'
+        liquidity:
+          type: integer
+          description: The amount of liquidity at this price
+      required:
+        - price
+        - liquidity
+
+    QuoteHomeConversionFactors:
+      type: object
+      description: Conversion factors for home currency
+      properties:
+        positiveUnits:
+          $ref: '#/components/schemas/DecimalNumber'
+        negativeUnits:
+          $ref: '#/components/schemas/DecimalNumber'
+      required:
+        - positiveUnits
+        - negativeUnits
+
+    UnitsAvailable:
+      type: object
+      description: The units available for trading
+      properties:
+        default:
+          $ref: '#/components/schemas/UnitsAvailableDetails'
+        openOnly:
+          $ref: '#/components/schemas/UnitsAvailableDetails'
+        reduceFirst:
+          $ref: '#/components/schemas/UnitsAvailableDetails'
+        reduceOnly:
+          $ref: '#/components/schemas/UnitsAvailableDetails'
+      required:
+        - default
+        - openOnly
+        - reduceFirst
+        - reduceOnly
+
+    UnitsAvailableDetails:
+      type: object
+      description: The units available in a specific direction
+      properties:
+        long:
+          $ref: '#/components/schemas/DecimalNumber'
+        short:
+          $ref: '#/components/schemas/DecimalNumber'
+      required:
+        - long
+        - short
+
+    HomeConversions:
+      type: object
+      description: Home currency conversion information
+      properties:
+        currency:
+          type: string
+          description: The home currency
+        accountGain:
+          $ref: '#/components/schemas/DecimalNumber'
+        accountLoss:
+          $ref: '#/components/schemas/DecimalNumber'
+        positionValue:
+          $ref: '#/components/schemas/DecimalNumber'
+      required:
+        - currency
+
+    # Streaming response schemas
+    PriceStreamResponse:
+      type: object
+      description: A streaming price update
+      properties:
+        type:
+          type: string
+          enum: [PRICE]
+        instrument:
+          $ref: '#/components/schemas/InstrumentName'
+        time:
+          $ref: '#/components/schemas/DateTime'
+        status:
+          type: string
+          enum: [tradeable, non-tradeable, invalid]
+        bids:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceBucket'
+        asks:
+          type: array
+          items:
+            $ref: '#/components/schemas/PriceBucket'
+        closeoutBid:
+          $ref: '#/components/schemas/PriceValue'
+        closeoutAsk:
+          $ref: '#/components/schemas/PriceValue'
+        quoteHomeConversionFactors:
+          $ref: '#/components/schemas/QuoteHomeConversionFactors'
+        unitsAvailable:
+          $ref: '#/components/schemas/UnitsAvailable'
+      required:
+        - type
+        - instrument
+        - time
+        - status
+
+    HeartbeatResponse:
+      type: object
+      description: A heartbeat message from streaming endpoints
+      properties:
+        type:
+          type: string
+          enum: [HEARTBEAT]
+        time:
+          $ref: '#/components/schemas/DateTime'
+      required:
+        - type
+        - time
+
+    TransactionStreamResponse:
+      type: object
+      description: A streaming transaction update
+      properties:
+        type:
+          type: string
+          enum: [TRANSACTION]
+        transaction:
+          $ref: '#/components/schemas/Transaction'
+      required:
+        - type
+        - transaction
+
+    TransactionHeartbeatResponse:
+      type: object
+      description: A heartbeat message from transaction streaming
+      properties:
+        type:
+          type: string
+          enum: [HEARTBEAT]
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+        time:
+          $ref: '#/components/schemas/DateTime'
+      required:
+        - type
+        - lastTransactionID
+        - time
+
+    # Order detail schemas
+    TakeProfitOrder:
+      type: object
+      description: A Take Profit Order
+      properties:
+        id:
+          $ref: '#/components/schemas/OrderID'
+        createTime:
+          $ref: '#/components/schemas/DateTime'
+        type:
+          type: string
+          enum: [TAKE_PROFIT]
+        tradeID:
+          $ref: '#/components/schemas/TradeID'
+        price:
+          $ref: '#/components/schemas/PriceValue'
+        timeInForce:
+          type: string
+          enum: [GTC, GTD, GFD]
+        state:
+          type: string
+          enum: [PENDING, FILLED, TRIGGERED, CANCELLED]
+      required:
+        - id
+        - createTime
+        - type
+        - tradeID
+        - price
+        - timeInForce
+        - state
+
+    StopLossOrder:
+      type: object
+      description: A Stop Loss Order
+      properties:
+        id:
+          $ref: '#/components/schemas/OrderID'
+        createTime:
+          $ref: '#/components/schemas/DateTime'
+        type:
+          type: string
+          enum: [STOP_LOSS]
+        tradeID:
+          $ref: '#/components/schemas/TradeID'
+        price:
+          $ref: '#/components/schemas/PriceValue'
+        distance:
+          $ref: '#/components/schemas/DecimalNumber'
+        timeInForce:
+          type: string
+          enum: [GTC, GTD, GFD]
+        state:
+          type: string
+          enum: [PENDING, FILLED, TRIGGERED, CANCELLED]
+        guaranteed:
+          type: boolean
+      required:
+        - id
+        - createTime
+        - type
+        - tradeID
+        - timeInForce
+        - state
+
+    TrailingStopLossOrder:
+      type: object
+      description: A Trailing Stop Loss Order
+      properties:
+        id:
+          $ref: '#/components/schemas/OrderID'
+        createTime:
+          $ref: '#/components/schemas/DateTime'
+        type:
+          type: string
+          enum: [TRAILING_STOP_LOSS]
+        tradeID:
+          $ref: '#/components/schemas/TradeID'
+        distance:
+          $ref: '#/components/schemas/DecimalNumber'
+        timeInForce:
+          type: string
+          enum: [GTC, GTD, GFD]
+        state:
+          type: string
+          enum: [PENDING, FILLED, TRIGGERED, CANCELLED]
+        trailingStopValue:
+          $ref: '#/components/schemas/PriceValue'
+      required:
+        - id
+        - createTime
+        - type
+        - tradeID
+        - distance
+        - timeInForce
+        - state
+
+    # Trade-related response schemas
+    TradeCloseResponse:
+      type: object
+      description: Response from trade closure
+      properties:
+        orderCreateTransaction:
+          $ref: '#/components/schemas/MarketOrderTransaction'
+        orderFillTransaction:
+          $ref: '#/components/schemas/OrderFillTransaction'
+        orderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        relatedTransactionIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionID'
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+      required:
+        - relatedTransactionIDs
+        - lastTransactionID
+
+    TradeClientExtensionsModifyTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            tradeID:
+              $ref: '#/components/schemas/TradeID'
+            clientExtensionsModify:
+              $ref: '#/components/schemas/ClientExtensions'
+
+    MarketOrderTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            instrument:
+              $ref: '#/components/schemas/InstrumentName'
+            units:
+              $ref: '#/components/schemas/DecimalNumber'
+            timeInForce:
+              type: string
+              enum: [FOK, IOC]
+            positionFill:
+              type: string
+              enum: [OPEN_ONLY, REDUCE_FIRST, REDUCE_ONLY, DEFAULT]
+            reason:
+              type: string
+
+    # Position-related response schemas
+    PositionCloseResponse:
+      type: object
+      description: Response from position closure
+      properties:
+        longOrderCreateTransaction:
+          $ref: '#/components/schemas/MarketOrderTransaction'
+        longOrderFillTransaction:
+          $ref: '#/components/schemas/OrderFillTransaction'
+        longOrderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        shortOrderCreateTransaction:
+          $ref: '#/components/schemas/MarketOrderTransaction'
+        shortOrderFillTransaction:
+          $ref: '#/components/schemas/OrderFillTransaction'
+        shortOrderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        relatedTransactionIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionID'
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+      required:
+        - relatedTransactionIDs
+        - lastTransactionID
+
+    # Trade dependent order schemas
+    TakeProfitDetails:
+      type: object
+      description: Take Profit order details
+      properties:
+        price:
+          $ref: '#/components/schemas/PriceValue'
+        timeInForce:
+          type: string
+          enum: [GTC, GTD, GFD]
+        clientExtensions:
+          $ref: '#/components/schemas/ClientExtensions'
+      required:
+        - price
+
+    StopLossDetails:
+      type: object
+      description: Stop Loss order details
+      properties:
+        price:
+          $ref: '#/components/schemas/PriceValue'
+        distance:
+          $ref: '#/components/schemas/DecimalNumber'
+        timeInForce:
+          type: string
+          enum: [GTC, GTD, GFD]
+        guaranteed:
+          type: boolean
+        clientExtensions:
+          $ref: '#/components/schemas/ClientExtensions'
+
+    TrailingStopLossDetails:
+      type: object
+      description: Trailing Stop Loss order details
+      properties:
+        distance:
+          $ref: '#/components/schemas/DecimalNumber'
+        timeInForce:
+          type: string
+          enum: [GTC, GTD, GFD]
+        clientExtensions:
+          $ref: '#/components/schemas/ClientExtensions'
+      required:
+        - distance
+
+    TradeDependentOrdersResponse:
+      type: object
+      description: Response from trade dependent order management
+      properties:
+        takeProfitOrderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        takeProfitOrderTransaction:
+          $ref: '#/components/schemas/TakeProfitOrderTransaction'
+        takeProfitOrderFillTransaction:
+          $ref: '#/components/schemas/OrderFillTransaction'
+        takeProfitOrderCreatedCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        stopLossOrderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        stopLossOrderTransaction:
+          $ref: '#/components/schemas/StopLossOrderTransaction'
+        stopLossOrderFillTransaction:
+          $ref: '#/components/schemas/OrderFillTransaction'
+        stopLossOrderCreatedCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        trailingStopLossOrderCancelTransaction:
+          $ref: '#/components/schemas/OrderCancelTransaction'
+        trailingStopLossOrderTransaction:
+          $ref: '#/components/schemas/TrailingStopLossOrderTransaction'
+        relatedTransactionIDs:
+          type: array
+          items:
+            $ref: '#/components/schemas/TransactionID'
+        lastTransactionID:
+          $ref: '#/components/schemas/TransactionID'
+      required:
+        - relatedTransactionIDs
+        - lastTransactionID
+
+    TakeProfitOrderTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            tradeID:
+              $ref: '#/components/schemas/TradeID'
+            price:
+              $ref: '#/components/schemas/PriceValue'
+            timeInForce:
+              type: string
+              enum: [GTC, GTD, GFD]
+            reason:
+              type: string
+
+    StopLossOrderTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            tradeID:
+              $ref: '#/components/schemas/TradeID'
+            price:
+              $ref: '#/components/schemas/PriceValue'
+            distance:
+              $ref: '#/components/schemas/DecimalNumber'
+            timeInForce:
+              type: string
+              enum: [GTC, GTD, GFD]
+            guaranteed:
+              type: boolean
+            reason:
+              type: string
+
+    TrailingStopLossOrderTransaction:
+      allOf:
+        - $ref: '#/components/schemas/Transaction'
+        - type: object
+          properties:
+            tradeID:
+              $ref: '#/components/schemas/TradeID'
+            distance:
+              $ref: '#/components/schemas/DecimalNumber'
+            timeInForce:
+              type: string
+              enum: [GTC, GTD, GFD]
+            reason:
+              type: string

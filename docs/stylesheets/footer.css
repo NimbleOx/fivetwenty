@@ -1,0 +1,104 @@
+/* Custom color scheme enhancements */
+:root {
+  --md-primary-fg-color: #009688;
+  --md-primary-fg-color--light: #4db6ac;
+  --md-primary-fg-color--dark: #00695c;
+  --md-accent-fg-color: #00e5ff;
+  --md-accent-fg-color--transparent: #00e5ff1a;
+}
+
+/* Custom gradient header */
+.md-header {
+  background: linear-gradient(135deg, var(--md-primary-fg-color) 0%, var(--md-primary-fg-color--dark) 100%);
+  box-shadow: 0 4px 8px rgba(0, 150, 136, 0.2);
+}
+
+/* Logo sizing */
+.md-header__button.md-logo img,
+.md-header__button.md-logo svg {
+  height: 1.5rem;
+  width: auto;
+}
+
+/* Enhanced navigation styling */
+.md-tabs {
+  background: linear-gradient(90deg, rgba(0, 150, 136, 0.95) 0%, rgba(0, 105, 92, 0.95) 100%);
+  backdrop-filter: blur(8px);
+}
+
+/* Code block enhancements */
+.highlight pre {
+  background: linear-gradient(135deg, rgba(0, 150, 136, 0.05) 0%, rgba(0, 229, 255, 0.05) 100%) !important;
+  border-left: 4px solid var(--md-accent-fg-color);
+}
+
+/* Admonition styling */
+.md-typeset .admonition.tip {
+  border-color: var(--md-accent-fg-color);
+}
+
+.md-typeset .admonition.tip > .admonition-title {
+  background-color: var(--md-accent-fg-color--transparent);
+  border-color: var(--md-accent-fg-color);
+}
+
+/* Multi-column footer styling */
+.footer-links {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 2rem;
+  margin-bottom: 1rem;
+  padding: 1rem 0;
+  width: 100%;
+}
+
+.footer-column h4 {
+  margin: 0 0 0.5rem 0;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.87);
+  font-size: 0.9rem;
+}
+
+.footer-column ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.footer-column li {
+  margin: 0.25rem 0;
+}
+
+.footer-column a {
+  color: var(--md-default-fg-color--light);
+  text-decoration: none;
+  font-size: 0.8rem;
+  transition: color 0.2s;
+}
+
+.footer-column a:hover {
+  color: var(--md-accent-fg-color);
+}
+
+
+/* Responsive adjustments */
+@media (max-width: 1024px) {
+  .footer-links {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .footer-links {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .footer-links {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+}

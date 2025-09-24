@@ -1,0 +1,322 @@
+site_name: FiveTwenty Documentation
+site_description: Comprehensive Python client for OANDA v20 REST API
+site_author: FiveTwenty Team
+site_url: https://nimbleox.github.io/fivetwenty
+
+repo_name: NimbleOx/fivetwenty
+repo_url: https://github.com/NimbleOx/fivetwenty
+edit_uri: blob/main/docs/
+
+# Suppress warnings for files that exist but aren't in nav (contributing docs, etc.)
+validation:
+  nav:
+    omitted_files: ignore
+    not_found: warn
+    absolute_links: warn
+  links:
+    not_found: warn
+    absolute_links: ignore
+    unrecognized_links: ignore
+
+
+theme:
+  name: material
+  features:
+    - announce.dismiss
+    - content.action.edit
+    - content.action.view
+    - content.code.annotate
+    - content.code.copy
+    - content.tabs.link
+    - content.tooltips
+    - header.autohide
+    - navigation.expand
+    - navigation.footer
+    - navigation.indexes
+    - navigation.instant
+    - navigation.instant.prefetch
+    - navigation.instant.progress
+    - navigation.tabs
+    - navigation.tabs.sticky
+    - navigation.path
+    - navigation.top
+    - navigation.tracking
+    - search.highlight
+    - search.share
+    - search.suggest
+    - toc.follow
+    - toc.integrate
+  palette:
+    - scheme: default
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: teal
+      accent: cyan
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+  favicon: assets/520logo.svg
+  logo: assets/520logo.svg
+
+nav:
+  - Home: index.md
+
+  # TUTORIALS - Learning-oriented content for skill building
+  - "Tutorials":
+      - Overview: tutorials/index.md
+      - Getting Started:
+          - Installation & Setup: tutorials/getting-started/installation.md
+          - Authentication Basics: tutorials/getting-started/authentication.md
+          - Your First Trade: tutorials/getting-started/first-trade.md
+          - Understanding Environments: tutorials/getting-started/environments.md
+      - Guided Learning:
+          - Basic Trading:
+              - Overview: tutorials/basic-trading/index.md
+              - Foundation: tutorials/basic-trading/lesson-1-foundation.md
+              - Connection & Setup: tutorials/basic-trading/lesson-2-connection-setup.md
+              - Market Data & Analysis: tutorials/basic-trading/lesson-3-market-data.md
+              - Your First Trade: tutorials/basic-trading/lesson-4-first-trade.md
+              - Position Management: tutorials/basic-trading/lesson-5-position-management.md
+              - Strategy Building: tutorials/basic-trading/lesson-6-strategy-building.md
+              - Complete System: tutorials/basic-trading/lesson-7-complete-system.md
+          - Advanced Order Types:
+              - Overview: tutorials/advanced-orders/index.md
+              - Order Types Overview: tutorials/advanced-orders/order-types.md
+              - Advanced Limit Orders: tutorials/advanced-orders/advanced-limit-orders.md
+              - Stop Orders & Market-If-Touched: tutorials/advanced-orders/stop-orders-mit.md
+              - Dynamic Order Management: tutorials/advanced-orders/dynamic-management.md
+              - Automated Order Systems: tutorials/advanced-orders/automated-systems.md
+              - Order Strategies & Combinations: tutorials/advanced-orders/order-strategies.md
+              - Validation & Best Practices: tutorials/advanced-orders/validation-best-practices.md
+          - Risk Management:
+              - Overview: tutorials/risk-management/index.md
+              - Risk Management Fundamentals: tutorials/risk-management/fundamentals.md
+              - Position Sizing Strategies: tutorials/risk-management/position-sizing.md
+              - Stop Loss Strategies: tutorials/risk-management/stop-loss-strategies.md
+              - Portfolio Risk Management: tutorials/risk-management/portfolio-risk.md
+              - Automated Risk Controls: tutorials/risk-management/automated-controls.md
+              - Performance Optimization: tutorials/risk-management/performance-optimization.md
+              - Best Practices & Validation: tutorials/risk-management/best-practices.md
+          - Portfolio Analysis:
+              - Overview: tutorials/portfolio-analysis/index.md
+              - Portfolio Theory: tutorials/portfolio-analysis/portfolio-theory.md
+              - Data Collection: tutorials/portfolio-analysis/data-collection.md
+              - Portfolio Optimization: tutorials/portfolio-analysis/portfolio-optimization.md
+              - Risk Attribution: tutorials/portfolio-analysis/risk-attribution.md
+              - Performance Attribution: tutorials/portfolio-analysis/performance-attribution.md
+              - Portfolio Rebalancing: tutorials/portfolio-analysis/portfolio-rebalancing.md
+              - Best Practices: tutorials/portfolio-analysis/best-practices.md
+          - Streaming Data:
+              - Overview: tutorials/streaming-data/index.md
+              - Streaming Fundamentals: tutorials/streaming-data/streaming-fundamentals.md
+              - Basic Streaming: tutorials/streaming-data/basic-streaming.md
+              - Advanced Data Management: tutorials/streaming-data/advanced-data-management.md
+              - Signal Generation: tutorials/streaming-data/signal-generation.md
+              - Automated Trading: tutorials/streaming-data/automated-trading.md
+              - Advanced Features: tutorials/streaming-data/advanced-features.md
+              - Best Practices: tutorials/streaming-data/best-practices.md
+          - Decimal Best Practices: tutorials/decimal-best-practices.md
+      - Interactive Examples:
+          - "Browse All Examples on GitHub": "https://github.com/NimbleOx/fivetwenty/tree/main/examples"
+          - "Python Scripts": "https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/scripts"
+          - "Jupyter Notebooks": "https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/notebooks"
+
+  # HOW-TO GUIDES - Problem-oriented solutions
+  - "How-to Guides":
+      - Overview: how-to-guides/index.md
+      - Getting Started:
+          - Set Up Live Trading: how-to-guides/setup-live-trading.md
+          - Handle Connection Failures: how-to-guides/handle-connection-failures.md
+          - Close Positions: how-to-guides/close-positions.md
+          - Manage Orders Effectively: how-to-guides/manage-orders-effectively.md
+      - Advanced Operations:
+          - Implement Stop-Loss Strategies: how-to-guides/implement-stop-loss-strategies.md
+          - HFT Optimization:
+              - Overview: how-to-guides/hft-optimization/index.md
+              - Connection Optimization: how-to-guides/hft-optimization/connection-optimization.md
+              - Streaming Optimization: how-to-guides/hft-optimization/streaming-optimization.md
+              - Memory & CPU Optimization: how-to-guides/hft-optimization/memory-cpu-optimization.md
+              - Latency Optimization: how-to-guides/hft-optimization/latency-optimization.md
+          - Production Deployment:
+              - Overview: how-to-guides/production-deployment/index.md
+              - Container Deployment: how-to-guides/production-deployment/container-deployment.md
+              - Cloud Deployment: how-to-guides/production-deployment/cloud-deployment.md
+              - Kubernetes Deployment: how-to-guides/production-deployment/kubernetes-deployment.md
+              - Bare Metal Deployment: how-to-guides/production-deployment/bare-metal-deployment.md
+              - Security & Compliance: how-to-guides/production-deployment/security-compliance.md
+              - Monitoring & Observability: how-to-guides/production-deployment/monitoring-observability.md
+          - Data Integration:
+              - Overview: how-to-guides/data-integration/index.md
+              - Economic Calendar: how-to-guides/data-integration/economic-calendar.md
+              - Financial News: how-to-guides/data-integration/financial-news.md
+              - Technical Indicators: how-to-guides/data-integration/technical-indicators.md
+              - Social Sentiment: how-to-guides/data-integration/social-sentiment.md
+              - Unified Pipeline: how-to-guides/data-integration/unified-pipeline.md
+  # REFERENCE - Information-oriented quick lookup
+  - "API Reference":
+      - Overview: api-reference/index.md
+      - Core Components:
+          - Client API: api-reference/client.md
+          - Models & Data Types: api-reference/models/index.md
+          - Configuration: api-reference/configuration.md
+          - Exceptions & Error Handling: api-reference/exceptions.md
+      - Data Models:
+          - Overview: api-reference/models/index.md
+          - Account Models: api-reference/models/account-models.md
+          - Trading Models: api-reference/models/trading-models.md
+          - Order Models: api-reference/models/order-models.md
+          - Market Data Models: api-reference/models/market-data-models.md
+          - Transaction Models: api-reference/models/transaction-models.md
+          - System Models: api-reference/models/system-models.md
+          - Enum Models: api-reference/models/enum-models.md
+      - API Endpoints:
+          - Overview: api-reference/endpoints/index.md
+          - Accounts: api-reference/endpoints/accounts.md
+          - Orders: api-reference/endpoints/orders.md
+          - Trades: api-reference/endpoints/trades.md
+          - Positions: api-reference/endpoints/positions.md
+          - Pricing: api-reference/endpoints/pricing.md
+          - Instruments: api-reference/endpoints/instruments.md
+          - Transactions: api-reference/endpoints/transactions.md
+      - OANDA API Specification:
+          - OpenAPI Spec: api-reference/oanda-openapi-spec.md
+  # EXPLANATIONS - Understanding-oriented deep dives
+  - "Explanations":
+      - Overview: explanation/index.md
+      - Architecture & Design:
+          - SDK Architecture: explanation/sdk-architecture.md
+          - Async vs Sync Design: explanation/async-vs-sync.md
+          - Error Handling Philosophy: explanation/error-handling.md
+          - Configuration Patterns: explanation/configuration.md
+      - Domain Knowledge:
+          - Forex Trading Concepts: explanation/forex-trading-concepts.md
+          - Market Data & Streaming: explanation/streaming.md
+          - Best Practices & Patterns: explanation/best-practices.md
+
+  # EXAMPLES - Practical demonstrations
+  - "Examples":
+      - Overview: examples.md
+      - Jupyter Notebooks: examples/notebooks/README.md
+
+
+markdown_extensions:
+  - abbr
+  - admonition
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - toc:
+      permalink: true
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem:
+      smart_enable: all
+  - pymdownx.caret
+  - pymdownx.details
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
+  - pymdownx.highlight:
+      anchor_linenums: true
+      line_spans: __span
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.keys
+  - pymdownx.magiclink:
+      repo_url_shorthand: true
+      user: squidfunk
+      repo: mkdocs-material
+  - pymdownx.mark
+  - pymdownx.smartsymbols
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+  - pymdownx.tabbed:
+      alternate_style: true
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.tilde
+
+plugins:
+  - search:
+      separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            docstring_style: google
+            docstring_options:
+              ignore_init_summary: true
+            merge_init_into_class: true
+            show_submodules: true
+  # Note: mkdocs-jupyter plugin disabled since examples moved to GitHub
+  # - mkdocs-jupyter:
+  #     execute: false
+  #     kernel_name: python3
+  #     include_source: true
+  #     ignore_h1_titles: true
+  #     allow_errors: true
+
+extra_css:
+  - stylesheets/footer.css
+
+extra:
+  # analytics:
+  #   provider: google
+  #   property: !ENV GOOGLE_ANALYTICS_KEY
+  generator: false  # Remove "Made with Material for MkDocs"
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/NimbleOx/fivetwenty
+    - icon: fontawesome/brands/python
+      link: https://pypi.org/project/fivetwenty/
+
+copyright: |
+  <div class="footer-links">
+    <div class="footer-column">
+      <h4>Documentation</h4>
+      <ul>
+        <li><a href="tutorials/getting-started/installation/">Getting Started</a></li>
+        <li><a href="tutorials/">Tutorials</a></li>
+        <li><a href="how-to-guides/">How-to Guides</a></li>
+        <li><a href="api-reference/">API Reference</a></li>
+        <li><a href="examples/">Examples</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h4>Community</h4>
+      <ul>
+        <li><a href="https://github.com/NimbleOx/fivetwenty">GitHub Repository</a></li>
+        <li><a href="https://github.com/NimbleOx/fivetwenty/issues">Issues & Bug Reports</a></li>
+        <li><a href="https://github.com/NimbleOx/fivetwenty/discussions">Discussions</a></li>
+        <li><a href="https://pypi.org/project/fivetwenty/">PyPI Package</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h4>Contributing</h4>
+      <ul>
+        <li><a href="contributing/">Contributing Guide</a></li>
+        <li><a href="contributing/development-setup/">Development Setup</a></li>
+        <li><a href="contributing/testing-guide/">Testing Guide</a></li>
+        <li><a href="contributing/code-style/">Code Style</a></li>
+      </ul>
+    </div>
+    <div class="footer-column">
+      <h4>Legal & Support</h4>
+      <ul>
+        <li><a href="https://github.com/NimbleOx/fivetwenty/security/policy">Security Policy</a></li>
+        <li><a href="https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE">License (MIT)</a></li>
+        <li><a href="https://github.com/NimbleOx">Contact</a></li>
+      </ul>
+    </div>
+  </div>

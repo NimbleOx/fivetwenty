@@ -1,0 +1,9 @@
+{
+  "recommendations": [
+    "ms-python.python",
+    "charliermarsh.ruff",
+    "ms-python.mypy-type-checker",
+    "be5invis.toml",
+    "redhat.vscode-yaml"
+  ]
+}

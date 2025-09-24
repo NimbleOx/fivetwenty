@@ -1,0 +1,55 @@
+# Configuration for external link validation only
+# This is a separate config for external link checking (slow network operations)
+
+file_patterns:
+  - "docs/**/*.md"
+
+exclude_patterns:
+  - "**/.git/**"
+  - "**/__pycache__/**"
+  - "**/.mypy_cache/**"
+  - "**/.ruff_cache/**"
+  - "**/.pytest_cache/**"
+  - "**/.venv/**"
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/*.egg-info/**"
+  - "**/node_modules/**"
+  - "**/validation_reports/**"
+  - "**/validation_old/**"
+  - "fivetwenty/**"
+  - "tests/**"
+  - "examples/**"
+  - "docs_validation/**"
+  - "oanda-api-reference/**"
+  - "*.py"
+  - "/*.md"
+
+# Execution settings
+parallel_execution: false  # Disabled for external requests to be respectful to servers
+max_workers: 1
+timeout_seconds: 120.0     # Increased timeout for network operations
+
+# Only enable external link validation
+validators:
+  financial_precision:
+    enabled: false
+  security:
+    enabled: false
+  markdown_syntax:
+    enabled: false
+  python_syntax:
+    enabled: false
+  cross_references:
+    enabled: false
+  sdk_methods:
+    enabled: false
+  code_executability:
+    enabled: false
+  external_links:
+    enabled: true
+    options:
+      exclude_urls:
+        - "https://api-fxpractice.oanda.com/v3"
+        - "https://api-fxtrade.oanda.com/v3"
+        - "https://diataxis.fr/"

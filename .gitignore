@@ -140,8 +140,13 @@ venv.bak/
 
 # mypy
 .mypy_cache/
+**/.mypy_cache/
 .dmypy.json
 dmypy.json
+
+# Ruff cache
+.ruff_cache/
+**/.ruff_cache/
 
 # Pyre type checker
 .pyre/
@@ -160,7 +165,6 @@ cython_debug/
 .idea/
 
 # VSCode
-.vscode/
 *.code-workspace
 
 # OS generated files
@@ -196,3 +200,12 @@ test-results/
 scratch/
 playground/
 *.local
+
+# Validation reports and generated files (should not be committed)
+docs-tooling/validation/reports/
+
+# OANDA API reference (local development only)
+oanda-api-reference/
+
+# Claude Code project instructions
+CLAUDE.md

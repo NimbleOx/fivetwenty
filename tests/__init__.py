@@ -1,1 +1,1 @@
-"""Test suite for OANDA SDK."""
+"""Test suite for FiveTwenty."""

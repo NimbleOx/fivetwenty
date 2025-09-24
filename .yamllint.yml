@@ -1,0 +1,25 @@
+---
+extends: default
+
+rules:
+  # Allow longer lines for documentation and API specs
+  line-length:
+    max: 120
+
+  # Allow document start (---) to be omitted
+  document-start: disable
+
+  # Allow indentation inconsistencies in some cases
+  indentation:
+    spaces: 2
+    indent-sequences: true
+
+  # Allow truthy values like "on", "off" which are common in GitHub workflows
+  truthy:
+    allowed-values: ['true', 'false', 'TRUE', 'FALSE', 'on', 'off', 'ON', 'OFF']
+
+  # Allow comments anywhere (needed for MkDocs configs)
+  comments: disable
+
+  # Allow various quote styles
+  quoted-strings: disable
