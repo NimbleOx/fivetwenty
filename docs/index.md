@@ -6,8 +6,6 @@ Welcome to **FiveTwenty** - the modern, secure Python SDK for OANDA's v20 REST A
 
 **FiveTwenty** is a robust Python SDK that makes forex trading through the OANDA v20 REST API accessible and reliable. Whether you're building automated trading systems, creating analytical tools, or developing trading applications, FiveTwenty provides the foundation you need.
 
-### Built for Real Trading
-
 FiveTwenty bridges the gap between OANDA's powerful v20 API and your Python applications. It handles the complexity of financial data types, connection management, and error handling so you can focus on your trading logic.
 
 **Key benefits:**
@@ -19,14 +17,34 @@ FiveTwenty bridges the gap between OANDA's powerful v20 API and your Python appl
 
 ## Quick Start
 
-Get trading in minutes with FiveTwenty's flexible configuration system:
+Get trading in minutes with FiveTwenty's flexible configuration system. By default, the client will look for three environment variables that must be set. The FIVETWENTY_OANDA_TOKEN and FIVETWENTY_OANDA_ACCOUNT environment variables represent your token and account number, needed to authenticate.  FIVETWENTY_OANDA_ENVIRONMENT is needed to know which OANDA url to connect to.
 
 ```bash
 # Zero-config with environment variables (recommended)
+
+# Option 1: Set in your shell session (temporary)
 export FIVETWENTY_OANDA_TOKEN="your-practice-token"
 export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
 export FIVETWENTY_OANDA_ENVIRONMENT="practice"
+
+# Option 2: Add to your shell profile (~/.bashrc, ~/.zshrc) for persistence
+echo 'export FIVETWENTY_OANDA_TOKEN="your-practice-token"' >> ~/.bashrc
+echo 'export FIVETWENTY_OANDA_ACCOUNT="your-account-id"' >> ~/.bashrc
+echo 'export FIVETWENTY_OANDA_ENVIRONMENT="practice"' >> ~/.bashrc
+
+# Option 3: Create a .env file in your project directory
+# File: .env
+# FIVETWENTY_OANDA_TOKEN=your-practice-token
+# FIVETWENTY_OANDA_ACCOUNT=your-account-id
+# FIVETWENTY_OANDA_ENVIRONMENT=practice
+# (Use python-dotenv to load: pip install python-dotenv)
 ```
+
+**Environment Variable Setup Methods:**
+
+- **Option 1** (temporary): Execute the `export` commands in your terminal. Variables last only for that session.
+- **Option 2** (persistent): Add to your shell configuration file (`.bashrc`, `.zshrc`, etc.) to persist across sessions.
+- **Option 3** (.env file): Create a `.env` file in your project for team sharing and version control (add `.env` to `.gitignore` for security).
 
 ```python
 from fivetwenty import AsyncClient, Environment

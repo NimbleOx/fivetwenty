@@ -35,14 +35,14 @@ class TestAsyncClientConfiguration:
 
     def test_environment_variables_success(self):
         """Test client initialization with environment variables."""
-        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "env-token", "FIVETWENTY_OANDA_ACCOUNT": "env-account-id", "FIVETWENTY_OANDA_ENVIRONMENT": "live", "FIVETWENTY_OANDA_ACCOUNT_ALIAS": "env_account"}, clear=True):
+        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "env-token", "FIVETWENTY_OANDA_ACCOUNT": "env-account-id", "FIVETWENTY_OANDA_ENVIRONMENT": "live"}, clear=True):
             client = AsyncClient()
 
             assert client._token == "env-token"
             assert client.account_id == "env-account-id"
             assert client._environment == Environment.LIVE
             assert client.config is not None
-            assert client.config.alias == "env_account"
+            assert client.config.alias == "default"
 
     def test_environment_variables_missing(self):
         """Test client initialization fails when env vars are missing."""
@@ -126,12 +126,12 @@ class TestClientConfiguration:
 
     def test_environment_variables_success(self):
         """Test sync client initialization with environment variables."""
-        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "sync-env-token", "FIVETWENTY_OANDA_ACCOUNT": "sync-env-account-id", "FIVETWENTY_OANDA_ENVIRONMENT": "practice", "FIVETWENTY_OANDA_ACCOUNT_ALIAS": "sync_env_account"}, clear=True):
+        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "sync-env-token", "FIVETWENTY_OANDA_ACCOUNT": "sync-env-account-id", "FIVETWENTY_OANDA_ENVIRONMENT": "practice"}, clear=True):
             client = Client()
 
             assert client.account_id == "sync-env-account-id"
             assert client.config is not None
-            assert client.config.alias == "sync_env_account"
+            assert client.config.alias == "default"
 
     def test_environment_variables_missing(self):
         """Test sync client initialization fails when env vars are missing."""
@@ -162,7 +162,6 @@ class TestClientConfigurationEdgeCases:
                     "FIVETWENTY_OANDA_TOKEN": "test-token",
                     "FIVETWENTY_OANDA_ACCOUNT": "test-account-id",
                     "FIVETWENTY_OANDA_ENVIRONMENT": "invalid",  # Invalid environment
-                    "FIVETWENTY_OANDA_ACCOUNT_ALIAS": "test_account",
                 },
                 clear=True,
             ),

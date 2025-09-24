@@ -244,7 +244,7 @@ class TestConfigurationManagement:
         print("✓ Testing AccountConfigLoader...")
 
         # Test 1: Load from environment variables
-        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "env-test-token-12345", "FIVETWENTY_OANDA_ACCOUNT": "123-456-7890123-456", "FIVETWENTY_OANDA_ENVIRONMENT": "practice", "FIVETWENTY_OANDA_ACCOUNT_ALIAS": "default"}):
+        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "env-test-token-12345", "FIVETWENTY_OANDA_ACCOUNT": "123-456-7890123-456", "FIVETWENTY_OANDA_ENVIRONMENT": "practice"}):
             config = AccountConfigLoader.load_default()
 
             assert config is not None
@@ -269,7 +269,6 @@ class TestConfigurationManagement:
                 "FIVETWENTY_OANDA_ENVIRONMENT": "practice",
                 # Clear all existing FIVETWENTY variables and only set the ones we want
                 "FIVETWENTY_OANDA_ACCOUNT": "",  # Missing required field
-                "FIVETWENTY_OANDA_ACCOUNT_ALIAS": "",
             },
         ):
             config = AccountConfigLoader.load_default()
@@ -277,7 +276,7 @@ class TestConfigurationManagement:
             print("  - Partial environment variables rejected")
 
         # Test 4: Invalid environment value
-        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "test-token", "FIVETWENTY_OANDA_ACCOUNT": "123-456-7890123-456", "FIVETWENTY_OANDA_ENVIRONMENT": "invalid", "FIVETWENTY_OANDA_ACCOUNT_ALIAS": ""}):
+        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "test-token", "FIVETWENTY_OANDA_ACCOUNT": "123-456-7890123-456", "FIVETWENTY_OANDA_ENVIRONMENT": "invalid"}):
             with pytest.raises(ValueError):
                 AccountConfigLoader.load_default()
             print("  - Invalid environment value rejected")
