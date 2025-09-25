@@ -1,0 +1,82 @@
+# FiveTwenty Documentation Validation Configuration - Fast Mode
+#
+# Fast validation for development workflow focusing on core quality checks.
+# Excludes slower validators like code_executability and external_links.
+
+# File discovery - docs directory only
+file_patterns:
+  - "docs/**/*.md"
+
+exclude_patterns:
+  # Version control and caches
+  - "**/.git/**"
+  - "**/__pycache__/**"
+  - "**/.mypy_cache/**"
+  - "**/.ruff_cache/**"
+  - "**/.pytest_cache/**"
+  - "**/.venv/**"
+
+  # Build artifacts
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/*.egg-info/**"
+  - "**/node_modules/**"
+
+  # Validation outputs
+  - "**/validation_reports/**"
+  - "**/validation_old/**"
+
+  # Exclude everything outside docs/
+  - "fivetwenty/**"          # SDK source code
+  - "tests/**"              # Test files
+  - "examples/**"           # Example scripts
+  - "docs_validation/**"    # This validation framework
+  - "oanda-api-reference/**" # External API reference
+  - "*.py"                  # Python files outside docs
+  - "/*.md"                 # Root-level markdown files only
+
+# Execution settings
+parallel_execution: true
+max_workers: 4
+timeout_seconds: 30.0
+
+# Validator configurations - Fast mode (core validators only)
+validators:
+  # Code linting with ruff (strict mode - all rules)
+  code_linting:
+    enabled: true
+
+  # Type checking with mypy (strict mode - all type issues)
+  code_typing:
+    enabled: true
+
+  # Internal link and cross-reference validation
+  cross_references:
+    enabled: true
+
+  # Critical financial safety validation
+  financial_precision:
+    enabled: true
+
+  # Markdown syntax and structure validation
+  markdown_syntax:
+    enabled: true
+
+  # Python code syntax in documentation
+  python_syntax:
+    enabled: true
+
+  # SDK API documentation completeness
+  sdk_methods:
+    enabled: true
+
+  # Security scanning for exposed secrets
+  security:
+    enabled: true
+
+  # Slower validators - disabled for fast mode
+  code_executability:
+    enabled: false
+
+  external_links:
+    enabled: false

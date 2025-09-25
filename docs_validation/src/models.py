@@ -64,6 +64,7 @@ class ValidatorSummary(BaseModel):
     warning_count: int
     duration_ms: float
     success_rate: float
+    enabled: bool = True  # Whether the validator was enabled for this run
 
 
 class ValidationSummary(BaseModel):

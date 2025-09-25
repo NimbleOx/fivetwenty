@@ -182,9 +182,9 @@ class ValidatorRegistry:
         """Calculate per-validator summary statistics."""
         validator_stats: dict[str, dict[str, Any]] = {}
 
-        # Initialize stats for all enabled validators
-        for validator_name in enabled_validators:
-            validator_stats[validator_name] = {"files_checked": set(), "files_passed": set(), "files_failed": set(), "total_issues": 0, "error_count": 0, "warning_count": 0, "duration_ms": 0.0}
+        # Initialize stats for ALL registered validators (not just enabled ones)
+        for validator_name in self._validators.keys():
+            validator_stats[validator_name] = {"files_checked": set(), "files_passed": set(), "files_failed": set(), "total_issues": 0, "error_count": 0, "warning_count": 0, "duration_ms": 0.0, "enabled": validator_name in enabled_validators}
 
         # Process each result
         for result in results:
@@ -215,7 +215,7 @@ class ValidatorRegistry:
 
             success_rate = (files_passed / files_checked * 100.0) if files_checked > 0 else 100.0
 
-            summary = ValidatorSummary(name=validator_name, files_checked=files_checked, files_passed=files_passed, files_failed=files_failed, total_issues=stats["total_issues"], error_count=stats["error_count"], warning_count=stats["warning_count"], duration_ms=stats["duration_ms"], success_rate=success_rate)
+            summary = ValidatorSummary(name=validator_name, files_checked=files_checked, files_passed=files_passed, files_failed=files_failed, total_issues=stats["total_issues"], error_count=stats["error_count"], warning_count=stats["warning_count"], duration_ms=stats["duration_ms"], success_rate=success_rate, enabled=stats["enabled"])
             summaries.append(summary)
 
         # Sort by validator name for consistent output

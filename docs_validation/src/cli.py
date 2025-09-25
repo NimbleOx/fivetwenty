@@ -222,42 +222,30 @@ def _display_results(
 
     console.print()
 
-    # Summary table
-    table = Table(title="Validation Summary")
-    table.add_column("Metric", style="cyan")
-    table.add_column("Value", style="white")
+    # Show per-validator summary (contains all necessary information)
+    _display_validator_summaries(summary)
 
-    table.add_row("Files", str(summary.total_files))
-    table.add_row("Validators", str(summary.total_validators))
-    table.add_row("Duration", f"{duration:.2f}s")
-
-    # Results with colors
-    if summary.passed_files == summary.total_files:
-        table.add_row("Status", Text("✅ PASSED", style="green"))
-    else:
-        table.add_row("Status", Text("❌ FAILED", style="red"))
-
-    table.add_row("Success Rate", f"{summary.success_rate:.1f}%")
-    table.add_row("Issues Found", str(summary.total_issues))
-
-    if summary.error_count > 0:
-        table.add_row("Errors", Text(str(summary.error_count), style="red"))
-    if summary.warning_count > 0:
-        table.add_row("Warnings", Text(str(summary.warning_count), style="yellow"))
-
-    console.print(table)
-
-    # Show per-validator summary if verbose or if there are issues
-    if verbose or summary.total_issues > 0:
-        _display_validator_summaries(summary)
-
-    # Show issues if any
-    if summary.total_issues > 0:
+    # Show brief issues summary if any (detailed issues only in report)
+    if summary.total_issues > 0 and verbose:
         _display_issues(summary, verbose)
+    elif summary.total_issues > 0:
+        _display_brief_issues_summary(summary)
 
     # Generate markdown report if requested
     if report:
         _generate_markdown_report(summary)
+
+
+def _display_brief_issues_summary(summary: ValidationSummary) -> None:
+    """Display a brief summary of issues without details."""
+    console.print(f"\n📋 Found {summary.total_issues} issues across {len([r for r in summary.results if r.issues])} files")
+
+    if summary.error_count > 0:
+        console.print(f"   ❌ {summary.error_count} errors", style="red")
+    if summary.warning_count > 0:
+        console.print(f"   ⚠️ {summary.warning_count} warnings", style="yellow")
+
+    console.print("   💡 Use --verbose for detailed output or --report for full analysis")
 
 
 def _display_issues(summary: ValidationSummary, verbose: bool) -> None:
@@ -309,7 +297,11 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
     if not summary.validator_summaries:
         return
 
-    console.print("\n📊 Per-Validator Summary:")
+    # Display overall status
+    overall_status = "✅ PASSED" if summary.passed_files == summary.total_files else "❌ FAILED"
+    status_style = "green" if summary.passed_files == summary.total_files else "red"
+
+    console.print(f"📊 Validation Results: {Text(overall_status, style=status_style)} | {summary.total_files} files | {summary.success_rate:.1f}% success rate | {summary.total_issues} issues")
 
     # Create table for validator summaries
     table = Table(show_header=True, header_style="bold magenta")
@@ -322,20 +314,33 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
     table.add_column("Duration", justify="right")
 
     for validator_summary in summary.validator_summaries:
-        # Format success rate with color
-        success_rate = f"{validator_summary.success_rate:.1f}%"
-        if validator_summary.success_rate == 100.0:
-            success_rate_text = Text(success_rate, style="green")
-        elif validator_summary.success_rate >= 80.0:
-            success_rate_text = Text(success_rate, style="yellow")
+        if not validator_summary.enabled:
+            # Disabled validator - show with disabled styling
+            table.add_row(
+                Text(validator_summary.name, style="dim"),
+                Text("—", style="dim"),  # No files checked
+                Text("DISABLED", style="dim italic"),
+                Text("—", style="dim"),  # No issues
+                Text("—", style="dim"),  # No errors
+                Text("—", style="dim"),  # No warnings
+                Text("—", style="dim"),  # No duration
+            )
         else:
-            success_rate_text = Text(success_rate, style="red")
+            # Enabled validator - show normal statistics
+            # Format success rate with color
+            success_rate = f"{validator_summary.success_rate:.1f}%"
+            if validator_summary.success_rate == 100.0:
+                success_rate_text = Text(success_rate, style="green")
+            elif validator_summary.success_rate >= 80.0:
+                success_rate_text = Text(success_rate, style="yellow")
+            else:
+                success_rate_text = Text(success_rate, style="red")
 
-        # Format errors and warnings with color
-        errors_text = Text(str(validator_summary.error_count), style="red") if validator_summary.error_count > 0 else str(validator_summary.error_count)
-        warnings_text = Text(str(validator_summary.warning_count), style="yellow") if validator_summary.warning_count > 0 else str(validator_summary.warning_count)
+            # Format errors and warnings with color
+            errors_text = Text(str(validator_summary.error_count), style="red") if validator_summary.error_count > 0 else str(validator_summary.error_count)
+            warnings_text = Text(str(validator_summary.warning_count), style="yellow") if validator_summary.warning_count > 0 else str(validator_summary.warning_count)
 
-        table.add_row(validator_summary.name, str(validator_summary.files_checked), success_rate_text, str(validator_summary.total_issues), errors_text, warnings_text, f"{validator_summary.duration_ms:.0f}ms")
+            table.add_row(validator_summary.name, str(validator_summary.files_checked), success_rate_text, str(validator_summary.total_issues), errors_text, warnings_text, f"{validator_summary.duration_ms:.0f}ms")
 
     console.print(table)
 

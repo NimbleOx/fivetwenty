@@ -1,7 +1,7 @@
-# FiveTwenty Documentation Validation Configuration
+# FiveTwenty Documentation Validation Configuration - Complete Mode
 #
-# This configuration is optimized for docs-only validation of the FiveTwenty trading SDK.
-# All patterns and settings are focused exclusively on the docs/ directory.
+# Complete validation including all validators for comprehensive quality assessment.
+# Includes slower validators like code_executability and external_links.
 
 # File discovery - docs directory only
 file_patterns:
@@ -40,19 +40,23 @@ parallel_execution: true
 max_workers: 4
 timeout_seconds: 30.0
 
-# Validator configurations
+# Validator configurations - Complete mode (all validators)
 validators:
+  # Code linting with ruff (strict mode - all rules)
+  code_linting:
+    enabled: true
+
+  # Type checking with mypy (strict mode - all type issues)
+  code_typing:
+    enabled: true
+
+  # Internal link and cross-reference validation
+  cross_references:
+    enabled: true
+
   # Critical financial safety validation
   financial_precision:
     enabled: true
-    options:
-      strict_mode: true
-
-  # Security scanning for exposed secrets
-  security:
-    enabled: true
-    options:
-      severity_filter: "high"
 
   # Markdown syntax and structure validation
   markdown_syntax:
@@ -62,27 +66,18 @@ validators:
   python_syntax:
     enabled: true
 
-  # Internal link and cross-reference validation
-  cross_references:
-    enabled: true
-
   # SDK API documentation completeness
   sdk_methods:
-    enabled: false  # Disabled for now due to many missing docs (334 issues found)
+    enabled: true
 
-  # Code example executability
+  # Security scanning for exposed secrets
+  security:
+    enabled: true
+
+  # Code example executability (slower)
   code_executability:
     enabled: true
 
-  # Code linting with ruff
-  code_linting:
+  # External link validation (slower)
+  external_links:
     enabled: true
-    options:
-      severity_filter: "warning"  # Only show warnings and errors
-
-  # Type checking with mypy
-  code_typing:
-    enabled: true
-    options:
-      strict_mode: false  # Relaxed mode for documentation examples
-

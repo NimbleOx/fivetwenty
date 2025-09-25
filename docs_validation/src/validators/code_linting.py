@@ -92,8 +92,8 @@ class CodeLintingValidator(BaseValidator):
             temp_path = temp_file.name
 
         try:
-            # Run ruff check with JSON output
-            result = subprocess.run(["ruff", "check", "--output-format=json", "--quiet", temp_path], check=False, capture_output=True, text=True, timeout=10)
+            # Run ruff check in strict mode with JSON output - capture all issues
+            result = subprocess.run(["ruff", "check", "--output-format=json", "--select=ALL", temp_path], check=False, capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0:
                 # No linting issues
@@ -119,9 +119,9 @@ class CodeLintingValidator(BaseValidator):
                     if 1 <= line_in_code <= len(code_lines):
                         context = code_lines[line_in_code - 1].strip()
 
-                    # Determine severity
+                    # All issues are errors in strict mode
                     rule_code = ruff_issue.get("code", "")
-                    severity = self._get_severity_for_rule(rule_code)
+                    severity = IssueSeverity.ERROR
 
                     issues.append(
                         ValidationIssue(
@@ -162,67 +162,15 @@ class CodeLintingValidator(BaseValidator):
                 if 1 <= int(line_num) <= len(code_lines):
                     context = code_lines[int(line_num) - 1].strip()
 
-                severity = self._get_severity_for_rule(rule_code)
+                severity = IssueSeverity.ERROR
 
                 issues.append(ValidationIssue(message=f"Linting: {message} ({rule_code})", file_path=file_path, line=doc_line, severity=severity, rule_id=f"code_lint_{rule_code.lower()}", context=context, suggestion=self._get_suggestion_for_rule(rule_code, message)))
 
         return issues
 
-    def _get_severity_for_rule(self, rule_code: str) -> IssueSeverity:
-        """Get severity level for a ruff rule code."""
-        # Critical/Error rules that break functionality
-        error_rules = {
-            "F",  # Pyflakes (undefined names, unused imports)
-            "E999",  # Syntax errors
-            "W605",  # Invalid escape sequences
-        }
-
-        # Warning rules for style and best practices
-        warning_rules = {
-            "E",  # pycodestyle errors (except E999)
-            "W",  # pycodestyle warnings (except W605)
-            "N",  # pep8-naming
-            "UP",  # pyupgrade
-            "B",  # flake8-bugbear
-            "A",  # flake8-builtins
-            "COM",  # flake8-commas
-            "C4",  # flake8-comprehensions
-            "SIM",  # flake8-simplify
-            "RUF",  # Ruff-specific
-        }
-
-        rule_prefix = rule_code[0] if rule_code else ""
-
-        if rule_code in error_rules or rule_prefix in error_rules:
-            return IssueSeverity.ERROR
-        if rule_code in warning_rules or rule_prefix in warning_rules:
-            return IssueSeverity.WARNING
-        return IssueSeverity.INFO
 
     def _get_suggestion_for_rule(self, rule_code: str, message: str) -> str:
-        """Get suggestion for fixing a specific rule violation."""
-        suggestions = {
-            "F401": "Remove unused import or use it in the code example",
-            "F841": "Use the variable or remove it from the example",
-            "E501": "Break long lines or simplify the example",
-            "E302": "Add blank lines between function definitions",
-            "E305": "Add blank lines after function/class definitions",
-            "W291": "Remove trailing whitespace",
-            "W292": "Add newline at end of file",
-            "N806": "Use lowercase variable names (snake_case)",
-            "N803": "Use lowercase argument names",
-            "UP": "Consider using more modern Python syntax",
-            "B": "Follow Python best practices to avoid common bugs",
-            "SIM": "Simplify the code structure",
-            "C4": "Use more efficient comprehensions",
-            "COM812": "Add trailing comma for better diffs",
-        }
-
-        # Try to find matching suggestion
-        for rule_pattern, suggestion in suggestions.items():
-            if rule_code.startswith(rule_pattern):
-                return suggestion
-
+        """Get suggestion for fixing a rule violation."""
         return f"Fix linting issue: {message}"
 
     def _is_placeholder_code(self, code: str) -> bool:

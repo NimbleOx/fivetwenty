@@ -57,7 +57,7 @@ class SecurityValidator(BaseValidator):
     def validate_file(self, file_info: FileInfo, content: str, options: dict[str, Any]) -> ValidationResult:
         """Scan file content for potential security issues."""
         issues: list[ValidationIssue] = []
-        severity_filter = options.get("severity_filter", "medium")
+        # Always use high severity filtering
         exclude_patterns = options.get("exclude_patterns", [])
 
         # Combine default and custom exclude patterns
@@ -76,7 +76,7 @@ class SecurityValidator(BaseValidator):
                 for match in matches:
                     # Additional context checks
                     if self._is_likely_real_secret(match.group(), line):
-                        severity = self._get_severity(pattern, severity_filter)
+                        severity = self._get_severity(pattern)
                         if severity:
                             issues.append(ValidationIssue(message=f"Potential {description} detected", file_path=file_info.path, line=line_num, severity=severity, rule_id="security_exposed_secret", context=self._mask_secret(line, match.start(), match.end()), suggestion="Remove or replace with placeholder value"))
 
@@ -110,8 +110,8 @@ class SecurityValidator(BaseValidator):
 
         return True
 
-    def _get_severity(self, pattern: str, severity_filter: str) -> IssueSeverity | None:
-        """Determine severity based on pattern and filter."""
+    def _get_severity(self, pattern: str) -> IssueSeverity | None:
+        """Determine severity based on pattern - always use high severity filtering."""
         # High severity patterns
         high_severity_patterns = [
             r"v20-[a-zA-Z0-9]{32,}",  # OANDA tokens
@@ -121,10 +121,11 @@ class SecurityValidator(BaseValidator):
 
         is_high_severity = any(re.match(hp, pattern) for hp in high_severity_patterns)
 
-        if severity_filter == "high" and not is_high_severity:
+        # Always use high severity filtering - only report high severity issues
+        if not is_high_severity:
             return None
 
-        return IssueSeverity.ERROR if is_high_severity else IssueSeverity.WARNING
+        return IssueSeverity.ERROR
 
     def _mask_secret(self, line: str, start: int, end: int) -> str:
         """Mask the secret in the context line."""

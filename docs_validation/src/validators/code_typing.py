@@ -49,7 +49,7 @@ class CodeTypingValidator(BaseValidator):
 
                     # Validate the code block if it's Python
                     if code_block_language in ["python", "py", ""] and code_block_lines:
-                        issues.extend(self._type_check_python_code(code_block_lines, code_block_start + 1, file_info.path, options.get("strict_mode", False)))
+                        issues.extend(self._type_check_python_code(code_block_lines, code_block_start + 1, file_info.path))
 
                     # Reset for next block
                     code_block_lines = []
@@ -60,7 +60,7 @@ class CodeTypingValidator(BaseValidator):
 
         return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues)
 
-    def _type_check_python_code(self, code_lines: list[str], start_line: int, file_path: Path, strict_mode: bool = False) -> list[ValidationIssue]:
+    def _type_check_python_code(self, code_lines: list[str], start_line: int, file_path: Path) -> list[ValidationIssue]:
         """Type check Python code using mypy."""
         issues: list[ValidationIssue] = []
 
@@ -100,11 +100,8 @@ class CodeTypingValidator(BaseValidator):
                 "--show-column-numbers",
             ]
 
-            if strict_mode:
-                mypy_args.extend(["--strict", "--warn-return-any", "--warn-unused-ignores"])
-            else:
-                # Relaxed mode for documentation examples
-                mypy_args.extend(["--ignore-missing-imports", "--allow-untyped-calls", "--allow-untyped-defs", "--no-warn-no-return", "--disable-error-code=import-untyped"])
+            # Always run in strict mode to capture all type issues
+            mypy_args.extend(["--strict", "--warn-return-any", "--warn-unused-ignores"])
 
             mypy_args.append(temp_path)
 
@@ -187,17 +184,8 @@ class CodeTypingValidator(BaseValidator):
                 if 1 <= original_line_num <= len(code_lines):
                     context = code_lines[original_line_num - 1].strip()
 
-                # Determine severity
-                if level == "error":
-                    severity = self._get_severity_for_error(error_code, message)
-                elif level == "warning":
-                    severity = IssueSeverity.WARNING
-                else:  # note
-                    severity = IssueSeverity.INFO
-
-                # Skip certain errors that are not relevant for documentation
-                if self._should_skip_error(error_code, message):
-                    continue
+                # All issues are errors in strict mode
+                severity = IssueSeverity.ERROR
 
                 issues.append(
                     ValidationIssue(
@@ -213,79 +201,11 @@ class CodeTypingValidator(BaseValidator):
 
         return issues
 
-    def _get_severity_for_error(self, error_code: str | None, message: str) -> IssueSeverity:
-        """Determine severity for mypy error."""
-        if not error_code:
-            return IssueSeverity.WARNING
 
-        # Critical errors that indicate broken code
-        critical_errors = {
-            "attr-defined",  # Attribute not defined
-            "name-defined",  # Name not defined
-            "call-arg",  # Invalid arguments to function call
-            "arg-type",  # Argument has incompatible type
-            "return-value",  # Return value type mismatch
-            "assignment",  # Assignment type mismatch
-        }
-
-        # Style/practice warnings
-        warning_errors = {
-            "no-untyped-def",  # Function missing type annotations
-            "no-untyped-call",  # Call to untyped function
-            "var-annotated",  # Variable should be annotated
-            "misc",  # Miscellaneous
-            "unused-ignore",  # Unused type ignore comment
-        }
-
-        if error_code in critical_errors:
-            return IssueSeverity.ERROR
-        if error_code in warning_errors:
-            return IssueSeverity.WARNING
-        return IssueSeverity.INFO
-
-    def _should_skip_error(self, error_code: str | None, message: str) -> bool:
-        """Check if we should skip this error for documentation examples."""
-        if not error_code:
-            return False
-
-        # Skip errors that are not relevant for documentation examples
-        skip_errors = {
-            "import-untyped",  # Importing untyped module
-            "no-redef",  # Redefinition (common in examples)
-        }
-
-        if error_code in skip_errors:
-            return True
-
-        # Skip certain message patterns
-        skip_patterns = [
-            "Cannot find implementation or library stub",
-            "Skipping analyzing",
-            "Library stubs not installed",
-        ]
-
-        return any(pattern in message for pattern in skip_patterns)
 
     def _get_suggestion_for_error(self, error_code: str | None, message: str) -> str:
         """Get suggestion for fixing a mypy error."""
-        if not error_code:
-            return "Review type usage in this code block"
-
-        suggestions = {
-            "attr-defined": "Check if the attribute exists or add proper imports",
-            "name-defined": "Define the variable or add proper imports",
-            "call-arg": "Check function arguments match the expected signature",
-            "arg-type": "Ensure argument types match the function signature",
-            "return-value": "Check that return type matches function signature",
-            "assignment": "Ensure assigned value type matches variable type",
-            "no-untyped-def": "Add type annotations to function definition",
-            "no-untyped-call": "Add type annotations or use # type: ignore",
-            "var-annotated": "Add type annotation to variable",
-            "misc": "Review the type usage",
-            "unused-ignore": "Remove unnecessary # type: ignore comment",
-        }
-
-        return suggestions.get(error_code, f"Fix type issue: {message}")
+        return f"Fix type issue: {message}"
 
     def _is_placeholder_code(self, code: str) -> bool:
         """Check if code is clearly a placeholder/example that shouldn't be type checked."""
