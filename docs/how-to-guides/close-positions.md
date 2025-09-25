@@ -39,7 +39,7 @@ async def close_position(account_id: str, instrument: str):
     ) as client:
         try:
             # Check current position
-            positions = await client.positions.list_open(account_id)
+            positions = await client.positions.get_open_positions(account_id)
             position = next((p for p in positions if p.instrument == instrument), None)
 
             if not position:
@@ -108,7 +108,7 @@ async def close_partial_position(account_id: str, instrument: str, units_to_clos
     ) as client:
         try:
             # Validate position exists and has sufficient units
-            positions = await client.positions.list_open(account_id)
+            positions = await client.positions.get_open_positions(account_id)
             position = next((p for p in positions if p.instrument == instrument), None)
 
             if not position:
@@ -215,7 +215,7 @@ async def emergency_close_all(account_id: str):
             print("🚨 EMERGENCY CLOSE: Closing all positions...")
 
             # Get all open positions
-            positions = await client.positions.list_open(account_id)
+            positions = await client.positions.get_open_positions(account_id)
 
             if not positions:
                 print("✅ No open positions to close")
@@ -286,7 +286,7 @@ async def verify_position_closed(account_id: str, instrument: str):
         token="your-token",
         environment=Environment.PRACTICE
     ) as client:
-        positions = await client.positions.list_open(account_id)
+        positions = await client.positions.get_open_positions(account_id)
         position = next((p for p in positions if p.instrument == instrument), None)
 
         if position and (int(position.long.units) != 0 or int(position.short.units) != 0):

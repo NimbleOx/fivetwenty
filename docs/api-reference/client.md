@@ -301,7 +301,7 @@ async def main():
     from fivetwenty.exceptions import FiveTwentyError
 
     try:
-        trade = await client.trades.get(client.account_id, "invalid_id")
+        trade = await client.trades.get_trade(client.account_id, "invalid_id")
     except FiveTwentyError as e:
         print(f"Error {e.status_code}: {e.message}")
         if e.error_code == "TRADE_NOT_FOUND":

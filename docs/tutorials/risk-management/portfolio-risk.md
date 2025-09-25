@@ -53,7 +53,7 @@ class RiskMonitor:
             account_balance = Decimal(str(account.balance))
 
             # Get open positions
-            positions = await self.client.positions.list_open(self.account_id)
+            positions = await self.client.positions.get_open_positions(self.account_id)
 
             risk_summary = {
                 'account_balance': account_balance,
@@ -131,7 +131,7 @@ class RiskMonitor:
         }
 
         try:
-            positions = await self.client.positions.list_open(self.account_id)
+            positions = await self.client.positions.get_open_positions(self.account_id)
             account = await self.client.accounts.get(self.account_id)
             account_balance = Decimal(str(account.balance))
 

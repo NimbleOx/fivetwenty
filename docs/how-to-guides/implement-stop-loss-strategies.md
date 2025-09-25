@@ -269,7 +269,7 @@ async def implement_trailing_stop_loss(account_id: str, instrument: str,
 
                 if trade_id:
                     # Check trade details to see trailing stop
-                    trade = await client.trades.get(account_id, trade_id)
+                    trade = await client.trades.get_trade(account_id, trade_id)
                     if trade.trailing_stop_loss_order:
                         tsl_order = trade.trailing_stop_loss_order
                         print(f"🎯 Trailing stop order ID: {tsl_order.id}")
@@ -400,7 +400,7 @@ async def modify_stop_loss(account_id: str, trade_id: str, new_stop_price: Decim
     async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
         try:
             # Modify trade's stop-loss order
-            response = await client.trades.modify(
+            response = await client.trades.put_trade_orders(
                 account_id=account_id,
                 trade_id=trade_id,
                 stop_loss=StopLossDetails(
@@ -438,7 +438,7 @@ async def move_to_breakeven(account_id: str, trade_id: str, trigger_pips: int = 
     async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
         try:
             # Get current trade details
-            trade = await client.trades.get(account_id, trade_id)
+            trade = await client.trades.get_trade(account_id, trade_id)
             entry_price = trade.price
             current_units = trade.current_units
             instrument = trade.instrument
@@ -595,7 +595,7 @@ async def monitor_stop_loss_positions(account_id: str, check_interval: int = 30)
         try:
             while True:
                 # Get all open trades
-                trades = await client.trades.list_open(account_id)
+                trades = await client.trades.get_open_trades(account_id)
 
                 print(f"\n📊 Monitoring {len(trades)} open positions:")
 
@@ -754,7 +754,7 @@ async def troubleshoot_stop_loss_issues(account_id: str):
                 print("⚠️ High margin usage - stops may trigger early")
 
             # Check open trades
-            trades = await client.trades.list_open(account_id)
+            trades = await client.trades.get_open_trades(account_id)
 
             for trade in trades:
                 print(f"🔍 Trade {trade.id}:")
@@ -777,7 +777,7 @@ async def troubleshoot_stop_loss_issues(account_id: str):
                     print(f"   📉 Large unrealized loss: {trade.unrealized_pl}")
 
             # Check pending stop orders
-            orders = await client.orders.list_pending(account_id)
+            orders = await client.orders.get_pending_orders(account_id)
             stop_orders = [o for o in orders if o.type == "STOP"]
 
             print(f"\n📋 Found {len(stop_orders)} pending stop orders")
@@ -813,7 +813,7 @@ async def emergency_stop_all_positions(account_id: str, reason: str = "Emergency
 
         try:
             # Get all open positions
-            positions = await client.positions.list_open(account_id)
+            positions = await client.positions.get_open_positions(account_id)
 
             if not positions:
                 print("✅ No positions to close")

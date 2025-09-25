@@ -443,13 +443,13 @@ async def emergency_stop_trading(account_id: str):
     ) as client:
         try:
             # Cancel all pending orders
-            orders = await client.orders.list_pending(account_id)
+            orders = await client.orders.get_pending_orders(account_id)
             for order in orders:
-                await client.orders.cancel(account_id, order.id)
+                await client.orders.cancel_order(account_id, order.id)
                 print(f"❌ Cancelled order: {order.id}")
 
             # Close all positions (optional - use with extreme caution)
-            # positions = await client.positions.list_open(account_id)
+            # positions = await client.positions.get_open_positions(account_id)
             # for position in positions:
             #     await close_position(account_id, position.instrument)
 

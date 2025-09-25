@@ -40,10 +40,10 @@ Get a list of all positions for an account.
 
 ## list_open
 ```python
-# positions.list_open(account_id: AccountID) -> dict[str, Any]
+# positions.get_open_positions(account_id: AccountID) -> dict[str, Any]
 
 # Example usage:
-open_positions = await client.positions.list_open(account_id="123-456-789")
+open_positions = await client.positions.get_open_positions(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openPositions`
 
@@ -67,10 +67,10 @@ Get a list of all open positions for an account.
 
 ## get
 ```python
-# positions.get(account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]
+# positions.get_position(account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]
 
 # Example usage:
-position = await client.positions.get(
+position = await client.positions.get_position(
     account_id="123-456-789",
     instrument="EUR_USD"
 )

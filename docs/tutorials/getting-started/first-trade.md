@@ -220,7 +220,7 @@ async def first_trade_example():
 
 async def check_position(client, instrument):
     """Check open position for an instrument."""
-    positions = await client.positions.list_open(client.account_id)
+    positions = await client.positions.get_open_positions(client.account_id)
 
     for position in positions:
         if position.instrument == instrument:
@@ -291,7 +291,7 @@ async def close_position(client, instrument="EUR_USD"):
     print(f"\n🔄 Closing position for {instrument}...")
 
     # Get current positions
-    positions = await client.positions.list_open(client.account_id)
+    positions = await client.positions.get_open_positions(client.account_id)
     position = next((p for p in positions if p.instrument == instrument), None)
 
     if not position:

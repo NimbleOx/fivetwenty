@@ -213,7 +213,7 @@ class StopLossManager:
         """Implement trailing stop."""
 
         # Get current trade
-        trade = await self.client.trades.get(account_id, trade_id)
+        trade = await self.client.trades.get_trade(account_id, trade_id)
 
         # Calculate new stop based on current price
         if float(trade.current_units) > 0:  # Long position
@@ -661,7 +661,7 @@ async def test_full_trade_lifecycle():
         assert trade_id in trade_ids
 
         # Close trade
-        await client.trades.close(account_id, trade_id)
+        await client.trades.close_trade(account_id, trade_id)
 
         # Verify trade closed
         trades = await client.trades.get_open_trades(account_id)

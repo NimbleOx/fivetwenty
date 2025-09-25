@@ -144,7 +144,7 @@ from decimal import Decimal
 
 async def calculate_trade_performance(trade_id: str, account_id: str) -> dict:
     """Calculate exact trade performance metrics."""
-    trade = await client.trades.get(account_id=account_id, trade_id=trade_id)
+    trade = await client.trades.get_trade(account_id=account_id, trade_id=trade_id)
 
     # Decimal fields are already Decimal
     initial_units = trade.initial_units
@@ -292,7 +292,7 @@ def calculate_stop_levels(
 
 # Usage with a trade
 async def demo_stop_loss_calculation():
-    trade = await client.trades.get(account_id=account_id, trade_id=trade_id)
+    trade = await client.trades.get_trade(account_id=account_id, trade_id=trade_id)
     direction = "long" if trade.initial_units > 0 else "short"
 
     stop_price, target_price = calculate_stop_levels(

@@ -63,9 +63,9 @@ async def concurrent_operations(client, account_id):
     # All requests happen in parallel - much faster!
     results = await asyncio.gather(
         client.accounts.get(account_id),
-        client.positions.list_open(account_id),
-        client.orders.list_pending(account_id),
-        client.trades.list_open(account_id),
+        client.positions.get_open_positions(account_id),
+        client.orders.get_pending_orders(account_id),
+        client.trades.get_open_trades(account_id),
         client.pricing.get_pricing(account_id, ["EUR_USD", "GBP_USD", "USD_JPY"])
     )
 
@@ -235,14 +235,14 @@ If you have sync code and want to upgrade:
 # OLD: Synchronous code
 def get_account_sync(client, account_id):
     account = client.accounts.get(account_id)
-    positions = client.positions.list_open(account_id)
+    positions = client.positions.get_open_positions(account_id)
     return account, positions
 
 # NEW: Asynchronous code
 async def get_account_async(client, account_id):
     account, positions = await asyncio.gather(
         client.accounts.get(account_id),
-        client.positions.list_open(account_id)
+        client.positions.get_open_positions(account_id)
     )
     return account, positions
 ```

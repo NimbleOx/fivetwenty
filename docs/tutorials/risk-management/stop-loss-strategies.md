@@ -324,7 +324,7 @@ class TrailingStopManager:
         """Set trailing stop with optional break-even protection."""
 
         try:
-            trade = await self.client.trades.get(self.account_id, trade_id)
+            trade = await self.client.trades.get_trade(self.account_id, trade_id)
 
             if not trade:
                 print(f"❌ Trade {trade_id} not found")
@@ -410,7 +410,7 @@ class TrailingStopManager:
                         print(f"🛡️ Trade {trade_id} moved to break-even protection")
 
                 # Update stop loss if beneficial
-                trade = await self.client.trades.get(self.account_id, trade_id)
+                trade = await self.client.trades.get_trade(self.account_id, trade_id)
 
                 if not trade:
                     # Trade closed - remove from tracking

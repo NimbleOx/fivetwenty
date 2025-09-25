@@ -315,7 +315,7 @@ async def main():
     # P/L = (1.1050 - 1.1000) × 10,000 = 50 USD profit
 
     # The SDK calculates this automatically:
-    trade = await client.trades.get(account_id, trade_id)
+    trade = await client.trades.get_trade(account_id, trade_id)
     print(f"Unrealized P/L: {trade.unrealized_pl}")  # Shows 50.00
 
 asyncio.run(main())

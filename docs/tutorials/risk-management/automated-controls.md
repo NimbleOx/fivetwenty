@@ -99,7 +99,7 @@ class CircuitBreaker:
                     return True
 
             # Check open positions limit
-            positions = await self.client.positions.list_open(self.account_id)
+            positions = await self.client.positions.get_open_positions(self.account_id)
             if len(positions) > self.max_open_positions:
                 self.halt_trading(f"Too many open positions: {len(positions)}")
                 return True
@@ -134,7 +134,7 @@ class CircuitBreaker:
         try:
             print("🚨 EMERGENCY: Closing all positions...")
 
-            positions = await self.client.positions.list_open(self.account_id)
+            positions = await self.client.positions.get_open_positions(self.account_id)
 
             for position in positions:
                 instrument = position.instrument
@@ -351,7 +351,7 @@ class PositionSizeEnforcer:
         """Check current exposure to specific instrument."""
         
         try:
-            positions = await self.client.positions.list_open(self.account_id)
+            positions = await self.client.positions.get_open_positions(self.account_id)
             account = await self.client.accounts.get(self.account_id)
             account_balance = Decimal(str(account.balance))
 
@@ -541,7 +541,7 @@ class RealTimeRiskMonitor:
             
             # Get account and position data
             account = await self.client.accounts.get(self.account_id)
-            positions = await self.client.positions.list_open(self.account_id)
+            positions = await self.client.positions.get_open_positions(self.account_id)
             
             # Calculate risk metrics
             risk_metrics = await self._calculate_risk_metrics(account, positions)
@@ -675,7 +675,7 @@ class RealTimeRiskMonitor:
         """Reduce position sizes by closing partial positions."""
         
         try:
-            positions = await self.client.positions.list_open(self.account_id)
+            positions = await self.client.positions.get_open_positions(self.account_id)
             
             for position in positions:
                 # Close 50% of each position
@@ -713,7 +713,7 @@ class RealTimeRiskMonitor:
         """Emergency close all positions."""
         
         try:
-            positions = await self.client.positions.list_open(self.account_id)
+            positions = await self.client.positions.get_open_positions(self.account_id)
             
             for position in positions:
                 instrument = position.instrument
