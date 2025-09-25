@@ -169,7 +169,7 @@ class CodeTypingValidator(BaseValidator):
             # Parse mypy output format: filename:line:col: error: message [error-code]
             match = re.match(r".+:(\d+):(\d+):\s*(error|warning|note):\s*(.+?)(?:\s*\[([^\]]+)\])?$", line)
             if match:
-                line_num, _col_num, level, message, error_code = match.groups()
+                line_num, _col_num, _level, message, error_code = match.groups()
 
                 # Adjust line number for original code
                 original_line_num = int(line_num) - line_offset

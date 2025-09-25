@@ -1,9 +1,7 @@
 """Command-line interface for the validation framework."""
 
 import sys
-import time
 from pathlib import Path
-from typing import Any
 
 import click
 from rich.console import Console
@@ -14,7 +12,7 @@ from rich.text import Text
 from .base import registry
 from .config import ValidationConfig
 from .engine import ValidationEngine
-from .models import IssueSeverity, ValidationSummary
+from .models import ValidationSummary
 from .reporters import MarkdownReporter
 
 # Import and register validators
@@ -61,29 +59,17 @@ def cli() -> None:
     type=click.Path(exists=True, path_type=Path),
     help="Path to YAML configuration file",
 )
-@click.option(
-    "--project-root",
-    type=click.Path(exists=True, file_okay=False, path_type=Path),
-    default=Path.cwd(),
-    help="Project root directory",
-)
 @click.option("--parallel/--sequential", default=True, help="Run validation in parallel")
 @click.option("--max-workers", type=int, default=4, help="Maximum number of worker threads")
-@click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
-@click.option("--quiet", "-q", is_flag=True, help="Show minimal output")
-@click.option("--fail-fast", is_flag=True, help="Exit on first error")
-@click.option("--report", is_flag=True, help="Generate markdown report in addition to console output")
 def validate(
     config: Path | None,
-    project_root: Path,
     parallel: bool,
     max_workers: int,
-    verbose: bool,
-    quiet: bool,
-    fail_fast: bool,
-    report: bool,
 ) -> None:
     """Run validation on documentation files."""
+
+    # Hardcode project root to current working directory
+    project_root = Path.cwd()
 
     # Load configuration
     if config and config.exists():
@@ -111,30 +97,23 @@ def validate(
     engine = ValidationEngine(validation_config, project_root)
 
     # Run validation with progress indicator
-    if not quiet:
-        console.print(f"🔍 Discovering files in {project_root}")
-
-    start_time = time.perf_counter()
+    console.print(f"🔍 Discovering files in {project_root}")
 
     with Progress(
         SpinnerColumn(),
         TextColumn("[progress.description]{task.description}"),
         TimeElapsedColumn(),
-        console=console if not quiet else None,
+        console=console,
         transient=True,
     ) as progress:
-        if not quiet:
-            task = progress.add_task("Running validation...", total=None)
+        task = progress.add_task("Running validation...", total=None)
 
         summary = engine.validate()
 
-        if not quiet:
-            progress.update(task, description="Validation complete")
+        progress.update(task, description="Validation complete")
 
-    duration = time.perf_counter() - start_time
-
-    # Display results
-    _display_results(summary, duration, verbose, quiet, fail_fast, report)
+    # Display results and always generate report
+    _display_results(summary)
 
     # Always exit with success - this is informational validation
     sys.exit(0)
@@ -147,9 +126,7 @@ def validate(
     type=click.Path(exists=True, path_type=Path),
     help="Path to YAML configuration file",
 )
-@click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
-@click.option("--report", is_flag=True, help="Generate markdown report in addition to console output")
-def check(files: tuple[Path, ...], config: Path | None, verbose: bool, report: bool) -> None:
+def check(files: tuple[Path, ...], config: Path | None) -> None:
     """Run validation on specific files (incremental mode)."""
 
     if not files:
@@ -179,12 +156,10 @@ def check(files: tuple[Path, ...], config: Path | None, verbose: bool, report: b
     # Run incremental validation
     console.print(f"🔍 Validating {len(files)} file(s)")
 
-    start_time = time.perf_counter()
     summary = engine.validate_incremental(list(files))
-    duration = time.perf_counter() - start_time
 
-    # Display results
-    _display_results(summary, duration, verbose, quiet=False, fail_fast=False, report=report)
+    # Display results and always generate report
+    _display_results(summary)
 
     # Always exit with success - this is informational validation
     sys.exit(0)
@@ -209,31 +184,20 @@ def list_validators() -> None:
 
 def _display_results(
     summary: ValidationSummary,
-    duration: float,
-    verbose: bool,
-    quiet: bool,
-    fail_fast: bool,  # noqa: ARG001
-    report: bool = False,
 ) -> None:
-    """Display validation results."""
-
-    if quiet and summary.total_issues == 0:
-        return
+    """Display validation results and always generate report."""
 
     console.print()
 
     # Show per-validator summary (contains all necessary information)
     _display_validator_summaries(summary)
 
-    # Show brief issues summary if any (detailed issues only in report)
-    if summary.total_issues > 0 and verbose:
-        _display_issues(summary, verbose)
-    elif summary.total_issues > 0:
+    # Show brief issues summary if any (detailed issues are in the report)
+    if summary.total_issues > 0:
         _display_brief_issues_summary(summary)
 
-    # Generate markdown report if requested
-    if report:
-        _generate_markdown_report(summary)
+    # Always generate markdown report
+    _generate_markdown_report(summary)
 
 
 def _display_brief_issues_summary(summary: ValidationSummary) -> None:
@@ -245,51 +209,8 @@ def _display_brief_issues_summary(summary: ValidationSummary) -> None:
     if summary.warning_count > 0:
         console.print(f"   ⚠️ {summary.warning_count} warnings", style="yellow")
 
-    console.print("   💡 Use --verbose for detailed output or --report for full analysis")
+    console.print("   💡 See detailed analysis in the generated validation report")
 
-
-def _display_issues(summary: ValidationSummary, verbose: bool) -> None:
-    """Display detailed issues."""
-    console.print("\n📋 Issues Found:")
-
-    # Group issues by file
-    issues_by_file: dict[Path, list[Any]] = {}
-    for result in summary.results:
-        if result.issues:
-            if result.file_path not in issues_by_file:
-                issues_by_file[result.file_path] = []
-            issues_by_file[result.file_path].extend(result.issues)
-
-    for file_path, issues in issues_by_file.items():
-        console.print(f"\n📄 {file_path}")
-
-        for issue in issues:
-            # Format issue with appropriate styling
-            severity_style = {
-                IssueSeverity.ERROR: "red",
-                IssueSeverity.WARNING: "yellow",
-                IssueSeverity.INFO: "blue",
-                IssueSeverity.SUGGESTION: "green",
-            }.get(issue.severity, "white")
-
-            severity_icon = {
-                IssueSeverity.ERROR: "❌",
-                IssueSeverity.WARNING: "⚠️",
-                IssueSeverity.INFO: "ℹ️",
-                IssueSeverity.SUGGESTION: "💡",
-            }.get(issue.severity, "•")
-
-            location = f":{issue.line}" if issue.line else ""
-
-            console.print(f"  {severity_icon} {issue.message} {location}", style=severity_style)
-
-            if verbose:
-                if issue.context:
-                    console.print(f"     Context: {issue.context}", style="dim")
-                if issue.suggestion:
-                    console.print(f"     💡 {issue.suggestion}", style="dim green")
-                if issue.rule_id:
-                    console.print(f"     Rule: {issue.rule_id}", style="dim")
 
 
 def _display_validator_summaries(summary: ValidationSummary) -> None:
