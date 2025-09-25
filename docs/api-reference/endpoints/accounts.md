@@ -6,15 +6,15 @@ Account management and information retrieval.
 
 ---
 
-## list
+## get_accounts
 ```python
 import asyncio
 
 async def main():
-    # accounts.list() -> list[AccountProperties]
+    # accounts.get_accounts() -> list[AccountProperties]
 
     # Example usage:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 
 asyncio.run(main())
 ```
@@ -36,12 +36,12 @@ Get list of all accounts for the authenticated user.
 
 ---
 
-## get
+## get_account
 ```python
-# accounts.get(account_id: AccountID) -> Account
+# accounts.get_account(account_id: AccountID) -> Account
 
 # Example usage:
-account = await client.accounts.get(account_id="123-456-789")
+account = await client.accounts.get_account(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}`
 
@@ -63,12 +63,12 @@ Get detailed information for specific account.
 
 ---
 
-## summary
+## get_account_summary
 ```python
-# accounts.summary(account_id: AccountID) -> AccountSummary
+# accounts.get_account_summary(account_id: AccountID) -> AccountSummary
 
 # Example usage:
-summary = await client.accounts.summary(account_id="123-456-789")
+summary = await client.accounts.get_account_summary(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/summary`
 
@@ -92,10 +92,10 @@ Get condensed account information.
 
 ## instruments
 ```python
-# accounts.instruments(account_id: AccountID, instruments: list[str] | None = None) -> list[Instrument]
+# accounts.get_account_instruments(account_id: AccountID, instruments: list[str] | None = None) -> list[Instrument]
 
 # Example usage:
-instruments = await client.accounts.instruments(
+instruments = await client.accounts.get_account_instruments(
     account_id="123-456-789",
     instruments=["EUR_USD", "GBP_USD"]
 )
@@ -123,11 +123,11 @@ Get all tradeable instruments for account.
 
 ## configure
 ```python
-# accounts.configure(account_id: AccountID, alias: str | None = None,
+# accounts.patch_account_configuration(account_id: AccountID, alias: str | None = None,
 #                   margin_rate: str | None = None) -> dict[str, Any]
 
 # Example usage:
-result = await client.accounts.configure(
+result = await client.accounts.patch_account_configuration(
     account_id="123-456-789",
     alias="My Trading Account"
 )
@@ -154,12 +154,12 @@ Update account configuration settings.
 
 ---
 
-## changes
+## get_account_changes
 ```python
-# accounts.changes(account_id: AccountID, since_transaction_id: str) -> dict[str, Any]
+# accounts.get_account_changes(account_id: AccountID, since_transaction_id: str) -> dict[str, Any]
 
 # Example usage:
-changes = await client.accounts.changes(
+changes = await client.accounts.get_account_changes(
     account_id="123-456-789",
     since_transaction_id="100"
 )

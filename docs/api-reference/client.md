@@ -22,7 +22,7 @@ Complete reference for FiveTwenty client interfaces and configuration.
 ### Endpoint Groups
 | Endpoint | Purpose | Key Methods |
 |----------|---------|-------------|
-| [accounts](endpoints/accounts.md) | Account management | `list()`, `get()`, `summary()`, `instruments()`, `configure()`, `changes()` |
+| [accounts](endpoints/accounts.md) | Account management | `get_accounts()`, `get_account()`, `get_account_summary()`, `get_account_instruments()`, `patch_account_configuration()`, `get_account_changes()` |
 | [orders](endpoints/orders.md) | Order operations | `post_market_order()`, `post_limit_order()`, `cancel()`, `list_pending()`, `list()`, `replace()` |
 | [trades](endpoints/trades.md) | Trade management | `list_open()`, `get()`, `close()`, `modify()`, `list()` |
 | [positions](endpoints/positions.md) | Position tracking | `list_open()`, `get()`, `close()`, `list()` |

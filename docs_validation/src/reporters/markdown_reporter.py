@@ -229,7 +229,10 @@ class MarkdownReporter:
 
     def _generate_detailed_issues(self, issues_by_file: dict[str, list[ValidationIssue]], max_issues_per_file: int, include_code_snippets: bool) -> list[str]:
         """Generate detailed issue listings."""
-        content = ["## 🔍 Detailed Issue Analysis", "", f"*Showing up to {max_issues_per_file} issues per file for the most problematic files.*", ""]
+        content = ["## 🔍 Detailed Issue Analysis", ""]
+
+        # First, show most problematic files
+        content.extend([f"### Most Problematic Files", "", f"*Showing up to {max_issues_per_file} issues per file for files with the most issues.*", ""])
 
         # Sort files by issue count and show top files
         sorted_files = sorted(issues_by_file.items(), key=lambda x: len(x[1]), reverse=True)
@@ -238,7 +241,7 @@ class MarkdownReporter:
             if not issues:
                 continue
 
-            content.extend([f"### 📄 `{file_path}`", "", f"**Total Issues**: {len(issues)} | **Errors**: {len([i for i in issues if i.severity == IssueSeverity.ERROR])} | **Warnings**: {len([i for i in issues if i.severity == IssueSeverity.WARNING])}", ""])
+            content.extend([f"#### 📄 `{file_path}`", "", f"**Total Issues**: {len(issues)} | **Errors**: {len([i for i in issues if i.severity == IssueSeverity.ERROR])} | **Warnings**: {len([i for i in issues if i.severity == IssueSeverity.WARNING])}", ""])
 
             # Show issues grouped by severity
             issues_by_sev = defaultdict(list)
@@ -252,11 +255,80 @@ class MarkdownReporter:
                     continue
 
                 severity_emoji = {"ERROR": "🔴", "WARNING": "🟡", "INFO": "🔵"}
-                content.append(f"#### {severity_emoji.get(severity.value, '•')} {severity.value.title()}s")
+                content.append(f"##### {severity_emoji.get(severity.value, '•')} {severity.value.title()}s")
                 content.append("")
 
                 for issue in sev_issues[:max_issues_per_file]:
                     content.extend(self._format_issue_details(issue, include_code_snippets))
+
+            content.append("---")
+            content.append("")
+
+        # Second, show examples from each validator type to ensure visibility of all issue types
+        content.extend(self._generate_validator_examples(issues_by_file, include_code_snippets))
+
+        return content
+
+    def _generate_validator_examples(self, issues_by_file: dict[str, list[ValidationIssue]], include_code_snippets: bool) -> list[str]:
+        """Generate examples from each validator type to ensure all issue types are visible."""
+        content = ["### Examples by Validator Type", "", "*Representative examples from each validator to ensure all issue types are visible.*", ""]
+
+        # Group issues by validator (rule_id prefix)
+        issues_by_validator: dict[str, list[ValidationIssue]] = defaultdict(list)
+        for issues in issues_by_file.values():
+            for issue in issues:
+                # Extract validator name from rule_id (e.g., "markdown_syntax_list_spacing" -> "markdown_syntax")
+                validator_name = issue.rule_id.split('_')[0:2]  # Take first two parts for compound names
+                if len(validator_name) >= 2:
+                    validator_key = '_'.join(validator_name)
+                else:
+                    validator_key = validator_name[0] if validator_name else 'unknown'
+
+                issues_by_validator[validator_key].append(issue)
+
+        # Define validator display names and priorities
+        validator_priorities = {
+            'markdown_syntax': ('📝 Markdown Syntax', 1),
+            'code_linting': ('🔍 Code Linting', 2),
+            'code_typing': ('🔧 Type Checking', 3),
+            'python_syntax': ('🐍 Python Syntax', 4),
+            'cross_references': ('🔗 Cross References', 5),
+            'sdk_methods': ('📚 SDK Methods', 6),
+            'security': ('🔒 Security', 7),
+            'financial_precision': ('💰 Financial Precision', 8),
+            'code_executability': ('⚡ Code Executability', 9),
+            'external_links': ('🌐 External Links', 10),
+        }
+
+        # Sort validators by priority, ensuring markdown_syntax appears first
+        sorted_validators = sorted(
+            issues_by_validator.items(),
+            key=lambda x: validator_priorities.get(x[0], (x[0], 999))[1]
+        )
+
+        for validator_key, validator_issues in sorted_validators:
+            if not validator_issues:
+                continue
+
+            display_name = validator_priorities.get(validator_key, (validator_key.replace('_', ' ').title(), 999))[0]
+
+            # Show up to 2 examples from this validator
+            example_issues = validator_issues[:2]
+
+            content.extend([f"#### {display_name}", ""])
+
+            for issue in example_issues:
+                content.append(f"**File**: `{issue.file_path}` (Line {issue.line})")
+                content.append(f"**Issue**: {issue.message}")
+                content.append(f"**Rule**: `{issue.rule_id}`")
+
+                if issue.context:
+                    content.append(f"**Context**: {issue.context}")
+
+                if issue.suggestion:
+                    content.append(f"💡 **Suggestion**: {issue.suggestion}")
+
+                content.append("")
 
             content.append("---")
             content.append("")

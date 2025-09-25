@@ -19,7 +19,7 @@ async def main():
     #                    weekly_alignment: str = "Friday") -> dict[str, Any]
 
     # Example usage:
-    candles = await client.instruments.candles(
+    candles = await client.instruments.get_instrument_candles(
         instrument="EUR_USD",
         granularity="H1",
         count=100

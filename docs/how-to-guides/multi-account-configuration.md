@@ -397,6 +397,7 @@ SWING_FIVETWENTY_OANDA_ENVIRONMENT=live
 ```
 
 This multi-account configuration approach gives you the flexibility to:
+
 - Run different strategies on different accounts
 - Separate practice and live trading
 - Organize accounts by risk profile or strategy type

@@ -60,13 +60,13 @@ async def main():
 
     async with AsyncClient() as client:
         # Account operations
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
 
         # Trading operations
         order = await client.orders.post_market_order(account_id, "EUR_USD", 1000)
 
         # Market data
-        prices = await client.pricing.get(account_id, ["EUR_USD"])
+        prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
 
 asyncio.run(main())
 ```
@@ -77,9 +77,9 @@ from fivetwenty import Client
 
 with Client() as client:
     # Same methods, synchronous execution
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
     order = client.orders.post_market_order(account_id, "EUR_USD", 1000)
-    prices = client.pricing.get(account_id, ["EUR_USD"])
+    prices = client.pricing.get_pricing(account_id, ["EUR_USD"])
 ```
 
 ---

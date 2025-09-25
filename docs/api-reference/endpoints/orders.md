@@ -15,7 +15,7 @@ async def main():
     #              timeout: float | None = None, client_request_id: str | None = None) -> OrderResponse
 
     # Example usage:
-    order_response = await client.orders.create(
+    order_response = await client.orders.post_order(
         account_id="123-456-789",
         order_request=MarketOrderRequest(
             instrument="EUR_USD",
@@ -298,11 +298,11 @@ Get order details.
 
 ## close
 ```python
-# orders.close(account_id: AccountID, order_specifier: str,
+# orders.cancel_order(account_id: AccountID, order_specifier: str,
 #             timeout: float | None = None, client_request_id: str | None = None) -> dict[str, Any]
 
 # Example usage:
-result = await client.orders.close(
+result = await client.orders.cancel_order(
     account_id="123-456-789",
     order_specifier="12345"
 )
@@ -332,10 +332,10 @@ Cancel pending order.
 
 ## list_open
 ```python
-# orders.list_open(account_id: AccountID) -> dict[str, Any]
+# orders.get_pending_orders(account_id: AccountID) -> dict[str, Any]
 
 # Example usage:
-open_orders = await client.orders.list_open(account_id="123-456-789")
+open_orders = await client.orders.get_pending_orders(account_id="123-456-789")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pendingOrders`
 

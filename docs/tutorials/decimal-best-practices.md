@@ -214,7 +214,7 @@ async def rebalance_portfolio(
     """Rebalance portfolio with exact precision."""
 
     # Get current positions
-    positions = await client.positions.list(account_id=account_id)
+    positions = await client.positions.get_positions(account_id=account_id)
     current_values = {}
 
     for position in positions.positions:

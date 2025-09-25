@@ -11,10 +11,10 @@ Position monitoring and management.
 import asyncio
 
 async def main():
-    # positions.list(account_id: AccountID) -> dict[str, Any]
+    # positions.get_positions(account_id: AccountID) -> dict[str, Any]
 
     # Example usage:
-    positions = await client.positions.list(account_id="123-456-789")
+    positions = await client.positions.get_positions(account_id="123-456-789")
 
 asyncio.run(main())
 ```
