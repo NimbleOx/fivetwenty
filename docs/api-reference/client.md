@@ -23,12 +23,12 @@ Complete reference for FiveTwenty client interfaces and configuration.
 | Endpoint | Purpose | Key Methods |
 |----------|---------|-------------|
 | [accounts](endpoints/accounts.md) | Account management | `get_accounts()`, `get_account()`, `get_account_summary()`, `get_account_instruments()`, `patch_account_configuration()`, `get_account_changes()` |
-| [orders](endpoints/orders.md) | Order operations | `post_market_order()`, `post_limit_order()`, `cancel()`, `list_pending()`, `list()`, `replace()` |
-| [trades](endpoints/trades.md) | Trade management | `list_open()`, `get()`, `close()`, `modify()`, `list()` |
-| [positions](endpoints/positions.md) | Position tracking | `list_open()`, `get()`, `close()`, `list()` |
-| [pricing](endpoints/pricing.md) | Market data | `get()`, `stream()`, `candles()`, `latest_candles()` |
-| [instruments](endpoints/instruments.md) | Instrument data | `get_all()`, `candles()`, `order_book()` |
-| [transactions](endpoints/transactions.md) | Transaction history | `list()`, `get()`, `get_range()`, `stream()`, `list_since()` |
+| [orders](endpoints/orders.md) | Order operations | `post_market_order()`, `post_limit_order()`, `cancel_order()`, `get_pending_orders()`, `get_orders()`, `put_order()` |
+| [trades](endpoints/trades.md) | Trade management | `get_open_trades()`, `get_trade()`, `close_trade()`, `put_trade_orders()`, `get_trades()` |
+| [positions](endpoints/positions.md) | Position tracking | `get_open_positions()`, `get_position()`, `close_position()`, `get_positions()` |
+| [pricing](endpoints/pricing.md) | Market data | `get_pricing()`, `get_pricing_stream()`, `get_instrument_candles()`, `get_latest_candles()` |
+| [instruments](endpoints/instruments.md) | Instrument data | `get_account_instruments()`, `get_instrument_candles()` |
+| [transactions](endpoints/transactions.md) | Transaction history | `get_transactions()`, `get_transaction()`, `get_transactions_range()`, `get_transactions_stream()`, `get_transactions_since_id()` |
 
 ---
 
