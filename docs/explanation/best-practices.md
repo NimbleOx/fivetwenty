@@ -985,25 +985,30 @@ result = await task
 #### Issue: SSL Certificate Errors
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
 
-# For development/testing only - never in production
-import ssl
-import aiohttp
+async def main():
+    from fivetwenty import AsyncClient, Environment
 
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
+    # For development/testing only - never in production
+    import ssl
+    import aiohttp
 
-connector = aiohttp.TCPConnector(ssl=ssl_context)
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
 
-async with AsyncClient(
-    token=token,
-    environment=Environment.PRACTICE,
-    connector=connector  # Custom connector
-) as client:
-    # This will bypass SSL verification (DANGEROUS)
-    pass
+    connector = aiohttp.TCPConnector(ssl=ssl_context)
+
+    async with AsyncClient(
+        token=token,
+        environment=Environment.PRACTICE,
+        connector=connector  # Custom connector
+    ) as client:
+        # This will bypass SSL verification (DANGEROUS)
+        pass
+
+asyncio.run(main())
 ```
 
 #### Issue: Rate Limiting

@@ -48,13 +48,18 @@ Understanding the distinction between positions and trades is crucial:
 A **trade** is a single order execution:
 
 ```python
-# Each order creates a separate trade
-trade1 = await client.orders.post_market_order(account_id, "EUR_USD", 10000)   # Buy 10k EUR
-trade2 = await client.orders.post_market_order(account_id, "EUR_USD", 15000)   # Buy 15k EUR
-trade3 = await client.orders.post_market_order(account_id, "EUR_USD", -5000)   # Sell 5k EUR
+import asyncio
 
-# Results in 3 separate Trade objects
-trades = await client.trades.list_open(account_id)  # Returns 3 trades
+async def main():
+    # Each order creates a separate trade
+    trade1 = await client.orders.post_market_order(account_id, "EUR_USD", 10000)   # Buy 10k EUR
+    trade2 = await client.orders.post_market_order(account_id, "EUR_USD", 15000)   # Buy 15k EUR
+    trade3 = await client.orders.post_market_order(account_id, "EUR_USD", -5000)   # Sell 5k EUR
+
+    # Results in 3 separate Trade objects
+    trades = await client.trades.list_open(account_id)  # Returns 3 trades
+
+asyncio.run(main())
 ```
 
 **Trade Properties**:
@@ -301,14 +306,19 @@ for trade in await client.trades.list_open(account_id):
 ### P/L Calculation Example
 
 ```python
-# You bought 10,000 EUR_USD at 1.1000
-# Current price: 1.1050
-# P/L = (Current Price - Entry Price) × Position Size
-# P/L = (1.1050 - 1.1000) × 10,000 = 50 USD profit
+import asyncio
 
-# The SDK calculates this automatically:
-trade = await client.trades.get(account_id, trade_id)
-print(f"Unrealized P/L: {trade.unrealized_pl}")  # Shows 50.00
+async def main():
+    # You bought 10,000 EUR_USD at 1.1000
+    # Current price: 1.1050
+    # P/L = (Current Price - Entry Price) × Position Size
+    # P/L = (1.1050 - 1.1000) × 10,000 = 50 USD profit
+
+    # The SDK calculates this automatically:
+    trade = await client.trades.get(account_id, trade_id)
+    print(f"Unrealized P/L: {trade.unrealized_pl}")  # Shows 50.00
+
+asyncio.run(main())
 ```
 
 ### Currency Conversion in P/L
@@ -577,21 +587,26 @@ jpy_rounded = jpy_price.quantize(Decimal("0.001"), rounding=ROUND_HALF_UP)
 Real-time price feeds for active trading:
 
 ```python
-async def price_monitor(client, account_id, instruments):
-    """Monitor real-time prices for trading signals."""
+import asyncio
 
-    async for price_data in client.pricing.stream(account_id, instruments):
-        if price_data.type == "PRICE":
-            # price_data is ClientPrice object
-            current_bid = price_data.bids[0].price
-            current_ask = price_data.asks[0].price
+async def main():
+    async def price_monitor(client, account_id, instruments):
+        """Monitor real-time prices for trading signals."""
 
-            # Your trading logic here
-            await check_trading_signals(price_data)
+        async for price_data in client.pricing.stream(account_id, instruments):
+            if price_data.type == "PRICE":
+                # price_data is ClientPrice object
+                current_bid = price_data.bids[0].price
+                current_ask = price_data.asks[0].price
 
-        elif price_data.type == "HEARTBEAT":
-            # Keep-alive signal - connection is healthy
-            pass
+                # Your trading logic here
+                await check_trading_signals(price_data)
+
+            elif price_data.type == "HEARTBEAT":
+                # Keep-alive signal - connection is healthy
+                pass
+
+asyncio.run(main())
 ```
 
 ### Error Handling in Trading Context

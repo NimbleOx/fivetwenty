@@ -64,11 +64,16 @@ export FIVETWENTY_OANDA_ACCOUNT_ALIAS="my_account"
 ```
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
 
-# No configuration needed - loads automatically
-async with AsyncClient() as client:
-    accounts = await client.accounts.list()
+async def main():
+    from fivetwenty import AsyncClient, Environment
+
+    # No configuration needed - loads automatically
+    async with AsyncClient() as client:
+        accounts = await client.accounts.list()
+
+asyncio.run(main())
 ```
 
 ## Configuration Patterns
@@ -108,35 +113,40 @@ client = AsyncClient(
 Best for: Production applications, multiple accounts, reusable configurations
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
 
-from fivetwenty import AccountConfig, AsyncClient, Environment
+async def main():
+    from fivetwenty import AsyncClient, Environment
 
-# Create reusable configurations
-practice_config = AccountConfig(
-    token="practice-token",
-    account_id="practice-account-123",
-    environment=Environment.PRACTICE,
-    alias="practice_trading",
+    from fivetwenty import AccountConfig, AsyncClient, Environment
 
-)
+    # Create reusable configurations
+    practice_config = AccountConfig(
+        token="practice-token",
+        account_id="practice-account-123",
+        environment=Environment.PRACTICE,
+        alias="practice_trading",
 
-live_config = AccountConfig(
-    token="live-token",
-    account_id="live-account-456",
-    environment=Environment.LIVE,
-    alias="live_trading",
+    )
 
-)
+    live_config = AccountConfig(
+        token="live-token",
+        account_id="live-account-456",
+        environment=Environment.LIVE,
+        alias="live_trading",
 
-# Use configurations
-async with AsyncClient(config=practice_config) as practice_client:
-    # Test strategies safely
-    await test_strategy(practice_client)
+    )
 
-async with AsyncClient(config=live_config) as live_client:
-    # Execute live trades
-    await execute_trades(live_client)
+    # Use configurations
+    async with AsyncClient(config=practice_config) as practice_client:
+        # Test strategies safely
+        await test_strategy(practice_client)
+
+    async with AsyncClient(config=live_config) as live_client:
+        # Execute live trades
+        await execute_trades(live_client)
+
+asyncio.run(main())
 ```
 
 ### 3. Environment Variables Pattern
@@ -326,34 +336,39 @@ async with AsyncClient(
 For advanced HTTP configuration:
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
 
-import httpx
+async def main():
+    from fivetwenty import AsyncClient, Environment
 
-# Create custom transport
-transport = httpx.AsyncClient(
-    base_url=Environment.PRACTICE.base_url,
-    timeout=httpx.Timeout(
-        connect=5.0,
-        read=60.0,
-        write=10.0,
-        pool=60.0
-    ),
-    limits=httpx.Limits(
-        max_connections=100,
-        max_keepalive_connections=20
-    ),
-    http2=False,
-    trust_env=True
-)
+    import httpx
 
-# Use with client
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE,
-    transport=transport
-) as client:
-    pass
+    # Create custom transport
+    transport = httpx.AsyncClient(
+        base_url=Environment.PRACTICE.base_url,
+        timeout=httpx.Timeout(
+            connect=5.0,
+            read=60.0,
+            write=10.0,
+            pool=60.0
+        ),
+        limits=httpx.Limits(
+            max_connections=100,
+            max_keepalive_connections=20
+        ),
+        http2=False,
+        trust_env=True
+    )
+
+    # Use with client
+    async with AsyncClient(
+        token="your-token",
+        environment=Environment.PRACTICE,
+        transport=transport
+    ) as client:
+        pass
+
+asyncio.run(main())
 ```
 
 ### Logging Configuration
@@ -476,37 +491,42 @@ spec:
 ### AWS Lambda Configuration
 
 ```python
-import os
-import boto3
-from fivetwenty import AsyncClient
+import asyncio
 
-def get_secret(secret_name):
-    """Get secret from AWS Secrets Manager."""
+async def main():
+    import os
+    import boto3
+    from fivetwenty import AsyncClient
 
-    session = boto3.Session()
-    client = session.client('secretsmanager')
+    def get_secret(secret_name):
+        """Get secret from AWS Secrets Manager."""
 
-    response = client.get_secret_value(SecretId=secret_name)
-    return response['SecretString']
+        session = boto3.Session()
+        client = session.client('secretsmanager')
 
-def lambda_handler(event, context):
-    """Lambda handler with secure configuration."""
+        response = client.get_secret_value(SecretId=secret_name)
+        return response['SecretString']
 
-    # Load secrets from AWS Secrets Manager
-    token = get_secret('OANDA/api-token')
-    account_id = get_secret('OANDA/account-id')
+    def lambda_handler(event, context):
+        """Lambda handler with secure configuration."""
 
-    # Environment from Lambda environment variables
-    environment = os.environ.get('FIVETWENTY_OANDA_ENVIRONMENT', 'practice')
+        # Load secrets from AWS Secrets Manager
+        token = get_secret('OANDA/api-token')
+        account_id = get_secret('OANDA/account-id')
 
-    async with AsyncClient(
-        token=token,
-        account_id=account_id,
-        environment=Environment.PRACTICE if environment == 'practice' else Environment.LIVE
-    ) as client:
-        # Your trading logic here
-        accounts = await client.accounts.list()
-        return {'accounts': len(accounts)}
+        # Environment from Lambda environment variables
+        environment = os.environ.get('FIVETWENTY_OANDA_ENVIRONMENT', 'practice')
+
+        async with AsyncClient(
+            token=token,
+            account_id=account_id,
+            environment=Environment.PRACTICE if environment == 'practice' else Environment.LIVE
+        ) as client:
+            # Your trading logic here
+            accounts = await client.accounts.list()
+            return {'accounts': len(accounts)}
+
+asyncio.run(main())
 ```
 
 ## Configuration Management Utilities

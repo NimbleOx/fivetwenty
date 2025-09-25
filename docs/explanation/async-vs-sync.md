@@ -161,7 +161,7 @@ from fivetwenty import AsyncClient, Client, Environment
 
 # ASYNC: Fast concurrent requests
 async def async_performance_test():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
         start = time.time()
 
         # 10 concurrent requests
@@ -190,7 +190,7 @@ def sync_performance_test():
 from fivetwenty import AsyncClient, Environment
 
 async def async_error_handling():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
         try:
             # Multiple operations with individual error handling
             results = await asyncio.gather(
@@ -281,7 +281,7 @@ from fastapi import FastAPI
 from fivetwenty import AsyncClient, Environment
 
 app = FastAPI()
-client = AsyncClient(token="your-token", environment=Environment.PRACTICE)
+client = AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE)
 
 @app.on_event("startup")
 async def startup():
@@ -342,7 +342,7 @@ import nest_asyncio
 nest_asyncio.apply()
 
 async def notebook_async():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
         accounts = await client.accounts.list()
         return accounts
 

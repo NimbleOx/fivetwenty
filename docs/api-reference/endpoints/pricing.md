@@ -8,15 +8,20 @@ Real-time pricing data and streaming.
 
 ## get
 ```python
-# pricing.get(account_id: AccountID, instruments: list[str], since: str | None = None,
-#             include_units_available: bool = True, include_home_conversions: bool = False) -> dict[str, Any]
+import asyncio
 
-# Example usage:
-prices = await client.pricing.get(
-    account_id="123-456-789",
-    instruments=["EUR_USD", "GBP_USD"],
-    include_units_available=True
-)
+async def main():
+    # pricing.get(account_id: AccountID, instruments: list[str], since: str | None = None,
+    #             include_units_available: bool = True, include_home_conversions: bool = False) -> dict[str, Any]
+
+    # Example usage:
+    prices = await client.pricing.get(
+        account_id="123-456-789",
+        instruments=["EUR_USD", "GBP_USD"],
+        include_units_available=True
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing`
 
@@ -83,20 +88,25 @@ Stream real-time pricing data.
 
 ## candles
 ```python
-# pricing.candles(account_id: AccountID, instrument: str, price: str = "M",
-#                granularity: str = "S5", count: int | None = None,
-#                from_time: str | None = None, to_time: str | None = None,
-#                smooth: bool = False, include_first: bool = True,
-#                daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
-#                weekly_alignment: str = "Friday") -> dict[str, Any]
+import asyncio
 
-# Example usage:
-candles = await client.pricing.candles(
-    account_id="123-456-789",
-    instrument="EUR_USD",
-    granularity="H1",
-    count=100
-)
+async def main():
+    # pricing.candles(account_id: AccountID, instrument: str, price: str = "M",
+    #                granularity: str = "S5", count: int | None = None,
+    #                from_time: str | None = None, to_time: str | None = None,
+    #                smooth: bool = False, include_first: bool = True,
+    #                daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
+    #                weekly_alignment: str = "Friday") -> dict[str, Any]
+
+    # Example usage:
+    candles = await client.pricing.candles(
+        account_id="123-456-789",
+        instrument="EUR_USD",
+        granularity="H1",
+        count=100
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/instruments/{instrument}/candles`
 

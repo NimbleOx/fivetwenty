@@ -39,18 +39,23 @@ Base exception for all OANDA API errors.
 
 **Example:**
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+import asyncio
 
-try:
-    await client.orders.post_market_order(
-        account_id="invalid-account",
-        instrument="EUR_USD",
-        units=10000
-    )
-except FiveTwentyError as e:
-    print(f"Error: {e.message}")
-    print(f"Code: {e.error_code}")
-    print(f"Details: {e.error_details}")
+async def main():
+    from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+
+    try:
+        await client.orders.post_market_order(
+            account_id="invalid-account",
+            instrument="EUR_USD",
+            units=10000
+        )
+    except FiveTwentyError as e:
+        print(f"Error: {e.message}")
+        print(f"Code: {e.error_code}")
+        print(f"Details: {e.error_details}")
+
+asyncio.run(main())
 ```
 
 ### `StreamStall`
@@ -59,15 +64,20 @@ Raised when a streaming connection stalls or times out.
 
 **Example:**
 ```python
-from fivetwenty.exceptions import StreamStall
+import asyncio
 
-try:
-    async for item in client.pricing.stream_pricing("123-456-789", ["EUR_USD"]):
-        pass
-except StreamStall as e:
-    print(f"Stream stalled: {e.message}")
-    # Implement reconnection logic
-    await asyncio.sleep(5)
+async def main():
+    from fivetwenty.exceptions import StreamStall
+
+    try:
+        async for item in client.pricing.stream_pricing("123-456-789", ["EUR_USD"]):
+            pass
+    except StreamStall as e:
+        print(f"Stream stalled: {e.message}")
+        # Implement reconnection logic
+        await asyncio.sleep(5)
+
+asyncio.run(main())
 ```
 
 ---

@@ -8,10 +8,15 @@ Position monitoring and management.
 
 ## list
 ```python
-# positions.list(account_id: AccountID) -> dict[str, Any]
+import asyncio
 
-# Example usage:
-positions = await client.positions.list(account_id="123-456-789")
+async def main():
+    # positions.list(account_id: AccountID) -> dict[str, Any]
+
+    # Example usage:
+    positions = await client.positions.list(account_id="123-456-789")
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/positions`
 
@@ -93,18 +98,23 @@ Get the position for a specific instrument in an account.
 
 ## close
 ```python
-# positions.close(account_id: AccountID, instrument: InstrumentName,
-#                long_units: str | Decimal | None = None,
-#                short_units: str | Decimal | None = None,
-#                long_client_extensions: ClientExtensions | dict[str, str] | None = None,
-#                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> dict[str, Any]
+import asyncio
 
-# Example usage:
-result = await client.positions.close(
-    account_id="123-456-789",
-    instrument="EUR_USD",
-    long_units="ALL"
-)
+async def main():
+    # positions.close(account_id: AccountID, instrument: InstrumentName,
+    #                long_units: str | Decimal | None = None,
+    #                short_units: str | Decimal | None = None,
+    #                long_client_extensions: ClientExtensions | dict[str, str] | None = None,
+    #                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> dict[str, Any]
+
+    # Example usage:
+    result = await client.positions.close(
+        account_id="123-456-789",
+        instrument="EUR_USD",
+        long_units="ALL"
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/positions/{instrument}/close`
 

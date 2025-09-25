@@ -53,17 +53,22 @@ Complete reference for all FiveTwenty endpoint implementations covering 100% of 
 
 ### Async Client
 ```python
-from fivetwenty import AsyncClient
+import asyncio
 
-async with AsyncClient() as client:
-    # Account operations
-    accounts = await client.accounts.list()
+async def main():
+    from fivetwenty import AsyncClient
 
-    # Trading operations
-    order = await client.orders.post_market_order(account_id, "EUR_USD", 1000)
+    async with AsyncClient() as client:
+        # Account operations
+        accounts = await client.accounts.list()
 
-    # Market data
-    prices = await client.pricing.get(account_id, ["EUR_USD"])
+        # Trading operations
+        order = await client.orders.post_market_order(account_id, "EUR_USD", 1000)
+
+        # Market data
+        prices = await client.pricing.get(account_id, ["EUR_USD"])
+
+asyncio.run(main())
 ```
 
 ### Sync Client

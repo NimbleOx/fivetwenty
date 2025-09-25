@@ -116,7 +116,7 @@ from fivetwenty import AsyncClient, Environment
 async def explore_account_details(account_id: str):
     """Interactive exploration of account information."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         account = await client.accounts.get_account_summary(account_id)
 
         print("\n📊 ACCOUNT ANALYSIS")
@@ -167,7 +167,7 @@ from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 async def check_account_status(account_id: str):
     """Get detailed account information."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
             account = await client.accounts.get(account_id)
 

@@ -295,15 +295,20 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 
 **Example:**
 ```python
-from fivetwenty.exceptions import FiveTwentyError
+import asyncio
 
-try:
-    trade = await client.trades.get(client.account_id, "invalid_id")
-except FiveTwentyError as e:
-    print(f"Error {e.status_code}: {e.message}")
-    if e.error_code == "TRADE_NOT_FOUND":
-        # Handle specific error
-        pass
+async def main():
+    from fivetwenty.exceptions import FiveTwentyError
+
+    try:
+        trade = await client.trades.get(client.account_id, "invalid_id")
+    except FiveTwentyError as e:
+        print(f"Error {e.status_code}: {e.message}")
+        if e.error_code == "TRADE_NOT_FOUND":
+            # Handle specific error
+            pass
+
+asyncio.run(main())
 ```
 
 ---

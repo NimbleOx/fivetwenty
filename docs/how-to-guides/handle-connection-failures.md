@@ -241,7 +241,7 @@ async def monitor_connection_health(client: AsyncClient, account_id: str,
 
 # Usage
 async def main():
-    async with AsyncClient(token="your-token", environment=Environment.PRACTICE) as client:
+    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
         accounts = await client.accounts.list()
         if accounts:
             # Monitor connection in background

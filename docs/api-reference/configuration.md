@@ -698,7 +698,7 @@ if not config:
 from fivetwenty import AsyncClient, Environment
 
 # Old way
-client = AsyncClient(token="token", environment=Environment.PRACTICE)
+client = AsyncClient(token="token", account_id="your-account-id", environment=Environment.PRACTICE)
 
 # New way - Direct parameters (still supported)
 client = AsyncClient(token="token", environment=Environment.PRACTICE)
@@ -720,7 +720,7 @@ from fivetwenty import AsyncClient, Environment
 
 # Old way
 token = os.environ["FIVETWENTY_OANDA_TOKEN"]
-client = AsyncClient(token=token, environment=Environment.PRACTICE)
+client = AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE)
 
 # New way
 config = AccountConfigLoader.load_default()  # Loads FIVETWENTY_* variables

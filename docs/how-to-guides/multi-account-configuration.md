@@ -246,13 +246,18 @@ async def graceful_config_loading():
 Always use context managers to ensure proper client cleanup:
 
 ```python
-# ✅ Correct - ensures cleanup
-async with AsyncClient(config=config) as client:
+import asyncio
+
+async def main():
+    # ✅ Correct - ensures cleanup
+    async with AsyncClient(config=config) as client:
+        await client.accounts.get(client.account_id)
+
+    # ❌ Incorrect - may leak resources
+    client = AsyncClient(config=config)
     await client.accounts.get(client.account_id)
 
-# ❌ Incorrect - may leak resources
-client = AsyncClient(config=config)
-await client.accounts.get(client.account_id)
+asyncio.run(main())
 ```
 
 ## Real-World Example

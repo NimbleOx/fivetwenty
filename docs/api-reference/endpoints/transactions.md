@@ -8,16 +8,21 @@ Transaction history and monitoring.
 
 ## list
 ```python
-# transactions.list(account_id: AccountID, from_time: str | None = None,
-#                   to_time: str | None = None, page_size: int = 100,
-#                   transaction_type: list[str] | None = None) -> dict[str, Any]
+import asyncio
 
-# Example usage:
-transactions = await client.transactions.list(
-    account_id="123-456-789",
-    page_size=50,
-    transaction_type=["ORDER_FILL", "MARKET_ORDER"]
-)
+async def main():
+    # transactions.list(account_id: AccountID, from_time: str | None = None,
+    #                   to_time: str | None = None, page_size: int = 100,
+    #                   transaction_type: list[str] | None = None) -> dict[str, Any]
+
+    # Example usage:
+    transactions = await client.transactions.list(
+        account_id="123-456-789",
+        page_size=50,
+        transaction_type=["ORDER_FILL", "MARKET_ORDER"]
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions`
 

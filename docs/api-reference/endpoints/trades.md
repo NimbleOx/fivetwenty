@@ -8,17 +8,22 @@ Trade monitoring and management.
 
 ## list
 ```python
-# trades.list(account_id: AccountID, ids: list[TradeID] | None = None,
-#            state: TradeStateFilter = TradeStateFilter.OPEN,
-#            instrument: InstrumentName | None = None, count: int = 50,
-#            before_id: TradeID | None = None) -> dict[str, Any]
+import asyncio
 
-# Example usage:
-trades = await client.trades.list(
-    account_id="123-456-789",
-    state=TradeStateFilter.OPEN,
-    count=20
-)
+async def main():
+    # trades.list(account_id: AccountID, ids: list[TradeID] | None = None,
+    #            state: TradeStateFilter = TradeStateFilter.OPEN,
+    #            instrument: InstrumentName | None = None, count: int = 50,
+    #            before_id: TradeID | None = None) -> dict[str, Any]
+
+    # Example usage:
+    trades = await client.trades.list(
+        account_id="123-456-789",
+        state=TradeStateFilter.OPEN,
+        count=20
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades`
 
@@ -140,16 +145,21 @@ Close a trade (fully or partially).
 
 ## modify_client_extensions
 ```python
-# trades.modify_client_extensions(account_id: AccountID, trade_specifier: str,
-#                                client_extensions: dict[str, Any] | None = None,
-#                                idempotency_key: str | None = None) -> dict[str, Any]
+import asyncio
 
-# Example usage:
-result = await client.trades.modify_client_extensions(
-    account_id="123-456-789",
-    trade_specifier="12345",
-    client_extensions={"comment": "Updated comment"}
-)
+async def main():
+    # trades.modify_client_extensions(account_id: AccountID, trade_specifier: str,
+    #                                client_extensions: dict[str, Any] | None = None,
+    #                                idempotency_key: str | None = None) -> dict[str, Any]
+
+    # Example usage:
+    result = await client.trades.modify_client_extensions(
+        account_id="123-456-789",
+        trade_specifier="12345",
+        client_extensions={"comment": "Updated comment"}
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/clientExtensions`
 

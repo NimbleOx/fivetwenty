@@ -8,19 +8,24 @@ Instrument information and historical data.
 
 ## candles
 ```python
-# instruments.candles(instrument: str, price: str = "M", granularity: str = "S5",
-#                    count: int | None = None, from_time: str | None = None,
-#                    to_time: str | None = None, smooth: bool = False,
-#                    include_first: bool = True, daily_alignment: int = 17,
-#                    alignment_timezone: str = "America/New_York",
-#                    weekly_alignment: str = "Friday") -> dict[str, Any]
+import asyncio
 
-# Example usage:
-candles = await client.instruments.candles(
-    instrument="EUR_USD",
-    granularity="H1",
-    count=100
-)
+async def main():
+    # instruments.candles(instrument: str, price: str = "M", granularity: str = "S5",
+    #                    count: int | None = None, from_time: str | None = None,
+    #                    to_time: str | None = None, smooth: bool = False,
+    #                    include_first: bool = True, daily_alignment: int = 17,
+    #                    alignment_timezone: str = "America/New_York",
+    #                    weekly_alignment: str = "Friday") -> dict[str, Any]
+
+    # Example usage:
+    candles = await client.instruments.candles(
+        instrument="EUR_USD",
+        granularity="H1",
+        count=100
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/instruments/{instrument}/candles`
 

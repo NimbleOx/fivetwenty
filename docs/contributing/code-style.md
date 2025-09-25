@@ -474,7 +474,7 @@ class TestAccountsEndpoint:
     @pytest.fixture
     def client(self):
         """Create test client with mocked HTTP."""
-        return AsyncClient(token="test-token", environment="practice")
+        return AsyncClient(token="test-token", account_id="your-account-id", environment="practice")
 
     @pytest.mark.asyncio
     async def test_get_accounts_success(self, client):

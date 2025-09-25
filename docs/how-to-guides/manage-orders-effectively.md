@@ -25,16 +25,21 @@ You need to create, monitor, and manage trading orders efficiently using FiveTwe
 
     **OnFill Pattern (Recommended)**: Set TP/SL when creating orders
     ```python
-from decimal import Decimal
+import asyncio
 
-# Risk management activates automatically when order fills
-await client.orders.post_market_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=1000,
-    take_profit=Decimal("1.1100"),  # Automatic TP
-    stop_loss=Decimal("1.0900")     # Automatic SL
-)
+async def main():
+    from decimal import Decimal
+
+    # Risk management activates automatically when order fills
+    await client.orders.post_market_order(
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=1000,
+        take_profit=Decimal("1.1100"),  # Automatic TP
+        stop_loss=Decimal("1.0900")     # Automatic SL
+    )
+
+asyncio.run(main())
     ```
 
     **Post-Trade Pattern**: Add TP/SL to existing trades

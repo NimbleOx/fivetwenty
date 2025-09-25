@@ -27,10 +27,15 @@ export FIVETWENTY_OANDA_ACCOUNT_ALIAS="my_first_trade"
 
 Then use zero-config initialization:
 ```python
-from fivetwenty import AsyncClient
+import asyncio
 
-async with AsyncClient() as client:
-    print(f"Connected: {client.config.summary()}")
+async def main():
+    from fivetwenty import AsyncClient
+
+    async with AsyncClient() as client:
+        print(f"Connected: {client.config.summary()}")
+
+asyncio.run(main())
 ```
 
 ### Option 2: Direct Parameters
@@ -810,20 +815,25 @@ async def api_example(client):
 
 **Connection Issues:**
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
 
-# Handle connection problems
-import httpx
+async def main():
+    from fivetwenty import AsyncClient, Environment
 
-try:
-    async with AsyncClient() as client:
-        accounts = await client.accounts.list()
-except httpx.ConnectError:
-    print("❌ Network connection failed")
-    print("   Check internet connection and firewall settings")
-except httpx.TimeoutError:
-    print("❌ Request timed out")
-    print("   Try again or increase timeout setting")
+    # Handle connection problems
+    import httpx
+
+    try:
+        async with AsyncClient() as client:
+            accounts = await client.accounts.list()
+    except httpx.ConnectError:
+        print("❌ Network connection failed")
+        print("   Check internet connection and firewall settings")
+    except httpx.TimeoutError:
+        print("❌ Request timed out")
+        print("   Try again or increase timeout setting")
+
+asyncio.run(main())
 ```
 
 ## Next Steps

@@ -1,0 +1,14 @@
+🔍 Discovering files in .
+
+
+     Validation Summary     
+┏━━━━━━━━━━━━━━┳━━━━━━━━━━━┓
+┃ Metric       ┃ Value     ┃
+┡━━━━━━━━━━━━━━╇━━━━━━━━━━━┩
+│ Files        │ 0         │
+│ Validators   │ 0         │
+│ Duration     │ 0.02s     │
+│ Status       │ ✅ PASSED │
+│ Success Rate │ 100.0%    │
+│ Issues Found │ 0         │
+└──────────────┴───────────┘

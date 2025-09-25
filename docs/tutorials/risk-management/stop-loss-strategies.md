@@ -35,7 +35,7 @@ async def place_order_with_fixed_stop(account_id: str, instrument: str, units: i
                                      stop_pips: Decimal, take_profit_pips: Decimal = None):
     """Place order with fixed pip-based stop loss."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
             # Get current price
             prices = await client.pricing.get(account_id=account_id, instruments=[instrument])
@@ -119,7 +119,7 @@ async def place_order_with_percentage_stop(account_id: str, instrument: str, uni
                                           stop_percentage: Decimal = Decimal("1.0")):
     """Place order with percentage-based stop loss."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
             # Get current price
             prices = await client.pricing.get(account_id=account_id, instruments=[instrument])

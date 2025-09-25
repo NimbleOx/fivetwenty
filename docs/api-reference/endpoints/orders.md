@@ -8,18 +8,23 @@ Order creation, modification, and management.
 
 ## create
 ```python
-# orders.create(account_id: AccountID, order_request: OrderRequest,
-#              timeout: float | None = None, client_request_id: str | None = None) -> OrderResponse
+import asyncio
 
-# Example usage:
-order_response = await client.orders.create(
-    account_id="123-456-789",
-    order_request=MarketOrderRequest(
-        instrument="EUR_USD",
-        units=1000
-    ),
-    client_request_id="my-order-123"
-)
+async def main():
+    # orders.create(account_id: AccountID, order_request: OrderRequest,
+    #              timeout: float | None = None, client_request_id: str | None = None) -> OrderResponse
+
+    # Example usage:
+    order_response = await client.orders.create(
+        account_id="123-456-789",
+        order_request=MarketOrderRequest(
+            instrument="EUR_USD",
+            units=1000
+        ),
+        client_request_id="my-order-123"
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
@@ -46,19 +51,24 @@ Create a new order using any order request type.
 
 ## post_market_order
 ```python
-# orders.post_market_order(account_id: AccountID, instrument: InstrumentName,
-#                         units: int | Decimal | str, take_profit: Decimal | None = None,
-#                         stop_loss: Decimal | None = None, timeout: float | None = None,
-#                         client_request_id: str | None = None) -> OrderResponse
+import asyncio
 
-# Example usage:
-order = await client.orders.post_market_order(
-    account_id="123-456-789",
-    instrument="EUR_USD",
-    units=1000,
-    take_profit=Decimal("1.1500"),
-    stop_loss=Decimal("1.1200")
-)
+async def main():
+    # orders.post_market_order(account_id: AccountID, instrument: InstrumentName,
+    #                         units: int | Decimal | str, take_profit: Decimal | None = None,
+    #                         stop_loss: Decimal | None = None, timeout: float | None = None,
+    #                         client_request_id: str | None = None) -> OrderResponse
+
+    # Example usage:
+    order = await client.orders.post_market_order(
+        account_id="123-456-789",
+        instrument="EUR_USD",
+        units=1000,
+        take_profit=Decimal("1.1500"),
+        stop_loss=Decimal("1.1200")
+    )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 

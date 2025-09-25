@@ -75,12 +75,17 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 ```
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
 
-# Zero-config - automatically loads environment variables
-async with AsyncClient() as client:
-    accounts = await client.accounts.list()
-    print(f"Loaded config: {client.config.summary()}")
+async def main():
+    from fivetwenty import AsyncClient, Environment
+
+    # Zero-config - automatically loads environment variables
+    async with AsyncClient() as client:
+        accounts = await client.accounts.list()
+        print(f"Loaded config: {client.config.summary()}")
+
+asyncio.run(main())
 ```
 
 ## Secure Token Management
@@ -115,15 +120,20 @@ FIVETWENTY_OANDA_ACCOUNT_ALIAS=development_account
 ```
 
 ```python
-from dotenv import load_dotenv
-from fivetwenty import AsyncClient
+import asyncio
 
-# Load .env file
-load_dotenv()
+async def main():
+    from dotenv import load_dotenv
+    from fivetwenty import AsyncClient
 
-# Automatically uses environment variables
-async with AsyncClient() as client:
-    accounts = await client.accounts.list()
+    # Load .env file
+    load_dotenv()
+
+    # Automatically uses environment variables
+    async with AsyncClient() as client:
+        accounts = await client.accounts.list()
+
+asyncio.run(main())
 ```
 
 ### Secret Management Systems
@@ -136,32 +146,37 @@ For production deployments, you can use AWS Secrets Manager, HashiCorp Vault, Ku
 ### Different Environments
 
 ```python
-import os
-from fivetwenty import AccountConfig, AsyncClient, Environment
+import asyncio
 
-# Practice account for testing
-practice_config = AccountConfig(
-    token=os.environ["PRACTICE_TOKEN"],
-    account_id=os.environ["PRACTICE_ACCOUNT"],
-    environment=Environment.PRACTICE,
-    alias="practice_testing"
-)
+async def main():
+    import os
+    from fivetwenty import AccountConfig, AsyncClient, Environment
 
-# Live account for production
-live_config = AccountConfig(
-    token=os.environ["LIVE_TOKEN"],
-    account_id=os.environ["LIVE_ACCOUNT"],
-    environment=Environment.LIVE,
-    alias="live_trading"
-)
+    # Practice account for testing
+    practice_config = AccountConfig(
+        token=os.environ["PRACTICE_TOKEN"],
+        account_id=os.environ["PRACTICE_ACCOUNT"],
+        environment=Environment.PRACTICE,
+        alias="practice_testing"
+    )
 
-# Test strategy on practice first
-async with AsyncClient(config=practice_config) as practice_client:
-    await test_strategy(practice_client)
+    # Live account for production
+    live_config = AccountConfig(
+        token=os.environ["LIVE_TOKEN"],
+        account_id=os.environ["LIVE_ACCOUNT"],
+        environment=Environment.LIVE,
+        alias="live_trading"
+    )
 
-# Deploy to live after validation
-async with AsyncClient(config=live_config) as live_client:
-    await execute_live_trades(live_client)
+    # Test strategy on practice first
+    async with AsyncClient(config=practice_config) as practice_client:
+        await test_strategy(practice_client)
+
+    # Deploy to live after validation
+    async with AsyncClient(config=live_config) as live_client:
+        await execute_live_trades(live_client)
+
+asyncio.run(main())
 ```
 
 ### Multiple Strategies
@@ -321,24 +336,29 @@ else:
 If you need to use a proxy:
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
 
-# Simple proxy
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE,
-    proxies="http://proxy.example.com:8080"
-) as client:
-    accounts = await client.accounts.list()
+async def main():
+    from fivetwenty import AsyncClient, Environment
 
-# Authenticated proxy
-proxy_url = "http://username:password@proxy.example.com:8080"
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE,
-    proxies=proxy_url
-) as client:
-    accounts = await client.accounts.list()
+    # Simple proxy
+    async with AsyncClient(
+        token="your-token",
+        environment=Environment.PRACTICE,
+        proxies="http://proxy.example.com:8080"
+    ) as client:
+        accounts = await client.accounts.list()
+
+    # Authenticated proxy
+    proxy_url = "http://username:password@proxy.example.com:8080"
+    async with AsyncClient(
+        token="your-token",
+        environment=Environment.PRACTICE,
+        proxies=proxy_url
+    ) as client:
+        accounts = await client.accounts.list()
+
+asyncio.run(main())
 ```
 
 ### Custom SSL Configuration
@@ -378,32 +398,37 @@ async with AsyncClient(
 For advanced HTTP configuration:
 
 ```python
-import httpx
-from fivetwenty import AsyncClient, Environment
+import asyncio
 
-# Create custom HTTP client
-transport = httpx.AsyncClient(
-    timeout=httpx.Timeout(
-        connect=5.0,
-        read=60.0,
-        write=10.0,
-        pool=60.0
-    ),
-    limits=httpx.Limits(
-        max_connections=100,
-        max_keepalive_connections=20
-    ),
-    http2=False,
-    trust_env=True
-)
+async def main():
+    import httpx
+    from fivetwenty import AsyncClient, Environment
 
-# Use with FiveTwenty client
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE,
-    transport=transport
-) as client:
-    accounts = await client.accounts.list()
+    # Create custom HTTP client
+    transport = httpx.AsyncClient(
+        timeout=httpx.Timeout(
+            connect=5.0,
+            read=60.0,
+            write=10.0,
+            pool=60.0
+        ),
+        limits=httpx.Limits(
+            max_connections=100,
+            max_keepalive_connections=20
+        ),
+        http2=False,
+        trust_env=True
+    )
+
+    # Use with FiveTwenty client
+    async with AsyncClient(
+        token="your-token",
+        environment=Environment.PRACTICE,
+        transport=transport
+    ) as client:
+        accounts = await client.accounts.list()
+
+asyncio.run(main())
 ```
 
 ## Production Deployment

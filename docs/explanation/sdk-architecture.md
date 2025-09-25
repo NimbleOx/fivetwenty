@@ -82,7 +82,7 @@ from fivetwenty import AsyncClient, Environment
 
 class Client:
     def __init__(self, token: str):
-        self._async_client = AsyncClient(token=token)
+        self._async_client = AsyncClient(token=token, account_id="your-account-id")
         self._executor = ThreadPoolExecutor(max_workers=1)
 
     def accounts_list(self):
@@ -349,7 +349,7 @@ account = Account.model_validate(data)  # Validation only when needed
 from fivetwenty import AsyncClient, Environment
 
 # SDK requires explicit token for each client
-client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], environment=Environment.PRACTICE)
+client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], account_id="your-account-id", environment=Environment.PRACTICE)
 ```
 
 **Benefits**:
@@ -365,7 +365,7 @@ Practice and live environments are fully isolated:
 from fivetwenty import AsyncClient, Environment
 
 # Explicit environment selection prevents accidents
-practice_client = AsyncClient(token=token, environment=Environment.PRACTICE)
+practice_client = AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE)
 live_client = AsyncClient(token=token, environment=Environment.LIVE)
 ```
 
@@ -469,11 +469,16 @@ When APIs change:
 
 **Example**:
 ```python
-# New preferred method
-await client.accounts.list()
+import asyncio
 
-# Deprecated (shows warning)
-await client.get_accounts()  # Deprecated: use accounts.list()
+async def main():
+    # New preferred method
+    await client.accounts.list()
+
+    # Deprecated (shows warning)
+    await client.get_accounts()  # Deprecated: use accounts.list()
+
+asyncio.run(main())
 ```
 
 ---
@@ -610,21 +615,26 @@ poe test-integration --record-mode=new_episodes
 #### Working with Financial Data
 
 ```python
-# Always use Decimal for money
-from decimal import Decimal
+import asyncio
 
-# Wrong
-price=Decimal("1.1234") + 0.0001
+async def main():
+    # Always use Decimal for money
+    from decimal import Decimal
 
-# Right
-price = Decimal("1.1234") + Decimal("0.0001")
+    # Wrong
+    price=Decimal("1.1234") + 0.0001
 
-# The SDK handles serialization automatically
-order = await client.orders.post_market_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=Decimal("10000")  # Automatically converted to string for API
-)
+    # Right
+    price = Decimal("1.1234") + Decimal("0.0001")
+
+    # The SDK handles serialization automatically
+    order = await client.orders.post_market_order(
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=Decimal("10000")  # Automatically converted to string for API
+    )
+
+asyncio.run(main())
 ```
 
 #### Error Handling Development

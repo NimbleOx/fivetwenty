@@ -190,7 +190,7 @@ async def close_position_safely(account_id: str, trade_id: str):
     print("🔚 CLOSING YOUR POSITION")
     print("=" * 30)
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
             # Get trade details before closing
             trade = await client.trades.get_trade(account_id, trade_id)

@@ -8,10 +8,15 @@ Account management and information retrieval.
 
 ## list
 ```python
-# accounts.list() -> list[AccountProperties]
+import asyncio
 
-# Example usage:
-accounts = await client.accounts.list()
+async def main():
+    # accounts.list() -> list[AccountProperties]
+
+    # Example usage:
+    accounts = await client.accounts.list()
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts`
 

@@ -218,7 +218,7 @@ async def demo_atr_position_sizing(account_id: str):
     if not account_id:
         return
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         account = await client.accounts.get(account_id)
         balance = Decimal(str(account.balance))
 

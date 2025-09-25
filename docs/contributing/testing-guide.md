@@ -162,7 +162,7 @@ class TestAccountsEndpoint:
     @pytest.fixture
     def client(self):
         """Create test client."""
-        return AsyncClient(token="test-token", environment="practice")
+        return AsyncClient(token="test-token", account_id="your-account-id", environment="practice")
 
     @pytest.mark.unit
     @pytest.mark.asyncio
@@ -453,7 +453,7 @@ class TestPricingStreaming:
 
     @pytest.fixture
     def client(self):
-        return AsyncClient(token="test-token", environment="practice")
+        return AsyncClient(token="test-token", account_id="your-account-id", environment="practice")
 
     @pytest.mark.asyncio
     async def test_stream_pricing_success(self, client):

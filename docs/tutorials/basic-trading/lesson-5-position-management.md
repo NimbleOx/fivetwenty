@@ -23,7 +23,7 @@ async def demonstrate_position_management(account_id: str, trade_id: str):
     print("🎛️ POSITION MANAGEMENT TECHNIQUES")
     print("=" * 40)
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         # Get current trade
         trade = await client.trades.get_trade(account_id, trade_id)
 

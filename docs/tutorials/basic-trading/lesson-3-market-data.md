@@ -18,7 +18,7 @@ from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 async def get_current_prices(account_id: str, instruments: list):
     """Fetch current market prices."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
             prices = await client.pricing.get(
                 account_id=account_id,
@@ -65,7 +65,7 @@ from fivetwenty.models import CandlestickGranularity
 async def get_historical_data(instrument: str, count: int = 100):
     """Get historical candlestick data."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
             candles = await client.instruments.candles(
                 instrument=instrument,
@@ -106,7 +106,7 @@ from fivetwenty import AsyncClient, Environment
 async def analyze_market_before_trading(account_id: str, instrument: str = "EUR_USD"):
     """Comprehensive market analysis before trading."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         print("🔍 MARKET ANALYSIS")
         print("=" * 30)
 
@@ -199,7 +199,7 @@ from fivetwenty import AsyncClient
 async def assess_market_conditions(account_id: str, instrument: str):
     """Assess current market conditions for trading suitability."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         pricing = await client.pricing.get_pricing(
             account_id=account_id,
             instruments=[instrument]
