@@ -162,7 +162,11 @@ class SDKMethodsValidator(BaseValidator):
         """Check if this file should document SDK methods comprehensively."""
         path_str = str(file_path).lower()
         # Only files specifically named as comprehensive API references
-        return any(indicator in path_str for indicator in ["api-reference/client.md", "reference/complete-api.md", "api/full-reference.md"])
+        # Exclude client.md as it's a navigation file, not comprehensive docs
+        return any(indicator in path_str for indicator in [
+            "reference/complete-api.md",
+            "api/full-reference.md"
+        ])
 
     def _find_project_root(self, file_path: Path) -> Path:
         """Find the project root directory."""
