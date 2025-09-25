@@ -6,7 +6,7 @@ Trade monitoring and management.
 
 ---
 
-## list
+## get_trades
 ```python
 import asyncio
 
@@ -50,7 +50,7 @@ Get a list of trades for an account.
 
 ---
 
-## list_open
+## get_open_trades
 ```python
 # trades.get_open_trades(account_id: AccountID) -> dict[str, Any]
 
@@ -77,7 +77,7 @@ Get all open trades for account.
 
 ---
 
-## get
+## get_trade
 ```python
 # trades.get_trade(account_id: AccountID, trade_specifier: str) -> dict[str, Any]
 
@@ -108,7 +108,7 @@ Get specific trade details.
 
 ---
 
-## close
+## close_trade
 ```python
 # trades.close_trade(account_id: AccountID, trade_specifier: str,
 #             units: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]
@@ -143,7 +143,7 @@ Close a trade (fully or partially).
 
 ---
 
-## modify_client_extensions
+## put_trade_client_extensions
 ```python
 import asyncio
 
@@ -184,7 +184,7 @@ Modify client extensions for existing trade.
 
 ---
 
-## modify
+## put_trade_orders
 ```python
 # trades.put_trade_orders(account_id: AccountID, trade_specifier: str,
 #              take_profit: dict[str, Any] | None = None,

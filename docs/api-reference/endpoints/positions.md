@@ -6,7 +6,7 @@ Position monitoring and management.
 
 ---
 
-## list
+## get_positions
 ```python
 import asyncio
 
@@ -38,7 +38,7 @@ Get a list of all positions for an account.
 
 ---
 
-## list_open
+## get_open_positions
 ```python
 # positions.get_open_positions(account_id: AccountID) -> dict[str, Any]
 
@@ -65,7 +65,7 @@ Get a list of all open positions for an account.
 
 ---
 
-## get
+## get_position
 ```python
 # positions.get_position(account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]
 
@@ -96,7 +96,7 @@ Get the position for a specific instrument in an account.
 
 ---
 
-## close
+## close_position
 ```python
 import asyncio
 

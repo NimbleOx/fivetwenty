@@ -6,7 +6,7 @@ Real-time pricing data and streaming.
 
 ---
 
-## get
+## get_pricing
 ```python
 import asyncio
 
@@ -47,7 +47,7 @@ Get current prices for instruments.
 
 ---
 
-## stream
+## get_pricing_stream
 ```python
 # pricing.get_pricing_stream(account_id: AccountID, instruments: list[str], snapshot: bool = True,
 #               include_home_conversions: bool = False, stall_timeout: float = 30.0)
@@ -86,7 +86,7 @@ Stream real-time pricing data.
 
 ---
 
-## candles
+## get_instrument_candles
 ```python
 import asyncio
 
@@ -139,7 +139,7 @@ Get historical candle data for an instrument.
 
 ---
 
-## latest_candles
+## get_latest_candles
 ```python
 # pricing.get_latest_candles(account_id: AccountID, candle_specifications: list[str],
 #                       units: int = 1, smooth: bool = False,
@@ -179,7 +179,7 @@ Get latest candles for multiple instruments.
 
 ---
 
-## stream_iter
+## get_pricing_stream_iter
 ```python
 # pricing.get_pricing_stream(account_id: AccountID, instruments: list[str],
 #                    snapshot: bool = True, include_home_conversions: bool = False,

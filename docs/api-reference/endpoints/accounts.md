@@ -90,7 +90,7 @@ Get condensed account information.
 
 ---
 
-## instruments
+## get_account_instruments
 ```python
 # accounts.get_account_instruments(account_id: AccountID, instruments: list[str] | None = None) -> list[Instrument]
 
@@ -121,7 +121,7 @@ Get all tradeable instruments for account.
 
 ---
 
-## configure
+## patch_account_configuration
 ```python
 # accounts.patch_account_configuration(account_id: AccountID, alias: str | None = None,
 #                   margin_rate: str | None = None) -> dict[str, Any]

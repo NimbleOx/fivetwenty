@@ -6,7 +6,7 @@ Transaction history and monitoring.
 
 ---
 
-## list
+## get_transactions
 ```python
 import asyncio
 
@@ -48,7 +48,7 @@ Get transaction history for account.
 
 ---
 
-## get
+## get_transaction
 ```python
 # transactions.get_transaction(account_id: AccountID, transaction_id: str) -> dict[str, Any]
 
@@ -79,7 +79,7 @@ Get specific transaction details.
 
 ---
 
-## list_since
+## get_transactions_since_id
 ```python
 # transactions.get_transactions_since_id(account_id: AccountID, transaction_id: str,
 #                        transaction_type: list[str] | None = None) -> dict[str, Any]
@@ -113,7 +113,7 @@ Get transactions since specific transaction ID.
 
 ---
 
-## stream
+## get_transactions_stream
 ```python
 # transactions.get_transactions_stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
 
@@ -146,7 +146,7 @@ Stream real-time transactions.
 
 ---
 
-## get_range
+## get_transactions_range
 ```python
 # transactions.get_transactions_range(account_id: AccountID, from_transaction_id: str,
 #                       to_transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
@@ -181,7 +181,7 @@ Get transactions in ID range.
 
 ---
 
-## get_all
+## get_transactions_deprecated
 ```python
 # transactions.get_transactions(account_id: AccountID, count: int = 500,
 #                     transaction_type: list[str] | None = None) -> dict[str, Any]

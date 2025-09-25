@@ -6,7 +6,7 @@ Order creation, modification, and management.
 
 ---
 
-## create
+## post_order
 ```python
 import asyncio
 
@@ -227,7 +227,7 @@ Create a market-if-touched order (convenience method).
 
 ---
 
-## list
+## get_orders
 ```python
 # orders.get_orders(account_id: AccountID, ids: list[str] | None = None,
 #            state: str = "PENDING", instrument: str | None = None,
@@ -265,7 +265,7 @@ Get list of orders for account.
 
 ---
 
-## get
+## get_order
 ```python
 # orders.get_order(account_id: AccountID, order_specifier: str) -> dict[str, Any]
 
@@ -296,7 +296,7 @@ Get order details.
 
 ---
 
-## close
+## cancel_order
 ```python
 # orders.cancel_order(account_id: AccountID, order_specifier: str,
 #             timeout: float | None = None, client_request_id: str | None = None) -> dict[str, Any]
@@ -330,7 +330,7 @@ Cancel pending order.
 
 ---
 
-## list_open
+## get_pending_orders
 ```python
 # orders.get_pending_orders(account_id: AccountID) -> dict[str, Any]
 
