@@ -74,3 +74,15 @@ validators:
   code_executability:
     enabled: true
 
+  # Code linting with ruff
+  code_linting:
+    enabled: true
+    options:
+      severity_filter: "warning"  # Only show warnings and errors
+
+  # Type checking with mypy
+  code_typing:
+    enabled: true
+    options:
+      strict_mode: false  # Relaxed mode for documentation examples
+

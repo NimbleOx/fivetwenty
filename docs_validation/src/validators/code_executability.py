@@ -403,9 +403,7 @@ class CodeExecutabilityValidator(BaseValidator):
             # Check for asyncio.run calls
             elif isinstance(node, ast.Call):
                 if isinstance(node.func, ast.Attribute):
-                    if (isinstance(node.func.value, ast.Name) and
-                        node.func.value.id == "asyncio" and
-                        node.func.attr == "run"):
+                    if isinstance(node.func.value, ast.Name) and node.func.value.id == "asyncio" and node.func.attr == "run":
                         has_asyncio_run = True
 
         # Issue: async with or await without async function context
@@ -414,15 +412,11 @@ class CodeExecutabilityValidator(BaseValidator):
             for line_num, line in enumerate(code_lines, 1):
                 if "async with" in line or "await " in line:
                     error_line = start_line + line_num - 1
-                    issues.append(ValidationIssue(
-                        message="'async with' or 'await' found outside async function",
-                        file_path=file_path,
-                        line=error_line,
-                        severity=IssueSeverity.ERROR,
-                        rule_id="code_async_outside_function",
-                        context=line.strip(),
-                        suggestion="Wrap async code in 'async def main():' function and call with 'asyncio.run(main())'"
-                    ))
+                    issues.append(
+                        ValidationIssue(
+                            message="'async with' or 'await' found outside async function", file_path=file_path, line=error_line, severity=IssueSeverity.ERROR, rule_id="code_async_outside_function", context=line.strip(), suggestion="Wrap async code in 'async def main():' function and call with 'asyncio.run(main())'"
+                        )
+                    )
                     break
 
         # Issue: AsyncClient without account_id when providing token
@@ -447,15 +441,11 @@ class CodeExecutabilityValidator(BaseValidator):
                     for line_num, line in enumerate(code_lines, 1):
                         if "AsyncClient(" in line and "token=" in line:
                             error_line = start_line + line_num - 1
-                            issues.append(ValidationIssue(
-                                message="AsyncClient with token parameter requires account_id parameter",
-                                file_path=file_path,
-                                line=error_line,
-                                severity=IssueSeverity.ERROR,
-                                rule_id="code_missing_account_id",
-                                context=line.strip(),
-                                suggestion="Add account_id='your-account-id' parameter to AsyncClient call"
-                            ))
+                            issues.append(
+                                ValidationIssue(
+                                    message="AsyncClient with token parameter requires account_id parameter", file_path=file_path, line=error_line, severity=IssueSeverity.ERROR, rule_id="code_missing_account_id", context=line.strip(), suggestion="Add account_id='your-account-id' parameter to AsyncClient call"
+                                )
+                            )
                             break
 
         return issues

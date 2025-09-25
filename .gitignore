@@ -202,7 +202,9 @@ playground/
 *.local
 
 # Validation reports and generated files (should not be committed)
+docs_validation/reports/
 docs-tooling/validation/reports/
+!docs_validation/reports/.gitkeep
 
 # OANDA API reference (local development only)
 oanda-api-reference/

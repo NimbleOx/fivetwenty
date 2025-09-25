@@ -95,6 +95,7 @@ class AsyncClient:
             if account_id is not None:
                 # Override the account_id from config
                 from pydantic import SecretStr
+
                 final_config = AccountConfig(
                     token=config.token,
                     account_id=SecretStr(account_id),

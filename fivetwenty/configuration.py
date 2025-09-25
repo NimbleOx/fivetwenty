@@ -171,7 +171,7 @@ class AccountConfigLoader:
         # Generate alias from prefix
         if prefix:
             # Remove trailing underscore and convert to lowercase for alias
-            alias = prefix.rstrip('_').lower()
+            alias = prefix.rstrip("_").lower()
         else:
             alias = "default"
 

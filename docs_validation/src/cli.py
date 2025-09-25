@@ -15,10 +15,13 @@ from .base import registry
 from .config import ValidationConfig
 from .engine import ValidationEngine
 from .models import IssueSeverity, ValidationSummary
+from .reporters import MarkdownReporter
 
 # Import and register validators
 from .validators import (
     CodeExecutabilityValidator,
+    CodeLintingValidator,
+    CodeTypingValidator,
     CrossReferenceValidator,
     ExternalLinkValidator,
     FinancialPrecisionValidator,
@@ -36,6 +39,8 @@ registry.register(PythonSyntaxValidator())
 registry.register(CrossReferenceValidator())
 registry.register(SDKMethodsValidator())
 registry.register(CodeExecutabilityValidator())
+registry.register(CodeLintingValidator())
+registry.register(CodeTypingValidator())
 registry.register(ExternalLinkValidator())
 
 console = Console()
@@ -67,6 +72,7 @@ def cli() -> None:
 @click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
 @click.option("--quiet", "-q", is_flag=True, help="Show minimal output")
 @click.option("--fail-fast", is_flag=True, help="Exit on first error")
+@click.option("--report", is_flag=True, help="Generate markdown report in addition to console output")
 def validate(
     config: Path | None,
     project_root: Path,
@@ -75,6 +81,7 @@ def validate(
     verbose: bool,
     quiet: bool,
     fail_fast: bool,
+    report: bool,
 ) -> None:
     """Run validation on documentation files."""
 
@@ -82,10 +89,13 @@ def validate(
     if config and config.exists():
         validation_config = ValidationConfig.load_from_file(config)
     else:
-        # Try to find validation.yml in config directory first, then current directory
+        # Try to find validation.yml in docs_validation/config, then config/, then current directory
+        docs_config_path = Path("docs_validation/config/validation.yml")
         config_dir_path = Path("config/validation.yml")
         default_config_path = Path("validation.yml")
-        if config_dir_path.exists():
+        if docs_config_path.exists():
+            validation_config = ValidationConfig.load_from_file(docs_config_path)
+        elif config_dir_path.exists():
             validation_config = ValidationConfig.load_from_file(config_dir_path)
         elif default_config_path.exists():
             validation_config = ValidationConfig.load_from_file(default_config_path)
@@ -124,7 +134,7 @@ def validate(
     duration = time.perf_counter() - start_time
 
     # Display results
-    _display_results(summary, duration, verbose, quiet, fail_fast)
+    _display_results(summary, duration, verbose, quiet, fail_fast, report)
 
     # Always exit with success - this is informational validation
     sys.exit(0)
@@ -138,7 +148,8 @@ def validate(
     help="Path to YAML configuration file",
 )
 @click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
-def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
+@click.option("--report", is_flag=True, help="Generate markdown report in addition to console output")
+def check(files: tuple[Path, ...], config: Path | None, verbose: bool, report: bool) -> None:
     """Run validation on specific files (incremental mode)."""
 
     if not files:
@@ -149,10 +160,13 @@ def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
     if config and config.exists():
         validation_config = ValidationConfig.load_from_file(config)
     else:
-        # Try to find validation.yml in config directory first, then current directory
+        # Try to find validation.yml in docs_validation/config, then config/, then current directory
+        docs_config_path = Path("docs_validation/config/validation.yml")
         config_dir_path = Path("config/validation.yml")
         default_config_path = Path("validation.yml")
-        if config_dir_path.exists():
+        if docs_config_path.exists():
+            validation_config = ValidationConfig.load_from_file(docs_config_path)
+        elif config_dir_path.exists():
             validation_config = ValidationConfig.load_from_file(config_dir_path)
         elif default_config_path.exists():
             validation_config = ValidationConfig.load_from_file(default_config_path)
@@ -170,7 +184,7 @@ def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
     duration = time.perf_counter() - start_time
 
     # Display results
-    _display_results(summary, duration, verbose, quiet=False, fail_fast=False)
+    _display_results(summary, duration, verbose, quiet=False, fail_fast=False, report=report)
 
     # Always exit with success - this is informational validation
     sys.exit(0)
@@ -199,6 +213,7 @@ def _display_results(
     verbose: bool,
     quiet: bool,
     fail_fast: bool,  # noqa: ARG001
+    report: bool = False,
 ) -> None:
     """Display validation results."""
 
@@ -239,6 +254,10 @@ def _display_results(
     # Show issues if any
     if summary.total_issues > 0:
         _display_issues(summary, verbose)
+
+    # Generate markdown report if requested
+    if report:
+        _generate_markdown_report(summary)
 
 
 def _display_issues(summary: ValidationSummary, verbose: bool) -> None:
@@ -319,6 +338,33 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
         table.add_row(validator_summary.name, str(validator_summary.files_checked), success_rate_text, str(validator_summary.total_issues), errors_text, warnings_text, f"{validator_summary.duration_ms:.0f}ms")
 
     console.print(table)
+
+
+def _generate_markdown_report(
+    summary: ValidationSummary,
+) -> None:
+    """Generate markdown validation report."""
+    # Always use the reports directory
+    reports_dir = Path(__file__).parent.parent / "reports"
+    reports_dir.mkdir(exist_ok=True)
+    output_file = reports_dir / "validation-report.md"
+
+    # Collect all issues from validation results
+    all_issues = []
+    for result in summary.results:
+        if result.issues:
+            all_issues.extend(result.issues)
+
+    try:
+        # Create markdown reporter and generate report
+        reporter = MarkdownReporter()
+        reporter.generate_report(summary=summary, all_issues=all_issues, output_path=output_file, include_detailed_issues=True)
+
+        # Display success message
+        console.print(f"\n📄 Markdown report generated: {output_file}", style="green")
+
+    except Exception as e:
+        console.print(f"\n❌ Failed to generate markdown report: {e}", style="red")
 
 
 def main() -> None:

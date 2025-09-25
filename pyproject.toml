@@ -254,14 +254,22 @@ docs-build = "python -m mkdocs build --clean"
 docs-deploy = "python -m mkdocs gh-deploy --force"
 
 # Documentation validation tasks
-docs-validate = { cmd = "uv run python -m src.cli validate --project-root ..", cwd = "docs_validation" }
-docs-validate-verbose = { cmd = "uv run python -m src.cli validate --project-root .. --verbose", cwd = "docs_validation" }
-docs-validate-list = { cmd = "uv run python -m src.cli list-validators", cwd = "docs_validation" }
-docs-check = { cmd = "uv run python -m src.cli check", cwd = "docs_validation" }
+docs-validate = "uv run python -m docs_validation.src.cli validate"
+docs-validate-verbose = "uv run python -m docs_validation.src.cli validate --verbose"
+docs-validate-list = "uv run python -m docs_validation.src.cli list-validators"
+# Enhanced validation with new validators (linting, typing, executability)
+docs-validate-full = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation.yml"
+docs-validate-full-verbose = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation.yml --verbose"
+
+# Validation with markdown reports (automatically generates report + shows console output)
+docs-validate-report = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation.yml --report"
+
+# Quick validation for specific files (pass file paths as arguments)
+docs-check = "uv run python -m docs_validation.src.cli check --config docs_validation/config/validation.yml --report"
 
 # External link validation (slow - network requests)
-docs-validate-links = { cmd = "uv run python -m src.cli validate --project-root .. --config config/validation-external-links.yml", cwd = "docs_validation" }
-docs-validate-links-verbose = { cmd = "uv run python -m src.cli validate --project-root .. --config config/validation-external-links.yml --verbose", cwd = "docs_validation" }
+docs-validate-links = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-external-links.yml"
+docs-validate-links-verbose = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-external-links.yml --verbose"
 
 # Markdown tasks
 markdown-format = "mdformat docs/ README.md"
@@ -272,4 +280,6 @@ yaml-lint = "yamllint mkdocs.yml docs_validation/config/validation.yml .pre-comm
 
 # Workflow tasks
 quality = ["format", "lint", "typecheck"]
+quality-docs = ["format", "lint", "typecheck", "docs-validate-full"]
 check = ["format", "lint", "typecheck", "test", "docs-validate", "docs-validate-links"]
+check-full = ["format", "lint", "typecheck", "test", "docs-validate-full", "docs-validate-links"]

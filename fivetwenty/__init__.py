@@ -43,6 +43,7 @@ Usage:
 
 try:
     from importlib.metadata import version
+
     __version__ = version("fivetwenty")
 except ImportError:
     # Fallback for development installs
