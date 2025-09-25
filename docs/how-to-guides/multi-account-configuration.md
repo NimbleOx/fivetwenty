@@ -61,9 +61,9 @@ async def multi_account_example():
                 print(f"Default: {default_client.config.summary()}")
 
                 # Use each client for different strategies
-                await trading_bot.accounts.get(trading_bot.account_id)
-                await live_client.accounts.get(live_client.account_id)
-                await default_client.accounts.get(default_client.account_id)
+                await trading_bot.accounts.get_account(trading_bot.account_id)
+                await live_client.accounts.get_account(live_client.account_id)
+                await default_client.accounts.get_account(default_client.account_id)
 ```
 
 ### Single Account with Custom Prefix
@@ -84,7 +84,7 @@ async def single_custom_account():
         print(f"Connected: {client.config.summary()}")
 
         # Use the client normally
-        account = await client.accounts.get(client.account_id)
+        account = await client.accounts.get_account(client.account_id)
         print(f"Balance: {account.balance} {account.currency}")
 ```
 
@@ -102,7 +102,7 @@ def sync_example():
         raise ValueError("MOMENTUM_ environment variables not found")
 
     with Client(config=momentum_config) as client:
-        account = client.accounts.get(client.account_id)
+        account = client.accounts.get_account(client.account_id)
         print(f"Balance: {account.balance} {account.currency}")
 ```
 
@@ -141,8 +141,8 @@ async def direct_config_example():
     async with clients[0] as strategy_a:
         async with clients[1] as live_trading:
             # Execute different strategies on different accounts
-            await strategy_a.accounts.get(strategy_a.account_id)
-            await live_trading.accounts.get(live_trading.account_id)
+            await strategy_a.accounts.get_account(strategy_a.account_id)
+            await live_trading.accounts.get_account(live_trading.account_id)
 ```
 
 ## Method 3: Mixed Approach
@@ -173,9 +173,9 @@ async def mixed_approach():
         async with AsyncClient(config=secondary_config) as secondary:
             async with AsyncClient(config=test_config) as test_client:
                 # Use different clients for different purposes
-                await primary.accounts.get(primary.account_id)
-                await secondary.accounts.get(secondary.account_id)
-                await test_client.accounts.get(test_client.account_id)
+                await primary.accounts.get_account(primary.account_id)
+                await secondary.accounts.get_account(secondary.account_id)
+                await test_client.accounts.get_account(test_client.account_id)
 ```
 
 ## Environment Variable Pattern
@@ -225,7 +225,7 @@ async def safe_config_loading():
 
     # Use the validated configuration
     async with AsyncClient(config=config) as client:
-        account = await client.accounts.get(client.account_id)
+        account = await client.accounts.get_account(client.account_id)
         return account
 
 # Alternative: Handle missing configuration gracefully
@@ -239,7 +239,7 @@ async def graceful_config_loading():
             raise ValueError("No valid configuration found")
 
     async with AsyncClient(config=config) as client:
-        return await client.accounts.get(client.account_id)
+        return await client.accounts.get_account(client.account_id)
 ```
 
 ### Resource Management
@@ -251,11 +251,11 @@ import asyncio
 async def main():
     # ✅ Correct - ensures cleanup
     async with AsyncClient(config=config) as client:
-        await client.accounts.get(client.account_id)
+        await client.accounts.get_account(client.account_id)
 
     # ❌ Incorrect - may leak resources
     client = AsyncClient(config=config)
-    await client.accounts.get(client.account_id)
+    await client.accounts.get_account(client.account_id)
 
 asyncio.run(main())
 ```
@@ -310,7 +310,7 @@ async def trading_system():
 async def scalping_strategy(client: AsyncClient):
     """High-frequency scalping strategy."""
     try:
-        account = await client.accounts.get(client.account_id)
+        account = await client.accounts.get_account(client.account_id)
         print(f"Scalping on {client.config.alias}: Balance {account.balance} {account.currency}")
 
         # Your scalping logic here
@@ -322,7 +322,7 @@ async def scalping_strategy(client: AsyncClient):
 async def swing_strategy(client: AsyncClient):
     """Medium-term swing strategy."""
     try:
-        account = await client.accounts.get(client.account_id)
+        account = await client.accounts.get_account(client.account_id)
         print(f"Swing trading on {client.config.alias}: Balance {account.balance} {account.currency}")
 
         # Your swing trading logic here
@@ -334,7 +334,7 @@ async def swing_strategy(client: AsyncClient):
 async def hedging_strategy(client: AsyncClient):
     """Risk management hedging."""
     try:
-        account = await client.accounts.get(client.account_id)
+        account = await client.accounts.get_account(client.account_id)
         print(f"Hedging on {client.config.alias}: Balance {account.balance} {account.currency}")
 
         # Your hedging logic here

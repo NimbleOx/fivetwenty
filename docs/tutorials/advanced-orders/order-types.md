@@ -147,7 +147,7 @@ from fivetwenty import AsyncClient
 async def place_mit_order():
     async with AsyncClient() as client:
         # Take profit when EUR/USD rises to 1.0950
-        response = await client.orders.post_mit_order(
+        response = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=-10000,  # Close long position

@@ -163,7 +163,7 @@ class LiveTradingValidator:
             raise ValueError(f"Order size {abs(units)} exceeds maximum {self.max_position_size}")
 
         # Check daily loss limit
-        account = await client.accounts.get(account_id)
+        account = await client.accounts.get_account(account_id)
         daily_pl = float(account.unrealized_pl) + float(account.pl)
 
         if daily_pl < -self.daily_loss_limit:
@@ -268,7 +268,7 @@ async def monitor_live_account(account_id: str, check_interval: int = 30):
 
         while True:
             try:
-                account = await client.accounts.get(account_id)
+                account = await client.accounts.get_account(account_id)
 
                 # Key metrics
                 balance = account.balance
@@ -370,7 +370,7 @@ async def test_live_configuration():
                 print(f"   Balance: {accounts[0].balance}")
 
             # Test market data access
-            instruments = await client.instruments.get_all(accounts[0].id)
+            instruments = await client.accounts.get_account_instruments(accounts[0].id)
             print(f"✅ Market data access: {len(instruments)} instruments")
 
             # Test order validation (without execution)

@@ -241,7 +241,7 @@ Unlike stocks, forex trading uses **leverage** - you can control large positions
 from decimal import Decimal
 
 # Check your account margin situation
-account = await client.accounts.get(account_id)
+account = await client.accounts.get_account(account_id)
 
 print(f"Balance: {account.balance}")              # Your actual money
 print(f"Margin Used: {account.margin_used}")     # Tied up in positions
@@ -266,7 +266,7 @@ print(f"Margin Available: {account.margin_available}")  # Available for new trad
 from decimal import Decimal
 
 # Account-level margin
-account = await client.accounts.get(account_id)
+account = await client.accounts.get_account(account_id)
 margin_utilization = Decimal(account.margin_used) / Decimal(account.balance)
 
 # Position-level margin
@@ -291,7 +291,7 @@ for trade in trades:
 
 ```python
 # Unrealized P/L (paper profits/losses)
-account = await client.accounts.get(account_id)
+account = await client.accounts.get_account(account_id)
 current_unrealized = account.unrealized_pl  # All open positions
 
 # Individual position unrealized P/L
@@ -380,7 +380,7 @@ spread = ask_price - bid_price               # Market maker profit
 See available liquidity at different price levels:
 
 ```python
-order_book = await client.instruments.order_book("EUR_USD")
+order_book = await client.instruments.get_instrument_candles("EUR_USD")
 
 # Bid side (buyers)
 for bucket in order_book.price_buckets[:5]:  # Top 5 levels
@@ -411,7 +411,7 @@ Never risk more than a small percentage of your account:
 from decimal import Decimal
 
 # The 2% rule: Never risk more than 2% on a single trade
-account = await client.accounts.get(account_id)
+account = await client.accounts.get_account(account_id)
 account_balance = Decimal(account.balance)
 max_risk = account_balance * Decimal("0.02")  # 2% of account
 
@@ -458,7 +458,7 @@ Track account performance:
 from decimal import Decimal
 
 # Monitor account equity (balance + unrealized P/L)
-account = await client.accounts.get(account_id)
+account = await client.accounts.get_account(account_id)
 current_equity = Decimal(str(account.balance)) + Decimal(str(account.unrealized_pl))
 
 # Compare to account high-water mark
@@ -535,7 +535,7 @@ Profit from interest rate differentials:
 # - Interest rate differential (swap/rollover)
 
 # Check financing costs/credits
-instruments = await client.instruments.get_all(account_id)
+instruments = await client.instruments.get_instrument_candles(account_id)
 aud_jpy = next(i for i in instruments if i.name == "AUD_JPY")
 
 if hasattr(aud_jpy, 'financing'):
@@ -593,7 +593,7 @@ async def main():
     async def price_monitor(client, account_id, instruments):
         """Monitor real-time prices for trading signals."""
 
-        async for price_data in client.pricing.stream(account_id, instruments):
+        async for price_data in client.pricing.get_pricing_stream(account_id, instruments):
             if price_data.type == "PRICE":
                 # price_data is ClientPrice object
                 current_bid = price_data.bids[0].price

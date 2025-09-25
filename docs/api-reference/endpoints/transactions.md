@@ -50,10 +50,10 @@ Get transaction history for account.
 
 ## get
 ```python
-# transactions.get(account_id: AccountID, transaction_id: str) -> dict[str, Any]
+# transactions.get_transaction(account_id: AccountID, transaction_id: str) -> dict[str, Any]
 
 # Example usage:
-transaction = await client.transactions.get(
+transaction = await client.transactions.get_transaction(
     account_id="123-456-789",
     transaction_id="12345"
 )
@@ -81,11 +81,11 @@ Get specific transaction details.
 
 ## list_since
 ```python
-# transactions.list_since(account_id: AccountID, transaction_id: str,
+# transactions.get_transactions_since_id(account_id: AccountID, transaction_id: str,
 #                        transaction_type: list[str] | None = None) -> dict[str, Any]
 
 # Example usage:
-transactions = await client.transactions.list_since(
+transactions = await client.transactions.get_transactions_since_id(
     account_id="123-456-789",
     transaction_id="100",
     transaction_type=["ORDER_FILL"]
@@ -115,10 +115,10 @@ Get transactions since specific transaction ID.
 
 ## stream
 ```python
-# transactions.stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
+# transactions.get_transactions_stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
 
 # Example usage:
-async for transaction in client.transactions.stream(
+async for transaction in client.transactions.get_transactions_stream(
     account_id="123-456-789",
     stall_timeout=60.0
 ):
@@ -148,11 +148,11 @@ Stream real-time transactions.
 
 ## get_range
 ```python
-# transactions.get_range(account_id: AccountID, from_transaction_id: str,
+# transactions.get_transactions_range(account_id: AccountID, from_transaction_id: str,
 #                       to_transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
 
 # Example usage:
-transactions = await client.transactions.get_range(
+transactions = await client.transactions.get_transactions_range(
     account_id="123-456-789",
     from_transaction_id="100",
     to_transaction_id="200"
@@ -183,11 +183,11 @@ Get transactions in ID range.
 
 ## get_all
 ```python
-# transactions.get_all(account_id: AccountID, count: int = 500,
+# transactions.get_transactions(account_id: AccountID, count: int = 500,
 #                     transaction_type: list[str] | None = None) -> dict[str, Any]
 
 # Example usage:
-all_transactions = await client.transactions.get_all(
+all_transactions = await client.transactions.get_transactions(
     account_id="123-456-789",
     count=100,
     transaction_type=["ORDER_FILL", "MARKET_ORDER"]

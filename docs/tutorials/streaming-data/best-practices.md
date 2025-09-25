@@ -132,7 +132,7 @@ class ProductionStreamingSystem:
                     continue
 
                 async with self.clients[0] as client:
-                    async for price in client.pricing.stream(
+                    async for price in client.pricing.get_pricing_stream(
                         account_id=self.config.account_id,
                         instruments=instruments
                     ):

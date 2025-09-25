@@ -49,12 +49,12 @@ Get current prices for instruments.
 
 ## stream
 ```python
-# pricing.stream(account_id: AccountID, instruments: list[str], snapshot: bool = True,
+# pricing.get_pricing_stream(account_id: AccountID, instruments: list[str], snapshot: bool = True,
 #               include_home_conversions: bool = False, stall_timeout: float = 30.0)
 #               -> AsyncIterator[ClientPrice | PricingHeartbeat]
 
 # Example usage:
-async for price in client.pricing.stream(
+async for price in client.pricing.get_pricing_stream(
     account_id="123-456-789",
     instruments=["EUR_USD", "GBP_USD"],
     snapshot=True
@@ -91,7 +91,7 @@ Stream real-time pricing data.
 import asyncio
 
 async def main():
-    # pricing.candles(account_id: AccountID, instrument: str, price: str = "M",
+    # pricing.get_latest_candles(account_id: AccountID, instrument: str, price: str = "M",
     #                granularity: str = "S5", count: int | None = None,
     #                from_time: str | None = None, to_time: str | None = None,
     #                smooth: bool = False, include_first: bool = True,
@@ -99,7 +99,7 @@ async def main():
     #                weekly_alignment: str = "Friday") -> dict[str, Any]
 
     # Example usage:
-    candles = await client.pricing.candles(
+    candles = await client.pricing.get_latest_candles(
         account_id="123-456-789",
         instrument="EUR_USD",
         granularity="H1",
@@ -141,13 +141,13 @@ Get historical candle data for an instrument.
 
 ## latest_candles
 ```python
-# pricing.latest_candles(account_id: AccountID, candle_specifications: list[str],
+# pricing.get_latest_candles(account_id: AccountID, candle_specifications: list[str],
 #                       units: int = 1, smooth: bool = False,
 #                       daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
 #                       weekly_alignment: str = "Friday") -> dict[str, Any]
 
 # Example usage:
-candles = await client.pricing.latest_candles(
+candles = await client.pricing.get_latest_candles(
     account_id="123-456-789",
     candle_specifications=["EUR_USD:S5:BM", "GBP_USD:M1:BM"],
     units=50
@@ -181,13 +181,13 @@ Get latest candles for multiple instruments.
 
 ## stream_iter
 ```python
-# pricing.stream_iter(account_id: AccountID, instruments: list[str],
+# pricing.get_pricing_stream(account_id: AccountID, instruments: list[str],
 #                    snapshot: bool = True, include_home_conversions: bool = False,
 #                    config: StreamingConfiguration | None = None)
 #                    -> AsyncIterator[ClientPrice | PricingHeartbeat]
 
 # Example usage:
-for price in client.pricing.stream_iter(
+for price in client.pricing.get_pricing_stream(
     account_id="123-456-789",
     instruments=["EUR_USD", "GBP_USD"]
 ):

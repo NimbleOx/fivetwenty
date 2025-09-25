@@ -40,7 +40,7 @@ class TechnicalAnalysisProvider:
         """Get comprehensive technical analysis for an instrument."""
 
         # Fetch historical data
-        candles_response = await self.fivetwenty_client.instruments.candles(
+        candles_response = await self.fivetwenty_client.instruments.get_instrument_candles(
             instrument=instrument,
             count=periods,
             granularity=timeframe

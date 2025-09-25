@@ -50,7 +50,7 @@ class AdvancedStreamManager:
         self.connection_state = "connecting"
 
         if stream_type == "pricing":
-            async for data in self.client.pricing.stream(
+            async for data in self.client.pricing.get_pricing_stream(
                 account_id=self.account_id,
                 instruments=instruments
             ):
@@ -63,7 +63,7 @@ class AdvancedStreamManager:
                 await self._process_stream_data("pricing", data)
 
         elif stream_type == "transactions":
-            async for data in self.client.transactions.stream(
+            async for data in self.client.transactions.get_transactions_stream(
                 account_id=self.account_id
             ):
                 if not self.is_streaming:
@@ -136,7 +136,7 @@ class HAStreamingCluster:
         """Run primary streaming connection."""
 
         try:
-            async for price in client.pricing.stream(
+            async for price in client.pricing.get_pricing_stream(
                 account_id=self.account_id,
                 instruments=instruments
             ):

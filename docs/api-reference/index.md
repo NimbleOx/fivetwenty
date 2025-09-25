@@ -89,7 +89,7 @@ Exception documentation including:
 - `client.accounts.get_account_summary(account_id)` - Get account overview
 - `client.orders.post_order(account_id, order)` - Place new order
 - `client.positions.get_positions(account_id)` - Get current positions
-- `client.pricing.stream_pricing(instruments)` - Stream live prices
+- `client.pricing.get_pricing_stream(instruments)` - Stream live prices
 
 ### **Essential Models**
 - `OrderRequest` - Order placement parameters

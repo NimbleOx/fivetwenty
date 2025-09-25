@@ -473,7 +473,7 @@ class TestPricingStreaming:
             prices = []
             heartbeats = []
 
-            async for item in client.pricing.stream_pricing("123-456-789", ["EUR_USD"]):
+            async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
                 if hasattr(item, 'instrument'):  # Price
                     prices.append(item)
                 else:  # Heartbeat
@@ -498,7 +498,7 @@ class TestPricingStreaming:
         with patch.object(client.pricing, '_stream_lines', return_value=slow_stream()):
             with patch('fivetwenty.endpoints.pricing.HEARTBEAT_TIMEOUT', 1):  # 1 second timeout
                 with pytest.raises(StreamStall):
-                    async for _ in client.pricing.stream_pricing("123-456-789", ["EUR_USD"]):
+                    async for _ in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
                         pass
 ```
 
@@ -518,7 +518,7 @@ class TestStreamingIntegration:
 
         async with client:
             stream_count = 0
-            async for item in client.pricing.stream_pricing(account_id, instruments):
+            async for item in client.pricing.get_pricing_stream(account_id, instruments):
                 stream_count += 1
 
                 # Verify stream item structure
@@ -663,7 +663,7 @@ class TestMemoryUsage:
 
         async with client:
             stream_count = 0
-            async for item in client.pricing.stream_pricing("123-456-789", ["EUR_USD"]):
+            async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
                 stream_count += 1
 
                 # Check memory every 100 items

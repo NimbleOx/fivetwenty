@@ -38,7 +38,7 @@ class BasicPriceStreamer:
         self.is_streaming = True
 
         try:
-            async for price in self.client.pricing.stream(
+            async for price in self.client.pricing.get_pricing_stream(
                 account_id=self.account_id,
                 instruments=instruments
             ):
@@ -130,7 +130,7 @@ class AccountStreamer:
         self.is_streaming = True
 
         try:
-            async for transaction in self.client.transactions.stream(
+            async for transaction in self.client.transactions.get_transactions_stream(
                 account_id=self.account_id
             ):
                 if self.is_streaming:

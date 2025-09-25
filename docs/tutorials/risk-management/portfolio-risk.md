@@ -49,7 +49,7 @@ class RiskMonitor:
 
         try:
             # Get account info
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
             account_balance = Decimal(str(account.balance))
 
             # Get open positions
@@ -132,7 +132,7 @@ class RiskMonitor:
 
         try:
             positions = await self.client.positions.get_open_positions(self.account_id)
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
             account_balance = Decimal(str(account.balance))
 
             correlation_risks = {}
@@ -270,7 +270,7 @@ class CorrelationAnalyzer:
             start_time = end_time - timedelta(days=days_back)
             
             for instrument in instruments:
-                candles = await self.client.instruments.candles(
+                candles = await self.client.instruments.get_instrument_candles(
                     instrument=instrument,
                     granularity=CandlestickGranularity.H4,
                     from_time=start_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),

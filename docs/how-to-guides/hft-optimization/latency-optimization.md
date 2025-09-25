@@ -294,7 +294,7 @@ class FastPreTradeValidator:
         # Fetch account details
         try:
             account = await asyncio.wait_for(
-                self.client.accounts.get(account_id),
+                self.client.accounts.get_account(account_id),
                 timeout=0.5  # 500ms timeout
             )
 

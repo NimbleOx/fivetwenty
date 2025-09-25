@@ -187,7 +187,7 @@ class ATRStopCalculator:
         
         try:
             # Get historical data
-            candles = await client.instruments.candles(
+            candles = await client.instruments.get_instrument_candles(
                 instrument=instrument,
                 count=periods + 20,  # Extra data for stable calculation
                 granularity=CandlestickGranularity.H4
@@ -511,7 +511,7 @@ class TechnicalStopCalculator:
         
         try:
             # Get recent price data
-            candles = await client.instruments.candles(
+            candles = await client.instruments.get_instrument_candles(
                 instrument=instrument,
                 count=100,
                 granularity=CandlestickGranularity.H4

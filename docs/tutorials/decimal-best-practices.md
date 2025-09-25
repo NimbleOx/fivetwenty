@@ -122,7 +122,7 @@ async def calculate_position_size(
 
 # Usage example
 async def position_sizing_example():
-    account = await client.accounts.get(account_id)
+    account = await client.accounts.get_account(account_id)
     position_size = await calculate_position_size(
         account_balance=account.balance,
         risk_percentage=Decimal('2'),     # 2% risk

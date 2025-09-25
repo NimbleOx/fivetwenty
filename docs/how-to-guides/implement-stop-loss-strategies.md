@@ -161,7 +161,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
     async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
         try:
             # Get account balance
-            account = await client.accounts.get(account_id)
+            account = await client.accounts.get_account(account_id)
             account_balance = Decimal(str(account.balance))
             max_loss = account_balance * risk_percentage
 
@@ -311,7 +311,7 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
     async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
         try:
             # Get historical data for ATR calculation
-            candles_response = await client.instruments.candles(
+            candles_response = await client.instruments.get_instrument_candles(
                 instrument=instrument,
                 count=atr_period + 10,  # Extra candles for calculation
                 granularity="H1"  # 1-hour candles
@@ -747,7 +747,7 @@ async def troubleshoot_stop_loss_issues(account_id: str):
 
         try:
             # Check account margin
-            account = await client.accounts.get(account_id)
+            account = await client.accounts.get_account(account_id)
             margin_utilization = Decimal(str(account.margin_used)) / Decimal(str(account.balance))
 
             if margin_utilization > 0.8:

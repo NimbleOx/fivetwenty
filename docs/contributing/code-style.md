@@ -616,7 +616,7 @@ async def process_price_stream(
 
     buffer: list[Price] = []
 
-    async for price in client.pricing.stream_pricing(account_id, instruments):
+    async for price in client.pricing.get_pricing_stream(account_id, instruments):
         if isinstance(price, PricingHeartbeat):
             continue  # Skip heartbeats
 

@@ -49,7 +49,7 @@ class PortfolioRebalancer:
 
         try:
             # Get account summary
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
 
             # Get current positions
             positions = {}
@@ -203,7 +203,7 @@ class PortfolioRebalancer:
                     print("Rebalancing triggered...")
 
                     # Get portfolio value
-                    account = await self.client.accounts.get(self.account_id)
+                    account = await self.client.accounts.get_account(self.account_id)
                     portfolio_value = float(account.nav)
 
                     # Calculate required trades

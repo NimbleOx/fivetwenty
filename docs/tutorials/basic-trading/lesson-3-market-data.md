@@ -67,7 +67,7 @@ async def get_historical_data(instrument: str, count: int = 100):
 
     async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
-            candles = await client.instruments.candles(
+            candles = await client.instruments.get_instrument_candles(
                 instrument=instrument,
                 count=count,
                 granularity=CandlestickGranularity.H1  # 1-hour candles

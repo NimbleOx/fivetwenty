@@ -220,7 +220,7 @@ class ReconnectionPolicy:
 Streaming uses Python's native async iteration:
 
 ```python
-async for price in client.pricing.stream(account_id, ["EUR_USD"]):
+async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
     # Natural, Pythonic streaming
     process_price(price)
 ```
@@ -282,7 +282,7 @@ The SDK provides complete type information:
 ```python
 # Full type inference
 async def get_account_balance(client: AsyncClient, account_id: str) -> Decimal:
-    account = await client.accounts.get(account_id)  # Type: Account
+    account = await client.accounts.get_account(account_id)  # Type: Account
     return account.balance  # Type: Decimal (known at compile time)
 ```
 
@@ -717,7 +717,7 @@ import asyncio
 # Efficient: Run operations concurrently
 async def get_market_overview(client, account_id):
     results = await asyncio.gather(
-        client.accounts.get(account_id),
+        client.accounts.get_account(account_id),
         client.positions.get_open_positions(account_id),
         client.pricing.get_pricing(account_id, ["EUR_USD", "GBP_USD"]),
         return_exceptions=True

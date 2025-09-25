@@ -11,7 +11,7 @@ Instrument information and historical data.
 import asyncio
 
 async def main():
-    # instruments.candles(instrument: str, price: str = "M", granularity: str = "S5",
+    # instruments.get_instrument_candles(instrument: str, price: str = "M", granularity: str = "S5",
     #                    count: int | None = None, from_time: str | None = None,
     #                    to_time: str | None = None, smooth: bool = False,
     #                    include_first: bool = True, daily_alignment: int = 17,

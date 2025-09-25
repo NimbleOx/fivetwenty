@@ -191,7 +191,7 @@ async def healthcheck_connection(client: AsyncClient, account_id: str) -> bool:
 
     try:
         # Quick API call to test connection
-        account = await client.accounts.get(account_id)
+        account = await client.accounts.get_account(account_id)
 
         # Check response quality
         if account and hasattr(account, 'balance'):

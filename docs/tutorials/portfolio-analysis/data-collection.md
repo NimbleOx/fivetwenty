@@ -67,7 +67,7 @@ class PortfolioAnalyzer:
             try:
                 print(f"   Fetching {instrument}...")
 
-                candles = await self.client.instruments.candles(
+                candles = await self.client.instruments.get_instrument_candles(
                     instrument=instrument,
                     count=periods,
                     granularity=granularity

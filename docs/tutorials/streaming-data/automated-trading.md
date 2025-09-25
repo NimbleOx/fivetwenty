@@ -69,7 +69,7 @@ class LiveTradingEngine:
         """Stream prices and generate signals."""
 
         try:
-            async for price in self.client.pricing.stream(
+            async for price in self.client.pricing.get_pricing_stream(
                 account_id=self.account_id,
                 instruments=instruments
             ):
@@ -129,7 +129,7 @@ class LiveTradingEngine:
         """Calculate appropriate position size."""
 
         # Get account balance
-        account = await self.client.accounts.get(self.account_id)
+        account = await self.client.accounts.get_account(self.account_id)
         balance = Decimal(str(account.balance))
 
         # Risk-based position sizing
@@ -234,7 +234,7 @@ class LiveTradingEngine:
         """Update current position information."""
 
         try:
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
 
             self.positions = {}
 

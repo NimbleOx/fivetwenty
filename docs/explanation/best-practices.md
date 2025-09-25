@@ -139,7 +139,7 @@ class PositionSizer:
         """Calculate position size based on risk."""
 
         # Get account info
-        account = await client.accounts.get(account_id)
+        account = await client.accounts.get_account(account_id)
         balance = Decimal(account.balance)
 
         # Calculate risk amount
@@ -575,7 +575,7 @@ async def test_account_balance_check(mock_client):
     mock_client.accounts.get.return_value = mock_account
 
     # Test the function
-    account = await mock_client.accounts.get("test-account")
+    account = await mock_client.accounts.get_account("test-account")
 
     assert account.balance == Decimal("10000.00")
     assert account.margin_available == Decimal("8000.00")
@@ -722,7 +722,7 @@ async def test_concurrent_requests():
 
     async def make_request(client, account_id):
         start = time.time()
-        await client.accounts.get(account_id)
+        await client.accounts.get_account(account_id)
         return time.time() - start
 
     async with AsyncClient(
@@ -914,7 +914,7 @@ async def performance_test():
         # Multiple concurrent operations
         results = await asyncio.gather(
             client.accounts.get_accounts(),
-            client.accounts.get("your-account-id"),
+            client.accounts.get_account("your-account-id"),
             client.pricing.get_pricing("your-account-id", ["EUR_USD", "GBP_USD"]),
             return_exceptions=True
         )

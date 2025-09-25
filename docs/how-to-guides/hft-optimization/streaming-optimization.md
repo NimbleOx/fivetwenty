@@ -50,7 +50,7 @@ class HighPerformanceStreamer:
         print(f"🚀 Starting HFT streaming for {len(instruments)} instruments")
 
         try:
-            async for price_data in self.client.pricing.stream(account_id, instruments):
+            async for price_data in self.client.pricing.get_pricing_stream(account_id, instruments):
                 if not self.streaming_active:
                     break
 

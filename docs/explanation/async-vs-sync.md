@@ -42,7 +42,7 @@ async def async_example():
         # Concurrent requests (fast!)
         accounts, instruments = await asyncio.gather(
             client.accounts.get_accounts(),
-            client.instruments.get_all("101-001-1234567-001")
+            client.instruments.get_instrument_candles("101-001-1234567-001")
         )
 
         print(f"Found {len(accounts)} accounts")
@@ -62,7 +62,7 @@ async def concurrent_operations(client, account_id):
 
     # All requests happen in parallel - much faster!
     results = await asyncio.gather(
-        client.accounts.get(account_id),
+        client.accounts.get_account(account_id),
         client.positions.get_open_positions(account_id),
         client.orders.get_pending_orders(account_id),
         client.trades.get_open_trades(account_id),
@@ -89,7 +89,7 @@ Async streaming is natural and efficient:
 ```python
 async def stream_prices(client, account_id):
     """Stream real-time prices."""
-    async for price in client.pricing.stream(account_id, ["EUR_USD"]):
+    async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
         if price.type == "PRICE":
             print(f"EUR/USD: Bid={price.bids[0].price}, Ask={price.asks[0].price}")
         elif price.type == "HEARTBEAT":
@@ -130,7 +130,7 @@ with Client(
 ) as client:
     # Sequential requests
     accounts = client.accounts.get_accounts()
-    account = client.accounts.get(accounts[0].id)
+    account = client.accounts.get_account(accounts[0].id)
 
     print(f"Account balance: {account.balance}")
 ```
@@ -142,7 +142,7 @@ Sync client provides streaming via iterator:
 ```python
 def stream_prices_sync(client, account_id):
     """Stream prices synchronously."""
-    for price in client.pricing.stream_iter(account_id, ["EUR_USD"]):
+    for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
         if price.type == "PRICE":
             print(f"Price: {price.asks[0].price}")
 
@@ -234,14 +234,14 @@ If you have sync code and want to upgrade:
 ```python
 # OLD: Synchronous code
 def get_account_sync(client, account_id):
-    account = client.accounts.get(account_id)
+    account = client.accounts.get_account(account_id)
     positions = client.positions.get_open_positions(account_id)
     return account, positions
 
 # NEW: Asynchronous code
 async def get_account_async(client, account_id):
     account, positions = await asyncio.gather(
-        client.accounts.get(account_id),
+        client.accounts.get_account(account_id),
         client.positions.get_open_positions(account_id)
     )
     return account, positions
@@ -296,7 +296,7 @@ async def shutdown():
 @app.get("/account/{account_id}")
 async def get_account(account_id: str):
     """Async endpoint."""
-    account = await client.accounts.get(account_id)
+    account = await client.accounts.get_account(account_id)
     return {"balance": account.balance, "currency": account.currency}
 ```
 
@@ -316,7 +316,7 @@ def get_client():
 def get_account(account_id):
     """Sync endpoint."""
     with get_client() as client:
-        account = client.accounts.get(account_id)
+        account = client.accounts.get_account(account_id)
         return jsonify({
             "balance": account.balance,
             "currency": account.currency

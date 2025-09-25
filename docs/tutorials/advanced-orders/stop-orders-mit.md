@@ -213,7 +213,7 @@ async def mean_reversion_mit_strategy():
 
         # MIT orders for mean reversion entries
         # Sell MIT when price goes too high (expect reversion down)
-        sell_mit_response = await client.orders.post_mit_order(
+        sell_mit_response = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=-10000,  # Short position
@@ -222,7 +222,7 @@ async def mean_reversion_mit_strategy():
         )
 
         # Buy MIT when price goes too low (expect reversion up)
-        buy_mit_response = await client.orders.post_mit_order(
+        buy_mit_response = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=10000,  # Long position
@@ -263,7 +263,7 @@ async def bollinger_band_reversion():
 
         # MIT orders at Bollinger Band extremes
         # Sell when price touches upper band (overbought)
-        sell_mit = await client.orders.post_mit_order(
+        sell_mit = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=-15000,
@@ -272,7 +272,7 @@ async def bollinger_band_reversion():
         )
 
         # Buy when price touches lower band (oversold)
-        buy_mit = await client.orders.post_mit_order(
+        buy_mit = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=15000,
@@ -328,7 +328,7 @@ class RSIMeanReversion:
         if 35 < rsi_data["current_rsi"] < 65:
 
             # Sell MIT at overbought level
-            sell_mit = await self.client.orders.post_mit_order(
+            sell_mit = await self.client.orders.post_market_if_touched_order(
                 account_id=self.account_id,
                 instrument=instrument,
                 units=-12000,
@@ -337,7 +337,7 @@ class RSIMeanReversion:
             )
 
             # Buy MIT at oversold level
-            buy_mit = await self.client.orders.post_mit_order(
+            buy_mit = await self.client.orders.post_market_if_touched_order(
                 account_id=self.account_id,
                 instrument=instrument,
                 units=12000,
@@ -607,7 +607,7 @@ async def stop_mit_combination_strategy():
         )
 
         # Place MIT orders for mean reversion
-        sell_mit = await client.orders.post_mit_order(
+        sell_mit = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=-8000,  # Smaller size for reversion
@@ -615,7 +615,7 @@ async def stop_mit_combination_strategy():
             time_in_force="GTC"
         )
 
-        buy_mit = await client.orders.post_mit_order(
+        buy_mit = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=8000,

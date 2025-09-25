@@ -31,7 +31,7 @@ async def stream_prices():
         environment=Environment.PRACTICE
     ) as client:
         # Stream EUR/USD and GBP/USD prices
-        async for price in client.pricing.stream(
+        async for price in client.pricing.get_pricing_stream(
             account_id="101-001-1234567-001",
             instruments=["EUR_USD", "GBP_USD"]
         ):
@@ -55,7 +55,7 @@ async def process_price_stream(client, account_id):
     spreads = {}
     last_prices = {}
 
-    async for event in client.pricing.stream(account_id, ["EUR_USD", "GBP_USD"]):
+    async for event in client.pricing.get_pricing_stream(account_id, ["EUR_USD", "GBP_USD"]):
         if isinstance(event, ClientPrice):
             # Calculate spread
             if event.bids and event.asks:
@@ -94,7 +94,7 @@ async def multi_instrument_stream(client, account_id):
 
     price_tracker = {}
 
-    async for price in client.pricing.stream(account_id, instruments):
+    async for price in client.pricing.get_pricing_stream(account_id, instruments):
         if price.type == "PRICE":
             # Update price tracker
             price_tracker[price.instrument] = {
@@ -118,7 +118,7 @@ Monitor account updates in real-time:
 async def stream_transactions(client, account_id):
     """Stream transaction events."""
 
-    async for event in client.transactions.stream(account_id):
+    async for event in client.transactions.get_transactions_stream(account_id):
         if event.type == "TRANSACTION":
             transaction = event.transaction
 
@@ -171,7 +171,7 @@ config = StreamingConfiguration(
 )
 
 # Use configuration (future enhancement)
-# async for price in client.pricing.stream_with_config(config):
+# async for price in client.pricing.get_pricing_stream(config.account_id, config.instruments):
 #     process_price(price)
 ```
 
@@ -193,7 +193,7 @@ async def resilient_stream(client, account_id, instruments):
 
     while retry_count < max_retries:
         try:
-            async for price in client.pricing.stream(
+            async for price in client.pricing.get_pricing_stream(
                 account_id=account_id,
                 instruments=instruments,
                 stall_timeout=30.0  # Raise StreamStall after 30s without data
@@ -246,7 +246,7 @@ class StreamManager:
         }
 
         try:
-            async for price in self.client.pricing.stream(
+            async for price in self.client.pricing.get_pricing_stream(
                 self.account_id,
                 instruments
             ):
@@ -298,7 +298,7 @@ def sync_price_stream():
         environment=Environment.PRACTICE
     ) as client:
         # Iterator-based streaming
-        for price in client.pricing.stream_iter(
+        for price in client.pricing.get_pricing_stream(
             account_id="101-001-1234567-001",
             instruments=["EUR_USD"]
         ):
@@ -340,7 +340,7 @@ class ThreadedStreamer:
     def _stream_worker(self, account_id, instruments):
         """Worker thread for streaming."""
 
-        for price in self.client.pricing.stream_iter(account_id, instruments):
+        for price in self.client.pricing.get_pricing_stream(account_id, instruments):
             if not self.running:
                 break
 
@@ -395,7 +395,7 @@ class PriceAggregator:
     async def process_stream(self, client, account_id, instruments):
         """Process and aggregate price stream."""
 
-        async for price in client.pricing.stream(account_id, instruments):
+        async for price in client.pricing.get_pricing_stream(account_id, instruments):
             if price.type != "PRICE":
                 continue
 
@@ -483,7 +483,7 @@ async def optimized_stream_processing(client, account_id):
     batch = []
     batch_size = 10
 
-    async for price in client.pricing.stream(account_id, instruments):
+    async for price in client.pricing.get_pricing_stream(account_id, instruments):
         if price.type != "PRICE":
             continue
 

@@ -56,7 +56,7 @@ class CircuitBreaker:
         """Initialize daily tracking parameters."""
 
         try:
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
             current_balance = Decimal(str(account.nav))
 
             if self.daily_start_balance is None:
@@ -77,7 +77,7 @@ class CircuitBreaker:
         """Check all circuit breaker conditions."""
 
         try:
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
             current_balance = Decimal(str(account.nav))
 
             # Check daily loss limit
@@ -176,7 +176,7 @@ class CircuitBreaker:
         """Get current circuit breaker status."""
 
         try:
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
             current_balance = Decimal(str(account.nav))
 
             status = {
@@ -275,7 +275,7 @@ class PositionSizeEnforcer:
         
         try:
             # Get current account balance
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
             account_balance = Decimal(str(account.balance))
             
             # Calculate risk metrics
@@ -352,7 +352,7 @@ class PositionSizeEnforcer:
         
         try:
             positions = await self.client.positions.get_open_positions(self.account_id)
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
             account_balance = Decimal(str(account.balance))
 
             for position in positions:
@@ -540,7 +540,7 @@ class RealTimeRiskMonitor:
             current_time = datetime.utcnow()
             
             # Get account and position data
-            account = await self.client.accounts.get(self.account_id)
+            account = await self.client.accounts.get_account(self.account_id)
             positions = await self.client.positions.get_open_positions(self.account_id)
             
             # Calculate risk metrics

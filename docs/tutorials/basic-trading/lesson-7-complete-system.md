@@ -53,7 +53,7 @@ async def run_complete_trading_strategy(strategy: SimpleMovingAverageCrossover, 
                     print(f"   Slow MA: {slow_ma:.5f}")
 
                 # Step 3: Check current position
-                open_trades = await client.trades.list_trades(
+                open_trades = await client.trades.get_trades(
                     strategy.account_id,
                     state="OPEN",
                     instrument=strategy.instrument

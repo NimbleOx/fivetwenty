@@ -84,7 +84,7 @@ async def check_account(client):
         raise RuntimeError("No accounts found")
 
     # Get detailed account information
-    account = await client.accounts.get(accounts[0].id)
+    account = await client.accounts.get_account(accounts[0].id)
 
     print(f"📊 Account Summary: {client.config.summary()}")
     print(f"💰 Balance: {account.balance} {account.currency}")
@@ -200,7 +200,7 @@ async def first_trade_example():
 
                 # 5. Show updated account balance
                 print("\n📊 Updated Account Status:")
-                updated_account = await client.accounts.get(client.account_id)
+                updated_account = await client.accounts.get_account(client.account_id)
                 print(f"   💰 New Balance: {updated_account.balance}")
                 print(f"   📈 Unrealized P/L: {updated_account.unrealized_pl}")
 
@@ -346,7 +346,7 @@ async def close_position_example():
                 print("\n📊 Position successfully closed!")
 
                 # Check updated account balance
-                account = await client.accounts.get(client.account_id)
+                account = await client.accounts.get_account(client.account_id)
                 print(f"   💰 Updated Balance: {account.balance}")
                 print(f"   📊 Open Trade Count: {account.open_trade_count}")
 
@@ -525,7 +525,7 @@ def sync_trading_example():
         print(f"📊 Found {len(accounts)} accounts")
 
         # Check balance
-        account = client.accounts.get(client.account_id)
+        account = client.accounts.get_account(client.account_id)
         print(f"💰 Balance: {account.balance} {account.currency}")
 
         # Get price
@@ -560,7 +560,7 @@ def sync_direct_params_example():
         environment=Environment.PRACTICE
     ) as client:
         # Same trading logic...
-        account = client.accounts.get(client.account_id)
+        account = client.accounts.get_account(client.account_id)
         print(f"Balance: {account.balance}")
 
 if __name__ == "__main__":
@@ -594,7 +594,7 @@ async def async_advantage():
 def sync_advantage():
     with Client() as client:
         # Simple, readable sequential flow
-        account = client.accounts.get(client.account_id)
+        account = client.accounts.get_account(client.account_id)
         if float(account.margin_available) > 1000:
             order = client.orders.post_market_order(
                 account_id=client.account_id,
@@ -630,7 +630,7 @@ client = AsyncClient()  # Loads from FIVETWENTY_* env vars
 ```python
 # Calculate position size based on account balance
 async def calculate_position_size(client, expected_loss_per_unit):
-    account = await client.accounts.get(client.account_id)
+    account = await client.accounts.get_account(client.account_id)
     max_risk = Decimal(str(account.balance)) * Decimal('0.02')  # 2% risk per trade
     position_size = min(1000, int(max_risk / expected_loss_per_unit))
     return position_size
@@ -714,7 +714,7 @@ except FiveTwentyError as e:
 ```python
 # Check margin before trading
 async def check_margin_requirements(client, units, instrument="EUR_USD"):
-    account = await client.accounts.get(client.account_id)
+    account = await client.accounts.get_account(client.account_id)
     margin_available = float(account.margin_available)
 
     # Rough margin calculation (varies by instrument)

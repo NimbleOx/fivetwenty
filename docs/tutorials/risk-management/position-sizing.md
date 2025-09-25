@@ -101,7 +101,7 @@ async def demo_position_sizing(account_id: str):
 
     async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
         # Get account balance
-        account = await client.accounts.get(account_id)
+        account = await client.accounts.get_account(account_id)
         balance = Decimal(str(account.balance))
 
         # Create position sizer
@@ -156,7 +156,7 @@ class VolatilityPositionSizer(PositionSizer):
 
         try:
             # Get historical data for ATR calculation
-            candles = await client.instruments.candles(
+            candles = await client.instruments.get_instrument_candles(
                 instrument=instrument,
                 count=50,
                 granularity=CandlestickGranularity.H4
@@ -219,7 +219,7 @@ async def demo_atr_position_sizing(account_id: str):
         return
 
     async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
-        account = await client.accounts.get(account_id)
+        account = await client.accounts.get_account(account_id)
         balance = Decimal(str(account.balance))
 
         sizer = VolatilityPositionSizer(balance, max_risk_percent=1.5)

@@ -59,7 +59,7 @@ async def connect_with_detailed_feedback():
         async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
 
             print("2️⃣ Requesting account list...")
-            accounts = await client.accounts.list_accounts()
+            accounts = await client.accounts.get_accounts()
 
             if not accounts:
                 print("❌ No accounts found - check your token and environment")
@@ -169,7 +169,7 @@ async def check_account_status(account_id: str):
 
     async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
-            account = await client.accounts.get(account_id)
+            account = await client.accounts.get_account(account_id)
 
             print("💰 Account Status:")
             print(f"   Balance: {account.balance} {account.currency}")

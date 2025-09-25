@@ -70,7 +70,7 @@ async def main():
     from fivetwenty.exceptions import StreamStall
 
     try:
-        async for item in client.pricing.stream_pricing("123-456-789", ["EUR_USD"]):
+        async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
             pass
     except StreamStall as e:
         print(f"Stream stalled: {e.message}")
