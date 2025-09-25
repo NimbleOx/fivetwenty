@@ -57,7 +57,7 @@ async def main():
     trade3 = await client.orders.post_market_order(account_id, "EUR_USD", -5000)   # Sell 5k EUR
 
     # Results in 3 separate Trade objects
-    trades = await client.trades.list_open(account_id)  # Returns 3 trades
+    trades = await client.trades.get_open_trades(account_id)  # Returns 3 trades
 
 asyncio.run(main())
 ```
@@ -76,7 +76,7 @@ A **position** is the net exposure for an instrument:
 
 ```python
 # After the trades above, you have:
-position = await client.positions.get(account_id, "EUR_USD")
+position = await client.positions.get_position(account_id, "EUR_USD")
 
 # Position shows NET exposure:
 # Long: 25,000 EUR (10k + 15k)
@@ -270,12 +270,12 @@ account = await client.accounts.get(account_id)
 margin_utilization = Decimal(account.margin_used) / Decimal(account.balance)
 
 # Position-level margin
-positions = await client.positions.list_open(account_id)
+positions = await client.positions.get_open_positions(account_id)
 for position in positions:
     print(f"{position.instrument}: {position.margin_used} margin used")
 
 # Individual trade margin
-trades = await client.trades.list_open(account_id)
+trades = await client.trades.get_open_trades(account_id)
 for trade in trades:
     print(f"Trade {trade.id}: {trade.margin_used} margin")
 ```
@@ -295,11 +295,11 @@ account = await client.accounts.get(account_id)
 current_unrealized = account.unrealized_pl  # All open positions
 
 # Individual position unrealized P/L
-position = await client.positions.get(account_id, "EUR_USD")
+position = await client.positions.get_position(account_id, "EUR_USD")
 eur_usd_unrealized = position.unrealized_pl
 
 # Realized P/L tracking
-for trade in await client.trades.list_open(account_id):
+for trade in await client.trades.get_open_trades(account_id):
     print(f"Trade {trade.id}: Realized P/L = {trade.realized_pl}")
 ```
 
@@ -330,7 +330,7 @@ When your account currency differs from the quote currency:
 # P/L is calculated in JPY (quote currency)
 # Then converted to USD (account currency)
 
-position = await client.positions.get(account_id, "GBP_JPY")
+position = await client.positions.get_position(account_id, "GBP_JPY")
 # position.unrealized_pl is already in USD (your account currency)
 
 # The SDK handles conversion automatically using current exchange rates
@@ -362,7 +362,7 @@ Trading Cost: You immediately lose the spread when opening a position
 ```
 
 ```python
-prices = await client.pricing.get(account_id, ["EUR_USD"])
+prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
 eur_usd_price = prices[0]
 
 bid_price = eur_usd_price.bids[0].price      # Price you can SELL at
@@ -439,8 +439,8 @@ Be aware of correlated positions:
 # EUR_USD and GBP_USD often move together
 # Having large positions in both = concentration risk
 
-eur_position = await client.positions.get(account_id, "EUR_USD")
-gbp_position = await client.positions.get(account_id, "GBP_USD")
+eur_position = await client.positions.get_position(account_id, "EUR_USD")
+gbp_position = await client.positions.get_position(account_id, "GBP_USD")
 
 # Calculate total USD exposure
 eur_net = eur_position.long.units + eur_position.short.units

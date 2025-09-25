@@ -25,7 +25,7 @@ async with AsyncClient(
     token="your-api-token",
     environment=Environment.PRACTICE
 ) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 ```
 
 ### Configuration Objects
@@ -48,7 +48,7 @@ config = AccountConfig(
 
 # Use configuration
 async with AsyncClient(config=config) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 ```
 
 ### Environment Variables
@@ -71,7 +71,7 @@ async def main():
 
     # No configuration needed - loads automatically
     async with AsyncClient() as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
 
 asyncio.run(main())
 ```
@@ -169,7 +169,7 @@ from fivetwenty import AsyncClient, Environment
 
 # Automatically loads FIVETWENTY_* variables
 async with AsyncClient() as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 ```
 
 #### Custom Environment Variable Prefixes
@@ -389,7 +389,7 @@ async with AsyncClient(
     logger=logger
 ) as client:
     # Client operations will be logged
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 ```
 
 ## Sync Client Configuration
@@ -401,16 +401,16 @@ from fivetwenty import Client, AccountConfig, Environment
 
 # Direct parameters
 with Client(token="your-token", environment=Environment.PRACTICE) as client:
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 
 # Configuration object
 config = AccountConfig(...)
 with Client(config=config) as client:
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 
 # Environment variables
 with Client() as client:  # Loads from FIVETWENTY_* variables
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 ```
 
 ## Production Deployment Patterns
@@ -523,7 +523,7 @@ async def main():
             environment=Environment.PRACTICE if environment == 'practice' else Environment.LIVE
         ) as client:
             # Your trading logic here
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
             return {'accounts': len(accounts)}
 
 asyncio.run(main())

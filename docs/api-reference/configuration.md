@@ -567,7 +567,7 @@ async def verify_config_connection(config: AccountConfig) -> bool:
     """Test configuration by connecting to API."""
     try:
         async with AsyncClient(config=config) as client:
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
             return len(accounts) > 0
     except Exception as e:
         logger.error(f"Config verification failed: {e}")

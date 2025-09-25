@@ -104,7 +104,7 @@ async def implement_pip_based_stop_loss(account_id: str, instrument: str,
     async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
         try:
             # Get current price to calculate entry point
-            prices = await client.pricing.get(account_id, [instrument])
+            prices = await client.pricing.get_pricing(account_id, [instrument])
             current_price = prices[0]
 
             # Use appropriate price for order direction
@@ -169,7 +169,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
             print(f"⚠️ Maximum risk: ${max_loss:.2f} ({risk_percentage:.1%})")
 
             # Get current pricing
-            prices = await client.pricing.get(account_id, [instrument])
+            prices = await client.pricing.get_pricing(account_id, [instrument])
             current_price = prices[0]
 
             # Calculate pip value for position size
@@ -444,7 +444,7 @@ async def move_to_breakeven(account_id: str, trade_id: str, trigger_pips: int = 
             instrument = trade.instrument
 
             # Get current market price
-            prices = await client.pricing.get(account_id, [instrument])
+            prices = await client.pricing.get_pricing(account_id, [instrument])
             current_price = prices[0]
 
             # Determine current market price for position
@@ -503,7 +503,7 @@ async def implement_tiered_stop_loss(account_id: str, instrument: str, units: in
     async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
         try:
             # Get current price
-            prices = await client.pricing.get(account_id, [instrument])
+            prices = await client.pricing.get_pricing(account_id, [instrument])
             entry_price = prices[0].asks[0].price if units > 0 else prices[0].bids[0].price
 
             # Calculate multiple stop levels
@@ -824,7 +824,7 @@ async def emergency_stop_all_positions(account_id: str, reason: str = "Emergency
             for position in positions:
                 try:
                     # Close entire position for this instrument
-                    response = await client.positions.close(
+                    response = await client.positions.close_position(
                         account_id=account_id,
                         instrument=position.instrument,
                         long_units="ALL",

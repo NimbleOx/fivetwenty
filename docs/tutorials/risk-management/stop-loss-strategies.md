@@ -38,7 +38,7 @@ async def place_order_with_fixed_stop(account_id: str, instrument: str, units: i
     async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
             # Get current price
-            prices = await client.pricing.get(account_id=account_id, instruments=[instrument])
+            prices = await client.pricing.get_pricing(account_id=account_id, instruments=[instrument])
 
             if units > 0:  # Buy order
                 entry_price = Decimal(str(prices[0].asks[0].price))
@@ -122,7 +122,7 @@ async def place_order_with_percentage_stop(account_id: str, instrument: str, uni
     async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
             # Get current price
-            prices = await client.pricing.get(account_id=account_id, instruments=[instrument])
+            prices = await client.pricing.get_pricing(account_id=account_id, instruments=[instrument])
 
             if units > 0:  # Buy order
                 entry_price = Decimal(str(prices[0].asks[0].price))
@@ -364,7 +364,7 @@ class TrailingStopManager:
             try:
                 # Get current price
                 instrument = trail_info['instrument']
-                prices = await self.client.pricing.get(
+                prices = await self.client.pricing.get_pricing(
                     account_id=self.account_id,
                     instruments=[instrument]
                 )
@@ -428,7 +428,7 @@ class TrailingStopManager:
                         should_update = True
 
                     if should_update:
-                        await self.client.trades.update(
+                        await self.client.trades.put_trade_orders(
                             account_id=self.account_id,
                             trade_id=trade_id,
                             stop_loss={'price': f"{new_stop:.5f}"}

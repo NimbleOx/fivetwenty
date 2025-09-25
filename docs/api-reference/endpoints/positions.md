@@ -101,14 +101,14 @@ Get the position for a specific instrument in an account.
 import asyncio
 
 async def main():
-    # positions.close(account_id: AccountID, instrument: InstrumentName,
+    # positions.close_position(account_id: AccountID, instrument: InstrumentName,
     #                long_units: str | Decimal | None = None,
     #                short_units: str | Decimal | None = None,
     #                long_client_extensions: ClientExtensions | dict[str, str] | None = None,
     #                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> dict[str, Any]
 
     # Example usage:
-    result = await client.positions.close(
+    result = await client.positions.close_position(
         account_id="123-456-789",
         instrument="EUR_USD",
         long_units="ALL"

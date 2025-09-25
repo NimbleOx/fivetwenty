@@ -11,13 +11,13 @@ Trade monitoring and management.
 import asyncio
 
 async def main():
-    # trades.list(account_id: AccountID, ids: list[TradeID] | None = None,
+    # trades.get_trades(account_id: AccountID, ids: list[TradeID] | None = None,
     #            state: TradeStateFilter = TradeStateFilter.OPEN,
     #            instrument: InstrumentName | None = None, count: int = 50,
     #            before_id: TradeID | None = None) -> dict[str, Any]
 
     # Example usage:
-    trades = await client.trades.list(
+    trades = await client.trades.get_trades(
         account_id="123-456-789",
         state=TradeStateFilter.OPEN,
         count=20

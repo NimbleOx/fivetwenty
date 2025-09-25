@@ -79,7 +79,7 @@ Before trading, verify your account status and available funds:
 async def check_account(client):
     """Check account balance and trading capacity."""
     # Get account list (we'll use the first one)
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
     if not accounts:
         raise RuntimeError("No accounts found")
 
@@ -104,7 +104,7 @@ Check current market prices before placing orders:
 async def get_price(client, instrument="EUR_USD"):
     """Get current pricing for an instrument."""
     # The SDK automatically uses the configured account ID
-    prices = await client.pricing.get(
+    prices = await client.pricing.get_pricing(
         account_id=client.account_id,
         instruments=[instrument]
     )
@@ -521,7 +521,7 @@ def sync_trading_example():
         print(f"📋 Connected: {client.config.summary()}")
 
         # All operations are synchronous
-        accounts = client.accounts.list()
+        accounts = client.accounts.get_accounts()
         print(f"📊 Found {len(accounts)} accounts")
 
         # Check balance
@@ -529,7 +529,7 @@ def sync_trading_example():
         print(f"💰 Balance: {account.balance} {account.currency}")
 
         # Get price
-        prices = client.pricing.get(
+        prices = client.pricing.get_pricing(
             account_id=client.account_id,
             instruments=["EUR_USD"]
         )
@@ -585,8 +585,8 @@ from fivetwenty import Client, AsyncClient, Environment
 async def async_advantage():
     async with AsyncClient() as client:
         # These run concurrently
-        accounts_task = client.accounts.list()
-        prices_task = client.pricing.get(client.account_id, ["EUR_USD", "GBP_USD"])
+        accounts_task = client.accounts.get_accounts()
+        prices_task = client.pricing.get_pricing(client.account_id, ["EUR_USD", "GBP_USD"])
 
         accounts, prices = await asyncio.gather(accounts_task, prices_task)
 
@@ -701,7 +701,7 @@ from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 # Error: Authentication failed
 try:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 except FiveTwentyError as e:
     if "401" in str(e):
         print("Invalid token - check your API credentials")
@@ -742,7 +742,7 @@ from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 async def check_market_hours(client, instrument="EUR_USD"):
     try:
         # Try to get current price
-        prices = await client.pricing.get(
+        prices = await client.pricing.get_pricing(
             account_id=client.account_id,
             instruments=[instrument]
         )
@@ -758,7 +758,7 @@ async def check_market_hours(client, instrument="EUR_USD"):
 ```python
 # Validate units before trading
 async def validate_trade_size(client, units, instrument="EUR_USD"):
-    instruments = await client.instruments.get(
+    instruments = await client.accounts.get_account_instruments(
         account_id=client.account_id,
         instruments=[instrument]
     )
@@ -808,7 +808,7 @@ async def robust_api_call(client, operation):
 async def api_example(client):
     accounts = await robust_api_call(
         client,
-        lambda: client.accounts.list()
+        lambda: client.accounts.get_accounts()
     )
     return accounts
 ```
@@ -825,7 +825,7 @@ async def main():
 
     try:
         async with AsyncClient() as client:
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
     except httpx.ConnectError:
         print("❌ Network connection failed")
         print("   Check internet connection and firewall settings")

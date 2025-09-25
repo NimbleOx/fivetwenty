@@ -110,7 +110,7 @@ class UnifiedTradingSystem:
         print(f"Building unified market context for {instrument}...")
 
         # Get current OANDA price
-        prices = await self.fivetwenty_client.pricing.get("101-001-1234567-001", [instrument])
+        prices = await self.fivetwenty_client.pricing.get_pricing("101-001-1234567-001", [instrument])
         current_price_data = prices[0]
 
         current_price = Decimal(str(current_price_data.asks[0].price))
@@ -840,7 +840,7 @@ class ResilientDataPipeline:
         """Get market context using only available data sources."""
 
         # Start with minimal context
-        prices = await self.unified_system.fivetwenty_client.pricing.get(
+        prices = await self.unified_system.fivetwenty_client.pricing.get_pricing(
             "101-001-1234567-001", [instrument]
         )
         current_price_data = prices[0]

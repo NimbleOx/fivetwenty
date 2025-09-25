@@ -225,7 +225,7 @@ async def rebalance_portfolio(
             net_units = long_units + short_units
 
             # Get current price
-            pricing = await client.pricing.get(
+            pricing = await client.pricing.get_pricing(
                 account_id=account_id,
                 instruments=[position.instrument]
             )
@@ -242,7 +242,7 @@ async def rebalance_portfolio(
 
         if abs(value_difference) > Decimal('10'):  # Minimum trade threshold
             # Get current price for unit calculation
-            pricing = await client.pricing.get(
+            pricing = await client.pricing.get_pricing(
                 account_id=account_id,
                 instruments=[instrument]
             )
@@ -357,7 +357,7 @@ async def convert_currency_precise(
     # Get exchange rate
     pair = f"{from_currency}_{to_currency}"
     try:
-        pricing = await client.pricing.get(
+        pricing = await client.pricing.get_pricing(
             account_id=account_id,
             instruments=[pair]
         )
@@ -365,7 +365,7 @@ async def convert_currency_precise(
     except:
         # Try reverse pair
         reverse_pair = f"{to_currency}_{from_currency}"
-        pricing = await client.pricing.get(
+        pricing = await client.pricing.get_pricing(
             account_id=account_id,
             instruments=[reverse_pair]
         )

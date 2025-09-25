@@ -11,11 +11,11 @@ Real-time pricing data and streaming.
 import asyncio
 
 async def main():
-    # pricing.get(account_id: AccountID, instruments: list[str], since: str | None = None,
+    # pricing.get_pricing(account_id: AccountID, instruments: list[str], since: str | None = None,
     #             include_units_available: bool = True, include_home_conversions: bool = False) -> dict[str, Any]
 
     # Example usage:
-    prices = await client.pricing.get(
+    prices = await client.pricing.get_pricing(
         account_id="123-456-789",
         instruments=["EUR_USD", "GBP_USD"],
         include_units_available=True

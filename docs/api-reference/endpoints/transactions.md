@@ -11,12 +11,12 @@ Transaction history and monitoring.
 import asyncio
 
 async def main():
-    # transactions.list(account_id: AccountID, from_time: str | None = None,
+    # transactions.get_transactions(account_id: AccountID, from_time: str | None = None,
     #                   to_time: str | None = None, page_size: int = 100,
     #                   transaction_type: list[str] | None = None) -> dict[str, Any]
 
     # Example usage:
-    transactions = await client.transactions.list(
+    transactions = await client.transactions.get_transactions(
         account_id="123-456-789",
         page_size=50,
         transaction_type=["ORDER_FILL", "MARKET_ORDER"]

@@ -87,7 +87,7 @@ class Client:
 
     def accounts_list(self):
         # Delegates to async client via thread pool
-        return self._run_async(self._async_client.accounts.list())
+        return self._run_async(self._async_client.accounts.get_accounts())
 ```
 
 ### Context Manager Pattern
@@ -103,7 +103,7 @@ from fivetwenty import AsyncClient, Environment
 
 # Correct usage - connection automatically managed
 async with AsyncClient(...) as client:
-    result = await client.accounts.list()
+    result = await client.accounts.get_accounts()
 # Connection automatically closed here
 ```
 
@@ -313,8 +313,8 @@ from fivetwenty import AsyncClient, Environment
 
 async with AsyncClient(...) as client:
     # Single connection pool for multiple requests
-    accounts = await client.accounts.list()
-    prices = await client.pricing.get(account_id, ["EUR_USD"])
+    accounts = await client.accounts.get_accounts()
+    prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
     # Both use same underlying connection pool
 ```
 
@@ -473,10 +473,10 @@ import asyncio
 
 async def main():
     # New preferred method
-    await client.accounts.list()
+    await client.accounts.get_accounts()
 
     # Deprecated (shows warning)
-    await client.get_accounts()  # Deprecated: use accounts.list()
+    await client.get_accounts()  # Deprecated: use accounts.get_accounts()
 
 asyncio.run(main())
 ```
@@ -673,7 +673,7 @@ logging.getLogger("httpx").setLevel(logging.DEBUG)
 
 async with AsyncClient(...) as client:
     # All HTTP requests/responses will be logged
-    result = await client.accounts.list()
+    result = await client.accounts.get_accounts()
 ```
 
 #### Model Validation Debugging
@@ -700,13 +700,13 @@ from fivetwenty import AsyncClient, Environment
 
 # Good: Reuse client for multiple operations
 async with AsyncClient(...) as client:
-    accounts = await client.accounts.list()
-    prices = await client.pricing.get(account_id, ["EUR_USD"])
+    accounts = await client.accounts.get_accounts()
+    prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
 
 # Bad: Create new client for each operation
 async def get_accounts():
     async with AsyncClient(...) as client:
-        return await client.accounts.list()
+        return await client.accounts.get_accounts()
 ```
 
 #### Concurrent Operations
@@ -718,8 +718,8 @@ import asyncio
 async def get_market_overview(client, account_id):
     results = await asyncio.gather(
         client.accounts.get(account_id),
-        client.positions.list_open(account_id),
-        client.pricing.get(account_id, ["EUR_USD", "GBP_USD"]),
+        client.positions.get_open_positions(account_id),
+        client.pricing.get_pricing(account_id, ["EUR_USD", "GBP_USD"]),
         return_exceptions=True
     )
     return results

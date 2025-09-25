@@ -146,7 +146,7 @@ class PositionSizer:
         risk_amount = balance * Decimal(str(self.risk_per_trade))
 
         # Get instrument info for pip value
-        instruments = await client.instruments.get(
+        instruments = await client.accounts.get_account_instruments(
             account_id=account_id,
             instruments=[instrument]
         )
@@ -344,7 +344,7 @@ class StateManager:
         """Recover positions after restart."""
 
         # Get current positions
-        current = await client.positions.list_open(account_id)
+        current = await client.positions.get_open_positions(account_id)
 
         # Compare with saved state
         for position in current:
@@ -422,7 +422,7 @@ class CachedDataProvider:
                 return self.cache[cache_key]
 
         # Fetch fresh data
-        data = await self.client.instruments.get(
+        data = await self.client.accounts.get_account_instruments(
             account_id=account_id,
             instruments=[instrument]
         )
@@ -462,7 +462,7 @@ class HealthMonitor:
 
         # Check API connectivity
         try:
-            accounts = await self.client.accounts.list()
+            accounts = await self.client.accounts.get_accounts()
             health["checks"]["api"] = "ok"
         except Exception as e:
             health["checks"]["api"] = f"failed: {e}"
@@ -629,7 +629,7 @@ async def test_account_retrieval():
         token=os.environ["TEST_OANDA_TOKEN"],
         environment=Environment.PRACTICE
     ) as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
 
         assert len(accounts) > 0
         assert accounts[0].currency in ["USD", "EUR", "GBP"]
@@ -656,7 +656,7 @@ async def test_full_trade_lifecycle():
         trade_id = order.order_fill_transaction.trade_opened_id
 
         # Verify trade created
-        trades = await client.trades.list_open(account_id)
+        trades = await client.trades.get_open_trades(account_id)
         trade_ids = [t.id for t in trades]
         assert trade_id in trade_ids
 
@@ -664,7 +664,7 @@ async def test_full_trade_lifecycle():
         await client.trades.close(account_id, trade_id)
 
         # Verify trade closed
-        trades = await client.trades.list_open(account_id)
+        trades = await client.trades.get_open_trades(account_id)
         trade_ids = [t.id for t in trades]
         assert trade_id not in trade_ids
 ```
@@ -706,7 +706,7 @@ async def test_pricing_request(mock_client, instruments):
         # Mock price objects for each instrument
     ]
 
-    prices = await mock_client.pricing.get("account-id", instruments)
+    prices = await mock_client.pricing.get_pricing("account-id", instruments)
     assert len(prices) == len(instruments)
 ```
 
@@ -796,7 +796,7 @@ async def debug_api_calls():
         environment=Environment.PRACTICE
     ) as client:
         # This will log all HTTP details
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
         print(f"Found {len(accounts)} accounts")
 ```
 
@@ -868,7 +868,7 @@ async def debug_connection_issues():
         ) as client:
 
             start_time = asyncio.get_event_loop().time()
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
             end_time = asyncio.get_event_loop().time()
 
             print(f"✅ Request successful in {end_time - start_time:.2f} seconds")
@@ -913,9 +913,9 @@ async def performance_test():
 
         # Multiple concurrent operations
         results = await asyncio.gather(
-            client.accounts.list(),
+            client.accounts.get_accounts(),
             client.accounts.get("your-account-id"),
-            client.pricing.get("your-account-id", ["EUR_USD", "GBP_USD"]),
+            client.pricing.get_pricing("your-account-id", ["EUR_USD", "GBP_USD"]),
             return_exceptions=True
         )
 
@@ -948,7 +948,7 @@ async def memory_usage_test():
 
         # Perform operations
         for i in range(100):
-            await client.accounts.list()
+            await client.accounts.get_accounts()
 
         # Take snapshot after
         snapshot2 = tracemalloc.take_snapshot()
@@ -974,7 +974,7 @@ nest_asyncio.apply()
 # Solution 2: Use asyncio.create_task() instead of asyncio.run()
 async def main():
     async with AsyncClient(...) as client:
-        result = await client.accounts.list()
+        result = await client.accounts.get_accounts()
     return result
 
 # In Jupyter or existing event loop:

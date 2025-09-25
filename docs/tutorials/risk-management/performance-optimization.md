@@ -268,7 +268,7 @@ class PerformanceAnalyzer:
             end_time = datetime.utcnow()
             start_time = end_time - timedelta(days=days_back)
             
-            transactions = await self.client.transactions.list(
+            transactions = await self.client.transactions.get_transactions(
                 account_id=self.account_id,
                 from_time=start_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ'),
                 to_time=end_time.strftime('%Y-%m-%dT%H:%M:%S.%fZ')

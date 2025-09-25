@@ -43,7 +43,7 @@ async def get_live_accounts():
         environment=Environment.LIVE  # CRITICAL: Use LIVE environment
     ) as client:
         try:
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
 
             print("🏦 Live Trading Accounts:")
             for account in accounts:
@@ -363,7 +363,7 @@ async def test_live_configuration():
             environment=Environment.LIVE
         ) as client:
             # Get account info
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
             if accounts:
                 print(f"✅ Live connection successful")
                 print(f"   Account: {accounts[0].id}")

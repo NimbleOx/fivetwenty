@@ -90,7 +90,7 @@ class BatchRequestManager:
 
         # Create concurrent price requests
         tasks = [
-            self.client.pricing.get(account_id, instruments)
+            self.client.pricing.get_pricing(account_id, instruments)
             for instruments in instrument_batches
         ]
 

@@ -36,7 +36,7 @@ async def main():
         account_id="your-account-id",  # Required parameter
         environment=Environment.PRACTICE
     ) as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
         print(f"Found {len(accounts)} accounts")
 
 # Run the async function
@@ -59,7 +59,7 @@ config = AccountConfig(
 
 # Use configuration
 async with AsyncClient(config=config) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
     print(f"Using account: {client.config.summary()}")
 ```
 
@@ -82,7 +82,7 @@ async def main():
 
     # Zero-config - automatically loads environment variables
     async with AsyncClient() as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
         print(f"Loaded config: {client.config.summary()}")
 
 asyncio.run(main())
@@ -131,7 +131,7 @@ async def main():
 
     # Automatically uses environment variables
     async with AsyncClient() as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
 
 asyncio.run(main())
 ```
@@ -286,7 +286,7 @@ async def test_authentication():
             environment=Environment.PRACTICE
         ) as client:
             # Test authentication by listing accounts
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
 
             print("✅ Authentication successful!")
             print(f"Configuration: {client.config.summary()}")
@@ -347,7 +347,7 @@ async def main():
         environment=Environment.PRACTICE,
         proxies="http://proxy.example.com:8080"
     ) as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
 
     # Authenticated proxy
     proxy_url = "http://username:password@proxy.example.com:8080"
@@ -356,7 +356,7 @@ async def main():
         environment=Environment.PRACTICE,
         proxies=proxy_url
     ) as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
 
 asyncio.run(main())
 ```
@@ -374,7 +374,7 @@ async with AsyncClient(
     environment=Environment.PRACTICE,
     verify="/path/to/ca-bundle.crt"
 ) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 
 # Client certificate authentication
 async with AsyncClient(
@@ -382,7 +382,7 @@ async with AsyncClient(
     environment=Environment.PRACTICE,
     cert="/path/to/client-cert.pem"
 ) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 
 # Disable SSL verification (not recommended)
 async with AsyncClient(
@@ -390,7 +390,7 @@ async with AsyncClient(
     environment=Environment.PRACTICE,
     verify=False
 ) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 ```
 
 ### Custom HTTP Transport
@@ -426,7 +426,7 @@ async def main():
         environment=Environment.PRACTICE,
         transport=transport
     ) as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
 
 asyncio.run(main())
 ```
@@ -540,7 +540,7 @@ except ValueError as e:
 # Error: Invalid token format
 try:
     client = AsyncClient(token="invalid-token")
-    await client.accounts.list()
+    await client.accounts.get_accounts()
 except Exception as e:
     print(f"Authentication error: {e}")
     # Fix: Get valid token from OANDA account settings
@@ -551,7 +551,7 @@ try:
         token="practice-token",
         environment=Environment.LIVE  # Wrong environment
     )
-    await client.accounts.list()
+    await client.accounts.get_accounts()
 except Exception as e:
     print(f"Environment error: {e}")
     # Fix: Use correct environment for your token
@@ -597,7 +597,7 @@ async with AsyncClient(
     max_retries=5,  # Increase retries
     timeout=60.0    # Increase timeout
 ) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 ```
 
 ## Migration from Previous Versions

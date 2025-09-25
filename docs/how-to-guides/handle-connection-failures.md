@@ -31,7 +31,7 @@ async def validate_credentials(token: str, environment: Environment):
     try:
         async with AsyncClient(token=token, environment=environment) as client:
             # Test connection with basic API call
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
 
             if accounts:
                 print("✅ Authentication successful")
@@ -79,7 +79,7 @@ async def robust_connection(token: str, timeout: float = 30.0):
         ) as client:
 
             # Test with basic request
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
             print("✅ Connection established successfully")
             return client
 
@@ -163,7 +163,7 @@ async def get_accounts_with_retry(token: str):
 
     async def _get_accounts():
         async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
-            return await client.accounts.list()
+            return await client.accounts.get_accounts()
 
     retry_config = RetryConfig(max_attempts=3, base_delay=2.0)
     return await retry_with_backoff(_get_accounts, retry_config)
@@ -242,7 +242,7 @@ async def monitor_connection_health(client: AsyncClient, account_id: str,
 # Usage
 async def main():
     async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
         if accounts:
             # Monitor connection in background
             health_task = asyncio.create_task(
@@ -297,7 +297,7 @@ async def handle_ssl_issues(token: str):
     try:
         # Default connection
         async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
 
     except ssl.SSLError as e:
         print("❌ SSL Error encountered:")
@@ -424,7 +424,7 @@ async def connection_diagnostics(token: str, environment: Environment):
     try:
         async with AsyncClient(token=token, environment=environment, timeout=10.0) as client:
             start_time = asyncio.get_event_loop().time()
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
             response_time = asyncio.get_event_loop().time() - start_time
 
             print(f"   ✅ Connection successful ({response_time:.2f}s)")

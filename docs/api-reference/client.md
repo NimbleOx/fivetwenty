@@ -89,14 +89,14 @@ from fivetwenty import AsyncClient, Environment
 
 # Environment variables (recommended for deployment)
 async with AsyncClient() as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 
 # Direct parameters (basic scripts)
 async with AsyncClient(
     token="your-token",
     environment=Environment.PRACTICE
 ) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 
 # Configuration object (structured applications)
 from fivetwenty import AccountConfig
@@ -110,7 +110,7 @@ config = AccountConfig(
 
 async with AsyncClient(config=config) as client:
     print(f"Trading on: {client.config.summary()}")
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 ```
 
 **Configuration Priority:**
@@ -149,20 +149,20 @@ Client(**kwargs)
 ```python
 # Environment variables
 with Client() as client:
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 
 # Direct parameters
 with Client(
     token="your-token",
     environment=Environment.PRACTICE
 ) as client:
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 
 # Configuration object
 config = AccountConfig(...)
 with Client(config=config) as client:
     print(f"Using: {client.config.summary()}")
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 ```
 
 **Properties:**

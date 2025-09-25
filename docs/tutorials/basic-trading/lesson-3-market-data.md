@@ -20,7 +20,7 @@ async def get_current_prices(account_id: str, instruments: list):
 
     async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
         try:
-            prices = await client.pricing.get(
+            prices = await client.pricing.get_pricing(
                 account_id=account_id,
                 instruments=instruments
             )

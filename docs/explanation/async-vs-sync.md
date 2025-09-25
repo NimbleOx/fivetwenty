@@ -41,7 +41,7 @@ async def async_example():
     ) as client:
         # Concurrent requests (fast!)
         accounts, instruments = await asyncio.gather(
-            client.accounts.list(),
+            client.accounts.get_accounts(),
             client.instruments.get_all("101-001-1234567-001")
         )
 
@@ -66,7 +66,7 @@ async def concurrent_operations(client, account_id):
         client.positions.list_open(account_id),
         client.orders.list_pending(account_id),
         client.trades.list_open(account_id),
-        client.pricing.get(account_id, ["EUR_USD", "GBP_USD", "USD_JPY"])
+        client.pricing.get_pricing(account_id, ["EUR_USD", "GBP_USD", "USD_JPY"])
     )
 
     account, positions, orders, trades, prices = results
@@ -129,7 +129,7 @@ with Client(
     environment=Environment.PRACTICE
 ) as client:
     # Sequential requests
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
     account = client.accounts.get(accounts[0].id)
 
     print(f"Account balance: {account.balance}")
@@ -166,7 +166,7 @@ async def async_performance_test():
 
         # 10 concurrent requests
         results = await asyncio.gather(*[
-            client.accounts.list() for _ in range(10)
+            client.accounts.get_accounts() for _ in range(10)
         ])
 
         print(f"Async time: {time.time() - start:.2f}s")  # ~0.5s
@@ -177,7 +177,7 @@ def sync_performance_test():
         start = time.time()
 
         # 10 sequential requests
-        results = [client.accounts.list() for _ in range(10)]
+        results = [client.accounts.get_accounts() for _ in range(10)]
 
         print(f"Sync time: {time.time() - start:.2f}s")  # ~5.0s
 ```
@@ -334,7 +334,7 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty import Client, Environment
 
 client = Client(token=token, environment=Environment.PRACTICE)
-accounts = client.accounts.list()
+accounts = client.accounts.get_accounts()
 print(accounts)
 
 # Async - Requires nest_asyncio
@@ -343,7 +343,7 @@ nest_asyncio.apply()
 
 async def notebook_async():
     async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
         return accounts
 
 await notebook_async()  # Jupyter supports top-level await
@@ -460,7 +460,7 @@ def efficient_sync(client, instruments):
 
     for instrument in instruments:
         if instrument not in cache:
-            cache[instrument] = client.pricing.get(account_id, [instrument])
+            cache[instrument] = client.pricing.get_pricing(account_id, [instrument])
 
         process_price(cache[instrument])
 ```

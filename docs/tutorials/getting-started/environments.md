@@ -92,7 +92,7 @@ async def practice_trading():
         environment=Environment.PRACTICE  # Always practice for testing!
     ) as client:
         # Get practice account
-        accounts = await client.accounts.list()
+        accounts = await client.accounts.get_accounts()
         account = accounts[0]
 
         print(f"Practice Account: {account.id}")
@@ -155,7 +155,7 @@ async def live_trading_with_safeguards():
     ) as client:
         try:
             # Get account info
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
             account = accounts[0]
 
             # Safety check: Verify sufficient margin

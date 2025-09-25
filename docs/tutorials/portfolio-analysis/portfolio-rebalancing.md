@@ -62,7 +62,7 @@ class PortfolioRebalancer:
                         units = float(Decimal(str(position.long.units)) - Decimal(str(position.short.units)))
 
                         # Get current price to calculate market value
-                        pricing = await self.client.pricing.get(
+                        pricing = await self.client.pricing.get_pricing(
                             self.account_id, [position.instrument]
                         )
 

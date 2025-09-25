@@ -229,12 +229,12 @@ Create a market-if-touched order (convenience method).
 
 ## list
 ```python
-# orders.list(account_id: AccountID, ids: list[str] | None = None,
+# orders.get_orders(account_id: AccountID, ids: list[str] | None = None,
 #            state: str = "PENDING", instrument: str | None = None,
 #            count: int | None = None, before_id: str | None = None) -> dict[str, Any]
 
 # Example usage:
-orders = await client.orders.list(
+orders = await client.orders.get_orders(
     account_id="123-456-789",
     state="PENDING",
     count=50
@@ -267,10 +267,10 @@ Get list of orders for account.
 
 ## get
 ```python
-# orders.get(account_id: AccountID, order_specifier: str) -> dict[str, Any]
+# orders.get_order(account_id: AccountID, order_specifier: str) -> dict[str, Any]
 
 # Example usage:
-order = await client.orders.get(
+order = await client.orders.get_order(
     account_id="123-456-789",
     order_specifier="12345"
 )
@@ -357,13 +357,13 @@ List all pending orders for an account.
 
 ---
 
-## modify
+## put_order
 ```python
-# orders.modify(account_id: AccountID, order_specifier: str,
+# orders.put_order(account_id: AccountID, order_specifier: str,
 #              order_request: dict[str, Any], client_request_id: str | None = None) -> dict[str, Any]
 
 # Example usage:
-result = await client.orders.modify(
+result = await client.orders.put_order(
     account_id="123-456-789",
     order_specifier="12345",
     order_request={"price": "1.1400"}
@@ -392,14 +392,14 @@ Replace existing order by cancelling and creating new order.
 
 ---
 
-## modify_client_extensions
+## put_order_client_extensions
 ```python
-# orders.modify_client_extensions(account_id: AccountID, order_specifier: str,
+# orders.put_order_client_extensions(account_id: AccountID, order_specifier: str,
 #                                client_extensions: dict[str, Any] | None = None,
 #                                trade_client_extensions: dict[str, Any] | None = None) -> dict[str, Any]
 
 # Example usage:
-result = await client.orders.modify_client_extensions(
+result = await client.orders.put_order_client_extensions(
     account_id="123-456-789",
     order_specifier="12345",
     client_extensions={"comment": "Updated order"}
