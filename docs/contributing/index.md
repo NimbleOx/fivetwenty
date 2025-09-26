@@ -241,12 +241,12 @@ async def post_market_order(
 
 ### **Documentation Types**
 
-Following the [Diátaxis framework](https://diataxis.fr/):
+Our documentation is organized into clear categories:
 
 - **Tutorials** - Learning-oriented, step-by-step guides
-- **How-to Guides** - Problem-oriented, practical solutions
+- **Guides** - Comprehensive guidance combining understanding and practical solutions
 - **API Reference** - Information-oriented, comprehensive specifications
-- **Explanations** - Understanding-oriented, background knowledge
+- **Examples** - Working code samples and demonstrations
 
 ---
 

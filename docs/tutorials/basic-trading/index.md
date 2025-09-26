@@ -21,7 +21,7 @@ This progressive tutorial series takes you from complete beginner to building au
 
 ### Prerequisites
 - Python 3.8 or higher
-- fivetwenty installed: `pip install fivetwenty`
+- fivetwenty installed: `uv add fivetwenty`
 - OANDA practice account with API token
 - Basic understanding of forex markets
 

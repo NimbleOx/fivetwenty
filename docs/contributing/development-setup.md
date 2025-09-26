@@ -35,7 +35,7 @@ uv run poe setup
 The `setup` command will:
 
 - Install all dependencies with `uv sync`
-- Install package in development mode with `uv pip install -e .`
+- Install package in editable development mode
 - Run type checking to verify setup
 - Run tests to ensure everything works
 
@@ -66,8 +66,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Windows
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# With pip
-pip install uv
+# Recommended: Use the installer script
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # With homebrew
 brew install uv
@@ -103,11 +103,8 @@ If needed, install dependencies manually:
 # Install all dependencies
 uv sync
 
-# Install package in development mode
-uv pip install -e .
-
-# Install with all development dependencies
-uv pip install -e .[dev]
+# Install package in development mode with all dependencies
+uv sync --dev
 ```
 
 ---
@@ -350,7 +347,7 @@ uv run pytest tests/unit/test_client.py::test_specific -v
 #### **Import errors during development**
 ```bash
 # Reinstall in development mode
-uv pip install -e .
+uv sync --dev
 
 # Check Python path
 uv run python -c "import fivetwenty; print(fivetwenty.__file__)"

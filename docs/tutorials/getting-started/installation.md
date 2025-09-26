@@ -8,16 +8,10 @@
 
 ## Install from PyPI
 
-The recommended way to install FiveTwenty is via pip:
+The recommended way to install FiveTwenty is via uv:
 
 ```bash
-pip install fivetwenty
-```
-
-Or if you're using uv (recommended for faster installs):
-
-```bash
-uv pip install fivetwenty
+uv add fivetwenty
 ```
 
 ## Install from Source
@@ -27,7 +21,7 @@ For the latest development version:
 ```bash
 git clone https://github.com/NimbleOx/fivetwenty.git
 cd fivetwenty
-pip install -e .
+uv sync --dev
 ```
 
 ## Verify Installation
@@ -52,26 +46,9 @@ The SDK automatically installs these minimal core dependencies:
 
 ## Environment Setup
 
-### Virtual Environment (Recommended)
+### Using uv (Recommended)
 
-Always use a virtual environment to avoid dependency conflicts:
-```bash
-# Create virtual environment
-python -m venv venv
-
-# Activate it
-# On macOS/Linux:
-source venv/bin/activate
-# On Windows:
-venv\Scripts\activate
-
-# Install SDK
-pip install fivetwenty
-```
-
-### Using uv
-
-For faster package management with uv:
+For faster package management with automatic virtual environment handling:
 
 ```bash
 # Install uv
@@ -79,7 +56,7 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Create project
 uv venv
-uv pip install fivetwenty
+uv add fivetwenty
 ```
 
 ## Next Steps

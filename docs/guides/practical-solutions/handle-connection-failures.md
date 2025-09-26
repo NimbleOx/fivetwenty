@@ -309,7 +309,7 @@ async def handle_ssl_issues(token: str):
         print("❌ SSL Error encountered:")
         print(f"   • Error: {e}")
         print("   • Solutions:")
-        print("     - Update certificates: pip install --upgrade certifi")
+        print("     - Update certificates: uv add --upgrade certifi")
         print("     - Check system time/date")
         print("     - Verify firewall allows HTTPS")
 
@@ -472,7 +472,7 @@ await connection_diagnostics("your-token", Environment.PRACTICE)
 - **Proxy**: Configure proxy settings if behind corporate firewall
 
 ### SSL Issues
-- **Certificate problems**: Update certificates with `pip install --upgrade certifi`
+- **Certificate problems**: Update certificates with `uv add --upgrade certifi`
 - **System time**: Ensure system time is accurate for SSL validation
 
 ### Rate Limiting

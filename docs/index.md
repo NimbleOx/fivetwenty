@@ -36,7 +36,12 @@ FiveTwenty bridges the gap between OANDA's powerful v20 API and your Python appl
 
 ## Quick Start
 
-Get trading in minutes with FiveTwenty's flexible configuration system. By default, the client will look for three environment variables that must be set. The `FIVETWENTY_OANDA_TOKEN` and `FIVETWENTY_OANDA_ACCOUNT` environment variables represent your token and account number, needed to authenticate.  `FIVETWENTY_OANDA_ENVIRONMENT` is needed to know which OANDA url to connect to.
+Get trading in minutes with FiveTwenty's flexible configuration system.
+
+!!! info "Package Management with uv"
+    Throughout this documentation, we use **[uv](https://github.com/astral-sh/uv)** - the fast, modern Python package manager. All package installation commands use `uv add` instead of `pip install` for better performance and dependency management.
+
+By default, the client will look for three environment variables that must be set. The `FIVETWENTY_OANDA_TOKEN` and `FIVETWENTY_OANDA_ACCOUNT` environment variables represent your token and account number, needed to authenticate.  `FIVETWENTY_OANDA_ENVIRONMENT` is needed to know which OANDA url to connect to.
 
 The example below places environment variables in place using the package `python-dotenv`
 
@@ -91,7 +96,7 @@ asyncio.run(main())
 
 ## Next Steps
 
-Our documentation follows the **[Diátaxis framework](https://diataxis.fr/)** to serve different user needs effectively:
+Our documentation is organized to serve different user needs effectively:
 
 ### Learn (Tutorials)
 **When you want to build skills through guided practice**
