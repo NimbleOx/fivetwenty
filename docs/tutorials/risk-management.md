@@ -226,45 +226,6 @@ async def trading_circuit_breaker(
     return True  # Continue trading
 ```
 
-## Key Risk Principles
-
-### 1. Position Sizing
-- Never risk more than 1-2% of account per trade
-- Use stop losses on every position
-- Calculate position size based on stop distance
-
-### 2. Diversification
-- Limit exposure to correlated currency pairs
-- Avoid concentration in single currency
-- Monitor total portfolio exposure
-
-### 3. Stop Loss Management
-- Always set stops when opening positions
-- Use trailing stops for profitable trades
-- Respect stop losses - don't move them against you
-
-### 4. Account Monitoring
-- Set daily loss limits
-- Monitor margin usage
-- Track drawdown levels
-
-## Implementation Checklist
-
-- [ ] Stop loss orders on all positions
-- [ ] Position sizing based on account risk
-- [ ] Daily loss monitoring
-- [ ] Maximum drawdown limits
-- [ ] Emergency position closing procedures
-- [ ] Risk monitoring dashboard
-
-## Best Practices
-
-1. **Risk First**: Set your stop loss before entering any trade
-2. **Size Appropriately**: Use the 1-2% rule for position sizing
-3. **Monitor Continuously**: Check risk metrics regularly
-4. **Automate Controls**: Use circuit breakers for discipline
-5. **Keep Records**: Track performance and risk metrics
-
 ## Next Steps
 
 - Learn [Advanced Orders](../advanced-orders/index.md) for sophisticated risk management

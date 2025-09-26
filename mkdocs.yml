@@ -93,14 +93,9 @@ nav:
           - Automated Order Systems: tutorials/advanced-orders/automated-systems.md
           - Order Strategies & Combinations: tutorials/advanced-orders/order-strategies.md
           - Validation & Best Practices: tutorials/advanced-orders/validation-best-practices.md
-      - Risk Management: tutorials/risk-management/index.md
-      - Portfolio Management: tutorials/portfolio-analysis/index.md
-      - Streaming Data:
-          - Overview: tutorials/streaming-data/index.md
-          - Streaming Fundamentals: tutorials/streaming-data/streaming-fundamentals.md
-          - Basic Streaming: tutorials/streaming-data/basic-streaming.md
-          - Automated Trading: tutorials/streaming-data/automated-trading.md
-          - Advanced Features: tutorials/streaming-data/advanced-features.md
+      - Risk Management: tutorials/risk-management.md
+      - Portfolio Management: tutorials/portfolio-analysis.md
+      - Streaming Data: tutorials/streaming-data.md
 
   # HOW-TO GUIDES - Problem-oriented solutions
   - "How-to Guides":
@@ -111,7 +106,7 @@ nav:
           - Close Positions: how-to-guides/close-positions.md
           - Manage Orders Effectively: how-to-guides/manage-orders-effectively.md
       - Implement Stop-Loss Strategies: how-to-guides/implement-stop-loss-strategies.md
-      - HFT Optimization:
+      - Optimization:
           - Overview: how-to-guides/hft-optimization/index.md
           - Connection Optimization: how-to-guides/hft-optimization/connection-optimization.md
           - Streaming Optimization: how-to-guides/hft-optimization/streaming-optimization.md

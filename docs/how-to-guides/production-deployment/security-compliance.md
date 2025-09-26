@@ -40,10 +40,15 @@ import secrets
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from typing import Any
+from enum import Enum
 
 import jwt
 import pyotp
 from cryptography.fernet import Fernet
+from cryptography.hazmat.primitives import serialization
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.exceptions import VeeTwentyError
+from decimal import Decimal
 
 @dataclass
 class UserSession:
@@ -511,10 +516,7 @@ class EncryptionManager:
 
     def encrypt_asymmetric(self, data: str, public_key_pem: str | None = None) -> str:
         """Encrypt data using RSA public key."""
-        if public_key_pem:
-            public_key = serialization.load_pem_public_key(public_key_pem.encode())
-        else:
-            public_key = self.public_key
+        public_key = serialization.load_pem_public_key(public_key_pem.encode()) if public_key_pem else self.public_key
 
         encrypted_data = public_key.encrypt(
             data.encode('utf-8'),

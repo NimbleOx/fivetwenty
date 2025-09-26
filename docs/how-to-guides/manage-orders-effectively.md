@@ -30,6 +30,14 @@ import os
 from decimal import Decimal
 
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import (
+    StopLossOrderRequest,
+    TrailingStopLossOrderRequest,
+    GuaranteedStopLossOrderRequest,
+    TakeProfitOrderRequest,
+    OrderRequest
+)
+from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError, BadRequest, TooManyRequests, InternalServerError
 
 
 async def main() -> None:
@@ -255,7 +263,7 @@ async def add_regular_stop_loss(client: AsyncClient, account_id: str, trade_id: 
 
 ```python
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError
 from fivetwenty.models import TakeProfitOrderRequest
 
 
@@ -562,7 +570,7 @@ from decimal import Decimal
 from typing import Any
 
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError
 from fivetwenty.models import AccountID, InstrumentName
 
 
@@ -654,7 +662,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError
 from fivetwenty.models import AccountID
 
 
@@ -676,8 +684,8 @@ async def manage_pending_orders(account_id: AccountID) -> None:
             order_time = datetime.fromisoformat(
                 order["createTime"].replace("Z", "+00:00")
             )
-            STALE_ORDER_THRESHOLD_HOURS = 1
-            if datetime.now(timezone.utc) - order_time > timedelta(hours=STALE_ORDER_THRESHOLD_HOURS):
+            stale_order_threshold_hours = 1
+            if datetime.now(timezone.utc) - order_time > timedelta(hours=stale_order_threshold_hours):
                 try:
                     cancel_response = await client.orders.cancel_order(
                         account_id,
@@ -810,14 +818,17 @@ async def example_order_handling():
 
         # Check order was created successfully
         if response.order_create_transaction is None:
-            raise ValueError("Order transaction is None")
+            order_error_msg = "Order transaction is None"
+            raise ValueError(order_error_msg)
         if response.order_create_transaction.id is None:
-            raise ValueError("Order transaction ID is None")
+            transaction_error_msg = "Order transaction ID is None"
+            raise ValueError(transaction_error_msg)
 
         # For market orders, verify immediate fill
         if order_type == "market":
             if response.order_fill_transaction is None:
-                raise ValueError("Market order fill transaction is None")
+                fill_error_msg = "Market order fill transaction is None"
+                raise ValueError(fill_error_msg)
             print("Order filled successfully")
 ```
 
@@ -828,23 +839,25 @@ import os
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
 
-# Example setup for demonstration
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = AccountID("101-004-12345678")
-order_id = "12345"  # Example order ID
-instrument = InstrumentName("EUR_USD")
-units = 1000
+async def verify_order_parameters() -> None:
+    """Verify order parameters match your request."""
+    # Example setup for demonstration
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = AccountID("101-004-12345678")
+        order_id = "12345"  # Example order ID
+        instrument = InstrumentName("EUR_USD")
+        units = 1000
 
-# Confirm order details match your request
-order_details = await client.orders.get_order(account_id, order_id)
-print(f"Order details retrieved for {order_id}")
-if order_details["instrument"] != str(instrument):
-    raise ValueError("Order instrument mismatch")
-if int(order_details["units"]) != units:
-    raise ValueError("Order units mismatch")
+        # Confirm order details match your request
+        order_details = await client.orders.get_order(account_id, order_id)
+        print(f"Order details retrieved for {order_id}")
+        if order_details["instrument"] != str(instrument):
+            raise ValueError("Order instrument mismatch")
+        if int(order_details["units"]) != units:
+            raise ValueError("Order units mismatch")
 ```
 
 ### Monitor Account Impact
@@ -855,18 +868,20 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID
 
-# Example setup for demonstration
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = AccountID("101-004-12345678")
+async def monitor_account_impact() -> None:
+    """Monitor account balance and positions after order."""
+    # Example setup for demonstration
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = AccountID("101-004-12345678")
 
-# Check account balance and positions after order
-account = await client.accounts.get_account(account_id)
-nav = account.nav
-print(f"Account NAV retrieved: {nav}")
-print("Unrealized P&L retrieved")
+        # Check account balance and positions after order
+        account = await client.accounts.get_account(account_id)
+        nav = account.nav
+        print(f"Account NAV retrieved: {nav}")
+        print("Unrealized P&L retrieved")
 ```
 
 ## Troubleshooting
@@ -881,20 +896,22 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID
 
-# Example setup for demonstration
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = AccountID("101-004-12345678")
-required_margin = Decimal("1000.00")  # Example required margin
+async def check_insufficient_margin() -> None:
+    """Check for insufficient margin error."""
+    # Example setup for demonstration
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = AccountID("101-004-12345678")
+        required_margin = Decimal("1000.00")  # Example required margin
 
-# Check available margin before placing order
-account = await client.accounts.get_account(account_id)
-available_margin = Decimal(account.margin_available)
-if available_margin < required_margin:
-    msg = f"Insufficient margin for order: {available_margin} < {required_margin}"
-    print(msg)
+        # Check available margin before placing order
+        account = await client.accounts.get_account(account_id)
+        available_margin = Decimal(account.margin_available)
+        if available_margin < required_margin:
+            msg = f"Insufficient margin for order: {available_margin} < {required_margin}"
+            print(msg)
 ```
 
 **"INSTRUMENT_NOT_TRADEABLE" Error:**
@@ -904,17 +921,19 @@ import os
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID
 
-# Example setup for demonstration
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = AccountID("101-004-12345678")
+async def check_instrument_tradeable() -> None:
+    """Check if instrument is tradeable."""
+    # Example setup for demonstration
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = AccountID("101-004-12345678")
 
-# Verify instrument is currently tradeable
-instruments = await client.accounts.get_account_instruments(account_id)
-tradeable_instruments = [i for i in instruments if i.tradeable]
-print(f"Found {len(tradeable_instruments)} tradeable instruments out of {len(instruments)} total")
+        # Verify instrument is currently tradeable
+        instruments = await client.accounts.get_account_instruments(account_id)
+        tradeable_instruments = [i for i in instruments if i.tradeable]
+        print(f"Found {len(tradeable_instruments)} tradeable instruments out of {len(instruments)} total")
 ```
 
 **"PRICE_PRECISION_EXCEEDED" Error:**
@@ -927,25 +946,27 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
 from fivetwenty._internal.utils import quantize_price
 
-# Example setup for demonstration
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = AccountID("101-004-12345678")
-instrument = InstrumentName("EUR_USD")
-your_price = Decimal("1.10555")
+async def check_price_precision() -> None:
+    """Handle price precision correctly."""
+    # Example setup for demonstration
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = AccountID("101-004-12345678")
+        instrument = InstrumentName("EUR_USD")
+        your_price = Decimal("1.10555")
 
-# Get instrument precision
-instrument_info = await client.accounts.get_account_instruments(
-    account_id, instruments=[instrument]
-)
-precision = instrument_info[0].display_precision
-print(f"Instrument precision: {precision}")
+        # Get instrument precision
+        instrument_info = await client.accounts.get_account_instruments(
+            account_id, instruments=[instrument]
+        )
+        precision = instrument_info[0].display_precision
+        print(f"Instrument precision: {precision}")
 
-# Quantize price correctly
-quantized_price = quantize_price(precision, your_price)
-print(f"Price quantized from {your_price} to {quantized_price}")
+        # Quantize price correctly
+        quantized_price = quantize_price(precision, your_price)
+        print(f"Price quantized from {your_price} to {quantized_price}")
 ```
 
 ### Order Timing Issues

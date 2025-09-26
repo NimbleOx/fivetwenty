@@ -34,11 +34,10 @@ graph TB
 
 ```python
 import functools
-import logging.handlers
 import sys
 import time
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Any
 
 from prometheus_client import Counter, Gauge, Histogram, Info
 
@@ -223,8 +222,7 @@ def metrics_middleware(metrics_collector: MetricsCollector) -> Any:
             status = "success"
 
             try:
-                result = await func(*args, **kwargs)
-                return result
+                return await func(*args, **kwargs)
             except Exception as e:
                 status = "error"
                 metrics_collector.track_error(

@@ -98,7 +98,7 @@ from decimal import Decimal
 account_balance = Decimal("10000.00")
 
 # Good: Exact precision
-position_size = Decimal("10000")
+position_size = Decimal(10000)
 risk_amount = account_balance * Decimal("0.02")  # 2% risk
 stop_distance = Decimal("0.0050")  # 50 pips
 
@@ -130,7 +130,7 @@ def calculate_position_size(
     risk_amount = balance * (risk_percentage / 100)
     risk_per_unit = stop_loss_pips * pip_value
     position_size = risk_amount / risk_per_unit
-    return position_size.quantize(Decimal("1"))  # Round to whole units
+    return position_size.quantize(Decimal(1))  # Round to whole units
 ```
 
 ### Field Type Handling
@@ -152,7 +152,7 @@ async def example_order():
         order = await client.orders.post_limit_order(
             account_id=account_id,
             instrument="EUR_USD",
-            units=Decimal("10000"),  # Converted to string for API
+            units=Decimal(10000),  # Converted to string for API
             price=Decimal("1.0850")  # Converted to string for API
         )
 
@@ -237,7 +237,9 @@ async def retry_with_backoff(
 
             # Exponential backoff with jitter
             delay = base_delay * (2 ** attempt)
-            jitter = random.random() * 0.3 * delay
+            # Use secrets module for cryptographically secure random
+            import secrets
+            jitter = secrets.randbelow(int(0.3 * delay * 1000)) / 1000
             await asyncio.sleep(delay + jitter)
     return None  # Explicit return for all code paths
 ```
@@ -328,7 +330,6 @@ def process_price_sync(price) -> None:
 Use different settings for practice vs live:
 
 ```python
-import os
 from fivetwenty import AsyncClient, Environment
 
 def get_token(is_live: bool) -> str:
@@ -383,8 +384,11 @@ Only stream instruments you actively use:
 # Good: Specific instruments only
 instruments = ["EUR_USD", "GBP_USD"]  # Only what you need
 
-# Bad: Too many instruments
-instruments = [f"{base}_{quote}" for base in bases for quote in quotes]
+# Bad: Too many instruments - undefined variables example
+# This would cause undefined variable errors:
+# bases = ["EUR", "GBP", "USD", "JPY", "CHF", "CAD", "AUD", "NZD"]
+# quotes = ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD"]
+# instruments = [f"{base}_{quote}" for base in bases for quote in quotes]
 ```
 
 ### Request Batching

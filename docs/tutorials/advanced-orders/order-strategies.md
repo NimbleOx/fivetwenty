@@ -19,7 +19,6 @@ Place a market order with automatic stop-loss and take-profit:
 
 ```python
 import os
-from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 # Setup
@@ -55,6 +54,14 @@ async def market_order_with_protection():
 Set up a limit order that automatically adds stops when filled:
 
 ```python
+import os
+from decimal import Decimal
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
 async def limit_entry_with_protection():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # Limit order to buy on pullback with protective orders
@@ -85,6 +92,14 @@ async def limit_entry_with_protection():
 Build positions with multiple entries:
 
 ```python
+import os
+from decimal import Decimal
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
 async def scale_into_position():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         orders = []
@@ -126,6 +141,14 @@ async def scale_into_position():
 Take partial profits at multiple levels:
 
 ```python
+import os
+from decimal import Decimal
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
 async def scale_out_of_position():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # First take partial profit at initial target
@@ -155,6 +178,13 @@ async def scale_out_of_position():
 ### Trailing Stops for Trend Following
 
 ```python
+import os
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
 async def trailing_stop_strategy():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # Enter position with trailing stop
@@ -177,10 +207,18 @@ async def trailing_stop_strategy():
 Update stop levels as trades move in your favor:
 
 ```python
+import os
+from decimal import Decimal
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
 async def update_stop_loss(trade_id: str, new_stop_price: Decimal):
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # Update the stop loss for an existing trade
-        response = await client.trades.put_trade_stop_loss(
+        response = await client.trades.put_trade_orders(
             account_id=account_id,
             trade_id=trade_id,
             stop_loss={
@@ -201,6 +239,13 @@ Simulate conditional orders with monitoring:
 
 ```python
 import asyncio
+import os
+from decimal import Decimal
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
 
 async def conditional_order_logic():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
@@ -242,6 +287,13 @@ async def conditional_order_logic():
 Close existing position and open opposite position:
 
 ```python
+import os
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
 async def position_reversal():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # Get current positions

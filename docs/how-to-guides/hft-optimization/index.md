@@ -1,12 +1,12 @@
-# High-Frequency Trading Optimization
+# Performance Optimization
 
-Comprehensive optimization techniques for high-frequency trading applications, covering connection optimization, latency reduction, and system performance tuning.
+Comprehensive optimization techniques for trading applications, covering connection optimization, latency reduction, and system performance tuning.
 
 ---
 
 ## Series Overview
 
-This guide series provides specialized optimization techniques for HFT applications using FiveTwenty:
+This guide series provides specialized optimization techniques for trading applications using FiveTwenty:
 
 ### 1. [Connection Optimization](connection-optimization.md)
 **Problem**: Minimize connection latency and maximize throughput
@@ -25,7 +25,7 @@ This guide series provides specialized optimization techniques for HFT applicati
 **Solution**: Low-latency order management and ultra-fast execution techniques
 
 ### 5. [System Resource Management](memory-cpu-optimization.md)
-**Problem**: Optimize system resources for maximum HFT performance
+**Problem**: Optimize system resources for maximum trading performance
 **Solution**: Memory pool management, garbage collection control, and process optimization
 
 ### 6. [Network Optimization](connection-optimization.md)

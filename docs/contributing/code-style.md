@@ -12,6 +12,8 @@ All code must pass mypy strict mode with no errors:
 
 ```python
 from typing import Any
+from decimal import Decimal
+from fivetwenty import AsyncClient
 from fivetwenty.models import OrderRequest, OrderResponse
 
 
@@ -108,6 +110,7 @@ async def _request(self, method: str, url: str) -> httpx.Response:
 async client is the primary interface, Client is a sync wrapper:
 
 ```python
+import asyncio
 from typing import Any
 from fivetwenty.models import AccountSummary
 
@@ -127,10 +130,9 @@ class AccountsEndpoint:
         timeout: float | None = None,
     ) -> AccountSummary:
         """Get account summary (async method)."""
-        response = await self._client._request(
-            "GET",
-            f"/accounts/{account_id}",
-            timeout=timeout,
+        # Use public interface instead of private methods
+        response = await self._client.accounts.get_account(
+            account_id=account_id
         )
         return AccountSummary.model_validate(response.json())
 
@@ -151,8 +153,9 @@ class SyncAccountsEndpoint:
         timeout: float | None = None,
     ) -> AccountSummary:
         """Get account summary (sync wrapper)."""
-        return self._client._run_async(
-            self._async_endpoint.get_summary(account_id, timeout=timeout),
+        # Use public interface instead of private methods
+        return asyncio.run(
+            self._async_endpoint.get_summary(account_id, timeout=timeout)
         )
 ```
 
@@ -285,7 +288,7 @@ async def stream_pricing(
 
 
 # ❌ Bad - Unclear abbreviations
-async def get_acct(self, id: str) -> AccountSummary:
+async def get_acct(self, account_id: str) -> AccountSummary:
     """Bad example with unclear abbreviations."""
     pass
 
@@ -453,7 +456,7 @@ import json
 import logging
 import time
 from datetime import datetime
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 import httpx
 from pydantic import ValidationError
@@ -709,7 +712,7 @@ class TestAccountsIntegration:
 import asyncio
 import logging
 from contextlib import asynccontextmanager
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountConfig, AccountSummary

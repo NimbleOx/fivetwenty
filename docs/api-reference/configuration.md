@@ -30,8 +30,9 @@ Secure configuration object for OANDA account credentials and settings.
 ### Class Definition
 
 ```python
+import os
 from pydantic import BaseModel, SecretStr
-from fivetwenty import Environment
+from fivetwenty import Environment, AccountConfig
 
 class AccountConfig(BaseModel):
     """Configuration for a single OANDA trading account."""
@@ -45,6 +46,7 @@ class AccountConfig(BaseModel):
 ### Constructor
 
 ```python
+import os
 from pydantic import SecretStr
 from fivetwenty import Environment, AccountConfig
 
@@ -284,7 +286,8 @@ Load configuration from standard `FIVETWENTY_*` environment variables.
 import os
 from fivetwenty import AccountConfigLoader
 
-os.environ["FIVETWENTY_OANDA_TOKEN"] = "your-token"
+# Set your actual token instead of placeholder
+os.environ["FIVETWENTY_OANDA_TOKEN"] = os.getenv("ACTUAL_OANDA_TOKEN", "demo-token")
 os.environ["FIVETWENTY_OANDA_ACCOUNT"] = "your-account"
 os.environ["FIVETWENTY_OANDA_ENVIRONMENT"] = "practice"
 os.environ["FIVETWENTY_OANDA_ACCOUNT_ALIAS"] = "my_account"
@@ -319,7 +322,8 @@ Load configuration using custom environment variable prefix.
 import os
 from fivetwenty import AccountConfigLoader
 
-os.environ["STRATEGY_A_OANDA_TOKEN"] = "token-a"
+# Set your actual token instead of placeholder
+os.environ["STRATEGY_A_OANDA_TOKEN"] = os.getenv("ACTUAL_STRATEGY_A_TOKEN", "demo-token-a")
 os.environ["STRATEGY_A_OANDA_ACCOUNT"] = "account-a"
 os.environ["STRATEGY_A_OANDA_ENVIRONMENT"] = "practice"
 os.environ["STRATEGY_A_OANDA_ACCOUNT_ALIAS"] = "momentum_strategy"
@@ -562,20 +566,23 @@ def load_production_config() -> AccountConfig:
     config = AccountConfigLoader.load_default()
 
     if not config:
-        raise RuntimeError("No configuration found - check environment variables")
+        config_error_msg = "No configuration found - check environment variables"
+        raise RuntimeError(config_error_msg)
 
     # Ensure we're in the expected environment
     expected_env = os.environ.get("EXPECTED_OANDA_ENVIRONMENT", "practice")
     if config.environment.value != expected_env:
-        raise RuntimeError(
+        env_error_msg = (
             f"Environment mismatch: expected {expected_env}, "
-            f"got {config.environment.value}",
+            f"got {config.environment.value}"
         )
+        raise RuntimeError(env_error_msg)
 
     # Extra validation for live
     if config.environment == Environment.LIVE:
         if "practice" in config.token.get_secret_value().lower():
-            raise RuntimeError("Practice token detected in live environment")
+            practice_error_msg = "Practice token detected in live environment"
+            raise RuntimeError(practice_error_msg)
 
     return config
 ```
