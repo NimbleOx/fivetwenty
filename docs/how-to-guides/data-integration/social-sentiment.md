@@ -480,6 +480,7 @@ class RealTimeSocialMonitor:
                 await callback(alert_data)
             except Exception as e:
                 # Expected output: f"Alert callback error: {e}"
+                pass
 
     def add_alert_callback(self, callback: Any) -> Any:
         """Add callback for sentiment alerts."""

@@ -368,7 +368,7 @@ For production systems, combine multiple news sources:
 class MultiSourceNewsProvider:
     """Aggregate news from multiple sources."""
 
-    def __init__(self, news_apis: Dict[str, str]: Any) -> None:
+    def __init__(self, news_apis: Dict[str, str]) -> None:
         self.providers = {}
 
         for provider_name, api_key in news_apis.items():
@@ -498,6 +498,7 @@ class RealTimeNewsMonitor:
                 await callback(alert_data)
             except Exception as e:
                 # Expected output: f"Alert callback error: {e}"
+                pass
 
     def add_alert_callback(self, callback: Any) -> Any:
         """Add callback for news alerts."""

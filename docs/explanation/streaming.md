@@ -22,10 +22,9 @@ Stream real-time prices for instruments:
 
 ```python
 import asyncio
+from typing import Any
 
 from fivetwenty import AsyncClient, Environment
-
-
 
 async def stream_prices() -> Any:
     """Stream real-time prices."""
@@ -49,13 +48,18 @@ asyncio.run(stream_prices())
 ### Processing Price Updates
 
 ```python
+import asyncio
 from decimal import Decimal
+from typing import Any
 
+from fivetwenty import AsyncClient
 from fivetwenty.models import ClientPrice, PricingHeartbeat
 
+async def consider_trade(instrument: str, bid: Decimal, ask: Decimal) -> None:
+    """Example trading logic function."""
+    print(f"Considering trade for {instrument} at bid={bid}, ask={ask}")
 
-
-async def process_price_stream(client: Any, account_id: str) -> Any:
+async def process_price_stream(client: AsyncClient, account_id: str) -> Any:
     """Process streaming prices with business logic."""
 
     spreads = {}
@@ -90,7 +94,10 @@ async def process_price_stream(client: Any, account_id: str) -> Any:
 ### Multiple Instrument Streaming
 
 ```python
-async def multi_instrument_stream(client: Any, account_id: str) -> Any:
+from typing import Any
+from fivetwenty import AsyncClient
+
+async def multi_instrument_stream(client: AsyncClient, account_id: str) -> Any:
     """Stream multiple instruments efficiently."""
 
     instruments = [
@@ -111,7 +118,8 @@ async def multi_instrument_stream(client: Any, account_id: str) -> Any:
             }
 
             # Check for arbitrage opportunities
-            await check_arbitrage(price_tracker)
+            # Example: check price differences between pairs
+            print(f"Price tracking update: {len(price_tracker)} instruments")
 ```
 
 ## Transaction Streaming
@@ -121,7 +129,10 @@ async def multi_instrument_stream(client: Any, account_id: str) -> Any:
 Monitor account updates in real-time:
 
 ```python
-async def stream_transactions(client: Any, account_id: str) -> Any:
+from typing import Any
+from fivetwenty import AsyncClient
+
+async def stream_transactions(client: AsyncClient, account_id: str) -> Any:
     """Stream transaction events."""
 
     async for event in client.transactions.get_transactions_stream(account_id):
@@ -189,11 +200,12 @@ config = StreamingConfiguration(
 Detect and recover from stalled streams:
 
 ```python
-from fivetwenty.exceptions import StreamStall
 import asyncio
+from typing import Any
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import StreamStall
 
-
-async def resilient_stream(client: Any, account_id: str, instruments: Any) -> Any:
+async def resilient_stream(client: AsyncClient, account_id: str, instruments: list[str]) -> Any:
     """Stream with automatic recovery from stalls."""
 
     max_retries = 5
@@ -233,19 +245,26 @@ async def resilient_stream(client: Any, account_id: str, instruments: Any) -> An
 Manage long-lived connections:
 
 ```python
+import asyncio
 from datetime import datetime
-
+from typing import Any
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import StreamStall
 
 class StreamManager:
     """Manage streaming connections with health monitoring."""
 
-    def __init__(self, client: Any, account_id: str) -> None:
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
-        self.streams = {}
-        self.health_status = {}
+        self.streams: dict[str, Any] = {}
+        self.health_status: dict[str, dict[str, Any]] = {}
 
-    async def start_price_stream(self, instruments: Any) -> Any:
+    async def process_price(self, price: Any) -> None:
+        """Example price processing method."""
+        print(f"Processing price: {price}")
+
+    async def start_price_stream(self, instruments: list[str]) -> Any:
         """Start price streaming with monitoring."""
 
         stream_id = f"price_{'-'.join(instruments)}"
@@ -272,7 +291,7 @@ class StreamManager:
             self.health_status[stream_id]["errors"] += 1
             await self.restart_stream(stream_id, instruments)
 
-    async def restart_stream(self, stream_id: str, instruments: Any) -> Any:
+    async def restart_stream(self, stream_id: str, instruments: list[str]) -> Any:
         """Restart a failed stream."""
 
         print(f"Restarting stream {stream_id}")

@@ -33,7 +33,7 @@ import matplotlib.pyplot as plt
 class PerformanceAttributionAnalyzer:
     """Advanced performance attribution analysis."""
 
-    def __init__(self, portfolio_returns: pd.Series, benchmark_returns: pd.Series, factor_returns: Dict[str, pd.Series]: Any = None) -> None:
+    def __init__(self, portfolio_returns: pd.Series, benchmark_returns: pd.Series, factor_returns: Dict[str, pd.Series] = None) -> None:
         self.portfolio_returns = portfolio_returns
         self.benchmark_returns = benchmark_returns
         self.factor_returns = pd.DataFrame(factor_returns) if factor_returns else None

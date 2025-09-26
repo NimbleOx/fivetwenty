@@ -34,12 +34,9 @@ async with AsyncClient(
 For more structured configuration:
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Create configuration
-
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
@@ -142,11 +139,13 @@ async def main():
     # Use configurations
     async with AsyncClient(config=practice_config) as practice_client:
         # Test strategies safely
-        await test_strategy(practice_client)
+        accounts = await practice_client.accounts.get_accounts()
+        print("Practice accounts:", len(accounts))
 
     async with AsyncClient(config=live_config) as live_client:
         # Execute live trades
-        await execute_trades(live_client)
+        accounts = await live_client.accounts.get_accounts()
+        print("Live accounts:", len(accounts))
 
 
 if __name__ == "__main__":
@@ -154,9 +153,6 @@ if __name__ == "__main__":
 ```
 
 ### 3. Environment Variables Pattern
-
-from fivetwenty import Environment
-
 
 Best for: Docker deployments, Kubernetes, CI/CD, serverless
 
@@ -183,8 +179,7 @@ async with AsyncClient() as client:
 For multiple accounts or microservices:
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
+import asyncio
 from fivetwenty import AccountConfigLoader, AsyncClient
 
 # Load with custom prefix
@@ -192,9 +187,16 @@ momentum_config = AccountConfigLoader.from_env_prefix("MOMENTUM_")
 grid_config = AccountConfigLoader.from_env_prefix("GRID_")
 
 # Use different clients for different strategies
-async with AsyncClient(config=momentum_config) as momentum_client:
-    async with AsyncClient(config=grid_config) as grid_client:
-        await run_parallel_strategies(momentum_client, grid_client)
+async def run_strategies() -> None:
+    async with AsyncClient(config=momentum_config) as momentum_client:
+        async with AsyncClient(config=grid_config) as grid_client:
+            # Example parallel strategy execution
+            accounts1 = await momentum_client.accounts.get_accounts()
+            accounts2 = await grid_client.accounts.get_accounts()
+            print(f"Momentum accounts: {len(accounts1)}, Grid accounts: {len(accounts2)}")
+
+# Run the strategies
+asyncio.run(run_strategies())
 ```
 
 Environment variables for custom prefixes:
@@ -245,7 +247,7 @@ client = AsyncClient(
 The library automatically protects sensitive information:
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AccountConfig, AsyncClient, Environment
 
 config = AccountConfig(
     token="super-secret-token",
@@ -274,6 +276,7 @@ The library validates configuration values:
 
 ```python
 from pydantic import ValidationError
+from fivetwenty import AccountConfig, Environment
 
 # Invalid alias (starts with number)
 try:
@@ -542,9 +545,8 @@ asyncio.run(main())
 ### Configuration Builder
 
 ```python
-
+import os
 from fivetwenty import AccountConfig, Environment
-
 
 class ConfigBuilder:
     """Helper to build configurations from various sources."""
@@ -589,10 +591,8 @@ class ConfigBuilder:
 ### Multi-Environment Manager
 
 ```python
-from typing import Dict
-
-from fivetwenty import AsyncClient
-
+from typing import Optional
+from fivetwenty import AccountConfig, AccountConfigLoader, AsyncClient
 
 class ConfigManager:
     """Manage configurations for multiple environments."""

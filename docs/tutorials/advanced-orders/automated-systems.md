@@ -21,7 +21,7 @@ Create systems that make order decisions based on predefined rules and market co
 ```python
 from abc import ABC, abstractmethod
 from datetime import datetime
-from typing import Any, Dict, List
+from typing import Any
 
 from fivetwenty import AsyncClient
 
@@ -58,7 +58,7 @@ class RuleBasedOrderManager:
         # Sort by priority (higher priority first)
         self.rules.sort(key=lambda r: r.priority, reverse=True)
 
-    async def evaluate_and_execute_rules(self, context: dict[str, Any]: Any) -> Any:
+    async def evaluate_and_execute_rules(self, context: dict[str, Any]) -> Any:
         """Evaluate all rules and execute applicable ones."""
         executed_rules = []
 
@@ -99,12 +99,12 @@ from typing import Any
 class SpreadThresholdRule(OrderRule):
     """Cancel orders when spread becomes too wide."""
 
-    def __init__(self, max_spread_pips: Decimal, instruments: List[str]) -> None:
+    def __init__(self, max_spread_pips: Decimal, instruments: list[str]) -> None:
         super().__init__("SpreadThreshold", priority=10)
         self.max_spread_pips = max_spread_pips
         self.instruments = instruments
 
-    async def evaluate(self, context: Dict[str, Any]) -> bool:
+    async def evaluate(self, context: dict[str, Any]) -> bool:
         """Check if spread exceeds threshold."""
         client = context["client"]
         account_id = context["account_id"]
@@ -130,7 +130,7 @@ class SpreadThresholdRule(OrderRule):
 
         return False
 
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
         """Cancel pending orders for wide spread instrument."""
         client = context["client"]
         account_id = context["account_id"]
@@ -164,7 +164,7 @@ class MarketSessionRule(OrderRule):
     def __init__(self) -> None:
         super().__init__("MarketSession", priority=5)
 
-    async def evaluate(self, context: Dict[str, Any]) -> bool:
+    async def evaluate(self, context: dict[str, Any]) -> bool:
         """Always evaluate - determines session-specific actions."""
         current_hour = datetime.utcnow().hour
         context["trading_session"] = self._determine_session(current_hour)
@@ -181,7 +181,7 @@ class MarketSessionRule(OrderRule):
         else:
             return "overlap"
 
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
         """Set session-specific parameters."""
         session = context["trading_session"]
 
@@ -233,7 +233,7 @@ class MaxPositionRule(OrderRule):
         super().__init__("MaxPosition", priority=8)
         self.max_total_exposure = max_total_exposure
 
-    async def evaluate(self, context: Dict[str, Any]) -> bool:
+    async def evaluate(self, context: dict[str, Any]) -> bool:
         """Check if current exposure exceeds maximum."""
         client = context["client"]
         account_id = context["account_id"]
@@ -251,7 +251,7 @@ class MaxPositionRule(OrderRule):
         context["current_exposure"] = total_exposure
         return total_exposure > self.max_total_exposure
 
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
         """Cancel new orders or reduce positions."""
         client = context["client"]
         account_id = context["account_id"]
@@ -285,7 +285,7 @@ class StopLossProtectionRule(OrderRule):
         super().__init__("StopLossProtection", priority=9)
         self.max_stop_distance = max_stop_distance
 
-    async def evaluate(self, context: Dict[str, Any]) -> bool:
+    async def evaluate(self, context: dict[str, Any]) -> bool:
         """Check for unprotected positions."""
         client = context["client"]
         account_id = context["account_id"]
@@ -312,7 +312,7 @@ class StopLossProtectionRule(OrderRule):
         context["unprotected_positions"] = unprotected_positions
         return len(unprotected_positions) > 0
 
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
         """Place stop-loss orders for unprotected positions."""
         client = context["client"]
         account_id = context["account_id"]
@@ -420,7 +420,7 @@ class OrderMonitoringEngine:
         # Check market conditions
         await self._check_market_conditions(context)
 
-    async def _check_order_timeouts(self, context: Dict[str, Any]: Any) -> Any:
+    async def _check_order_timeouts(self, context: dict[str, Any]) -> Any:
         """Check for orders that have been pending too long."""
         orders = await self.client.orders.get_orders(
             account_id=self.account_id,
@@ -442,7 +442,7 @@ class OrderMonitoringEngine:
                         "age_hours": order_age.total_seconds() / 3600,
                     })
 
-    async def _check_position_risks(self, context: Dict[str, Any]: Any) -> Any:
+    async def _check_position_risks(self, context: dict[str, Any]) -> Any:
         """Check for high-risk position situations."""
         positions = await self.client.positions.get_positions(
             account_id=self.account_id,
@@ -471,7 +471,7 @@ class OrderMonitoringEngine:
                         "position_size": position_size,
                     })
 
-    async def _check_market_conditions(self, context: Dict[str, Any]: Any) -> Any:
+    async def _check_market_conditions(self, context: dict[str, Any]) -> Any:
         """Check for unusual market conditions."""
         instruments = ["EUR_USD", "GBP_USD", "USD_JPY"]  # Monitor major pairs
 
@@ -497,7 +497,7 @@ class OrderMonitoringEngine:
                     "threshold": normal_spread_threshold,
                 })
 
-    async def _trigger_alert(self, alert_data: Dict[str, Any]: Any) -> Any:
+    async def _trigger_alert(self, alert_data: dict[str, Any]) -> Any:
         """Trigger alert through all registered handlers."""
         for handler in self.alert_handlers:
             try:
@@ -527,14 +527,14 @@ class BaseAlertHandler(ABC):
     """Base class for alert handlers."""
 
     @abstractmethod
-    async def handle_alert(self, alert_data: Dict[str, Any]: Any) -> Any:
+    async def handle_alert(self, alert_data: dict[str, Any]) -> Any:
         """Handle an alert."""
         pass
 
 class ConsoleAlertHandler(BaseAlertHandler):
     """Simple console-based alert handler."""
 
-    async def handle_alert(self, alert_data: Dict[str, Any]: Any) -> Any:
+    async def handle_alert(self, alert_data: dict[str, Any]) -> Any:
         """Print alert to console."""
         alert_type = alert_data["type"]
         timestamp = datetime.utcnow().isoformat()
@@ -556,10 +556,10 @@ class ConsoleAlertHandler(BaseAlertHandler):
 class EmailAlertHandler(BaseAlertHandler):
     """Email-based alert handler (implementation depends on email service)."""
 
-    def __init__(self, email_config: Dict[str, str]: Any) -> None:
+    def __init__(self, email_config: dict[str, str]) -> None:
         self.email_config = email_config
 
-    async def handle_alert(self, alert_data: Dict[str, Any]: Any) -> Any:
+    async def handle_alert(self, alert_data: dict[str, Any]) -> Any:
         """Send alert via email."""
         # Implementation would integrate with your email service
         print(f"Email alert sent: {alert_data['type']}")
@@ -570,7 +570,7 @@ class DatabaseAlertHandler(BaseAlertHandler):
     def __init__(self, db_connection: Any) -> None:
         self.db_connection = db_connection
 
-    async def handle_alert(self, alert_data: Dict[str, Any]: Any) -> Any:
+    async def handle_alert(self, alert_data: dict[str, Any]) -> Any:
         """Log alert to database."""
         # Implementation would log to your database
         print(f"Database alert logged: {alert_data['type']}")
@@ -606,14 +606,14 @@ class EventType(Enum):
 class TradingEvent:
     event_type: EventType
     timestamp: datetime
-    data: Dict[str, Any]
+    data: dict[str, Any]
     instrument: str = None
 
 class EventDrivenOrderSystem:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
-        self.event_handlers: Dict[EventType, List[Callable]] = {}
+        self.event_handlers: dict[EventType, list[Callable]] = {}
         self.event_queue = asyncio.Queue()
         self.processing_events = False
 
@@ -721,7 +721,7 @@ class ErrorRecoveryManager:
         """Register a recovery strategy for specific error types."""
         self.recovery_strategies[error_type] = strategy
 
-    async def handle_order_error(self, error: Exception, order_context: Dict[str, Any]: Any) -> Any:
+    async def handle_order_error(self, error: Exception, order_context: dict[str, Any]) -> Any:
         """Handle order-related errors with appropriate recovery."""
         error_type = type(error).__name__
         error_message = str(error)
@@ -754,7 +754,7 @@ class ErrorRecoveryManager:
         return error_record
 
 # Recovery strategy implementations
-async def insufficient_margin_recovery(error: Exception, context: Dict[str, Any]: Any) -> Any:
+async def insufficient_margin_recovery(error: Exception, context: dict[str, Any]) -> Any:
     """Recover from insufficient margin errors."""
     # Reduce position size and retry
     original_units = context.get("units", 0)
@@ -768,7 +768,7 @@ async def insufficient_margin_recovery(error: Exception, context: Dict[str, Any]
         "reduced_units": reduced_units
     }
 
-async def invalid_price_recovery(error: Exception, context: Dict[str, Any]: Any) -> Any:
+async def invalid_price_recovery(error: Exception, context: dict[str, Any]) -> Any:
     """Recover from invalid price errors."""
     # Get current market price and adjust
     client = context["client"]
@@ -790,7 +790,7 @@ async def invalid_price_recovery(error: Exception, context: Dict[str, Any]: Any)
         "new_price": current_price
     }
 
-async def market_closed_recovery(error: Exception, context: Dict[str, Any]: Any) -> Any:
+async def market_closed_recovery(error: Exception, context: dict[str, Any]) -> Any:
     """Recover from market closed errors."""
     # Queue order for next market open
     return {
@@ -868,7 +868,7 @@ class TradingLogger:
         self.performance_logger.addHandler(perf_handler)
         self.performance_logger.setLevel(logging.INFO)
 
-    def log_order_action(self, action: str, order_data: Dict[str, Any]) -> Any:
+    def log_order_action(self, action: str, order_data: dict[str, Any]) -> Any:
         """Log order-related actions."""
         log_entry = {
             "action": action,
@@ -878,7 +878,7 @@ class TradingLogger:
 
         self.order_logger.info(json.dumps(log_entry))
 
-    def log_error(self, error: Exception, context: Dict[str, Any]) -> Any:
+    def log_error(self, error: Exception, context: dict[str, Any]) -> Any:
         """Log errors with context."""
         log_entry = {
             "error_type": type(error).__name__,
@@ -889,7 +889,7 @@ class TradingLogger:
 
         self.error_logger.error(json.dumps(log_entry))
 
-    def log_performance_metric(self, metric_name: str, value: Any, metadata: Dict[str, Any] = None) -> Any:
+    def log_performance_metric(self, metric_name: str, value: Any, metadata: dict[str, Any] = None) -> Any:
         """Log performance metrics."""
         log_entry = {
             "metric": metric_name,

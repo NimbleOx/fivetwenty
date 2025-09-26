@@ -36,7 +36,7 @@ warnings.filterwarnings('ignore')
 class PortfolioOptimizer:
     """Portfolio optimization using Modern Portfolio Theory."""
 
-    def __init__(self, returns_data: Dict[str, pd.Series]: Any) -> None:
+    def __init__(self, returns_data: Dict[str, pd.Series]) -> None:
         self.returns_data = returns_data
         self.instruments = list(returns_data.keys())
         self.returns_df = pd.DataFrame(returns_data).dropna()
@@ -203,7 +203,7 @@ class PortfolioOptimizer:
 class RiskBudgetOptimizer:
     """Optimize portfolio using risk budgeting approach."""
 
-    def __init__(self, returns_data: Dict[str, pd.Series]: Any) -> None:
+    def __init__(self, returns_data: Dict[str, pd.Series]) -> None:
         self.returns_data = returns_data
         self.returns_df = pd.DataFrame(returns_data).dropna()
         self.cov_matrix = self.returns_df.cov()

@@ -357,7 +357,7 @@ class ScaleOutStrategy:
         self.account_id = account_id
         self.take_profit_levels = []
 
-    async def setup_scale_out_levels(self, instrument: str, entry_price: Decimal, position_units: int, profit_targets: list, # List of profit distances in pips: Any) -> Any:
+    async def setup_scale_out_levels(self, instrument: str, entry_price: Decimal, position_units: int, profit_targets: list) -> Any:
         """Set up multiple take-profit levels above entry price."""
 
         remaining_units = position_units

@@ -11,8 +11,6 @@ FiveTwenty follows strict code quality standards to ensure maintainability, secu
 All code must pass mypy strict mode with no errors:
 
 ```python
-from typing import Optional
-
 from fivetwenty.models import OrderRequest, OrderResponse
 
 
@@ -22,7 +20,7 @@ async def create_order(
     account_id: str,
     order: OrderRequest,
     *,
-    timeout: Optional[float] = None,
+    timeout: float | None = None,
 ) -> OrderResponse:
     """Create an order with proper typing."""
     pass
@@ -110,8 +108,6 @@ async def _request(self, method: str, url: str) -> httpx.Response:
 async client is the primary interface, Client is a sync wrapper:
 
 ```python
-from typing import Optional
-
 from fivetwenty.models import AccountSummary
 
 
@@ -127,7 +123,7 @@ class AccountsEndpoint:
         self,
         account_id: str,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> AccountSummary:
         """Get account summary (async method)."""
         response = await self._client._request(
@@ -151,7 +147,7 @@ class SyncAccountsEndpoint:
         self,
         account_id: str,
         *,
-        timeout: Optional[float] = None,
+        timeout: float | None = None,
     ) -> AccountSummary:
         """Get account summary (sync wrapper)."""
         return self._client._run_async(
@@ -214,7 +210,6 @@ Use Pydantic models for all API data:
 ```python
 from datetime import datetime
 from decimal import Decimal
-from typing import Optional
 
 from pydantic import BaseModel, Field
 
@@ -226,7 +221,7 @@ class Order(BaseModel):
     id: str = Field(alias="id", description="Order ID")
     instrument: str = Field(alias="instrument", description="Trading instrument")
     units: int = Field(alias="units", description="Order size")
-    price: Optional[Decimal] = Field(alias="price", description="Order price")
+    price: Decimal | None = Field(alias="price", description="Order price")
     time_in_force: str = Field(alias="timeInForce", description="Time in force")
     create_time: datetime = Field(alias="createTime", description="Creation time")
 
@@ -250,7 +245,7 @@ def parse_order_response(data: dict) -> Order:
 ### **Methods and Functions**
 
 ```python
-from typing import AsyncIterator
+from collections.abc import AsyncIterator
 
 from fivetwenty.models import AccountSummary, OrderResponse, Price
 
@@ -294,8 +289,6 @@ async def mk_ord(self, acct: str, instr: str, u: int) -> OrderResponse:
 ### **Variables and Parameters**
 
 ```python
-from typing import Optional
-
 from fivetwenty.models import OrderRequest
 
 
@@ -304,14 +297,14 @@ account_id: str
 instrument_name: str
 order_request: OrderRequest
 timeout_seconds: float
-client_request_id: Optional[str]
+client_request_id: str | None
 
 # ❌ Bad - Cryptic abbreviations
 acct_id: str
 instr: str
 req: OrderRequest
 timeout: float  # Ambiguous units
-req_id: Optional[str]
+req_id: str | None
 ```
 
 ### **Model Classes**
@@ -357,7 +350,6 @@ All public methods require comprehensive docstrings:
 
 ```python
 from decimal import Decimal
-from typing import Optional
 
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 from fivetwenty.models import OrderResponse
@@ -371,8 +363,8 @@ async def post_limit_order(
     price: Decimal,
     *,
     time_in_force: str = "GTC",
-    client_request_id: Optional[str] = None,
-    timeout: Optional[float] = None,
+    client_request_id: str | None = None,
+    timeout: float | None = None,
 ) -> OrderResponse:
     """Create a limit order for execution at a specific price.
 

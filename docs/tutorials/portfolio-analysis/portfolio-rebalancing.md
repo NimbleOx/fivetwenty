@@ -26,7 +26,7 @@ Implement dynamic portfolio rebalancing strategies that maintain target allocati
 ```python
 import numpy as np
 import pandas as pd
-from typing import Dict, List, Tuple, Optional
+from typing import Any
 from datetime import datetime, timedelta
 import asyncio
 from decimal import Decimal
@@ -37,7 +37,7 @@ from fivetwenty import AsyncClient, Environment
 class PortfolioRebalancer:
     """Dynamic portfolio rebalancing with transaction cost optimization."""
 
-    def __init__(self, client: AsyncClient, account_id: str, target_weights: Dict[str, float]: Any) -> None:
+    def __init__(self, client: AsyncClient, account_id: str, target_weights: dict[str, float]) -> None:
         self.client = client
         self.account_id = account_id
         self.target_weights = target_weights
@@ -45,7 +45,7 @@ class PortfolioRebalancer:
         self.transaction_costs = {}
         self.rebalancing_history = []
 
-    async def get_current_positions(self) -> Dict[str, float]:
+    async def get_current_positions(self) -> dict[str, float]:
         """Get current portfolio positions."""
 
         try:
@@ -84,9 +84,9 @@ class PortfolioRebalancer:
             print(f"Error getting positions: {e}")
             return {inst: 0.0 for inst in self.instruments}
 
-    def calculate_rebalancing_trades(self, current_weights: Dict[str, float],
+    def calculate_rebalancing_trades(self, current_weights: dict[str, float],
                                    total_portfolio_value: Decimal,
-                                   tolerance: Decimal = Decimal("0.05")) -> Dict[str, float]:
+                                   tolerance: Decimal = Decimal("0.05")) -> dict[str, float]:
         """Calculate required trades for rebalancing."""
 
         trades = {}
@@ -107,8 +107,8 @@ class PortfolioRebalancer:
 
         return trades
 
-    async def execute_rebalancing_trades(self, trades: Dict[str, float],
-                                       max_trade_size: Decimal = Decimal("10000")) -> List[Dict]:
+    async def execute_rebalancing_trades(self, trades: dict[str, float],
+                                       max_trade_size: Decimal = Decimal("10000")) -> list[dict]:
         """Execute rebalancing trades with size limits."""
 
         executed_trades = []
@@ -156,7 +156,7 @@ class PortfolioRebalancer:
 
         return executed_trades
 
-    def should_rebalance(self, current_weights: Dict[str, float],
+    def should_rebalance(self, current_weights: dict[str, float],
                         rebalancing_method: str = 'threshold') -> bool:
         """Determine if rebalancing is needed."""
 
@@ -242,11 +242,11 @@ class PortfolioRebalancer:
 class TransactionCostOptimizer:
     """Optimize rebalancing considering transaction costs."""
 
-    def __init__(self, spread_costs: Dict[str, float]: Any, commission_rates: Dict[str, float]: Any) -> None:
+    def __init__(self, spread_costs: dict[str, float]: Any, commission_rates: dict[str, float]: Any) -> None:
         self.spread_costs = spread_costs  # Spread cost per unit
         self.commission_rates = commission_rates  # Commission as % of trade value
 
-    def calculate_transaction_costs(self, trades: Dict[str, float]) -> Dict[str, float]:
+    def calculate_transaction_costs(self, trades: dict[str, float]) -> dict[str, float]:
         """Calculate transaction costs for proposed trades."""
 
         costs = {}
@@ -264,8 +264,8 @@ class TransactionCostOptimizer:
 
         return costs
 
-    def optimize_rebalancing_schedule(self, weight_deviations: Dict[str, float],
-                                    rebalancing_benefit: Decimal) -> Dict[str, bool]:
+    def optimize_rebalancing_schedule(self, weight_deviations: dict[str, float],
+                                    rebalancing_benefit: Decimal) -> dict[str, bool]:
         """Determine which instruments to rebalance based on cost-benefit."""
 
         rebalance_decisions = {}
@@ -291,7 +291,7 @@ class AdaptiveRebalancer:
         self.base_rebalancer = base_rebalancer
         self.market_conditions = {}
 
-    def calculate_adaptive_thresholds(self, market_volatility: Decimal) -> Dict[str, float]:
+    def calculate_adaptive_thresholds(self, market_volatility: Decimal) -> dict[str, float]:
         """Calculate dynamic rebalancing thresholds based on market conditions."""
 
         base_threshold = 0.05  # 5% base threshold
@@ -302,7 +302,7 @@ class AdaptiveRebalancer:
 
         return {inst: adaptive_threshold for inst in self.base_rebalancer.instruments}
 
-    def market_timing_rebalance(self, market_signals: Dict[str, float]) -> Dict[str, float]:
+    def market_timing_rebalance(self, market_signals: dict[str, float]) -> dict[str, float]:
         """Adjust target weights based on market timing signals."""
 
         adjusted_weights = self.base_rebalancer.target_weights.copy()

@@ -200,7 +200,7 @@ class RiskMonitor:
         self.risk_limits = {}
         self.alerts = []
 
-    def set_risk_limits(self, limits: dict[str, dict]: Any) -> Any:
+    def set_risk_limits(self, limits: dict[str, dict]) -> Any:
         """Set risk limits for monitoring."""
         self.risk_limits = limits
 

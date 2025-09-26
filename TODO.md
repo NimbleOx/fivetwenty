@@ -54,3 +54,8 @@ Based on spec, we could add:
 **High**: Fix CLI examples in spec (breaks copy-paste)
 **Medium**: Add prose/link validators if needed
 **Low**: Full spec rewrite
+
+
+
+Need to add a disclaimer to main page
+Need to add outline of modern tools (uv, typing) to main page

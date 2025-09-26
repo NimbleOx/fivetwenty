@@ -171,7 +171,7 @@ class TradingObjectPool:
             return self.price_objects.popleft()
         return {'bid': 0.0, 'ask': 0.0, 'timestamp': 0.0, 'instrument': ''}
 
-    def return_price_object(self, obj: Dict[str, Any]: Any) -> Any:
+    def return_price_object(self, obj: Dict[str, Any]) -> Any:
         """Return object to pool."""
         # Clear object data
         obj.clear()

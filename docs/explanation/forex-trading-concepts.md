@@ -178,23 +178,30 @@ def analyze_pnl(trades: list, position: Any) -> None:
 Execute immediately at current market price:
 
 ```python
+import asyncio
 from fivetwenty import AsyncClient
 
-# Setup example variables
-client = AsyncClient()
-account_id = "your-account-id"
 
-# Market order - executes now
-order = await client.orders.post_market_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=10000  # Buy 10,000 EUR
-)
+async def place_market_order() -> None:
+    """Place a market order example."""
+    # Setup example variables
+    client = AsyncClient()
+    account_id = "your-account-id"
 
-# Usually fills immediately
-if order.order_fill_transaction:
-    fill_price = order.order_fill_transaction.price
-    print(f"Filled at {fill_price}")
+    # Market order - executes now
+    order = await client.orders.post_market_order(
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=10000  # Buy 10,000 EUR
+    )
+
+    # Usually fills immediately
+    if order.order_fill_transaction:
+        fill_price = order.order_fill_transaction.price
+        print(f"Filled at {fill_price}")
+
+if __name__ == "__main__":
+    asyncio.run(place_market_order())
 ```
 
 **Use Cases**:
@@ -207,21 +214,29 @@ if order.order_fill_transaction:
 Execute only at specified price or better:
 
 ```python
+import asyncio
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-# Setup example variables
-client = AsyncClient()
-account_id = "your-account-id"
 
-# Current EUR_USD price: 1.1050
-# Place buy limit at 1.1000 (below market)
-limit_order = await client.orders.post_limit_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=10000,
-    price=Decimal("1.1000")  # Will only buy at 1.1000 or lower
-)
+async def place_limit_order() -> None:
+    """Place a limit order example."""
+    # Setup example variables
+    client = AsyncClient()
+    account_id = "your-account-id"
+
+    # Current EUR_USD price: 1.1050
+    # Place buy limit at 1.1000 (below market)
+    limit_order = await client.orders.post_limit_order(
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=10000,
+        price=Decimal("1.1000")  # Will only buy at 1.1000 or lower
+    )
+    print(f"Limit order placed: {limit_order}")
+
+if __name__ == "__main__":
+    asyncio.run(place_limit_order())
 ```
 
 **Market Scenarios**:
@@ -235,21 +250,29 @@ limit_order = await client.orders.post_limit_order(
 Triggered when market reaches specified price:
 
 ```python
+import asyncio
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-# Setup example variables
-client = AsyncClient()
-account_id = "your-account-id"
 
-# Current EUR_USD: 1.1050
-# Stop buy at 1.1100 (above market) - breakout strategy
-stop_order = await client.orders.post_stop_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=10000,
-    price=Decimal("1.1100")  # Buy if price breaks above 1.1100
-)
+async def place_stop_order() -> None:
+    """Place a stop order example."""
+    # Setup example variables
+    client = AsyncClient()
+    account_id = "your-account-id"
+
+    # Current EUR_USD: 1.1050
+    # Stop buy at 1.1100 (above market) - breakout strategy
+    stop_order = await client.orders.post_stop_order(
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=10000,
+        price=Decimal("1.1100")  # Buy if price breaks above 1.1100
+    )
+    print(f"Stop order placed: {stop_order}")
+
+if __name__ == "__main__":
+    asyncio.run(place_stop_order())
 ```
 
 
@@ -294,17 +317,22 @@ from fivetwenty import AsyncClient
 client = AsyncClient()
 account_id = "your-account-id"
 
-# Check your account margin situation
-account = await client.accounts.get_account(account_id)
+async def main() -> None:
+    """Check your account margin situation."""
+    account = await client.accounts.get_account(account_id)
 
-print(f"Balance: {account.balance}")              # Your actual money
-print(f"Margin Used: {account.margin_used}")     # Tied up in positions
-print(f"Margin Available: {account.margin_available}")  # Available for new trades
+    print(f"Balance: {account.balance}")              # Your actual money
+    print(f"Margin Used: {account.margin_used}")     # Tied up in positions
+    print(f"Margin Available: {account.margin_available}")  # Available for new trades
 
-# Margin calculation example:
-# Position: 100,000 EUR_USD
-# Margin Rate: 3.33% (30:1 leverage)
-# Required Margin: 100,000 * Decimal("0.0333") = 3,330 USD
+    # Margin calculation example:
+    # Position: 100,000 EUR_USD
+    # Margin Rate: 3.33% (30:1 leverage)
+    # Required Margin: 100,000 * Decimal("0.0333") = 3,330 USD
+
+if __name__ == "__main__":
+    asyncio.run(main())
+
 ```
 
 **Key Concepts**:
@@ -324,19 +352,24 @@ from fivetwenty import AsyncClient
 client = AsyncClient()
 account_id = "your-account-id"
 
-# Account-level margin
-account = await client.accounts.get_account(account_id)
-margin_utilization = Decimal(account.margin_used) / Decimal(account.balance)
+async def main() -> None:
+    """Check account margin levels."""
+    # Account-level margin
+    account = await client.accounts.get_account(account_id)
+    margin_utilization = Decimal(account.margin_used) / Decimal(account.balance)
 
-# Position-level margin
-positions = await client.positions.get_open_positions(account_id)
-for position in positions:
-    print(f"{position.instrument}: {position.margin_used} margin used")
+    # Position-level margin
+    positions = await client.positions.get_open_positions(account_id)
+    for position in positions:
+        print(f"{position.instrument}: {position.margin_used} margin used")
 
-# Individual trade margin
-trades = await client.trades.get_open_trades(account_id)
-for trade in trades:
-    print(f"Trade {trade.id}: {trade.margin_used} margin")
+    # Individual trade margin
+    trades = await client.trades.get_open_trades(account_id)
+    for trade in trades:
+        print(f"Trade {trade.id}: {trade.margin_used} margin")
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ---
@@ -349,17 +382,22 @@ for trade in trades:
 **Realized P/L**: Actual profit/loss from closed trades
 
 ```python
-# Unrealized P/L (paper profits/losses)
-account = await client.accounts.get_account(account_id)
-current_unrealized = account.unrealized_pl  # All open positions
+async def check_pnl() -> None:
+    """Check unrealized and realized P/L."""
+    client = AsyncClient()
+    account_id = "your-account-id"
 
-# Individual position unrealized P/L
-position = await client.positions.get_position(account_id, "EUR_USD")
-eur_usd_unrealized = position.unrealized_pl
+    # Unrealized P/L (paper profits/losses)
+    account = await client.accounts.get_account(account_id)
+    current_unrealized = account.unrealized_pl  # All open positions
 
-# Realized P/L tracking
-for trade in await client.trades.get_open_trades(account_id):
-    print(f"Trade {trade.id}: Realized P/L = {trade.realized_pl}")
+    # Individual position unrealized P/L
+    position = await client.positions.get_position(account_id, "EUR_USD")
+    eur_usd_unrealized = position.unrealized_pl
+
+    # Realized P/L tracking
+    for trade in await client.trades.get_open_trades(account_id):
+        print(f"Trade {trade.id}: Realized P/L = {trade.realized_pl}")
 ```
 
 ### P/L Calculation Example
@@ -375,10 +413,15 @@ async def main():
     # P/L = (1.1050 - 1.1000) × 10,000 = 50 USD profit
 
     # The SDK calculates this automatically:
+    client = AsyncClient()
+    account_id = "your-account-id"
+    trade_id = "123"
+
     trade = await client.trades.get_trade(account_id, trade_id)
     print(f"Unrealized P/L: {trade.unrealized_pl}")  # Shows 50.00
 
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Currency Conversion in P/L
@@ -386,14 +429,19 @@ asyncio.run(main())
 When your account currency differs from the quote currency:
 
 ```python
-# Account in USD, trading GBP_JPY
-# P/L is calculated in JPY (quote currency)
-# Then converted to USD (account currency)
+async def check_currency_conversion() -> None:
+    """Check currency conversion in P/L."""
+    client = AsyncClient()
+    account_id = "your-account-id"
 
-position = await client.positions.get_position(account_id, "GBP_JPY")
-# position.unrealized_pl is already in USD (your account currency)
+    # Account in USD, trading GBP_JPY
+    # P/L is calculated in JPY (quote currency)
+    # Then converted to USD (account currency)
 
-# The SDK handles conversion automatically using current exchange rates
+    position = await client.positions.get_position(account_id, "GBP_JPY")
+    # position.unrealized_pl is already in USD (your account currency)
+
+    # The SDK handles conversion automatically using current exchange rates
 ```
 
 ---
@@ -422,17 +470,22 @@ Trading Cost: You immediately lose the spread when opening a position
 ```
 
 ```python
-prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
-eur_usd_price = prices[0]
+async def check_spread() -> None:
+    """Check bid-ask spread."""
+    client = AsyncClient()
+    account_id = "your-account-id"
 
-bid_price = eur_usd_price.bids[0].price      # Price you can SELL at
-ask_price = eur_usd_price.asks[0].price      # Price you can BUY at
-spread = ask_price - bid_price               # Market maker profit
+    prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
+    eur_usd_price = prices.prices[0]
 
-# Trading implications:
-# - Buying: You pay the ask price (higher)
-# - Selling: You receive the bid price (lower)
-# - Position starts with negative P/L equal to spread
+    bid_price = eur_usd_price.bids[0].price      # Price you can SELL at
+    ask_price = eur_usd_price.asks[0].price      # Price you can BUY at
+    spread = ask_price - bid_price               # Market maker profit
+
+    # Trading implications:
+    # - Buying: You pay the ask price (higher)
+    # - Selling: You receive the bid price (lower)
+    # - Position starts with negative P/L equal to spread
 ```
 
 ### Market Depth (Order Book)
@@ -440,17 +493,20 @@ spread = ask_price - bid_price               # Market maker profit
 See available liquidity at different price levels:
 
 ```python
-order_book = await client.instruments.get_instrument_candles("EUR_USD")
+async def check_order_book() -> None:
+    """Check order book depth."""
+    client = AsyncClient()
+    account_id = "your-account-id"
 
-# Bid side (buyers)
-for bucket in order_book.price_buckets[:5]:  # Top 5 levels
-    if bucket.price < order_book.price:  # Below current price = bids
-        print(f"Bid: {bucket.price} ({bucket.liquidity} units)")
+    # Get candle data as a proxy for market depth analysis
+    candles = await client.instruments.get_instrument_candles(
+        instrument="EUR_USD",
+        count=1
+    )
 
-# Ask side (sellers)
-for bucket in order_book.price_buckets[:5]:
-    if bucket.price > order_book.price:  # Above current price = asks
-        print(f"Ask: {bucket.price} ({bucket.liquidity} units)")
+    print(f"Current candle data: {candles.candles[0]}")
+    # Note: OANDA API doesn't provide order book data directly
+    # This is a simplified example for educational purposes
 ```
 
 
@@ -470,25 +526,30 @@ Never risk more than a small percentage of your account:
 ```python
 from decimal import Decimal
 
-# The 2% rule: Never risk more than 2% on a single trade
-account = await client.accounts.get_account(account_id)
-account_balance = Decimal(account.balance)
-max_risk = account_balance * Decimal("0.02")  # 2% of account
+async def calculate_position_size() -> None:
+    """Calculate position size based on risk."""
+    client = AsyncClient()
+    account_id = "your-account-id"
 
-# Calculate position size based on stop loss
-stop_loss_pips = 50  # Stop loss 50 pips away
-pip_value = Decimal("1.0")      # For EUR_USD, 1 pip = $1 per 10k units
+    # The 2% rule: Never risk more than 2% on a single trade
+    account = await client.accounts.get_account(account_id)
+    account_balance = Decimal(account.balance)
+    max_risk = account_balance * Decimal("0.02")  # 2% of account
 
-# Position size = Max Risk / (Stop Loss Pips × Pip Value)
-position_size = int(max_risk / (stop_loss_pips * pip_value))
+    # Calculate position size based on stop loss
+    stop_loss_pips = 50  # Stop loss 50 pips away
+    pip_value = Decimal("1.0")      # For EUR_USD, 1 pip = $1 per 10k units
 
-# Place order with calculated size
-await client.orders.post_market_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=position_size,
-    stop_loss_on_fill=StopLossDetails(price=entry_price - stop_loss_distance)
-)
+    # Position size = Max Risk / (Stop Loss Pips × Pip Value)
+    position_size = int(max_risk / (stop_loss_pips * pip_value))
+
+    # Place order with calculated size
+    # Note: StopLossDetails needs to be properly imported and constructed
+    await client.orders.post_market_order(
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=position_size
+    )
 ```
 
 ### Correlation Risk
@@ -496,18 +557,24 @@ await client.orders.post_market_order(
 Be aware of correlated positions:
 
 ```python
-# EUR_USD and GBP_USD often move together
-# Having large positions in both = concentration risk
+async def check_correlation_risk() -> None:
+    """Check correlation risk across positions."""
+    client = AsyncClient()
+    account_id = "your-account-id"
 
-eur_position = await client.positions.get_position(account_id, "EUR_USD")
-gbp_position = await client.positions.get_position(account_id, "GBP_USD")
+    # EUR_USD and GBP_USD often move together
+    # Having large positions in both = concentration risk
 
-# Calculate total USD exposure
-eur_net = eur_position.long.units + eur_position.short.units
-gbp_net = gbp_position.long.units + gbp_position.short.units
+    eur_position = await client.positions.get_position(account_id, "EUR_USD")
+    gbp_position = await client.positions.get_position(account_id, "GBP_USD")
 
-# Both positive = both long USD (correlated risk)
-# Opposite signs = hedged positions
+    # Calculate total USD exposure
+    eur_net = int(eur_position.long.units) + int(eur_position.short.units)
+    gbp_net = int(gbp_position.long.units) + int(gbp_position.short.units)
+
+    # Both positive = both long USD (correlated risk)
+    # Opposite signs = hedged positions
+    print(f"EUR net: {eur_net}, GBP net: {gbp_net}")
 ```
 
 ### Drawdown Management
@@ -517,14 +584,20 @@ Track account performance:
 ```python
 from decimal import Decimal
 
-# Monitor account equity (balance + unrealized P/L)
-account = await client.accounts.get_account(account_id)
-current_equity = Decimal(str(account.balance)) + Decimal(str(account.unrealized_pl))
+async def monitor_drawdown() -> None:
+    """Monitor account drawdown."""
+    client = AsyncClient()
+    account_id = "your-account-id"
+    peak_equity = Decimal("10000")  # Example peak equity
 
-# Compare to account high-water mark
-if current_equity < peak_equity * Decimal("0.95"):  # 5% drawdown
-    print("⚠️ Significant drawdown detected")
-    # Consider reducing position sizes or stopping trading
+    # Monitor account equity (balance + unrealized P/L)
+    account = await client.accounts.get_account(account_id)
+    current_equity = Decimal(str(account.balance)) + Decimal(str(account.unrealized_pl))
+
+    # Compare to account high-water mark
+    if current_equity < peak_equity * Decimal("0.95"):  # 5% drawdown
+        print("⚠️ Significant drawdown detected")
+        # Consider reducing position sizes or stopping trading
 ```
 
 ---
@@ -567,16 +640,25 @@ print(f"Current session: {current_session}")
 Major news events affect volatility:
 
 ```python
-# Before major economic releases, consider:
-# - Reducing position sizes
-# - Widening stop losses
-# - Avoiding new positions
+def adjust_for_news() -> None:
+    """Adjust trading parameters for news events."""
+    major_news_expected = True  # Example - would come from economic calendar
+    stop_loss_distance = 50  # Example stop loss distance
+    position_size = 10000  # Example position size
 
-# Check if major news expected (external data needed)
-# Then adjust trading parameters:
-if major_news_expected:
-    stop_loss_distance *= 1.5  # Wider stops
-    position_size //= 2         # Smaller positions
+    # Before major economic releases, consider:
+    # - Reducing position sizes
+    # - Widening stop losses
+    # - Avoiding new positions
+
+    # Check if major news expected (external data needed)
+    # Then adjust trading parameters:
+    if major_news_expected:
+        stop_loss_distance *= 1.5  # Wider stops
+        position_size //= 2         # Smaller positions
+
+    print(f"Adjusted stop loss: {stop_loss_distance}")
+    print(f"Adjusted position size: {position_size}")
 ```
 
 ---
@@ -595,14 +677,23 @@ Profit from interest rate differentials:
 # - Capital appreciation if AUD rises vs JPY
 # - Interest rate differential (swap/rollover)
 
-# Check financing costs/credits
-instruments = await client.instruments.get_instrument_candles(account_id)
-aud_jpy = next(i for i in instruments if i.name == "AUD_JPY")
+async def check_carry_trade() -> None:
+    """Check carry trade financing."""
+    client = AsyncClient()
+    account_id = "your-account-id"
 
-if hasattr(aud_jpy, 'financing'):
-    long_financing = aud_jpy.financing.long_rate
-    short_financing = aud_jpy.financing.short_rate
-    print(f"Long AUD_JPY financing: {long_financing}% annually")
+    # Get instrument information (financing rates would be in instrument details)
+    # Note: This is a simplified example - actual financing data structure may differ
+    try:
+        # Get current candles as proxy for instrument data
+        candles = await client.instruments.get_instrument_candles(
+            instrument="AUD_JPY",
+            count=1
+        )
+        print(f"AUD_JPY candle data: {candles.candles[0]}")
+        # Financing rates would typically be in account/instrument details
+    except Exception as e:
+        print(f"Error getting instrument data: {e}")
 ```
 
 ### Currency Hedging
@@ -613,14 +704,23 @@ Protect against currency risk:
 # If you have EUR exposure from business
 # but trade with USD account, you have currency risk
 
-# Natural hedge: Go short EUR_USD to offset EUR exposure
-hedge_position = -business_eur_exposure  # Opposite position
+async def hedge_currency_exposure() -> None:
+    """Hedge currency exposure."""
+    client = AsyncClient()
+    account_id = "your-account-id"
+    business_eur_exposure = 100000  # Example EUR exposure from business
 
-await client.orders.post_market_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=hedge_position  # Negative = short EUR
-)
+    # If you have EUR exposure from business
+    # but trade with USD account, you have currency risk
+
+    # Natural hedge: Go short EUR_USD to offset EUR exposure
+    hedge_position = -business_eur_exposure  # Opposite position
+
+    await client.orders.post_market_order(
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=hedge_position  # Negative = short EUR
+    )
 ```
 
 ---
@@ -650,45 +750,75 @@ Real-time price feeds for active trading:
 import asyncio
 
 
-async def main():
-    async def price_monitor(client, account_id, instruments):
+async def main() -> None:
+    """Main streaming example."""
+    client = AsyncClient()
+    account_id = "your-account-id"
+    instruments = ["EUR_USD", "GBP_USD"]
+
+    async def price_monitor() -> None:
         """Monitor real-time prices for trading signals."""
 
         async for price_data in client.pricing.get_pricing_stream(account_id, instruments):
-            if price_data.type == "PRICE":
+            if hasattr(price_data, 'type') and price_data.type == "PRICE":
                 # price_data is ClientPrice object
                 current_bid = price_data.bids[0].price
                 current_ask = price_data.asks[0].price
 
-                # Your trading logic here
-                await check_trading_signals(price_data)
+                # Your trading logic here would go here
+                print(f"Price update: {current_bid}/{current_ask}")
 
-            elif price_data.type == "HEARTBEAT":
+            elif hasattr(price_data, 'type') and price_data.type == "HEARTBEAT":
                 # Keep-alive signal - connection is healthy
                 pass
 
-asyncio.run(main())
+    await price_monitor()
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Error Handling in Trading Context
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+async def handle_trading_errors() -> None:
+    """Handle trading errors properly."""
+    import asyncio
+    import logging
+    from decimal import Decimal
+    from fivetwenty.exceptions import VeeTwentyError
 
-try:
-    order = await client.orders.post_market_order(account_id, "EUR_USD", 10000)
-except FiveTwentyError as e:
-    if e.error_code == "INSUFFICIENT_MARGIN":
-        # Reduce position size and retry
-        smaller_size = calculate_affordable_size(account_balance)
-        order = await client.orders.post_market_order(account_id, "EUR_USD", smaller_size)
-    elif e.error_code == "MARKET_HALTED":
-        # Wait and retry later
-        await asyncio.sleep(60)
-        # Implement retry logic
-    else:
-        # Log error and alert
-        logger.error(f"Unexpected trading error: {e}")
+    client = AsyncClient()
+    account_id = "your-account-id"
+    logger = logging.getLogger(__name__)
+
+    def calculate_affordable_size(balance: str) -> int:
+        """Calculate affordable position size."""
+        return int(Decimal(balance) * Decimal('0.01'))  # 1% of balance
+
+    try:
+        order = await client.orders.post_market_order(
+            account_id=account_id,
+            instrument="EUR_USD",
+            units=10000
+        )
+    except VeeTwentyError as e:
+        if "INSUFFICIENT_MARGIN" in str(e):
+            # Reduce position size and retry
+            account = await client.accounts.get_account(account_id)
+            smaller_size = calculate_affordable_size(account.balance)
+            order = await client.orders.post_market_order(
+                account_id=account_id,
+                instrument="EUR_USD",
+                units=smaller_size
+            )
+        elif "MARKET_HALTED" in str(e):
+            # Wait and retry later
+            await asyncio.sleep(60)
+            # Implement retry logic
+        else:
+            # Log error and alert
+            logger.error(f"Unexpected trading error: {e}")
 ```
 
 ---

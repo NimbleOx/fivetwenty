@@ -22,7 +22,7 @@ Bracket orders combine entry, stop-loss, and take-profit orders for complete pos
 import asyncio
 from datetime import datetime
 from decimal import Decimal
-from typing import Dict, Optional
+from typing import Any
 
 from fivetwenty import AsyncClient
 
@@ -426,9 +426,9 @@ class ConditionalOrderChain:
 
     async def create_if_then_order_chain(
         self,
-        trigger_condition: Dict[str, Any],
-        primary_orders: List[Dict[str, Any]],
-        secondary_orders: List[Dict[str, Any]]
+        trigger_condition: dict[str, Any],
+        primary_orders: list[dict[str, Any]],
+        secondary_orders: list[dict[str, Any]]
     ) -> str:
         """Create conditional order chain: if trigger, then primary, then secondary."""
 
@@ -473,7 +473,7 @@ class ConditionalOrderChain:
 
             await asyncio.sleep(10)  # Check every 10 seconds
 
-    async def _evaluate_trigger(self, trigger: Dict[str, Any]) -> bool:
+    async def _evaluate_trigger(self, trigger: dict[str, Any]) -> bool:
         """Evaluate if trigger condition is met."""
 
         trigger_type = trigger["type"]
@@ -530,7 +530,7 @@ class ConditionalOrderChain:
         # Start monitoring primary orders for secondary trigger
         asyncio.create_task(self._monitor_primary_completion(chain_id))
 
-    async def _place_order_from_spec(self, order_spec: Dict[str, Any]) -> str:
+    async def _place_order_from_spec(self, order_spec: dict[str, Any]) -> str:
         """Place order from specification dictionary."""
 
         order_type = order_spec["type"]
@@ -638,8 +638,8 @@ class OCOOrderManager:
     async def place_oco_orders(
         self,
         instrument: str,
-        order1_spec: Dict[str, Any],
-        order2_spec: Dict[str, Any],
+        order1_spec: dict[str, Any],
+        order2_spec: dict[str, Any],
     ) -> str:
         """Place two orders where filling one cancels the other."""
 
@@ -720,7 +720,7 @@ class OCOOrderManager:
         except Exception as e:
             print(f"Failed to cancel order {order_id}: {e}")
 
-    async def _place_order_from_spec(self, order_spec: Dict[str, Any]) -> str:
+    async def _place_order_from_spec(self, order_spec: dict[str, Any]) -> str:
         """Place order from specification (same as ConditionalOrderChain)."""
         # Implementation same as above
         pass
@@ -960,7 +960,7 @@ class PortfolioHedgeManager:
         for hedge in hedges_needed:
             await self._place_hedge_order(hedge)
 
-    async def _place_hedge_order(self, hedge: Dict[str, Any]: Any) -> Any:
+    async def _place_hedge_order(self, hedge: dict[str, Any]) -> Any:
         """Place hedge order for specific currency exposure."""
 
         currency = hedge["currency"]

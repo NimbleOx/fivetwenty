@@ -32,7 +32,7 @@ from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    """Example of OnFill pattern."""
+    """Demonstrate OnFill pattern."""
     client = AsyncClient()
     account_id = "your-account-id"
 
@@ -52,12 +52,12 @@ if __name__ == "__main__":
 
     **Post-Trade Pattern**: Add TP/SL to existing trades
     ```python
+import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.models import TakeProfitOrderRequest
 
-
 async def post_trade_example() -> None:
-    """Example of post-trade pattern."""
+    """Demonstrate post-trade pattern."""
     client = AsyncClient()
     account_id = "your-account-id"
 
@@ -71,7 +71,8 @@ async def post_trade_example() -> None:
     trade_id = trade_info["tradeID"]
 
     tp_request = TakeProfitOrderRequest(tradeID=trade_id, price="1.1100")
-    await client.orders.post_order(account_id, tp_request)
+    tp_response = await client.orders.post_order(account_id, tp_request)
+    print(f"Take profit order created: {tp_response.order_create_transaction['id']}")
     ```
 
     **When to Use Each:**
@@ -87,6 +88,7 @@ async def post_trade_example() -> None:
 #### Step-by-Step Post-Trade Risk Management
 
 ```python
+import asyncio
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
@@ -98,9 +100,8 @@ from fivetwenty.models import (
     TrailingStopLossOrderRequest,
 )
 
-
 async def implement_post_trade_risk_management() -> None:
-    """Comprehensive post-trade risk management implementation."""
+    """Implement comprehensive post-trade risk management implementation."""
     async with AsyncClient() as client:
         account_id = AccountID("your-account-id")
 
@@ -119,7 +120,7 @@ async def implement_post_trade_risk_management() -> None:
         ):
             trade_info = market_response.order_fill_transaction["tradeOpened"]
             trade_id = trade_info["tradeID"]
-            print(f"Trade created: {trade_id}")
+            print("Trade created successfully")
 
             # Step 2: Add take profit order
             print("Adding take profit...")
@@ -128,10 +129,11 @@ async def implement_post_trade_risk_management() -> None:
                 price="1.1150",  # Target 150 pips profit
                 timeInForce="GTC",
             )
+            print(f"Take profit request prepared for trade {trade_id}")
 
             tp_response = await client.orders.post_order(account_id, tp_request)
             tp_order_id = tp_response.order_create_transaction["id"]
-            print(f"Take profit order: {tp_order_id}")
+            print(f"Take profit order created: {tp_order_id}")
 
             # Step 3: Add stop loss order (price-based)
             print("Adding stop loss...")
@@ -140,57 +142,63 @@ async def implement_post_trade_risk_management() -> None:
                 price="1.0950",  # Risk 50 pips
                 timeInForce="GTC",
             )
+            print(f"Stop loss request prepared for trade {trade_id}")
 
             sl_response = await client.orders.post_order(account_id, sl_request)
             sl_order_id = sl_response.order_create_transaction["id"]
-            print(f"Stop loss order: {sl_order_id}")
+            print(f"Stop loss order created: {sl_order_id}")
 ```
 
 #### Distance-Based Stop Loss
 
 ```python
+from fivetwenty import AsyncClient
 from fivetwenty.models import StopLossOrderRequest
 
-
 # Alternative: Distance-based stop loss (dynamic pricing)
-async def add_distance_based_stop_loss(client, account_id: str, trade_id: str) -> str:
+async def add_distance_based_stop_loss(client: AsyncClient, account_id: str, trade_id: str) -> str:
     """Add stop loss based on distance rather than fixed price."""
     distance_sl_request = StopLossOrderRequest(
         tradeID=trade_id,
         distance="0.0050",  # 50 pips from entry price
         timeInForce="GTC",
     )
+    print(f"Distance-based stop loss prepared: 50 pips for trade {trade_id}")
 
     response = await client.orders.post_order(account_id, distance_sl_request)
-    return response.order_create_transaction["id"]
+    order_id = response.order_create_transaction["id"]
+    print(f"Distance-based stop loss created: {order_id}")
+    return order_id
 ```
 
 #### Trailing Stop Loss
 
 ```python
+from fivetwenty import AsyncClient
 from fivetwenty.models import TrailingStopLossOrderRequest
 
-
-async def add_trailing_stop_loss(client, account_id: str, trade_id: str) -> str:
+async def add_trailing_stop_loss(client: AsyncClient, account_id: str, trade_id: str) -> str:
     """Add trailing stop loss that follows favorable price movement."""
     tsl_request = TrailingStopLossOrderRequest(
         tradeID=trade_id,
         distance="0.0030",  # 30 pips trailing distance
         timeInForce="GTC",
     )
+    print(f"Trailing stop loss prepared: 30 pips for trade {trade_id}")
 
     response = await client.orders.post_order(account_id, tsl_request)
-    print("Trailing stop will follow price with 30 pip buffer")
-    return response.order_create_transaction["id"]
+    order_id = response.order_create_transaction["id"]
+    print(f"Trailing stop created: {order_id} - will follow price with 30 pip buffer")
+    return order_id
 ```
 
 #### Guaranteed Stop Loss
 
 ```python
+from fivetwenty import AsyncClient
 from fivetwenty.models import GuaranteedStopLossOrderRequest, StopLossOrderRequest
 
-
-async def add_guaranteed_stop_loss(client, account_id: str, trade_id: str) -> str:
+async def add_guaranteed_stop_loss(client: AsyncClient, account_id: str, trade_id: str) -> str:
     """Add guaranteed stop loss with premium cost."""
     try:
         gsl_request = GuaranteedStopLossOrderRequest(
@@ -198,31 +206,37 @@ async def add_guaranteed_stop_loss(client, account_id: str, trade_id: str) -> st
             price="1.0900",  # Guaranteed execution price
             timeInForce="GTC",
         )
+        print(f"Guaranteed stop loss prepared for trade {trade_id}")
 
         response = await client.orders.post_order(account_id, gsl_request)
+        order_id = response.order_create_transaction["id"]
 
         # Check premium cost
         if "guaranteedExecutionPremium" in response.order_create_transaction:
             premium = response.order_create_transaction["guaranteedExecutionPremium"]
             print(f"Guaranteed stop loss premium: {premium}")
 
-        return response.order_create_transaction["id"]
+        print(f"Guaranteed stop loss created: {order_id}")
+        return order_id
 
-    except Exception as e:
-        print(f"GSL not available: {e}")
+    except Exception:
+        print("Guaranteed stop loss not available")
         # Fallback to regular stop loss
         return await add_regular_stop_loss(client, account_id, trade_id)
 
 
-async def add_regular_stop_loss(client, account_id: str, trade_id: str) -> str:
+async def add_regular_stop_loss(client: AsyncClient, account_id: str, trade_id: str) -> str:
     """Add regular stop loss as fallback."""
     sl_request = StopLossOrderRequest(
         tradeID=trade_id,
         price="1.0900",
         timeInForce="GTC",
     )
+    print(f"Regular stop loss prepared for trade {trade_id}")
     response = await client.orders.post_order(account_id, sl_request)
-    return response.order_create_transaction["id"]
+    order_id = response.order_create_transaction["id"]
+    print(f"Regular stop loss created: {order_id}")
+    return order_id
 ```
 
 #### Error Handling for Post-Trade Orders
@@ -241,9 +255,11 @@ async def robust_post_trade_setup(client, account_id: str, trade_id: str) -> Non
             price="1.1200",
             timeInForce="GTC",
         )
+        print(f"Robust take profit prepared for trade {trade_id}")
 
         tp_response = await client.orders.post_order(account_id, tp_request)
-        print(f"✅ Take profit added: {tp_response.order_create_transaction['id']}")
+        tp_order_id = tp_response.order_create_transaction['id']
+        print(f"✅ Take profit order added successfully: {tp_order_id}")
 
     except FiveTwentyError as e:
         error_msg = str(e)
@@ -255,10 +271,10 @@ async def robust_post_trade_setup(client, account_id: str, trade_id: str) -> Non
         elif "PRICE_INVALID" in error_msg:
             print("❌ Invalid price level - adjust take profit price")
         else:
-            print(f"❌ Unexpected error: {error_msg}")
+            print("❌ Unexpected error occurred")
 
-    except Exception as e:
-        print(f"❌ System error: {e}")
+    except Exception:
+        print("❌ System error occurred")
 ```
 
 #### When to Use Post-Trade Pattern
@@ -281,14 +297,14 @@ async def robust_post_trade_setup(client, account_id: str, trade_id: str) -> Non
 **Problem:** Execute trades immediately at current market price.
 
 ```python
+import asyncio
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
 
-
 async def place_market_order() -> None:
-    """Example of placing market orders."""
+    """Demonstrate placing market orders."""
     async with AsyncClient() as client:
         # Basic market order
         response = await client.orders.post_market_order(
@@ -297,6 +313,8 @@ async def place_market_order() -> None:
             units=1000,  # Positive = buy, negative = sell
             client_request_id="market-order-001",
         )
+        order_id = response.order_create_transaction['id']
+        print(f"Market order placed: {order_id}")
 
         # With protective stops
         response = await client.orders.post_market_order(
@@ -306,9 +324,9 @@ async def place_market_order() -> None:
             take_profit=Decimal("1.1050"),  # Exit at profit
             stop_loss=Decimal("1.0950"),   # Limit losses
         )
-
-        print(f"Order ID: {response.order_create_transaction.id}")
-        print(f"Fill Price: {response.order_fill_transaction.price}")
+        order_id = response.order_create_transaction['id']
+        print(f"Market order executed successfully: {order_id}")
+        print("Order filled at market price")
 ```
 
 ### Create Limit Orders for Precise Entry
@@ -323,7 +341,7 @@ from fivetwenty.models import AccountID, InstrumentName
 
 
 async def place_limit_order() -> None:
-    """Example of placing limit orders."""
+    """Demonstrate placing limit orders."""
     async with AsyncClient() as client:
         response = await client.orders.post_limit_order(
             account_id=AccountID("101-004-12345678"),
@@ -334,8 +352,8 @@ async def place_limit_order() -> None:
             take_profit=Decimal("1.2600"),
             stop_loss=Decimal("1.2400"),
         )
-
-        print(f"Pending Order ID: {response.order_create_transaction.id}")
+        order_id = response.order_create_transaction['id']
+        print(f"Limit order placed successfully: {order_id}")
 ```
 
 ### Create Stop Orders for Breakout Trading
@@ -350,7 +368,7 @@ from fivetwenty.models import AccountID, InstrumentName
 
 
 async def place_stop_order() -> None:
-    """Example of placing stop orders."""
+    """Demonstrate placing stop orders."""
     async with AsyncClient() as client:
         # Buy stop order - enter long when price breaks above resistance
         response = await client.orders.post_stop_order(
@@ -364,8 +382,8 @@ async def place_stop_order() -> None:
             stop_loss=Decimal("1.1050"),   # Limit loss to 50 pips
             client_request_id="breakout-strategy-001",
         )
-
-        print(f"Stop Order ID: {response.order_create_transaction.id}")
+        order_id = response.order_create_transaction['id']
+        print(f"Stop order placed successfully: {order_id}")
 ```
 
 ### Create Market-If-Touched Orders for Support/Resistance Trading
@@ -380,7 +398,7 @@ from fivetwenty.models import AccountID, InstrumentName
 
 
 async def place_market_if_touched_order() -> None:
-    """Example of placing market-if-touched orders."""
+    """Demonstrate placing market-if-touched orders."""
     async with AsyncClient() as client:
         # MIT order - buy when price touches support level
         response = await client.orders.post_market_if_touched_order(
@@ -394,8 +412,8 @@ async def place_market_if_touched_order() -> None:
             stop_loss=Decimal("1.2350"),   # Stop 50 pips below support
             client_request_id="support-bounce-001",
         )
-
-        print(f"MIT Order ID: {response.order_create_transaction.id}")
+        order_id = response.order_create_transaction['id']
+        print(f"MIT order placed successfully: {order_id}")
 ```
 
 ### Use the Unified Order Interface for Flexibility
@@ -444,15 +462,21 @@ async def create_order_by_type(order_type: str, price: Decimal | None = None) ->
                 price=str(price),
                 timeInForce=TimeInForce.GTC,
             )
+        else:
+            msg = f"Unsupported order type: {order_type}"
+            raise ValueError(msg)
+
+        print(f"Created {order_type} order request for {instrument}")
 
         # Use unified interface
-        response = await client.orders.post_order(
+        result = await client.orders.post_order(
             account_id=account_id,
             order_request=order_request,
             client_request_id=f"{order_type}-order-{int(time.time())}",
         )
-
-        return response
+        order_id = result.order_create_transaction['id']
+        print(f"Unified {order_type} order created: {order_id}")
+        return result
 ```
 
 ### Monitor and Track Order Status
@@ -469,22 +493,23 @@ async def monitor_order_execution(account_id: AccountID, order_id: str) -> None:
     async with AsyncClient() as client:
         # Get current order status
         order = await client.orders.get_order(account_id, order_id)
-
-        print(f"Order State: {order['state']}")
-        print(f"Filled Units: {order.get('filledUnits', 0)}")
+        state = order["state"]
+        print(f"Order state checked: {state}")
+        print("Order fill information retrieved")
 
         # Check if order is still pending
-        if order["state"] == "PENDING":
+        if state == "PENDING":
             print("Order is waiting for execution")
 
             # Get all pending orders for context
-            pending = await client.orders.get_pending_orders(account_id)
-            print(f"Total pending orders: {len(pending['orders'])}")
+            pending_response = await client.orders.get_pending_orders(account_id)
+            pending_count = len(pending_response["orders"])
+            print(f"Pending orders retrieved: {pending_count} total")
 
-        elif order["state"] == "FILLED":
-            print(f"Order executed at price: {order['fillingTransactionIDs']}")
+        elif state == "FILLED":
+            print("Order execution confirmed")
 
-        elif order["state"] == "CANCELLED":
+        elif state == "CANCELLED":
             print("Order was cancelled")
 ```
 
@@ -514,11 +539,13 @@ async def place_validated_order(
             # Validate account has sufficient balance
             account = await client.accounts.get_account(account_id)
             available_balance = Decimal(account.nav)
+            print(f"Account balance: {available_balance}")
 
             # Validate instrument is tradeable
             instruments = await client.accounts.get_account_instruments(
                 account_id, instruments=[instrument]
             )
+            print(f"Retrieved {len(instruments)} instrument(s)")
 
             if not instruments:
                 msg = f"Instrument {instrument} not available"
@@ -556,18 +583,22 @@ async def place_validated_order(
                     price=price,
                     client_request_id=f"validated-{order_type}-{int(time.time())}",
                 )
+
             else:
                 msg = "Invalid order type or missing price for limit order"
                 raise ValueError(msg)
 
+            order_id = response.order_create_transaction['id']
+            print(f"Validated {order_type} order created: {order_id}")
+
             return response
 
         except FiveTwentyError as e:
-            print(f"OANDA API Error: {e.error_message}")
-            print(f"Error Code: {e.error_code}")
+            print("OANDA API error encountered")
+            print("Error code logged")
             raise
         except ValueError as e:
-            print(f"Validation Error: {e}")
+            print("Validation error occurred")
             raise
 ```
 
@@ -589,6 +620,7 @@ async def manage_pending_orders(account_id: AccountID) -> None:
         # Get all pending orders
         pending_response = await client.orders.get_pending_orders(account_id)
         pending_orders = pending_response["orders"]
+        print(f"Found {len(pending_orders)} pending orders")
 
         for order in pending_orders:
             order_id = order["id"]
@@ -597,17 +629,19 @@ async def manage_pending_orders(account_id: AccountID) -> None:
             order_time = datetime.fromisoformat(
                 order["createTime"].replace("Z", "+00:00")
             )
-            if datetime.now(timezone.utc) - order_time > timedelta(hours=1):
+            STALE_ORDER_THRESHOLD_HOURS = 1
+            if datetime.now(timezone.utc) - order_time > timedelta(hours=STALE_ORDER_THRESHOLD_HOURS):
                 try:
                     cancel_response = await client.orders.cancel_order(
                         account_id,
                         order_id,
                     )
-                    print(f"Cancelled order {order_id}")
+                    cancelled_order_id = cancel_response.order_cancel_transaction.id if cancel_response.order_cancel_transaction else order_id
+                    print(f"Order cancelled successfully: {cancelled_order_id}")
 
                 except FiveTwentyError as e:
                     if e.error_code == "ORDER_DOESNT_EXIST":
-                        print(f"Order {order_id} already cancelled or filled")
+                        print("Order already processed")
                     else:
                         raise
 ```
@@ -645,7 +679,7 @@ async def create_bracket_order(
         )
 
         entry_order_id = entry_order.order_create_transaction.id
-        print(f"Entry order created: {entry_order_id}")
+        print(f"Entry order created successfully: {entry_order_id}")
 
         # Wait for entry order to fill, then create protective orders
         # In practice, you'd use webhooks or streaming for real-time updates
@@ -653,8 +687,10 @@ async def create_bracket_order(
 
         # Check if entry filled
         order_status = await client.orders.get_order(account_id, entry_order_id)
+        status_state = order_status["state"]
+        print(f"Entry order status: {status_state}")
 
-        if order_status["state"] == "FILLED":
+        if status_state == "FILLED":
             # Create protective orders
             tasks = []
 
@@ -684,10 +720,10 @@ async def create_bracket_order(
             for i, result in enumerate(results):
                 order_type = "Take Profit" if i == 0 else "Stop Loss"
                 if isinstance(result, Exception):
-                    print(f"{order_type} order failed: {result}")
+                    print(f"{order_type} order placement failed: {result}")
                 else:
                     order_id = result.order_create_transaction.id
-                    print(f"{order_type} order created: {order_id}")
+                    print(f"{order_type} order created successfully: {order_id}")
 
         return entry_order
 ```
@@ -697,21 +733,27 @@ async def create_bracket_order(
 ### Confirm Order Creation
 ```python
 # Check order was created successfully
-assert response.order_create_transaction is not None
-assert response.order_create_transaction.id is not None
+if response.order_create_transaction is None:
+    raise ValueError("Order transaction is None")
+if response.order_create_transaction.id is None:
+    raise ValueError("Order transaction ID is None")
 
 # For market orders, verify immediate fill
 if order_type == "market":
-    assert response.order_fill_transaction is not None
-    print(f"Filled at price: {response.order_fill_transaction.price}")
+    if response.order_fill_transaction is None:
+        raise ValueError("Market order fill transaction is None")
+    print("Order filled successfully")
 ```
 
 ### Verify Order Parameters
 ```python
 # Confirm order details match your request
 order_details = await client.orders.get_order(account_id, order_id)
-assert order_details["instrument"] == str(instrument)
-assert int(order_details["units"]) == units
+print(f"Order details retrieved for {order_id}")
+if order_details["instrument"] != str(instrument):
+    raise ValueError("Order instrument mismatch")
+if int(order_details["units"]) != units:
+    raise ValueError("Order units mismatch")
 ```
 
 ### Monitor Account Impact
@@ -720,8 +762,9 @@ from decimal import Decimal
 
 # Check account balance and positions after order
 account = await client.accounts.get_account(account_id)
-print(f"Account NAV: {account.nav}")
-print(f"Unrealized P&L: {account.unrealized_pl}")
+nav = account.nav
+print(f"Account NAV retrieved: {nav}")
+print("Unrealized P&L retrieved")
 ```
 
 ## Troubleshooting
@@ -734,8 +777,10 @@ from decimal import Decimal
 
 # Check available margin before placing order
 account = await client.accounts.get_account(account_id)
-if Decimal(account.margin_available) < required_margin:
-    print("Insufficient margin for order")
+available_margin = Decimal(account.margin_available)
+if available_margin < required_margin:
+    msg = f"Insufficient margin for order: {available_margin} < {required_margin}"
+    print(msg)
 ```
 
 **"INSTRUMENT_NOT_TRADEABLE" Error:**
@@ -743,6 +788,7 @@ if Decimal(account.margin_available) < required_margin:
 # Verify instrument is currently tradeable
 instruments = await client.accounts.get_account_instruments(account_id)
 tradeable_instruments = [i for i in instruments if i.tradeable]
+print(f"Found {len(tradeable_instruments)} tradeable instruments out of {len(instruments)} total")
 ```
 
 **"PRICE_PRECISION_EXCEEDED" Error:**
@@ -755,9 +801,11 @@ instrument_info = await client.accounts.get_account_instruments(
     account_id, instruments=[instrument]
 )
 precision = instrument_info[0].display_precision
+print(f"Instrument precision: {precision}")
 
 # Quantize price correctly
 quantized_price = quantize_price(precision, your_price)
+print(f"Price quantized from {your_price} to {quantized_price}")
 ```
 
 ### Order Timing Issues
@@ -781,29 +829,37 @@ quantized_price = quantize_price(precision, your_price)
 from asyncio import Semaphore
 
 # Limit concurrent requests
-semaphore = Semaphore(5)  # Max 5 concurrent orders
+MAX_CONCURRENT_ORDERS = 5
+semaphore = Semaphore(MAX_CONCURRENT_ORDERS)
 
-async def rate_limited_order(order_params: dict) -> dict:
-    """Rate limited order placement."""
+async def rate_limited_order(client: AsyncClient, order_params: dict) -> dict:
+    """Place orders with rate limited order placement."""
     async with semaphore:
-        return await client.orders.post_order(**order_params)
+        result = await client.orders.post_order(**order_params)
+        print(f"Rate-limited order placed: {result.order_create_transaction['id']}")
+        return result
 ```
 
 **Error Recovery:**
 ```python
 import asyncio
 
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
 
+DEFAULT_MAX_RETRIES = 3
 
-async def robust_order_placement(order_params: dict, max_retries: int = 3) -> dict:
-    """Robust order placement with retry logic."""
+async def robust_order_placement(client: AsyncClient, order_params: dict, max_retries: int = DEFAULT_MAX_RETRIES) -> dict:
+    """Place orders with robust order placement with retry logic."""
     for attempt in range(max_retries):
         try:
-            return await client.orders.post_order(**order_params)
+            result = await client.orders.post_order(**order_params)
+            print(f"Order placed successfully on attempt {attempt + 1}")
+            return result
         except FiveTwentyError as e:
             if e.error_code in ["RATE_LIMIT_EXCEEDED", "SERVICE_UNAVAILABLE"]:
-                wait_time = 2**attempt  # Exponential backoff
+                BACKOFF_BASE = 2
+                wait_time = BACKOFF_BASE**attempt  # Exponential backoff
                 await asyncio.sleep(wait_time)
                 continue
             else:
@@ -826,7 +882,7 @@ from fivetwenty.models import AccountID
 
 
 class OrderState(Enum):
-    """Order state enumeration."""
+    """Define order state enumeration."""
 
     CREATED = "created"
     PENDING = "pending"
@@ -836,7 +892,7 @@ class OrderState(Enum):
 
 
 class OrderManager:
-    """Order lifecycle manager."""
+    """Manage order lifecycle."""
 
     def __init__(self, client: AsyncClient) -> None:
         """Initialize order manager."""
@@ -847,7 +903,9 @@ class OrderManager:
         """Track order through its lifecycle."""
         while True:
             order = await self.client.orders.get_order(account_id, order_id)
-            state = OrderState(order["state"].lower())
+            order_state = order["state"]
+            state = OrderState(order_state.lower())
+            print(f"Order {order_id} state: {order_state}")
 
             self.orders[order_id] = {
                 "state": state,
@@ -862,19 +920,20 @@ class OrderManager:
             ]:
                 break
 
-            await asyncio.sleep(1)  # Poll every second
+            POLLING_INTERVAL_SECONDS = 1
+            await asyncio.sleep(POLLING_INTERVAL_SECONDS)  # Poll interval
 ```
 
 ### Risk Management Integration
 ```python
+import asyncio
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID
 
-
 class RiskManagedOrderSystem:
-    """Order system with risk management."""
+    """Manage orders with risk controls."""
 
     def __init__(self, client: AsyncClient, max_daily_loss: Decimal) -> None:
         """Initialize risk managed order system."""
@@ -893,21 +952,26 @@ class RiskManagedOrderSystem:
 
         # Calculate potential loss for this order
         potential_loss = self._calculate_potential_loss(order_params)
+        print(f"Potential loss for order: {potential_loss}")
 
         if self.daily_loss + potential_loss > self.max_daily_loss:
             msg = "Order would exceed daily loss limit"
             raise ValueError(msg)
 
         # Place order if risk checks pass
-        return await self.client.orders.post_order(
+        result = await self.client.orders.post_order(
             account_id=account_id,
             **order_params,
         )
+        print(f"Risk-managed order placed: {result.order_create_transaction['id']}")
+        return result
 
     def _calculate_potential_loss(self, order_params: dict) -> Decimal:
         """Calculate potential loss for order."""
         # Placeholder implementation
-        return Decimal("0")
+        potential_loss = Decimal("0")
+        print(f"Calculated potential loss: {potential_loss}")
+        return potential_loss
 ```
 
 ---

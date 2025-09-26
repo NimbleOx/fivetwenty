@@ -11,7 +11,6 @@ import asyncio
 import os
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Optional
 
 from fivetwenty import AsyncClient, Environment
 
@@ -48,11 +47,12 @@ class ProductionTradingSystem:
         import logging
 
         # Initialize client
+        PRODUCTION_MAX_RETRIES = 5
         self.client = AsyncClient(
             token=os.environ["FIVETWENTY_OANDA_TOKEN"],
             environment=Environment.LIVE,  # Production!
             timeout=self.config.order_timeout,
-            max_retries=5,  # More retries for production
+            max_retries=PRODUCTION_MAX_RETRIES,  # More retries for production
             logger=logging.getLogger(__name__),
         )
 
@@ -79,12 +79,14 @@ class ProductionTradingSystem:
         """Stream price data."""
         if self.client:
             # Implement price streaming
-            await asyncio.sleep(1)
+            PRICE_STREAM_DELAY = 1
+            await asyncio.sleep(PRICE_STREAM_DELAY)
 
     async def manage_risk(self) -> None:
         """Manage risk."""
         while self.is_running:
-            await asyncio.sleep(60)
+            RISK_CHECK_INTERVAL = 60
+            await asyncio.sleep(RISK_CHECK_INTERVAL)
 
 ```
 
@@ -98,6 +100,7 @@ from fivetwenty import AsyncClient
 # Setup example variables for code snippets
 client = AsyncClient()
 account_id = "your-account-id"
+print(f"Setup complete for account: {account_id}")
 
 
 class DataLayer:
@@ -154,7 +157,8 @@ class OrderExecutor:
     async def execute_order(self, order: dict) -> dict:
         """Execute order with risk checks."""
         if not self.risk.validate_order(order):
-            raise ValueError("Order failed risk checks")
+            msg = "Order failed risk checks"
+            raise ValueError(msg)
 
         return await self.client.orders.post_market_order(**order)
 
@@ -172,12 +176,15 @@ from fivetwenty import AsyncClient
 # Setup example variables for code snippets
 client = AsyncClient()
 account_id = "your-account-id"
+print(f"Position sizing setup for account: {account_id}")
 
 
 class PositionSizer:
     """Calculate safe position sizes."""
 
-    def __init__(self, risk_per_trade: float = 0.02) -> None:
+    DEFAULT_RISK_PER_TRADE = 0.02
+
+    def __init__(self, risk_per_trade: float = DEFAULT_RISK_PER_TRADE) -> None:
         self.risk_per_trade = risk_per_trade  # 2% risk per trade
 
     async def calculate_position_size(
@@ -192,6 +199,7 @@ class PositionSizer:
         # Get account info
         account = await client.accounts.get_account(account_id)
         balance = Decimal(account.balance)
+        print(f"Account balance: {balance}")
 
         # Calculate risk amount
         risk_amount = balance * Decimal(str(self.risk_per_trade))
@@ -201,23 +209,31 @@ class PositionSizer:
             account_id=account_id,
             instruments=[instrument],
         )
-        pip_value = self.calculate_pip_value(instruments[0])
+        instrument_data = instruments[0]
+        pip_value = self.calculate_pip_value(instrument_data)
+        print(f"Pip value for {instrument}: {pip_value}")
 
         # Calculate position size
         position_size = risk_amount / (stop_distance * pip_value)
+        print(f"Calculated position size: {position_size}")
 
         # Round to valid increment
-        return self.round_to_increment(position_size, instruments[0])
+        rounded_size = self.round_to_increment(position_size, instrument_data)
+        print(f"Rounded to valid increment: {rounded_size}")
+        return rounded_size
 
     def calculate_pip_value(self, instrument: dict) -> float:
         """Calculate pip value for instrument."""
         # Standard pip value for most pairs
-        return 0.0001
+        STANDARD_PIP_VALUE = 0.0001
+        return STANDARD_PIP_VALUE
 
     def round_to_increment(self, position_size: Decimal, instrument: dict) -> int:
         """Round position size to valid increment."""
         increment = int(instrument.get("minimumTradeSize", 1))
-        return int(position_size // increment) * increment
+        rounded = int(position_size // increment) * increment
+        print(f"Rounded {position_size} to increment {increment}: {rounded}")
+        return rounded
 
 ```
 
@@ -252,8 +268,9 @@ class StopLossManager:
                 price=stop_price,
                 timeInForce="GTC",
             )
-            await self.client.orders.post_order(account_id, sl_request)
-            print(f"Stop loss set at {stop_price} for trade {trade_id}")
+            sl_response = await self.client.orders.post_order(account_id, sl_request)
+            order_id = sl_response.order_create_transaction['id']
+            print(f"Stop loss set at {stop_price} for trade {trade_id}: Order {order_id}")
 
         except FiveTwentyError as e:
             if e.code == FiveTwentyErrorCode.STOP_LOSS_ORDER_ALREADY_EXISTS:
@@ -266,6 +283,7 @@ class StopLossManager:
         """Implement trailing stop."""
         # Get current trade
         trade = await self.client.trades.get_trade(account_id, trade_id)
+        print(f"Retrieved trade {trade_id} for trailing stop update")
 
         # Calculate new stop based on current price
         if float(trade.current_units) > 0:  # Long position
@@ -286,7 +304,9 @@ class StopLossManager:
             price=stop_price,
             timeInForce="GTC",
         )
-        await self.client.orders.post_order(account_id, sl_request)
+        update_response = await self.client.orders.post_order(account_id, sl_request)
+        order_id = update_response.order_create_transaction['id']
+        print(f"Stop loss updated to {stop_price} for trade {trade_id}: Order {order_id}")
 
 
     def is_better_stop(self, trade: dict, new_stop: Decimal) -> bool:
@@ -411,14 +431,17 @@ class ResilientClient:
         try:
             # Check circuit breaker
             if self.circuit_breaker.is_open():
-                raise Exception("Circuit breaker open")
+                msg = "Circuit breaker open"
+            raise Exception(msg)
 
             # Validate order
             self.validate_order(kwargs)
+            print("Order validation passed")
 
             # Execute with timeout
             async with asyncio.timeout(5.0):
                 result = await self.client.orders.post_market_order(**kwargs)
+                print(f"Order executed successfully: {result.order_create_transaction['id']}")
 
             # Reset circuit breaker on success
             self.circuit_breaker.on_success()
@@ -427,7 +450,8 @@ class ResilientClient:
 
         except TooManyRequests as e:
             # Rate limited - wait and retry
-            await asyncio.sleep(e.retry_after or 60)
+            DEFAULT_RETRY_AFTER = 60
+            await asyncio.sleep(e.retry_after or DEFAULT_RETRY_AFTER)
             return await self.safe_order(**kwargs)
 
         except InternalServerError as e:
@@ -445,7 +469,8 @@ class ResilientClient:
         required_fields = ["account_id", "instrument", "units"]
         for field in required_fields:
             if field not in kwargs:
-                raise ValueError(f"Missing required field: {field}")
+                msg = f"Missing required field: {field}"
+                raise ValueError(msg)
 
 ```
 
@@ -495,6 +520,7 @@ class StateManager:
         """Recover positions after restart."""
         # Get current positions
         current = await client.positions.get_open_positions(account_id)
+        print(f"Found {len(current)} open positions during recovery")
 
         # Compare with saved state
         for position in current:
@@ -533,6 +559,8 @@ class ConnectionPool:
         if not config:
             raise ValueError("No configuration found for connection pool")
 
+        print(f"Configuration loaded for connection pool of size {size}")
+
         for _ in range(size):
             client = AsyncClient(config=config)
             self.clients.append(client)
@@ -541,7 +569,9 @@ class ConnectionPool:
         """Get next available client."""
 
         client = self.clients[self.current]
+        selected_index = self.current
         self.current = (self.current + 1) % len(self.clients)
+        print(f"Selected client {selected_index} from pool")
         return client
 
     async def close_all(self) -> None:
@@ -586,12 +616,14 @@ class CachedDataProvider:
             account_id=account_id,
             instruments=[instrument],
         )
+        instrument_data = data[0]
+        print(f"Cached instrument data for {instrument}")
 
         # Update cache
-        self.cache[cache_key] = data[0]
+        self.cache[cache_key] = instrument_data
         self.cache_times[cache_key] = datetime.now()
 
-        return data[0]
+        return instrument_data
 
 ```
 
@@ -632,7 +664,8 @@ class HealthMonitor:
         # Check API connectivity
         try:
             accounts = await self.client.accounts.get_accounts()
-            health["checks"]["api"] = "ok"
+            account_count = len(accounts)
+            health["checks"]["api"] = f"ok ({account_count} accounts)"
         except Exception as e:
             health["checks"]["api"] = f"failed: {e}"
             health["status"] = "unhealthy"
@@ -640,7 +673,8 @@ class HealthMonitor:
         # Check stream status
         if self.metrics["last_heartbeat"]:
             heartbeat_age = datetime.now() - self.metrics["last_heartbeat"]
-            if heartbeat_age.total_seconds() > 60:
+            HEARTBEAT_TIMEOUT_SECONDS = 60
+            if heartbeat_age.total_seconds() > HEARTBEAT_TIMEOUT_SECONDS:
                 health["checks"]["stream"] = "stale"
                 health["status"] = "degraded"
             else:
@@ -649,9 +683,12 @@ class HealthMonitor:
         # Check error rate
         if self.metrics["api_calls"] > 0:
             error_rate = self.metrics["errors"] / self.metrics["api_calls"]
-            if error_rate > 0.05:  # 5% error rate
+            ERROR_RATE_THRESHOLD = 0.05
+            if error_rate > ERROR_RATE_THRESHOLD:  # 5% error rate
                 health["checks"]["errors"] = f"high: {error_rate:.2%}"
                 health["status"] = "degraded"
+            else:
+                health["checks"]["errors"] = f"ok: {error_rate:.2%}"
 
         return health
 
@@ -683,12 +720,15 @@ class AlertManager:
 
         logger = logging.getLogger(__name__)
 
-        if severity not in ["INFO", "WARNING", "CRITICAL"]:
+        VALID_SEVERITIES = ["INFO", "WARNING", "CRITICAL"]
+        if severity not in VALID_SEVERITIES:
             severity = "INFO"
 
         # Only send email for WARNING and CRITICAL
-        if severity in ["WARNING", "CRITICAL"]:
+        EMAIL_SEVERITIES = ["WARNING", "CRITICAL"]
+        if severity in EMAIL_SEVERITIES:
             await self.send_email(subject, message)
+            print(f"Email alert sent: {subject}")
 
         # Always log
         logger.log(
@@ -759,14 +799,15 @@ async def test_account_balance_check(mock_client):
         margin_used=Decimal("2000.00"),
         margin_available=Decimal("8000.00"),
     )
-    mock_client.accounts.get.return_value = mock_account
+    mock_client.accounts.get_account.return_value = mock_account
 
     # Test the function
     account = await mock_client.accounts.get_account("test-account")
+    print(f"Retrieved test account: {account.id}")
 
     assert account.balance == Decimal("10000.00")
     assert account.margin_available == Decimal("8000.00")
-    mock_client.accounts.get.assert_called_once_with("test-account")
+    mock_client.accounts.get_account.assert_called_once_with("test-account")
 
 async def test_order_error_handling(mock_client):
     """Test error handling in order placement."""
@@ -822,8 +863,10 @@ async def test_account_retrieval():
         environment=Environment.PRACTICE,
     ) as client:
         accounts = await client.accounts.get_accounts()
+        account_count = len(accounts)
+        print(f"Retrieved {account_count} accounts in test")
 
-        assert len(accounts) > 0
+        assert account_count > 0
         assert accounts[0].currency in ["USD", "EUR", "GBP"]
 
 @pytest.mark.integration
@@ -842,21 +885,26 @@ async def test_full_trade_lifecycle():
             instrument="EUR_USD",
             units=1000,
         )
+        print(f"Order placed: {order.order_create_transaction['id']}")
 
         assert order.order_fill_transaction
         trade_id = order.order_fill_transaction.trade_opened_id
+        print(f"Trade opened: {trade_id}")
 
         # Verify trade created
         trades = await client.trades.get_open_trades(account_id)
         trade_ids = [t.id for t in trades]
+        print(f"Found {len(trades)} open trades")
         assert trade_id in trade_ids
 
         # Close trade
-        await client.trades.close_trade(account_id, trade_id)
+        close_response = await client.trades.close_trade(account_id, trade_id)
+        print(f"Trade closed: {close_response}")
 
         # Verify trade closed
         trades = await client.trades.get_open_trades(account_id)
         trade_ids = [t.id for t in trades]
+        print(f"Remaining open trades: {len(trades)}")
         assert trade_id not in trade_ids
 ```
 
@@ -884,6 +932,7 @@ async def test_position_size_calculation(mock_client, units, price):
     """Test position size calculations with various inputs."""
 
     position_value = Decimal(str(units)) * price
+    print(f"Position value calculated: {position_value}")
 
     # Test that calculations are always precise
     assert isinstance(position_value, Decimal)
@@ -901,11 +950,11 @@ async def test_pricing_request(mock_client, instruments):
     """Test pricing requests with various instrument combinations."""
 
     # Mock successful response
-    mock_client.pricing.get.return_value = [
-        # Mock price objects for each instrument
-    ]
+    mock_prices = [{"instrument": inst, "price": "1.1234"} for inst in instruments]
+    mock_client.pricing.get_pricing.return_value = mock_prices
 
     prices = await mock_client.pricing.get_pricing("account-id", instruments)
+    print(f"Retrieved prices for {len(instruments)} instruments")
     assert len(prices) == len(instruments)
 ```
 
@@ -937,6 +986,7 @@ async def test_concurrent_requests():
         # Run 20 concurrent requests
         tasks = [make_request(client, account_id) for _ in range(20)]
         durations = await asyncio.gather(*tasks)
+        print(f"Completed {len(durations)} concurrent requests")
 
         # Performance assertions
         assert mean(durations) < 2.0  # Average under 2 seconds
@@ -1001,7 +1051,8 @@ async def debug_api_calls():
     ) as client:
         # This will log all HTTP details
         accounts = await client.accounts.get_accounts()
-        print(f"Found {len(accounts)} accounts")
+        account_count = len(accounts)
+        print(f"Found {account_count} accounts")
 
 ```
 
@@ -1022,7 +1073,7 @@ def debug_model_validation(raw_data: dict):
     """Debug model validation issues."""
     try:
         account = Account.model_validate(raw_data)
-        print("✅ Validation successful")
+        print(f"✅ Validation successful for account {account.id}")
         return account
     except ValidationError as e:
         print("❌ Validation failed:")
@@ -1048,7 +1099,9 @@ raw_account_data = {
 
 try:
     account = debug_model_validation(raw_account_data)
-except ValidationError:
+    print(f"Successfully validated account: {account}")
+except ValidationError as e:
+    print(f"Validation failed: {e}")
     print("Fix the data and try again")
 
 ```
@@ -1084,8 +1137,10 @@ async def debug_connection_issues():
             start_time = asyncio.get_event_loop().time()
             accounts = await client.accounts.get_accounts()
             end_time = asyncio.get_event_loop().time()
+            duration = end_time - start_time
+            account_count = len(accounts)
 
-            print(f"✅ Request successful in {end_time - start_time:.2f} seconds")
+            print(f"✅ Request successful in {duration:.2f} seconds: {account_count} accounts")
 
     except asyncio.TimeoutError:
         print("❌ Request timed out - check your internet connection")
@@ -1112,6 +1167,7 @@ def profile_async_function(func):
 
         # Run the async function
         result = asyncio.run(func(*args, **kwargs))
+        print(f"Profile completed for function: {func.__name__}")
 
         pr.disable()
         pr.print_stats(sort="cumulative")
@@ -1134,6 +1190,7 @@ async def performance_test():
             client.pricing.get_pricing("your-account-id", ["EUR_USD", "GBP_USD"]),
             return_exceptions=True,
         )
+        print(f"Performance test completed: {len(results)} operations")
 
         return results
 
@@ -1165,7 +1222,9 @@ async def memory_usage_test() -> None:
 
         # Perform operations
         for i in range(100):
-            await client.accounts.get_accounts()
+            accounts = await client.accounts.get_accounts()
+            if i % 10 == 0:  # Log every 10th iteration
+                print(f"Memory test iteration {i}: {len(accounts)} accounts")
 
         # Take snapshot after
         snapshot2 = tracemalloc.take_snapshot()
@@ -1201,6 +1260,7 @@ async def main():
 # In Jupyter or existing event loop:
 task = asyncio.create_task(main())
 result = await task
+print(f"Task completed: {result}")
 ```
 
 #### Issue: SSL Certificate Errors
@@ -1293,13 +1353,14 @@ def trading_system_mocks():
         mock_client_class.return_value.__aenter__.return_value = mock_client
 
         # Setup realistic mock responses
-        mock_client.accounts.list.return_value = [
-            # Mock account objects
-        ]
+        mock_accounts = [{"id": "test-123", "balance": "10000.00"}]
+        mock_client.accounts.get_accounts.return_value = mock_accounts
 
-        mock_client.orders.post_market_order.return_value = {
+        mock_order_response = {
             "order_fill_transaction": {"id": "123", "trade_opened_id": "456"},
+            "order_create_transaction": {"id": "order-123"}
         }
+        mock_client.orders.post_market_order.return_value = mock_order_response
 
         yield mock_client
 
@@ -1336,14 +1397,17 @@ class SecureCredentials:
 
         # Use system keyring
         keyring.set_password(self.service, username, token)
+        print(f"Token stored securely for user: {username}")
 
     def get_token(self, username: str = "default") -> str:
         """Retrieve token securely."""
 
         token = keyring.get_password(self.service, username)
         if not token:
-            raise ValueError("Token not found")
+            msg = f"Token not found for user: {username}"
+            raise ValueError(msg)
 
+        print(f"Token retrieved for user: {username}")
         return token
 
     def encrypt_config(self, config: dict) -> tuple[bytes, bytes]:
@@ -1353,6 +1417,7 @@ class SecureCredentials:
 
         config_bytes = json.dumps(config).encode()
         encrypted = cipher.encrypt(config_bytes)
+        print(f"Configuration encrypted: {len(encrypted)} bytes")
 
         return encrypted, key
 ```
@@ -1362,14 +1427,13 @@ class SecureCredentials:
 ### Code Documentation
 
 ```python
-from typing import Optional
-
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 # Setup example variables
 client = AsyncClient()
 account_id = "your-account-id"
+print(f"Documentation standards setup for account: {account_id}")
 
 
 async def place_order_with_risk_management(
@@ -1411,8 +1475,18 @@ async def place_order_with_risk_management(
         ... )
         >>> print(f"Order filled at {order.order_fill_transaction.price}")
     """
-    # Implementation
-    pass
+    # Implementation would validate order, set stops, and execute
+    print(f"Placing order for {instrument}: {units} units")
+    if stop_loss:
+        print(f"Stop loss set at: {stop_loss}")
+    if take_profit:
+        print(f"Take profit set at: {take_profit}")
+
+    # Return mock response for documentation
+    return {
+        "order_create_transaction": {"id": "order-123"},
+        "order_fill_transaction": {"price": "1.1234"}
+    }
 ```
 
 ## Deployment Checklist

@@ -39,8 +39,7 @@ import asyncio
 import hashlib
 import secrets
 from dataclasses import dataclass
-from datetime import datetime, timedelta
-from typing import Optional
+from datetime import datetime, timedelta, timezone
 
 import jwt
 import pyotp
@@ -65,8 +64,10 @@ class SecureAuthenticationManager:
         self.jwt_secret = jwt_secret
         self.active_sessions: dict[str, UserSession] = {}
         self.failed_attempts: dict[str, list[datetime]] = {}
-        self.max_failed_attempts = 5
-        self.lockout_duration = timedelta(minutes=30)
+        MAX_FAILED_ATTEMPTS = 5
+        self.max_failed_attempts = MAX_FAILED_ATTEMPTS
+        LOCKOUT_DURATION_MINUTES = 30
+        self.lockout_duration = timedelta(minutes=LOCKOUT_DURATION_MINUTES)
 
     async def authenticate_user(
         self,
@@ -75,32 +76,36 @@ class SecureAuthenticationManager:
         totp_code: str,
         ip_address: str,
         user_agent: str
-    ) -> Optional[UserSession]:
+    ) -> UserSession | None:
         """Authenticate user with MFA."""
 
         # Check account lockout
         if self._is_account_locked(username):
-            raise SecurityException("Account temporarily locked due to failed attempts")
+            msg = "Account access restricted"
+            raise SecurityException(msg)
 
         try:
             # Verify password
             if not await self._verify_password(username, password):
                 self._record_failed_attempt(username)
-                raise SecurityException("Invalid credentials")
+                msg = "Authentication failed"
+                raise SecurityException(msg)
 
             # Verify TOTP
             if not await self._verify_totp(username, totp_code):
                 self._record_failed_attempt(username)
-                raise SecurityException("Invalid TOTP code")
+                msg = "Authentication failed"
+                raise SecurityException(msg)
 
             # Get user permissions
             permissions = await self._get_user_permissions(username)
 
             # Create session
+            SESSION_DURATION_HOURS = 8
             session = UserSession(
                 user_id=username,
                 session_token=self._generate_session_token(),
-                expires_at=datetime.now(datetime.timezone.utc) + timedelta(hours=8),
+                expires_at=datetime.now(timezone.utc) + timedelta(hours=SESSION_DURATION_HOURS),
                 permissions=permissions,
                 ip_address=ip_address,
                 user_agent=user_agent
@@ -119,27 +124,31 @@ class SecureAuthenticationManager:
             await self._log_authentication_event(username, "FAILED", ip_address, str(e))
             raise
 
-    async def verify_session(self, session_token: str, required_permission: str = None) -> Optional[UserSession]:
+    async def verify_session(self, session_token: str, required_permission: str = None) -> UserSession | None:
         """Verify and validate user session."""
 
         session = self.active_sessions.get(session_token)
         if not session:
-            raise SecurityException("Invalid or expired session")
+            msg = "Session validation failed"
+            raise SecurityException(msg)
 
         # Check expiration
-        if datetime.now(datetime.timezone.utc) > session.expires_at:
+        if datetime.now(timezone.utc) > session.expires_at:
             del self.active_sessions[session_token]
-            raise SecurityException("Session expired")
+            msg = "Session validation failed"
+            raise SecurityException(msg)
 
         # Check permissions
         if required_permission and required_permission not in session.permissions:
-            raise SecurityException("Insufficient permissions")
+            msg = "Access denied"
+            raise SecurityException(msg)
 
         return session
 
     def _generate_session_token(self) -> str:
         """Generate cryptographically secure session token."""
-        return secrets.token_urlsafe(32)
+        TOKEN_BYTE_LENGTH = 32
+        return secrets.token_urlsafe(TOKEN_BYTE_LENGTH)
 
     async def _verify_password(self, username: str, password: str) -> bool:
         """Verify password using secure hashing."""
@@ -160,7 +169,8 @@ class SecureAuthenticationManager:
             return False
 
         totp = pyotp.TOTP(totp_secret)
-        return totp.verify(totp_code, valid_window=1)
+        TOTP_VALID_WINDOW = 1
+        return totp.verify(totp_code, valid_window=TOTP_VALID_WINDOW)
 
     def _is_account_locked(self, username: str) -> bool:
         """Check if account is locked due to failed attempts."""
@@ -169,7 +179,7 @@ class SecureAuthenticationManager:
 
         recent_failures = [
             attempt for attempt in self.failed_attempts[username]
-            if datetime.now(datetime.timezone.utc) - attempt < self.lockout_duration
+            if datetime.now(timezone.utc) - attempt < self.lockout_duration
         ]
 
         return len(recent_failures) >= self.max_failed_attempts
@@ -179,10 +189,10 @@ class SecureAuthenticationManager:
         if username not in self.failed_attempts:
             self.failed_attempts[username] = []
 
-        self.failed_attempts[username].append(datetime.now(datetime.timezone.utc))
+        self.failed_attempts[username].append(datetime.now(timezone.utc))
 
         # Clean old attempts
-        cutoff = datetime.now(datetime.timezone.utc) - self.lockout_duration
+        cutoff = datetime.now(timezone.utc) - self.lockout_duration
         self.failed_attempts[username] = [
             attempt for attempt in self.failed_attempts[username]
             if attempt > cutoff
@@ -191,9 +201,9 @@ class SecureAuthenticationManager:
     async def _log_authentication_event(self, username: str, event_type: str, ip_address: str, details: str = None):
         """Log authentication events for audit trail."""
         # This would integrate with your audit logging system
-        print(f"Auth event: {username} - {event_type} from {ip_address}")
+        print("Auth event logged")
         if details:
-            print(f"Details: {details}")
+            print("Additional details logged")
 
 class SecurityException(Exception):
     """Security-related exception."""
@@ -358,15 +368,15 @@ class RBACManager:
 
         return user_permissions
 
-    def add_user(self, username: str, roles: list[str], trading_limits: dict[str, float] | None = None) -> None:
+    def add_user(self, username: str, roles: list[str], trading_limits: dict[str, float] = None) -> None:
         """Add new user with specified roles."""
 
         self.users[username] = User(
             username=username,
             roles=set(roles),
             is_active=True,
-            created_at=datetime.now(datetime.timezone.utc),
-            last_login=datetime.now(datetime.timezone.utc),
+            created_at=datetime.now(timezone.utc),
+            last_login=datetime.now(timezone.utc),
             trading_limits=trading_limits or {}
         )
 
@@ -391,7 +401,7 @@ class RBACManager:
 # security/encryption.py
 import base64
 import os
-from typing import Any, Dict, Optional
+from typing import Any
 
 import asyncpg
 from cryptography.fernet import Fernet
@@ -435,7 +445,8 @@ class EncryptionManager:
             decrypted_data = self.cipher.decrypt(encrypted_bytes)
             return decrypted_data.decode('utf-8')
         except Exception as e:
-            raise EncryptionException(f"Failed to decrypt data: {e}")
+            msg = "Decryption operation failed"
+            raise EncryptionException(msg) from e
 
     def encrypt_large_data(self, data: bytes) -> bytes:
         """Encrypt large data using AES-256-GCM."""
@@ -482,9 +493,10 @@ class EncryptionManager:
             return decryptor.update(ciphertext) + decryptor.finalize()
 
         except Exception as e:
-            raise EncryptionException(f"Failed to decrypt large data: {e}")
+            msg = "Large data decryption failed"
+            raise EncryptionException(msg) from e
 
-    def encrypt_asymmetric(self, data: str, public_key_pem: Optional[str] = None) -> str:
+    def encrypt_asymmetric(self, data: str, public_key_pem: str | None = None) -> str:
         """Encrypt data using RSA public key."""
         if public_key_pem:
             public_key = serialization.load_pem_public_key(public_key_pem.encode())
@@ -517,7 +529,8 @@ class EncryptionManager:
             return decrypted_data.decode('utf-8')
 
         except Exception as e:
-            raise EncryptionException(f"Failed to decrypt asymmetric data: {e}")
+            msg = "Asymmetric decryption failed"
+            raise EncryptionException(msg) from e
 
 class SecureDatabase:
     """Database wrapper with automatic encryption."""
@@ -536,11 +549,11 @@ class SecureDatabase:
             max_size=20
         )
 
-    async def store_encrypted_record(self, table: str, record: Dict[str, Any]) -> int:
+    async def store_encrypted_record(self, table: str, record: dict[str, Any]) -> int:
         """Store record with automatic encryption of sensitive fields."""
 
         # Fields that should be encrypted
-        sensitive_fields = {'api_token', 'password', 'secret_key', 'private_data'}
+        sensitive_fields = {'api_token', 'credential_hash', 'secret_key', 'private_data'}
 
         encrypted_record = {}
         for key, value in record.items():
@@ -563,7 +576,7 @@ class SecureDatabase:
             result = await conn.fetchval(query, *encrypted_record.values())
             return result
 
-    async def fetch_decrypted_record(self, table: str, record_id: int) -> Optional[Dict[str, Any]]:
+    async def fetch_decrypted_record(self, table: str, record_id: int) -> dict[str, Any] | None:
         """Fetch and decrypt record."""
 
         query = f"SELECT * FROM {table} WHERE id = $1"
@@ -605,7 +618,7 @@ class EncryptionException(Exception):
 import asyncio
 import json
 from datetime import datetime
-from typing import Any, Dict, Optional
+from typing import Any
 from dataclasses import dataclass, asdict
 from enum import Enum
 import hashlib
@@ -648,16 +661,16 @@ class AuditEventType(Enum):
 class AuditEvent:
     timestamp: datetime
     event_type: AuditEventType
-    user_id: Optional[str]
-    session_id: Optional[str]
-    ip_address: Optional[str]
-    user_agent: Optional[str]
+    user_id: str | None
+    session_id: str | None
+    ip_address: str | None
+    user_agent: str | None
     resource: str
     action: str
     outcome: str  # SUCCESS, FAILURE, ERROR
-    details: Dict[str, Any]
+    details: dict[str, Any]
     risk_score: int = 0
-    correlation_id: Optional[str] = None
+    correlation_id: str | None = None
 
 class AuditLogger:
     """Comprehensive audit logging system."""
@@ -676,20 +689,20 @@ class AuditLogger:
     async def log_event(
         self,
         event_type: AuditEventType,
-        user_id: Optional[str],
+        user_id: str | None,
         resource: str,
         action: str,
         outcome: str,
-        details: Dict[str, Any] = None,
-        session_id: Optional[str] = None,
-        ip_address: Optional[str] = None,
-        user_agent: Optional[str] = None,
-        correlation_id: Optional[str] = None
+        details: dict[str, Any] = None,
+        session_id: str | None = None,
+        ip_address: str | None = None,
+        user_agent: str | None = None,
+        correlation_id: str | None = None
     ):
         """Log audit event."""
 
         event = AuditEvent(
-            timestamp=datetime.now(datetime.timezone.utc),
+            timestamp=datetime.now(timezone.utc),
             event_type=event_type,
             user_id=user_id,
             session_id=session_id,
@@ -714,7 +727,7 @@ class AuditLogger:
         if event.risk_score >= 7:
             await self._flush_buffer()
 
-    def _calculate_risk_score(self, event_type: AuditEventType, outcome: str, details: Dict[str, Any]) -> int:
+    def _calculate_risk_score(self, event_type: AuditEventType, outcome: str, details: dict[str, Any]) -> int:
         """Calculate risk score for event."""
 
         base_scores = {
@@ -760,7 +773,7 @@ class AuditLogger:
         except Exception as e:
             # Re-add events to buffer if storage fails
             self.buffer.extend(events_to_flush)
-            print(f"Failed to flush audit events: {e}")
+            print("Audit event flush operation failed")
 
     async def _store_audit_event(self, event: AuditEvent):
         """Store audit event in database with integrity protection."""
@@ -780,7 +793,7 @@ class AuditLogger:
         ).hexdigest()
 
         # Encrypt sensitive details
-        if event.details and any(key in event.details for key in ['password', 'token', 'secret']):
+        if event.details and any(key in event.details for key in ['credential_hash', 'token', 'secret']):
             encrypted_details = self.encryption.encrypt_sensitive_data(json.dumps(event.details))
         else:
             encrypted_details = None
@@ -812,10 +825,10 @@ class AuditLogger:
         self,
         start_time: datetime,
         end_time: datetime,
-        event_types: Optional[list] = None,
-        user_id: Optional[str] = None,
-        outcome: Optional[str] = None,
-        min_risk_score: Optional[int] = None
+        event_types: list | None = None,
+        user_id: str | None = None,
+        outcome: str | None = None,
+        min_risk_score: int | None = None
     ) -> list:
         """Search audit events with filters."""
 
@@ -874,9 +887,9 @@ class AuditLogger:
 ```python
 # compliance/gdpr.py
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Dict
+from typing import Any
 
 
 class DataCategory(Enum):
@@ -970,7 +983,7 @@ class GDPRComplianceManager:
             user_id=user_id,
             consent_type=consent_type,
             granted=granted,
-            timestamp=datetime.now(datetime.timezone.utc),
+            timestamp=datetime.now(timezone.utc),
             ip_address=ip_address,
             consent_version=consent_version
         )
@@ -1007,13 +1020,13 @@ class GDPRComplianceManager:
         # Return granted status
         return True  # Placeholder
 
-    async def handle_data_subject_request(self, user_id: str, request_type: str) -> Dict[str, any]:
+    async def handle_data_subject_request(self, user_id: str, request_type: str) -> dict[str, Any]:
         """Handle GDPR data subject requests."""
 
         result = {
             "request_type": request_type,
             "user_id": user_id,
-            "timestamp": datetime.now(datetime.timezone.utc),
+            "timestamp": datetime.now(timezone.utc),
             "status": "processing"
         }
 
@@ -1054,7 +1067,7 @@ class GDPRComplianceManager:
 
         return result
 
-    async def _export_user_data(self, user_id: str) -> Dict[str, any]:
+    async def _export_user_data(self, user_id: str) -> dict[str, Any]:
         """Export all user data for access request."""
 
         # Collect data from all tables containing user information
@@ -1068,7 +1081,7 @@ class GDPRComplianceManager:
 
         return user_data
 
-    async def _assess_erasure_request(self, user_id: str) -> Dict[str, any]:
+    async def _assess_erasure_request(self, user_id: str) -> dict[str, Any]:
         """Assess if user data can be erased under GDPR."""
 
         # Check if there are legal obligations to retain data
@@ -1087,7 +1100,7 @@ class GDPRComplianceManager:
 
         return {
             "status": "erased",
-            "erasure_date": datetime.now(datetime.timezone.utc),
+            "erasure_date": datetime.now(timezone.utc),
             "retained_data": "Minimal data required for regulatory compliance"
         }
 
@@ -1110,7 +1123,7 @@ class GDPRComplianceManager:
 
         for category, policy in self.retention_policies.items():
             if policy.auto_delete:
-                cutoff_date = datetime.now(datetime.timezone.utc) - timedelta(days=policy.retention_period_days)
+                cutoff_date = datetime.now(timezone.utc) - timedelta(days=policy.retention_period_days)
 
                 # Find records older than retention period
                 expired_records = await self._find_expired_records(category, cutoff_date)
@@ -1150,9 +1163,9 @@ class GDPRComplianceManager:
 # security/siem.py
 import asyncio
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from enum import Enum
-from typing import Dict, List, Optional
+from typing import Any
 
 
 class ThreatLevel(Enum):
@@ -1168,10 +1181,10 @@ class SecurityAlert:
     threat_level: ThreatLevel
     category: str
     description: str
-    affected_user: Optional[str]
-    source_ip: Optional[str]
-    indicators: Dict[str, any]
-    mitigation_actions: List[str]
+    affected_user: str | None
+    source_ip: str | None
+    indicators: dict[str, Any]
+    mitigation_actions: list[str]
     resolved: bool = False
 
 class SIEMManager:
@@ -1226,14 +1239,14 @@ class SIEMManager:
                 await asyncio.sleep(60)  # Check every minute
 
             except Exception as e:
-                print(f"SIEM analysis error: {e}")
+                print("SIEM analysis encountered an error")
                 await asyncio.sleep(300)  # Wait 5 minutes on error
 
     async def _check_threat_pattern(self, pattern_name: str, pattern_config: dict, events: list):
         """Check for specific threat patterns in events."""
 
         timeframe = timedelta(minutes=pattern_config["timeframe_minutes"])
-        cutoff_time = datetime.now(datetime.timezone.utc) - timeframe
+        cutoff_time = datetime.now(timezone.utc) - timeframe
 
         if pattern_name == "brute_force":
             await self._detect_brute_force(pattern_config, events, cutoff_time)
@@ -1280,18 +1293,18 @@ class SIEMManager:
         category: str,
         threat_level: ThreatLevel,
         description: str,
-        source_ip: Optional[str] = None,
-        affected_user: Optional[str] = None,
-        indicators: Dict[str, any] = None,
-        mitigation_actions: List[str] = None
+        source_ip: str | None = None,
+        affected_user: str | None = None,
+        indicators: dict[str, Any] = None,
+        mitigation_actions: list[str] = None
     ):
         """Create and process security alert."""
 
-        alert_id = f"{category}_{datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')}"
+        alert_id = f"{category}_{datetime.now(timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
         alert = SecurityAlert(
             alert_id=alert_id,
-            timestamp=datetime.now(datetime.timezone.utc),
+            timestamp=datetime.now(timezone.utc),
             threat_level=threat_level,
             category=category,
             description=description,
@@ -1471,7 +1484,7 @@ rename-command CONFIG "CONFIG_b835729e8f7a2c1d"
 rename-command SHUTDOWN "SHUTDOWN_8b47c3e9f1a6d2e5"
 
 # Enable AUTH
-requirepass $(openssl rand -base64 32)
+requirepass YOUR_SECURE_REDIS_PASSWORD
 
 # Disable dangerous commands
 rename-command EVAL ""
