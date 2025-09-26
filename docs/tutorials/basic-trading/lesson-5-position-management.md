@@ -57,7 +57,7 @@ async def demonstrate_position_management(account_id: str, trade_id: str):
         print(f"\n💡 In real trading, you would set these levels using:")
         print(f"   • Stop Loss orders for risk management")
         print(f"   • Take Profit orders to secure gains")
-        print(f"   • Trailing stops to capture more profit")
+        print(f"   • Position monitoring for optimal exits")
 
 # Demonstrate position management
 if trade_id:
@@ -198,85 +198,6 @@ print(f"Multiple targets: {[f'{tp:.5f}' for tp in multiple_tps]}")
 
 ---
 
-## Trailing Stop Implementation
-
-Capture more profit with trailing stops:
-
-```python
-from fivetwenty import AsyncClient
-from decimal import Decimal
-
-
-
-class TrailingStopManager:
-    """Manage trailing stop loss orders."""
-
-    def __init__(self, initial_stop: Decimal, trail_distance_pips: int = 15) -> None:
-        self.current_stop = initial_stop
-        self.trail_distance = Decimal(str(trail_distance_pips)) * Decimal("0.0001")
-        self.best_price = None
-
-    def update_trailing_stop(self, current_price: Decimal, is_long: bool) -> tuple[bool, Decimal]:
-        """Update trailing stop based on current price."""
-
-        if self.best_price is None:
-            self.best_price = current_price
-
-        stop_updated = False
-
-        if is_long:
-            # Long position: trail stop up as price rises
-            if current_price > self.best_price:
-                self.best_price = current_price
-                new_stop = current_price - self.trail_distance
-
-                if new_stop > self.current_stop:
-                    self.current_stop = new_stop
-                    stop_updated = True
-        else:
-            # Short position: trail stop down as price falls
-            if current_price < self.best_price:
-                self.best_price = current_price
-                new_stop = current_price + self.trail_distance
-
-                if new_stop < self.current_stop:
-                    self.current_stop = new_stop
-                    stop_updated = True
-
-        return stop_updated, self.current_stop
-
-# Example trailing stop usage
-async def demonstrate_trailing_stop(account_id: str, trade_id: str) -> Any:
-    """Demonstrate trailing stop functionality."""
-
-    if not trade_id:
-        return
-
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
-        # Get trade details
-        trade = await client.trades.get_trade(account_id, trade_id)
-        is_long = int(trade.current_units) > 0
-
-        # Initialize trailing stop
-        initial_stop = Decimal(str(trade.price)) - Decimal('0.0020') if is_long else Decimal(str(trade.price)) + Decimal('0.0020')
-        trailing_stop = TrailingStopManager(initial_stop, trail_distance_pips=15)
-
-        print("📈 Trailing Stop Demonstration:")
-        print(f"Initial Stop: {trailing_stop.current_stop:.5f}")
-
-        # Simulate price movements
-        prices = [1.1010, 1.1025, 1.1030, 1.1020, 1.1035] if is_long else [1.0990, 1.0975, 1.0970, 1.0980, 1.0965]
-
-        for price in prices:
-            updated, new_stop = trailing_stop.update_trailing_stop(price, is_long)
-            status = "UPDATED" if updated else "NO CHANGE"
-            print(f"Price: {price:.5f} | Stop: {new_stop:.5f} | {status}")
-
-# Run trailing stop demo
-# await demonstrate_trailing_stop(account_id, trade_id)
-```
-
----
 
 ## Position Sizing and Risk Management
 
@@ -363,10 +284,10 @@ Test your understanding of position management:
        **Profitable even with 50% win rate**. If you risk $100 to make $200, you can be wrong half the time and still be profitable overall.
        </details>
 
-    2. **When should you use a trailing stop?**
+    2. **How do you optimize take profit levels?**
        <details>
        <summary>Click to reveal answer</summary>
-       **In trending markets when you want to capture more profit**. Trailing stops let you stay in profitable trades longer while still protecting against reversals.
+       **Use technical analysis and risk-reward ratios**. Target key resistance levels and maintain at least 1:2 risk-reward ratios for profitable trading.
        </details>
 
     3. **Why adjust position size based on volatility?**
@@ -387,7 +308,7 @@ Test your understanding of position management:
 
 ### While In Position
 - ✅ Monitor price action and your levels
-- ✅ Adjust trailing stops as price moves favorably
+- ✅ Monitor position performance continuously
 - ✅ Be prepared to exit if analysis changes
 - ✅ Don't move stops against you
 
@@ -405,7 +326,7 @@ Test your understanding of position management:
 
 ✅ **Take Profit Optimization**: Maximizing profits with intelligent exit strategies
 
-✅ **Trailing Stop Management**: Capturing additional profits in trending markets
+✅ **Position Monitoring**: Tracking performance and adjusting positions dynamically
 
 ✅ **Position Sizing Mastery**: Risk-based and volatility-adjusted position sizing
 
