@@ -298,25 +298,9 @@ Test your understanding of position management:
 
 ---
 
-## Position Management Best Practices
+## Using FiveTwenty for Position Management
 
-### Before Entering
-- ✅ Plan your exit strategy before entering
-- ✅ Calculate position size based on risk
-- ✅ Set stop loss and take profit levels
-- ✅ Consider market volatility
-
-### While In Position
-- ✅ Monitor price action and your levels
-- ✅ Monitor position performance continuously
-- ✅ Be prepared to exit if analysis changes
-- ✅ Don't move stops against you
-
-### After Exiting
-- ✅ Analyze what worked and what didn't
-- ✅ Document lessons learned
-- ✅ Plan improvements for next trade
-- ✅ Maintain trading journal
+Use FiveTwenty's order management APIs to set stop losses and take profits when opening positions. Monitor positions using the trades endpoint and close them using the position close methods when needed.
 
 ---
 

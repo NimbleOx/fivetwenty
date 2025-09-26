@@ -428,33 +428,6 @@ Test your understanding of strategy building:
 
 ---
 
-## Strategy Development Framework
-
-### 1. Strategy Design
-- Define clear entry and exit rules
-- Establish risk management parameters
-- Choose appropriate timeframes
-- Set position sizing rules
-
-### 2. Backtesting
-- Test on sufficient historical data
-- Include transaction costs
-- Account for slippage and spreads
-- Validate on multiple market conditions
-
-### 3. Optimization
-- Test parameter ranges systematically
-- Avoid overfitting to historical data
-- Use walk-forward analysis
-- Consider robustness over maximum returns
-
-### 4. Forward Testing
-- Test on paper trading first
-- Start with small position sizes
-- Monitor performance vs backtests
-- Be prepared to adjust or stop
-
----
 
 ## What You've Learned
 
