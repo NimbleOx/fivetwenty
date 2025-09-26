@@ -1,15 +1,6 @@
-# Order Types Overview
+# Order Types Reference
 
-Understanding the fundamental order types available in OANDA's trading system and when to use each one effectively.
-
-## Learning Objectives
-
-By the end of this guide, you will:
-
-- Understand all OANDA order types and their characteristics
-- Know when to use each order type for different market conditions
-- Implement basic order creation with proper parameters
-- Handle order state transitions and lifecycle management
+Complete reference for OANDA order types available through the FiveTwenty SDK.
 
 ## OANDA Order Types
 

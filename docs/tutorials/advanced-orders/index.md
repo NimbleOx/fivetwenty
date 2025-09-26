@@ -18,7 +18,7 @@ This tutorial series explores advanced order types and management strategies tha
 
 Each guide builds upon previous concepts while remaining focused on specific techniques:
 
-1. **[Order Types Overview](order-types.md)** - Foundation concepts for all order types
+1. **[Order Types Reference](../../api-reference/order-types.md)** - Complete reference for all OANDA order types
 2. **[Advanced Limit Orders](advanced-limit-orders.md)** - Time controls and protective mechanisms
 3. **[Stop Orders & Market-If-Touched](stop-orders-mit.md)** - Breakout and mean reversion strategies
 4. **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
@@ -66,6 +66,6 @@ graph TD
 
 ## Getting Started
 
-Begin with [Order Types Overview](order-types.md) to establish foundational knowledge, then progress through the series based on your specific needs and trading style.
+Review the [Order Types Reference](../../api-reference/order-types.md) to understand all available order types, then progress through the tutorials based on your specific needs and trading style.
 
 Each tutorial includes practical examples, code implementations, and real-world scenarios to ensure you can apply these concepts effectively in your trading systems.

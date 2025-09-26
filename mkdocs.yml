@@ -88,7 +88,6 @@ nav:
               - Complete System: tutorials/basic-trading/lesson-7-complete-system.md
           - Advanced Order Types:
               - Overview: tutorials/advanced-orders/index.md
-              - Order Types Overview: tutorials/advanced-orders/order-types.md
               - Advanced Limit Orders: tutorials/advanced-orders/advanced-limit-orders.md
               - Stop Orders & Market-If-Touched: tutorials/advanced-orders/stop-orders-mit.md
               - Dynamic Order Management: tutorials/advanced-orders/dynamic-management.md
@@ -143,6 +142,7 @@ nav:
       - Overview: api-reference/index.md
       - Core Components:
           - Client API: api-reference/client.md
+          - Order Types: api-reference/order-types.md
           - Models & Data Types: api-reference/models/index.md
           - Configuration: api-reference/configuration.md
           - Exceptions & Error Handling: api-reference/exceptions.md
