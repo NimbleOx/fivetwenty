@@ -9,7 +9,7 @@ Deploy robust streaming systems to production with comprehensive monitoring, err
 ```python
 import asyncio
 import logging
-from typing import Dict, List, Optional, Any
+from typing import Optional, Any
 from datetime import datetime, timedelta
 from dataclasses import dataclass, field
 from decimal import Decimal
@@ -26,7 +26,7 @@ class ProductionConfig:
     max_concurrent_streams: int = 5
     heartbeat_interval: int = 5
     reconnect_attempts: int = 10
-    position_limits: Dict[str, float] = field(default_factory=dict)
+    position_limits: dict[str, float] = field(default_factory=dict)
     daily_loss_limit: float = 1000.0
     enable_metrics: bool = True
     log_level: str = "INFO"
@@ -62,7 +62,7 @@ class ProductionStreamingSystem:
 
         return logger
 
-    async def start_production_system(self, instruments: List[str]) -> Any:
+    async def start_production_system(self, instruments: list[str]) -> Any:
         """Start production streaming system."""
 
         self.logger.info("Starting production streaming system")
@@ -95,7 +95,7 @@ class ProductionStreamingSystem:
 
         self.logger.info(f"Initialized {len(self.clients)} clients")
 
-    async def _start_fault_tolerant_streaming(self, instruments: List[str]) -> Any:
+    async def _start_fault_tolerant_streaming(self, instruments: list[str]) -> Any:
         """Start streaming with fault tolerance and load balancing."""
 
         tasks = []
@@ -123,7 +123,7 @@ class ProductionStreamingSystem:
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def _run_primary_stream(self, instruments: List[str]) -> Any:
+    async def _run_primary_stream(self, instruments: list[str]) -> Any:
         """Run primary streaming connection with circuit breaker."""
 
         while self.is_running:
@@ -231,7 +231,7 @@ class ProductionStreamingSystem:
                 self.logger.error(f"Health monitoring error: {e}")
                 await asyncio.sleep(60)
 
-    async def _get_health_status(self) -> Dict[str, Any]:
+    async def _get_health_status(self) -> dict[str, Any]:
         """Get comprehensive health status."""
 
         import psutil
@@ -379,7 +379,7 @@ class ProductionMetrics:
         ]
         return len(recent_errors)
 
-    def get_performance_summary(self) -> Dict[str, Any]:
+    def get_performance_summary(self) -> dict[str, Any]:
         """Get performance summary."""
         processing_times = [pt['time'] for pt in self.metrics['processing_times']]
 
@@ -468,12 +468,14 @@ class SecureCredentialManager:
         # Integrate with your key management system
         # token = get_from_key_vault('oanda-api-token')
 
-        raise ValueError("API token not found in secure sources")
+        message = "API token not found in secure sources"
+        raise ValueError(message)
 
     @staticmethod
     def validate_token_permissions(token: str) -> bool:
         """Validate token has required permissions."""
-
+        # token parameter will be used for validation logic
+        _ = token  # Will be used when validation is implemented
         # Implement token validation logic
         # Check token scope and permissions
 
@@ -487,7 +489,8 @@ def create_secure_client() -> AsyncClient:
     token = credential_manager.get_api_token()
 
     if not credential_manager.validate_token_permissions(token):
-        raise ValueError("Token lacks required permissions")
+        message = "Token lacks required permissions"
+        raise ValueError(message)
 
     return AsyncClient(
         token=token,
@@ -504,8 +507,11 @@ import httpx
 
 from fivetwenty import AsyncClient, Environment
 
-
-
+# For this example, we'll reference the previously defined class
+class SecureCredentialManager:
+    @staticmethod
+    def get_api_token() -> str:
+        return "secure-token"
 
 def create_secure_client_with_tls() -> AsyncClient:
     """Create client with enhanced TLS security."""
@@ -536,12 +542,33 @@ def create_secure_client_with_tls() -> AsyncClient:
 ### Memory Management
 
 ```python
+import asyncio
 import gc
 from datetime import datetime
+from dataclasses import dataclass, field
+from typing import Any
 
 import psutil
 
+from fivetwenty import Environment
 
+@dataclass
+class ProductionConfig:
+    """Production-ready configuration."""
+    api_token: str
+    account_id: str
+    environment: Environment = Environment.PRACTICE
+    max_concurrent_streams: int = 5
+    heartbeat_interval: int = 5
+    reconnect_attempts: int = 10
+    position_limits: dict[str, float] = field(default_factory=dict)
+    daily_loss_limit: float = 1000.0
+
+class ProductionStreamingSystem:
+    """Base production streaming system."""
+    def __init__(self, config: ProductionConfig) -> None:
+        self.config = config
+        # Simplified base implementation
 
 class MemoryOptimizer:
     """Optimize memory usage for long-running streams."""
@@ -581,7 +608,7 @@ class OptimizedStreamingSystem(ProductionStreamingSystem):
         super().__init__(config)
         self.memory_optimizer = MemoryOptimizer()
 
-    async def start_production_system(self, instruments: List[str]) -> Any:
+    async def start_production_system(self, instruments: list[str]) -> Any:
         """Start system with memory monitoring."""
 
         # Start memory monitoring
