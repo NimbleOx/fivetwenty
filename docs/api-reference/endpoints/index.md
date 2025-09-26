@@ -87,7 +87,6 @@ with Client() as client:
 ## Need More Context?
 
 - **Learn with [Tutorials](../../tutorials/index.md)** for hands-on guidance
-- **Solve problems with [How-to Guides](../../how-to-guides/index.md)** for specific solutions
-- **Understand with [Explanations](../../explanation/index.md)** for background knowledge
+- **Get comprehensive guidance with [Guides](../../guides/index.md)** for both solutions and understanding
 
 **Ready to explore?** Choose an endpoint above or browse the complete [Client API Reference](../client.md) for setup and configuration details.

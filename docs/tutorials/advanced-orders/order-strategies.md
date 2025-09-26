@@ -395,6 +395,6 @@ if __name__ == "__main__":
 
 - Review [Validation Best Practices](validation-best-practices.md) for robust order handling
 - See [Automated Systems](automated-systems.md) for order monitoring
-- Check [Best Practices](../../explanation/best-practices.md) for production deployment
+- Check [Best Practices](../../guides/understanding/best-practices.md) for production deployment
 
 FiveTwenty provides powerful order combinations through OANDA's proven order types - use these building blocks rather than complex custom strategies.

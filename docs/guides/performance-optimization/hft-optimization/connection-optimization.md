@@ -209,4 +209,4 @@ Continue to [Streaming Optimization](streaming-optimization.md) to optimize real
 
 - [Latency Optimization](latency-optimization.md) - Ultra-fast order execution
 - [Network Optimization](connection-optimization.md) - Connection quality monitoring
-- [Production Integration](../production-deployment/index.md) - Complete system setup
+- [Memory & CPU Optimization](memory-cpu-optimization.md) - System resource optimization

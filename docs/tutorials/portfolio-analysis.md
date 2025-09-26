@@ -11,7 +11,7 @@ Learn how to manage multiple positions and track portfolio performance using Fiv
 
 ## Prerequisites
 
-- Completed [Basic Trading](../basic-trading/index.md) tutorial
+- Completed [Basic Trading](basic-trading/index.md) tutorial
 - Understanding of position management concepts
 - FiveTwenty setup with live or practice account
 
@@ -113,6 +113,6 @@ async def calculate_position_sizes(
 
 - Learn [Risk Management](risk-management.md) for portfolio-level risk controls
 - Explore [Advanced Orders](advanced-orders/index.md) for complex position management
-- See [Best Practices](../explanation/best-practices.md) for production considerations
+- See [Best Practices](../guides/understanding/best-practices.md) for production considerations
 
 For comprehensive portfolio theory and optimization techniques, consider specialized financial libraries like `scipy.optimize` or `cvxpy` alongside FiveTwenty for execution.

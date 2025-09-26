@@ -408,7 +408,7 @@ Once your environment is set up:
 
 1. **Explore the codebase** - Start with `fivetwenty/client.py` and `fivetwenty/models.py`
 2. **Run the examples** - Try `examples/scripts/basic_usage.py`
-3. **Read the architecture** - Check `docs/explanation/sdk-architecture.md`
+3. **Read the architecture** - Check `docs/guides/understanding/sdk-architecture.md`
 4. **Pick an issue** - Look for "good first issue" labels on GitHub
 5. **Join discussions** - Participate in GitHub Discussions
 

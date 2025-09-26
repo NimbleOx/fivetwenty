@@ -123,6 +123,6 @@ Ready to make your first trade? Continue to [Lesson 2: Connection Setup](lesson-
 
 ## Related Resources
 
-- [SDK Architecture](../../explanation/sdk-architecture.md) - Deep dive into FiveTwenty design
+- [SDK Architecture](../../guides/understanding/sdk-architecture.md) - Deep dive into FiveTwenty design
 - [API Reference](../../api-reference/index.md) - Complete model documentation
-- [Configuration Guide](../../explanation/configuration.md) - Environment setup patterns
+- [Configuration Guide](../../guides/understanding/configuration.md) - Environment setup patterns

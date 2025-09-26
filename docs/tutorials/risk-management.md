@@ -11,7 +11,7 @@ Learn essential risk management techniques using FiveTwenty's stop loss orders, 
 
 ## Prerequisites
 
-- Completed [Basic Trading](../basic-trading/index.md) tutorial
+- Completed [Basic Trading](basic-trading/index.md) tutorial
 - Understanding of position management concepts
 - FiveTwenty setup with live or practice account
 
@@ -229,7 +229,7 @@ async def trading_circuit_breaker(
 ## Next Steps
 
 - Learn [Advanced Orders](advanced-orders/index.md) for sophisticated risk management
-- Explore [Best Practices](../explanation/best-practices.md) for production trading
+- Explore [Best Practices](../guides/understanding/best-practices.md) for production trading
 - See [Portfolio Management](portfolio-analysis.md) for multi-position risk
 
 For comprehensive risk management theory, consider specialized finance resources alongside FiveTwenty for implementation.

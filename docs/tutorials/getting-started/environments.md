@@ -59,7 +59,7 @@ async with AsyncClient(
     **Always start with practice environment** to test your strategies safely, then gradually move to live trading with small position sizes.
 
 !!! info "Complete Environment Guide"
-    For comprehensive environment concepts, safety considerations, and deployment workflows, see [Configuration Guide](../../explanation/configuration.md#environment-concepts).
+    For comprehensive environment concepts, safety considerations, and deployment workflows, see [Configuration Guide](../../guides/understanding/configuration.md#environment-concepts).
 
 ## Getting Started
 
@@ -102,4 +102,4 @@ Once you're comfortable with the practice environment:
 
 - [Make your first trade](first-trade.md) to learn the basic trading workflow
 - [Set up authentication](authentication.md) for production-ready configuration
-- [Review configuration options](../../explanation/configuration.md) for comprehensive environment guidance
+- [Review configuration options](../../guides/understanding/configuration.md) for comprehensive environment guidance

@@ -16,9 +16,8 @@ Tutorials are **learning-oriented** content designed to teach you how to use the
 
 **Don't use tutorials when you:**
 
-- Need to solve a specific problem (use [How-to Guides](../how-to-guides/index.md))
+- Need to solve a specific problem or understand concepts (use [Guides](../guides/index.md))
 - Want to look up API details (use [API Reference](../api-reference/index.md))
-- Need background understanding (use [Explanations](../explanation/index.md))
 
 ## Learning Path
 
@@ -94,7 +93,7 @@ While working through tutorials:
 - **Found a bug?** Check our [GitHub Issues](#)
 - **Need clarification?** Visit our [Discussions](#)
 - **Want more details?** See our [API Reference](../api-reference/index.md)
-- **Need background knowledge?** Check our [Explanations](../explanation/index.md)
+- **Need background knowledge?** Check our [Guides](../guides/index.md)
 
 ---
 

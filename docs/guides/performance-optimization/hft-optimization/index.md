@@ -36,10 +36,6 @@ This guide series provides specialized optimization techniques for trading appli
 **Problem**: Monitor and maintain optimal HFT system performance
 **Solution**: Real-time monitoring, alerting, and performance analysis
 
-### 8. [Production Integration](../production-deployment/index.md)
-**Problem**: Integrate all optimizations into a complete production-ready system
-**Solution**: Complete HFT framework with comprehensive optimization integration
-
 ---
 
 ## Prerequisites
@@ -71,12 +67,11 @@ For immediate HFT optimization:
 1. **Start with [Connection Optimization](connection-optimization.md)** - Set up persistent connection pooling
 2. **Move to [Latency Optimization](latency-optimization.md)** - Implement low-latency order execution
 3. **Add [Streaming Optimization](streaming-optimization.md)** - Optimize real-time data processing
-4. **Complete with [Production Integration](../production-deployment/index.md)** - Deploy the full system
+4. **Apply optimizations** - Integrate all optimization techniques into your trading system
 
 ---
 
 ## Related Guides
 
-- [Deploy SDK to Production](../production-deployment/index.md) - Production deployment strategies
-- [Handle Connection Failures](../handle-connection-failures.md) - Connection resilience
-- [Streaming Data Tutorials](../../tutorials/streaming-data.md) - Streaming fundamentals
+- [Handle Connection Failures](../../practical-solutions/handle-connection-failures.md) - Connection resilience
+- [Streaming Data Tutorials](../../../tutorials/streaming-data.md) - Streaming fundamentals

@@ -669,10 +669,10 @@ For your first trades, remember these essential points:
 - **Handle errors gracefully** - Markets can close unexpectedly
 
 !!! tip "Comprehensive Trading Best Practices"
-    For complete security, risk management, and configuration guidance, see [Best Practices Guide](../../explanation/best-practices.md).
+    For complete security, risk management, and configuration guidance, see [Best Practices Guide](../../guides/understanding/best-practices.md).
 
 !!! info "Advanced Configuration"
-    For production configuration patterns and organizational strategies, see [Configuration Guide](../../explanation/configuration.md).
+    For production configuration patterns and organizational strategies, see [Configuration Guide](../../guides/understanding/configuration.md).
 
 ## Common Issues
 
@@ -686,7 +686,7 @@ If you encounter issues while making your first trade:
 !!! warning "Troubleshooting Resources"
     For comprehensive error handling and troubleshooting guidance:
 
-    - **Configuration issues**: See [Configuration Guide](../../explanation/configuration.md#troubleshooting)
+    - **Configuration issues**: See [Configuration Guide](../../guides/understanding/configuration.md#troubleshooting)
     - **Trading errors**: See [Error Handling Guide](../../api-reference/error-handling.md#common-trading-errors)
     - **Network problems**: See [Error Handling Guide](../../api-reference/error-handling.md#retry-strategies)
 
@@ -704,10 +704,10 @@ If you encounter issues while making your first trade:
 
 Once comfortable with basic trading:
 
-- **[Configuration Guide](../../explanation/configuration.md)** - Master all configuration patterns
-- **[Streaming Data](../../explanation/streaming.md)** - Real-time price feeds for your applications
+- **[Configuration Guide](../../guides/understanding/configuration.md)** - Master all configuration patterns
+- **[Streaming Data](../../guides/trading-concepts/streaming.md)** - Real-time price feeds for your applications
 - **[Error Handling](../../api-reference/error-handling.md)** - Production-ready error management
-- **[Best Practices](../../explanation/best-practices.md)** - Trading application patterns and best practices
+- **[Best Practices](../../guides/understanding/best-practices.md)** - Trading application patterns and best practices
 
 ### Building Trading Applications
 

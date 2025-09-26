@@ -95,21 +95,31 @@ nav:
       - Portfolio Management: tutorials/portfolio-analysis.md
       - Streaming Data: tutorials/streaming-data.md
 
-  # HOW-TO GUIDES - Problem-oriented solutions
-  - "How-to Guides":
-      - Overview: how-to-guides/index.md
-      - Getting Started:
-          - Set Up Live Trading: how-to-guides/setup-live-trading.md
-          - Handle Connection Failures: how-to-guides/handle-connection-failures.md
-          - Close Positions: how-to-guides/close-positions.md
-          - Manage Orders Effectively: how-to-guides/manage-orders-effectively.md
-      - Implement Stop-Loss Strategies: how-to-guides/implement-stop-loss-strategies.md
-      - Optimization:
-          - Overview: how-to-guides/hft-optimization/index.md
-          - Connection Optimization: how-to-guides/hft-optimization/connection-optimization.md
-          - Streaming Optimization: how-to-guides/hft-optimization/streaming-optimization.md
-          - Memory & CPU Optimization: how-to-guides/hft-optimization/memory-cpu-optimization.md
-          - Latency Optimization: how-to-guides/hft-optimization/latency-optimization.md
+  # GUIDES - Comprehensive practical guidance
+  - "Guides":
+      - Overview: guides/index.md
+      - Understanding & Architecture:
+          - SDK Architecture: guides/understanding/sdk-architecture.md
+          - Async vs Sync Design: guides/understanding/async-vs-sync.md
+          - Configuration Patterns: guides/understanding/configuration.md
+          - Best Practices & Patterns: guides/understanding/best-practices.md
+      - Trading Concepts:
+          - Forex Trading Concepts: guides/trading-concepts/forex-trading-concepts.md
+          - Market Data & Streaming: guides/trading-concepts/streaming.md
+          - Order Types & Strategies: guides/trading-concepts/order-types.md
+      - Practical Solutions:
+          - Set Up Live Trading: guides/practical-solutions/setup-live-trading.md
+          - Handle Connection Failures: guides/practical-solutions/handle-connection-failures.md
+          - Close Positions: guides/practical-solutions/close-positions.md
+          - Manage Orders Effectively: guides/practical-solutions/manage-orders-effectively.md
+          - Implement Stop-Loss Strategies: guides/practical-solutions/implement-stop-loss-strategies.md
+          - Multi-Account Configuration: guides/practical-solutions/multi-account-configuration.md
+      - Performance Optimization:
+          - Overview: guides/performance-optimization/hft-optimization/index.md
+          - Connection Optimization: guides/performance-optimization/hft-optimization/connection-optimization.md
+          - Streaming Optimization: guides/performance-optimization/hft-optimization/streaming-optimization.md
+          - Memory & CPU Optimization: guides/performance-optimization/hft-optimization/memory-cpu-optimization.md
+          - Latency Optimization: guides/performance-optimization/hft-optimization/latency-optimization.md
   # REFERENCE - Information-oriented quick lookup
   - "API Reference":
       - Overview: api-reference/index.md
@@ -139,16 +149,6 @@ nav:
           - Transactions: api-reference/endpoints/transactions.md
       - OANDA API Specification:
           - OpenAPI Spec: api-reference/oanda-openapi-spec.md
-  # EXPLANATIONS - Understanding-oriented deep dives
-  - "Explanations":
-      - Overview: explanation/index.md
-      - SDK Architecture: explanation/sdk-architecture.md
-      - Async vs Sync Design: explanation/async-vs-sync.md
-      - Configuration Patterns: explanation/configuration.md
-      - Forex Trading Concepts: explanation/forex-trading-concepts.md
-      - Order Types & Strategies: explanation/order-types.md
-      - Market Data & Streaming: explanation/streaming.md
-      - Best Practices & Patterns: explanation/best-practices.md
 
   # EXAMPLES - Practical demonstrations
   - Examples: examples.md
@@ -216,7 +216,7 @@ plugins:
   #     allow_errors: true
 
 extra_css:
-  - stylesheets/footer.css
+  - assets/footer.css
 
 extra:
   # analytics:
@@ -236,7 +236,7 @@ copyright: |
       <ul>
         <li><a href="tutorials/getting-started/installation/">Getting Started</a></li>
         <li><a href="tutorials/">Tutorials</a></li>
-        <li><a href="how-to-guides/">How-to Guides</a></li>
+        <li><a href="guides/">Guides</a></li>
         <li><a href="api-reference/">API Reference</a></li>
         <li><a href="examples/">Examples</a></li>
       </ul>

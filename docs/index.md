@@ -98,20 +98,15 @@ Our documentation follows the **[Diátaxis framework](https://diataxis.fr/)** to
 
 Start with [Tutorials](tutorials/index.md) for hands-on learning that builds your confidence with the FiveTwenty step by step.
 
-### Solve (How-to Guides)
-**When you have a specific problem to solve**
+### Understand & Solve (Guides)
+**When you need comprehensive guidance - both understanding and solutions**
 
-Use [How-to Guides](how-to-guides/index.md) for direct, practical solutions to specific trading tasks and challenges.
+Use [Guides](guides/index.md) for both conceptual understanding and practical solutions to trading challenges.
 
 ### Reference (API Docs)
 **When you need to look up specific details**
 
 Check [API Reference](api-reference/index.md) for comprehensive method signatures, parameters, and return values.
-
-### Understand (Explanations)
-**When you want to understand concepts and design decisions**
-
-Explore [Explanations](explanation/index.md) for background knowledge and deeper understanding of trading concepts.
 
 ## Architecture Overview
 
@@ -147,10 +142,10 @@ Choose your learning journey based on your experience level:
 ### **Production Applications**
 Build production trading systems with confidence:
 
-- [Configuration patterns](explanation/configuration.md) - Multi-account, multi-environment setup
-- [Best practices](explanation/best-practices.md) - Security, performance, and reliability
+- [Configuration patterns](guides/understanding/configuration.md) - Multi-account, multi-environment setup
+- [Best practices](guides/understanding/best-practices.md) - Security, performance, and reliability
 - [Error handling](api-reference/error-handling.md) - Robust production error management
-- [Streaming guide](explanation/streaming.md) - Real-time data processing
+- [Streaming guide](guides/trading-concepts/streaming.md) - Real-time data processing
 
 ## Support & Community
 

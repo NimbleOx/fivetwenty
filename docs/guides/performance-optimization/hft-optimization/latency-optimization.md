@@ -704,4 +704,4 @@ Continue to [System Resource Management](memory-cpu-optimization.md) for advance
 
 - [Connection Optimization](connection-optimization.md) - Connection pooling strategies
 - [Performance Monitoring](latency-optimization.md) - Comprehensive monitoring
-- [Production Integration](../production-deployment/index.md) - Complete system integration
+- [Streaming Optimization](streaming-optimization.md) - Real-time data processing

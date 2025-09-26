@@ -393,10 +393,10 @@ Always follow these critical security guidelines:
 - **Validate configurations before deployment** - Catch issues early
 
 !!! tip "Comprehensive Security Guide"
-    For complete security best practices, token rotation strategies, and production deployment patterns, see [Best Practices Guide](../../explanation/best-practices.md).
+    For complete security best practices, token rotation strategies, and production deployment patterns, see [Best Practices Guide](../../guides/understanding/best-practices.md).
 
 !!! info "Advanced Configuration"
-    For environment-specific settings, organizational patterns, and performance optimization, see [Configuration Guide](../../explanation/configuration.md).
+    For environment-specific settings, organizational patterns, and performance optimization, see [Configuration Guide](../../guides/understanding/configuration.md).
 
 ## Troubleshooting
 
@@ -486,5 +486,5 @@ Now that authentication is configured:
 
 - [Learn about environments](environments.md) to understand practice vs live trading
 - [Make your first trade](first-trade.md) to test your setup
-- [Review configuration options](../../explanation/configuration.md) for advanced use cases
+- [Review configuration options](../../guides/understanding/configuration.md) for advanced use cases
 - [Check error handling](../../api-reference/error-handling.md) for production readiness

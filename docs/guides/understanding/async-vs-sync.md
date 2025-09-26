@@ -303,4 +303,4 @@ The context managers ensure:
 
 Both clients provide identical functionality - the choice depends on your application's concurrency model and performance requirements.
 
-For detailed implementation examples, see the [tutorials](../tutorials/index.md) and [how-to guides](../how-to-guides/index.md).
+For detailed implementation examples, see the [tutorials](../../tutorials/index.md) and [practical guides](../index.md).

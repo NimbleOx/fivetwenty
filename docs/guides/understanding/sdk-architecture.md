@@ -874,8 +874,8 @@ The architecture reflects the realities of financial trading: precision matters,
 Now that you understand the SDK architecture:
 
 - **Learn the async patterns**: Read [Async vs Sync Design](async-vs-sync.md) to choose the right approach
-- **Understand financial concepts**: Explore [Forex Trading Concepts](forex-trading-concepts.md) for domain knowledge
-- **Build robust systems**: Study [Error Handling](../api-reference/error-handling.md) for production-ready error management
+- **Understand financial concepts**: Explore [Forex Trading Concepts](../trading-concepts/forex-trading-concepts.md) for domain knowledge
+- **Build robust systems**: Study [Error Handling](../../api-reference/error-handling.md) for production-ready error management
 - **Apply best practices**: Review [Best Practices](best-practices.md) for production deployment
-- **Implement real-time data**: See [Streaming Data](streaming.md) for market data integration
+- **Implement real-time data**: See [Streaming Data](../trading-concepts/streaming.md) for market data integration
 - **Configure properly**: Check [Configuration](configuration.md) for secure credential management

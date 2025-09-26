@@ -301,6 +301,6 @@ Continue to [Lesson 5: Position Management Mastery](lesson-5-position-management
 
 ## Related Resources
 
-- [Order Management](../../how-to-guides/manage-orders-effectively.md) - Advanced order techniques
+- [Order Management](../../guides/practical-solutions/manage-orders-effectively.md) - Advanced order techniques
 - [Risk Management](../risk-management.md) - Comprehensive risk control
 - [Trading Models](../../api-reference/models/trading-models.md) - Technical documentation

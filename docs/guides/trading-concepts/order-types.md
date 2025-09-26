@@ -416,9 +416,9 @@ async def calculate_position_size(risk_amount: Decimal, stop_distance: Decimal) 
 
 Now that you understand the fundamental order types, you're ready to explore:
 
-- **[Advanced Limit Orders](../tutorials/advanced-orders/advanced-limit-orders.md)** - Time controls and protective mechanisms
-- **[Stop Orders & Market-If-Touched](../tutorials/advanced-orders/stop-orders-mit.md)** - Breakout and mean reversion strategies
-- **[Dynamic Order Management](../tutorials/advanced-orders/dynamic-management.md)** - Trailing stops and adaptive sizing
+- **[Advanced Limit Orders](../../tutorials/advanced-orders/advanced-limit-orders.md)** - Time controls and protective mechanisms
+- **[Stop Orders & Market-If-Touched](../../tutorials/advanced-orders/stop-orders-mit.md)** - Breakout and mean reversion strategies
+- **[Dynamic Order Management](../../tutorials/advanced-orders/dynamic-management.md)** - Trailing stops and adaptive sizing
 
 ## Key Takeaways
 

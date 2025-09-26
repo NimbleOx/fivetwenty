@@ -373,4 +373,4 @@ Continue to [Lesson 4: Your First Trade](lesson-4-first-trade.md) to place your 
 
 - [Market Data Models](../../api-reference/models/market-data-models.md) - Technical documentation
 - [Streaming Data Tutorial](../streaming-data.md) - Real-time data processing
-- [Forex Trading Concepts](../../explanation/forex-trading-concepts.md) - Market fundamentals
+- [Forex Trading Concepts](../../guides/trading-concepts/forex-trading-concepts.md) - Market fundamentals

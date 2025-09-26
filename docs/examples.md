@@ -98,9 +98,8 @@ Before running any examples, make sure you have:
 Examples complement our structured documentation:
 
 - **[Tutorials](tutorials/index.md)** - Step-by-step learning paths
-- **[How-to Guides](how-to-guides/index.md)** - Problem-solving solutions
+- **[Guides](guides/index.md)** - Comprehensive guidance and solutions
 - **[API Reference](api-reference/index.md)** - Complete API documentation
-- **[Explanations](explanation/index.md)** - Deep-dive concepts
 
 ## Contributing Examples
 
