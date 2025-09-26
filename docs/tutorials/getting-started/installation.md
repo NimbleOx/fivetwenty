@@ -5,6 +5,21 @@
 - Python 3.10 or higher
 - An OANDA account (practice or live)
 - API access token from OANDA
+- **uv** - Modern Python package manager ([installation guide](https://docs.astral.sh/uv/getting-started/installation/))
+
+## Environment Setup
+
+### Using uv (Recommended)
+
+For optimal package management with automatic virtual environment handling:
+
+```bash
+# Create project with virtual environment
+uv venv
+
+# Add FiveTwenty to your project
+uv add fivetwenty
+```
 
 ## Install from PyPI
 
@@ -37,27 +52,10 @@ print(fivetwenty.__version__)
 
 ## Dependencies
 
-from fivetwenty import Environment
-
 The SDK automatically installs these minimal core dependencies:
 
 - **httpx** - Modern async HTTP client with connection pooling
 - **pydantic** - Data validation and serialization (v2+)
-
-## Environment Setup
-
-### Using uv (Recommended)
-
-For faster package management with automatic virtual environment handling:
-
-```bash
-# Install uv
-curl -LsSf https://astral.sh/uv/install.sh | sh
-
-# Create project
-uv venv
-uv add fivetwenty
-```
 
 ## Next Steps
 
