@@ -833,7 +833,7 @@ async def calculate_risk_position_size(
     risk_per_unit = stop_loss_pips * pip_value
 
     position_size = risk_amount / risk_per_unit
-    return position_size.quantize(Decimal("1"))  # Round to whole units
+    return position_size.quantize(Decimal(1))  # Round to whole units
 ```
 
 ### Price Calculation Precision
@@ -851,7 +851,7 @@ def calculate_stop_levels(
     """Calculate exact stop loss and take profit levels."""
 
     entry = Decimal(entry_price)
-    pip_value = Decimal("10") ** (-pip_location)
+    pip_value = Decimal(10) ** (-pip_location)
 
     if direction.lower() == "long":
         stop_loss = entry - (stop_pips * pip_value)
@@ -882,13 +882,13 @@ def calculate_sharpe_ratio(
     """Calculate Sharpe ratio with Decimal precision."""
 
     if not returns:
-        return Decimal("0")
+        return Decimal(0)
 
     if risk_free_rate is None:
         risk_free_rate = _DEFAULT_RISK_FREE_RATE
 
     # Convert annual risk-free rate to period rate
-    periods_per_year = Decimal("252")  # Trading days
+    periods_per_year = Decimal(252)  # Trading days
     period_risk_free = risk_free_rate / periods_per_year
 
     # Calculate excess returns
@@ -902,7 +902,7 @@ def calculate_sharpe_ratio(
     std_dev = variance.sqrt()  # Decimal has sqrt method
 
     if std_dev == 0:
-        return Decimal("0")
+        return Decimal(0)
 
     # Annualized Sharpe ratio
     sharpe = (mean_excess / std_dev) * periods_per_year.sqrt()
@@ -956,7 +956,9 @@ async def main() -> None:
         token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
         environment=Environment.PRACTICE
     ) as client:
-        print(f"Health monitoring setup complete")
+        print("Health monitoring setup complete")
+        # Client is used for health monitoring setup
+        _ = client
 
 
     class HealthMonitor:

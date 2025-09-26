@@ -229,7 +229,6 @@ class SecurityException(Exception):
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any
 
 
 class Permission(Enum):
@@ -905,6 +904,13 @@ from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from enum import Enum
 from typing import Any
+
+# For this example, we'll define AuditEventType inline
+class AuditEventType(Enum):
+    ACCOUNT_SETTINGS_CHANGED = "account_settings_changed"
+    ACCOUNT_VIEWED = "account_viewed"
+    SYSTEM_CONFIG_CHANGED = "system_config_changed"
+    SECURITY_ALERT = "security_alert"
 
 
 class DataCategory(Enum):

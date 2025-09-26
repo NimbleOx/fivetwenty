@@ -55,7 +55,7 @@ class SocialSentimentProvider:
             'AUD': ['#AUD', '#RBA', '#Lowe']
         }
 
-    async def get_social_sentiment(self, currencies: List[str], hours_back: int = 24) -> Dict[str, Dict]:
+    async def get_social_sentiment(self, currencies: list[str], hours_back: int = 24) -> dict[str, dict]:
         """Get aggregated social sentiment for currencies."""
 
         sentiment_data = {}
@@ -104,7 +104,7 @@ class SocialSentimentProvider:
 
         return sentiment_data
 
-    async def _fetch_currency_tweets(self, currency: str, hours_back: int) -> List[str]:
+    async def _fetch_currency_tweets(self, currency: str, hours_back: int) -> list[str]:
         """Fetch recent tweets related to a currency."""
 
         keywords = self.currency_keywords.get(currency, [])
@@ -169,7 +169,7 @@ class SocialTradingSystem:
             sentiment_label = "POSITIVE" if data['sentiment'] > 0.1 else "NEGATIVE" if data['sentiment'] < -0.1 else "NEUTRAL"
             print(f"  {currency}: {sentiment_label} ({data['sentiment']:.3f}, {data['tweet_count']} tweets)")
 
-    def get_pair_sentiment_bias(self, instrument: str) -> Dict[str, float]:
+    def get_pair_sentiment_bias(self, instrument: str) -> dict[str, float]:
         """Get sentiment bias for a currency pair."""
 
         # Extract currencies from instrument (e.g., EUR_USD -> EUR, USD)
@@ -299,7 +299,7 @@ async def social_sentiment_integration_example():
 Combine sentiment from multiple social platforms:
 
 ```python
-from typing import Dict, List
+from typing import Optional
 
 # Assume SocialSentimentProvider is defined elsewhere
 class SocialSentimentProvider:
@@ -310,7 +310,7 @@ class MultiPlatformSentimentProvider:
     """Class docstring."""
     """Aggregate sentiment from multiple social platforms."""
 
-    def __init__(self, twitter_token: str, reddit_credentials: Dict = None) -> None:
+    def __init__(self, twitter_token: str, reddit_credentials: Optional[dict] = None) -> None:
         self.twitter_provider = SocialSentimentProvider(twitter_token)
         self.reddit_credentials = reddit_credentials
 
@@ -320,7 +320,7 @@ class MultiPlatformSentimentProvider:
             "reddit": 0.4,
         }
 
-    async def get_aggregated_sentiment(self, currencies: List[str], hours_back: int = 24) -> Dict[str, Dict]:
+    async def get_aggregated_sentiment(self, currencies: list[str], hours_back: int = 24) -> dict[str, dict]:
         """Get sentiment aggregated from multiple platforms."""
 
         # Get Twitter sentiment
@@ -375,10 +375,12 @@ class MultiPlatformSentimentProvider:
 
         return aggregated_sentiment
 
-    async def _get_reddit_sentiment(self, currencies: List[str], hours_back: int) -> Dict[str, Dict]:
+    async def _get_reddit_sentiment(self, currencies: list[str], hours_back: int) -> dict[str, dict]:
         """Get sentiment from Reddit (placeholder for Reddit API integration)."""
 
         # This would integrate with Reddit API using PRAW
+        # hours_back parameter would be used for API filtering
+        _ = hours_back  # Will be used when Reddit API is implemented
         # For now, return empty data
         return {currency: {} for currency in currencies}
 ```
@@ -400,7 +402,7 @@ class RealTimeSocialMonitor:
         self.sentiment_history = {}
         self.alert_callbacks = []
 
-    async def start_monitoring(self, currencies: List[str], check_interval_minutes: int = 10) -> Any:
+    async def start_monitoring(self, currencies: list[str], check_interval_minutes: int = 10) -> Any:
         """Start real-time sentiment monitoring."""
 
         self.monitoring = True
@@ -590,7 +592,7 @@ class CentralBankSentimentAnalyzer:
             "stimulus", "tapering", "forward guidance",
         ]
 
-    async def analyze_central_bank_communications(self, hours_back: int = 48) -> Dict[str, Dict]:
+    async def analyze_central_bank_communications(self, hours_back: int = 48) -> dict[str, dict]:
         """Analyze recent central bank communications."""
 
         bank_analysis = {}
@@ -626,7 +628,7 @@ class CentralBankSentimentAnalyzer:
 
         return bank_analysis
 
-    async def _fetch_bank_tweets(self, username: str, hours_back: int) -> List[Dict]:
+    async def _fetch_bank_tweets(self, username: str, hours_back: int) -> list[dict]:
         """Fetch recent tweets from a central bank."""
 
         try:
@@ -705,7 +707,7 @@ class SocialDataFilter:
     """Filter and validate social media data quality."""
 
     @staticmethod
-    def filter_high_quality_tweets(tweets: List[str], min_length: int = 20) -> List[str]:
+    def filter_high_quality_tweets(tweets: list[str], min_length: int = 20) -> list[str]:
         """Filter tweets for quality."""
 
         filtered_tweets = []
@@ -797,7 +799,7 @@ class SentimentValidator:
 
         return enhanced_sentiment
 
-    def validate_sentiment_consistency(self, sentiments: List[float], confidence_threshold: float = 0.3) -> bool:
+    def validate_sentiment_consistency(self, sentiments: list[float], confidence_threshold: float = 0.3) -> bool:
         """Check if sentiment measurements are consistent."""
 
         if len(sentiments) < 3:
