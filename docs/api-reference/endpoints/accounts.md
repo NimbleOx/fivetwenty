@@ -9,13 +9,16 @@ Account management and information retrieval.
 ## get_accounts
 ```python
 import asyncio
+from fivetwenty import AsyncClient
 
 
-async def main():
-    # accounts.get_accounts() -> list[AccountProperties]
+async def main() -> None:
+    async with AsyncClient(token="demo-token") as client:
+        # accounts.get_accounts() -> list[AccountProperties]
 
-    # Example usage:
-    accounts = await client.accounts.get_accounts()
+        # Example usage:
+        accounts = await client.accounts.get_accounts()
+        print(f"Found {len(accounts)} accounts")
 
 asyncio.run(main())
 ```
@@ -39,10 +42,13 @@ Get list of all accounts for the authenticated user.
 
 ## get_account
 ```python
-# accounts.get_account(account_id: AccountID) -> Account
+async def get_account_example() -> None:
+    async with AsyncClient(token="demo-token") as client:
+        # accounts.get_account(account_id: AccountID) -> Account
 
-# Example usage:
-account = await client.accounts.get_account(account_id="123-456-789")
+        # Example usage:
+        account = await client.accounts.get_account(account_id="123-456-789")
+        print(f"Account balance: {account.balance}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}`
 
@@ -66,10 +72,13 @@ Get detailed information for specific account.
 
 ## get_account_summary
 ```python
-# accounts.get_account_summary(account_id: AccountID) -> AccountSummary
+async def get_account_summary_example() -> None:
+    async with AsyncClient(token="demo-token") as client:
+        # accounts.get_account_summary(account_id: AccountID) -> AccountSummary
 
-# Example usage:
-summary = await client.accounts.get_account_summary(account_id="123-456-789")
+        # Example usage:
+        summary = await client.accounts.get_account_summary(account_id="123-456-789")
+        print(f"Account NAV: {summary.nav}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/summary`
 

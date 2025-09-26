@@ -28,11 +28,10 @@ export FIVETWENTY_OANDA_ACCOUNT_ALIAS="my_first_trade"
 Then use zero-config initialization:
 ```python
 import asyncio
+from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    from fivetwenty import AsyncClient
-
     async with AsyncClient() as client:
         print(f"Connected: {client.config.summary()}")
 
