@@ -79,4 +79,4 @@ For immediate HFT optimization:
 
 - [Deploy SDK to Production](../production-deployment/index.md) - Production deployment strategies
 - [Handle Connection Failures](../handle-connection-failures.md) - Connection resilience
-- [Streaming Data Tutorials](../../tutorials/streaming-data/index.md) - Streaming fundamentals
+- [Streaming Data Tutorials](../../tutorials/streaming-data.md) - Streaming fundamentals

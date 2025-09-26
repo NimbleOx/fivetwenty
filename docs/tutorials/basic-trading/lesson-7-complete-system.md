@@ -450,7 +450,7 @@ Congratulations! You've successfully completed the comprehensive FiveTwenty trad
 ### Ready for Advanced Learning?
 
 **For Strategy Development:**
-- Explore [Risk Management Fundamentals](../risk-management/index.md)
+- Explore [Risk Management Fundamentals](../risk-management.md)
 - Study [Advanced Order Types](../advanced-orders/index.md)
 - Learn [HFT Optimization](../../how-to-guides/hft-optimization/index.md)
 
@@ -480,6 +480,6 @@ Remember: **Successful trading requires practice, discipline, and continuous lea
 
 ## Related Resources
 
-- [Portfolio Analysis](../portfolio-analysis/index.md) - Advanced analysis techniques
-- [Streaming Data](../streaming-data/index.md) - Real-time data processing
+- [Portfolio Analysis](../portfolio-analysis.md) - Advanced analysis techniques
+- [Streaming Data](../streaming-data.md) - Real-time data processing
 - [API Reference](../../api-reference/index.md) - Complete technical documentation

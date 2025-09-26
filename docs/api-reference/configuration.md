@@ -30,7 +30,6 @@ Secure configuration object for OANDA account credentials and settings.
 ### Class Definition
 
 ```python
-import os
 from pydantic import BaseModel, SecretStr
 from fivetwenty import Environment, AccountConfig
 

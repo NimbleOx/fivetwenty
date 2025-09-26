@@ -369,6 +369,6 @@ def calculate_event_adjusted_position_size(
 
 ## Related Guides
 
-- [Risk Management Tutorial](../../tutorials/risk-management/index.md)
+- [Risk Management Tutorial](../../tutorials/risk-management.md)
 - [Advanced Orders Guide](../../tutorials/advanced-orders/index.md)
 - [Production Deployment](../production-deployment/index.md)

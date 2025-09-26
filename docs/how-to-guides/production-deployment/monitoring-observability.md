@@ -132,7 +132,7 @@ class MetricsCollector:
             "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         })
 
-    def track_trade(self, instrument: str, direction: str, volume: Decimal, status: str):
+    def track_trade(self, instrument: str, direction: str, volume: Decimal, status: str) -> None:
         """Track trade execution metrics."""
         TRADES_TOTAL.labels(
             instrument=instrument,

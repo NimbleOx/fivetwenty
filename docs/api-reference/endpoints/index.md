@@ -54,11 +54,10 @@ Complete reference for all FiveTwenty endpoint implementations covering 100% of 
 ### Async Client
 ```python
 import asyncio
+from fivetwenty import AsyncClient
 
 
 async def main():
-    from fivetwenty import AsyncClient
-
     async with AsyncClient() as client:
         # Account operations
         accounts = await client.accounts.get_accounts()

@@ -169,7 +169,7 @@ nav:
 
   # EXAMPLES - Practical demonstrations
   - "Examples":
-      - Overview: examples.md
+      - examples.md
       - Jupyter Notebooks: examples/notebooks/README.md
 
 

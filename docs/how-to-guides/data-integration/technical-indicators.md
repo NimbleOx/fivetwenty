@@ -845,5 +845,5 @@ class SignalPerformanceTracker:
 ## Related Guides
 
 - [Economic Calendar Integration](economic-calendar.md)
-- [Risk Management Tutorial](../../tutorials/risk-management/index.md)
+- [Risk Management Tutorial](../../tutorials/risk-management.md)
 - [Advanced Orders Guide](../../tutorials/advanced-orders/index.md)

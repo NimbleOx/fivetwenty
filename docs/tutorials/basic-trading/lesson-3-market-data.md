@@ -372,5 +372,5 @@ Continue to [Lesson 4: Your First Trade](lesson-4-first-trade.md) to place your 
 ## Related Resources
 
 - [Market Data Models](../../api-reference/models/market-data-models.md) - Technical documentation
-- [Streaming Data Tutorial](../streaming-data/index.md) - Real-time data processing
+- [Streaming Data Tutorial](../streaming-data.md) - Real-time data processing
 - [Forex Trading Concepts](../../explanation/forex-trading-concepts.md) - Market fundamentals

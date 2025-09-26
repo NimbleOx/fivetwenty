@@ -71,7 +71,7 @@ from fivetwenty.models import InstrumentName
 
 load_dotenv()
 
-async def main():
+async def main() -> None:
     async with AsyncClient() as client:
         result = await client.accounts.get_account_summary(client.account_id)  # No type warnings!
         account = result["account"]

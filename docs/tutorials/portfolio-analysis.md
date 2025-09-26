@@ -111,7 +111,7 @@ async def calculate_position_sizes(
 
 ## Next Steps
 
-- Learn [Risk Management](../risk-management/index.md) for portfolio-level risk controls
+- Learn [Risk Management](../risk-management.md) for portfolio-level risk controls
 - Explore [Advanced Orders](../advanced-orders/index.md) for complex position management
 - See [Best Practices](../../explanation/best-practices.md) for production considerations
 

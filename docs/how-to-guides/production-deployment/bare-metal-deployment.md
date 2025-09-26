@@ -722,7 +722,7 @@ class BareMetalTradingSystem:
 # Configuration loading
 from config import load_production_config
 
-async def main():
+async def main() -> None:
     """Main application entry point."""
 
     system = None

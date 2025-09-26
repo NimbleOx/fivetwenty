@@ -37,18 +37,46 @@ graph TB
 ```python
 import hashlib
 import secrets
+import os
+import asyncio
+import logging
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from typing import Any
+from typing import Any, Optional, List, Dict
 from enum import Enum
 
 import jwt
 import pyotp
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import serialization
-from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty import AsyncClient, Environment, Client
+from fivetwenty.exceptions import VeeTwentyError, BadRequest, TooManyRequests, InternalServerError
 from decimal import Decimal
+
+# Security-specific exceptions
+class SecurityException(Exception):
+    """Custom security exception."""
+    pass
+
+class AuthenticationError(SecurityException):
+    """Authentication failure exception."""
+    pass
+
+class AuthorizationError(SecurityException):
+    """Authorization failure exception."""
+    pass
+
+# Additional required types and classes
+class Permission(Enum):
+    """Trading permission levels."""
+    ACCOUNT_VIEW = "account_view"
+    ACCOUNT_MODIFY = "account_modify"
+    TRADE_VIEW = "trade_view"
+    TRADE_EXECUTE = "trade_execute"
+    POSITION_VIEW = "position_view"
+    POSITION_MODIFY = "position_modify"
+    SYSTEM_MONITOR = "system_monitor"
+    SYSTEM_AUDIT = "system_audit"
 
 @dataclass
 class UserSession:

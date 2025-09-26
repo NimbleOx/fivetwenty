@@ -327,6 +327,6 @@ Continue to [Lesson 6: Building Trading Strategies](lesson-6-strategy-building.m
 
 ## Related Resources
 
-- [Risk Management Fundamentals](../risk-management/index.md) - Comprehensive risk control
+- [Risk Management Fundamentals](../risk-management.md) - Comprehensive risk control
 - [Advanced Stop-Loss Strategies](../../how-to-guides/implement-stop-loss-strategies.md) - Detailed stop loss techniques
 - [Trading Models](../../api-reference/models/trading-models.md) - Technical API documentation

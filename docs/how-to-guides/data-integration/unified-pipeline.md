@@ -943,4 +943,4 @@ With the unified data pipeline complete, you can:
 - [Financial News Integration](financial-news.md)
 - [Technical Indicators Integration](technical-indicators.md)
 - [Social Sentiment Integration](social-sentiment.md)
-- [Risk Management Tutorial](../../tutorials/risk-management/index.md)
+- [Risk Management Tutorial](../../tutorials/risk-management.md)

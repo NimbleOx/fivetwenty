@@ -842,5 +842,5 @@ class SentimentValidator:
 ## Related Guides
 
 - [Economic Calendar Integration](economic-calendar.md)
-- [Risk Management Tutorial](../../tutorials/risk-management/index.md)
+- [Risk Management Tutorial](../../tutorials/risk-management.md)
 - [Production Deployment](../production-deployment/index.md)

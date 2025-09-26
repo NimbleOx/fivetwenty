@@ -147,4 +147,4 @@ Key metrics include:
 - Memory usage patterns
 - Network bandwidth utilization
 
-For detailed implementation examples, see the [Streaming Data Tutorials](../tutorials/streaming-data/index.md).
+For detailed implementation examples, see the [Streaming Data Tutorials](../tutorials/streaming-data.md).

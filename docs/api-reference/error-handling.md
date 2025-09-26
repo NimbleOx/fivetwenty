@@ -78,8 +78,33 @@ OANDA server errors.
 ### Basic Exception Handling
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError
-from fivetwenty import AsyncClient
+import os
+import asyncio
+import time
+import logging
+from decimal import Decimal
+from typing import Any, Optional, List, Dict
+from datetime import datetime, timedelta
+
+from fivetwenty import AsyncClient, Environment, Client
+from fivetwenty.models import (
+    OrderRequest,
+    OrderResponse,
+    MarketOrderRequest,
+    Order,
+    Position,
+    Trade,
+    ClientPrice
+)
+from fivetwenty.exceptions import (
+    VeeTwentyError as FiveTwentyError,
+    BadRequest,
+    Unauthorized,
+    Forbidden,
+    NotFound,
+    TooManyRequests,
+    InternalServerError
+)
 
 async def safe_trade(client: AsyncClient, account_id: str) -> None:
     """Place a trade with error handling."""

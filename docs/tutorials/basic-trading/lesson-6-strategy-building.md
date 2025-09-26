@@ -453,5 +453,5 @@ Continue to [Lesson 7: Complete Trading System](lesson-7-complete-system.md) to 
 ## Related Resources
 
 - [Advanced Orders](../advanced-orders/index.md) - Complex order strategies
-- [Risk Management](../risk-management/index.md) - Comprehensive risk frameworks
+- [Risk Management](../risk-management.md) - Comprehensive risk frameworks
 - [HFT Optimization](../../how-to-guides/hft-optimization/index.md) - Performance optimization

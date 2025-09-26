@@ -29,7 +29,7 @@ Each guide builds upon previous concepts while remaining focused on specific tec
 ### Prerequisites
 
 - Completion of [Basic Trading Tutorial](../basic-trading/index.md)
-- Understanding of [Risk Management](../risk-management/index.md) concepts
+- Understanding of [Risk Management](../risk-management.md) concepts
 - Familiarity with OANDA API authentication and basic operations
 
 ### Series Learning Path
