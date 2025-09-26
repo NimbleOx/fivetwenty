@@ -788,32 +788,33 @@ import os
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID
 
-# Example setup for demonstration
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = AccountID("101-004-12345678")
-order_type = "market"
+async def example_order_handling():
+    # Example setup for demonstration
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = AccountID("101-004-12345678")
+        order_type = "market"
 
-# Create example response
-response = await client.orders.post_market_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=1000
-)
+        # Create example response
+        response = await client.orders.post_market_order(
+            account_id=account_id,
+            instrument="EUR_USD",
+            units=1000
+        )
 
-# Check order was created successfully
-if response.order_create_transaction is None:
-    raise ValueError("Order transaction is None")
-if response.order_create_transaction.id is None:
-    raise ValueError("Order transaction ID is None")
+        # Check order was created successfully
+        if response.order_create_transaction is None:
+            raise ValueError("Order transaction is None")
+        if response.order_create_transaction.id is None:
+            raise ValueError("Order transaction ID is None")
 
-# For market orders, verify immediate fill
-if order_type == "market":
-    if response.order_fill_transaction is None:
-        raise ValueError("Market order fill transaction is None")
-    print("Order filled successfully")
+        # For market orders, verify immediate fill
+        if order_type == "market":
+            if response.order_fill_transaction is None:
+                raise ValueError("Market order fill transaction is None")
+            print("Order filled successfully")
 ```
 
 ### Verify Order Parameters

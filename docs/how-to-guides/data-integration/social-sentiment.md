@@ -299,6 +299,12 @@ async def social_sentiment_integration_example():
 Combine sentiment from multiple social platforms:
 
 ```python
+from typing import Dict, List
+
+# Assume SocialSentimentProvider is defined elsewhere
+class SocialSentimentProvider:
+    def __init__(self, token: str):
+        self.token = token
 
 class MultiPlatformSentimentProvider:
     """Class docstring."""
@@ -538,6 +544,26 @@ Focus on central bank communications for high-impact sentiment:
 ```python
 from datetime import datetime
 
+# These would be imported from external libraries in practice
+# import tweepy
+# from vaderSentiment.vaderSentiment import SentimentIntensityAnalyzer
+
+class MockTwitterClient:
+    def __init__(self, bearer_token: str):
+        self.bearer_token = bearer_token
+
+class MockSentimentAnalyzer:
+    def polarity_scores(self, text: str):
+        return {"compound": 0.5}
+
+# Mock the external dependencies for documentation
+class tweepy:
+    @staticmethod
+    def Client(bearer_token: str):
+        return MockTwitterClient(bearer_token)
+
+def SentimentIntensityAnalyzer():
+    return MockSentimentAnalyzer()
 
 class CentralBankSentimentAnalyzer:
     """Specialized analysis of central bank communications."""

@@ -276,6 +276,7 @@ def slow_spread_calculation(price) -> Any:
 ```python
 # Efficient: Cache frequently accessed attributes
 
+from decimal import Decimal
 from typing import Any
 
 async def handle_price_update(instrument: str, bid_price: Decimal, ask_price: Decimal, spread: Decimal) -> None:
