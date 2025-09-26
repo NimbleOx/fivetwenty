@@ -795,6 +795,139 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+## Financial Precision Best Practices
+
+### Decimal Usage Patterns
+
+```python
+from decimal import Decimal
+
+# ✅ Correct: Always use Decimal for financial calculations
+def calculate_position_value(units: Decimal, price: str) -> Decimal:
+    """Calculate position value with exact precision."""
+    return units * Decimal(price)
+
+# ✅ Correct: Quantize results for display/storage
+def format_currency(amount: Decimal) -> str:
+    """Format amount for display."""
+    return str(amount.quantize(Decimal("0.01")))
+
+# ❌ Wrong: Mixing float and Decimal
+def bad_calculation(units: Decimal) -> float:
+    return float(units) * 1.1  # Loses precision
+```
+
+### Position Sizing with Precision
+
+```python
+async def calculate_risk_position_size(
+    account_balance: str,  # AccountUnits from OANDA
+    risk_percentage: Decimal,
+    stop_loss_pips: int,
+    pip_value: Decimal,
+) -> Decimal:
+    """Calculate position size with exact precision."""
+    balance = Decimal(account_balance)
+    risk_amount = balance * (risk_percentage / 100)
+    risk_per_unit = stop_loss_pips * pip_value
+
+    position_size = risk_amount / risk_per_unit
+    return position_size.quantize(Decimal("1"))  # Round to whole units
+```
+
+### Price Calculation Precision
+
+```python
+def calculate_stop_levels(
+    entry_price: str,     # PriceValue from OANDA
+    direction: str,       # "long" or "short"
+    stop_pips: int,
+    target_pips: int,
+    pip_location: int = 4,  # Decimal places for price
+) -> tuple[str, str]:
+    """Calculate exact stop loss and take profit levels."""
+
+    entry = Decimal(entry_price)
+    pip_value = Decimal("10") ** (-pip_location)
+
+    if direction.lower() == "long":
+        stop_loss = entry - (stop_pips * pip_value)
+        take_profit = entry + (target_pips * pip_value)
+    else:  # short
+        stop_loss = entry + (stop_pips * pip_value)
+        take_profit = entry - (target_pips * pip_value)
+
+    # Format back to string with proper precision
+    price_format = f"{{:.{pip_location}f}}"
+    return (
+        price_format.format(stop_loss),
+        price_format.format(take_profit),
+    )
+```
+
+### Performance Metrics with Exact Math
+
+```python
+def calculate_sharpe_ratio(
+    returns: list[Decimal],
+    risk_free_rate: Decimal = Decimal("0.02"),
+) -> Decimal:
+    """Calculate Sharpe ratio with Decimal precision."""
+
+    if not returns:
+        return Decimal("0")
+
+    # Convert annual risk-free rate to period rate
+    periods_per_year = Decimal("252")  # Trading days
+    period_risk_free = risk_free_rate / periods_per_year
+
+    # Calculate excess returns
+    excess_returns = [r - period_risk_free for r in returns]
+
+    # Mean excess return
+    mean_excess = sum(excess_returns) / len(excess_returns)
+
+    # Standard deviation of excess returns
+    variance = sum((r - mean_excess) ** 2 for r in excess_returns) / len(excess_returns)
+    std_dev = variance.sqrt()  # Decimal has sqrt method
+
+    if std_dev == 0:
+        return Decimal("0")
+
+    # Annualized Sharpe ratio
+    sharpe = (mean_excess / std_dev) * periods_per_year.sqrt()
+    return sharpe.quantize(Decimal("0.0001"))
+```
+
+### Common Precision Pitfalls
+
+```python
+# ❌ Don't: Mix float and Decimal
+price = Decimal("1.1000")
+adjustment = 0.0001  # float
+result = price + adjustment  # Decimal + float = float!
+
+# ✅ Do: Keep everything as Decimal
+price = Decimal("1.1000")
+adjustment = Decimal("0.0001")
+result = price + adjustment  # Both Decimal = exact result
+
+# ❌ Don't: Ignore rounding in final results
+result = Decimal('10') / Decimal('3')  # 3.333333333...
+
+# ✅ Do: Use quantize() for display/storage
+result = Decimal("10") / Decimal("3")
+display_result = result.quantize(Decimal("0.01"))  # 3.33
+
+# ❌ Don't: Convert unnecessarily
+order = MarketOrderRequest(units=1000, ...)
+units_float = float(order.units)  # Why convert to less precise type?
+
+# ✅ Do: Work with native Decimal
+order = MarketOrderRequest(units=1000, ...)
+calculation = order.units * Decimal("1.5")  # Direct Decimal arithmetic
+```
+
 ## Monitoring and Alerting
 
 ### Health Checks

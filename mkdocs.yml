@@ -122,7 +122,6 @@ nav:
               - Automated Trading: tutorials/streaming-data/automated-trading.md
               - Advanced Features: tutorials/streaming-data/advanced-features.md
               - Best Practices: tutorials/streaming-data/best-practices.md
-          - Decimal Best Practices: tutorials/decimal-best-practices.md
 
   # HOW-TO GUIDES - Problem-oriented solutions
   - "How-to Guides":

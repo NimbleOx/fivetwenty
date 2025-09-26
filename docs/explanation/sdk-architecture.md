@@ -34,14 +34,68 @@ The FiveTwenty was designed with **async-first principles** to handle the inhere
 ```python
 from decimal import Decimal
 
-# Wrong - potential precision errors
-price=Decimal("1.1234") + 0.0001  # May not equal exactly 1.1235
+# ❌ Float arithmetic can be imprecise
+float_sum = 0.1 + 0.2
+print(float_sum)  # 0.30000000000000004 (not exactly 0.3!)
 
-# Right - precise decimal arithmetic
-price = Decimal("1.1234") + Decimal("0.0001")  # Always exactly 1.1235
+# ✅ Decimal arithmetic is exact
+decimal_sum = Decimal("0.1") + Decimal("0.2")
+print(decimal_sum)  # 0.3 (exact!)
 ```
 
 This design choice permeates the entire SDK - every price, balance, and monetary calculation uses `Decimal` to ensure accuracy.
+
+#### Automatic Type Conversion
+
+FiveTwenty automatically handles Decimal conversion for financial fields:
+
+```python
+from decimal import Decimal
+from fivetwenty.models import MarketOrderRequest, InstrumentName, TimeInForce
+
+# All these inputs work seamlessly
+order1 = MarketOrderRequest(
+    instrument=InstrumentName.EUR_USD,
+    units=1000,                    # int → Decimal
+    time_in_force=TimeInForce.GTC,
+)
+
+order2 = MarketOrderRequest(
+    instrument=InstrumentName.EUR_USD,
+    units="1500.25",               # str → Decimal
+    time_in_force=TimeInForce.GTC,
+)
+
+order3 = MarketOrderRequest(
+    instrument=InstrumentName.EUR_USD,
+    units=Decimal("2000.123456"),  # Decimal (direct)
+    time_in_force=TimeInForce.GTC,
+)
+
+# All units fields are now native Decimal objects
+assert isinstance(order1.units, Decimal)
+assert isinstance(order2.units, Decimal)
+assert isinstance(order3.units, Decimal)
+```
+
+#### Field Type Categories
+
+**Decimal Fields** - Accept various inputs, store as Decimal:
+- Order quantities: `units` in all order requests
+- Position calculations: `units` in position data
+- Financial rates: `margin_rate`, percentage fields
+- Transaction amounts: `pl`, `commission`, `financing`
+
+**AccountUnits Fields** - Account-level monetary values (remain strings):
+- Account balances: `balance`, `margin_available`
+- Trade P&L: `realized_pl`, `unrealized_pl` in trades
+- Margin amounts: `margin_used` at account level
+
+**PriceValue Fields** - Price fields (remain strings for OANDA precision):
+- Market prices: `price`, `closeout_bid`, `closeout_ask`
+- Order prices: All price thresholds and levels
+
+This mixed approach ensures exact calculations where needed while preserving OANDA's original precision formats.
 
 ### Pydantic-Based Models
 
