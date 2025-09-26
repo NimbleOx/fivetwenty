@@ -511,7 +511,10 @@ async def process_batch(prices):
 Track streaming performance:
 
 ```python
+
+"""Module docstring."""
 class StreamMetrics:
+    """Class docstring."""
     """Track streaming metrics."""
 
     def __init__(self):

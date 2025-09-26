@@ -157,7 +157,10 @@ class OrderValidationFramework:
 ```python
 from decimal import Decimal
 
+
+"""Module docstring."""
 class MaxPositionSizeValidator(OrderValidator):
+    """Class docstring."""
     """Validate order doesn't exceed maximum position size limits."""
 
     def __init__(self, max_units_per_instrument: int, max_total_exposure: Decimal):
@@ -224,6 +227,7 @@ class MaxPositionSizeValidator(OrderValidator):
         )
 
 class MarginRequirementValidator(OrderValidator):
+    """Class docstring."""
     """Validate sufficient margin for order."""
 
     def __init__(self, margin_buffer: Decimal = Decimal("0.1")):
@@ -267,6 +271,7 @@ class MarginRequirementValidator(OrderValidator):
         )
 
 class RiskPerTradeValidator(OrderValidator):
+    """Class docstring."""
     """Validate risk per trade doesn't exceed limits."""
 
     def __init__(self, max_risk_per_trade: Decimal):
@@ -324,7 +329,10 @@ from datetime import datetime
 from decimal import Decimal
 
 
+
+"""Module docstring."""
 class SpreadValidator(OrderValidator):
+    """Class docstring."""
     """Validate spread isn't too wide for order execution."""
 
     def __init__(self, max_spread_pips: Decimal):
@@ -382,6 +390,7 @@ class SpreadValidator(OrderValidator):
             )
 
 class MarketHoursValidator(OrderValidator):
+    """Class docstring."""
     """Validate market is open for the instrument."""
 
     def __init__(self):
@@ -426,7 +435,10 @@ class MarketHoursValidator(OrderValidator):
 from decimal import Decimal
 
 
+
+"""Module docstring."""
 class PriceValidityValidator(OrderValidator):
+    """Class docstring."""
     """Validate order price is reasonable relative to current market."""
 
     def __init__(self, max_price_deviation: Decimal = Decimal("0.05")):
@@ -501,6 +513,7 @@ class PriceValidityValidator(OrderValidator):
             )
 
 class OrderParametersValidator(OrderValidator):
+    """Class docstring."""
     """Validate order parameters are properly formatted."""
 
     def __init__(self):

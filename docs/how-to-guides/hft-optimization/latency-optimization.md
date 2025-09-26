@@ -165,7 +165,10 @@ async def hft_execution_example(client: AsyncClient, account_id: str):
 Configure timeouts for optimal latency:
 
 ```python
+
+"""Module docstring."""
 class AdaptiveTimeoutManager:
+    """Class docstring."""
     """Dynamically adjust timeouts based on network conditions."""
 
     def __init__(self):
@@ -211,6 +214,7 @@ class AdaptiveTimeoutManager:
 
 # Usage with order manager
 class AdaptiveLowLatencyOrderManager(LowLatencyOrderManager):
+    """Class docstring."""
     """Order manager with adaptive timeout optimization."""
 
     def __init__(self, client: AsyncClient):
@@ -393,8 +397,11 @@ import heapq
 from dataclasses import dataclass, field
 from typing import Any
 
+
+"""Module docstring."""
 @dataclass
 class PriorityOrder:
+    """Class docstring."""
     """Order with priority for queue management."""
     priority: int
     timestamp: float
@@ -407,6 +414,7 @@ class PriorityOrder:
         return self.timestamp < other.timestamp
 
 class PriorityOrderQueue:
+    """Class docstring."""
     """Priority queue for order execution."""
 
     def __init__(self, max_size: int = 1000):
@@ -467,6 +475,7 @@ class PriorityOrderQueue:
 
 # Usage with order manager
 class QueuedOrderManager(LowLatencyOrderManager):
+    """Class docstring."""
     """Order manager with priority queuing."""
 
     def __init__(self, client: AsyncClient):

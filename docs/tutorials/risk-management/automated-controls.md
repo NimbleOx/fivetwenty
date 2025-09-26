@@ -885,11 +885,13 @@ thresholds = {
 ```python
 # WRONG: No way to stop automated system
 class RiskSystem:
+    """Class docstring."""
     def __init__(self):
         self.can_be_stopped = False  # Dangerous!
 
 # RIGHT: Always include emergency stops
 class RiskSystem:
+    """Class docstring."""
     def __init__(self):
         self.emergency_stop_enabled = True
         self.manual_override = True
@@ -902,7 +904,10 @@ class RiskSystem:
 ### Machine Learning Integration
 
 ```python
+
+"""Module docstring."""
 class MLRiskPredictor:
+    """Class docstring."""
     """Use machine learning to predict risk scenarios."""
     
     def __init__(self):

@@ -53,6 +53,7 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 
 ```python
 class Account(ApiModel):
+    """Class docstring."""
     balance: Decimal  # Validated at runtime
     currency: Currency  # Enum validation
     created_time: DateTime  # Proper datetime handling

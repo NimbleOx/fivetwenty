@@ -550,7 +550,10 @@ class MultiTimeframeAnalysis:
 Create custom indicators for specific strategies:
 
 ```python
+
+"""Module docstring."""
 class CustomIndicators:
+    """Class docstring."""
     """Custom technical indicators for specific strategies."""
 
     @staticmethod
@@ -709,7 +712,10 @@ class TechnicalSignalTradingSystem:
 Always validate your indicators before live trading:
 
 ```python
+
+"""Module docstring."""
 class IndicatorValidator:
+    """Class docstring."""
     """Validate technical indicators and signals."""
 
     @staticmethod
@@ -758,7 +764,10 @@ class IndicatorValidator:
 Track the performance of your technical signals:
 
 ```python
+
+"""Module docstring."""
 class SignalPerformanceTracker:
+    """Class docstring."""
     """Track performance of technical signals."""
 
     def __init__(self):

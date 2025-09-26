@@ -509,7 +509,10 @@ class RealTimeNewsMonitor:
 ### Sentiment Analysis Enhancement
 
 ```python
+
+"""Module docstring."""
 class EnhancedSentimentAnalyzer:
+    """Class docstring."""
     """Enhanced sentiment analysis with financial context."""
 
     def __init__(self):

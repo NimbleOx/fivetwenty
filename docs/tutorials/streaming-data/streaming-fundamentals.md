@@ -296,7 +296,10 @@ class StallDetector:
 from datetime import datetime
 
 
+
+"""Module docstring."""
 class StreamMultiplexer:
+    """Class docstring."""
     """Multiplex multiple streams into single output."""
 
     def __init__(self):

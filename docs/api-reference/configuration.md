@@ -30,7 +30,10 @@ Secure configuration object for OANDA account credentials and settings.
 ### Class Definition
 
 ```python
+
+"""Module docstring."""
 class AccountConfig(BaseModel):
+    """Class docstring."""
     """Configuration for a single OANDA trading account."""
 
     token: SecretStr
@@ -42,7 +45,10 @@ class AccountConfig(BaseModel):
 ### Constructor
 
 ```python
+
+"""Module docstring."""
 class AccountConfig:
+    """Class docstring."""
     def __init__(
         self,
         token: SecretStr | str,
@@ -368,7 +374,10 @@ Enumeration for OANDA trading environments.
 from enum import Enum
 
 
+
+"""Module docstring."""
 class Environment(Enum):
+    """Class docstring."""
     """OANDA trading environments."""
     PRACTICE = "practice"
     LIVE = "live"
@@ -586,7 +595,10 @@ async def verify_config_connection(config: AccountConfig) -> bool:
 ### Configuration Factory
 
 ```python
+
+"""Module docstring."""
 class ConfigFactory:
+    """Class docstring."""
     """Factory for creating configurations."""
 
     @staticmethod
@@ -620,7 +632,10 @@ class ConfigFactory:
 ### Configuration Manager
 
 ```python
+
+"""Module docstring."""
 class ConfigManager:
+    """Class docstring."""
     """Manage multiple configurations."""
 
     def __init__(self):

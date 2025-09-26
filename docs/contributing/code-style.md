@@ -125,6 +125,7 @@ Group related methods into endpoint classes:
 ```python
 # ✅ Good - Organized by OANDA API endpoints
 class OrdersEndpoint:
+    """Class docstring."""
     """Order management operations."""
 
     async def list_orders(self, account_id: str) -> list[Order]:
@@ -141,6 +142,7 @@ class OrdersEndpoint:
 
 # Attach to client
 class AsyncClient:
+    """Class docstring."""
     def __init__(self):
         self.orders = OrdersEndpoint(self)
         self.accounts = AccountsEndpoint(self)
@@ -159,7 +161,10 @@ from pydantic import BaseModel, Field
 
 
 # ✅ Good - Complete Pydantic model
+
+"""Module docstring."""
 class Order(BaseModel):
+    """Class docstring."""
     """Represents an OANDA order."""
 
     id: str = Field(alias="id", description="Order ID")
@@ -237,12 +242,15 @@ req_id: Optional[str]
 ```python
 # ✅ Good - Descriptive, matches OANDA terminology
 class AccountSummary(BaseModel):
+    """Class docstring."""
     pass
 
 class MarketOrderRequest(BaseModel):
+    """Class docstring."""
     pass
 
 class PricingHeartbeat(BaseModel):
+    """Class docstring."""
     pass
 
 # ❌ Bad - Generic or unclear names
@@ -316,7 +324,10 @@ async def post_limit_order(
 ### **Model Documentation**
 
 ```python
+
+"""Module docstring."""
 class Position(BaseModel):
+    """Class docstring."""
     """Represents a trading position for a specific instrument.
 
     A position aggregates all trades for an instrument into long and short sides,
@@ -657,7 +668,10 @@ from pydantic import SecretStr
 
 
 # ✅ Good - Secure credential handling
+
+"""Module docstring."""
 class AccountConfig(BaseModel):
+    """Class docstring."""
     """Secure account configuration."""
 
     token: SecretStr  # Never logged or printed

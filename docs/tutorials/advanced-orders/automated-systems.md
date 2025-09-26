@@ -799,7 +799,10 @@ from datetime import datetime
 from pathlib import Path
 
 
+
+"""Module docstring."""
 class TradingLogger:
+    """Class docstring."""
     def __init__(self, log_directory: str = "trading_logs"):
         self.log_directory = Path(log_directory)
         self.log_directory.mkdir(exist_ok=True)

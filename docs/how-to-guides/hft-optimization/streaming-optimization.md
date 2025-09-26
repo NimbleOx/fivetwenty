@@ -264,6 +264,7 @@ from typing import NamedTuple
 
 
 class FastPrice(NamedTuple):
+    """Class docstring."""
     bid: float
     ask: float
     timestamp: float

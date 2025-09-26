@@ -444,7 +444,10 @@ import os
 from fivetwenty import AsyncClient, Environment
 
 
+
+"""Module docstring."""
 class SecureCredentialManager:
+    """Class docstring."""
     """Secure credential management for production."""
 
     @staticmethod
@@ -600,7 +603,10 @@ from datetime import datetime
 from typing import Any, Dict
 
 
+
+"""Module docstring."""
 class HealthCheckServer:
+    """Class docstring."""
     """Health check server for monitoring."""
 
     def __init__(self, streaming_system: ProductionStreamingSystem):

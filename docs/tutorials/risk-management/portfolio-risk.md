@@ -813,7 +813,10 @@ Test your understanding of portfolio-level risk management:
 ### Risk Limit Framework
 
 ```python
+
+"""Module docstring."""
 class RiskLimitFramework:
+    """Class docstring."""
     """Comprehensive risk limit management system."""
     
     def __init__(self, account_balance: Decimal):

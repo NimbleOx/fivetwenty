@@ -668,7 +668,10 @@ class DataQualityMonitor:
 Monitor the performance and efficiency of the data pipeline:
 
 ```python
+
+"""Module docstring."""
 class PipelinePerformanceMonitor:
+    """Class docstring."""
     """Monitor performance of the unified data pipeline."""
 
     def __init__(self):

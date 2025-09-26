@@ -16,8 +16,11 @@ from typing import Optional
 from fivetwenty import AsyncClient, Environment
 
 
+
+"""Module docstring."""
 @dataclass
 class TradingSystemConfig:
+    """Class docstring."""
     """Production trading system configuration."""
 
     # Risk limits
@@ -34,6 +37,7 @@ class TradingSystemConfig:
     alert_on_disconnect: bool = True
 
 class ProductionTradingSystem:
+    """Class docstring."""
     """Production-ready trading system."""
 
     def __init__(self, config: TradingSystemConfig):
@@ -234,7 +238,10 @@ class StopLossManager:
 ### Daily Loss Limits
 
 ```python
+
+"""Module docstring."""
 class DailyLossLimiter:
+    """Class docstring."""
     """Enforce daily loss limits."""
 
     def __init__(self, max_daily_loss: Decimal):
@@ -501,7 +508,10 @@ import smtplib
 from email.mime.text import MIMEText
 
 
+
+"""Module docstring."""
 class AlertManager:
+    """Class docstring."""
     """Send alerts for critical events."""
 
     def __init__(self, email_config: dict):

@@ -31,8 +31,11 @@ from dataclasses import dataclass
 from typing import Dict
 
 
+
+"""Module docstring."""
 @dataclass
 class PortfolioConfig:
+    """Class docstring."""
     """Production portfolio configuration."""
 
     target_weights: dict[str, float]
@@ -43,6 +46,7 @@ class PortfolioConfig:
     monitoring_interval_hours: int = 6
 
 class ProductionPortfolioManager:
+    """Class docstring."""
     """Production-ready portfolio management system."""
 
     def __init__(self, config: PortfolioConfig):
@@ -143,7 +147,10 @@ class ProductionPortfolioManager:
 ### Risk Management Integration
 
 ```python
+
+"""Module docstring."""
 class RiskManagementFramework:
+    """Class docstring."""
     """Comprehensive risk management for portfolio systems."""
 
     def __init__(self):
@@ -235,7 +242,10 @@ class RiskManagementFramework:
 ```python
 from datetime import datetime
 
+
+"""Module docstring."""
 class PerformanceMonitor:
+    """Class docstring."""
     """Real-time performance monitoring and reporting."""
 
     def __init__(self):

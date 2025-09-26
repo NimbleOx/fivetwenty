@@ -298,7 +298,10 @@ async def social_sentiment_integration_example():
 Combine sentiment from multiple social platforms:
 
 ```python
+
+"""Module docstring."""
 class MultiPlatformSentimentProvider:
+    """Class docstring."""
     """Aggregate sentiment from multiple social platforms."""
 
     def __init__(self, twitter_token: str, reddit_credentials: Dict = None):
@@ -663,7 +666,10 @@ class CentralBankSentimentAnalyzer:
 Ensure high-quality social media data:
 
 ```python
+
+"""Module docstring."""
 class SocialDataFilter:
+    """Class docstring."""
     """Filter and validate social media data quality."""
 
     @staticmethod
@@ -726,7 +732,10 @@ class SocialDataFilter:
 Validate sentiment analysis results:
 
 ```python
+
+"""Module docstring."""
 class SentimentValidator:
+    """Class docstring."""
     """Validate and improve sentiment analysis accuracy."""
 
     def __init__(self):

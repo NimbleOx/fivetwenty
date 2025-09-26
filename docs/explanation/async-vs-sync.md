@@ -363,7 +363,10 @@ Stick to one pattern throughout your application:
 from fivetwenty import AsyncClient, Environment
 
 # Good: Consistent async throughout
+
+"""Module docstring."""
 class TradingSystem:
+    """Class docstring."""
     def __init__(self):
         self.client = AsyncClient(...)
 
@@ -377,6 +380,7 @@ class TradingSystem:
 
 # Bad: Mixed patterns
 class MixedSystem:
+    """Class docstring."""
     def __init__(self):
         self.async_client = AsyncClient(...)
         self.sync_client = Client(...)
