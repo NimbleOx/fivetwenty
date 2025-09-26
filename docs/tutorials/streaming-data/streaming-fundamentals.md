@@ -39,6 +39,9 @@ Understand the basics of real-time market data streaming and the foundational co
 ## Streaming Architecture Patterns
 
 ### Producer-Consumer Pattern
+
+This pattern separates data generation from data processing. The producer handles the streaming connection while consumers process the data without blocking the stream. This architecture provides better performance and reliability.
+
 ```python
 import asyncio
 from typing import Any, Callable
@@ -103,6 +106,9 @@ class StreamConsumer:
 ```
 
 ### Event-Driven Architecture
+
+Event-driven systems respond to data as it arrives rather than polling for updates. This approach provides lower latency and better resource utilization for real-time trading systems.
+
 ```python
 from dataclasses import dataclass
 from datetime import datetime
@@ -168,6 +174,9 @@ async def heartbeat_handler(event: StreamEvent) -> Any:
 ## Connection Management
 
 ### Reconnection Strategies
+
+Network connections can fail unexpectedly in trading systems. This class implements exponential backoff reconnection with configurable retry limits to maintain stable streaming connections.
+
 ```python
 import random
 from typing import Optional
@@ -249,9 +258,13 @@ class ConnectionManager:
 ## Stall Detection
 
 ### Heartbeat Monitoring
+
+Heartbeats are periodic messages that indicate the connection is alive. This monitor tracks heartbeat timing and can detect when a connection has stalled, triggering reconnection if needed.
+
 ```python
 import asyncio
 from datetime import datetime
+from typing import Any
 
 
 
@@ -297,10 +310,14 @@ class StallDetector:
 ## Data Flow Patterns
 
 ### Stream Multiplexing
-```python
 
-from typing import Any
+When you need to handle multiple data streams simultaneously, multiplexing allows you to process different types of data (prices, account updates, etc.) in a coordinated way without blocking any single stream.
+
+```python
+import asyncio
+from collections.abc import AsyncIterator
 from datetime import datetime
+from typing import Any
 
 
 

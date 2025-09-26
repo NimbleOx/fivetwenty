@@ -19,6 +19,8 @@ Learn how to manage multiple positions and track portfolio performance using Fiv
 
 ### Getting Portfolio Overview
 
+The first step in portfolio management is understanding your current position across all instruments. This function retrieves account information and calculates key metrics like total exposure and position details.
+
 ```python
 import asyncio
 from decimal import Decimal
@@ -74,6 +76,8 @@ asyncio.run(main())
 
 ### Position Sizing and Allocation
 
+When managing multiple positions, you need to determine how much capital to allocate to each instrument. This function takes your target allocation percentages and calculates the exact position sizes needed based on current market prices.
+
 ```python
 async def calculate_position_sizes(
     client: AsyncClient,
@@ -104,101 +108,6 @@ async def calculate_position_sizes(
     return position_sizes
 ```
 
-### Simple Rebalancing
-
-```python
-async def rebalance_portfolio(
-    client: AsyncClient,
-    account_id: str,
-    target_allocations: dict[str, Decimal],
-    rebalance_threshold: Decimal = Decimal("0.05")  # 5% threshold
-) -> list[dict]:
-    """Rebalance portfolio when allocations drift beyond threshold."""
-
-    # Get current portfolio state
-    account = await client.accounts.get_account(account_id)
-    positions = await client.positions.get_positions(account_id)
-    total_capital = Decimal(account.balance)
-
-    # Calculate current allocations
-    current_values = {}
-    total_value = Decimal("0")
-
-    for position in positions.positions:
-        if position.long.units != "0" or position.short.units != "0":
-            # Get current pricing
-            pricing = await client.pricing.get_pricing(
-                account_id=account_id,
-                instruments=[position.instrument]
-            )
-            current_price = Decimal(pricing.prices[0].asks[0].price)
-
-            long_units = Decimal(position.long.units) if position.long.units != "0" else Decimal("0")
-            short_units = Decimal(position.short.units) if position.short.units != "0" else Decimal("0")
-            net_units = long_units + short_units
-
-            position_value = abs(net_units) * current_price
-            current_values[position.instrument] = position_value
-            total_value += position_value
-
-    # Check if rebalancing is needed
-    rebalance_trades = []
-
-    for instrument, target_allocation in target_allocations.items():
-        current_value = current_values.get(instrument, Decimal("0"))
-        current_allocation = current_value / total_value if total_value > 0 else Decimal("0")
-
-        allocation_drift = abs(current_allocation - target_allocation)
-
-        if allocation_drift > rebalance_threshold:
-            target_value = total_capital * target_allocation
-            value_adjustment = target_value - current_value
-
-            # Get pricing for unit calculation
-            pricing = await client.pricing.get_pricing(
-                account_id=account_id,
-                instruments=[instrument]
-            )
-            current_price = Decimal(pricing.prices[0].asks[0].price)
-
-            units_to_trade = (value_adjustment / current_price).quantize(Decimal("1"))
-
-            if abs(units_to_trade) >= 1:  # Minimum trade size
-                rebalance_trades.append({
-                    "instrument": instrument,
-                    "units": units_to_trade,
-                    "reason": f"Drift: {allocation_drift:.1%} > {rebalance_threshold:.1%}"
-                })
-
-    return rebalance_trades
-```
-
-## Key Portfolio Concepts
-
-### Position Correlation
-When managing multiple positions, consider correlation between currency pairs to avoid excessive risk concentration.
-
-### Risk Limits
-Set portfolio-level limits:
-- Maximum total exposure
-- Maximum positions per currency
-- Daily loss limits
-- Drawdown thresholds
-
-### Performance Tracking
-Monitor these metrics:
-- Total portfolio P&L
-- Individual position performance
-- Win/loss ratios
-- Risk-adjusted returns
-
-## Best Practices
-
-1. **Keep it Simple**: Focus on basic allocation and risk management rather than complex optimization
-2. **Use FiveTwenty's Position API**: Leverage built-in position tracking rather than building your own
-3. **Monitor Margin**: Always check margin requirements when sizing positions
-4. **Regular Rebalancing**: Set clear thresholds for when to rebalance
-5. **Risk First**: Set maximum loss limits before optimizing for returns
 
 ## Next Steps
 

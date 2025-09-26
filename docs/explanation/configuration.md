@@ -474,7 +474,6 @@ else:
 ```python
 import asyncio
 import os
-import httpx
 from fivetwenty import AsyncClient, Environment
 
 
@@ -503,7 +502,6 @@ For advanced HTTP configuration:
 ```python
 import asyncio
 import os
-import httpx
 from fivetwenty import AsyncClient, Environment
 
 
@@ -532,7 +530,7 @@ async def main() -> None:
         environment=Environment.PRACTICE,
         transport=transport,
     ) as client:
-        pass
+        print(f"Client configured: {client.config.environment}")
 
 asyncio.run(main())
 ```

@@ -104,6 +104,8 @@ async def check_account(client: Any) -> Any:
 Check current market prices before placing orders:
 
 ```python
+from typing import Any
+
 async def get_price(client: Any, instrument: str = "EUR_USD") -> Any:
     """Get current pricing for an instrument."""
     # The SDK automatically uses the configured account ID
@@ -127,6 +129,8 @@ async def get_price(client: Any, instrument: str = "EUR_USD") -> Any:
 Place your first market order using the configured account:
 
 ```python
+from typing import Any
+
 async def place_market_order(client: Any, instrument: str = "EUR_USD", units: int = 1000) -> Any:
     """Place a market order."""
     print(f"\n🛒 Placing {('BUY' if units > 0 else 'SELL')} order:")
@@ -371,6 +375,15 @@ Place an order to execute at a specific price level:
 ```python
 from decimal import Decimal
 from typing import Any
+
+
+async def get_price(client: Any, instrument: str) -> Any:
+    """Get current pricing for an instrument."""
+    prices = await client.pricing.get_pricing(
+        account_id=client.account_id,
+        instruments=[instrument],
+    )
+    return prices[0]
 
 
 async def place_limit_order(client: Any, instrument: str = "EUR_USD") -> Any:

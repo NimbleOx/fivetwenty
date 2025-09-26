@@ -14,6 +14,8 @@ Implement your first real-time data streams using FiveTwenty for price feeds and
 
 ## Price Stream Implementation
 
+This example shows how to connect to OANDA's pricing stream and process real-time market data. The stream provides live bid/ask prices for specified instruments with automatic heartbeat monitoring.
+
 ```python
 import asyncio
 from datetime import datetime
@@ -111,6 +113,8 @@ async def basic_streaming_example():
 ```
 
 ## Account Stream Monitoring
+
+Account streams provide real-time updates about trades, orders, and account changes. This is essential for monitoring position changes and order fills as they happen.
 
 ```python
 from fivetwenty import AsyncClient

@@ -741,7 +741,7 @@ async def create_bracket_order(params: BracketOrderParams) -> Any:
         await asyncio.sleep(1)  # Brief pause for demo
 
         # Check if entry filled
-        order_status = await client.orders.get_order(account_id, entry_order_id)
+        order_status = await client.orders.get_order(params.account_id, entry_order_id)
         status_state = order_status["state"]
         print(f"Entry order status: {status_state}")
 
@@ -751,20 +751,20 @@ async def create_bracket_order(params: BracketOrderParams) -> Any:
 
             # Take profit order (opposite direction)
             tp_task = client.orders.post_limit_order(
-                account_id=account_id,
-                instrument=instrument,
-                units=-units,  # Opposite direction to close position
-                price=take_profit,
+                account_id=params.account_id,
+                instrument=params.instrument,
+                units=-params.units,  # Opposite direction to close position
+                price=params.take_profit,
                 client_request_id=f"bracket-tp-{int(time.time())}",
             )
             tasks.append(tp_task)
 
             # Stop loss order (opposite direction)
             sl_task = client.orders.post_limit_order(
-                account_id=account_id,
-                instrument=instrument,
-                units=-units,  # Opposite direction to close position
-                price=stop_loss,
+                account_id=params.account_id,
+                instrument=params.instrument,
+                units=-params.units,  # Opposite direction to close position
+                price=params.stop_loss,
                 client_request_id=f"bracket-sl-{int(time.time())}",
             )
             tasks.append(sl_task)

@@ -11,7 +11,7 @@ Transaction history and monitoring.
 import asyncio
 
 
-async def main():
+async def main(client):
     # transactions.get_transactions(account_id: AccountID, from_time: str | None = None,
     #                   to_time: str | None = None, page_size: int = 100,
     #                   transaction_type: list[str] | None = None) -> dict[str, Any]
@@ -22,6 +22,7 @@ async def main():
         page_size=50,
         transaction_type=["ORDER_FILL", "MARKET_ORDER"],
     )
+    return transactions
 
 asyncio.run(main())
 ```
@@ -54,10 +55,12 @@ Get transaction history for account.
 # transactions.get_transaction(account_id: AccountID, transaction_id: str) -> dict[str, Any]
 
 # Example usage:
-transaction = await client.transactions.get_transaction(
-    account_id="123-456-789",
-    transaction_id="12345"
-)
+async def get_transaction_example(client):
+    transaction = await client.transactions.get_transaction(
+        account_id="123-456-789",
+        transaction_id="12345"
+    )
+    return transaction
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/{transactionID}`
 
@@ -86,11 +89,13 @@ Get specific transaction details.
 #                        transaction_type: list[str] | None = None) -> dict[str, Any]
 
 # Example usage:
-transactions = await client.transactions.get_transactions_since_id(
-    account_id="123-456-789",
-    transaction_id="100",
-    transaction_type=["ORDER_FILL"]
-)
+async def get_transactions_since_id_example(client):
+    transactions = await client.transactions.get_transactions_since_id(
+        account_id="123-456-789",
+        transaction_id="100",
+        transaction_type=["ORDER_FILL"]
+    )
+    return transactions
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/sinceid`
 
@@ -119,11 +124,12 @@ Get transactions since specific transaction ID.
 # transactions.get_transactions_stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
 
 # Example usage:
-async for transaction in client.transactions.get_transactions_stream(
-    account_id="123-456-789",
-    stall_timeout=60.0
-):
-    print(f"Transaction: {transaction}")
+async def stream_transactions_example(client):
+    async for transaction in client.transactions.get_transactions_stream(
+        account_id="123-456-789",
+        stall_timeout=60.0
+    ):
+        print(f"Transaction: {transaction}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/stream`
 

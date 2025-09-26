@@ -186,6 +186,14 @@ class OrdersEndpoint:
         pass
 
 
+class AccountsEndpoint:
+    """Account management operations."""
+
+    def __init__(self, client: Any) -> None:
+        """Initialize accounts endpoint."""
+        self._client = client
+
+
 class TradesEndpoint:
     """Trades management operations."""
 
