@@ -616,243 +616,36 @@ def sync_advantage() -> None:
             )
 ```
 
-## Best Practices
+## Key Trading Considerations
 
-### 1. **Security First**
-- **Never hardcode tokens** in your source code
-- **Use environment variables** or secure vaults for credentials
-- **Keep practice and live tokens separate**
-- **Rotate API tokens periodically**
+For your first trades, remember these essential points:
 
-```python
-from fivetwenty import AsyncClient, Environment
+- **Start with practice accounts** - Test all strategies before using real money
+- **Use stop losses** - Protect your capital with proper risk management
+- **Check margin requirements** - Ensure sufficient funds before placing orders
+- **Handle errors gracefully** - Markets can close unexpectedly
 
-# ❌ Bad - Never do this
-client = AsyncClient(token="abc123def456", environment=Environment.PRACTICE)
+!!! tip "Comprehensive Trading Best Practices"
+    For complete security, risk management, and configuration guidance, see [Best Practices Guide](../../explanation/best-practices.md).
 
-# ✅ Good - Use environment variables
-client = AsyncClient()  # Loads from FIVETWENTY_* env vars
-```
+!!! info "Advanced Configuration"
+    For production configuration patterns and organizational strategies, see [Configuration Guide](../../explanation/configuration.md).
 
-### 2. **Risk Management**
-- **Always use stop losses** to limit potential losses
-- **Start small** with minimal position sizes while learning
-- **Use practice accounts** extensively before going live
-- **Set position size limits** based on account balance
+## Common Issues
 
-```python
-# Calculate position size based on account balance
-async def calculate_position_size(client: Any, expected_loss_per_unit: Any) -> int:
-    account = await client.accounts.get_account(client.account_id)
-    max_risk = Decimal(str(account.balance)) * Decimal("0.02")  # 2% risk per trade
-    position_size = min(1000, int(max_risk / expected_loss_per_unit))
-    return position_size
-```
+If you encounter issues while making your first trade:
 
-### 3. **Order Management**
-- **Check margin requirements** before placing orders
-- **Monitor positions** regularly
-- **Use limit orders** in volatile markets
-- **Implement proper error handling**
+- **Authentication errors** - Verify your API token and account ID are correct
+- **Insufficient margin** - Check your account balance and reduce position size
+- **Market closed** - Forex markets are closed on weekends and holidays
+- **Network issues** - Ensure stable internet connection
 
-```python
-from fivetwenty.exceptions import FiveTwentyError
+!!! warning "Troubleshooting Resources"
+    For comprehensive error handling and troubleshooting guidance:
 
-try:
-    order = await client.orders.post_market_order(...)
-except FiveTwentyError as e:
-    if "INSUFFICIENT_MARGIN" in str(e):
-        print("Reduce position size")
-    elif "MARKET_HALTED" in str(e):
-        print("Market closed, try later")
-```
-
-### 4. **Configuration Management**
-- **Use descriptive aliases** for account configurations
-- **Document your setup** in comments
-- **Test configurations** before deploying
-- **Use structured logging** for monitoring
-
-```python
-import os
-
-from fivetwenty import AccountConfig, Environment
-
-# Good configuration practice
-config = AccountConfig(
-    token=os.environ["PRACTICE_TOKEN"],
-    account_id=os.environ["PRACTICE_ACCOUNT"],
-    environment=Environment.PRACTICE,
-    alias="strategy_testing",
-)
-```
-
-### 5. **Development Workflow**
-
-- **Test on practice first** - always validate strategies in practice environment
-- **Use proper logging** - log trades but never log credentials
-- **Handle network issues** - implement retry logic for transient failures
-- **Monitor API usage** - stay within rate limits
-
-## Troubleshooting Common Issues
-
-### Configuration Problems
-
-**Missing Environment Variables:**
-```python
-from fivetwenty import AsyncClient
-
-# Error: "No configuration provided"
-try:
-    client = AsyncClient()
-except ValueError as e:
-    print("Set FIVETWENTY_OANDA_TOKEN and FIVETWENTY_OANDA_ACCOUNT environment variables")
-    print("Or pass credentials directly to AsyncClient()")
-```
-
-**Invalid Token:**
-```python
-from typing import Any
-from fivetwenty.exceptions import FiveTwentyError
-
-# Error: Authentication failed
-try:
-    accounts = await client.accounts.get_accounts()
-except FiveTwentyError as e:
-    if "401" in str(e):
-        print("Invalid token - check your API credentials")
-        print("Generate new token in OANDA account settings")
-```
-
-### Trading Issues
-
-**Insufficient Margin:**
-```python
-# Check margin before trading
-async def check_margin_requirements(client: Any, units: int, instrument: str = "EUR_USD") -> bool:
-    account = await client.accounts.get_account(client.account_id)
-    margin_available = float(account.margin_available)
-
-    # Rough margin calculation (varies by instrument)
-    estimated_margin = abs(units) * 0.03  # 3% margin for major pairs
-
-    if margin_available < estimated_margin:
-        print(f"❌ Insufficient margin:")
-        print(f"   Required: ~{estimated_margin}")
-        print(f"   Available: {margin_available}")
-        return False
-
-    return True
-
-# Use before placing orders (inside an async function)
-async def trading_example(client: Any) -> None:
-    if await check_margin_requirements(client, 10000):
-        order = await client.orders.post_market_order(...)
-```
-
-**Market Closed:**
-```python
-from typing import Any
-from fivetwenty.exceptions import FiveTwentyError
-
-
-# Check trading hours
-async def check_market_hours(client: Any, instrument: str = "EUR_USD") -> bool:
-    try:
-        # Try to get current price
-        prices = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[instrument],
-        )
-        return True  # Market is open
-    except FiveTwentyError as e:
-        if "MARKET_HALTED" in str(e) or "MARKET_CLOSED" in str(e):
-            print(f"Market closed for {instrument}")
-            return False
-        raise  # Re-raise other errors
-```
-
-**Invalid Units:**
-```python
-# Validate units before trading
-async def validate_trade_size(client: Any, units: int, instrument: str = "EUR_USD") -> bool:
-    instruments = await client.accounts.get_account_instruments(
-        account_id=client.account_id,
-        instruments=[instrument]
-    )
-
-    instrument_info = instruments[0]
-    min_size = int(instrument_info.minimum_trade_size)
-    max_size = int(instrument_info.maximum_order_units)
-
-    if abs(units) < min_size:
-        print(f"❌ Units too small. Minimum: {min_size}")
-        return False
-
-    if abs(units) > max_size:
-        print(f"❌ Units too large. Maximum: {max_size}")
-        return False
-
-    print(f"✅ Trade size {units} is valid")
-    return True
-```
-
-### Network and API Issues
-
-**Rate Limiting:**
-```python
-# Handle rate limits gracefully
-import asyncio
-from fivetwenty.exceptions import FiveTwentyError
-
-async def robust_api_call(client: Any, operation: Any) -> Any:
-    """Make API call with retry logic."""
-    max_retries = 3
-
-    for attempt in range(max_retries):
-        try:
-            return await operation()
-        except FiveTwentyError as e:
-            if "429" in str(e):  # Rate limited
-                delay = 2 ** attempt  # Exponential backoff
-                print(f"Rate limited, waiting {delay}s...")
-                await asyncio.sleep(delay)
-                continue
-            raise  # Re-raise other errors
-
-    raise Exception(f"Failed after {max_retries} attempts")
-
-# Usage (inside an async function)
-async def api_example(client: Any) -> Any:
-    accounts = await robust_api_call(
-        client,
-        lambda: client.accounts.get_accounts()
-    )
-    return accounts
-```
-
-**Connection Issues:**
-```python
-import asyncio
-import httpx
-from typing import Any
-from fivetwenty import AsyncClient
-
-async def main() -> None:
-    # Handle connection problems
-
-    try:
-        async with AsyncClient() as client:
-            accounts = await client.accounts.get_accounts()
-    except httpx.ConnectError:
-        print("❌ Network connection failed")
-        print("   Check internet connection and firewall settings")
-    except httpx.TimeoutError:
-        print("❌ Request timed out")
-        print("   Try again or increase timeout setting")
-
-asyncio.run(main())
-```
+    - **Configuration issues**: See [Configuration Guide](../../explanation/configuration.md#troubleshooting)
+    - **Trading errors**: See [Error Handling Guide](../../explanation/error-handling.md#common-trading-errors)
+    - **Network problems**: See [Error Handling Guide](../../explanation/error-handling.md#retry-strategies)
 
 ## Next Steps
 
