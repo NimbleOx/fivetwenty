@@ -37,6 +37,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 from fivetwenty import AsyncClient
 from fivetwenty.configuration import AccountConfigLoader
 
+
 async def multi_account_example():
     # Load configurations with custom prefixes
     trading_bot_config = AccountConfigLoader.from_env_prefix("TRADING_BOT_")
@@ -72,6 +73,7 @@ async def multi_account_example():
 from fivetwenty import AsyncClient
 from fivetwenty.configuration import AccountConfigLoader
 
+
 async def single_custom_account():
     # Load configuration from MOMENTUM_FIVETWENTY_OANDA_* variables
     momentum_config = AccountConfigLoader.from_env_prefix("MOMENTUM_")
@@ -94,6 +96,7 @@ async def single_custom_account():
 from fivetwenty import Client
 from fivetwenty.configuration import AccountConfigLoader
 
+
 def sync_example():
     # Load configuration for synchronous client
     momentum_config = AccountConfigLoader.from_env_prefix("MOMENTUM_")
@@ -111,9 +114,11 @@ def sync_example():
 Create configurations programmatically without environment variables:
 
 ```python
+from pydantic import SecretStr
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.configuration import AccountConfig
-from pydantic import SecretStr
+
 
 async def direct_config_example():
     # Define multiple account configurations
@@ -150,9 +155,11 @@ async def direct_config_example():
 Combine environment variables with direct configuration:
 
 ```python
-from fivetwenty import AsyncClient, Environment
-from fivetwenty.configuration import AccountConfigLoader, AccountConfig
 from pydantic import SecretStr
+
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.configuration import AccountConfig, AccountConfigLoader
+
 
 async def mixed_approach():
     # Load primary account from default environment variables
@@ -217,6 +224,7 @@ Always validate that configurations were loaded successfully:
 from fivetwenty import AsyncClient
 from fivetwenty.configuration import AccountConfigLoader
 
+
 async def safe_config_loading():
     # Load configuration with validation
     config = AccountConfigLoader.from_env_prefix("MYBOT_")
@@ -247,6 +255,7 @@ Always use context managers to ensure proper client cleanup:
 
 ```python
 import asyncio
+
 
 async def main():
     # ✅ Correct - ensures cleanup

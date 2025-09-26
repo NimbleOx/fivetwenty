@@ -81,8 +81,10 @@ The practice environment is perfect for:
 
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Environment
 import os
+
+from fivetwenty import AsyncClient, Environment
+
 
 async def practice_trading():
     """Safe trading in practice environment."""
@@ -136,10 +138,11 @@ The live environment is for:
 ### Example: Safe Live Trading
 
 ```python
-import asyncio
+import os
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
-import os
+
 
 async def live_trading_with_safeguards():
     """Production trading with safety checks."""
@@ -217,7 +220,9 @@ FIVETWENTY_OANDA_ACCOUNT=001-001-1234567-001
 
 ```python
 import os
+
 from fivetwenty import AsyncClient, Environment
+
 
 def create_client():
     """Create client based on environment variable."""
@@ -254,8 +259,11 @@ client = create_client()
 
 ```python
 import os
+
 import pytest
+
 from fivetwenty import AsyncClient, Environment
+
 
 @pytest.mark.parametrize("environment", [Environment.PRACTICE])
 async def test_practice_only(environment):
@@ -282,6 +290,7 @@ async def test_live_systems():
 
 ```python
 from fivetwenty import Environment
+
 
 class TradingMonitor:
     def __init__(self, environment: Environment):
@@ -311,6 +320,7 @@ Never test new code directly in live:
 ```python
 from fivetwenty import Environment
 
+
 def validate_strategy(strategy):
     """Always validate in practice first."""
     # Run in practice for minimum period
@@ -329,6 +339,7 @@ Control features per environment:
 ```python
 from fivetwenty import Environment
 
+
 class FeatureFlags:
     def __init__(self, environment: Environment):
         self.is_live = environment == Environment.LIVE
@@ -346,7 +357,9 @@ FiveTwenty's configuration system makes credential separation straightforward an
 ```python
 # config.py - Secure credential management
 import os
-from fivetwenty import AccountConfig, Environment, AccountConfigLoader
+
+from fivetwenty import AccountConfig, AccountConfigLoader, Environment
+
 
 class SecureCredentialManager:
     """Manage separate credentials for different environments."""
@@ -443,7 +456,6 @@ Before moving from Practice to Live:
 If you get unexpected behavior:
 
 ```python
-from fivetwenty import Environment
 
 # Always log the environment
 print(f"Environment: {client._environment}")
@@ -456,6 +468,7 @@ Practice and live tokens are different:
 
 ```python
 from fivetwenty import Environment
+
 
 def validate_token_environment(token: str, environment: Environment):
     """Ensure token matches environment."""

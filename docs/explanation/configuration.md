@@ -66,8 +66,9 @@ export FIVETWENTY_OANDA_ACCOUNT_ALIAS="my_account"
 ```python
 import asyncio
 
+
 async def main():
-    from fivetwenty import AsyncClient, Environment
+    from fivetwenty import AsyncClient
 
     # No configuration needed - loads automatically
     async with AsyncClient() as client:
@@ -115,9 +116,8 @@ Best for: Production applications, multiple accounts, reusable configurations
 ```python
 import asyncio
 
-async def main():
-    from fivetwenty import AsyncClient, Environment
 
+async def main():
     from fivetwenty import AccountConfig, AsyncClient, Environment
 
     # Create reusable configurations
@@ -215,7 +215,7 @@ When multiple configuration methods are used, the priority is:
 3. **Environment variables** (lowest priority)
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 # Config object takes priority over direct parameters
 config = AccountConfig(token="config-token", account_id="account-id")
@@ -338,10 +338,11 @@ For advanced HTTP configuration:
 ```python
 import asyncio
 
-async def main():
-    from fivetwenty import AsyncClient, Environment
 
+async def main():
     import httpx
+
+    from fivetwenty import AsyncClient, Environment
 
     # Create custom transport
     transport = httpx.AsyncClient(
@@ -534,8 +535,9 @@ asyncio.run(main())
 ### Configuration Builder
 
 ```python
+
 from fivetwenty import AccountConfig, Environment
-from typing import Optional
+
 
 class ConfigBuilder:
     """Helper to build configurations from various sources."""
@@ -580,10 +582,10 @@ class ConfigBuilder:
 ### Multi-Environment Manager
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
 from typing import Dict
-import os
+
+from fivetwenty import AsyncClient
+
 
 class ConfigManager:
     """Manage configurations for multiple environments."""
@@ -662,8 +664,9 @@ prod_client = manager.get_client('production')
 ### Common Configuration Errors
 
 ```python
-from fivetwenty import AsyncClient, AccountConfig
 from pydantic import ValidationError
+
+from fivetwenty import AccountConfig, AsyncClient
 
 # Error: Missing configuration
 try:
@@ -712,6 +715,7 @@ print(f"Configuration summary: {client.config.summary()}")
 
 # Validate configuration manually
 from fivetwenty import ConfigValidator
+
 errors = ConfigValidator.validate_account_config(client.config)
 if errors:
     print("Configuration issues:", errors)

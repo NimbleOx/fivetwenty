@@ -10,6 +10,7 @@ Real-time pricing data and streaming.
 ```python
 import asyncio
 
+
 async def main():
     # pricing.get_pricing(account_id: AccountID, instruments: list[str], since: str | None = None,
     #             include_units_available: bool = True, include_home_conversions: bool = False) -> dict[str, Any]
@@ -89,6 +90,7 @@ Stream real-time pricing data.
 ## get_instrument_candles
 ```python
 import asyncio
+
 
 async def main():
     # pricing.get_latest_candles(account_id: AccountID, instrument: str, price: str = "M",

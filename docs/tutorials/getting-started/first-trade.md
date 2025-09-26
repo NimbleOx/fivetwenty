@@ -29,6 +29,7 @@ Then use zero-config initialization:
 ```python
 import asyncio
 
+
 async def main():
     from fivetwenty import AsyncClient
 
@@ -366,6 +367,7 @@ Place an order to execute at a specific price level:
 ```python
 from decimal import Decimal
 
+
 async def place_limit_order(client, instrument="EUR_USD"):
     """Place a limit order to buy at a specific price."""
 
@@ -397,6 +399,7 @@ Protect your positions with automatic stop losses:
 
 ```python
 from decimal import Decimal
+
 
 async def place_order_with_stop_loss(client, instrument="EUR_USD"):
     """Place market order with protective stop loss."""
@@ -434,6 +437,7 @@ Set profit targets for your trades:
 ```python
 from decimal import Decimal
 
+
 async def place_order_with_take_profit(client, instrument="EUR_USD"):
     """Place market order with take profit target."""
 
@@ -469,6 +473,7 @@ Combine stop loss and take profit for complete risk management:
 
 ```python
 from decimal import Decimal
+
 
 async def place_protected_trade(client, instrument="EUR_USD", units=1000):
     """Place a trade with both stop loss and take profit."""
@@ -579,7 +584,9 @@ if __name__ == "__main__":
 
 ```python
 import asyncio
-from fivetwenty import Client, AsyncClient, Environment
+
+from fivetwenty import AsyncClient, Client
+
 
 # Async: Better for multiple concurrent operations
 async def async_advantage():
@@ -662,6 +669,7 @@ except FiveTwentyError as e:
 
 ```python
 import os
+
 from fivetwenty import AccountConfig, Environment
 
 # Good configuration practice
@@ -685,7 +693,7 @@ config = AccountConfig(
 
 **Missing Environment Variables:**
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 # Error: "No configuration provided"
 try:
@@ -736,7 +744,8 @@ async def trading_example(client):
 
 **Market Closed:**
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
+
 
 # Check trading hours
 async def check_market_hours(client, instrument="EUR_USD"):
@@ -817,11 +826,12 @@ async def api_example(client):
 ```python
 import asyncio
 
-async def main():
-    from fivetwenty import AsyncClient, Environment
 
+async def main():
     # Handle connection problems
     import httpx
+
+    from fivetwenty import AsyncClient
 
     try:
         async with AsyncClient() as client:

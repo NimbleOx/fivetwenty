@@ -7,12 +7,14 @@ This guide provides production-ready best practices for using the FiveTwenty in 
 ### System Design
 
 ```python
+import asyncio
+import os
 from dataclasses import dataclass
 from decimal import Decimal
 from typing import Optional
-import asyncio
-import os
+
 from fivetwenty import AsyncClient, Environment
+
 
 @dataclass
 class TradingSystemConfig:
@@ -123,6 +125,7 @@ class OrderExecutor:
 ```python
 from decimal import Decimal
 
+
 class PositionSizer:
     """Calculate safe position sizes."""
 
@@ -168,7 +171,9 @@ class PositionSizer:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+
 
 class StopLossManager:
     """Manage stop losses for all positions."""
@@ -311,6 +316,7 @@ class ResilientClient:
 import json
 from pathlib import Path
 
+
 class StateManager:
     """Persist and recover system state."""
 
@@ -358,7 +364,8 @@ class StateManager:
 ### Connection Pooling
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
+
 
 class ConnectionPool:
     """Manage multiple client connections."""
@@ -394,8 +401,8 @@ class ConnectionPool:
 ### Caching Strategy
 
 ```python
-from functools import lru_cache
 from datetime import datetime, timedelta
+
 
 class CachedDataProvider:
     """Cache frequently accessed data."""
@@ -493,6 +500,7 @@ class HealthMonitor:
 import smtplib
 from email.mime.text import MIMEText
 
+
 class AlertManager:
     """Send alerts for critical events."""
 
@@ -549,12 +557,15 @@ poe test-cov           # Tests with coverage report
 ### Unit Testing with Mocks
 
 ```python
-import pytest
-from unittest.mock import AsyncMock, patch
 from decimal import Decimal
+from unittest.mock import AsyncMock
+
+import pytest
+
 from fivetwenty import AsyncClient
-from fivetwenty.models import Account, Trade
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.models import Account
+
 
 @pytest.fixture
 def mock_client():
@@ -609,6 +620,7 @@ Integration tests use VCR.py to record real API interactions:
 ```python
 import pytest
 import vcr
+
 from fivetwenty import AsyncClient, Environment
 
 # Configure VCR for sensitive data
@@ -674,8 +686,11 @@ async def test_full_trade_lifecycle():
 Use Hypothesis for robust testing with random data:
 
 ```python
-from hypothesis import given, strategies as st
 from decimal import Decimal
+
+from hypothesis import given
+from hypothesis import strategies as st
+
 
 @given(
     units=st.integers(min_value=1, max_value=100000),
@@ -717,6 +732,7 @@ import asyncio
 import time
 from statistics import mean, median
 
+
 async def test_concurrent_requests():
     """Test SDK performance under concurrent load."""
 
@@ -741,7 +757,6 @@ async def test_concurrent_requests():
         assert max(durations) < 5.0  # No request over 5 seconds
 
 ### Error Scenario Testing
-
 ```python
 @pytest.mark.parametrize("error_code,expected_behavior", [
     (FiveTwentyErrorCode.INSUFFICIENT_FUNDS, "reduce_position_size"),
@@ -776,6 +791,7 @@ Enable detailed logging to see all API interactions:
 import logging
 import os
 import sys
+
 from fivetwenty import AsyncClient, Environment
 
 # Configure detailed logging
@@ -806,7 +822,9 @@ When Pydantic models fail validation:
 
 ```python
 from pydantic import ValidationError
+
 from fivetwenty.models import Account
+
 
 def debug_model_validation(raw_data: dict):
     """Debug model validation issues."""
@@ -846,9 +864,12 @@ except ValidationError:
 ### Connection and Network Debugging
 
 ```python
-import aiohttp
 import asyncio
+
+import aiohttp
+
 from fivetwenty import AsyncClient
+
 
 async def debug_connection_issues():
     """Debug connection and timeout issues."""
@@ -879,7 +900,6 @@ async def debug_connection_issues():
         print(f"❌ Connection error: {type(e).__name__}: {e}")
 
 ### Performance Profiling
-
 ```python
 import cProfile
 import asyncio
@@ -926,7 +946,6 @@ async def performance_test():
 ```
 
 ### Memory Usage Debugging
-
 ```python
 import tracemalloc
 import asyncio
@@ -987,12 +1006,14 @@ result = await task
 ```python
 import asyncio
 
-async def main():
-    from fivetwenty import AsyncClient, Environment
 
+async def main():
     # For development/testing only - never in production
     import ssl
+
     import aiohttp
+
+    from fivetwenty import AsyncClient, Environment
 
     ssl_context = ssl.create_default_context()
     ssl_context.check_hostname = False
@@ -1046,7 +1067,9 @@ Mock testing allows rapid development without API calls:
 
 ```python
 from unittest.mock import AsyncMock, patch
+
 import pytest
+
 
 @pytest.fixture
 def trading_system_mocks():
@@ -1082,6 +1105,7 @@ async def test_trading_strategy(trading_system_mocks):
 ```python
 import keyring
 from cryptography.fernet import Fernet
+
 
 class SecureCredentials:
     """Secure credential storage."""

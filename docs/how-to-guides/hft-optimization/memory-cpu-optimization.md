@@ -268,6 +268,7 @@ async def unoptimized_price_processing(price):
 ```python
 import numpy as np
 
+
 def calculate_multiple_spreads(prices_array):
     """Calculate spreads for multiple prices efficiently."""
 
@@ -298,6 +299,7 @@ def detect_price_movements(prices, threshold=0.0001):
 ```python
 import weakref
 from typing import WeakSet
+
 
 class MemoryEfficientSubscriptionManager:
     """Manage price subscriptions without memory leaks."""
@@ -337,6 +339,7 @@ subscription_manager.subscribe(price_callback)
 
 ```python
 from collections import deque
+
 
 class BoundedDataStorage:
     """Storage with automatic size limits."""
@@ -392,6 +395,7 @@ async def store_price_efficiently(price):
 import functools
 import time
 
+
 def benchmark_function(func):
     """Decorator to benchmark function execution time."""
 
@@ -435,8 +439,10 @@ def calculate_technical_indicator(prices):
 ### Memory Profiling
 
 ```python
-import psutil
 import os
+
+import psutil
+
 
 class MemoryProfiler:
     """Monitor memory usage during HFT operations."""

@@ -24,11 +24,11 @@ Understand and decompose portfolio risk sources using advanced statistical techn
 ## Risk Attribution Framework
 
 ```python
+from typing import Dict, List
+
 import numpy as np
 import pandas as pd
-from scipy import stats
-from typing import Dict, List, Tuple
-import matplotlib.pyplot as plt
+
 
 class RiskAttributionAnalyzer:
     """Advanced risk attribution and decomposition analysis."""

@@ -34,14 +34,11 @@ graph TB
 
 ```python
 # monitoring/metrics.py
-import time
 import functools
-from typing import Dict, Any, Optional
+import time
 from decimal import Decimal
-from prometheus_client import Counter, Histogram, Gauge, Summary, Info
-from prometheus_client import start_http_server, generate_latest
-from datetime import datetime
-import asyncio
+
+from prometheus_client import Counter, Gauge, Histogram, Info
 
 # Business Metrics
 TRADES_TOTAL = Counter(
@@ -470,18 +467,18 @@ class PerformanceMonitor:
 
 ```python
 # monitoring/tracing.py
-import asyncio
-from opentelemetry import trace
+import functools
+from typing import Any, Dict, Optional
+
+from opentelemetry import propagate, trace
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
 from opentelemetry.instrumentation.asyncpg import AsyncPGInstrumentor
 from opentelemetry.instrumentation.redis import RedisInstrumentor
 from opentelemetry.propagators.b3 import B3MultiFormat
-from opentelemetry import propagate
-import functools
-from typing import Dict, Any, Optional
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk.trace.export import BatchSpanProcessor
+
 
 class TracingManager:
     """Comprehensive distributed tracing for FiveTwenty applications."""
@@ -686,13 +683,13 @@ class TracingManager:
 ```python
 # monitoring/logging.py
 import logging
-import json
 import sys
 from datetime import datetime
-from typing import Dict, Any, Optional
-from pythonjsonlogger import jsonlogger
-import asyncio
 from enum import Enum
+from typing import Any, Dict, Optional
+
+from pythonjsonlogger import jsonlogger
+
 
 class LogLevel(Enum):
     DEBUG = "DEBUG"

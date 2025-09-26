@@ -439,10 +439,10 @@ async def production_deployment_example():
 ### API Token Management
 
 ```python
-from fivetwenty import AsyncClient
-from fivetwenty import Environment
 import os
-from typing import Optional
+
+from fivetwenty import AsyncClient, Environment
+
 
 class SecureCredentialManager:
     """Secure credential management for production."""
@@ -493,10 +493,12 @@ def create_secure_client() -> AsyncClient:
 ### Network Security
 
 ```python
-from fivetwenty import Environment
 import ssl
+
 import httpx
-from fivetwenty import AsyncClient
+
+from fivetwenty import AsyncClient, Environment
+
 
 def create_secure_client_with_tls() -> AsyncClient:
     """Create client with enhanced TLS security."""
@@ -527,10 +529,11 @@ def create_secure_client_with_tls() -> AsyncClient:
 ### Memory Management
 
 ```python
-from datetime import datetime
 import gc
+from datetime import datetime
+
 import psutil
-from typing import Dict, Any
+
 
 class MemoryOptimizer:
     """Optimize memory usage for long-running streams."""
@@ -594,7 +597,8 @@ class OptimizedStreamingSystem(ProductionStreamingSystem):
 
 ```python
 from datetime import datetime
-from typing import Dict, Any
+from typing import Any, Dict
+
 
 class HealthCheckServer:
     """Health check server for monitoring."""

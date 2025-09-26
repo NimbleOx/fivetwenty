@@ -12,10 +12,12 @@ Optimize streaming for minimal latency:
 
 ```python
 import asyncio
-from collections import deque
-from typing import Dict, Callable, Optional
-from decimal import Decimal
 import time
+from collections import deque
+from collections.abc import Callable
+from decimal import Decimal
+from typing import Dict, Optional
+
 
 class HighPerformanceStreamer:
     """Optimized streaming client for HFT applications."""
@@ -259,6 +261,7 @@ Understand latency sources:
 ```python
 # Use NamedTuple for memory efficiency
 from typing import NamedTuple
+
 
 class FastPrice(NamedTuple):
     bid: float

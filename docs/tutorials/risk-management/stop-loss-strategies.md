@@ -800,6 +800,7 @@ scaling_setup = scaling_manager.setup_scaling_stops(
 ```python
 from datetime import datetime, timedelta
 
+
 class TimeBasedStopManager:
     """Manage stops based on time in trade."""
     

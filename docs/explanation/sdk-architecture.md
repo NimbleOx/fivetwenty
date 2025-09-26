@@ -242,7 +242,8 @@ async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
 **Solution**: Rich, structured error information
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
+
 
 class FiveTwentyError(Exception):
     status_code: int           # HTTP level
@@ -257,7 +258,6 @@ class FiveTwentyError(Exception):
 Follows Python exception conventions:
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 ```
 
 ```text
@@ -334,6 +334,7 @@ Models and enums are constructed only when needed:
 ```python
 # Enums populated at import time but models built on demand
 from fivetwenty.models import Account  # Fast import
+
 account = Account.model_validate(data)  # Validation only when needed
 ```
 
@@ -470,6 +471,7 @@ When APIs change:
 **Example**:
 ```python
 import asyncio
+
 
 async def main():
     # New preferred method
@@ -617,6 +619,7 @@ poe test-integration --record-mode=new_episodes
 ```python
 import asyncio
 
+
 async def main():
     # Always use Decimal for money
     from decimal import Decimal
@@ -713,6 +716,7 @@ async def get_accounts():
 
 ```python
 import asyncio
+
 
 # Efficient: Run operations concurrently
 async def get_market_overview(client, account_id):

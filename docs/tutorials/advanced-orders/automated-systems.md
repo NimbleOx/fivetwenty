@@ -19,12 +19,12 @@ Create systems that make order decisions based on predefined rules and market co
 ### Basic Rule Engine Implementation
 
 ```python
-import asyncio
 from abc import ABC, abstractmethod
-from decimal import Decimal
-from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from datetime import datetime
+from typing import Any, Dict, List
+
 from fivetwenty import AsyncClient
+
 
 class OrderRule(ABC):
     """Base class for order management rules."""
@@ -218,6 +218,7 @@ class MarketSessionRule(OrderRule):
 ```python
 from decimal import Decimal
 
+
 class MaxPositionRule(OrderRule):
     """Enforce maximum position size limits."""
 
@@ -365,7 +366,9 @@ Create comprehensive monitoring for order and position management.
 ```python
 from datetime import datetime
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class OrderMonitoringEngine:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -506,6 +509,7 @@ class OrderMonitoringEngine:
 ```python
 from datetime import datetime
 
+
 class BaseAlertHandler(ABC):
     """Base class for alert handlers."""
 
@@ -566,11 +570,13 @@ Build systems that respond to market events and order state changes.
 ### Event-Driven Architecture
 
 ```python
-from datetime import datetime
-from fivetwenty import AsyncClient
-from enum import Enum
+from collections.abc import Callable
 from dataclasses import dataclass
-from typing import Callable
+from datetime import datetime
+from enum import Enum
+
+from fivetwenty import AsyncClient
+
 
 class EventType(Enum):
     ORDER_FILLED = "order_filled"
@@ -787,10 +793,11 @@ Implement detailed logging for compliance and analysis.
 ### Advanced Logging System
 
 ```python
-from datetime import datetime
-import logging
 import json
+import logging
+from datetime import datetime
 from pathlib import Path
+
 
 class TradingLogger:
     def __init__(self, log_directory: str = "trading_logs"):

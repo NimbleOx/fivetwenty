@@ -35,6 +35,7 @@ async def create_order(self, account_id, order, timeout=None):
 from decimal import Decimal
 from typing import Union
 
+
 # ✅ Good - Decimal for financial values
 def calculate_position_value(
     units: int,
@@ -58,7 +59,8 @@ def parse_price(value: Union[str, int, Decimal]) -> Decimal:
 Use FiveTwenty's exception hierarchy:
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, StreamStall
+from fivetwenty.exceptions import FiveTwentyError
+
 
 # ✅ Good - Specific exception types
 async def get_account(self, account_id: str) -> AccountSummary:
@@ -150,9 +152,11 @@ class AsyncClient:
 Use Pydantic models for all API data:
 
 ```python
-from pydantic import BaseModel, Field
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
+from pydantic import BaseModel, Field
+
 
 # ✅ Good - Complete Pydantic model
 class Order(BaseModel):
@@ -344,6 +348,7 @@ class Position(BaseModel):
 ```python
 from fivetwenty.exceptions import FiveTwentyError, StreamStall
 
+
 # ✅ Good - Appropriate exception types
 async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Price]:
     """Get current pricing with proper error handling."""
@@ -419,6 +424,7 @@ async def stream_pricing(
 
 ```python
 from pydantic import ValidationError
+
 
 # ✅ Good - Validate inputs early
 def create_order_request(
@@ -522,11 +528,13 @@ class TestAccountsEndpoint:
 ### **Integration Test Patterns**
 
 ```python
+import os
 from decimal import Decimal
 
 import pytest
-import os
+
 from fivetwenty import AsyncClient, Environment
+
 
 @pytest.mark.integration
 class TestAccountsIntegration:
@@ -562,10 +570,11 @@ class TestAccountsIntegration:
 ### **Async Best Practices**
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
 import asyncio
 from contextlib import asynccontextmanager
+
+from fivetwenty import AsyncClient
+
 
 # ✅ Good - Proper async context management
 @asynccontextmanager
@@ -645,6 +654,7 @@ async def process_price_batch(prices: list[Price]) -> None:
 
 ```python
 from pydantic import SecretStr
+
 
 # ✅ Good - Secure credential handling
 class AccountConfig(BaseModel):

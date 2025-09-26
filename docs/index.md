@@ -65,6 +65,7 @@ Make sure this is your practice account, obviously.
 import asyncio
 
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import InstrumentName
 

@@ -890,13 +890,15 @@ import asyncio
 import logging
 import os
 from typing import Optional
+
 import aiohttp
-from google.cloud import secretmanager
 import boto3
-from azure.keyvault.secrets import SecretClient
 from azure.identity import DefaultAzureCredential
+from azure.keyvault.secrets import SecretClient
+from google.cloud import secretmanager
 
 from fivetwenty import AsyncClient, Environment
+
 
 class CloudSecretsManager:
     """Multi-cloud secrets management."""

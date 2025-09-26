@@ -121,7 +121,9 @@ Combine multiple timeframe signals for robust breakouts:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class MultiTimeframeBreakout:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -294,7 +296,9 @@ Combine MIT orders with RSI signals for enhanced mean reversion:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class RSIMeanReversion:
     def __init__(self, client: AsyncClient, account_id: str):

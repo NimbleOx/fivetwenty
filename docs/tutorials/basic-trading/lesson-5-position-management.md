@@ -73,6 +73,7 @@ Different types of stop losses for different market conditions:
 ```python
 from decimal import Decimal
 
+
 class StopLossStrategy:
     """Advanced stop loss calculation strategies."""
 
@@ -137,6 +138,7 @@ Maximize profits with intelligent take profit placement:
 
 ```python
 from decimal import Decimal
+
 
 class TakeProfitStrategy:
     """Advanced take profit strategies."""

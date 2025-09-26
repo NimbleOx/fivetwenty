@@ -10,6 +10,7 @@ Account management and information retrieval.
 ```python
 import asyncio
 
+
 async def main():
     # accounts.get_accounts() -> list[AccountProperties]
 

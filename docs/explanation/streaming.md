@@ -22,7 +22,9 @@ Stream real-time prices for instruments:
 
 ```python
 import asyncio
+
 from fivetwenty import AsyncClient, Environment
+
 
 async def stream_prices():
     """Stream real-time prices."""
@@ -46,8 +48,10 @@ asyncio.run(stream_prices())
 ### Processing Price Updates
 
 ```python
-from fivetwenty.models import ClientPrice, PricingHeartbeat
 from decimal import Decimal
+
+from fivetwenty.models import ClientPrice, PricingHeartbeat
+
 
 async def process_price_stream(client, account_id):
     """Process streaming prices with business logic."""
@@ -150,7 +154,7 @@ async def stream_transactions(client, account_id):
 Configure streaming behavior:
 
 ```python
-from fivetwenty.models.streaming import StreamingConfiguration, ReconnectionPolicy
+from fivetwenty.models.streaming import ReconnectionPolicy, StreamingConfiguration
 
 # Configure streaming
 config = StreamingConfiguration(
@@ -290,6 +294,7 @@ Stream with the sync client:
 ```python
 from fivetwenty import Client, Environment
 
+
 def sync_price_stream():
     """Stream prices synchronously."""
 
@@ -315,8 +320,9 @@ def sync_price_stream():
 Handle streams in separate threads:
 
 ```python
-import threading
 import queue
+import threading
+
 
 class ThreadedStreamer:
     """Thread-safe streaming handler."""

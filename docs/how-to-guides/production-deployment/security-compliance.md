@@ -201,10 +201,11 @@ class SecurityException(Exception):
 
 ```python
 # security/rbac.py
-from enum import Enum
-from typing import Dict, List, Set
 from dataclasses import dataclass
 from datetime import datetime
+from enum import Enum
+from typing import Dict, List, Set
+
 
 class Permission(Enum):
     # Trading permissions
@@ -381,16 +382,17 @@ class RBACManager:
 
 ```python
 # security/encryption.py
-import os
 import base64
+import os
+from typing import Any, Dict, Optional
+
+import asyncpg
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes, serialization
-from cryptography.hazmat.primitives.asymmetric import rsa, padding
-from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+from cryptography.hazmat.primitives.asymmetric import padding, rsa
 from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
-import asyncpg
-import aioredis
-from typing import Any, Dict, Optional
+from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+
 
 class EncryptionManager:
     """Comprehensive encryption manager for trading data."""
@@ -864,10 +866,11 @@ class AuditLogger:
 
 ```python
 # compliance/gdpr.py
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
+from typing import Dict
+
 
 class DataCategory(Enum):
     PERSONAL_IDENTIFIABLE = "pii"
@@ -1139,11 +1142,11 @@ class GDPRComplianceManager:
 ```python
 # security/siem.py
 import asyncio
-from datetime import datetime, timedelta
-from typing import Dict, List, Optional
 from dataclasses import dataclass
+from datetime import datetime, timedelta
 from enum import Enum
-import json
+from typing import Dict, List, Optional
+
 
 class ThreatLevel(Enum):
     LOW = 1

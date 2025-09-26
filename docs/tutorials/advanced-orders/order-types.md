@@ -197,7 +197,6 @@ All orders require these fundamental parameters:
 
 ```python
 from decimal import Decimal
-from fivetwenty.models import OrderRequest
 
 # Common order parameters
 order_params = {
@@ -369,6 +368,7 @@ Always validate parameters before submission:
 ```python
 from decimal import Decimal
 
+
 def validate_order_params(instrument: str, units: int, price: Decimal):
     # Check minimum/maximum units
     if abs(units) < 1:
@@ -387,6 +387,7 @@ def validate_order_params(instrument: str, units: int, price: Decimal):
 
 ```python
 from decimal import Decimal
+
 
 async def calculate_position_size(risk_amount: Decimal, stop_distance: Decimal) -> int:
     """Calculate position size based on risk management rules."""

@@ -10,6 +10,7 @@ Instrument information and historical data.
 ```python
 import asyncio
 
+
 async def main():
     # instruments.get_instrument_candles(instrument: str, price: str = "M", granularity: str = "S5",
     #                    count: int | None = None, from_time: str | None = None,

@@ -19,14 +19,15 @@ Build validation systems that prevent costly trading errors before they occur.
 ### Pre-Order Validation Framework
 
 ```python
-import asyncio
 from abc import ABC, abstractmethod
-from decimal import Decimal
-from datetime import datetime, timezone
-from typing import Dict, List, Any, Optional
 from dataclasses import dataclass
+from datetime import datetime
+from decimal import Decimal
 from enum import Enum
-from fivetwenty import AsyncClient, VeeTwentyError
+from typing import Any, Dict, List, Optional
+
+from fivetwenty import AsyncClient
+
 
 class ValidationSeverity(Enum):
     INFO = "info"
@@ -322,6 +323,7 @@ class RiskPerTradeValidator(OrderValidator):
 from datetime import datetime
 from decimal import Decimal
 
+
 class SpreadValidator(OrderValidator):
     """Validate spread isn't too wide for order execution."""
 
@@ -422,6 +424,7 @@ class MarketHoursValidator(OrderValidator):
 
 ```python
 from decimal import Decimal
+
 
 class PriceValidityValidator(OrderValidator):
     """Validate order price is reasonable relative to current market."""
@@ -766,7 +769,9 @@ Implement comprehensive risk controls for trading operations.
 ```python
 from datetime import datetime
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class RealTimeRiskMonitor:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -923,9 +928,9 @@ Implement comprehensive testing for order management systems.
 ### Order Testing Framework
 
 ```python
-import unittest
-from unittest.mock import AsyncMock, MagicMock
 from decimal import Decimal
+from unittest.mock import AsyncMock, MagicMock
+
 
 class OrderSystemTestFramework:
     """Framework for testing order management systems."""
@@ -1107,7 +1112,9 @@ Establish comprehensive monitoring for production trading systems.
 ```python
 from datetime import datetime
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class ProductionMonitoringSystem:
     """Comprehensive monitoring system for production trading."""

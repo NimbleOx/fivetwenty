@@ -20,9 +20,11 @@ Trailing stops protect profits while allowing positions to run in favorable dire
 
 ```python
 import asyncio
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class TrailingStopManager:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -178,7 +180,9 @@ Tighten trail distance as profits increase:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class AcceleratedTrailing:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -243,7 +247,9 @@ Build and reduce positions systematically based on market conditions.
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class ScaleInStrategy:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -348,7 +354,9 @@ class ScaleInStrategy:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class ScaleOutStrategy:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -618,7 +626,9 @@ class DynamicRiskManager:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class OrderPerformanceAnalyzer:
     def __init__(self, client: AsyncClient, account_id: str):

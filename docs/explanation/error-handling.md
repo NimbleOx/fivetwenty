@@ -23,9 +23,8 @@ Exception
 ### Basic Try-Catch
 
 ```python
-import os
-from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
+
 
 async def safe_trade(client, account_id):
     """Place a trade with error handling."""
@@ -52,14 +51,9 @@ Handle different errors differently:
 
 ```python
 import asyncio
-from fivetwenty.exceptions import (
-    BadRequest,
-    Unauthorized,
-    Forbidden,
-    NotFound,
-    TooManyRequests,
-    InternalServerError
-)
+
+from fivetwenty.exceptions import BadRequest, Forbidden, InternalServerError, NotFound, TooManyRequests, Unauthorized
+
 
 async def handle_specific_errors(client, account_id):
     """Handle specific error types."""
@@ -112,6 +106,7 @@ The SDK includes 67 specific OANDA error codes:
 ```python
 from fivetwenty.exceptions import FiveTwentyErrorCode
 
+
 # Check for specific error codes
 async def handle_trading_errors(client, account_id):
     try:
@@ -149,6 +144,7 @@ async def handle_trading_errors(client, account_id):
 
 ```python
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+
 
 def categorize_error(error: FiveTwentyError) -> str:
     """Categorize errors for different handling."""
@@ -192,11 +188,11 @@ def categorize_error(error: FiveTwentyError) -> str:
 The SDK includes built-in retry logic, but you can add your own:
 
 ```python
-from decimal import Decimal
-
 import asyncio
-from typing import TypeVar, Callable
 import random
+from collections.abc import Callable
+from decimal import Decimal
+from typing import TypeVar
 
 T = TypeVar('T')
 
@@ -252,10 +248,11 @@ async def place_order_with_retry():
 Implement circuit breaker pattern for system protection:
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
-
 from datetime import datetime, timedelta
 from enum import Enum
+
+from fivetwenty.exceptions import FiveTwentyError
+
 
 class CircuitState(Enum):
     CLOSED = "closed"  # Normal operation
@@ -382,6 +379,7 @@ Recover state after errors:
 ```python
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
+
 class StatefulTrader:
     def __init__(self):
         self.pending_orders = []
@@ -424,11 +422,12 @@ class StatefulTrader:
 ### Structured Error Logging
 
 ```python
+import json
+import logging
+from datetime import datetime
+
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
-import logging
-import json
-from datetime import datetime
 
 class ErrorLogger:
     def __init__(self):
@@ -528,9 +527,12 @@ class ErrorMetrics:
 ### Unit Tests
 
 ```python
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, patch
-from fivetwenty.exceptions import FiveTwentyError, ErrorCode
+
+from fivetwenty.exceptions import FiveTwentyError
+
 
 @pytest.mark.asyncio
 async def test_insufficient_funds_handling():

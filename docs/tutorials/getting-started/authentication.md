@@ -77,8 +77,9 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 ```python
 import asyncio
 
+
 async def main():
-    from fivetwenty import AsyncClient, Environment
+    from fivetwenty import AsyncClient
 
     # Zero-config - automatically loads environment variables
     async with AsyncClient() as client:
@@ -102,6 +103,7 @@ token = "abc123def456"  # NEVER hardcode tokens!
 **✅ Good - Use environment variables:**
 ```python
 import os
+
 token = os.environ.get("FIVETWENTY_OANDA_TOKEN")
 if not token:
     raise ValueError("FIVETWENTY_OANDA_TOKEN not set")
@@ -122,8 +124,10 @@ FIVETWENTY_OANDA_ACCOUNT_ALIAS=development_account
 ```python
 import asyncio
 
+
 async def main():
     from dotenv import load_dotenv
+
     from fivetwenty import AsyncClient
 
     # Load .env file
@@ -148,8 +152,10 @@ For production deployments, you can use AWS Secrets Manager, HashiCorp Vault, Ku
 ```python
 import asyncio
 
+
 async def main():
     import os
+
     from fivetwenty import AccountConfig, AsyncClient, Environment
 
     # Practice account for testing
@@ -244,8 +250,9 @@ print(config.summary())
 The library validates all configuration values:
 
 ```python
-from fivetwenty import AccountConfig, Environment
 from pydantic import ValidationError
+
+from fivetwenty import AccountConfig, Environment
 
 try:
     config = AccountConfig(
@@ -273,9 +280,11 @@ except ValidationError as e:
 ### Verify Configuration
 
 ```python
-import os
 import asyncio
+import os
+
 from fivetwenty import AsyncClient, Environment
+
 
 async def test_authentication():
     """Test OANDA API authentication."""
@@ -308,7 +317,8 @@ asyncio.run(test_authentication())
 
 ```python
 import os
-from fivetwenty import ConfigValidator, AccountConfig, Environment
+
+from fivetwenty import AccountConfig, ConfigValidator, Environment
 
 # Create configuration
 config = AccountConfig(
@@ -337,6 +347,7 @@ If you need to use a proxy:
 
 ```python
 import asyncio
+
 
 async def main():
     from fivetwenty import AsyncClient, Environment
@@ -400,8 +411,10 @@ For advanced HTTP configuration:
 ```python
 import asyncio
 
+
 async def main():
     import httpx
+
     from fivetwenty import AsyncClient, Environment
 
     # Create custom HTTP client
@@ -571,6 +584,7 @@ print(f"Config summary: {client.config.summary()}")
 
 # Validate manually
 from fivetwenty import ConfigValidator
+
 errors = ConfigValidator.validate_account_config(client.config)
 if errors:
     print("Configuration issues:", errors)
@@ -607,14 +621,17 @@ If upgrading from an older version:
 ```python
 # Old way (deprecated)
 from fivetwenty import AsyncClient, Environment
+
 client = AsyncClient("token", Environment.PRACTICE)
 
 # New way - Direct parameters
 from fivetwenty import AsyncClient, Environment
+
 client = AsyncClient(token="token", environment=Environment.PRACTICE)
 
 # New way - Configuration object (recommended)
 from fivetwenty import AccountConfig, AsyncClient, Environment
+
 config = AccountConfig(
     token="token",
     account_id="account-id",

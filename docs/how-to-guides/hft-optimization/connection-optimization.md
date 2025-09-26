@@ -11,11 +11,10 @@
 Reuse connections to minimize latency:
 
 ```python
-import asyncio
-import time
-from typing import Dict, List, Optional
+from typing import Optional
+
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.models import ClientPrice
+
 
 class OptimizedTradingClient:
     """High-performance OANDA client for HFT applications."""

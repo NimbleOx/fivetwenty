@@ -250,11 +250,14 @@ class TestAccountsEndpoint:
 ### **Model Testing**
 
 ```python
-import pytest
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
+import pytest
 from pydantic import ValidationError
-from fivetwenty.models import Order, OrderRequest
+
+from fivetwenty.models import Order
+
 
 class TestOrderModel:
     """Unit tests for Order model."""
@@ -330,12 +333,14 @@ class TestOrderModel:
 Integration tests use real OANDA API calls recorded with VCR.py for reproducibility:
 
 ```python
+import os
 from decimal import Decimal
 
 import pytest
-import os
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
+
 
 @pytest.mark.integration
 class TestAccountsIntegration:
@@ -385,9 +390,10 @@ VCR.py records HTTP interactions for reproducible tests:
 
 ```python
 # conftest.py
+
 import pytest
 import vcr
-import os
+
 
 @pytest.fixture(scope="function")
 def vcr_config():
@@ -543,12 +549,15 @@ class TestStreamingIntegration:
 
 ```python
 # conftest.py
-import pytest
 import os
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
+
+import pytest
+
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.models import AccountSummary, Order, Trade
+from fivetwenty.models import AccountSummary, Order
+
 
 @pytest.fixture
 def test_client():

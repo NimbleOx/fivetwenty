@@ -232,10 +232,11 @@ Load configuration from standard `FIVETWENTY_*` environment variables.
 
 **Usage:**
 ```python
-from fivetwenty import AccountConfigLoader
-
 # Set environment variables first
 import os
+
+from fivetwenty import AccountConfigLoader
+
 os.environ['FIVETWENTY_OANDA_TOKEN'] = 'your-token'
 os.environ['FIVETWENTY_OANDA_ACCOUNT'] = 'your-account'
 os.environ['FIVETWENTY_OANDA_ENVIRONMENT'] = 'practice'
@@ -366,6 +367,7 @@ Enumeration for OANDA trading environments.
 ```python
 from enum import Enum
 
+
 class Environment(Enum):
     """OANDA trading environments."""
     PRACTICE = "practice"
@@ -469,6 +471,7 @@ print(f"Active strategies: {list(active_accounts.keys())}")
 ```python
 from fivetwenty import ConfigValidator
 
+
 def create_safe_config(**kwargs) -> AccountConfig:
     """Create configuration with validation."""
     config = AccountConfig(**kwargs)
@@ -484,7 +487,9 @@ def create_safe_config(**kwargs) -> AccountConfig:
 
 ```python
 import os
+
 from fivetwenty import AccountConfigLoader, Environment
+
 
 def load_production_config() -> AccountConfig:
     """Load production configuration with safety checks."""
@@ -527,9 +532,8 @@ logger.info(f"Token: {config.token.get_secret_value()}")  # DON'T DO THIS
 ### 2. Validate Before Use
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient, ConfigValidator
 
-from fivetwenty import ConfigValidator
 
 def safe_client_creation(config: AccountConfig) -> AsyncClient:
     """Create client with validation."""
@@ -561,7 +565,8 @@ def load_env_specific_config(env: str) -> AccountConfig:
 ### 4. Runtime Verification
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
+
 
 async def verify_config_connection(config: AccountConfig) -> bool:
     """Test configuration by connecting to API."""

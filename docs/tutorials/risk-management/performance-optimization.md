@@ -724,6 +724,7 @@ Optimize allocation across multiple strategies and instruments.
 import numpy as np
 from scipy.optimize import minimize
 
+
 class PortfolioOptimizer:
     """Optimize portfolio allocation using Modern Portfolio Theory."""
     

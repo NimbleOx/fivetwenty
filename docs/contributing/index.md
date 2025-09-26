@@ -128,6 +128,7 @@ uv run poe clean      # Clean build artifacts and caches
 ```python
 # ✅ Correct
 from decimal import Decimal
+
 price = Decimal("1.25435")
 units = Decimal("1000")
 value = price * units

@@ -17,10 +17,12 @@ Create secure configuration management for containerized deployment:
 ```python
 # config/production.py
 import os
-from typing import Dict, Optional
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Optional
+
 from fivetwenty import Environment
+
 
 @dataclass
 class ProductionConfig:

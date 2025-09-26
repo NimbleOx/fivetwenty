@@ -36,6 +36,7 @@ Test your installation:
 
 ```python
 import fivetwenty
+
 print(fivetwenty.__version__)
 # Output: 0.1.1
 ```

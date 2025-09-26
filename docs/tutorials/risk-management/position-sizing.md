@@ -26,12 +26,9 @@ The most straightforward approach to position sizing.
 ### Implementation
 
 ```python
-import asyncio
 from decimal import Decimal
-from datetime import datetime
 
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import FiveTwentyError
 
 # Configuration
 TOKEN = "your-api-token-here"
@@ -539,6 +536,7 @@ Test your understanding of position sizing strategies:
 
 ```python
 from decimal import Decimal
+
 
 def validate_position_size_decision(account_balance: Decimal, position_size: int,
                                    entry_price: Decimal, stop_loss: Decimal,

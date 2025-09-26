@@ -10,6 +10,7 @@ Trade monitoring and management.
 ```python
 import asyncio
 
+
 async def main():
     # trades.get_trades(account_id: AccountID, ids: list[TradeID] | None = None,
     #            state: TradeStateFilter = TradeStateFilter.OPEN,
@@ -146,6 +147,7 @@ Close a trade (fully or partially).
 ## put_trade_client_extensions
 ```python
 import asyncio
+
 
 async def main():
     # trades.put_trade_client_extensions(account_id: AccountID, trade_specifier: str,

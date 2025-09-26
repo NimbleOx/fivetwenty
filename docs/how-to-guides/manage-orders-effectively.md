@@ -27,6 +27,7 @@ You need to create, monitor, and manage trading orders efficiently using FiveTwe
     ```python
 import asyncio
 
+
 async def main():
     from decimal import Decimal
 
@@ -192,6 +193,7 @@ async def add_guaranteed_stop_loss(client, account_id, trade_id):
 ```python
 from fivetwenty.exceptions import FiveTwentyError
 
+
 async def robust_post_trade_setup(client, account_id, trade_id):
     """Add risk management with comprehensive error handling."""
 
@@ -243,8 +245,10 @@ async def robust_post_trade_setup(client, account_id, trade_id):
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
+
 
 async def place_market_order():
     async with AsyncClient() as client:
@@ -275,8 +279,10 @@ async def place_market_order():
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
+
 
 async def place_limit_order():
     async with AsyncClient() as client:
@@ -299,8 +305,10 @@ async def place_limit_order():
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
+
 
 async def place_stop_order():
     async with AsyncClient() as client:
@@ -326,8 +334,10 @@ async def place_stop_order():
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
+
 
 async def place_market_if_touched_order():
     async with AsyncClient() as client:
@@ -352,14 +362,9 @@ async def place_market_if_touched_order():
 **Problem:** Need to create different order types programmatically based on strategy logic.
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
+from fivetwenty.models import LimitOrderRequest, MarketOrderRequest, StopOrderRequest, TimeInForce
 
-from fivetwenty.models import (
-    MarketOrderRequest,
-    LimitOrderRequest,
-    StopOrderRequest,
-    TimeInForce
-)
 
 async def create_order_by_type(order_type: str, price: Decimal = None):
     async with AsyncClient() as client:
@@ -403,7 +408,8 @@ async def create_order_by_type(order_type: str, price: Decimal = None):
 **Problem:** Track order execution and handle different outcomes.
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
+
 
 async def monitor_order_execution(account_id: AccountID, order_id: str):
     async with AsyncClient() as client:
@@ -508,8 +514,9 @@ async def place_validated_order(
 **Problem:** Manage pending orders by cancelling or replacing them.
 
 ```python
-from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import FiveTwentyError
+
 
 async def manage_pending_orders(account_id: AccountID):
     async with AsyncClient() as client:
@@ -543,9 +550,10 @@ async def manage_pending_orders(account_id: AccountID):
 **Problem:** Create multiple related orders efficiently.
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
 import asyncio
+
+from fivetwenty import AsyncClient
+
 
 async def create_bracket_order(
     account_id: AccountID,
@@ -701,7 +709,6 @@ quantized_price = quantize_price(precision, your_price)
 
 **Rate Limiting:**
 ```python
-import asyncio
 from asyncio import Semaphore
 
 # Limit concurrent requests
@@ -714,7 +721,8 @@ async def rate_limited_order(order_params):
 
 **Error Recovery:**
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
+
 
 async def robust_order_placement(order_params, max_retries=3):
     for attempt in range(max_retries):
@@ -737,10 +745,11 @@ async def robust_order_placement(order_params, max_retries=3):
 ```python
 import asyncio
 from datetime import datetime
-from decimal import Decimal
 from enum import Enum
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID
+
 
 class OrderState(Enum):
     CREATED = "created"
@@ -775,8 +784,10 @@ class OrderManager:
 ### Risk Management Integration
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID
+
 
 class RiskManagedOrderSystem:
     def __init__(self, client: AsyncClient, max_daily_loss: Decimal):

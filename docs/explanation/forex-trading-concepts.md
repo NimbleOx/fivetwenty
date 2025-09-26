@@ -50,6 +50,7 @@ A **trade** is a single order execution:
 ```python
 import asyncio
 
+
 async def main():
     # Each order creates a separate trade
     trade1 = await client.orders.post_market_order(account_id, "EUR_USD", 10000)   # Buy 10k EUR
@@ -308,6 +309,7 @@ for trade in await client.trades.get_open_trades(account_id):
 ```python
 import asyncio
 
+
 async def main():
     # You bought 10,000 EUR_USD at 1.1000
     # Current price: 1.1050
@@ -478,6 +480,7 @@ Forex markets trade 24/5, but activity varies:
 ```python
 from datetime import datetime, timezone
 
+
 def get_market_session(dt: datetime) -> str:
     """Determine current forex market session."""
     utc_hour = dt.replace(tzinfo=timezone.utc).hour
@@ -571,7 +574,7 @@ await client.orders.post_market_order(
 The SDK uses `Decimal` for financial accuracy:
 
 ```python
-from decimal import Decimal, ROUND_HALF_UP
+from decimal import ROUND_HALF_UP, Decimal
 
 # Proper forex price handling
 price = Decimal("1.10505")  # 5-decimal precision for most pairs
@@ -588,6 +591,7 @@ Real-time price feeds for active trading:
 
 ```python
 import asyncio
+
 
 async def main():
     async def price_monitor(client, account_id, instruments):

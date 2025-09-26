@@ -41,8 +41,9 @@ Base exception for all OANDA API errors.
 ```python
 import asyncio
 
+
 async def main():
-    from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+    from fivetwenty.exceptions import FiveTwentyError
 
     try:
         await client.orders.post_market_order(
@@ -65,6 +66,7 @@ Raised when a streaming connection stalls or times out.
 **Example:**
 ```python
 import asyncio
+
 
 async def main():
     from fivetwenty.exceptions import StreamStall
@@ -112,7 +114,8 @@ asyncio.run(main())
 
 ### Basic Error Handling
 ```python
-from fivetwenty.exceptions import FiveTwentyError, AuthenticationError
+from fivetwenty.exceptions import AuthenticationError, FiveTwentyError
+
 
 async def safe_api_call():
     try:
@@ -130,10 +133,11 @@ async def safe_api_call():
 
 ### Retry with Exponential Backoff
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
-
 import asyncio
 import random
+
+from fivetwenty.exceptions import FiveTwentyError
+
 
 async def retry_api_call(func, max_retries: int = 3):
     """Retry API call with exponential backoff."""

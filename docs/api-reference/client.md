@@ -261,7 +261,7 @@ config = AccountConfigLoader.from_env_prefix("TRADING_")
 
 **ValueError**: Raised when no valid configuration is provided:
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 try:
     client = AsyncClient()  # No config provided
@@ -296,6 +296,7 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 **Example:**
 ```python
 import asyncio
+
 
 async def main():
     from fivetwenty.exceptions import FiveTwentyError

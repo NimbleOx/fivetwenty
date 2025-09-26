@@ -10,6 +10,7 @@ Position monitoring and management.
 ```python
 import asyncio
 
+
 async def main():
     # positions.get_positions(account_id: AccountID) -> dict[str, Any]
 
@@ -99,6 +100,7 @@ Get the position for a specific instrument in an account.
 ## close_position
 ```python
 import asyncio
+
 
 async def main():
     # positions.close_position(account_id: AccountID, instrument: InstrumentName,

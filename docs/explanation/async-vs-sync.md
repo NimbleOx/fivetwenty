@@ -31,7 +31,9 @@ Use `AsyncClient` when you need:
 
 ```python
 import asyncio
+
 from fivetwenty import AsyncClient, Environment
+
 
 async def async_example():
     """Async client example."""
@@ -212,7 +214,8 @@ async def async_error_handling():
 #### Sync Error Handling
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
+
 
 def sync_error_handling():
     with Client(token=token, environment=Environment.PRACTICE) as client:
@@ -253,6 +256,7 @@ If you need to call async from sync code:
 
 ```python
 import asyncio
+
 
 def sync_wrapper():
     """Call async code from sync context."""

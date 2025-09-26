@@ -26,11 +26,10 @@ Production considerations, implementation guidelines, and summary of portfolio a
 ### System Architecture Best Practices
 
 ```python
-import asyncio
 import logging
-from typing import Dict, List, Optional
 from dataclasses import dataclass
-from datetime import datetime, timedelta
+from typing import Dict
+
 
 @dataclass
 class PortfolioConfig:

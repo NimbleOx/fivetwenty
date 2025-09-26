@@ -20,10 +20,12 @@ Bracket orders combine entry, stop-loss, and take-profit orders for complete pos
 
 ```python
 import asyncio
+from datetime import datetime
 from decimal import Decimal
-from datetime import datetime, timedelta
-from typing import Optional, Dict, List
+from typing import Dict, Optional
+
 from fivetwenty import AsyncClient
+
 
 class BracketOrderManager:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -311,6 +313,7 @@ async def scaling_bracket_strategy():
 
 ```python
 from decimal import Decimal
+
 
 class TrailingBracketManager(BracketOrderManager):
     """Bracket manager with trailing stop functionality."""
@@ -613,7 +616,9 @@ class ConditionalOrderChain:
 
 ```python
 from datetime import datetime
+
 from fivetwenty import AsyncClient
+
 
 class OCOOrderManager:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -885,7 +890,9 @@ class PairsTradingStrategy:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class PortfolioHedgeManager:
     def __init__(self, client: AsyncClient, account_id: str):

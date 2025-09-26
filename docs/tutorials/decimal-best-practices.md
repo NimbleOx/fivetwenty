@@ -48,8 +48,8 @@ FiveTwenty automatically handles Decimal conversion for financial fields:
 
 ```python
 from decimal import Decimal
-from fivetwenty import AsyncClient
-from fivetwenty.models import MarketOrderRequest, InstrumentName, TimeInForce
+
+from fivetwenty.models import InstrumentName, MarketOrderRequest, TimeInForce
 
 # ✅ All these inputs work seamlessly
 order1 = MarketOrderRequest(
@@ -101,10 +101,10 @@ Price fields remain strings for OANDA precision:
 
 ### 1. Position Sizing with Decimal Precision
 ```python
-from fivetwenty.models import InstrumentName
-from fivetwenty.models import MarketOrderRequest
-from fivetwenty.models import TimeInForce
 from decimal import Decimal
+
+from fivetwenty.models import InstrumentName, MarketOrderRequest, TimeInForce
+
 
 async def calculate_position_size(
     account_balance: str,
@@ -142,6 +142,7 @@ async def position_sizing_example():
 ```python
 from decimal import Decimal
 
+
 async def calculate_trade_performance(trade_id: str, account_id: str) -> dict:
     """Calculate exact trade performance metrics."""
     trade = await client.trades.get_trade(account_id=account_id, trade_id=trade_id)
@@ -172,6 +173,7 @@ async def calculate_trade_performance(trade_id: str, account_id: str) -> dict:
 ### 3. Commission and Fee Calculations
 ```python
 from decimal import Decimal
+
 
 def calculate_total_trading_costs(
     base_units: Decimal,
@@ -205,6 +207,7 @@ print(f"Total trading cost: ${total_cost}")  # Exact cost calculation
 ### 4. Portfolio Position Weighting
 ```python
 from decimal import Decimal
+
 
 async def rebalance_portfolio(
     target_weights: dict[str, Decimal],
@@ -264,6 +267,7 @@ async def rebalance_portfolio(
 ```python
 from decimal import Decimal
 
+
 def calculate_stop_levels(
     entry_price: str,  # PriceValue from trade
     direction: str,    # "long" or "short"
@@ -317,6 +321,7 @@ async def demo_stop_loss_calculation():
 
 # Run the example
 import asyncio
+
 asyncio.run(demo_stop_loss_calculation())
 ```
 
@@ -342,6 +347,7 @@ def safe_divide(numerator: Decimal, denominator: Decimal) -> Decimal:
 ### 2. Currency Conversion Precision
 ```python
 from decimal import Decimal
+
 
 async def convert_currency_precise(
     amount: Decimal,
@@ -378,6 +384,7 @@ async def convert_currency_precise(
 ### 3. Performance Metrics with Exact Math
 ```python
 from decimal import Decimal
+
 
 def calculate_sharpe_ratio(
     returns: list[Decimal],
@@ -457,8 +464,9 @@ units_float = float(order.units)  # Why convert to less precise type?
 
 ### ✅ Do: Work with native Decimal
 ```python
-from fivetwenty.models import MarketOrderRequest
 from decimal import Decimal
+
+from fivetwenty.models import MarketOrderRequest
 
 order = MarketOrderRequest(units=1000, instrument="EUR_USD")
 calculation = order.units * Decimal('1.5')  # Direct Decimal arithmetic

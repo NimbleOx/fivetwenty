@@ -149,7 +149,9 @@ Create comprehensive position management with entry, stop, and target:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class BracketOrder:
     def __init__(self, client: AsyncClient, account_id: str):
@@ -259,7 +261,9 @@ Break large orders into smaller chunks to hide size:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
+
 
 class IcebergOrder:
     def __init__(self, client: AsyncClient, account_id: str):

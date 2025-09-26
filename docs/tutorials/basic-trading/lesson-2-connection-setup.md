@@ -8,12 +8,7 @@
 ## Import Required Libraries
 
 ```python
-import asyncio
-from decimal import Decimal
-from datetime import datetime
 
-from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import FiveTwentyError
 ```
 
 !!! warning "⚠️ Safety First"

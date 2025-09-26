@@ -107,6 +107,7 @@ except ValueError as e:
 import json
 from pathlib import Path
 
+
 def load_live_config(config_path: str = "live_config.json"):
     """Load live trading configuration from secure file."""
 
@@ -147,6 +148,7 @@ def load_live_config(config_path: str = "live_config.json"):
 
 ```python
 from decimal import Decimal
+
 
 class LiveTradingValidator:
     """Safety validator for live trading operations."""
@@ -312,6 +314,7 @@ async def monitor_live_account(account_id: str, check_interval: int = 30):
 ```python
 from decimal import Decimal
 
+
 class LiveTradingRiskManager:
     """Comprehensive risk management for live trading."""
 
@@ -431,6 +434,7 @@ Before starting live trading:
 
 ```python
 from fivetwenty import AsyncClient, Environment
+
 
 async def emergency_stop_trading(account_id: str):
     """Emergency procedure to stop all trading activity."""

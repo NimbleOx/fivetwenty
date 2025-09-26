@@ -175,8 +175,10 @@ def print_strategy_performance(strategy: SimpleMovingAverageCrossover):
 Here's an enhanced version with additional capabilities:
 
 ```python
-from fivetwenty import AsyncClient
 from decimal import Decimal
+
+from fivetwenty import AsyncClient
+
 
 # Enhanced strategy concepts (for further learning)
 class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
@@ -298,6 +300,7 @@ Monitor your strategy's real-time performance:
 
 ```python
 from datetime import datetime
+
 
 class StrategyMonitor:
     """Monitor strategy performance in real-time."""

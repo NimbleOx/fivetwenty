@@ -41,8 +41,8 @@ Understand the basics of real-time market data streaming and the foundational co
 ### Producer-Consumer Pattern
 ```python
 import asyncio
-from typing import AsyncIterator, Callable
-from datetime import datetime, timedelta
+from collections.abc import AsyncIterator, Callable
+
 
 class StreamProducer:
     """Base producer for streaming data."""
@@ -102,10 +102,11 @@ class StreamConsumer:
 
 ### Event-Driven Architecture
 ```python
-from datetime import datetime
-from typing import Dict, List, Any
 from dataclasses import dataclass
+from datetime import datetime
 from enum import Enum
+from typing import Any
+
 
 class StreamEventType(Enum):
     PRICE_UPDATE = "price_update"
@@ -245,8 +246,9 @@ class ConnectionManager:
 
 ### Heartbeat Monitoring
 ```python
-from datetime import datetime, timedelta
 import asyncio
+from datetime import datetime
+
 
 class StallDetector:
     """Detect streaming connection stalls."""
@@ -292,6 +294,7 @@ class StallDetector:
 ### Stream Multiplexing
 ```python
 from datetime import datetime
+
 
 class StreamMultiplexer:
     """Multiplex multiple streams into single output."""
