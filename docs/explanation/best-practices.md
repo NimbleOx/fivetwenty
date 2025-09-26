@@ -92,75 +92,84 @@ class ProductionTradingSystem:
 ### Separation of Concerns
 
 ```python
+import asyncio
+import os
 from decimal import Decimal
 from typing import Any
-
-from fivetwenty import AsyncClient
-
-# Setup example variables for code snippets
-client = AsyncClient()
-account_id = "your-account-id"
-print(f"Setup complete for account: {account_id}")
+from fivetwenty import AsyncClient, Environment
 
 
-class DataLayer:
-    """Handle all data operations."""
-
-    def __init__(self, client: AsyncClient) -> None:
-        self.client = client
-        self.price_cache: dict[str, Any] = {}
-        self.account_cache = None
-
-    async def get_price(self, instrument: str) -> Decimal:
-        """Get current price with caching."""
-        if instrument in self.price_cache:
-            return self.price_cache[instrument]
-
-        # Default price for example
-        price = Decimal("1.1234")
-        self.price_cache[instrument] = price
-        return price
+async def main() -> None:
+    # Setup example variables for code snippets
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = "your-account-id"
+        print(f"Setup complete for account: {account_id}")
 
 
-class TradingLogic:
-    """Trading strategy implementation."""
+    class DataLayer:
+        """Handle all data operations."""
 
-    def __init__(self, data: DataLayer) -> None:
-        self.data = data
+        def __init__(self, client: AsyncClient) -> None:
+            self.client = client
+            self.price_cache: dict[str, Any] = {}
+            self.account_cache = None
 
-    async def should_trade(self, instrument: str) -> bool:
-        """Determine if we should trade."""
-        # Example strategy logic
-        current_price = await self.data.get_price(instrument)
-        return current_price > Decimal("1.1000")
+        async def get_price(self, instrument: str) -> Decimal:
+            """Get current price with caching."""
+            if instrument in self.price_cache:
+                return self.price_cache[instrument]
 
-
-class RiskManager:
-    """Risk management layer."""
-
-    def __init__(self, config: TradingSystemConfig) -> None:
-        self.config = config
-
-    def validate_order(self, order: dict[str, Any]) -> bool:
-        """Validate order against risk limits."""
-        units = abs(int(order.get("units", 0)))
-        return units <= self.config.max_position_size
+            # Default price for example
+            price = Decimal("1.1234")
+            self.price_cache[instrument] = price
+            return price
 
 
-class OrderExecutor:
-    """Handle order execution."""
+    class TradingLogic:
+        """Trading strategy implementation."""
 
-    def __init__(self, client: AsyncClient, risk: RiskManager) -> None:
-        self.client = client
-        self.risk = risk
+        def __init__(self, data: DataLayer) -> None:
+            self.data = data
 
-    async def execute_order(self, order: dict[str, Any]) -> dict[str, Any]:
-        """Execute order with risk checks."""
-        if not self.risk.validate_order(order):
-            msg = "Order failed risk checks"
-            raise ValueError(msg)
+        async def should_trade(self, instrument: str) -> bool:
+            """Determine if we should trade."""
+            # Example strategy logic
+            current_price = await self.data.get_price(instrument)
+            return current_price > Decimal("1.1000")
 
-        return await self.client.orders.post_market_order(**order)
+
+    class RiskManager:
+        """Risk management layer."""
+
+        def __init__(self, config: TradingSystemConfig) -> None:
+            self.config = config
+
+        def validate_order(self, order: dict[str, Any]) -> bool:
+            """Validate order against risk limits."""
+            units = abs(int(order.get("units", 0)))
+            return units <= self.config.max_position_size
+
+
+    class OrderExecutor:
+        """Handle order execution."""
+
+        def __init__(self, client: AsyncClient, risk: RiskManager) -> None:
+            self.client = client
+            self.risk = risk
+
+        async def execute_order(self, order: dict[str, Any]) -> dict[str, Any]:
+            """Execute order with risk checks."""
+            if not self.risk.validate_order(order):
+                msg = "Order failed risk checks"
+                raise ValueError(msg)
+
+            return await self.client.orders.post_market_order(**order)
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 ```
 
@@ -169,213 +178,229 @@ class OrderExecutor:
 ### Position Sizing
 
 ```python
+import asyncio
 import os
 from decimal import Decimal
 from typing import Any
-
 from fivetwenty import AsyncClient, Environment
 
-# Setup example variables for code snippets
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = "your-account-id"
-print(f"Position sizing setup for account: {account_id}")
+
+async def main() -> None:
+    # Setup example variables for code snippets
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = "your-account-id"
+        print(f"Position sizing setup for account: {account_id}")
 
 
-class PositionSizer:
-    """Calculate safe position sizes."""
+    class PositionSizer:
+        """Calculate safe position sizes."""
 
-    DEFAULT_RISK_PER_TRADE = 0.02
+        DEFAULT_RISK_PER_TRADE = 0.02
 
-    def __init__(self, risk_per_trade: float = DEFAULT_RISK_PER_TRADE) -> None:
-        self.risk_per_trade = risk_per_trade  # 2% risk per trade
+        def __init__(self, risk_per_trade: float = DEFAULT_RISK_PER_TRADE) -> None:
+            self.risk_per_trade = risk_per_trade  # 2% risk per trade
 
-    async def calculate_position_size(
-        self,
-        client: AsyncClient,
-        account_id: str,
-        instrument: str,
-        stop_distance: Decimal,
-    ) -> int:
-        """Calculate position size based on risk."""
+        async def calculate_position_size(
+            self,
+            client: AsyncClient,
+            account_id: str,
+            instrument: str,
+            stop_distance: Decimal,
+        ) -> int:
+            """Calculate position size based on risk."""
+            # Get account info
+            account = await client.accounts.get_account(account_id)
+            balance = Decimal(account.balance)
+            print(f"Account balance: {balance}")
 
-        # Get account info
-        account = await client.accounts.get_account(account_id)
-        balance = Decimal(account.balance)
-        print(f"Account balance: {balance}")
+            # Calculate risk amount
+            risk_amount = balance * Decimal(str(self.risk_per_trade))
 
-        # Calculate risk amount
-        risk_amount = balance * Decimal(str(self.risk_per_trade))
+            # Get instrument info for pip value
+            instruments = await client.accounts.get_account_instruments(
+                account_id=account_id,
+                instruments=[instrument],
+            )
+            instrument_data = instruments[0]
+            pip_value = self.calculate_pip_value(instrument_data)
+            print(f"Pip value for {instrument}: {pip_value}")
 
-        # Get instrument info for pip value
-        instruments = await client.accounts.get_account_instruments(
-            account_id=account_id,
-            instruments=[instrument],
-        )
-        instrument_data = instruments[0]
-        pip_value = self.calculate_pip_value(instrument_data)
-        print(f"Pip value for {instrument}: {pip_value}")
+            # Calculate position size
+            position_size = risk_amount / (stop_distance * Decimal(str(pip_value)))
+            print(f"Calculated position size: {position_size}")
 
-        # Calculate position size
-        position_size = risk_amount / (stop_distance * pip_value)
-        print(f"Calculated position size: {position_size}")
+            # Round to valid increment
+            rounded_size = self.round_to_increment(position_size, instrument_data)
+            print(f"Rounded to valid increment: {rounded_size}")
+            return rounded_size
 
-        # Round to valid increment
-        rounded_size = self.round_to_increment(position_size, instrument_data)
-        print(f"Rounded to valid increment: {rounded_size}")
-        return rounded_size
+        def calculate_pip_value(self, instrument: Any) -> float:
+            """Calculate pip value for instrument."""
+            # Standard pip value for most pairs
+            STANDARD_PIP_VALUE = 0.0001
+            return STANDARD_PIP_VALUE
 
-    def calculate_pip_value(self, instrument: Any) -> float:
-        """Calculate pip value for instrument."""
-        # Standard pip value for most pairs
-        STANDARD_PIP_VALUE = 0.0001
-        return STANDARD_PIP_VALUE
+        def round_to_increment(self, position_size: Decimal, instrument: Any) -> int:
+            """Round position size to valid increment."""
+            increment = int(instrument.get("minimumTradeSize", 1))
+            rounded = int(position_size // increment) * increment
+            print(f"Rounded {position_size} to increment {increment}: {rounded}")
+            return rounded
 
-    def round_to_increment(self, position_size: Decimal, instrument: Any) -> int:
-        """Round position size to valid increment."""
-        increment = int(instrument.get("minimumTradeSize", 1))
-        rounded = int(position_size // increment) * increment
-        print(f"Rounded {position_size} to increment {increment}: {rounded}")
-        return rounded
+if __name__ == "__main__":
+    asyncio.run(main())
 
 ```
 
 ### Stop Loss Management
 
 ```python
+import asyncio
 import os
 from decimal import Decimal
-
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
-# Setup example variables for code snippets
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = "your-account-id"
+
+async def main() -> None:
+    # Setup example variables for code snippets
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = "your-account-id"
 
 
-class StopLossManager:
-    """Manage stop losses for all positions."""
+    class StopLossManager:
+        """Manage stop losses for all positions."""
 
-    def __init__(self, client: AsyncClient) -> None:
-        self.client = client
+        def __init__(self, client: AsyncClient) -> None:
+            self.client = client
 
-    async def set_stop_loss(self, account_id: str, trade_id: str, stop_price: str) -> None:
-        """Set or update stop loss."""
-        from fivetwenty.models import StopLossOrderRequest
+        async def set_stop_loss(self, account_id: str, trade_id: str, stop_price: str) -> None:
+            """Set or update stop loss."""
+            from fivetwenty.models import StopLossOrderRequest
 
-        try:
-            # Update stop loss
-            # Create stop loss using post_order with StopLossOrderRequest
+            try:
+                # Update stop loss
+                # Create stop loss using post_order with StopLossOrderRequest
+                sl_request = StopLossOrderRequest(
+                    tradeID=trade_id,
+                    price=stop_price,
+                    timeInForce="GTC",
+                )
+                sl_response = await self.client.orders.post_order(account_id, sl_request)
+                order_id = sl_response.order_create_transaction['id']
+                print(f"Stop loss set at {stop_price} for trade {trade_id}: Order {order_id}")
+
+            except FiveTwentyError as e:
+                if e.code == FiveTwentyErrorCode.STOP_LOSS_ORDER_ALREADY_EXISTS:
+                    # Update existing stop loss
+                    await self.update_stop_loss(account_id, trade_id, stop_price)
+                else:
+                    raise
+
+        async def trailing_stop(self, account_id: str, trade_id: str, distance: Decimal) -> None:
+            """Implement trailing stop."""
+            # Get current trade
+            trade = await self.client.trades.get_trade(account_id, trade_id)
+            print(f"Retrieved trade {trade_id} for trailing stop update")
+
+            # Calculate new stop based on current price
+            if float(trade.current_units) > 0:  # Long position
+                new_stop = Decimal(trade.price) - distance
+            else:  # Short position
+                new_stop = Decimal(trade.price) + distance
+
+            # Update if better than current stop
+            if self.is_better_stop(trade, new_stop):
+                await self.set_stop_loss(account_id, trade_id, str(new_stop))
+
+        async def update_stop_loss(self, account_id: str, trade_id: str, stop_price: str) -> None:
+            """Update existing stop loss."""
+            # Implementation for updating existing stop loss
+            from fivetwenty.models import StopLossOrderRequest
             sl_request = StopLossOrderRequest(
                 tradeID=trade_id,
                 price=stop_price,
                 timeInForce="GTC",
             )
-            sl_response = await self.client.orders.post_order(account_id, sl_request)
-            order_id = sl_response.order_create_transaction['id']
-            print(f"Stop loss set at {stop_price} for trade {trade_id}: Order {order_id}")
+            update_response = await self.client.orders.post_order(account_id, sl_request)
+            order_id = update_response.order_create_transaction['id']
+            print(f"Stop loss updated to {stop_price} for trade {trade_id}: Order {order_id}")
 
-        except FiveTwentyError as e:
-            if e.code == FiveTwentyErrorCode.STOP_LOSS_ORDER_ALREADY_EXISTS:
-                # Update existing stop loss
-                await self.update_stop_loss(account_id, trade_id, stop_price)
-            else:
-                raise
+        def is_better_stop(self, trade: Any, new_stop: Decimal) -> bool:
+            """Check if new stop is better."""
+            current_stop = trade.get("stopLoss", {}).get("price")
+            if not current_stop:
+                return True
 
-    async def trailing_stop(self, account_id: str, trade_id: str, distance: Decimal) -> None:
-        """Implement trailing stop."""
-        # Get current trade
-        trade = await self.client.trades.get_trade(account_id, trade_id)
-        print(f"Retrieved trade {trade_id} for trailing stop update")
+            # For long positions, higher stop is better
+            if float(trade.get("currentUnits", 0)) > 0:
+                return new_stop > Decimal(current_stop)
+            # For short positions, lower stop is better
+            return new_stop < Decimal(current_stop)
 
-        # Calculate new stop based on current price
-        if float(trade.current_units) > 0:  # Long position
-            new_stop = Decimal(trade.price) - distance
-        else:  # Short position
-            new_stop = Decimal(trade.price) + distance
-
-        # Update if better than current stop
-        if self.is_better_stop(trade, new_stop):
-            await self.set_stop_loss(account_id, trade_id, str(new_stop))
-
-    async def update_stop_loss(self, account_id: str, trade_id: str, stop_price: str) -> None:
-        """Update existing stop loss."""
-        # Implementation for updating existing stop loss
-        from fivetwenty.models import StopLossOrderRequest
-        sl_request = StopLossOrderRequest(
-            tradeID=trade_id,
-            price=stop_price,
-            timeInForce="GTC",
-        )
-        update_response = await self.client.orders.post_order(account_id, sl_request)
-        order_id = update_response.order_create_transaction['id']
-        print(f"Stop loss updated to {stop_price} for trade {trade_id}: Order {order_id}")
-
-
-    def is_better_stop(self, trade: Any, new_stop: Decimal) -> bool:
-        """Check if new stop is better."""
-        current_stop = trade.get("stopLoss", {}).get("price")
-        if not current_stop:
-            return True
-
-        # For long positions, higher stop is better
-        if float(trade.get("currentUnits", 0)) > 0:
-            return new_stop > Decimal(current_stop)
-        # For short positions, lower stop is better
-        return new_stop < Decimal(current_stop)
+if __name__ == "__main__":
+    asyncio.run(main())
 
 ```
 
 ### Daily Loss Limits
 
 ```python
+import asyncio
 from decimal import Decimal
-
-# Setup example variables
-max_daily_loss = Decimal("1000.0")
+from typing import Any
 
 
-class DailyLossLimiter:
-    """Enforce daily loss limits."""
-
-    def __init__(self, max_daily_loss: Decimal) -> None:
-        self.max_daily_loss = max_daily_loss
-        self.daily_pnl = Decimal("0.0")
-        self.trading_enabled = True
-
-    async def update_pnl(self, pnl: Decimal) -> None:
-        """Update daily P&L and check limits."""
-        self.daily_pnl += pnl
-
-        if self.daily_pnl <= -self.max_daily_loss:
-            self.trading_enabled = False
-            await self.close_all_positions()
-            await self.send_alert("Daily loss limit reached!")
-
-    def can_trade(self) -> bool:
-        """Check if trading is allowed."""
-        return self.trading_enabled
-
-    def reset_daily(self) -> None:
-        """Reset for new trading day."""
-        self.daily_pnl = Decimal("0.0")
-        self.trading_enabled = True
-
-    async def close_all_positions(self) -> None:
-        """Close all open positions."""
-        # Implementation would close all positions
-        print("Emergency: Closing all positions due to daily loss limit")
+async def main() -> None:
+    # Setup example variables
+    max_daily_loss = Decimal("1000.0")
+    print(f"Daily loss limit set to: {max_daily_loss}")
 
 
-    async def send_alert(self, message: str) -> None:
-        """Send alert message."""
-        print(f"ALERT: {message}")
+    class DailyLossLimiter:
+        """Enforce daily loss limits."""
+
+        def __init__(self, max_daily_loss: Decimal) -> None:
+            self.max_daily_loss = max_daily_loss
+            self.daily_pnl = Decimal("0.0")
+            self.trading_enabled = True
+
+        async def update_pnl(self, pnl: Decimal) -> None:
+            """Update daily P&L and check limits."""
+            self.daily_pnl += pnl
+
+            if self.daily_pnl <= -self.max_daily_loss:
+                self.trading_enabled = False
+                await self.close_all_positions()
+                await self.send_alert("Daily loss limit reached!")
+
+        def can_trade(self) -> bool:
+            """Check if trading is allowed."""
+            return self.trading_enabled
+
+        def reset_daily(self) -> None:
+            """Reset for new trading day."""
+            self.daily_pnl = Decimal("0.0")
+            self.trading_enabled = True
+
+        async def close_all_positions(self) -> None:
+            """Close all open positions."""
+            # Implementation would close all positions
+            print("Emergency: Closing all positions due to daily loss limit")
+
+        async def send_alert(self, message: str) -> None:
+            """Send alert message."""
+            print(f"ALERT: {message}")
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 ```
 
@@ -491,20 +516,23 @@ class ResilientClient:
 ### State Persistence
 
 ```python
+import asyncio
 import json
 import os
 from datetime import datetime
 from pathlib import Path
 from typing import Any
-
 from fivetwenty import AsyncClient, Environment
 
-# Setup example variables
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = "your-account-id"
+
+async def main() -> None:
+    # Setup example variables
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = "your-account-id"
+        print(f"Setup complete for account: {account_id}")
 
 
 class StateManager:
@@ -559,104 +587,115 @@ class StateManager:
 ### Connection Pooling
 
 ```python
+import asyncio
 import os
 from typing import Any
-
 from fivetwenty import AsyncClient, Environment
 
-# Setup example variables for connection pool
-config = None  # Configuration would be loaded here
+
+async def main() -> None:
+    # Setup example variables for connection pool
+    config = None  # Configuration would be loaded here
+    print(f"Configuration placeholder: {config}")
 
 
-class ConnectionPool:
-    """Manage multiple client connections."""
+    class ConnectionPool:
+        """Manage multiple client connections."""
 
-    def __init__(self, size: int = 5) -> None:
-        self.clients = []
-        self.current = 0
+        def __init__(self, size: int = 5) -> None:
+            self.clients = []
+            self.current = 0
 
-        # Load secure configuration - this is a placeholder for the example
-        # from fivetwenty import AccountConfigLoader
-        # config = AccountConfigLoader.load_default()
-        # if not config:
-        #     raise ValueError("No configuration found for connection pool")
+            # Load secure configuration - this is a placeholder for the example
+            # from fivetwenty import AccountConfigLoader
+            # config = AccountConfigLoader.load_default()
+            # if not config:
+            #     raise ValueError("No configuration found for connection pool")
 
-        # Placeholder config for example
-        config = None  # Replace with actual config loading
+            # Placeholder config for example
+            config = None  # Replace with actual config loading
 
-        print(f"Configuration loaded for connection pool of size {size}")
+            print(f"Configuration loaded for connection pool of size {size}")
 
-        for _ in range(size):
-            client = AsyncClient(
-                token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-                environment=Environment.PRACTICE
-            )
-            self.clients.append(client)
+            for _ in range(size):
+                client = AsyncClient(
+                    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+                    environment=Environment.PRACTICE
+                )
+                self.clients.append(client)
 
-    def get_client(self) -> AsyncClient:
-        """Get next available client."""
+        def get_client(self) -> AsyncClient:
+            """Get next available client."""
+            client = self.clients[self.current]
+            selected_index = self.current
+            self.current = (self.current + 1) % len(self.clients)
+            print(f"Selected client {selected_index} from pool")
+            return client
 
-        client = self.clients[self.current]
-        selected_index = self.current
-        self.current = (self.current + 1) % len(self.clients)
-        print(f"Selected client {selected_index} from pool")
-        return client
+        async def close_all(self) -> None:
+            """Close all clients."""
+            for client in self.clients:
+                await client.aclose()
 
-    async def close_all(self) -> None:
-        """Close all clients."""
-        for client in self.clients:
-            await client.aclose()
+if __name__ == "__main__":
+    asyncio.run(main())
 
 ```
 
 ### Caching Strategy
 
 ```python
+import asyncio
 import os
 from datetime import datetime, timedelta
 from typing import Any
-
 from fivetwenty import AsyncClient, Environment
 
-# Setup example variables
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
-account_id = "your-account-id"
+
+async def main() -> None:
+    # Setup example variables
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        account_id = "your-account-id"
+        print(f"Setup complete for account: {account_id}")
 
 
-class CachedDataProvider:
-    """Cache frequently accessed data."""
+    class CachedDataProvider:
+        """Cache frequently accessed data."""
 
-    def __init__(self, client: AsyncClient) -> None:
-        self.client = client
-        self.cache = {}
-        self.cache_times = {}
+        def __init__(self, client: AsyncClient) -> None:
+            self.client = client
+            self.cache: dict[str, Any] = {}
+            self.cache_times: dict[str, datetime] = {}
 
-    async def get_instrument_info(self, account_id: str, instrument: str, cache_duration: int = 3600) -> Any:
-        """Get instrument info with caching."""
-        cache_key = f"{account_id}:{instrument}"
+        async def get_instrument_info(self, account_id: str, instrument: str, cache_duration: int = 3600) -> Any:
+            """Get instrument info with caching."""
+            cache_key = f"{account_id}:{instrument}"
 
-        # Check cache
-        if cache_key in self.cache:
-            cache_time = self.cache_times[cache_key]
-            if datetime.now() - cache_time < timedelta(seconds=cache_duration):
-                return self.cache[cache_key]
+            # Check cache
+            if cache_key in self.cache:
+                cache_time = self.cache_times[cache_key]
+                if datetime.now() - cache_time < timedelta(seconds=cache_duration):
+                    return self.cache[cache_key]
 
-        # Fetch fresh data
-        data = await self.client.accounts.get_account_instruments(
-            account_id=account_id,
-            instruments=[instrument],
-        )
-        instrument_data = data[0]
-        print(f"Cached instrument data for {instrument}")
+            # Fetch fresh data
+            data = await self.client.accounts.get_account_instruments(
+                account_id=account_id,
+                instruments=[instrument],
+            )
+            instrument_data = data[0]
+            print(f"Cached instrument data for {instrument}")
 
-        # Update cache
-        self.cache[cache_key] = instrument_data
-        self.cache_times[cache_key] = datetime.now()
+            # Update cache
+            self.cache[cache_key] = instrument_data
+            self.cache_times[cache_key] = datetime.now()
 
-        return instrument_data
+            return instrument_data
+
+if __name__ == "__main__":
+    asyncio.run(main())
 
 ```
 
@@ -674,8 +713,11 @@ Optimize authentication and client management for high-performance trading:
 import asyncio
 import os
 from typing import Any
-
 from fivetwenty import AsyncClient, Environment
+
+
+async def main() -> None:
+    print("Starting optimized client manager example")
 
 class OptimizedClientManager:
     """Manage clients efficiently for high-performance trading."""
@@ -708,46 +750,49 @@ class OptimizedClientManager:
             await self._client.aclose()
             self._client = None
 
-# Usage example
-async def high_frequency_operation() -> Any:
-    """Example of optimized client usage."""
-    manager = OptimizedClientManager()
-    client = await manager.get_client()
+    # Usage example
+    async def high_frequency_operation() -> Any:
+        """Example of optimized client usage."""
+        manager = OptimizedClientManager()
+        client = await manager.get_client()
 
-    # Reuse the same client for multiple operations
-    accounts = await client.accounts.get_accounts()
-    pricing = await client.pricing.get_pricing("account-id", ["EUR_USD"])
+        # Reuse the same client for multiple operations
+        accounts = await client.accounts.get_accounts()
+        pricing = await client.pricing.get_pricing("account-id", ["EUR_USD"])
 
-    return {"accounts": len(accounts), "prices": len(pricing)}
+        return {"accounts": len(accounts), "prices": len(pricing)}
 
-class RateLimitHandler:
-    """Handle rate limiting with exponential backoff."""
+    class RateLimitHandler:
+        """Handle rate limiting with exponential backoff."""
 
-    def __init__(self) -> None:
-        self.request_count = 0
-        self.rate_limit_delay = 0.1  # Start with 100ms delay
+        def __init__(self) -> None:
+            self.request_count = 0
+            self.rate_limit_delay = 0.1  # Start with 100ms delay
 
-    async def execute_with_rate_limit(self, operation: Any) -> Any:
-        """Execute operation with rate limiting."""
-        try:
-            # Implement pre-emptive rate limiting
-            if self.request_count % 10 == 0:  # Every 10th request
-                await asyncio.sleep(self.rate_limit_delay)
+        async def execute_with_rate_limit(self, operation: Any) -> Any:
+            """Execute operation with rate limiting."""
+            try:
+                # Implement pre-emptive rate limiting
+                if self.request_count % 10 == 0:  # Every 10th request
+                    await asyncio.sleep(self.rate_limit_delay)
 
-            result = await operation()
-            self.request_count += 1
+                result = await operation()
+                self.request_count += 1
 
-            # Reset delay on success
-            self.rate_limit_delay = max(0.1, self.rate_limit_delay * 0.9)
-            return result
+                # Reset delay on success
+                self.rate_limit_delay = max(0.1, self.rate_limit_delay * 0.9)
+                return result
 
-        except Exception as e:
-            # Exponential backoff on rate limit errors
-            if "rate limit" in str(e).lower():
-                self.rate_limit_delay = min(5.0, self.rate_limit_delay * 2)
-                await asyncio.sleep(self.rate_limit_delay)
-                return await self.execute_with_rate_limit(operation)
-            raise
+            except Exception as e:
+                # Exponential backoff on rate limit errors
+                if "rate limit" in str(e).lower():
+                    self.rate_limit_delay = min(5.0, self.rate_limit_delay * 2)
+                    await asyncio.sleep(self.rate_limit_delay)
+                    return await self.execute_with_rate_limit(operation)
+                raise
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ## Monitoring and Alerting
@@ -755,125 +800,136 @@ class RateLimitHandler:
 ### Health Checks
 
 ```python
+import asyncio
 import os
 from datetime import datetime
 from typing import Any
-
 from fivetwenty import AsyncClient, Environment
 
-# Setup example variables
-client = AsyncClient(
-    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
-    environment=Environment.PRACTICE
-)
+
+async def main() -> None:
+    # Setup example variables
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        print(f"Health monitoring setup complete")
 
 
-class HealthMonitor:
-    """Monitor system health."""
+    class HealthMonitor:
+        """Monitor system health."""
 
-    def __init__(self, client: AsyncClient) -> None:
-        self.client = client
-        self.metrics = {
-            "api_calls": 0,
-            "errors": 0,
-            "last_heartbeat": None,
-            "stream_status": "unknown",
-        }
+        def __init__(self, client: AsyncClient) -> None:
+            self.client = client
+            self.metrics: dict[str, Any] = {
+                "api_calls": 0,
+                "errors": 0,
+                "last_heartbeat": None,
+                "stream_status": "unknown",
+            }
 
-    async def health_check(self) -> Any:
-        """Perform health check."""
+        async def health_check(self) -> Any:
+            """Perform health check."""
+            health = {
+                "timestamp": datetime.now().isoformat(),
+                "status": "healthy",
+                "checks": {},
+            }
 
-        health = {
-            "timestamp": datetime.now().isoformat(),
-            "status": "healthy",
-            "checks": {},
-        }
+            # Check API connectivity
+            try:
+                accounts = await self.client.accounts.get_accounts()
+                account_count = len(accounts)
+                health["checks"]["api"] = f"ok ({account_count} accounts)"
+            except Exception as e:
+                health["checks"]["api"] = f"failed: {e}"
+                health["status"] = "unhealthy"
 
-        # Check API connectivity
-        try:
-            accounts = await self.client.accounts.get_accounts()
-            account_count = len(accounts)
-            health["checks"]["api"] = f"ok ({account_count} accounts)"
-        except Exception as e:
-            health["checks"]["api"] = f"failed: {e}"
-            health["status"] = "unhealthy"
+            # Check stream status
+            if self.metrics["last_heartbeat"]:
+                heartbeat_age = datetime.now() - self.metrics["last_heartbeat"]
+                heartbeat_timeout_seconds = 60
+                if heartbeat_age.total_seconds() > heartbeat_timeout_seconds:
+                    health["checks"]["stream"] = "stale"
+                    health["status"] = "degraded"
+                else:
+                    health["checks"]["stream"] = "ok"
 
-        # Check stream status
-        if self.metrics["last_heartbeat"]:
-            heartbeat_age = datetime.now() - self.metrics["last_heartbeat"]
-            heartbeat_timeout_seconds = 60
-            if heartbeat_age.total_seconds() > heartbeat_timeout_seconds:
-                health["checks"]["stream"] = "stale"
-                health["status"] = "degraded"
-            else:
-                health["checks"]["stream"] = "ok"
+            # Check error rate
+            if self.metrics["api_calls"] > 0:
+                error_rate = self.metrics["errors"] / self.metrics["api_calls"]
+                error_rate_threshold = 0.05
+                if error_rate > error_rate_threshold:  # 5% error rate
+                    health["checks"]["errors"] = f"high: {error_rate:.2%}"
+                    health["status"] = "degraded"
+                else:
+                    health["checks"]["errors"] = f"ok: {error_rate:.2%}"
 
-        # Check error rate
-        if self.metrics["api_calls"] > 0:
-            error_rate = self.metrics["errors"] / self.metrics["api_calls"]
-            error_rate_threshold = 0.05
-            if error_rate > error_rate_threshold:  # 5% error rate
-                health["checks"]["errors"] = f"high: {error_rate:.2%}"
-                health["status"] = "degraded"
-            else:
-                health["checks"]["errors"] = f"ok: {error_rate:.2%}"
+            return health
 
-        return health
+if __name__ == "__main__":
+    asyncio.run(main())
 
 ```
 
 ### Alerting System
 
 ```python
+import asyncio
+import logging
 import smtplib
 from email.mime.text import MIMEText
 from typing import Any
 
-# Setup example variables
-email_config = {
-    "from": "alerts@example.com",
-    "to": "trader@example.com",
-    "smtp_server": "smtp.example.com"
-}
+
+async def main() -> None:
+    # Setup example variables
+    email_config = {
+        "from": "alerts@example.com",
+        "to": "trader@example.com",
+        "smtp_server": "smtp.example.com"
+    }
+    print(f"Email config setup: {email_config['from']}")
 
 
-class AlertManager:
-    """Send alerts for critical events."""
+    class AlertManager:
+        """Send alerts for critical events."""
 
-    def __init__(self, email_config: Any) -> None:
-        self.email_config = email_config
+        def __init__(self, email_config: Any) -> None:
+            self.email_config = email_config
 
-    async def send_alert(self, subject: str, message: str, severity: str = "INFO") -> None:
-        """Send alert via email."""
-        import logging
+        async def send_alert(self, subject: str, message: str, severity: str = "INFO") -> None:
+            """Send alert via email."""
+            logger = logging.getLogger(__name__)
 
-        logger = logging.getLogger(__name__)
+            VALID_SEVERITIES = ["INFO", "WARNING", "CRITICAL"]
+            if severity not in VALID_SEVERITIES:
+                severity = "INFO"
 
-        VALID_SEVERITIES = ["INFO", "WARNING", "CRITICAL"]
-        if severity not in VALID_SEVERITIES:
-            severity = "INFO"
+            # Only send email for WARNING and CRITICAL
+            EMAIL_SEVERITIES = ["WARNING", "CRITICAL"]
+            if severity in EMAIL_SEVERITIES:
+                await self.send_email(subject, message)
+                print(f"Email alert sent: {subject}")
 
-        # Only send email for WARNING and CRITICAL
-        EMAIL_SEVERITIES = ["WARNING", "CRITICAL"]
-        if severity in EMAIL_SEVERITIES:
-            await self.send_email(subject, message)
-            print(f"Email alert sent: {subject}")
+            # Always log
+            logger.log(
+                getattr(logging, severity),
+                f"Alert: {subject} - {message}",
+            )
 
-        # Always log
-        logger.log(
-            getattr(logging, severity),
-            f"Alert: {subject} - {message}",
-        )
+        async def send_email(self, subject: str, body: str) -> None:
+            """Send email alert."""
+            msg = MIMEText(body)
+            msg["Subject"] = f"[Trading Alert] {subject}"
+            msg["From"] = self.email_config["from"]
+            msg["To"] = self.email_config["to"]
 
-    async def send_email(self, subject: str, body: str) -> None:
-        """Send email alert."""
-        msg = MIMEText(body)
-        msg["Subject"] = f"[Trading Alert] {subject}"
-        msg["From"] = self.email_config["from"]
-        msg["To"] = self.email_config["to"]
+            with smtplib.SMTP(self.email_config["smtp_server"]) as server:
+                server.send_message(msg)
 
-        with smtplib.SMTP(self.email_config["smtp_server"]) as server:
-            server.send_message(msg)
+if __name__ == "__main__":
+    asyncio.run(main())
 
 ```
 

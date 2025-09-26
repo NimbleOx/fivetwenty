@@ -287,12 +287,14 @@ if __name__ == "__main__":
 Once you have an open position, you can close it by placing an opposite order:
 
 ```python
+from typing import Any
+from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
+
 async def close_position(client: Any, instrument: str = "EUR_USD") -> Any:
     """Close an open position for the specified instrument."""
-
     print(f"\n🔄 Closing position for {instrument}...")
 
     # Get current positions
@@ -307,7 +309,6 @@ async def close_position(client: Any, instrument: str = "EUR_USD") -> Any:
     units_to_close = 0
     if position.long.units != "0":
         # Close long position (sell)
-        from decimal import Decimal
         units_to_close = -int(Decimal(str(position.long.units)))
         print(f"   📉 Closing LONG position of {position.long.units} units")
     elif position.short.units != "0":
@@ -342,7 +343,6 @@ async def close_position(client: Any, instrument: str = "EUR_USD") -> Any:
 # Example usage
 async def close_position_example() -> None:
     """Example of closing a position."""
-
     async with AsyncClient() as client:
         try:
             # Close EUR/USD position if it exists
@@ -373,15 +373,15 @@ Place an order to execute at a specific price level:
 from decimal import Decimal
 from typing import Any
 
+
 async def place_limit_order(client: Any, instrument: str = "EUR_USD") -> Any:
     """Place a limit order to buy at a specific price."""
-
     # Get current price for reference
     current_price = await get_price(client, instrument)
     current_ask = Decimal(current_price.asks[0].price)
 
     # Set limit price 10 pips below current ask
-    limit_price = current_ask - 0.0010  # 10 pips for EUR/USD
+    limit_price = current_ask - Decimal("0.0010")  # 10 pips for EUR/USD
 
     print(f"\n📝 Placing LIMIT order:")
     print(f"   Current Ask: {current_ask}")
@@ -404,17 +404,17 @@ Protect your positions with automatic stop losses:
 
 ```python
 from decimal import Decimal
+from typing import Any
 
 
 async def place_order_with_stop_loss(client: Any, instrument: str = "EUR_USD") -> Any:
     """Place market order with protective stop loss."""
-
     # Get current price to calculate stop loss
     current_price = await get_price(client, instrument)
     current_ask = Decimal(current_price.asks[0].price)
 
     # Set stop loss 50 pips below entry (for long position)
-    stop_loss_price = current_ask - 0.0050
+    stop_loss_price = current_ask - Decimal("0.0050")
 
     print(f"\n📝 Placing order with STOP LOSS:")
     print(f"   Entry ~{current_ask}")
@@ -441,17 +441,17 @@ Set profit targets for your trades:
 
 ```python
 from decimal import Decimal
+from typing import Any
 
 
 async def place_order_with_take_profit(client: Any, instrument: str = "EUR_USD") -> Any:
     """Place market order with take profit target."""
-
     # Get current price
     current_price = await get_price(client, instrument)
     current_ask = Decimal(current_price.asks[0].price)
 
     # Set take profit 100 pips above entry
-    take_profit_price = current_ask + 0.0100
+    take_profit_price = current_ask + Decimal("0.0100")
 
     print(f"\n📝 Placing order with TAKE PROFIT:")
     print(f"   Entry ~{current_ask}")
@@ -478,11 +478,11 @@ Combine stop loss and take profit for complete risk management:
 
 ```python
 from decimal import Decimal
+from typing import Any
 
 
 async def place_protected_trade(client: Any, instrument: str = "EUR_USD", units: int = 1000) -> Any:
     """Place a trade with both stop loss and take profit."""
-
     # Get current price
     current_price = await get_price(client, instrument)
     current_ask = Decimal(current_price.asks[0].price)
@@ -523,10 +523,9 @@ If you prefer synchronous code, use the sync `Client` class:
 from typing import Any
 from fivetwenty import Client, Environment
 
-# Sync client supports same configuration patterns
+
 def sync_trading_example() -> None:
     """Synchronous trading example."""
-
     # Using environment variables (recommended)
     with Client() as client:
         print(f"📋 Connected: {client.config.summary()}")
@@ -564,7 +563,6 @@ def sync_trading_example() -> None:
 # Alternative: Direct parameter configuration
 def sync_direct_params_example() -> None:
     """Sync client with direct parameters."""
-
     with Client(
         token="your-practice-token",
         account_id="your-account-id",
@@ -590,7 +588,7 @@ if __name__ == "__main__":
 | Maximum performance | Simplicity preferred |
 ```python
 import asyncio
-
+from typing import Any
 from fivetwenty import AsyncClient, Client
 
 
@@ -602,6 +600,7 @@ async def async_advantage() -> None:
         prices_task = client.pricing.get_pricing(client.account_id, ["EUR_USD", "GBP_USD"])
 
         accounts, prices = await asyncio.gather(accounts_task, prices_task)
+        print(f"Found {len(accounts)} accounts and {len(prices)} prices")
 
 # Sync: Better for simple sequential operations
 def sync_advantage() -> None:
@@ -614,6 +613,11 @@ def sync_advantage() -> None:
                 instrument="EUR_USD",
                 units=1000,
             )
+            print(f"Order placed: {order.order_create_transaction.id if order.order_create_transaction else 'N/A'}")
+
+if __name__ == "__main__":
+    asyncio.run(async_advantage())
+    sync_advantage()
 ```
 
 ## Key Trading Considerations
@@ -685,7 +689,7 @@ Ready to build more sophisticated systems:
 
 If you encounter issues:
 
-- Check the [troubleshooting section](#troubleshooting-common-issues) above
+- Check the [Common Issues section](#common-issues) above
 - Review the [error handling guide](../../explanation/error-handling.md)
 - Consult the [API documentation](../../api-reference/index.md) for detailed references
 
