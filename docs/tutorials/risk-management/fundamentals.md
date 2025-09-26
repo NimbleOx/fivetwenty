@@ -225,7 +225,7 @@ print(f"Within Limits: {'Yes' if exposure['within_limits'] else 'No'}")
 
 ---
 
-## ✅ Skill Checkpoint: Risk Fundamentals
+## Skill Checkpoint: Risk Fundamentals
 
 Test your understanding of risk management fundamentals:
 

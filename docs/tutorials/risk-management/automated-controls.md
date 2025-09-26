@@ -798,7 +798,7 @@ async def demo_risk_monitoring(account_id: str) -> Any:
 
 ---
 
-## ✅ Skill Checkpoint: Automated Risk Controls
+## Skill Checkpoint: Automated Risk Controls
 
 Test your understanding of automated risk management:
 

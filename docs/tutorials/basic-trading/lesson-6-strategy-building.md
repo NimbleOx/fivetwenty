@@ -403,7 +403,7 @@ class StrategyOptimizer:
 
 ---
 
-## ✅ Skill Checkpoint: Strategy Development
+## Skill Checkpoint: Strategy Development
 
 Test your understanding of strategy building:
 

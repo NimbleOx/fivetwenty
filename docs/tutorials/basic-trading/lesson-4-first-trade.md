@@ -5,7 +5,7 @@
 
 ---
 
-## 💻 Hands-on Exercise: Your First Market Order
+## Hands-on Exercise: Your First Market Order
 
 Now let's place your first trade with comprehensive safety checks:
 
@@ -253,7 +253,7 @@ async def close_position_safely(account_id: str, trade_id: str):
 
 ---
 
-## ✅ Skill Checkpoint: Trade Execution
+## Skill Checkpoint: Trade Execution
 
 Test your understanding of trade execution:
 

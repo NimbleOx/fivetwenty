@@ -5,7 +5,7 @@
 
 ---
 
-## 💻 Complete Trading Strategy Implementation
+## Complete Trading Strategy Implementation
 
 Let's build a comprehensive automated trading system:
 
@@ -385,7 +385,7 @@ monitor.print_performance_dashboard()
 
 ---
 
-## ✅ Skill Checkpoint: Complete Trading System
+## Skill Checkpoint: Complete Trading System
 
 Test your understanding of complete trading systems:
 

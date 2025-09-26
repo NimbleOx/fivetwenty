@@ -36,7 +36,7 @@ print(f"Token: {'✅ Set' if TOKEN != 'your-api-token-here' else '❌ Please set
 
 ---
 
-## 💻 Hands-on Exercise: Your First Connection
+## Hands-on Exercise: Your First Connection
 
 Let's establish your first connection to OANDA with detailed feedback:
 
@@ -190,7 +190,7 @@ if __name__ == "__main__":
 
 ---
 
-## ✅ Skill Checkpoint: Connection & Account Understanding
+## Skill Checkpoint: Connection & Account Understanding
 
 Test your understanding before moving to trading:
 

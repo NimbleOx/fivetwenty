@@ -78,7 +78,7 @@ Forex trading involves buying one currency while selling another. Currencies are
 
 ---
 
-## 💻 Hands-on Exercise: Concept Exploration
+## Hands-on Exercise: Concept Exploration
 
 Let's explore real currency pair data to understand these concepts:
 
@@ -130,7 +130,7 @@ if __name__ == "__main__":
 
 ---
 
-## ✅ Skill Checkpoint: Foundation Knowledge
+## Skill Checkpoint: Foundation Knowledge
 
 Before moving on, make sure you can answer these questions:
 

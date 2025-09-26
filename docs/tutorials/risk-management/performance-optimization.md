@@ -942,7 +942,7 @@ def demo_portfolio_optimization() -> dict[str, Any]:
 
 ---
 
-## ✅ Skill Checkpoint: Performance Optimization
+## Skill Checkpoint: Performance Optimization
 
 Test your understanding of performance optimization:
 

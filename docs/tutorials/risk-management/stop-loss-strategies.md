@@ -667,7 +667,7 @@ async def demo_technical_stops(account_id: str, instrument: str = "EUR_USD") -> 
 
 ---
 
-## ✅ Skill Checkpoint: Stop Loss Strategies
+## Skill Checkpoint: Stop Loss Strategies
 
 Test your understanding of stop loss techniques:
 

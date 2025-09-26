@@ -763,7 +763,7 @@ def demo_risk_budgeting():
 
 ---
 
-## ✅ Skill Checkpoint: Portfolio Risk Management
+## Skill Checkpoint: Portfolio Risk Management
 
 Test your understanding of portfolio-level risk management:
 

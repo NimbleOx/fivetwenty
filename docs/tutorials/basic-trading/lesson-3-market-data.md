@@ -97,7 +97,7 @@ if account_id:
 
 ---
 
-## 💻 Hands-on Exercise: Market Analysis Before Trading
+## Hands-on Exercise: Market Analysis Before Trading
 
 Let's create a comprehensive market analysis function:
 
@@ -317,7 +317,7 @@ if __name__ == "__main__":
 
 ---
 
-## ✅ Skill Checkpoint: Market Data Analysis
+## Skill Checkpoint: Market Data Analysis
 
 Test your understanding of market data:
 

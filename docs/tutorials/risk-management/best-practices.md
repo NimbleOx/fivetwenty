@@ -1072,7 +1072,7 @@ def demo_risk_documentation() -> dict[str, str]:
 
 ---
 
-## ✅ Skill Checkpoint: Risk Management Implementation
+## Skill Checkpoint: Risk Management Implementation
 
 Test your understanding of professional risk management implementation:
 

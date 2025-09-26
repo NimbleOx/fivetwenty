@@ -489,7 +489,7 @@ Use Kelly Criterion with safety modifications and adaptive adjustments.
 
 ---
 
-## ✅ Skill Checkpoint: Position Sizing
+## Skill Checkpoint: Position Sizing
 
 Test your understanding of position sizing strategies:
 

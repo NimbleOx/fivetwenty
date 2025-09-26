@@ -352,7 +352,7 @@ print(f"Adjusted Position: {adjusted_size} units")
 
 ---
 
-## ✅ Skill Checkpoint: Advanced Position Management
+## Skill Checkpoint: Advanced Position Management
 
 Test your understanding of position management:
 
