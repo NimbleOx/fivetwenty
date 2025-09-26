@@ -44,7 +44,7 @@ async def main():
 asyncio.run(main())
 ```
 
-### 2. Configuration Objects (Recommended)
+### 2. Configuration Objects
 
 Apporpriate for running multiple clients connected to multiple accounts within the same logic (for example a short account and a long account):
 
@@ -67,9 +67,7 @@ async with AsyncClient(config=config) as client:
     print(f"Retrieved {account_count} accounts")
 ```
 
-### 3. Environment Variables (Deployment)
-
-For Docker, Kubernetes, and CI/CD:
+### 3. Environment Variables
 
 ```bash
 # Set environment variables (in your shell etc).
@@ -119,7 +117,11 @@ print(f"Token loaded from environment: {'*' * min(8, len(token))}...")
 
 ### Using .env Files
 
-For local development:
+For local development, install python-dotenv and create a .env file:
+
+```bash
+uv add python-dotenv
+```
 
 ```bash
 # .env file (add to .gitignore!)
@@ -157,7 +159,9 @@ For production deployments, you can use AWS Secrets Manager, HashiCorp Vault, Ku
 
 ## Multiple Account Configuration
 
-### Different Environments
+You can create as many clients as you need to access different accounts with OANDA. Common scenarios include separating long and short positions to comply with US broker hedging rules, isolating different trading strategies to manage risk, or maintaining separate accounts for testing versus live trading.
+
+For traders subject to US broker hedging rules, using separate long and short accounts provides a compliant way to maintain opposing positions in the same currency pair. This approach allows you to hedge positions without violating FIFO (First In, First Out) rules that prevent holding both long and short positions simultaneously in a single account. The next example shows how you might approach this.
 
 ```python
 import asyncio
@@ -166,95 +170,46 @@ from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
 async def main():
-
-    # Practice account for testing
-    practice_config = AccountConfig(
-        token=os.environ["PRACTICE_TOKEN"],
-        account_id=os.environ["PRACTICE_ACCOUNT"],
-        environment=Environment.PRACTICE,
-        alias="practice_testing",
-    )
-
-    # Live account for production
-    live_config = AccountConfig(
-        token=os.environ["LIVE_TOKEN"],
-        account_id=os.environ["LIVE_ACCOUNT"],
+    # Long account for bullish positions
+    long_config = AccountConfig(
+        token=os.environ["LONG_ACCOUNT_TOKEN"],
+        account_id=os.environ["LONG_ACCOUNT_ID"],
         environment=Environment.LIVE,
-        alias="live_trading",
+        alias="long_positions",
     )
 
-    # Test strategy on practice first
-    async with AsyncClient(config=practice_config) as practice_client:
-        print(f"Testing strategy on practice account: {practice_config.alias}")
-        await test_strategy(practice_client)
+    # Short account for bearish positions
+    short_config = AccountConfig(
+        token=os.environ["SHORT_ACCOUNT_TOKEN"],
+        account_id=os.environ["SHORT_ACCOUNT_ID"],
+        environment=Environment.LIVE,
+        alias="short_positions",
+    )
 
-    # Deploy to live after validation
-    async with AsyncClient(config=live_config) as live_client:
-        print(f"Executing live trades on account: {live_config.alias}")
-        await execute_live_trades(live_client)
+    # Execute hedged strategy across both accounts
+    async with AsyncClient(config=long_config) as long_client:
+        async with AsyncClient(config=short_config) as short_client:
+            print("Executing hedged strategy across long and short accounts")
 
-async def test_strategy(client: AsyncClient) -> None:
-    """Test trading strategy on practice account."""
+            # Open long position in one account
+            await execute_long_strategy(long_client)
+
+            # Open short position in separate account for hedging
+            await execute_short_strategy(short_client)
+
+async def execute_long_strategy(client: AsyncClient) -> None:
+    """Execute bullish strategy on long account."""
     accounts = await client.accounts.get_accounts()
-    print(f"Strategy test completed with {len(accounts)} accounts")
+    print(f"Long strategy executed on account: {client.config.alias}")
+    print(f"Account count: {len(accounts)}")
 
-async def execute_live_trades(client: AsyncClient) -> None:
-    """Execute live trading operations."""
+async def execute_short_strategy(client: AsyncClient) -> None:
+    """Execute bearish strategy on short account."""
     accounts = await client.accounts.get_accounts()
-    print(f"Live trading executed with {len(accounts)} accounts")
+    print(f"Short strategy executed on account: {client.config.alias}")
+    print(f"Account count: {len(accounts)}")
 
 asyncio.run(main())
-```
-
-### Multiple Strategies
-
-Use environment variable prefixes for different strategies:
-
-```bash
-# Momentum strategy
-export MOMENTUM_OANDA_TOKEN="momentum-strategy-token"
-export MOMENTUM_OANDA_ACCOUNT="momentum-account"
-export MOMENTUM_OANDA_ENVIRONMENT="practice"
-export MOMENTUM_OANDA_ACCOUNT_ALIAS="momentum_strategy"
-
-# Grid strategy
-export GRID_OANDA_TOKEN="grid-strategy-token"
-export GRID_OANDA_ACCOUNT="grid-account"
-export GRID_OANDA_ENVIRONMENT="practice"
-export GRID_OANDA_ACCOUNT_ALIAS="grid_strategy"
-```
-
-```python
-import asyncio
-from fivetwenty import AccountConfigLoader, AsyncClient
-
-# Load configurations with custom prefixes
-momentum_config = AccountConfigLoader.from_env_prefix("MOMENTUM_")
-grid_config = AccountConfigLoader.from_env_prefix("GRID_")
-print(f"Loaded momentum config: {momentum_config.summary()}")
-print(f"Loaded grid config: {grid_config.summary()}")
-
-# Run strategies in parallel
-async with AsyncClient(config=momentum_config) as momentum_client:
-    async with AsyncClient(config=grid_config) as grid_client:
-        print("Starting parallel strategies...")
-        results = await asyncio.gather(
-            run_momentum_strategy(momentum_client),
-            run_grid_strategy(grid_client)
-        )
-        print(f"Parallel strategies completed: {len(results)} results")
-
-async def run_momentum_strategy(client: AsyncClient) -> str:
-    """Run momentum trading strategy."""
-    accounts = await client.accounts.get_accounts()
-    print(f"Momentum strategy running with {len(accounts)} accounts")
-    return "momentum_complete"
-
-async def run_grid_strategy(client: AsyncClient) -> str:
-    """Run grid trading strategy."""
-    accounts = await client.accounts.get_accounts()
-    print(f"Grid strategy running with {len(accounts)} accounts")
-    return "grid_complete"
 ```
 
 ## Security Features
@@ -318,7 +273,9 @@ except ValidationError as e:
 
 ## Testing Authentication
 
-### Verify Configuration
+Before deploying your application, it's important to verify that your authentication setup works correctly. You can test your configuration in two ways: validate the configuration structure without making API calls, or verify authentication by connecting to OANDA's servers.
+
+### Test Your Authentication Setup
 
 ```python
 import asyncio
@@ -328,7 +285,7 @@ from fivetwenty import AsyncClient, Environment
 
 
 async def test_authentication():
-    """Test OANDA API authentication."""
+    """Test OANDA API authentication and configuration."""
 
     try:
         async with AsyncClient(
@@ -357,33 +314,6 @@ async def test_authentication():
 asyncio.run(test_authentication())
 ```
 
-### Validate Configuration
-
-```python
-import os
-
-from fivetwenty import AccountConfig, ConfigValidator, Environment
-
-# Create configuration
-config = AccountConfig(
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
-    environment=Environment.PRACTICE,
-    alias="test_account",
-)
-
-# Validate configuration
-errors = ConfigValidator.validate_account_config(config)
-error_count = len(errors) if errors else 0
-
-if errors:
-    print(f"Configuration errors ({error_count}):")
-    for error in errors:
-        print(f"  • {error}")
-else:
-    print("✅ Configuration is valid")
-```
-
 ## Security Considerations
 
 Always follow these critical security guidelines:
@@ -400,85 +330,46 @@ Always follow these critical security guidelines:
 
 ## Troubleshooting
 
-### Common Authentication Errors
-```python
-from fivetwenty import AsyncClient, Environment
+If you encounter authentication issues, this section provides quick solutions for the most common problems.
 
-# Error: Missing token
-try:
-    client = AsyncClient()  # No token or env vars
-    print(f"Unexpected success: {client}")
-except ValueError as e:
-    print(f"Configuration error (expected): {e}")
-    # Fix: Set FIVETWENTY_OANDA_TOKEN environment variable
+### Quick Fixes
 
-# Error: Invalid token format
-try:
-    client = AsyncClient(token="invalid-token")
-    accounts = await client.accounts.get_accounts()
-    print(f"Unexpected success: {len(accounts)} accounts")
-except Exception as e:
-    print(f"Authentication error (expected): {e}")
-    # Fix: Get valid token from OANDA account settings
-
-# Error: Wrong environment
-try:
-    client = AsyncClient(
-        token="practice-token",
-        environment=Environment.LIVE  # Wrong environment
-    )
-    accounts = await client.accounts.get_accounts()
-    print(f"Unexpected success: {len(accounts)} accounts")
-except Exception as e:
-    print(f"Environment error (expected): {e}")
-    # Fix: Use correct environment for your token
+**Missing Environment Variables**
+```bash
+export FIVETWENTY_OANDA_TOKEN="your-api-token"
+export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
+export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 ```
 
-### Debug Authentication Issues
-
+**Invalid Token Format**
 ```python
-from fivetwenty import AsyncClient, Environment
-
-# Check configuration
-client = AsyncClient(token="your-token", environment=Environment.PRACTICE)
-config = client.config
-
-print(f"Environment: {config.environment.value}")
-print(f"Account ID: {client.account_id}")
-print(f"Config summary: {config.summary()}")
-
-# Validate manually
-from fivetwenty import ConfigValidator
-
-errors = ConfigValidator.validate_account_config(config)
-if errors:
-    print(f"Configuration issues ({len(errors)}): {errors}")
+# Check your token is properly formatted
+import os
+token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "").strip()
+if not token:
+    print("❌ Token is empty or missing")
 else:
-    print("Configuration is valid")
+    print(f"✅ Token loaded: {token[:8]}...")
 ```
 
-### Rate Limiting
-
-If you encounter rate limits:
-
-- Use the SDK's built-in retry mechanism
-- Implement exponential backoff
-- Cache frequently accessed data
-- Monitor your request patterns
-
+**Environment Mismatch**
 ```python
+# Ensure token matches environment
 from fivetwenty import AsyncClient, Environment
 
-# Configure retries for rate limiting
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE,
-    max_retries=5,  # Increase retries
-    timeout=60.0    # Increase timeout
-) as client:
-    accounts = await client.accounts.get_accounts()
-    print(f"Retrieved {len(accounts)} accounts with retry configuration")
+# Practice token → Practice environment
+client = AsyncClient(token=practice_token, environment=Environment.PRACTICE)
+
+# Live token → Live environment
+client = AsyncClient(token=live_token, environment=Environment.LIVE)
 ```
+
+!!! info "Comprehensive Troubleshooting"
+    For detailed authentication troubleshooting, debugging tools, network issues, SSL problems, and complete error diagnostics, see [Connection Failure Handling Guide](../../guides/practical-solutions/handle-connection-failures.md#authentication-troubleshooting).
+
+## Summary
+
+You now have a secure, flexible authentication setup for FiveTwenty. The SDK supports multiple authentication methods from direct parameters to environment variables, with automatic secret masking and comprehensive validation. Whether you're using a single account for development or multiple accounts for complex trading strategies, the configuration system scales to meet your needs while maintaining security best practices.
 
 ## Next Steps
 

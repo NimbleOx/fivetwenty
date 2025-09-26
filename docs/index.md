@@ -41,6 +41,8 @@ Get trading in minutes with FiveTwenty's flexible configuration system.
 !!! info "Package Management with uv"
     Throughout this documentation, we use **[uv](https://github.com/astral-sh/uv)** - the fast, modern Python package manager. All package installation commands use `uv add` instead of `pip install` for better performance and dependency management.
 
+    We also use **python-dotenv** throughout the documentation for secure credential management with `.env` files.
+
     **New to uv?** [Learn more about uv](https://docs.astral.sh/uv/) and how it simplifies Python package management.
 
 By default, the client will look for three environment variables that must be set. The `FIVETWENTY_OANDA_TOKEN` and `FIVETWENTY_OANDA_ACCOUNT` environment variables represent your token and account number, needed to authenticate.  `FIVETWENTY_OANDA_ENVIRONMENT` is needed to know which OANDA url to connect to.

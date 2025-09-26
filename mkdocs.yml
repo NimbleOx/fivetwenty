@@ -73,7 +73,6 @@ nav:
           - Installation & Setup: tutorials/getting-started/installation.md
           - Authentication Basics: tutorials/getting-started/authentication.md
           - Your First Trade: tutorials/getting-started/first-trade.md
-          - Understanding Environments: tutorials/getting-started/environments.md
       - Basic Trading:
           - tutorials/basic-trading/index.md
           - Foundation: tutorials/basic-trading/lesson-1-foundation.md
@@ -101,6 +100,7 @@ nav:
       - Understanding & Architecture:
           - SDK Architecture: guides/understanding/sdk-architecture.md
           - Async vs Sync Design: guides/understanding/async-vs-sync.md
+          - Environment Management: guides/understanding/environments.md
           - Configuration Patterns: guides/understanding/configuration.md
           - Best Practices & Patterns: guides/understanding/best-practices.md
       - Trading Concepts:

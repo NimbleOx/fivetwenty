@@ -14,6 +14,137 @@
 
 ---
 
+## Authentication Troubleshooting
+
+Authentication issues are often the first barrier users encounter. This section provides detailed guidance for diagnosing and resolving authentication-specific problems.
+
+### Configuration Errors
+
+**Missing Environment Variables**
+```
+ValueError: FIVETWENTY_OANDA_TOKEN environment variable not set
+```
+**Cause:** The SDK cannot find your API token in environment variables.
+**Solution:** Set the required environment variables:
+```bash
+export FIVETWENTY_OANDA_TOKEN="your-api-token"
+export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
+export FIVETWENTY_OANDA_ENVIRONMENT="practice"
+```
+
+**Invalid Token Format**
+```
+ValueError: Invalid token format: token must be a non-empty string
+```
+**Cause:** Token is empty, None, or contains only whitespace.
+**Solution:** Verify your token is copied correctly from OANDA without extra spaces:
+```python
+# Check your token
+import os
+token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "").strip()
+if not token:
+    print("❌ Token is empty or missing")
+else:
+    print(f"✅ Token loaded: {token[:8]}...")
+```
+
+**Account ID Mismatch**
+```
+ValidationError: Account ID format invalid
+```
+**Cause:** Account ID doesn't match OANDA's format (XXX-XXX-XXXXXXX-XXX).
+**Solution:** Copy the exact account ID from your OANDA account dashboard.
+
+### API Authentication Errors
+
+**HTTP 401 Unauthorized**
+```
+HTTPError: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/accounts
+```
+**Cause:** Invalid or expired API token.
+**Solutions:**
+- Generate a new token in your OANDA account settings
+- Verify you're using the correct token for the environment (practice vs live)
+- Check if your token has expired (OANDA tokens don't expire but can be revoked)
+
+**HTTP 403 Forbidden**
+```
+HTTPError: 403 Client Error: Forbidden for url: https://api-fxpractice.oanda.com/v3/accounts/101-001-XXXXXXX-001
+```
+**Cause:** Token doesn't have access to the specified account.
+**Solutions:**
+- Verify the account ID belongs to your OANDA login
+- Ensure you're using the correct environment (practice tokens can't access live accounts)
+- Check if the account is active and not suspended
+
+### Environment Mismatch Errors
+
+**Wrong Environment URL**
+```
+HTTPError: 404 Client Error: Not Found
+```
+**Cause:** Using a practice token with live environment or vice versa.
+**Solution:** Match your token type to the environment:
+```python
+from fivetwenty import AsyncClient, Environment
+
+# Practice token → Practice environment
+client = AsyncClient(
+    token=practice_token,
+    environment=Environment.PRACTICE  # Uses api-fxpractice.oanda.com
+)
+
+# Live token → Live environment
+client = AsyncClient(
+    token=live_token,
+    environment=Environment.LIVE  # Uses api-fxtrade.oanda.com
+)
+```
+
+### Rate Limiting Issues
+
+**HTTP 429 Too Many Requests**
+```
+HTTPError: 429 Client Error: Too Many Requests
+```
+**Cause:** Exceeded OANDA's rate limits (20 requests per second).
+**Solutions:**
+- Implement delays between requests
+- Use built-in retry mechanisms
+- Cache data to reduce API calls
+
+```python
+import asyncio
+from fivetwenty import AsyncClient, Environment
+
+# Add delays between requests
+async def rate_limited_requests(token: str):
+    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+        for i in range(5):
+            accounts = await client.accounts.get_accounts()
+            print(f"Request {i+1}: {len(accounts)} accounts")
+            await asyncio.sleep(0.1)  # 100ms delay
+```
+
+### Common Error Patterns
+
+**Pattern: "Works in code but fails in deployment"**
+- Check environment variables are set in deployment environment
+- Verify container/server has internet access
+- Ensure firewall allows HTTPS to OANDA servers
+
+**Pattern: "Worked yesterday but fails today"**
+- OANDA may have rotated SSL certificates
+- Check for any OANDA service announcements
+- Verify system date/time is accurate
+
+**Pattern: "Works in practice but fails in live"**
+- Confirm you have a funded live account
+- Verify live token permissions
+- Check live account is active and not restricted
+
+---
+
 ## Common Connection Errors
 
 ### Authentication Failures
@@ -397,9 +528,86 @@ async def resilient_example():
 
 ---
 
-## Troubleshooting Checklist
+## Debugging Tools and Diagnostics
 
-### Quick Diagnostics
+### Configuration Checker
+
+```python
+import os
+from fivetwenty import AsyncClient, Environment
+
+def check_configuration():
+    """Comprehensive configuration check."""
+
+    # Check environment variables
+    required_vars = [
+        "FIVETWENTY_OANDA_TOKEN",
+        "FIVETWENTY_OANDA_ACCOUNT",
+        "FIVETWENTY_OANDA_ENVIRONMENT"
+    ]
+
+    missing_vars = []
+    for var in required_vars:
+        if not os.environ.get(var):
+            missing_vars.append(var)
+
+    if missing_vars:
+        print(f"❌ Missing environment variables: {missing_vars}")
+        return False
+
+    # Test client creation
+    try:
+        client = AsyncClient()
+        print(f"✅ Client created successfully")
+        print(f"Environment: {client.config.environment.value}")
+        print(f"Account: {client.account_id}")
+        return True
+    except Exception as e:
+        print(f"❌ Client creation failed: {e}")
+        return False
+
+# Run configuration check
+check_configuration()
+```
+
+### Connection Test
+
+```python
+import asyncio
+from fivetwenty import AsyncClient, Environment
+
+async def test_connection():
+    """Test actual API connectivity."""
+
+    try:
+        async with AsyncClient() as client:
+            # Test basic API call
+            accounts = await client.accounts.get_accounts()
+            print(f"✅ API connection successful: {len(accounts)} accounts")
+
+            # Test account access
+            account = await client.accounts.get_account(client.account_id)
+            print(f"✅ Account access successful: {account.balance} {account.currency}")
+
+    except Exception as e:
+        error_type = type(e).__name__
+        print(f"❌ Connection test failed ({error_type}): {e}")
+
+        # Provide specific guidance based on error type
+        if "401" in str(e):
+            print("💡 Check your API token is valid and not expired")
+        elif "403" in str(e):
+            print("💡 Verify account ID matches your OANDA account")
+        elif "timeout" in str(e).lower():
+            print("💡 Check network connectivity and firewall settings")
+        elif "ssl" in str(e).lower():
+            print("💡 Update SSL certificates or check system time")
+
+# Run connection test
+asyncio.run(test_connection())
+```
+
+### Comprehensive Diagnostics
 
 ```python
 from fivetwenty import AsyncClient, Environment
