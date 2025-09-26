@@ -229,12 +229,12 @@ async def add_guaranteed_stop_loss(client: AsyncClient, account_id: str, trade_i
             print(f"Guaranteed stop loss premium: {premium}")
 
         print(f"Guaranteed stop loss created: {order_id}")
-        return order_id
-
     except Exception:
         print("Guaranteed stop loss not available")
         # Fallback to regular stop loss
         return await add_regular_stop_loss(client, account_id, trade_id)
+    else:
+        return order_id
 
 
 async def add_regular_stop_loss(client: AsyncClient, account_id: str, trade_id: str) -> str:
@@ -701,20 +701,24 @@ async def manage_pending_orders(account_id: AccountID) -> None:
 import asyncio
 import os
 import time
+from dataclasses import dataclass
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
 
 
-async def create_bracket_order(
-    account_id: AccountID,
-    instrument: InstrumentName,
-    entry_price: Decimal,
-    take_profit: Decimal,
-    stop_loss: Decimal,
-    units: int,
-) -> Any:
+@dataclass
+class BracketOrderParams:
+    account_id: AccountID
+    instrument: InstrumentName
+    entry_price: Decimal
+    take_profit: Decimal
+    stop_loss: Decimal
+    units: int
+
+async def create_bracket_order(params: BracketOrderParams) -> Any:
     """Create a bracket order: entry + take profit + stop loss."""
     async with AsyncClient(
         token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
@@ -722,10 +726,10 @@ async def create_bracket_order(
     ) as client:
         # Create entry order
         entry_order = await client.orders.post_limit_order(
-            account_id=account_id,
-            instrument=instrument,
-            units=units,
-            price=entry_price,
+            account_id=params.account_id,
+            instrument=params.instrument,
+            units=params.units,
+            price=params.entry_price,
             client_request_id=f"bracket-entry-{int(time.time())}",
         )
 
