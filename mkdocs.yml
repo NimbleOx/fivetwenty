@@ -73,11 +73,10 @@ nav:
           - Installation & Setup: tutorials/getting-started/installation.md
           - Authentication Basics: tutorials/getting-started/authentication.md
           - Your First Trade: tutorials/getting-started/first-trade.md
-      - Basic Trading:
+      - Trading Basics:
           - tutorials/basic-trading/index.md
           - Foundation: tutorials/basic-trading/foundation.md
           - Market Data & Analysis: tutorials/basic-trading/market-data.md
-          - Your First Trade: tutorials/basic-trading/first-trade.md
           - Position Management: tutorials/basic-trading/position-management.md
           - Strategy Building: tutorials/basic-trading/strategy-building.md
           - Complete System: tutorials/basic-trading/complete-system.md
@@ -90,7 +89,7 @@ nav:
           - Order Strategies & Combinations: tutorials/advanced-orders/order-strategies.md
           - Validation & Best Practices: tutorials/advanced-orders/validation-best-practices.md
       - Risk Management: tutorials/risk-management.md
-      - Portfolio Management: tutorials/portfolio-analysis.md
+      - Account Management: tutorials/portfolio-analysis.md
       - Streaming Data: tutorials/streaming-data.md
 
   # GUIDES - Comprehensive practical guidance

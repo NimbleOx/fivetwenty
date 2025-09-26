@@ -365,7 +365,7 @@ Use FiveTwenty's pricing API to check current spreads and recent price action be
 
 ## Next Steps
 
-Continue to [Your First Trade](first-trade.md) to place your first trade using the market analysis skills you've learned.
+Continue to [Position Management](position-management.md) to learn advanced techniques for managing your trading positions.
 
 ---
 

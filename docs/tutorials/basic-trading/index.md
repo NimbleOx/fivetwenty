@@ -13,24 +13,24 @@ A comprehensive, hands-on tutorial series that walks you through forex trading f
 
     **Time commitment:** 30-45 minutes per tutorial, 2-3 hours total
 
-This progressive tutorial series takes you from complete beginner to building automated trading strategies. Each lesson builds on the previous one with checkpoints to ensure you're developing skills effectively.
+This progressive tutorial series builds on the getting-started tutorials to advance your trading skills from market analysis to building automated trading strategies. Each tutorial explores advanced concepts with hands-on examples.
 
 ---
 
 ## Learning Path
 
 ### Prerequisites
-- Python 3.8 or higher
-- fivetwenty installed: `uv add fivetwenty`
-- OANDA practice account with API token
-- Basic understanding of forex markets
+- Completed [Getting Started tutorials](../getting-started/installation.md)
+- Python 3.10 or higher with FiveTwenty installed
+- OANDA practice account with API token configured
+- Familiarity with placing your first trade
 
 ### 📈 Your Progressive Journey
 
 !!! info "🎯 Skill Progression Framework"
     **Foundation** → Understand forex concepts and fundamentals
     **Market Analysis** → Analyze market data and conditions
-    **Active Trading** → Place and manage trades
+    **Position Management** → Monitor and manage trading positions
     **Strategy Development** → Build systematic trading systems
 
 ---
@@ -65,22 +65,8 @@ Understand market data before trading:
 
 ---
 
-### [Your First Trade](first-trade.md)
-**First Trading**
-
-Place and manage your first trade with comprehensive safety:
-
-- Pre-trade market analysis
-- Safe trade execution with risk controls
-- Real-time position monitoring
-- Performance analysis and lessons learned
-
-**Skills gained:** Trade execution, risk management, and position monitoring
-
----
-
 ### [Position Management](position-management.md)
-**Advanced Position Management**
+**Position Management**
 
 Learn the art of managing open positions:
 

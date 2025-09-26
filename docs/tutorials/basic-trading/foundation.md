@@ -109,13 +109,13 @@ asyncio.run(test_fivetwenty_setup())
 
 ## What You've Learned
 
-✅ **FiveTwenty Instrument Names** - Using `InstrumentName` enum for currency pairs
+**FiveTwenty Instrument Names** - Using `InstrumentName` enum for currency pairs
 
-✅ **Order Models** - Creating market, limit, and stop loss orders with proper types
+**Order Models** - Creating market, limit, and stop loss orders with proper types
 
-✅ **Decimal Precision** - Using `Decimal` for exact financial calculations
+**Decimal Precision** - Using `Decimal` for exact financial calculations
 
-✅ **Environment Setup** - Distinguishing between practice and live trading
+**Environment Setup** - Distinguishing between practice and live trading
 
 ## Next Steps
 
