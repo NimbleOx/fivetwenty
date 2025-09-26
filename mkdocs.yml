@@ -95,24 +95,8 @@ nav:
               - Automated Order Systems: tutorials/advanced-orders/automated-systems.md
               - Order Strategies & Combinations: tutorials/advanced-orders/order-strategies.md
               - Validation & Best Practices: tutorials/advanced-orders/validation-best-practices.md
-          - Risk Management:
-              - Overview: tutorials/risk-management/index.md
-              - Risk Management Fundamentals: tutorials/risk-management/fundamentals.md
-              - Position Sizing Strategies: tutorials/risk-management/position-sizing.md
-              - Stop Loss Strategies: tutorials/risk-management/stop-loss-strategies.md
-              - Portfolio Risk Management: tutorials/risk-management/portfolio-risk.md
-              - Automated Risk Controls: tutorials/risk-management/automated-controls.md
-              - Performance Optimization: tutorials/risk-management/performance-optimization.md
-              - Best Practices & Validation: tutorials/risk-management/best-practices.md
-          - Portfolio Analysis:
-              - Overview: tutorials/portfolio-analysis/index.md
-              - Portfolio Theory: tutorials/portfolio-analysis/portfolio-theory.md
-              - Data Collection: tutorials/portfolio-analysis/data-collection.md
-              - Portfolio Optimization: tutorials/portfolio-analysis/portfolio-optimization.md
-              - Risk Attribution: tutorials/portfolio-analysis/risk-attribution.md
-              - Performance Attribution: tutorials/portfolio-analysis/performance-attribution.md
-              - Portfolio Rebalancing: tutorials/portfolio-analysis/portfolio-rebalancing.md
-              - Best Practices: tutorials/portfolio-analysis/best-practices.md
+          - Risk Management: tutorials/risk-management/index.md
+          - Portfolio Management: tutorials/portfolio-analysis/index.md
           - Streaming Data:
               - Overview: tutorials/streaming-data/index.md
               - Streaming Fundamentals: tutorials/streaming-data/streaming-fundamentals.md

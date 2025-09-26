@@ -44,11 +44,10 @@ Continue here once you've completed the getting started section.
 ### **Specialized Learning** (Advanced Topics)
 Deep-dive tutorials for specific areas of trading and SDK usage.
 
-1. **[Decimal Best Practices](decimal-best-practices.md)** - Learn financial precision
-2. **[Risk Management](risk-management/index.md)** - Protect your trading capital
-3. **[Portfolio Analysis](portfolio-analysis/index.md)** - Monitor and analyze performance
-4. **[Streaming Data](streaming-data/index.md)** - Handle real-time market feeds
-5. **[Advanced Orders](advanced-orders/index.md)** - Learn complex order types
+1. **[Risk Management](risk-management/index.md)** - Protect your trading capital using FiveTwenty controls
+2. **[Portfolio Management](portfolio-analysis/index.md)** - Manage multiple positions effectively
+3. **[Streaming Data](streaming-data/index.md)** - Handle real-time market feeds
+4. **[Advanced Orders](advanced-orders/index.md)** - Learn complex order types
 
 ### **Interactive Notebooks** (Hands-On Practice)
 Apply your knowledge with Jupyter notebooks that combine code, explanation, and exercises.
