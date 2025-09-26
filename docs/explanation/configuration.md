@@ -430,7 +430,7 @@ try:
         environment=Environment.PRACTICE,
         alias="123invalid",  # Error!
     )
-except ValidationError as e:
+except ValidationError:
     print("Alias must be a valid identifier")
 
 # Empty tokens are rejected
@@ -441,7 +441,7 @@ try:
         environment=Environment.PRACTICE,
         alias="valid_alias",
     )
-except ValidationError as e:
+except ValidationError:
     print("Token cannot be empty")
 ```
 
@@ -502,6 +502,9 @@ For advanced HTTP configuration:
 ```python
 import asyncio
 import os
+
+import httpx
+
 from fivetwenty import AsyncClient, Environment
 
 
@@ -679,7 +682,10 @@ spec:
 ```python
 import asyncio
 import os
+from typing import Any
+
 import boto3
+
 from fivetwenty import AsyncClient, Environment
 
 
@@ -691,7 +697,7 @@ def get_secret(secret_name: str) -> str:
     return response['SecretString']
 
 
-async def lambda_handler(event: Any, context: Any) -> dict[str, Any]:
+async def lambda_handler(_event: Any, _context: Any) -> dict[str, Any]:
     """Lambda handler with secure configuration."""
     # Load secrets from AWS Secrets Manager
     token = get_secret('OANDA/api-token')

@@ -774,22 +774,25 @@ class PipelinePerformanceMonitor:
 Centralize configuration for all data sources:
 
 ```python
+import json
+from typing import Any
+
 class DataSourceConfig:
     """Centralized configuration for all data sources."""
 
-    def __init__(self, config_file: str = None) -> None:
+    def __init__(self, config_file: str | None = None) -> None:
         self.config = self._load_config(config_file) if config_file else {}
 
-    def _load_config(self, config_file: str) -> Dict:
+    def _load_config(self, config_file: str) -> dict[str, Any]:
         """Load configuration from file."""
         try:
-            with open(config_file, "r") as f:
+            with open(config_file) as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading config: {e}")
             return {}
 
-    def get_api_keys(self) -> Dict[str, str]:
+    def get_api_keys(self) -> dict[str, str]:
         """Get all API keys."""
         return {
             "economic_calendar": self.config.get("economic_calendar_api_key"),
@@ -798,7 +801,7 @@ class DataSourceConfig:
             "oanda_token": self.config.get("oanda_token"),
         }
 
-    def get_update_intervals(self) -> Dict[str, int]:
+    def get_update_intervals(self) -> dict[str, int]:
         """Get update intervals for each data source."""
         return self.config.get("update_intervals", {
             "economic": 3600,   # 1 hour
@@ -807,7 +810,7 @@ class DataSourceConfig:
             "technical": 300,    # 5 minutes
         })
 
-    def get_risk_settings(self) -> Dict[str, float]:
+    def get_risk_settings(self) -> dict[str, float]:
         """Get risk management settings."""
         return self.config.get("risk_settings", {
             "max_position_size": 100000,
@@ -821,14 +824,20 @@ class DataSourceConfig:
 Implement robust error handling for production use:
 
 ```python
+from __future__ import annotations
+
 from decimal import Decimal
 from datetime import datetime
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from typing import Any
 
 
 class ResilientDataPipeline:
     """Resilient wrapper for unified trading system."""
 
-    def __init__(self, unified_system: UnifiedTradingSystem) -> None:
+    def __init__(self, unified_system: Any) -> None:
         self.unified_system = unified_system
         self.fallback_modes = {
             "economic": True,   # Can trade without economic data
@@ -837,7 +846,7 @@ class ResilientDataPipeline:
             "technical": False,  # Cannot trade without technical analysis
         }
 
-    async def get_resilient_market_context(self, instrument: str) -> MarketContext:
+    async def get_resilient_market_context(self, instrument: str) -> Any:
         """Get market context with fallback for failed data sources."""
 
         try:
@@ -849,7 +858,7 @@ class ResilientDataPipeline:
             # Try with fallback mode
             return await self._get_fallback_context(instrument)
 
-    async def _get_fallback_context(self, instrument: str) -> MarketContext:
+    async def _get_fallback_context(self, instrument: str) -> Any:
         """Get market context using only available data sources."""
 
         # Start with minimal context

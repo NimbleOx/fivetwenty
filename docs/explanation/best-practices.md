@@ -471,7 +471,7 @@ class ResilientClient:
             # Check circuit breaker
             if self.circuit_breaker.is_open():
                 msg = "Circuit breaker open"
-            raise Exception(msg)
+                raise Exception(msg)
 
             # Validate order
             self.validate_order(kwargs)
@@ -751,7 +751,7 @@ class OptimizedClientManager:
 
     # Usage example
     async def high_frequency_operation() -> Any:
-        """Example of optimized client usage."""
+        """Provide example of optimized client usage."""
         manager = OptimizedClientManager()
         client = await manager.get_client()
 
@@ -1047,13 +1047,13 @@ async def main() -> None:
             """Send alert via email."""
             logger = logging.getLogger(__name__)
 
-            VALID_SEVERITIES = ["INFO", "WARNING", "CRITICAL"]
-            if severity not in VALID_SEVERITIES:
+            valid_severities = ["INFO", "WARNING", "CRITICAL"]
+            if severity not in valid_severities:
                 severity = "INFO"
 
             # Only send email for WARNING and CRITICAL
-            EMAIL_SEVERITIES = ["WARNING", "CRITICAL"]
-            if severity in EMAIL_SEVERITIES:
+            email_severities = ["WARNING", "CRITICAL"]
+            if severity in email_severities:
                 await self.send_email(subject, message)
                 print(f"Email alert sent: {subject}")
 
@@ -1111,7 +1111,7 @@ from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 from fivetwenty.models import Account
 
 # Setup test variables
-mock_client = AsyncMock(spec=AsyncClient)
+# mock_client = AsyncMock(spec=AsyncClient)
 
 
 @pytest.fixture
@@ -1252,7 +1252,7 @@ from hypothesis import given
 from hypothesis import strategies as st
 
 # Setup test variables
-mock_client = None
+# mock_client = None
 units = 1000
 price = Decimal("1.1234")
 
@@ -1261,7 +1261,7 @@ price = Decimal("1.1234")
     units=st.integers(min_value=1, max_value=100000),
     price=st.decimals(min_value=Decimal("0.01"), max_value=Decimal("10.00"), places=5),
 )
-async def test_position_size_calculation(mock_client: Any, units: int, price: Decimal) -> None:
+async def test_position_size_calculation(_mock_client: Any, units: int, price: Decimal) -> None:
     """Test position size calculations with various inputs."""
 
     position_value = Decimal(str(units)) * price
@@ -1701,7 +1701,7 @@ from unittest.mock import AsyncMock, patch
 import pytest
 
 # Setup mock variables
-mock_client = AsyncMock()
+# mock_client = AsyncMock()
 
 
 @pytest.fixture
