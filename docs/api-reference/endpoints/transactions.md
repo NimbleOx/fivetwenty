@@ -9,9 +9,11 @@ Transaction history and monitoring.
 ## get_transactions
 ```python
 import asyncio
+from typing import Any
+from fivetwenty import AsyncClient
 
 
-async def main(client):
+async def main(client: AsyncClient) -> None:
     # transactions.get_transactions(account_id: AccountID, from_time: str | None = None,
     #                   to_time: str | None = None, page_size: int = 100,
     #                   transaction_type: list[str] | None = None) -> dict[str, Any]
@@ -155,15 +157,25 @@ Stream real-time transactions.
 
 ## get_transactions_range
 ```python
-# transactions.get_transactions_range(account_id: AccountID, from_transaction_id: str,
-#                       to_transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
+import asyncio
+from typing import Any
+from fivetwenty import AsyncClient, Configuration
 
-# Example usage:
-transactions = await client.transactions.get_transactions_range(
-    account_id="123-456-789",
-    from_transaction_id="100",
-    to_transaction_id="200"
-)
+
+async def main() -> None:
+    # transactions.get_transactions_range(account_id: AccountID, from_transaction_id: str,
+    #                       to_transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
+
+    config = Configuration(token="your-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        transactions = await client.transactions.get_transactions_range(
+            account_id="123-456-789",
+            from_transaction_id="100",
+            to_transaction_id="200"
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/idrange`
 
@@ -190,15 +202,25 @@ Get transactions in ID range.
 
 ## get_transactions_deprecated
 ```python
-# transactions.get_transactions(account_id: AccountID, count: int = 500,
-#                     transaction_type: list[str] | None = None) -> dict[str, Any]
+import asyncio
+from typing import Any
+from fivetwenty import AsyncClient, Configuration
 
-# Example usage:
-all_transactions = await client.transactions.get_transactions(
-    account_id="123-456-789",
-    count=100,
-    transaction_type=["ORDER_FILL", "MARKET_ORDER"]
-)
+
+async def main() -> None:
+    # transactions.get_transactions(account_id: AccountID, count: int = 500,
+    #                     transaction_type: list[str] | None = None) -> dict[str, Any]
+
+    config = Configuration(token="your-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        all_transactions = await client.transactions.get_transactions(
+            account_id="123-456-789",
+            count=100,
+            transaction_type=["ORDER_FILL", "MARKET_ORDER"]
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions`
 

@@ -424,8 +424,13 @@ async def batch_pricing_example():
 ### Avoid These Patterns
 
 ```python
+import os
 import time
 from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
 
 # ❌ Creating clients in loops
 async def bad_pattern_example():
@@ -465,11 +470,16 @@ async def bad_rate_limit_handling():
 ```python
 import asyncio
 import logging
+import os
 from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import VeeTwentyError, TooManyRequests
 
 logger = logging.getLogger(__name__)
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
 
 # ✅ Reuse client across operations
 async def good_pattern_example():

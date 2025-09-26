@@ -111,8 +111,8 @@ async def calculate_position_sizes(
 
 ## Next Steps
 
-- Learn [Risk Management](../risk-management.md) for portfolio-level risk controls
-- Explore [Advanced Orders](../advanced-orders/index.md) for complex position management
-- See [Best Practices](../../explanation/best-practices.md) for production considerations
+- Learn [Risk Management](risk-management.md) for portfolio-level risk controls
+- Explore [Advanced Orders](advanced-orders/index.md) for complex position management
+- See [Best Practices](../explanation/best-practices.md) for production considerations
 
 For comprehensive portfolio theory and optimization techniques, consider specialized financial libraries like `scipy.optimize` or `cvxpy` alongside FiveTwenty for execution.

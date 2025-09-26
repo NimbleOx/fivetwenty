@@ -79,32 +79,12 @@ OANDA server errors.
 
 ```python
 import os
-import asyncio
-import time
-import logging
-from decimal import Decimal
-from typing import Any, Optional, List, Dict
-from datetime import datetime, timedelta
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import FiveTwentyError
 
-from fivetwenty import AsyncClient, Environment, Client
-from fivetwenty.models import (
-    OrderRequest,
-    OrderResponse,
-    MarketOrderRequest,
-    Order,
-    Position,
-    Trade,
-    ClientPrice
-)
-from fivetwenty.exceptions import (
-    VeeTwentyError as FiveTwentyError,
-    BadRequest,
-    Unauthorized,
-    Forbidden,
-    NotFound,
-    TooManyRequests,
-    InternalServerError
-)
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
 
 async def safe_trade(client: AsyncClient, account_id: str) -> None:
     """Place a trade with error handling."""

@@ -594,11 +594,14 @@ def load_production_config() -> AccountConfig:
 
 ```python
 import logging
-from fivetwenty import AccountConfig
+from fivetwenty import AccountConfig, Environment
 
 logger = logging.getLogger(__name__)
-# Assume config is defined elsewhere
-config: AccountConfig  # type: ignore
+# Define config for demonstration
+config = AccountConfig(
+    token="demo-token",
+    environment=Environment.PRACTICE
+)
 
 # ✅ Safe - uses automatic masking
 logger.info("Config: %s", repr(config))

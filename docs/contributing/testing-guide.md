@@ -156,7 +156,7 @@ import pytest
 from unittest.mock import AsyncMock, Mock, patch
 import httpx
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.exceptions import VeeTwentyError
 
 class TestAccountsEndpoint:
     """Unit tests for accounts endpoint."""
@@ -341,7 +341,7 @@ from decimal import Decimal
 import pytest
 
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.exceptions import VeeTwentyError
 
 
 @pytest.mark.integration

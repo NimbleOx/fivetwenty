@@ -96,6 +96,8 @@ class SimpleMovingAverageCrossover:
         return False
 
 # Create your strategy instance
+# account_id would be defined from environment or configuration
+account_id = "101-001-0000000-001"  # Example account ID
 strategy = SimpleMovingAverageCrossover(account_id, "EUR_USD")
 ```
 
@@ -106,6 +108,7 @@ strategy = SimpleMovingAverageCrossover(account_id, "EUR_USD")
 Test your strategy on historical data:
 
 ```python
+from decimal import Decimal
 from fivetwenty import AsyncClient
 import pandas as pd
 from datetime import datetime, timedelta

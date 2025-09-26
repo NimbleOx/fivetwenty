@@ -55,6 +55,12 @@ async def process_price_update(price):
 Monitor account changes and trade updates:
 
 ```python
+import os
+from fivetwenty import AsyncClient, Environment
+
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
 async def account_stream():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         async for transaction in client.transactions.get_transaction_stream(
@@ -82,7 +88,17 @@ async def handle_market_order(transaction):
 ### Basic Stream with Error Handling
 
 ```python
+import os
+import asyncio
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import StreamStall
+
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+async def process_price_update(price):
+    """Process incoming price data."""
+    pass
 
 async def robust_price_stream():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
@@ -113,8 +129,17 @@ async def robust_price_stream():
 Monitor stream health and implement reconnection logic:
 
 ```python
+import os
 import time
 from datetime import datetime, timedelta
+from fivetwenty import AsyncClient, Environment
+
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+async def process_price_update(price):
+    """Process incoming price data."""
+    pass
 
 class StreamMonitor:
     def __init__(self, stall_timeout: float = 30.0):
@@ -151,8 +176,13 @@ async def monitored_stream():
 ### Signal Generation from Price Streams
 
 ```python
+import os
 from decimal import Decimal
 from collections import deque
+from fivetwenty import AsyncClient, Environment
+
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
 
 class MovingAverageSignal:
     def __init__(self, window_size: int = 20):
@@ -196,6 +226,13 @@ async def automated_trading_system():
 ### Order Management with Real-time Updates
 
 ```python
+import os
+import asyncio
+from fivetwenty import AsyncClient, Environment
+
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
 class PositionManager:
     def __init__(self):
         self.open_positions = {}
@@ -253,7 +290,16 @@ async def monitor_transactions(client, position_manager):
 ### Stream Configuration
 
 ```python
+import os
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.streaming import StreamingConfiguration
+
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+async def process_price_update(price):
+    """Process incoming price data."""
+    pass
 
 # Configure streaming parameters
 config = StreamingConfiguration(
@@ -278,7 +324,18 @@ async def production_stream():
 ### Error Recovery and Logging
 
 ```python
+import os
+import asyncio
 import logging
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.exceptions import StreamStall
+
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+async def process_price_update(price):
+    """Process incoming price data."""
+    pass
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)

@@ -67,17 +67,15 @@ theme:
 
 nav:
   - Home: index.md
-
-  # TUTORIALS - Learning-oriented content for skill building
-  - "Tutorials":
-      - Overview: tutorials/index.md
+  - Tutorials:
+      - tutorials/index.md
       - Getting Started:
           - Installation & Setup: tutorials/getting-started/installation.md
           - Authentication Basics: tutorials/getting-started/authentication.md
           - Your First Trade: tutorials/getting-started/first-trade.md
           - Understanding Environments: tutorials/getting-started/environments.md
       - Basic Trading:
-          - Overview: tutorials/basic-trading/index.md
+          - tutorials/basic-trading/index.md
           - Foundation: tutorials/basic-trading/lesson-1-foundation.md
           - Connection & Setup: tutorials/basic-trading/lesson-2-connection-setup.md
           - Market Data & Analysis: tutorials/basic-trading/lesson-3-market-data.md
@@ -85,8 +83,8 @@ nav:
           - Position Management: tutorials/basic-trading/lesson-5-position-management.md
           - Strategy Building: tutorials/basic-trading/lesson-6-strategy-building.md
           - Complete System: tutorials/basic-trading/lesson-7-complete-system.md
-      - Advanced Order Types:
-          - Overview: tutorials/advanced-orders/index.md
+      - Advanced Orders:
+          - tutorials/advanced-orders/index.md
           - Advanced Limit Orders: tutorials/advanced-orders/advanced-limit-orders.md
           - Stop Orders & Market-If-Touched: tutorials/advanced-orders/stop-orders-mit.md
           - Dynamic Order Management: tutorials/advanced-orders/dynamic-management.md
@@ -112,21 +110,6 @@ nav:
           - Streaming Optimization: how-to-guides/hft-optimization/streaming-optimization.md
           - Memory & CPU Optimization: how-to-guides/hft-optimization/memory-cpu-optimization.md
           - Latency Optimization: how-to-guides/hft-optimization/latency-optimization.md
-      - Production Deployment:
-          - Overview: how-to-guides/production-deployment/index.md
-          - Container Deployment: how-to-guides/production-deployment/container-deployment.md
-          - Cloud Deployment: how-to-guides/production-deployment/cloud-deployment.md
-          - Kubernetes Deployment: how-to-guides/production-deployment/kubernetes-deployment.md
-          - Bare Metal Deployment: how-to-guides/production-deployment/bare-metal-deployment.md
-          - Security & Compliance: how-to-guides/production-deployment/security-compliance.md
-          - Monitoring & Observability: how-to-guides/production-deployment/monitoring-observability.md
-      - Data Integration:
-          - Overview: how-to-guides/data-integration/index.md
-          - Economic Calendar: how-to-guides/data-integration/economic-calendar.md
-          - Financial News: how-to-guides/data-integration/financial-news.md
-          - Technical Indicators: how-to-guides/data-integration/technical-indicators.md
-          - Social Sentiment: how-to-guides/data-integration/social-sentiment.md
-          - Unified Pipeline: how-to-guides/data-integration/unified-pipeline.md
   # REFERENCE - Information-oriented quick lookup
   - "API Reference":
       - Overview: api-reference/index.md
@@ -168,9 +151,7 @@ nav:
       - Best Practices & Patterns: explanation/best-practices.md
 
   # EXAMPLES - Practical demonstrations
-  - "Examples":
-      - examples.md
-      - Jupyter Notebooks: examples/notebooks/README.md
+  - Examples: examples.md
 
 
 markdown_extensions:

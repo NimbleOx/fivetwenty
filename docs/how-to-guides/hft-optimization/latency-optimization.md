@@ -11,10 +11,12 @@
 Minimize order execution latency:
 
 ```python
+import asyncio
+import time
+from collections import deque
 from decimal import Decimal
+from typing import List, Dict
 from fivetwenty import AsyncClient
-
-
 
 class LowLatencyOrderManager:
     """Optimized order execution for HFT."""

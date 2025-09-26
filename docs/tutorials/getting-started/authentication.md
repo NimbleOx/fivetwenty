@@ -161,12 +161,11 @@ For production deployments, you can use AWS Secrets Manager, HashiCorp Vault, Ku
 
 ```python
 import asyncio
+import os
+from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
 async def main():
-    import os
-
-    from fivetwenty import AccountConfig, AsyncClient, Environment
 
     # Practice account for testing
     practice_config = AccountConfig(
@@ -189,15 +188,15 @@ async def main():
         print(f"Testing strategy on practice account: {practice_config.alias}")
         await test_strategy(practice_client)
 
-async def test_strategy(client: AsyncClient) -> None:
-    """Test trading strategy on practice account."""
-    accounts = await client.accounts.get_accounts()
-    print(f"Strategy test completed with {len(accounts)} accounts")
-
     # Deploy to live after validation
     async with AsyncClient(config=live_config) as live_client:
         print(f"Executing live trades on account: {live_config.alias}")
         await execute_live_trades(live_client)
+
+async def test_strategy(client: AsyncClient) -> None:
+    """Test trading strategy on practice account."""
+    accounts = await client.accounts.get_accounts()
+    print(f"Strategy test completed with {len(accounts)} accounts")
 
 async def execute_live_trades(client: AsyncClient) -> None:
     """Execute live trading operations."""

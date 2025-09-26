@@ -419,6 +419,15 @@ from decimal import Decimal
 from typing import Any
 
 
+async def get_price(client: Any, instrument: str) -> Any:
+    """Get current pricing for an instrument."""
+    prices = await client.pricing.get_pricing(
+        account_id=client.account_id,
+        instruments=[instrument],
+    )
+    return prices[0]
+
+
 async def place_order_with_stop_loss(client: Any, instrument: str = "EUR_USD") -> Any:
     """Place market order with protective stop loss."""
     # Get current price to calculate stop loss
@@ -456,6 +465,15 @@ from decimal import Decimal
 from typing import Any
 
 
+async def get_price(client: Any, instrument: str) -> Any:
+    """Get current pricing for an instrument."""
+    prices = await client.pricing.get_pricing(
+        account_id=client.account_id,
+        instruments=[instrument],
+    )
+    return prices[0]
+
+
 async def place_order_with_take_profit(client: Any, instrument: str = "EUR_USD") -> Any:
     """Place market order with take profit target."""
     # Get current price
@@ -491,6 +509,15 @@ Combine stop loss and take profit for complete risk management:
 ```python
 from decimal import Decimal
 from typing import Any
+
+
+async def get_price(client: Any, instrument: str) -> Any:
+    """Get current pricing for an instrument."""
+    prices = await client.pricing.get_pricing(
+        account_id=client.account_id,
+        instruments=[instrument],
+    )
+    return prices[0]
 
 
 async def place_protected_trade(client: Any, instrument: str = "EUR_USD", units: int = 1000) -> Any:

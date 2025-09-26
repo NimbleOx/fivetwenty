@@ -54,7 +54,7 @@ FIVETWENTY_OANDA_ACCOUNT=your-account-id
 FIVETWENTY_OANDA_ENVIRONMENT=practice
 ```
 
-Alternatively, you can set the environment varables manually by adding them to your `.bashrc` or `.zshrc`, or by otherwise setting them in your environment as needed.
+Alternatively, you can set the environment variables manually by adding them to your `.bashrc` or `.zshrc`, or by otherwise setting them in your environment as needed.
 
 With `python-dotenv` installed, you can run this minimal example which will print out your account balance and open a trade for 1000 EUR_USD. You do not need to import `load_dotenv`, nor execute `load_dotenv()`
 

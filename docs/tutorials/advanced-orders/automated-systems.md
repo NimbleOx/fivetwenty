@@ -57,8 +57,13 @@ async def place_order_with_exits():
 Use trailing stops to protect profits automatically:
 
 ```python
+import os
 from decimal import Decimal
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
 
 async def place_trailing_stop_order():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
@@ -85,8 +90,12 @@ Monitor multiple orders and implement conditional logic:
 
 ```python
 import asyncio
-from typing import Any
-from fivetwenty import AsyncClient
+import os
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
 
 async def monitor_and_manage_orders():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:

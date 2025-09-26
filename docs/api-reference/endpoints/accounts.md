@@ -9,11 +9,12 @@ Account management and information retrieval.
 ## get_accounts
 ```python
 import asyncio
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Configuration
 
 
 async def main() -> None:
-    async with AsyncClient(token="demo-token") as client:
+    config = Configuration(token="demo-token", environment="practice")
+    async with AsyncClient(config=config) as client:
         # accounts.get_accounts() -> list[AccountProperties]
 
         # Example usage:
@@ -42,8 +43,13 @@ Get list of all accounts for the authenticated user.
 
 ## get_account
 ```python
+import asyncio
+from fivetwenty import AsyncClient, Configuration
+
+
 async def get_account_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
+    config = Configuration(token="demo-token", environment="practice")
+    async with AsyncClient(config=config) as client:
         # accounts.get_account(account_id: AccountID) -> Account
 
         # Example usage:
@@ -102,13 +108,22 @@ Get condensed account information.
 
 ## get_account_instruments
 ```python
-# accounts.get_account_instruments(account_id: AccountID, instruments: list[str] | None = None) -> list[Instrument]
+import asyncio
+from fivetwenty import AsyncClient, Configuration
 
-# Example usage:
-instruments = await client.accounts.get_account_instruments(
-    account_id="123-456-789",
-    instruments=["EUR_USD", "GBP_USD"]
-)
+
+async def main() -> None:
+    # accounts.get_account_instruments(account_id: AccountID, instruments: list[str] | None = None) -> list[Instrument]
+
+    config = Configuration(token="demo-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        instruments = await client.accounts.get_account_instruments(
+            account_id="123-456-789",
+            instruments=["EUR_USD", "GBP_USD"]
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/instruments`
 
@@ -133,14 +148,24 @@ Get all tradeable instruments for account.
 
 ## patch_account_configuration
 ```python
-# accounts.patch_account_configuration(account_id: AccountID, alias: str | None = None,
-#                   margin_rate: str | None = None) -> dict[str, Any]
+import asyncio
+from typing import Any
+from fivetwenty import AsyncClient, Configuration
 
-# Example usage:
-result = await client.accounts.patch_account_configuration(
-    account_id="123-456-789",
-    alias="My Trading Account"
-)
+
+async def main() -> None:
+    # accounts.patch_account_configuration(account_id: AccountID, alias: str | None = None,
+    #                   margin_rate: str | None = None) -> dict[str, Any]
+
+    config = Configuration(token="demo-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        result = await client.accounts.patch_account_configuration(
+            account_id="123-456-789",
+            alias="My Trading Account"
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PATCH /v3/accounts/{accountID}/configuration`
 
@@ -166,13 +191,23 @@ Update account configuration settings.
 
 ## get_account_changes
 ```python
-# accounts.get_account_changes(account_id: AccountID, since_transaction_id: str) -> dict[str, Any]
+import asyncio
+from typing import Any
+from fivetwenty import AsyncClient, Configuration
 
-# Example usage:
-changes = await client.accounts.get_account_changes(
-    account_id="123-456-789",
-    since_transaction_id="100"
-)
+
+async def main() -> None:
+    # accounts.get_account_changes(account_id: AccountID, since_transaction_id: str) -> dict[str, Any]
+
+    config = Configuration(token="demo-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        changes = await client.accounts.get_account_changes(
+            account_id="123-456-789",
+            since_transaction_id="100"
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/changes`
 

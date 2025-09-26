@@ -185,9 +185,11 @@ Execute callbacks without blocking the main stream:
 ```python
 # Good: Non-blocking callback execution
 
+import asyncio
 from typing import Any
+from fivetwenty.models import ClientPrice
 
-async def _process_price_update(self, price) -> Any:
+async def _process_price_update(self, price: ClientPrice) -> Any:
     # Store data first (fast)
     self.store_price_data(price)
 

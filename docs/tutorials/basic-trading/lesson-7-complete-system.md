@@ -10,11 +10,20 @@
 Let's build a comprehensive automated trading system:
 
 ```python
+import os
+import asyncio
 from datetime import datetime
 from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
-async def run_complete_trading_strategy(strategy: SimpleMovingAverageCrossover, duration_minutes: int = 10):
+# Setup variables
+TOKEN = os.getenv("OANDA_TOKEN")
+ENVIRONMENT = Environment.PRACTICE
+
+# SimpleMovingAverageCrossover would be defined elsewhere
+# (see previous lessons for implementation)
+
+async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
     """Run a complete trading strategy with full automation."""
 
     print("🤖 LAUNCHING AUTOMATED TRADING STRATEGY")
@@ -95,7 +104,7 @@ async def run_complete_trading_strategy(strategy: SimpleMovingAverageCrossover, 
         print(f"\n✅ Strategy completed after {duration_minutes} minutes")
         print_strategy_performance(strategy)
 
-async def execute_strategy_trade(client: AsyncClient, strategy: SimpleMovingAverageCrossover,
+async def execute_strategy_trade(client: AsyncClient, strategy,
                                direction: str, current_price: Decimal):
     """Execute a trade based on strategy signal."""
 
@@ -132,7 +141,7 @@ async def execute_strategy_trade(client: AsyncClient, strategy: SimpleMovingAver
     except Exception as e:
         print(f"   ❌ Trade execution failed: {e}")
 
-def print_strategy_performance(strategy: SimpleMovingAverageCrossover):
+def print_strategy_performance(strategy):
     """Display comprehensive strategy performance."""
 
     print(f"\n📊 FINAL STRATEGY PERFORMANCE")

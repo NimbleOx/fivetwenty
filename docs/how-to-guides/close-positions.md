@@ -97,8 +97,9 @@ close_result = await close_position(account_id, "EUR_USD")
 Close only part of a position:
 
 ```python
+from typing import Any
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
 
 
 async def close_partial_position(account_id: str, instrument: str, units_to_close: int) -> Any:

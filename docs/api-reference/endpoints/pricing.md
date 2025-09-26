@@ -9,18 +9,22 @@ Real-time pricing data and streaming.
 ## get_pricing
 ```python
 import asyncio
+from fivetwenty import AsyncClient, Configuration
+from typing import Any
 
 
-async def main():
+async def main() -> None:
     # pricing.get_pricing(account_id: AccountID, instruments: list[str], since: str | None = None,
     #             include_units_available: bool = True, include_home_conversions: bool = False) -> dict[str, Any]
 
-    # Example usage:
-    prices = await client.pricing.get_pricing(
-        account_id="123-456-789",
-        instruments=["EUR_USD", "GBP_USD"],
-        include_units_available=True,
-    )
+    config = Configuration(token="your-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        prices = await client.pricing.get_pricing(
+            account_id="123-456-789",
+            instruments=["EUR_USD", "GBP_USD"],
+            include_units_available=True,
+        )
 
 asyncio.run(main())
 ```
@@ -50,17 +54,26 @@ Get current prices for instruments.
 
 ## get_pricing_stream
 ```python
-# pricing.get_pricing_stream(account_id: AccountID, instruments: list[str], snapshot: bool = True,
-#               include_home_conversions: bool = False, stall_timeout: float = 30.0)
-#               -> AsyncIterator[ClientPrice | PricingHeartbeat]
+import asyncio
+from fivetwenty import AsyncClient, Configuration
 
-# Example usage:
-async for price in client.pricing.get_pricing_stream(
-    account_id="123-456-789",
-    instruments=["EUR_USD", "GBP_USD"],
-    snapshot=True
-):
-    print(f"Price update: {price}")
+
+async def main() -> None:
+    # pricing.get_pricing_stream(account_id: AccountID, instruments: list[str], snapshot: bool = True,
+    #               include_home_conversions: bool = False, stall_timeout: float = 30.0)
+    #               -> AsyncIterator[ClientPrice | PricingHeartbeat]
+
+    config = Configuration(token="your-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        async for price in client.pricing.get_pricing_stream(
+            account_id="123-456-789",
+            instruments=["EUR_USD", "GBP_USD"],
+            snapshot=True
+        ):
+            print(f"Price update: {price}")
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing/stream`
 
@@ -90,9 +103,11 @@ Stream real-time pricing data.
 ## get_instrument_candles
 ```python
 import asyncio
+from fivetwenty import AsyncClient, Configuration
+from typing import Any
 
 
-async def main():
+async def main() -> None:
     # pricing.get_latest_candles(account_id: AccountID, instrument: str, price: str = "M",
     #                granularity: str = "S5", count: int | None = None,
     #                from_time: str | None = None, to_time: str | None = None,
@@ -100,13 +115,15 @@ async def main():
     #                daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
     #                weekly_alignment: str = "Friday") -> dict[str, Any]
 
-    # Example usage:
-    candles = await client.pricing.get_latest_candles(
-        account_id="123-456-789",
-        instrument="EUR_USD",
-        granularity="H1",
-        count=100,
-    )
+    config = Configuration(token="your-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        candles = await client.pricing.get_latest_candles(
+            account_id="123-456-789",
+            instrument="EUR_USD",
+            granularity="H1",
+            count=100,
+        )
 
 asyncio.run(main())
 ```
@@ -143,17 +160,27 @@ Get historical candle data for an instrument.
 
 ## get_latest_candles
 ```python
-# pricing.get_latest_candles(account_id: AccountID, candle_specifications: list[str],
-#                       units: int = 1, smooth: bool = False,
-#                       daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
-#                       weekly_alignment: str = "Friday") -> dict[str, Any]
+import asyncio
+from fivetwenty import AsyncClient, Configuration
+from typing import Any
 
-# Example usage:
-candles = await client.pricing.get_latest_candles(
-    account_id="123-456-789",
-    candle_specifications=["EUR_USD:S5:BM", "GBP_USD:M1:BM"],
-    units=50
-)
+
+async def main() -> None:
+    # pricing.get_latest_candles(account_id: AccountID, candle_specifications: list[str],
+    #                       units: int = 1, smooth: bool = False,
+    #                       daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
+    #                       weekly_alignment: str = "Friday") -> dict[str, Any]
+
+    config = Configuration(token="your-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        candles = await client.pricing.get_latest_candles(
+            account_id="123-456-789",
+            candle_specifications=["EUR_USD:S5:BM", "GBP_USD:M1:BM"],
+            units=50
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/candles/latest`
 
@@ -183,17 +210,25 @@ Get latest candles for multiple instruments.
 
 ## get_pricing_stream_iter
 ```python
-# pricing.get_pricing_stream(account_id: AccountID, instruments: list[str],
-#                    snapshot: bool = True, include_home_conversions: bool = False,
-#                    config: StreamingConfiguration | None = None)
-#                    -> AsyncIterator[ClientPrice | PricingHeartbeat]
+from fivetwenty import Client, Configuration
 
-# Example usage:
-for price in client.pricing.get_pricing_stream(
-    account_id="123-456-789",
-    instruments=["EUR_USD", "GBP_USD"],
-):
-    print(f"Price update: {price}")
+
+def main() -> None:
+    # pricing.get_pricing_stream(account_id: AccountID, instruments: list[str],
+    #                    snapshot: bool = True, include_home_conversions: bool = False,
+    #                    config: StreamingConfiguration | None = None)
+    #                    -> AsyncIterator[ClientPrice | PricingHeartbeat]
+
+    config = Configuration(token="your-token", environment="practice")
+    with Client(config=config) as client:
+        # Example usage:
+        for price in client.pricing.get_pricing_stream(
+            account_id="123-456-789",
+            instruments=["EUR_USD", "GBP_USD"],
+        ):
+            print(f"Price update: {price}")
+
+main()
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing/stream`
 
