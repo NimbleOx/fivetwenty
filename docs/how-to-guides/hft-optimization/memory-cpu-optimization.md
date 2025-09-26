@@ -281,7 +281,7 @@ def calculate_multiple_spreads(prices_array):
 
 def calculate_moving_average(prices, window):
     """Fast moving average using numpy."""
-    return np.convolve(prices, np.ones(window)/window, mode='valid')
+    return np.convolve(prices, np.ones(window)/window, mode="valid")
 
 def detect_price_movements(prices, threshold=0.0001):
     """Vectorized price movement detection."""
@@ -359,10 +359,10 @@ class BoundedDataStorage:
     def get_memory_stats(self):
         """Get memory usage statistics."""
         return {
-            'current_size': len(self.data),
-            'max_size': self.max_size,
-            'utilization': len(self.data) / self.max_size,
-            'overflow_count': self.overflow_count
+            "current_size": len(self.data),
+            "max_size": self.max_size,
+            "utilization": len(self.data) / self.max_size,
+            "overflow_count": self.overflow_count,
         }
 
 # Usage
@@ -371,17 +371,17 @@ price_storage = BoundedDataStorage(max_size=5000)
 async def store_price_efficiently(price):
     """Store price with automatic memory management."""
     price_data = {
-        'instrument': price.instrument,
-        'bid': Decimal(str(price.bids[0].price)) if price.bids else Decimal('0'),
-        'ask': Decimal(str(price.asks[0].price)) if price.asks else Decimal('0'),
-        'timestamp': time.perf_counter()
+        "instrument": price.instrument,
+        "bid": Decimal(str(price.bids[0].price)) if price.bids else Decimal("0"),
+        "ask": Decimal(str(price.asks[0].price)) if price.asks else Decimal("0"),
+        "timestamp": time.perf_counter(),
     }
 
     price_storage.add_data(price_data)
 
     # Monitor memory usage
     stats = price_storage.get_memory_stats()
-    if stats['utilization'] > 0.9:
+    if stats["utilization"] > 0.9:
         print(f"Warning: Price storage {stats['utilization']:.1%} full")
 ```
 
@@ -465,10 +465,10 @@ class MemoryProfiler:
             self.peak_memory = current_memory
 
         measurement = {
-            'label': label,
-            'memory_mb': current_memory,
-            'delta_mb': current_memory - self.baseline_memory,
-            'timestamp': time.perf_counter()
+            "label": label,
+            "memory_mb": current_memory,
+            "delta_mb": current_memory - self.baseline_memory,
+            "timestamp": time.perf_counter(),
         }
 
         self.measurements.append(measurement)
@@ -485,11 +485,11 @@ class MemoryProfiler:
 
         current = self.measurements[-1]
         return {
-            'baseline_mb': self.baseline_memory,
-            'current_mb': current['memory_mb'],
-            'peak_mb': self.peak_memory,
-            'total_increase_mb': current['memory_mb'] - self.baseline_memory,
-            'measurement_count': len(self.measurements)
+            "baseline_mb": self.baseline_memory,
+            "current_mb": current["memory_mb"],
+            "peak_mb": self.peak_memory,
+            "total_increase_mb": current["memory_mb"] - self.baseline_memory,
+            "measurement_count": len(self.measurements),
         }
 
 # Usage
@@ -517,8 +517,8 @@ async def profiled_hft_operation():
 async def simulate_price_processing():
     """Simulate price processing for profiling."""
     # Create and process some data
-    data = [{'price': i * 0.0001, 'timestamp': time.time()} for i in range(100)]
-    processed = [d['price'] * 1.1 for d in data]
+    data = [{"price": i * 0.0001, "timestamp": time.time()} for i in range(100)]
+    processed = [d["price"] * 1.1 for d in data]
     return processed
 ```
 

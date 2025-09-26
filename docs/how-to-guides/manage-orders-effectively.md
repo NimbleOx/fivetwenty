@@ -37,7 +37,7 @@ async def main():
         instrument="EUR_USD",
         units=1000,
         take_profit=Decimal("1.1100"),  # Automatic TP
-        stop_loss=Decimal("1.0900")     # Automatic SL
+        stop_loss=Decimal("1.0900"),     # Automatic SL
     )
 
 asyncio.run(main())
@@ -136,11 +136,11 @@ async def add_distance_based_stop_loss(client, account_id, trade_id):
     distance_sl_request = StopLossOrderRequest(
         tradeID=trade_id,
         distance="0.0050",  # 50 pips from entry price
-        timeInForce="GTC"
+        timeInForce="GTC",
     )
 
     response = await client.orders.post_order(account_id, distance_sl_request)
-    return response.order_create_transaction['id']
+    return response.order_create_transaction["id"]
 ```
 
 #### Trailing Stop Loss
@@ -152,12 +152,12 @@ async def add_trailing_stop_loss(client, account_id, trade_id):
     tsl_request = TrailingStopLossOrderRequest(
         tradeID=trade_id,
         distance="0.0030",  # 30 pips trailing distance
-        timeInForce="GTC"
+        timeInForce="GTC",
     )
 
     response = await client.orders.post_order(account_id, tsl_request)
     print(f"Trailing stop will follow price with 30 pip buffer")
-    return response.order_create_transaction['id']
+    return response.order_create_transaction["id"]
 ```
 
 #### Guaranteed Stop Loss
@@ -170,17 +170,17 @@ async def add_guaranteed_stop_loss(client, account_id, trade_id):
         gsl_request = GuaranteedStopLossOrderRequest(
             tradeID=trade_id,
             price="1.0900",  # Guaranteed execution price
-            timeInForce="GTC"
+            timeInForce="GTC",
         )
 
         response = await client.orders.post_order(account_id, gsl_request)
 
         # Check premium cost
-        if 'guaranteedExecutionPremium' in response.order_create_transaction:
-            premium = response.order_create_transaction['guaranteedExecutionPremium']
+        if "guaranteedExecutionPremium" in response.order_create_transaction:
+            premium = response.order_create_transaction["guaranteedExecutionPremium"]
             print(f"Guaranteed stop loss premium: {premium}")
 
-        return response.order_create_transaction['id']
+        return response.order_create_transaction["id"]
 
     except Exception as e:
         print(f"GSL not available: {e}")
@@ -202,7 +202,7 @@ async def robust_post_trade_setup(client, account_id, trade_id):
         tp_request = TakeProfitOrderRequest(
             tradeID=trade_id,
             price="1.1200",
-            timeInForce="GTC"
+            timeInForce="GTC",
         )
 
         tp_response = await client.orders.post_order(account_id, tp_request)
@@ -257,7 +257,7 @@ async def place_market_order():
             account_id=AccountID("101-004-12345678"),
             instrument=InstrumentName("EUR_USD"),
             units=1000,  # Positive = buy, negative = sell
-            client_request_id="market-order-001"
+            client_request_id="market-order-001",
         )
 
         # With protective stops
@@ -322,7 +322,7 @@ async def place_stop_order():
             time_in_force="GFD",           # Good for day
             take_profit=Decimal("1.1150"), # Target 50 pips profit
             stop_loss=Decimal("1.1050"),   # Limit loss to 50 pips
-            client_request_id="breakout-strategy-001"
+            client_request_id="breakout-strategy-001",
         )
 
         print(f"Stop Order ID: {response.order_create_transaction.id}")
@@ -351,7 +351,7 @@ async def place_market_if_touched_order():
             time_in_force="GTC",           # Good till cancelled
             take_profit=Decimal("1.2500"), # Target 100 pips
             stop_loss=Decimal("1.2350"),   # Stop 50 pips below support
-            client_request_id="support-bounce-001"
+            client_request_id="support-bounce-001",
         )
 
         print(f"MIT Order ID: {response.order_create_transaction.id}")
@@ -376,28 +376,28 @@ async def create_order_by_type(order_type: str, price: Decimal = None):
         if order_type == "market":
             order_request = MarketOrderRequest(
                 instrument=instrument,
-                units=units
+                units=units,
             )
         elif order_type == "limit":
             order_request = LimitOrderRequest(
                 instrument=instrument,
                 units=units,
                 price=str(price),
-                timeInForce=TimeInForce.GTC
+                timeInForce=TimeInForce.GTC,
             )
         elif order_type == "stop":
             order_request = StopOrderRequest(
                 instrument=instrument,
                 units=units,
                 price=str(price),
-                timeInForce=TimeInForce.GTC
+                timeInForce=TimeInForce.GTC,
             )
 
         # Use unified interface
         response = await client.orders.post_order(
             account_id=account_id,
             order_request=order_request,
-            client_request_id=f"{order_type}-order-{int(time.time())}"
+            client_request_id=f"{order_type}-order-{int(time.time())}",
         )
 
         return response
@@ -420,17 +420,17 @@ async def monitor_order_execution(account_id: AccountID, order_id: str):
         print(f"Filled Units: {order.get('filledUnits', 0)}")
 
         # Check if order is still pending
-        if order['state'] == 'PENDING':
+        if order["state"] == "PENDING":
             print("Order is waiting for execution")
 
             # Get all pending orders for context
             pending = await client.orders.get_pending_orders(account_id)
             print(f"Total pending orders: {len(pending['orders'])}")
 
-        elif order['state'] == 'FILLED':
+        elif order["state"] == "FILLED":
             print(f"Order executed at price: {order['fillingTransactionIDs']}")
 
-        elif order['state'] == 'CANCELLED':
+        elif order["state"] == "CANCELLED":
             print("Order was cancelled")
 ```
 
@@ -522,19 +522,19 @@ async def manage_pending_orders(account_id: AccountID):
     async with AsyncClient() as client:
         # Get all pending orders
         pending_response = await client.orders.get_pending_orders(account_id)
-        pending_orders = pending_response['orders']
+        pending_orders = pending_response["orders"]
 
         for order in pending_orders:
-            order_id = order['id']
+            order_id = order["id"]
 
             # Cancel old orders (example: cancel orders older than 1 hour)
-            order_time = datetime.fromisoformat(order['createTime'].replace('Z', '+00:00'))
+            order_time = datetime.fromisoformat(order["createTime"].replace("Z", "+00:00"))
             if datetime.now(timezone.utc) - order_time > timedelta(hours=1):
 
                 try:
                     cancel_response = await client.orders.cancel_order(
                         account_id,
-                        order_id
+                        order_id,
                     )
                     print(f"Cancelled order {order_id}")
 
@@ -561,7 +561,7 @@ async def create_bracket_order(
     entry_price: Decimal,
     take_profit: Decimal,
     stop_loss: Decimal,
-    units: int
+    units: int,
 ):
     """Create a bracket order: entry + take profit + stop loss"""
     async with AsyncClient() as client:
@@ -572,7 +572,7 @@ async def create_bracket_order(
             instrument=instrument,
             units=units,
             price=entry_price,
-            client_request_id=f"bracket-entry-{int(time.time())}"
+            client_request_id=f"bracket-entry-{int(time.time())}",
         )
 
         entry_order_id = entry_order.order_create_transaction.id
@@ -585,7 +585,7 @@ async def create_bracket_order(
         # Check if entry filled
         order_status = await client.orders.get_order(account_id, entry_order_id)
 
-        if order_status['state'] == 'FILLED':
+        if order_status["state"] == "FILLED":
             # Create protective orders
             tasks = []
 
@@ -595,7 +595,7 @@ async def create_bracket_order(
                 instrument=instrument,
                 units=-units,  # Opposite direction to close position
                 price=take_profit,
-                client_request_id=f"bracket-tp-{int(time.time())}"
+                client_request_id=f"bracket-tp-{int(time.time())}",
             )
             tasks.append(tp_task)
 
@@ -605,7 +605,7 @@ async def create_bracket_order(
                 instrument=instrument,
                 units=-units,  # Opposite direction to close position
                 price=stop_loss,
-                client_request_id=f"bracket-sl-{int(time.time())}"
+                client_request_id=f"bracket-sl-{int(time.time())}",
             )
             tasks.append(sl_task)
 
@@ -767,12 +767,12 @@ class OrderManager:
         """Track order through its lifecycle"""
         while True:
             order = await self.client.orders.get_order(account_id, order_id)
-            state = OrderState(order['state'].lower())
+            state = OrderState(order["state"].lower())
 
             self.orders[order_id] = {
-                'state': state,
-                'last_updated': datetime.now(),
-                'details': order
+                "state": state,
+                "last_updated": datetime.now(),
+                "details": order,
             }
 
             if state in [OrderState.FILLED, OrderState.CANCELLED, OrderState.REJECTED]:
@@ -793,7 +793,7 @@ class RiskManagedOrderSystem:
     def __init__(self, client: AsyncClient, max_daily_loss: Decimal):
         self.client = client
         self.max_daily_loss = max_daily_loss
-        self.daily_loss = Decimal('0')
+        self.daily_loss = Decimal("0")
 
     async def place_order_with_risk_check(self, account_id: AccountID, **order_params):
         # Check daily loss limit
@@ -809,7 +809,7 @@ class RiskManagedOrderSystem:
         # Place order if risk checks pass
         return await self.client.orders.post_order(
             account_id=account_id,
-            **order_params
+            **order_params,
         )
 ```
 

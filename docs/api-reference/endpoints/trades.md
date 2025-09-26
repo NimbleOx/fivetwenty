@@ -21,7 +21,7 @@ async def main():
     trades = await client.trades.get_trades(
         account_id="123-456-789",
         state=TradeStateFilter.OPEN,
-        count=20
+        count=20,
     )
 
 asyncio.run(main())
@@ -158,7 +158,7 @@ async def main():
     result = await client.trades.put_trade_client_extensions(
         account_id="123-456-789",
         trade_specifier="12345",
-        client_extensions={"comment": "Updated comment"}
+        client_extensions={"comment": "Updated comment"},
     )
 
 asyncio.run(main())

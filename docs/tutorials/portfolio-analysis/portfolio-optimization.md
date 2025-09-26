@@ -315,7 +315,7 @@ def black_litterman_optimization(returns_data, market_caps, tau=0.05):
 
 ### Dynamic Optimization
 ```python
-def dynamic_portfolio_optimization(returns_data, rebalance_frequency='monthly'):
+def dynamic_portfolio_optimization(returns_data, rebalance_frequency="monthly"):
     """Implement dynamic portfolio optimization with rebalancing."""
 
     # Time-varying optimization

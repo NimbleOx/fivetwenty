@@ -41,7 +41,7 @@ class ValidationResult:
     severity: ValidationSeverity
     rule_name: str
     message: str
-    details: Optional[Dict[str, Any]] = None
+    details: dict[str, Any] | None = None
 
 class OrderValidator(ABC):
     """Base class for order validation rules."""
@@ -52,7 +52,7 @@ class OrderValidator(ABC):
         self.enabled = True
 
     @abstractmethod
-    async def validate(self, order_params: Dict[str, Any], context: Dict[str, Any]) -> ValidationResult:
+    async def validate(self, order_params: dict[str, Any], context: dict[str, Any]) -> ValidationResult:
         """Validate order parameters and return result."""
         pass
 
@@ -60,7 +60,7 @@ class OrderValidationFramework:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
         self.account_id = account_id
-        self.validators: List[OrderValidator] = []
+        self.validators: list[OrderValidator] = []
         self.validation_history = []
 
     def add_validator(self, validator: OrderValidator):
@@ -69,9 +69,9 @@ class OrderValidationFramework:
 
     async def validate_order(
         self,
-        order_params: Dict[str, Any],
-        strict_mode: bool = True
-    ) -> Dict[str, Any]:
+        order_params: dict[str, Any],
+        strict_mode: bool = True,
+    ) -> dict[str, Any]:
         """Validate order against all registered validators."""
 
         validation_session = {
@@ -80,7 +80,7 @@ class OrderValidationFramework:
             "results": [],
             "passed": True,
             "errors": [],
-            "warnings": []
+            "warnings": [],
         }
 
         # Build context for validators
@@ -110,7 +110,7 @@ class OrderValidationFramework:
                     severity=ValidationSeverity.CRITICAL,
                     rule_name=validator.name,
                     message=f"Validator failed: {e}",
-                    details={"exception": str(e)}
+                    details={"exception": str(e)},
                 )
                 validation_session["results"].append(error_result)
                 validation_session["errors"].append(error_result)
@@ -121,7 +121,7 @@ class OrderValidationFramework:
 
         return validation_session
 
-    async def _build_validation_context(self) -> Dict[str, Any]:
+    async def _build_validation_context(self) -> dict[str, Any]:
         """Build context information for validators."""
         try:
             # Get account information
@@ -140,7 +140,7 @@ class OrderValidationFramework:
                 "current_time": datetime.utcnow(),
                 "account_balance": Decimal(account.balance),
                 "margin_available": Decimal(account.margin_available),
-                "margin_used": Decimal(account.margin_used)
+                "margin_used": Decimal(account.margin_used),
             }
 
             return context
@@ -340,7 +340,7 @@ class SpreadValidator(OrderValidator):
             # Get current pricing
             pricing = await context["client"].pricing.get_pricing(
                 account_id=context["account_id"],
-                instruments=[instrument]
+                instruments=[instrument],
             )
 
             ask_price = Decimal(pricing.prices[0].asks[0].price)
@@ -362,15 +362,15 @@ class SpreadValidator(OrderValidator):
                         "spread_pips": spread_pips,
                         "limit": self.max_spread_pips,
                         "ask": ask_price,
-                        "bid": bid_price
-                    }
+                        "bid": bid_price,
+                    },
                 )
 
             return ValidationResult(
                 is_valid=True,
                 severity=ValidationSeverity.INFO,
                 rule_name=self.name,
-                message=f"Spread validation passed: {spread_pips:.1f} pips"
+                message=f"Spread validation passed: {spread_pips:.1f} pips",
             )
 
         except Exception as e:
@@ -378,7 +378,7 @@ class SpreadValidator(OrderValidator):
                 is_valid=False,
                 severity=ValidationSeverity.ERROR,
                 rule_name=self.name,
-                message=f"Failed to check spread: {e}"
+                message=f"Failed to check spread: {e}",
             )
 
 class MarketHoursValidator(OrderValidator):
@@ -405,8 +405,8 @@ class MarketHoursValidator(OrderValidator):
                 message="Market closed - weekend trading not available",
                 details={
                     "current_time": current_time.isoformat(),
-                    "weekday": current_time.weekday()
-                }
+                    "weekday": current_time.weekday(),
+                },
             )
 
         # Check for major market holidays (simplified)
@@ -416,7 +416,7 @@ class MarketHoursValidator(OrderValidator):
             is_valid=True,
             severity=ValidationSeverity.INFO,
             rule_name=self.name,
-            message="Market hours validation passed"
+            message="Market hours validation passed",
         )
 ```
 
@@ -442,7 +442,7 @@ class PriceValidityValidator(OrderValidator):
                 is_valid=True,
                 severity=ValidationSeverity.INFO,
                 rule_name=self.name,
-                message="Market order - no price validation needed"
+                message="Market order - no price validation needed",
             )
 
         order_price = order_params.get("price")
@@ -453,14 +453,14 @@ class PriceValidityValidator(OrderValidator):
                 is_valid=False,
                 severity=self.severity,
                 rule_name=self.name,
-                message="No price specified for non-market order"
+                message="No price specified for non-market order",
             )
 
         try:
             # Get current market price
             pricing = await context["client"].pricing.get_pricing(
                 account_id=context["account_id"],
-                instruments=[instrument]
+                instruments=[instrument],
             )
 
             mid_price = (
@@ -481,15 +481,15 @@ class PriceValidityValidator(OrderValidator):
                         "order_price": order_price,
                         "market_price": mid_price,
                         "deviation": price_deviation,
-                        "limit": self.max_price_deviation
-                    }
+                        "limit": self.max_price_deviation,
+                    },
                 )
 
             return ValidationResult(
                 is_valid=True,
                 severity=ValidationSeverity.INFO,
                 rule_name=self.name,
-                message="Price validity validation passed"
+                message="Price validity validation passed",
             )
 
         except Exception as e:
@@ -497,7 +497,7 @@ class PriceValidityValidator(OrderValidator):
                 is_valid=False,
                 severity=ValidationSeverity.ERROR,
                 rule_name=self.name,
-                message=f"Failed to validate price: {e}"
+                message=f"Failed to validate price: {e}",
             )
 
 class OrderParametersValidator(OrderValidator):
@@ -518,7 +518,7 @@ class OrderParametersValidator(OrderValidator):
                 severity=self.severity,
                 rule_name=self.name,
                 message=f"Missing required parameters: {missing_params}",
-                details={"missing_params": missing_params}
+                details={"missing_params": missing_params},
             )
 
         # Validate instrument format
@@ -528,7 +528,7 @@ class OrderParametersValidator(OrderValidator):
                 is_valid=False,
                 severity=self.severity,
                 rule_name=self.name,
-                message=f"Invalid instrument format: {instrument}"
+                message=f"Invalid instrument format: {instrument}",
             )
 
         # Validate units
@@ -538,7 +538,7 @@ class OrderParametersValidator(OrderValidator):
                 is_valid=False,
                 severity=self.severity,
                 rule_name=self.name,
-                message=f"Invalid units: {units}"
+                message=f"Invalid units: {units}",
             )
 
         # Validate order type
@@ -549,14 +549,14 @@ class OrderParametersValidator(OrderValidator):
                 is_valid=False,
                 severity=self.severity,
                 rule_name=self.name,
-                message=f"Invalid order type: {order_type}"
+                message=f"Invalid order type: {order_type}",
             )
 
         return ValidationResult(
             is_valid=True,
             severity=ValidationSeverity.INFO,
             rule_name=self.name,
-            message="Parameter validation passed"
+            message="Parameter validation passed",
         )
 ```
 
@@ -816,7 +816,7 @@ class RealTimeRiskMonitor:
                     "limit_name": limit_name,
                     "limit_value": limit_value,
                     "current_value": current_value,
-                    "severity": "HIGH" if current_value > limit_value * 1.2 else "MEDIUM"
+                    "severity": "HIGH" if current_value > limit_value * 1.2 else "MEDIUM",
                 }
 
                 self.risk_violations.append(violation)
@@ -825,7 +825,7 @@ class RealTimeRiskMonitor:
     async def _calculate_risk_metrics(
         self,
         account,
-        positions: List[Any]
+        positions: List[Any],
     ) -> Dict[str, Decimal]:
         """Calculate current risk metrics."""
 
@@ -852,7 +852,7 @@ class RealTimeRiskMonitor:
             "unrealized_pl": total_unrealized_pl,
             "drawdown_percent": abs(total_unrealized_pl) / account_balance * 100 if total_unrealized_pl < 0 else Decimal("0"),
             "margin_used_percent": Decimal(account.margin_used) / account_balance * 100,
-            "exposure_to_balance_ratio": total_exposure / account_balance
+            "exposure_to_balance_ratio": total_exposure / account_balance,
         })
 
         return metrics
@@ -886,7 +886,7 @@ class RealTimeRiskMonitor:
                         account_id=self.account_id,
                         instrument=position.instrument,
                         units=-units_to_close,
-                        time_in_force="FOK"
+                        time_in_force="FOK",
                     )
 
                 if position.short.units != "0":
@@ -896,7 +896,7 @@ class RealTimeRiskMonitor:
                         account_id=self.account_id,
                         instrument=position.instrument,
                         units=units_to_close,
-                        time_in_force="FOK"
+                        time_in_force="FOK",
                     )
 
             except Exception as e:
@@ -915,7 +915,7 @@ class RealTimeRiskMonitor:
                 try:
                     await self.client.orders.cancel_order(
                         account_id=self.account_id,
-                        order_id=order.id
+                        order_id=order.id,
                     )
                 except Exception as e:
                     print(f"Failed to cancel order {order.id}: {e}")
@@ -978,7 +978,7 @@ class OrderSystemTestFramework:
 
         # Add test validators
         validator_framework.add_validator(
-            MaxPositionSizeValidator(50000, Decimal("100000"))
+            MaxPositionSizeValidator(50000, Decimal("100000")),
         )
         validator_framework.add_validator(PriceValidityValidator())
 
@@ -987,7 +987,7 @@ class OrderSystemTestFramework:
             "instrument": "EUR_USD",
             "units": 10000,
             "type": "LIMIT",
-            "price": Decimal("1.0850")
+            "price": Decimal("1.0850"),
         }
 
         result = await validator_framework.validate_order(valid_order)
@@ -1000,7 +1000,7 @@ class OrderSystemTestFramework:
             "instrument": "EUR_USD",
             "units": 200000,  # Exceeds limit
             "type": "LIMIT",
-            "price": Decimal("1.0850")
+            "price": Decimal("1.0850"),
         }
 
         result = await validator_framework.validate_order(invalid_order)
@@ -1019,7 +1019,7 @@ class OrderSystemTestFramework:
         # Register test handlers
         error_handler.register_error_handler(
             ErrorCategory.INSUFFICIENT_FUNDS,
-            insufficient_funds_handler
+            insufficient_funds_handler,
         )
 
         # Test error handling
@@ -1029,7 +1029,7 @@ class OrderSystemTestFramework:
         result = await error_handler.handle_error(
             test_error,
             context,
-            ErrorCategory.INSUFFICIENT_FUNDS
+            ErrorCategory.INSUFFICIENT_FUNDS,
         )
 
         assert result["recovery_attempted"] == True
@@ -1044,7 +1044,7 @@ class OrderSystemTestFramework:
         # Set test limits
         risk_monitor.set_risk_limits({
             "drawdown_percent": Decimal("5.0"),
-            "total_exposure": Decimal("50000")
+            "total_exposure": Decimal("50000"),
         })
 
         # Test risk calculation
@@ -1056,7 +1056,7 @@ class OrderSystemTestFramework:
 
         risk_metrics = await risk_monitor._calculate_risk_metrics(
             account,
-            mock_positions.positions
+            mock_positions.positions,
         )
 
         assert "total_exposure" in risk_metrics
@@ -1070,7 +1070,7 @@ class OrderSystemTestFramework:
         test_suites = [
             self.test_validation_framework,
             self.test_error_handling,
-            self.test_risk_monitoring
+            self.test_risk_monitoring,
         ]
 
         for test_suite in test_suites:
@@ -1078,13 +1078,13 @@ class OrderSystemTestFramework:
                 await test_suite()
                 self.test_results.append({
                     "test": test_suite.__name__,
-                    "status": "PASSED"
+                    "status": "PASSED",
                 })
             except Exception as e:
                 self.test_results.append({
                     "test": test_suite.__name__,
                     "status": "FAILED",
-                    "error": str(e)
+                    "error": str(e),
                 })
 
         # Print results
@@ -1139,7 +1139,7 @@ class ProductionMonitoringSystem:
             asyncio.create_task(self._monitor_system_health()),
             asyncio.create_task(self._monitor_trading_performance()),
             asyncio.create_task(self._monitor_risk_metrics()),
-            asyncio.create_task(self._monitor_order_execution())
+            asyncio.create_task(self._monitor_order_execution()),
         ]
 
         await asyncio.gather(*tasks)
@@ -1158,7 +1158,7 @@ class ProductionMonitoringSystem:
                     await self._send_alert({
                         "type": "SLOW_API_RESPONSE",
                         "response_time": response_time,
-                        "threshold": 5.0
+                        "threshold": 5.0,
                     })
 
                 # Monitor memory usage, CPU, etc.
@@ -1167,7 +1167,7 @@ class ProductionMonitoringSystem:
             except Exception as e:
                 await self._send_alert({
                     "type": "API_CONNECTION_FAILED",
-                    "error": str(e)
+                    "error": str(e),
                 })
 
             await asyncio.sleep(60)  # Check every minute
@@ -1185,7 +1185,7 @@ class ProductionMonitoringSystem:
                     "account_balance": Decimal(account.balance),
                     "unrealized_pl": Decimal(account.unrealized_pl or "0"),
                     "margin_used": Decimal(account.margin_used),
-                    "margin_available": Decimal(account.margin_available)
+                    "margin_available": Decimal(account.margin_available),
                 }
 
                 self.metrics_history.append(performance_metrics)
@@ -1203,7 +1203,7 @@ class ProductionMonitoringSystem:
                         await self._send_alert({
                             "type": "LARGE_LOSS",
                             "balance_change": balance_change,
-                            "current_balance": performance_metrics["account_balance"]
+                            "current_balance": performance_metrics["account_balance"],
                         })
 
             except Exception as e:

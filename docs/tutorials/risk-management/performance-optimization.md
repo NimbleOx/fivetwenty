@@ -558,40 +558,40 @@ class PerformanceAttribution:
     
     def __init__(self):
         self.attribution_factors = {
-            'strategy': {},
-            'instrument': {},
-            'timeframe': {},
-            'market_condition': {}
+            "strategy": {},
+            "instrument": {},
+            "timeframe": {},
+            "market_condition": {},
         }
     
     def add_trade_attribution(self, trade_data: dict):
         """Add trade with attribution factors."""
         
-        pnl = trade_data['pnl']
+        pnl = trade_data["pnl"]
         
         # Attribute to strategy
-        strategy = trade_data.get('strategy', 'unknown')
-        if strategy not in self.attribution_factors['strategy']:
-            self.attribution_factors['strategy'][strategy] = []
-        self.attribution_factors['strategy'][strategy].append(pnl)
+        strategy = trade_data.get("strategy", "unknown")
+        if strategy not in self.attribution_factors["strategy"]:
+            self.attribution_factors["strategy"][strategy] = []
+        self.attribution_factors["strategy"][strategy].append(pnl)
         
         # Attribute to instrument
-        instrument = trade_data.get('instrument', 'unknown')
-        if instrument not in self.attribution_factors['instrument']:
-            self.attribution_factors['instrument'][instrument] = []
-        self.attribution_factors['instrument'][instrument].append(pnl)
+        instrument = trade_data.get("instrument", "unknown")
+        if instrument not in self.attribution_factors["instrument"]:
+            self.attribution_factors["instrument"][instrument] = []
+        self.attribution_factors["instrument"][instrument].append(pnl)
         
         # Attribute to timeframe
-        timeframe = trade_data.get('timeframe', 'unknown')
-        if timeframe not in self.attribution_factors['timeframe']:
-            self.attribution_factors['timeframe'][timeframe] = []
-        self.attribution_factors['timeframe'][timeframe].append(pnl)
+        timeframe = trade_data.get("timeframe", "unknown")
+        if timeframe not in self.attribution_factors["timeframe"]:
+            self.attribution_factors["timeframe"][timeframe] = []
+        self.attribution_factors["timeframe"][timeframe].append(pnl)
         
         # Attribute to market condition
-        market_condition = trade_data.get('market_condition', 'unknown')
-        if market_condition not in self.attribution_factors['market_condition']:
-            self.attribution_factors['market_condition'][market_condition] = []
-        self.attribution_factors['market_condition'][market_condition].append(pnl)
+        market_condition = trade_data.get("market_condition", "unknown")
+        if market_condition not in self.attribution_factors["market_condition"]:
+            self.attribution_factors["market_condition"][market_condition] = []
+        self.attribution_factors["market_condition"][market_condition].append(pnl)
     
     def calculate_attribution_metrics(self) -> dict:
         """Calculate attribution metrics for each factor."""
@@ -611,10 +611,10 @@ class PerformanceAttribution:
                     factor_avg_pnl = factor_pnl / factor_trades
                     
                     attribution_results[factor_type][factor_name] = {
-                        'total_pnl': factor_pnl,
-                        'trade_count': factor_trades,
-                        'win_rate': factor_win_rate,
-                        'avg_pnl': factor_avg_pnl
+                        "total_pnl": factor_pnl,
+                        "trade_count": factor_trades,
+                        "win_rate": factor_win_rate,
+                        "avg_pnl": factor_avg_pnl,
                     }
                     
                     total_factor_pnl += factor_pnl
@@ -622,10 +622,10 @@ class PerformanceAttribution:
             # Calculate percentage contribution
             for factor_name, metrics in attribution_results[factor_type].items():
                 if total_factor_pnl != 0:
-                    contribution_pct = (metrics['total_pnl'] / total_factor_pnl) * 100
-                    metrics['contribution_pct'] = contribution_pct
+                    contribution_pct = (metrics["total_pnl"] / total_factor_pnl) * 100
+                    metrics["contribution_pct"] = contribution_pct
                 else:
-                    metrics['contribution_pct'] = 0
+                    metrics["contribution_pct"] = 0
         
         return attribution_results
     
@@ -643,12 +643,12 @@ class PerformanceAttribution:
             # Sort by contribution
             sorted_factors = sorted(
                 factor_results.items(),
-                key=lambda x: x[1]['total_pnl'],
-                reverse=True
+                key=lambda x: x[1]["total_pnl"],
+                reverse=True,
             )
             
             for factor_name, metrics in sorted_factors:
-                status = "🟫" if metrics['total_pnl'] > 0 else "🔴"
+                status = "🟫" if metrics["total_pnl"] > 0 else "🔴"
                 print(f"   {factor_name}: ${metrics['total_pnl']:+.2f} "
                       f"({metrics['contribution_pct']:+.1f}%) - "
                       f"{metrics['trade_count']} trades, "
@@ -666,12 +666,12 @@ class PerformanceAttribution:
             if factor_results:
                 best_factor = max(
                     factor_results.items(),
-                    key=lambda x: x[1]['total_pnl']
+                    key=lambda x: x[1]["total_pnl"],
                 )
                 
                 best_performers[factor_type] = {
-                    'name': best_factor[0],
-                    'metrics': best_factor[1]
+                    "name": best_factor[0],
+                    "metrics": best_factor[1],
                 }
         
         print(f"\n🏆 Best Performers by Category:")
@@ -687,13 +687,13 @@ def demo_attribution_analysis():
     
     # Sample trade data with attribution factors
     sample_trades = [
-        {'pnl': 150, 'strategy': 'trend_following', 'instrument': 'EUR_USD', 'timeframe': 'H4', 'market_condition': 'trending'},
-        {'pnl': -80, 'strategy': 'mean_reversion', 'instrument': 'GBP_USD', 'timeframe': 'H1', 'market_condition': 'ranging'},
-        {'pnl': 200, 'strategy': 'trend_following', 'instrument': 'USD_JPY', 'timeframe': 'H4', 'market_condition': 'trending'},
-        {'pnl': -50, 'strategy': 'breakout', 'instrument': 'EUR_USD', 'timeframe': 'M15', 'market_condition': 'volatile'},
-        {'pnl': 120, 'strategy': 'mean_reversion', 'instrument': 'AUD_USD', 'timeframe': 'H1', 'market_condition': 'ranging'},
-        {'pnl': -30, 'strategy': 'trend_following', 'instrument': 'GBP_USD', 'timeframe': 'H4', 'market_condition': 'choppy'},
-        {'pnl': 180, 'strategy': 'breakout', 'instrument': 'USD_CAD', 'timeframe': 'M15', 'market_condition': 'volatile'}
+        {"pnl": 150, "strategy": "trend_following", "instrument": "EUR_USD", "timeframe": "H4", "market_condition": "trending"},
+        {"pnl": -80, "strategy": "mean_reversion", "instrument": "GBP_USD", "timeframe": "H1", "market_condition": "ranging"},
+        {"pnl": 200, "strategy": "trend_following", "instrument": "USD_JPY", "timeframe": "H4", "market_condition": "trending"},
+        {"pnl": -50, "strategy": "breakout", "instrument": "EUR_USD", "timeframe": "M15", "market_condition": "volatile"},
+        {"pnl": 120, "strategy": "mean_reversion", "instrument": "AUD_USD", "timeframe": "H1", "market_condition": "ranging"},
+        {"pnl": -30, "strategy": "trend_following", "instrument": "GBP_USD", "timeframe": "H4", "market_condition": "choppy"},
+        {"pnl": 180, "strategy": "breakout", "instrument": "USD_CAD", "timeframe": "M15", "market_condition": "volatile"},
     ]
     
     attribution = PerformanceAttribution()
@@ -707,8 +707,8 @@ def demo_attribution_analysis():
     best_performers = attribution.identify_best_performers()
     
     return {
-        'attribution_results': results,
-        'best_performers': best_performers
+        "attribution_results": results,
+        "best_performers": best_performers,
     }
 ```
 
@@ -749,10 +749,10 @@ class PortfolioOptimizer:
         sharpe_ratio = (portfolio_return - self.risk_free_rate) / portfolio_volatility
         
         return {
-            'return': portfolio_return,
-            'volatility': portfolio_volatility,
-            'sharpe_ratio': sharpe_ratio,
-            'weights': weights
+            "return": portfolio_return,
+            "volatility": portfolio_volatility,
+            "sharpe_ratio": sharpe_ratio,
+            "weights": weights,
         }
     
     def optimize_sharpe_ratio(self) -> dict:
@@ -763,11 +763,11 @@ class PortfolioOptimizer:
         # Objective function (negative Sharpe ratio for minimization)
         def negative_sharpe(weights):
             metrics = self.calculate_portfolio_metrics(weights)
-            return -metrics['sharpe_ratio']
+            return -metrics["sharpe_ratio"]
         
         # Constraints
         constraints = (
-            {'type': 'eq', 'fun': lambda x: np.sum(x) - 1},  # Weights sum to 1
+            {"type": "eq", "fun": lambda x: np.sum(x) - 1},  # Weights sum to 1
         )
         
         # Bounds (0 to 1 for each weight)
@@ -780,9 +780,9 @@ class PortfolioOptimizer:
         result = minimize(
             negative_sharpe,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
-            constraints=constraints
+            constraints=constraints,
         )
         
         if result.success:
@@ -799,7 +799,7 @@ class PortfolioOptimizer:
             
             return optimal_metrics
         else:
-            return {'error': 'Optimization failed'}
+            return {"error": "Optimization failed"}
     
     def optimize_minimum_variance(self) -> dict:
         """Find portfolio weights that minimize variance."""
@@ -813,7 +813,7 @@ class PortfolioOptimizer:
         
         # Constraints
         constraints = (
-            {'type': 'eq', 'fun': lambda x: np.sum(x) - 1},  # Weights sum to 1
+            {"type": "eq", "fun": lambda x: np.sum(x) - 1},  # Weights sum to 1
         )
         
         # Bounds
@@ -826,9 +826,9 @@ class PortfolioOptimizer:
         result = minimize(
             portfolio_variance,
             initial_weights,
-            method='SLSQP',
+            method="SLSQP",
             bounds=bounds,
-            constraints=constraints
+            constraints=constraints,
         )
         
         if result.success:
@@ -845,7 +845,7 @@ class PortfolioOptimizer:
             
             return optimal_metrics
         else:
-            return {'error': 'Optimization failed'}
+            return {"error": "Optimization failed"}
     
     def calculate_efficient_frontier(self, num_points: int = 50) -> dict:
         """Calculate efficient frontier points."""
@@ -868,8 +868,8 @@ class PortfolioOptimizer:
             
             # Constraints
             constraints = (
-                {'type': 'eq', 'fun': lambda x: np.sum(x) - 1},  # Weights sum to 1
-                {'type': 'eq', 'fun': lambda x: np.sum(np.mean(self.returns_matrix, axis=0) * x) - target_return}  # Target return
+                {"type": "eq", "fun": lambda x: np.sum(x) - 1},  # Weights sum to 1
+                {"type": "eq", "fun": lambda x: np.sum(np.mean(self.returns_matrix, axis=0) * x) - target_return},  # Target return
             )
             
             # Bounds
@@ -882,9 +882,9 @@ class PortfolioOptimizer:
             result = minimize(
                 portfolio_variance,
                 initial_weights,
-                method='SLSQP',
+                method="SLSQP",
                 bounds=bounds,
-                constraints=constraints
+                constraints=constraints,
             )
             
             if result.success:
@@ -898,8 +898,8 @@ class PortfolioOptimizer:
               f"{max([p['volatility'] for p in efficient_portfolios]):.2%}")
         
         return {
-            'efficient_portfolios': efficient_portfolios,
-            'target_returns': target_returns.tolist()
+            "efficient_portfolios": efficient_portfolios,
+            "target_returns": target_returns.tolist(),
         }
 
 # Example portfolio optimization
@@ -908,10 +908,10 @@ def demo_portfolio_optimization():
     
     # Sample strategy returns (daily) - replace with your actual historical returns
     strategy_returns = {
-        'trend_following': np.random.normal(0.001, 0.02, 252),   # Example: 252 trading days
-        'mean_reversion': np.random.normal(0.0008, 0.015, 252),  # Example returns and volatility
-        'breakout': np.random.normal(0.0012, 0.025, 252),        # Example returns and volatility
-        'carry_trade': np.random.normal(0.0005, 0.01, 252)       # Example returns and volatility
+        "trend_following": np.random.normal(0.001, 0.02, 252),   # Example: 252 trading days
+        "mean_reversion": np.random.normal(0.0008, 0.015, 252),  # Example returns and volatility
+        "breakout": np.random.normal(0.0012, 0.025, 252),        # Example returns and volatility
+        "carry_trade": np.random.normal(0.0005, 0.01, 252),       # Example returns and volatility
     }
     
     optimizer = PortfolioOptimizer(strategy_returns)
@@ -926,9 +926,9 @@ def demo_portfolio_optimization():
     frontier = optimizer.calculate_efficient_frontier()
     
     return {
-        'max_sharpe': max_sharpe,
-        'min_variance': min_variance,
-        'efficient_frontier': frontier
+        "max_sharpe": max_sharpe,
+        "min_variance": min_variance,
+        "efficient_frontier": frontier,
     }
 ```
 

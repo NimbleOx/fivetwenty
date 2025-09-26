@@ -294,7 +294,7 @@ Types are enforced at runtime via Pydantic:
 # This will raise ValidationError at runtime
 order = MarketOrderRequest(
     instrument="EUR_USD",
-    units="not-a-number"  # Type error caught immediately
+    units="not-a-number",  # Type error caught immediately
 )
 ```
 
@@ -634,7 +634,7 @@ async def main():
     order = await client.orders.post_market_order(
         account_id=account_id,
         instrument="EUR_USD",
-        units=Decimal("10000")  # Automatically converted to string for API
+        units=Decimal("10000"),  # Automatically converted to string for API
     )
 
 asyncio.run(main())
@@ -724,7 +724,7 @@ async def get_market_overview(client, account_id):
         client.accounts.get_account(account_id),
         client.positions.get_open_positions(account_id),
         client.pricing.get_pricing(account_id, ["EUR_USD", "GBP_USD"]),
-        return_exceptions=True
+        return_exceptions=True,
     )
     return results
 ```

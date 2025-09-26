@@ -57,7 +57,7 @@ class PositionSizer:
         position_size = int(self.max_risk_amount / risk_per_unit)
 
         # Get pip value for display
-        pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
+        pip_value = Decimal("0.01") if instrument.endswith("JPY") else Decimal("0.0001")
         risk_pips = risk_per_unit / pip_value
 
         print(f"📊 Position Size Calculation:")
@@ -544,10 +544,10 @@ def validate_position_size_decision(account_balance: Decimal, position_size: int
     """Comprehensive position size validation."""
     
     validation = {
-        'checks': [],
-        'warnings': [],
-        'errors': [],
-        'approved': True
+        "checks": [],
+        "warnings": [],
+        "errors": [],
+        "approved": True,
     }
     
     # Calculate risk metrics
@@ -556,28 +556,28 @@ def validate_position_size_decision(account_balance: Decimal, position_size: int
     
     # Risk percentage check
     if risk_percent <= Decimal("1.0"):
-        validation['checks'].append(f"✅ Risk {risk_percent:.2f}% within 1% limit")
+        validation["checks"].append(f"✅ Risk {risk_percent:.2f}% within 1% limit")
     elif risk_percent <= Decimal("2.0"):
-        validation['warnings'].append(f"⚠️ Risk {risk_percent:.2f}% above 1% but acceptable")
+        validation["warnings"].append(f"⚠️ Risk {risk_percent:.2f}% above 1% but acceptable")
     else:
-        validation['errors'].append(f"❌ Risk {risk_percent:.2f}% exceeds safe limits")
-        validation['approved'] = False
+        validation["errors"].append(f"❌ Risk {risk_percent:.2f}% exceeds safe limits")
+        validation["approved"] = False
     
     # Position size reasonableness
     if abs(position_size) <= 10000:  # Example: 10,000 units threshold
-        validation['checks'].append("✅ Position size reasonable")
+        validation["checks"].append("✅ Position size reasonable")
     elif abs(position_size) <= 50000:  # Example: 50,000 units threshold
-        validation['warnings'].append("⚠️ Large position size")
+        validation["warnings"].append("⚠️ Large position size")
     else:
-        validation['errors'].append("❌ Excessive position size")
-        validation['approved'] = False
+        validation["errors"].append("❌ Excessive position size")
+        validation["approved"] = False
     
     # Stop loss presence
     if stop_loss != entry_price:
-        validation['checks'].append("✅ Stop loss defined")
+        validation["checks"].append("✅ Stop loss defined")
     else:
-        validation['errors'].append("❌ No stop loss defined")
-        validation['approved'] = False
+        validation["errors"].append("❌ No stop loss defined")
+        validation["approved"] = False
     
     return validation
 
@@ -587,15 +587,15 @@ result = validate_position_size_decision(
     position_size=2000,               # Example: 2,000 units
     entry_price=Decimal("1.1000"),   # Example entry price
     stop_loss=Decimal("1.0950"),     # Example stop loss
-    instrument="EUR_USD"              # Example instrument
+    instrument="EUR_USD",              # Example instrument
 )
 
 print("📋 Position Size Validation:")
-for check in result['checks']:
+for check in result["checks"]:
     print(f"   {check}")
-for warning in result['warnings']:
+for warning in result["warnings"]:
     print(f"   {warning}")
-for error in result['errors']:
+for error in result["errors"]:
     print(f"   {error}")
 print(f"   Approved: {'Yes' if result['approved'] else 'No'}")
 ```

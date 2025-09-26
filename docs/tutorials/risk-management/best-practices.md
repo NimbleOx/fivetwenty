@@ -256,61 +256,61 @@ class RiskValidationChecklist:
     
     def __init__(self):
         self.validation_categories = {
-            'strategy_validation': {
-                'name': 'Strategy Validation',
-                'weight': 25,
-                'checks': [
-                    'backtest_minimum_1_year',
-                    'forward_test_30_days',
-                    'multiple_market_conditions',
-                    'out_of_sample_validation',
-                    'walk_forward_analysis'
-                ]
+            "strategy_validation": {
+                "name": "Strategy Validation",
+                "weight": 25,
+                "checks": [
+                    "backtest_minimum_1_year",
+                    "forward_test_30_days",
+                    "multiple_market_conditions",
+                    "out_of_sample_validation",
+                    "walk_forward_analysis",
+                ],
             },
-            'risk_controls': {
-                'name': 'Risk Controls',
-                'weight': 30,
-                'checks': [
-                    'position_sizing_implemented',
-                    'stop_losses_mandatory',
-                    'portfolio_limits_set',
-                    'correlation_monitoring',
-                    'circuit_breakers_active'
-                ]
+            "risk_controls": {
+                "name": "Risk Controls",
+                "weight": 30,
+                "checks": [
+                    "position_sizing_implemented",
+                    "stop_losses_mandatory",
+                    "portfolio_limits_set",
+                    "correlation_monitoring",
+                    "circuit_breakers_active",
+                ],
             },
-            'technical_implementation': {
-                'name': 'Technical Implementation',
-                'weight': 20,
-                'checks': [
-                    'error_handling_robust',
-                    'reconnection_logic',
-                    'position_monitoring',
-                    'alert_system_functional',
-                    'backup_systems_ready'
-                ]
+            "technical_implementation": {
+                "name": "Technical Implementation",
+                "weight": 20,
+                "checks": [
+                    "error_handling_robust",
+                    "reconnection_logic",
+                    "position_monitoring",
+                    "alert_system_functional",
+                    "backup_systems_ready",
+                ],
             },
-            'operational_readiness': {
-                'name': 'Operational Readiness',
-                'weight': 15,
-                'checks': [
-                    'documentation_complete',
-                    'monitoring_dashboard',
-                    'alert_procedures',
-                    'recovery_plans',
-                    'staff_training_done'
-                ]
+            "operational_readiness": {
+                "name": "Operational Readiness",
+                "weight": 15,
+                "checks": [
+                    "documentation_complete",
+                    "monitoring_dashboard",
+                    "alert_procedures",
+                    "recovery_plans",
+                    "staff_training_done",
+                ],
             },
-            'compliance_governance': {
-                'name': 'Compliance & Governance',
-                'weight': 10,
-                'checks': [
-                    'risk_policies_documented',
-                    'approval_processes',
-                    'audit_trail_enabled',
-                    'regulatory_compliance',
-                    'review_schedule_set'
-                ]
-            }
+            "compliance_governance": {
+                "name": "Compliance & Governance",
+                "weight": 10,
+                "checks": [
+                    "risk_policies_documented",
+                    "approval_processes",
+                    "audit_trail_enabled",
+                    "regulatory_compliance",
+                    "review_schedule_set",
+                ],
+            },
         }
         
         self.checklist_results = {}
@@ -319,10 +319,10 @@ class RiskValidationChecklist:
         """Evaluate a specific validation category."""
         
         if category not in self.validation_categories:
-            return {'error': f'Unknown category: {category}'}
+            return {"error": f"Unknown category: {category}"}
         
         category_info = self.validation_categories[category]
-        required_checks = category_info['checks']
+        required_checks = category_info["checks"]
         
         # Calculate completion percentage
         completed_count = len([check for check in completed_checks if check in required_checks])
@@ -330,16 +330,16 @@ class RiskValidationChecklist:
         completion_percentage = (completed_count / total_checks) * 100
         
         # Weighted score
-        weighted_score = (completion_percentage / 100) * category_info['weight']
+        weighted_score = (completion_percentage / 100) * category_info["weight"]
         
         result = {
-            'category': category_info['name'],
-            'completed': completed_count,
-            'total': total_checks,
-            'completion_percentage': completion_percentage,
-            'weight': category_info['weight'],
-            'weighted_score': weighted_score,
-            'missing_checks': [check for check in required_checks if check not in completed_checks]
+            "category": category_info["name"],
+            "completed": completed_count,
+            "total": total_checks,
+            "completion_percentage": completion_percentage,
+            "weight": category_info["weight"],
+            "weighted_score": weighted_score,
+            "missing_checks": [check for check in required_checks if check not in completed_checks],
         }
         
         self.checklist_results[category] = result
@@ -349,10 +349,10 @@ class RiskValidationChecklist:
         """Generate overall validation assessment."""
         
         if not self.checklist_results:
-            return {'error': 'No categories evaluated'}
+            return {"error": "No categories evaluated"}
         
-        total_weighted_score = sum(result['weighted_score'] for result in self.checklist_results.values())
-        total_possible_score = sum(cat['weight'] for cat in self.validation_categories.values())
+        total_weighted_score = sum(result["weighted_score"] for result in self.checklist_results.values())
+        total_possible_score = sum(cat["weight"] for cat in self.validation_categories.values())
         
         overall_percentage = (total_weighted_score / total_possible_score) * 100
         
@@ -375,12 +375,12 @@ class RiskValidationChecklist:
             emoji = "❌"
         
         assessment = {
-            'overall_score': overall_percentage,
-            'readiness_level': readiness,
-            'recommendation': recommendation,
-            'emoji': emoji,
-            'category_scores': {cat: result['completion_percentage'] 
-                              for cat, result in self.checklist_results.items()}
+            "overall_score": overall_percentage,
+            "readiness_level": readiness,
+            "recommendation": recommendation,
+            "emoji": emoji,
+            "category_scores": {cat: result["completion_percentage"] 
+                              for cat, result in self.checklist_results.items()},
         }
         
         return assessment
@@ -393,16 +393,16 @@ class RiskValidationChecklist:
         
         # Category breakdown
         for category, result in self.checklist_results.items():
-            status_emoji = "✅" if result['completion_percentage'] >= 80 else "⚠️" if result['completion_percentage'] >= 60 else "❌"
+            status_emoji = "✅" if result["completion_percentage"] >= 80 else "⚠️" if result["completion_percentage"] >= 60 else "❌"
             
             print(f"\n{status_emoji} {result['category']}:")
             print(f"   Completed: {result['completed']}/{result['total']} ({result['completion_percentage']:.1f}%)")
             print(f"   Weighted Score: {result['weighted_score']:.1f}/{result['weight']}")
             
-            if result['missing_checks']:
+            if result["missing_checks"]:
                 print(f"   Missing:")
-                for missing in result['missing_checks']:
-                    formatted_missing = missing.replace('_', ' ').title()
+                for missing in result["missing_checks"]:
+                    formatted_missing = missing.replace("_", " ").title()
                     print(f"     • {formatted_missing}")
         
         # Overall assessment
@@ -423,16 +423,16 @@ class RiskValidationChecklist:
         # Sort categories by lowest completion percentage
         sorted_categories = sorted(
             self.checklist_results.items(),
-            key=lambda x: x[1]['completion_percentage']
+            key=lambda x: x[1]["completion_percentage"],
         )
         
         for category, result in sorted_categories[:3]:  # Top 3 priorities
-            for missing_check in result['missing_checks'][:2]:  # Top 2 per category
-                formatted_check = missing_check.replace('_', ' ').title()
+            for missing_check in result["missing_checks"][:2]:  # Top 2 per category
+                formatted_check = missing_check.replace("_", " ").title()
                 priority_actions.append({
-                    'category': result['category'],
-                    'action': formatted_check,
-                    'priority': 'HIGH' if result['completion_percentage'] < 60 else 'MEDIUM'
+                    "category": result["category"],
+                    "action": formatted_check,
+                    "priority": "HIGH" if result["completion_percentage"] < 60 else "MEDIUM",
                 })
         
         print(f"\n🎯 Priority Actions:")
@@ -449,30 +449,30 @@ def demo_validation_checklist():
     
     # Simulate completed checks for each category
     completed_checks = {
-        'strategy_validation': [
-            'backtest_minimum_1_year',
-            'forward_test_30_days',
-            'multiple_market_conditions'
+        "strategy_validation": [
+            "backtest_minimum_1_year",
+            "forward_test_30_days",
+            "multiple_market_conditions",
         ],
-        'risk_controls': [
-            'position_sizing_implemented',
-            'stop_losses_mandatory',
-            'portfolio_limits_set',
-            'circuit_breakers_active'
+        "risk_controls": [
+            "position_sizing_implemented",
+            "stop_losses_mandatory",
+            "portfolio_limits_set",
+            "circuit_breakers_active",
         ],
-        'technical_implementation': [
-            'error_handling_robust',
-            'position_monitoring',
-            'alert_system_functional'
+        "technical_implementation": [
+            "error_handling_robust",
+            "position_monitoring",
+            "alert_system_functional",
         ],
-        'operational_readiness': [
-            'documentation_complete',
-            'monitoring_dashboard'
+        "operational_readiness": [
+            "documentation_complete",
+            "monitoring_dashboard",
         ],
-        'compliance_governance': [
-            'risk_policies_documented',
-            'audit_trail_enabled'
-        ]
+        "compliance_governance": [
+            "risk_policies_documented",
+            "audit_trail_enabled",
+        ],
     }
     
     # Evaluate each category
@@ -484,9 +484,9 @@ def demo_validation_checklist():
     priority_actions = validator.get_priority_actions()
     
     return {
-        'validator': validator,
-        'assessment': assessment,
-        'priority_actions': priority_actions
+        "validator": validator,
+        "assessment": assessment,
+        "priority_actions": priority_actions,
     }
 ```
 

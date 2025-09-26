@@ -204,7 +204,7 @@ order_params = {
     "units": 10000,                   # Position size (+ buy, - sell)
     "type": "LIMIT",                  # Order type
     "price": Decimal("1.0850"),      # Execution price (if applicable)
-    "time_in_force": "GTC"           # Time validity
+    "time_in_force": "GTC",           # Time validity
 }
 ```
 

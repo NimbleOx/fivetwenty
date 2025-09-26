@@ -272,7 +272,7 @@ class TestOrderModel:
             "price": "1.2345",
             "timeInForce": "GTC",
             "createTime": "2024-01-15T10:30:00.000000Z",
-            "state": "PENDING"
+            "state": "PENDING",
         }
 
         order = Order.model_validate(order_data)
@@ -291,7 +291,7 @@ class TestOrderModel:
             "id": "",  # Empty ID
             "instrument": "INVALID",  # Invalid instrument format
             "units": "not-a-number",  # Invalid units
-            "price": "invalid-price"  # Invalid price
+            "price": "invalid-price",  # Invalid price
         }
 
         with pytest.raises(ValidationError) as exc_info:
@@ -309,7 +309,7 @@ class TestOrderModel:
             "units": "-500",
             "price": "1.3456",
             "timeInForce": "FOK",
-            "createTime": "2024-01-15T15:45:30.123456Z"
+            "createTime": "2024-01-15T15:45:30.123456Z",
         }
 
         # Parse from dict
@@ -352,7 +352,7 @@ class TestAccountsIntegration:
         return AsyncClient(
             token=os.environ["TEST_OANDA_TOKEN"],
             account_id=os.environ["TEST_OANDA_ACCOUNT"],
-            environment=Environment.PRACTICE  # Always use practice for tests
+            environment=Environment.PRACTICE,  # Always use practice for tests
         )
 
     @pytest.mark.asyncio

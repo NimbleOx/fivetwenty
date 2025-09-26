@@ -726,16 +726,16 @@ winning_position_stop = 1.0960  # Moved in your favor
 ```python
 # WRONG: Hoping position will recover
 position_without_stop = {
-    'entry': 1.1000,
-    'stop': None,  # Dangerous!
-    'hope': 'Price will come back'
+    "entry": 1.1000,
+    "stop": None,  # Dangerous!
+    "hope": "Price will come back",
 }
 
 # RIGHT: Always have a stop
 position_with_stop = {
-    'entry': 1.1000,
-    'stop': 1.0950,  # Risk defined
-    'risk_amount': 'Known and acceptable'
+    "entry": 1.1000,
+    "stop": 1.0950,  # Risk defined
+    "risk_amount": "Known and acceptable",
 }
 ```
 
@@ -773,10 +773,10 @@ class ScalingStopManager:
         position_per_scale = total_position // len(scale_levels)
         
         self.position_scales[trade_id] = {
-            'remaining_position': total_position,
-            'scale_levels': scale_levels,
-            'position_per_scale': position_per_scale,
-            'stops_hit': []
+            "remaining_position": total_position,
+            "scale_levels": scale_levels,
+            "position_per_scale": position_per_scale,
+            "stops_hit": [],
         }
         
         print(f"🔄 Scaling Stops Setup:")
@@ -791,7 +791,7 @@ scaling_manager = ScalingStopManager()
 scaling_setup = scaling_manager.setup_scaling_stops(
     trade_id="trade_123",
     total_position=3000,
-    scale_levels=[1.1050, 1.1100, 1.1150]  # Three profit targets
+    scale_levels=[1.1050, 1.1100, 1.1150],  # Three profit targets
 )
 ```
 
@@ -814,9 +814,9 @@ class TimeBasedStopManager:
         exit_time = entry_time + timedelta(hours=max_hours)
         
         self.time_stops[trade_id] = {
-            'entry_time': entry_time,
-            'exit_time': exit_time,
-            'max_hours': max_hours
+            "entry_time": entry_time,
+            "exit_time": exit_time,
+            "max_hours": max_hours,
         }
         
         print(f"⏰ Time Stop Set:")
@@ -831,7 +831,7 @@ class TimeBasedStopManager:
         expired_trades = []
         
         for trade_id, stop_info in self.time_stops.items():
-            if current_time >= stop_info['exit_time']:
+            if current_time >= stop_info["exit_time"]:
                 expired_trades.append(trade_id)
                 print(f"⏰ Time stop triggered for {trade_id}")
         

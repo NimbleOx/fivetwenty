@@ -456,7 +456,7 @@ class SecureCredentialManager:
         # 2. Key management service
         # 3. Encrypted configuration file
 
-        token = os.getenv('OANDA_API_TOKEN')
+        token = os.getenv("OANDA_API_TOKEN")
         if token:
             return token
 
@@ -486,7 +486,7 @@ def create_secure_client() -> AsyncClient:
 
     return AsyncClient(
         token=token,
-        environment=Environment.LIVE
+        environment=Environment.LIVE,
     )
 ```
 
@@ -512,13 +512,13 @@ def create_secure_client_with_tls() -> AsyncClient:
     # Configure httpx with secure settings
     http_client = httpx.AsyncClient(
         verify=ssl_context,
-        timeout=httpx.Timeout(30.0)
+        timeout=httpx.Timeout(30.0),
     )
 
     return AsyncClient(
         token=SecureCredentialManager.get_api_token(),
         environment=Environment.LIVE,
-        http_client=http_client
+        http_client=http_client,
     )
 ```
 
@@ -578,12 +578,12 @@ class OptimizedStreamingSystem(ProductionStreamingSystem):
 
         # Start memory monitoring
         memory_task = asyncio.create_task(
-            self.memory_optimizer.monitor_memory()
+            self.memory_optimizer.monitor_memory(),
         )
 
         # Start main system
         system_task = asyncio.create_task(
-            super().start_production_system(instruments)
+            super().start_production_system(instruments),
         )
 
         await asyncio.gather(memory_task, system_task)
@@ -606,32 +606,32 @@ class HealthCheckServer:
     def __init__(self, streaming_system: ProductionStreamingSystem):
         self.system = streaming_system
 
-    async def get_health_status(self) -> Dict[str, Any]:
+    async def get_health_status(self) -> dict[str, Any]:
         """Get comprehensive health status."""
 
         return {
-            'status': 'healthy' if self.system.is_running else 'unhealthy',
-            'timestamp': datetime.now().isoformat(),
-            'uptime_seconds': self._get_uptime(),
-            'active_streams': len(self.system.active_streams),
-            'memory_usage': self._get_memory_usage(),
-            'error_rate': self._get_error_rate(),
-            'performance': self._get_performance_metrics()
+            "status": "healthy" if self.system.is_running else "unhealthy",
+            "timestamp": datetime.now().isoformat(),
+            "uptime_seconds": self._get_uptime(),
+            "active_streams": len(self.system.active_streams),
+            "memory_usage": self._get_memory_usage(),
+            "error_rate": self._get_error_rate(),
+            "performance": self._get_performance_metrics(),
         }
 
     def _get_uptime(self) -> float:
         """Get system uptime in seconds."""
-        if hasattr(self.system, 'start_time'):
+        if hasattr(self.system, "start_time"):
             return (datetime.now() - self.system.start_time).total_seconds()
         return 0
 
-    def _get_memory_usage(self) -> Dict[str, float]:
+    def _get_memory_usage(self) -> dict[str, float]:
         """Get memory usage statistics."""
         memory = psutil.virtual_memory()
         return {
-            'percent': memory.percent,
-            'used_gb': memory.used / (1024**3),
-            'available_gb': memory.available / (1024**3)
+            "percent": memory.percent,
+            "used_gb": memory.used / (1024**3),
+            "available_gb": memory.available / (1024**3),
         }
 
     def _get_error_rate(self) -> float:
@@ -640,7 +640,7 @@ class HealthCheckServer:
             return self.system.metrics.get_error_rate(minutes=5)
         return 0
 
-    def _get_performance_metrics(self) -> Dict[str, Any]:
+    def _get_performance_metrics(self) -> dict[str, Any]:
         """Get performance metrics."""
         if self.system.metrics:
             return self.system.metrics.get_performance_summary()

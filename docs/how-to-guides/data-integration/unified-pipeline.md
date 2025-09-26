@@ -774,7 +774,7 @@ class DataSourceConfig:
     def _load_config(self, config_file: str) -> Dict:
         """Load configuration from file."""
         try:
-            with open(config_file, 'r') as f:
+            with open(config_file, "r") as f:
                 return json.load(f)
         except Exception as e:
             print(f"Error loading config: {e}")
@@ -783,27 +783,27 @@ class DataSourceConfig:
     def get_api_keys(self) -> Dict[str, str]:
         """Get all API keys."""
         return {
-            'economic_calendar': self.config.get('economic_calendar_api_key'),
-            'news_api': self.config.get('news_api_key'),
-            'twitter_bearer': self.config.get('twitter_bearer_token'),
-            'oanda_token': self.config.get('oanda_token')
+            "economic_calendar": self.config.get("economic_calendar_api_key"),
+            "news_api": self.config.get("news_api_key"),
+            "twitter_bearer": self.config.get("twitter_bearer_token"),
+            "oanda_token": self.config.get("oanda_token"),
         }
 
     def get_update_intervals(self) -> Dict[str, int]:
         """Get update intervals for each data source."""
-        return self.config.get('update_intervals', {
-            'economic': 3600,   # 1 hour
-            'news': 600,        # 10 minutes
-            'social': 900,      # 15 minutes
-            'technical': 300    # 5 minutes
+        return self.config.get("update_intervals", {
+            "economic": 3600,   # 1 hour
+            "news": 600,        # 10 minutes
+            "social": 900,      # 15 minutes
+            "technical": 300,    # 5 minutes
         })
 
     def get_risk_settings(self) -> Dict[str, float]:
         """Get risk management settings."""
-        return self.config.get('risk_settings', {
-            'max_position_size': 100000,
-            'risk_multipliers': {'LOW': 1.0, 'MEDIUM': 0.7, 'HIGH': 0.3},
-            'min_signal_strength': 0.3
+        return self.config.get("risk_settings", {
+            "max_position_size": 100000,
+            "risk_multipliers": {"LOW": 1.0, "MEDIUM": 0.7, "HIGH": 0.3},
+            "min_signal_strength": 0.3,
         })
 ```
 
@@ -818,10 +818,10 @@ class ResilientDataPipeline:
     def __init__(self, unified_system: UnifiedTradingSystem):
         self.unified_system = unified_system
         self.fallback_modes = {
-            'economic': True,   # Can trade without economic data
-            'news': True,       # Can trade without news
-            'social': True,     # Can trade without social sentiment
-            'technical': False  # Cannot trade without technical analysis
+            "economic": True,   # Can trade without economic data
+            "news": True,       # Can trade without news
+            "social": True,     # Can trade without social sentiment
+            "technical": False,  # Cannot trade without technical analysis
         }
 
     async def get_resilient_market_context(self, instrument: str) -> MarketContext:
@@ -841,7 +841,7 @@ class ResilientDataPipeline:
 
         # Start with minimal context
         prices = await self.unified_system.fivetwenty_client.pricing.get_pricing(
-            "101-001-1234567-001", [instrument]
+            "101-001-1234567-001", [instrument],
         )
         current_price_data = prices[0]
 
@@ -850,7 +850,7 @@ class ResilientDataPipeline:
             instrument=instrument,
             current_price=Decimal(str(current_price_data.asks[0].price)),
             spread=Decimal(str(current_price_data.asks[0].price)) - Decimal(str(current_price_data.bids[0].price)),
-            technical_signal='NEUTRAL',
+            technical_signal="NEUTRAL",
             technical_strength=0,
             technical_reasons=[],
             upcoming_events=[],
@@ -860,27 +860,27 @@ class ResilientDataPipeline:
             news_count=0,
             social_bias=0,
             social_confidence=0,
-            final_signal='NEUTRAL',
+            final_signal="NEUTRAL",
             signal_strength=0,
-            risk_level='HIGH'  # High risk due to missing data
+            risk_level="HIGH",  # High risk due to missing data
         )
 
         # Try to get technical analysis (critical)
         try:
             technical = await self.unified_system.signal_generator.generate_comprehensive_signal(instrument)
-            context.technical_signal = technical.get('signal', 'NEUTRAL')
-            context.technical_strength = technical.get('strength', 0)
-            context.technical_reasons = technical.get('reasons', [])
+            context.technical_signal = technical.get("signal", "NEUTRAL")
+            context.technical_strength = technical.get("strength", 0)
+            context.technical_reasons = technical.get("reasons", [])
 
             # If we have technical analysis, we can trade
             if context.technical_strength > 0.3:
                 context.final_signal = context.technical_signal
                 context.signal_strength = context.technical_strength * 0.7  # Reduced confidence
-                context.risk_level = 'MEDIUM'
+                context.risk_level = "MEDIUM"
 
         except Exception as e:
             print(f"Technical analysis failed: {e}")
-            context.risk_level = 'HIGH'
+            context.risk_level = "HIGH"
 
         return context
 ```

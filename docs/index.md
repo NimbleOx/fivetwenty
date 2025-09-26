@@ -79,7 +79,7 @@ async def main():
 
         # Place your first trade
         order = await client.orders.post_market_order(
-            account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000
+            account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000,
         )
 
         if order.order_fill_transaction:

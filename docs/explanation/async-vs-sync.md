@@ -39,12 +39,12 @@ async def async_example():
     """Async client example."""
     async with AsyncClient(
         token="your-token",
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
         # Concurrent requests (fast!)
         accounts, instruments = await asyncio.gather(
             client.accounts.get_accounts(),
-            client.instruments.get_instrument_candles("101-001-1234567-001")
+            client.instruments.get_instrument_candles("101-001-1234567-001"),
         )
 
         print(f"Found {len(accounts)} accounts")
@@ -68,7 +68,7 @@ async def concurrent_operations(client, account_id):
         client.positions.get_open_positions(account_id),
         client.orders.get_pending_orders(account_id),
         client.trades.get_open_trades(account_id),
-        client.pricing.get_pricing(account_id, ["EUR_USD", "GBP_USD", "USD_JPY"])
+        client.pricing.get_pricing(account_id, ["EUR_USD", "GBP_USD", "USD_JPY"]),
     )
 
     account, positions, orders, trades, prices = results
@@ -78,7 +78,7 @@ async def concurrent_operations(client, account_id):
         "positions": positions,
         "orders": orders,
         "trades": trades,
-        "prices": prices
+        "prices": prices,
     }
 
 # This takes ~200ms instead of ~1000ms sequential
@@ -128,7 +128,7 @@ from fivetwenty import Client, Environment
 # Sync client - simpler but slower
 with Client(
     token="your-token",
-    environment=Environment.PRACTICE
+    environment=Environment.PRACTICE,
 ) as client:
     # Sequential requests
     accounts = client.accounts.get_accounts()
@@ -245,7 +245,7 @@ def get_account_sync(client, account_id):
 async def get_account_async(client, account_id):
     account, positions = await asyncio.gather(
         client.accounts.get_account(account_id),
-        client.positions.get_open_positions(account_id)
+        client.positions.get_open_positions(account_id),
     )
     return account, positions
 ```
@@ -417,14 +417,14 @@ from fivetwenty import AsyncClient, Environment
 async_client = AsyncClient(
     token=token,
     environment=Environment.PRACTICE,
-    timeout=60.0  # Longer timeout for slow operations
+    timeout=60.0,  # Longer timeout for slow operations
 )
 
 # Sync with custom timeout
 sync_client = Client(
     token=token,
     environment=Environment.PRACTICE,
-    timeout=60.0
+    timeout=60.0,
 )
 ```
 

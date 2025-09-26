@@ -167,7 +167,7 @@ class BracketOrder:
         units: int,
         entry_price: Decimal,
         stop_price: Decimal,
-        target_price: Decimal
+        target_price: Decimal,
     ):
         """Place a complete bracket order system."""
 
@@ -177,7 +177,7 @@ class BracketOrder:
             instrument=instrument,
             units=units,
             price=entry_price,
-            time_in_force="GTC"
+            time_in_force="GTC",
         )
 
         self.entry_id = entry_response.order_create_transaction.id
@@ -191,7 +191,7 @@ class BracketOrder:
             # Check entry order status
             entry_order = await self.client.orders.get_order(
                 account_id=self.account_id,
-                order_id=self.entry_id
+                order_id=self.entry_id,
             )
 
             if entry_order.state == "FILLED":
@@ -276,7 +276,7 @@ class IcebergOrder:
         instrument: str,
         total_units: int,
         price: Decimal,
-        chunk_size: int = 10000
+        chunk_size: int = 10000,
     ):
         """Place large order as series of smaller limit orders."""
 
@@ -292,7 +292,7 @@ class IcebergOrder:
                 instrument=instrument,
                 units=current_chunk,
                 price=price,
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             order_id = response.order_create_transaction.id
@@ -313,7 +313,7 @@ class IcebergOrder:
             for order_id in self.active_orders[:]:  # Copy list for iteration
                 order = await self.client.orders.get_order(
                     account_id=self.account_id,
-                    order_id=order_id
+                    order_id=order_id,
                 )
 
                 if order.state == "FILLED":

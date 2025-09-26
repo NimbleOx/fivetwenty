@@ -33,13 +33,13 @@ import pandas as pd
 class RiskAttributionAnalyzer:
     """Advanced risk attribution and decomposition analysis."""
 
-    def __init__(self, returns_data: Dict[str, pd.Series], portfolio_weights: Dict[str, float]):
+    def __init__(self, returns_data: dict[str, pd.Series], portfolio_weights: dict[str, float]):
         self.returns_data = returns_data
         self.returns_df = pd.DataFrame(returns_data).dropna()
         self.portfolio_weights = portfolio_weights
         self.instruments = list(returns_data.keys())
 
-    def calculate_component_var(self, confidence_level: float = 0.05) -> Dict:
+    def calculate_component_var(self, confidence_level: float = 0.05) -> dict:
         """Calculate Component Value at Risk for each instrument."""
 
         # Portfolio returns
@@ -75,12 +75,12 @@ class RiskAttributionAnalyzer:
                 component_vars[instrument] = component_var
 
         return {
-            'portfolio_var': portfolio_var,
-            'component_vars': component_vars,
-            'confidence_level': confidence_level
+            "portfolio_var": portfolio_var,
+            "component_vars": component_vars,
+            "confidence_level": confidence_level,
         }
 
-    def risk_factor_analysis(self, factor_returns: Dict[str, pd.Series]) -> Dict:
+    def risk_factor_analysis(self, factor_returns: dict[str, pd.Series]) -> dict:
         """Perform risk factor analysis using multiple regression."""
 
         factor_df = pd.DataFrame(factor_returns).dropna()
@@ -118,18 +118,18 @@ class RiskAttributionAnalyzer:
                     total_variance = np.var(y_aligned)
 
                     results[instrument] = {
-                        'alpha': alpha,
-                        'betas': betas,
-                        'r_squared': r_squared,
-                        'factor_variance': factor_variance,
-                        'specific_variance': specific_variance,
-                        'total_variance': total_variance,
-                        'factor_contribution': factor_variance / total_variance if total_variance > 0 else 0
+                        "alpha": alpha,
+                        "betas": betas,
+                        "r_squared": r_squared,
+                        "factor_variance": factor_variance,
+                        "specific_variance": specific_variance,
+                        "total_variance": total_variance,
+                        "factor_contribution": factor_variance / total_variance if total_variance > 0 else 0,
                     }
 
         return results
 
-    def correlation_risk_decomposition(self) -> Dict:
+    def correlation_risk_decomposition(self) -> dict:
         """Decompose portfolio risk using correlation structure."""
 
         # Calculate correlation matrix
@@ -166,12 +166,12 @@ class RiskAttributionAnalyzer:
                 correlation_contributions[instrument] = correlation_contrib
 
         return {
-            'individual_variance_contributions': individual_vars,
-            'correlation_contributions': correlation_contributions,
-            'total_portfolio_variance': sum(individual_vars.values()) + sum(correlation_contributions.values()) / 2
+            "individual_variance_contributions": individual_vars,
+            "correlation_contributions": correlation_contributions,
+            "total_portfolio_variance": sum(individual_vars.values()) + sum(correlation_contributions.values()) / 2,
         }
 
-    def _calculate_portfolio_returns(self, weights: Dict[str, float] = None) -> pd.Series:
+    def _calculate_portfolio_returns(self, weights: dict[str, float] = None) -> pd.Series:
         """Calculate portfolio returns using specified or default weights."""
 
         if weights is None:
@@ -199,11 +199,11 @@ class RiskMonitor:
         self.risk_limits = {}
         self.alerts = []
 
-    def set_risk_limits(self, limits: Dict[str, Dict]):
+    def set_risk_limits(self, limits: dict[str, dict]):
         """Set risk limits for monitoring."""
         self.risk_limits = limits
 
-    def check_risk_limits(self) -> List[Dict]:
+    def check_risk_limits(self) -> list[dict]:
         """Check current risk against limits and generate alerts."""
 
         alerts = []
@@ -211,24 +211,24 @@ class RiskMonitor:
         # Check VaR limits
         var_analysis = self.risk_analyzer.calculate_component_var()
 
-        if 'portfolio_var_limit' in self.risk_limits:
-            limit = self.risk_limits['portfolio_var_limit']
-            if abs(var_analysis['portfolio_var']) > limit:
+        if "portfolio_var_limit" in self.risk_limits:
+            limit = self.risk_limits["portfolio_var_limit"]
+            if abs(var_analysis["portfolio_var"]) > limit:
                 alerts.append({
-                    'type': 'VaR_BREACH',
-                    'message': f"Portfolio VaR ({var_analysis['portfolio_var']:.4f}) exceeds limit ({limit:.4f})",
-                    'severity': 'HIGH'
+                    "type": "VaR_BREACH",
+                    "message": f"Portfolio VaR ({var_analysis['portfolio_var']:.4f}) exceeds limit ({limit:.4f})",
+                    "severity": "HIGH",
                 })
 
         # Check concentration limits
-        for instrument, component_var in var_analysis['component_vars'].items():
-            if f'{instrument}_var_limit' in self.risk_limits:
-                limit = self.risk_limits[f'{instrument}_var_limit']
+        for instrument, component_var in var_analysis["component_vars"].items():
+            if f"{instrument}_var_limit" in self.risk_limits:
+                limit = self.risk_limits[f"{instrument}_var_limit"]
                 if abs(component_var) > limit:
                     alerts.append({
-                        'type': 'CONCENTRATION_BREACH',
-                        'message': f"{instrument} Component VaR ({component_var:.4f}) exceeds limit ({limit:.4f})",
-                        'severity': 'MEDIUM'
+                        "type": "CONCENTRATION_BREACH",
+                        "message": f"{instrument} Component VaR ({component_var:.4f}) exceeds limit ({limit:.4f})",
+                        "severity": "MEDIUM",
                     })
 
         self.alerts.extend(alerts)

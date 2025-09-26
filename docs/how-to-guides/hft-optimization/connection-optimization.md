@@ -23,7 +23,7 @@ class OptimizedTradingClient:
         self.token = token
         self.environment = environment
         self.max_connections = max_connections
-        self.client: Optional[AsyncClient] = None
+        self.client: AsyncClient | None = None
         self._connection_pool_initialized = False
 
     async def initialize(self):
@@ -62,7 +62,7 @@ async def setup_hft_client():
     async with OptimizedTradingClient(
         token="your-token",
         environment=Environment.PRACTICE,
-        max_connections=20  # Higher connection limit for HFT
+        max_connections=20,  # Higher connection limit for HFT
     ) as hft_client:
         return hft_client.client
 
@@ -118,9 +118,9 @@ class BatchRequestManager:
         for order_req in order_requests:
             task = self.client.orders.post_market_order(
                 account_id=account_id,
-                instrument=order_req['instrument'],
-                units=order_req['units'],
-                **order_req.get('extra_params', {})
+                instrument=order_req["instrument"],
+                units=order_req["units"],
+                **order_req.get("extra_params", {}),
             )
             tasks.append(task)
 
@@ -128,7 +128,7 @@ class BatchRequestManager:
         try:
             results = await asyncio.wait_for(
                 asyncio.gather(*tasks, return_exceptions=True),
-                timeout=2.0  # 2-second timeout for HFT
+                timeout=2.0,  # 2-second timeout for HFT
             )
         except asyncio.TimeoutError:
             print("⚠️ Batch order timeout - some orders may have failed")
@@ -137,7 +137,7 @@ class BatchRequestManager:
         end_time = time.perf_counter()
 
         # Analyze results
-        successful_orders = [r for r in results if not isinstance(r, Exception) and hasattr(r, 'order_fill_transaction')]
+        successful_orders = [r for r in results if not isinstance(r, Exception) and hasattr(r, "order_fill_transaction")]
 
         print(f"⚡ Batch orders: {len(successful_orders)}/{len(order_requests)} successful")
         print(f"   Execution time: {(end_time - start_time) * 1000:.1f}ms")
@@ -154,14 +154,14 @@ async def hft_batch_example(client: AsyncClient, account_id: str):
     exotic_pairs = ["USD_TRY", "EUR_TRY", "GBP_TRY"]
 
     price_results = await batch_manager.batch_get_prices(
-        account_id, [major_pairs, minor_pairs, exotic_pairs]
+        account_id, [major_pairs, minor_pairs, exotic_pairs],
     )
 
     # Batch order execution based on price analysis
     orders = [
-        {'instrument': 'EUR_USD', 'units': 10000},
-        {'instrument': 'GBP_USD', 'units': -5000},
-        {'instrument': 'USD_JPY', 'units': 15000}
+        {"instrument": "EUR_USD", "units": 10000},
+        {"instrument": "GBP_USD", "units": -5000},
+        {"instrument": "USD_JPY", "units": 15000},
     ]
 
     order_results = await batch_manager.batch_market_orders(account_id, orders)

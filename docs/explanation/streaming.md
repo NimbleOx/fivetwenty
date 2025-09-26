@@ -30,12 +30,12 @@ async def stream_prices():
     """Stream real-time prices."""
     async with AsyncClient(
         token="your-token",
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
         # Stream EUR/USD and GBP/USD prices
         async for price in client.pricing.get_pricing_stream(
             account_id="101-001-1234567-001",
-            instruments=["EUR_USD", "GBP_USD"]
+            instruments=["EUR_USD", "GBP_USD"],
         ):
             if price.type == "PRICE":
                 print(f"{price.instrument}: Bid={price.bids[0].price}, Ask={price.asks[0].price}")
@@ -93,7 +93,7 @@ async def multi_instrument_stream(client, account_id):
 
     instruments = [
         "EUR_USD", "GBP_USD", "USD_JPY", "AUD_USD",
-        "USD_CAD", "EUR_GBP", "EUR_JPY", "GBP_JPY"
+        "USD_CAD", "EUR_GBP", "EUR_JPY", "GBP_JPY",
     ]
 
     price_tracker = {}
@@ -105,7 +105,7 @@ async def multi_instrument_stream(client, account_id):
                 "bid": price.bids[0].price if price.bids else None,
                 "ask": price.asks[0].price if price.asks else None,
                 "time": price.time,
-                "liquidity": sum(b.liquidity for b in price.bids) if price.bids else 0
+                "liquidity": sum(b.liquidity for b in price.bids) if price.bids else 0,
             }
 
             # Check for arbitrage opportunities
@@ -168,10 +168,10 @@ config = StreamingConfiguration(
         reconnection_delay_ms=1000,
         exponential_backoff=True,
         max_delay_ms=30000,
-        heartbeat_timeout_ms=10000
+        heartbeat_timeout_ms=10000,
     ),
     compression=True,  # Enable compression
-    buffer_size=1024  # Message buffer size
+    buffer_size=1024,  # Message buffer size
 )
 
 # Use configuration (future enhancement)
@@ -246,13 +246,13 @@ class StreamManager:
             "started": datetime.now(),
             "last_data": None,
             "message_count": 0,
-            "errors": 0
+            "errors": 0,
         }
 
         try:
             async for price in self.client.pricing.get_pricing_stream(
                 self.account_id,
-                instruments
+                instruments,
             ):
                 # Update health metrics
                 self.health_status[stream_id]["last_data"] = datetime.now()
@@ -300,12 +300,12 @@ def sync_price_stream():
 
     with Client(
         token="your-token",
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
         # Iterator-based streaming
         for price in client.pricing.get_pricing_stream(
             account_id="101-001-1234567-001",
-            instruments=["EUR_USD"]
+            instruments=["EUR_USD"],
         ):
             if price.type == "PRICE":
                 print(f"Price: {price.asks[0].price}")
@@ -339,7 +339,7 @@ class ThreadedStreamer:
         thread = threading.Thread(
             target=self._stream_worker,
             args=(account_id, instruments),
-            daemon=True
+            daemon=True,
         )
         thread.start()
 
@@ -450,10 +450,10 @@ async def coordinate_streams(client, account_id):
     """Coordinate price and transaction streams."""
 
     price_task = asyncio.create_task(
-        price_stream_handler(client, account_id)
+        price_stream_handler(client, account_id),
     )
     transaction_task = asyncio.create_task(
-        transaction_stream_handler(client, account_id)
+        transaction_stream_handler(client, account_id),
     )
 
     # Run both streams concurrently
@@ -470,7 +470,7 @@ async def coordinate_streams(client, account_id):
         await asyncio.gather(
             price_task,
             transaction_task,
-            return_exceptions=True
+            return_exceptions=True,
         )
 ```
 
@@ -521,7 +521,7 @@ class StreamMetrics:
             "errors": 0,
             "reconnections": 0,
             "last_message_time": None,
-            "stream_start_time": datetime.now()
+            "stream_start_time": datetime.now(),
         }
 
     def update(self, event_type):

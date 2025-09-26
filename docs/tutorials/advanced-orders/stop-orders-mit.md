@@ -139,16 +139,16 @@ class MultiTimeframeBreakout:
         breakout_levels = {
             "15min": {
                 "resistance": Decimal("1.0890"),
-                "support": Decimal("1.0810")
+                "support": Decimal("1.0810"),
             },
             "1hour": {
                 "resistance": Decimal("1.0920"),
-                "support": Decimal("1.0780")
+                "support": Decimal("1.0780"),
             },
             "4hour": {
                 "resistance": Decimal("1.0950"),
-                "support": Decimal("1.0750")
-            }
+                "support": Decimal("1.0750"),
+            },
         }
 
         return breakout_levels
@@ -171,7 +171,7 @@ class MultiTimeframeBreakout:
                 instrument=instrument,
                 units=scaled_units,
                 price=level_data["resistance"] + Decimal("0.0005"),
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             # Bearish breakout stop
@@ -180,12 +180,12 @@ class MultiTimeframeBreakout:
                 instrument=instrument,
                 units=-scaled_units,
                 price=level_data["support"] - Decimal("0.0005"),
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             self.active_stops.extend([
                 buy_stop.order_create_transaction.id,
-                sell_stop.order_create_transaction.id
+                sell_stop.order_create_transaction.id,
             ])
 
             print(f"{timeframe} breakout stops: {scaled_units} units")
@@ -319,7 +319,7 @@ class RSIMeanReversion:
         rsi_price_levels = {
             "overbought_price": Decimal("1.0920"),  # Price at RSI 70
             "oversold_price": Decimal("1.0780"),    # Price at RSI 30
-            "current_rsi": current_rsi
+            "current_rsi": current_rsi,
         }
 
         return rsi_price_levels
@@ -337,7 +337,7 @@ class RSIMeanReversion:
                 instrument=instrument,
                 units=-12000,
                 price=rsi_data["overbought_price"],
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             # Buy MIT at oversold level
@@ -346,7 +346,7 @@ class RSIMeanReversion:
                 instrument=instrument,
                 units=12000,
                 price=rsi_data["oversold_price"],
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             print(f"RSI reversion orders placed:")

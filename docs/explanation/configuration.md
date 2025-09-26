@@ -221,13 +221,13 @@ from fivetwenty import AsyncClient
 config = AccountConfig(token="config-token", account_id="account-id")
 client = AsyncClient(
     token="direct-token",  # Ignored
-    config=config  # Used
+    config=config,  # Used
 )
 
 # Direct parameters take priority over environment variables
 # (assuming FIVETWENTY_OANDA_TOKEN is set)
 client = AsyncClient(
-    token="direct-token"  # Used instead of FIVETWENTY_OANDA_TOKEN
+    token="direct-token",  # Used instead of FIVETWENTY_OANDA_TOKEN
 )
 ```
 
@@ -244,7 +244,7 @@ config = AccountConfig(
     token="super-secret-token",
     account_id="secret-account-123",
     environment=Environment.PRACTICE,
-    alias="my_account"
+    alias="my_account",
 )
 
 # Secrets are automatically masked
@@ -274,7 +274,7 @@ try:
         token="token",
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="123invalid"  # Error!
+        alias="123invalid",  # Error!
     )
 except ValidationError as e:
     print("Alias must be a valid identifier")
@@ -285,7 +285,7 @@ try:
         token="   ",  # Whitespace-only token
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="valid_alias"
+        alias="valid_alias",
     )
 except ValidationError as e:
     print("Token cannot be empty")
@@ -351,21 +351,21 @@ async def main():
             connect=5.0,
             read=60.0,
             write=10.0,
-            pool=60.0
+            pool=60.0,
         ),
         limits=httpx.Limits(
             max_connections=100,
-            max_keepalive_connections=20
+            max_keepalive_connections=20,
         ),
         http2=False,
-        trust_env=True
+        trust_env=True,
     )
 
     # Use with client
     async with AsyncClient(
         token="your-token",
         environment=Environment.PRACTICE,
-        transport=transport
+        transport=transport,
     ) as client:
         pass
 
@@ -548,17 +548,17 @@ class ConfigBuilder:
 
         secret = vault_client.secrets.kv.v2.read_secret_version(
             path=secret_path,
-            mount_point='secret'
+            mount_point="secret",
         )
 
-        data = secret['data']['data']
+        data = secret["data"]["data"]
 
         return AccountConfig(
-            token=data['token'],
-            account_id=data['account_id'],
-            environment=Environment.PRACTICE if environment == 'practice' else Environment.LIVE,
-            alias=data.get('alias', 'vault_account'),
-            description=data.get('description')
+            token=data["token"],
+            account_id=data["account_id"],
+            environment=Environment.PRACTICE if environment == "practice" else Environment.LIVE,
+            alias=data.get("alias", "vault_account"),
+            description=data.get("description"),
         )
 
     @staticmethod
@@ -571,11 +571,11 @@ class ConfigBuilder:
             data = json.load(f)
 
         return AccountConfig(
-            token=os.environ['FIVETWENTY_OANDA_TOKEN'],  # From environment
-            account_id=os.environ['FIVETWENTY_OANDA_ACCOUNT'],  # From environment
-            environment=Environment(data['environment']),
-            alias=data['alias'],
-            description=data.get('description')
+            token=os.environ["FIVETWENTY_OANDA_TOKEN"],  # From environment
+            account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],  # From environment
+            environment=Environment(data["environment"]),
+            alias=data["alias"],
+            description=data.get("description"),
         )
 ```
 
@@ -591,13 +591,13 @@ class ConfigManager:
     """Manage configurations for multiple environments."""
 
     def __init__(self):
-        self.configs: Dict[str, AccountConfig] = {}
+        self.configs: dict[str, AccountConfig] = {}
         self._load_configs()
 
     def _load_configs(self):
         """Load configurations for all environments."""
 
-        environments = ['development', 'staging', 'production']
+        environments = ["development", "staging", "production"]
 
         for env in environments:
             prefix = f"{env.upper()}_FIVETWENTY_"
@@ -621,8 +621,8 @@ class ConfigManager:
 
 # Usage
 manager = ConfigManager()
-dev_client = manager.get_client('development')
-prod_client = manager.get_client('production')
+dev_client = manager.get_client("development")
+prod_client = manager.get_client("production")
 ```
 
 ## Best Practices
@@ -681,7 +681,7 @@ try:
         token="token",
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="123-invalid"  # Starts with number
+        alias="123-invalid",  # Starts with number
     )
 except ValidationError as e:
     print(f"Validation error: {e}")
@@ -693,7 +693,7 @@ try:
         token="",  # Empty token
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="my_account"
+        alias="my_account",
     )
 except ValidationError as e:
     print(f"Token error: {e}")

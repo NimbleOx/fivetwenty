@@ -19,7 +19,7 @@ async def main():
     prices = await client.pricing.get_pricing(
         account_id="123-456-789",
         instruments=["EUR_USD", "GBP_USD"],
-        include_units_available=True
+        include_units_available=True,
     )
 
 asyncio.run(main())
@@ -105,7 +105,7 @@ async def main():
         account_id="123-456-789",
         instrument="EUR_USD",
         granularity="H1",
-        count=100
+        count=100,
     )
 
 asyncio.run(main())
@@ -191,7 +191,7 @@ Get latest candles for multiple instruments.
 # Example usage:
 for price in client.pricing.get_pricing_stream(
     account_id="123-456-789",
-    instruments=["EUR_USD", "GBP_USD"]
+    instruments=["EUR_USD", "GBP_USD"],
 ):
     print(f"Price update: {price}")
 ```

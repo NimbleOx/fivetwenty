@@ -141,17 +141,17 @@ def calculate_risk_parameters(account_balance: Decimal, monthly_income: Decimal,
     max_monthly_risk = tradeable_capital * 0.20    # 20%
     
     return {
-        'tradeable_capital': tradeable_capital,
-        'max_risk_per_trade': max_risk_per_trade,
-        'max_daily_risk': max_daily_risk,
-        'max_monthly_risk': max_monthly_risk
+        "tradeable_capital": tradeable_capital,
+        "max_risk_per_trade": max_risk_per_trade,
+        "max_daily_risk": max_daily_risk,
+        "max_monthly_risk": max_monthly_risk,
     }
 
 # Example calculation with sample financial values
 params = calculate_risk_parameters(
     account_balance=Decimal("10000"),  # Example: $10,000 trading account
     monthly_income=Decimal("5000"),   # Example: $5,000 monthly income
-    emergency_fund=Decimal("15000")   # Example: $15,000 emergency fund
+    emergency_fund=Decimal("15000"),   # Example: $15,000 emergency fund
 )
 
 print("📊 Your Risk Parameters:")
@@ -200,10 +200,10 @@ class RiskTracker:
         risk_percentage = (total_risk / self.account_balance) * 100
         
         return {
-            'total_risk_amount': total_risk,
-            'risk_percentage': risk_percentage,
-            'open_positions': len(self.open_risks),
-            'within_limits': risk_percentage <= 20  # 20% max portfolio risk
+            "total_risk_amount": total_risk,
+            "risk_percentage": risk_percentage,
+            "open_positions": len(self.open_risks),
+            "within_limits": risk_percentage <= 20,  # 20% max portfolio risk
         }
 
 # Example usage with sample account balance
@@ -271,9 +271,9 @@ def compare_risk_strategies(initial_balance: Decimal, months: int):
     """Compare different risk management approaches."""
     
     strategies = {
-        'Conservative (1% risk)': {'risk': 0.01, 'win_rate': 0.55, 'rr': 1.8},
-        'Moderate (2% risk)': {'risk': 0.02, 'win_rate': 0.55, 'rr': 1.8},
-        'Aggressive (5% risk)': {'risk': 0.05, 'win_rate': 0.55, 'rr': 1.8}
+        "Conservative (1% risk)": {"risk": 0.01, "win_rate": 0.55, "rr": 1.8},
+        "Moderate (2% risk)": {"risk": 0.02, "win_rate": 0.55, "rr": 1.8},
+        "Aggressive (5% risk)": {"risk": 0.05, "win_rate": 0.55, "rr": 1.8},
     }
     
     for name, params in strategies.items():
@@ -282,11 +282,11 @@ def compare_risk_strategies(initial_balance: Decimal, months: int):
         
         for month in range(months):
             for trade in range(trades_per_month):
-                risk_amount = balance * params['risk']
+                risk_amount = balance * params["risk"]
                 
-                if random.random() < params['win_rate']:
+                if random.random() < params["win_rate"]:
                     # Win
-                    balance += risk_amount * params['rr']
+                    balance += risk_amount * params["rr"]
                 else:
                     # Loss
                     balance -= risk_amount

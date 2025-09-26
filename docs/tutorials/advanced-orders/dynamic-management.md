@@ -37,7 +37,7 @@ class TrailingStopManager:
         position_id: str,
         initial_stop: Decimal,
         trail_distance: Decimal,
-        instrument: str
+        instrument: str,
     ):
         """Create and manage a trailing stop for a position."""
 
@@ -47,7 +47,7 @@ class TrailingStopManager:
             instrument=instrument,
             units=-10000,  # Assume long position to close
             price=initial_stop,
-            time_in_force="GTC"
+            time_in_force="GTC",
         )
 
         # Store trailing stop configuration
@@ -58,7 +58,7 @@ class TrailingStopManager:
             "trail_distance": trail_distance,
             "stop_order_id": initial_stop_response.order_create_transaction.id,
             "highest_price": initial_stop + trail_distance,  # Starting reference
-            "direction": "long"  # Assume long position
+            "direction": "long",  # Assume long position
         }
 
         self.active_trails[position_id] = trail_config
@@ -73,7 +73,7 @@ class TrailingStopManager:
             # Get current market price
             pricing = await self.client.pricing.get_pricing(
                 account_id=self.account_id,
-                instruments=[config["instrument"]]
+                instruments=[config["instrument"]],
             )
 
             current_price = Decimal(pricing.prices[0].bids[0].price)
@@ -98,7 +98,7 @@ class TrailingStopManager:
             # Cancel existing stop order
             await self.client.orders.cancel_order(
                 account_id=self.account_id,
-                order_id=config["stop_order_id"]
+                order_id=config["stop_order_id"],
             )
 
             # Place new stop order at updated level
@@ -107,7 +107,7 @@ class TrailingStopManager:
                 instrument=config["instrument"],
                 units=-10000,  # Close position size
                 price=new_stop,
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             # Update configuration
@@ -194,7 +194,7 @@ class AcceleratedTrailing:
         position_id: str,
         entry_price: Decimal,
         initial_trail: Decimal,
-        instrument: str
+        instrument: str,
     ):
         """Create trailing stop that tightens as profits increase."""
 
@@ -208,7 +208,7 @@ class AcceleratedTrailing:
                 {"profit_pips": Decimal("0.0020"), "trail_pips": initial_trail * Decimal("0.8")},
                 {"profit_pips": Decimal("0.0040"), "trail_pips": initial_trail * Decimal("0.6")},
                 {"profit_pips": Decimal("0.0060"), "trail_pips": initial_trail * Decimal("0.4")},
-            ]
+            ],
         }
 
         return config
@@ -218,7 +218,7 @@ class AcceleratedTrailing:
         # Get current price
         pricing = await self.client.pricing.get_pricing(
             account_id=self.account_id,
-            instruments=[config["instrument"]]
+            instruments=[config["instrument"]],
         )
 
         current_price = Decimal(pricing.prices[0].bids[0].price)
@@ -264,7 +264,7 @@ class ScaleInStrategy:
         base_price: Decimal,
         total_units: int,
         num_levels: int = 4,
-        level_spacing: Decimal = Decimal("0.0020")
+        level_spacing: Decimal = Decimal("0.0020"),
     ):
         """Set up multiple scale-in levels below current price."""
 
@@ -278,7 +278,7 @@ class ScaleInStrategy:
                 "price": level_price,
                 "units": units_per_level,
                 "order_id": None,
-                "filled": False
+                "filled": False,
             }
 
             self.scale_levels.append(scale_level)
@@ -296,7 +296,7 @@ class ScaleInStrategy:
                     instrument=instrument,
                     units=level["units"],
                     price=level["price"],
-                    time_in_force="GTC"
+                    time_in_force="GTC",
                 )
 
                 level["order_id"] = response.order_create_transaction.id
@@ -311,7 +311,7 @@ class ScaleInStrategy:
                     # Check order status
                     order = await self.client.orders.get_order(
                         account_id=self.account_id,
-                        order_id=level["order_id"]
+                        order_id=level["order_id"],
                     )
 
                     if order.state == "FILLED":
@@ -344,7 +344,7 @@ class ScaleInStrategy:
             instrument=instrument,
             units=-total_units,  # Close entire accumulated position
             price=new_stop_price,
-            time_in_force="GTC"
+            time_in_force="GTC",
         )
 
         print(f"Updated stop: {new_stop_price} for {total_units} units (avg: {weighted_price})")
@@ -369,7 +369,7 @@ class ScaleOutStrategy:
         instrument: str,
         entry_price: Decimal,
         position_units: int,
-        profit_targets: list  # List of profit distances in pips
+        profit_targets: list,  # List of profit distances in pips
     ):
         """Set up multiple take-profit levels above entry price."""
 
@@ -391,7 +391,7 @@ class ScaleOutStrategy:
                 "units": level_units,
                 "distance": target_distance,
                 "order_id": None,
-                "filled": False
+                "filled": False,
             }
 
             self.take_profit_levels.append(tp_level)
@@ -408,7 +408,7 @@ class ScaleOutStrategy:
                 instrument=instrument,
                 units=-level["units"],  # Negative to close long position
                 price=level["price"],
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             level["order_id"] = response.order_create_transaction.id
@@ -424,7 +424,7 @@ class ScaleOutStrategy:
                 if not level["filled"] and level["order_id"]:
                     order = await self.client.orders.get_order(
                         account_id=self.account_id,
-                        order_id=level["order_id"]
+                        order_id=level["order_id"],
                     )
 
                     if order.state == "FILLED":
@@ -641,7 +641,7 @@ class OrderPerformanceAnalyzer:
 
         order = await self.client.orders.get_order(
             account_id=self.account_id,
-            order_id=order_id
+            order_id=order_id,
         )
 
         if order.state == "FILLED":
@@ -652,7 +652,7 @@ class OrderPerformanceAnalyzer:
                 "fill_price": Decimal(order.filling_transaction.price),
                 "requested_price": Decimal(order.price),
                 "slippage": Decimal(order.filling_transaction.price) - Decimal(order.price),
-                "units": order.units
+                "units": order.units,
             }
 
             self.order_history.append(fill_data)
@@ -686,7 +686,7 @@ class OrderPerformanceAnalyzer:
             "average_slippage": avg_slippage,
             "slippage_variance": slippage_variance,
             "max_slippage": max(order["slippage"] for order in strategy_orders),
-            "min_slippage": min(order["slippage"] for order in strategy_orders)
+            "min_slippage": min(order["slippage"] for order in strategy_orders),
         }
 
         print(f"Strategy {strategy_type} performance:")

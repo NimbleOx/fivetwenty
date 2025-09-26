@@ -107,7 +107,7 @@ async def get_price(client, instrument="EUR_USD"):
     # The SDK automatically uses the configured account ID
     prices = await client.pricing.get_pricing(
         account_id=client.account_id,
-        instruments=[instrument]
+        instruments=[instrument],
     )
 
     price = prices[0]
@@ -135,7 +135,7 @@ async def place_market_order(client, instrument="EUR_USD", units=1000):
     order_response = await client.orders.post_market_order(
         account_id=client.account_id,  # Uses configured account
         instrument=instrument,
-        units=units  # Positive for buy, negative for sell
+        units=units,  # Positive for buy, negative for sell
     )
 
     if order_response.order_fill_transaction:
@@ -149,13 +149,13 @@ async def place_market_order(client, instrument="EUR_USD", units=1000):
         print(f"   🕒 Time: {fill.time}")
 
         # Show commission if any
-        if hasattr(fill, 'commission') and fill.commission:
+        if hasattr(fill, "commission") and fill.commission:
             print(f"   💳 Commission: {fill.commission}")
 
         return fill
     else:
         print("❌ Order was not filled")
-        if hasattr(order_response, 'error_message'):
+        if hasattr(order_response, "error_message"):
             print(f"   Error: {order_response.error_message}")
         return None
 ```
@@ -386,7 +386,7 @@ async def place_limit_order(client, instrument="EUR_USD"):
         account_id=client.account_id,
         instrument=instrument,
         units=1000,
-        price=f"{limit_price:.5f}"
+        price=f"{limit_price:.5f}",
     )
 
     print(f"✅ Limit order placed: ID {limit_order.order_create_transaction.id}")
@@ -419,7 +419,7 @@ async def place_order_with_stop_loss(client, instrument="EUR_USD"):
         account_id=client.account_id,
         instrument=instrument,
         units=1000,
-        stop_loss_on_fill={"price": f"{stop_loss_price:.5f}"}
+        stop_loss_on_fill={"price": f"{stop_loss_price:.5f}"},
     )
 
     if order_with_sl.order_fill_transaction:
@@ -456,7 +456,7 @@ async def place_order_with_take_profit(client, instrument="EUR_USD"):
         account_id=client.account_id,
         instrument=instrument,
         units=1000,
-        take_profit_on_fill={"price": f"{take_profit_price:.5f}"}
+        take_profit_on_fill={"price": f"{take_profit_price:.5f}"},
     )
 
     if order_with_tp.order_fill_transaction:
@@ -500,7 +500,7 @@ async def place_protected_trade(client, instrument="EUR_USD", units=1000):
         instrument=instrument,
         units=units,
         stop_loss_on_fill={"price": f"{stop_loss_price:.5f}"},
-        take_profit_on_fill={"price": f"{take_profit_price:.5f}"}
+        take_profit_on_fill={"price": f"{take_profit_price:.5f}"},
     )
 
     if protected_order.order_fill_transaction:
@@ -606,7 +606,7 @@ def sync_advantage():
             order = client.orders.post_market_order(
                 account_id=client.account_id,
                 instrument="EUR_USD",
-                units=1000
+                units=1000,
             )
 ```
 
@@ -638,7 +638,7 @@ client = AsyncClient()  # Loads from FIVETWENTY_* env vars
 # Calculate position size based on account balance
 async def calculate_position_size(client, expected_loss_per_unit):
     account = await client.accounts.get_account(client.account_id)
-    max_risk = Decimal(str(account.balance)) * Decimal('0.02')  # 2% risk per trade
+    max_risk = Decimal(str(account.balance)) * Decimal("0.02")  # 2% risk per trade
     position_size = min(1000, int(max_risk / expected_loss_per_unit))
     return position_size
 ```
@@ -677,7 +677,7 @@ config = AccountConfig(
     token=os.environ["PRACTICE_TOKEN"],
     account_id=os.environ["PRACTICE_ACCOUNT"],
     environment=Environment.PRACTICE,
-    alias="strategy_testing"
+    alias="strategy_testing",
 )
 ```
 
@@ -753,7 +753,7 @@ async def check_market_hours(client, instrument="EUR_USD"):
         # Try to get current price
         prices = await client.pricing.get_pricing(
             account_id=client.account_id,
-            instruments=[instrument]
+            instruments=[instrument],
         )
         return True  # Market is open
     except FiveTwentyError as e:

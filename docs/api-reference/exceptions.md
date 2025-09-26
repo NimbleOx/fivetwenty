@@ -49,7 +49,7 @@ async def main():
         await client.orders.post_market_order(
             account_id="invalid-account",
             instrument="EUR_USD",
-            units=10000
+            units=10000,
         )
     except FiveTwentyError as e:
         print(f"Error: {e.message}")

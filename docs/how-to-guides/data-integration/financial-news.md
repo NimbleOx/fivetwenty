@@ -482,11 +482,11 @@ class RealTimeNewsMonitor:
         """Trigger alerts for breaking news."""
 
         alert_data = {
-            'timestamp': news.timestamp,
-            'title': news.title,
-            'sentiment': news.sentiment_score,
-            'relevance': news.relevance_score,
-            'instruments': news.instruments_mentioned
+            "timestamp": news.timestamp,
+            "title": news.title,
+            "sentiment": news.sentiment_score,
+            "relevance": news.relevance_score,
+            "instruments": news.instruments_mentioned,
         }
 
         for callback in self.alert_callbacks:
@@ -514,14 +514,14 @@ class EnhancedSentimentAnalyzer:
 
     def __init__(self):
         self.financial_keywords = {
-            'positive': [
-                'bullish', 'surge', 'rally', 'gains', 'optimistic',
-                'breakthrough', 'strong', 'outperform', 'beat expectations'
+            "positive": [
+                "bullish", "surge", "rally", "gains", "optimistic",
+                "breakthrough", "strong", "outperform", "beat expectations",
             ],
-            'negative': [
-                'bearish', 'plunge', 'crash', 'losses', 'pessimistic',
-                'concerns', 'weak', 'underperform', 'miss expectations'
-            ]
+            "negative": [
+                "bearish", "plunge", "crash", "losses", "pessimistic",
+                "concerns", "weak", "underperform", "miss expectations",
+            ],
         }
 
     def analyze_financial_sentiment(self, text: str) -> Dict[str, float]:
@@ -534,9 +534,9 @@ class EnhancedSentimentAnalyzer:
         # Financial keyword adjustment
         text_lower = text.lower()
 
-        positive_count = sum(1 for word in self.financial_keywords['positive']
+        positive_count = sum(1 for word in self.financial_keywords["positive"]
                            if word in text_lower)
-        negative_count = sum(1 for word in self.financial_keywords['negative']
+        negative_count = sum(1 for word in self.financial_keywords["negative"]
                            if word in text_lower)
 
         # Adjust sentiment based on financial keywords
@@ -545,11 +545,11 @@ class EnhancedSentimentAnalyzer:
         final_sentiment = max(-1.0, min(1.0, base_sentiment + keyword_adjustment))
 
         return {
-            'sentiment': final_sentiment,
-            'base_sentiment': base_sentiment,
-            'keyword_adjustment': keyword_adjustment,
-            'positive_keywords': positive_count,
-            'negative_keywords': negative_count
+            "sentiment": final_sentiment,
+            "base_sentiment": base_sentiment,
+            "keyword_adjustment": keyword_adjustment,
+            "positive_keywords": positive_count,
+            "negative_keywords": negative_count,
         }
 ```
 

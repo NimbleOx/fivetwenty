@@ -113,7 +113,7 @@ async def main():
     result = await client.positions.close_position(
         account_id="123-456-789",
         instrument="EUR_USD",
-        long_units="ALL"
+        long_units="ALL",
     )
 
 asyncio.run(main())

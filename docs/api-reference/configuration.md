@@ -147,7 +147,7 @@ config = AccountConfig(
     alias="my_trader",
     environment=Environment.PRACTICE,
     token="token",
-    account_id="account_id"
+    account_id="account_id",
 )
 print(config.summary())  # "my_trader (practice)"
 
@@ -165,7 +165,7 @@ config = AccountConfig(
     token="super-secret-token",
     account_id="secret-account-123",
     alias="demo_account",
-    environment=Environment.PRACTICE
+    environment=Environment.PRACTICE,
 )
 
 # Secrets are masked in all representations
@@ -193,7 +193,7 @@ try:
         alias="123invalid",  # Must be valid identifier
         token="token",
         account_id="account",
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     )
 except ValidationError as e:
     print("Alias must be valid Python identifier")
@@ -204,7 +204,7 @@ try:
         token="   ",  # Whitespace-only
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="valid_alias"
+        alias="valid_alias",
     )
 except ValidationError as e:
     print("Token cannot be empty or whitespace")
@@ -237,10 +237,10 @@ import os
 
 from fivetwenty import AccountConfigLoader
 
-os.environ['FIVETWENTY_OANDA_TOKEN'] = 'your-token'
-os.environ['FIVETWENTY_OANDA_ACCOUNT'] = 'your-account'
-os.environ['FIVETWENTY_OANDA_ENVIRONMENT'] = 'practice'
-os.environ['FIVETWENTY_OANDA_ACCOUNT_ALIAS'] = 'my_account'
+os.environ["FIVETWENTY_OANDA_TOKEN"] = "your-token"
+os.environ["FIVETWENTY_OANDA_ACCOUNT"] = "your-account"
+os.environ["FIVETWENTY_OANDA_ENVIRONMENT"] = "practice"
+os.environ["FIVETWENTY_OANDA_ACCOUNT_ALIAS"] = "my_account"
 
 # Load configuration
 config = AccountConfigLoader.load_default()
@@ -269,10 +269,10 @@ Load configuration using custom environment variable prefix.
 **Usage:**
 ```python
 # Set custom prefixed variables
-os.environ['STRATEGY_A_OANDA_TOKEN'] = 'token-a'
-os.environ['STRATEGY_A_OANDA_ACCOUNT'] = 'account-a'
-os.environ['STRATEGY_A_OANDA_ENVIRONMENT'] = 'practice'
-os.environ['STRATEGY_A_OANDA_ACCOUNT_ALIAS'] = 'momentum_strategy'
+os.environ["STRATEGY_A_OANDA_TOKEN"] = "token-a"
+os.environ["STRATEGY_A_OANDA_ACCOUNT"] = "account-a"
+os.environ["STRATEGY_A_OANDA_ENVIRONMENT"] = "practice"
+os.environ["STRATEGY_A_OANDA_ACCOUNT_ALIAS"] = "momentum_strategy"
 
 # Load with custom prefix
 config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")
@@ -324,7 +324,7 @@ config = AccountConfig(
     token="valid-token",
     account_id="valid-account",
     environment=Environment.PRACTICE,
-    alias="valid_alias"
+    alias="valid_alias",
 )
 
 errors = ConfigValidator.validate_account_config(config)
@@ -343,7 +343,7 @@ config = AccountConfig(
     token="valid-token",
     account_id="",  # Empty account ID
     environment=Environment.PRACTICE,
-    alias="123invalid"  # Invalid alias
+    alias="123invalid",  # Invalid alias
 )
 
 errors = ConfigValidator.validate_account_config(config)
@@ -402,14 +402,14 @@ practice_config = AccountConfig(
     environment=Environment.PRACTICE,
     token="practice_token",
     account_id="practice_account_id",
-    alias="practice"
+    alias="practice",
 )
 
 live_config = AccountConfig(
     environment=Environment.LIVE,
     token="live_token",
     account_id="live_account_id",
-    alias="live"
+    alias="live",
 )
 
 # Check environment in code
@@ -458,7 +458,7 @@ from fivetwenty import AccountConfigLoader
 accounts = {
     "momentum": AccountConfigLoader.from_env_prefix("MOMENTUM_"),
     "grid": AccountConfigLoader.from_env_prefix("GRID_"),
-    "scalping": AccountConfigLoader.from_env_prefix("SCALPING_")
+    "scalping": AccountConfigLoader.from_env_prefix("SCALPING_"),
 }
 
 # Filter out None values
@@ -503,7 +503,7 @@ def load_production_config() -> AccountConfig:
     if config.environment.value != expected_env:
         raise RuntimeError(
             f"Environment mismatch: expected {expected_env}, "
-            f"got {config.environment.value}"
+            f"got {config.environment.value}",
         )
 
     # Extra validation for live
@@ -675,7 +675,7 @@ try:
         token="",
         account_id="123",
         environment=Environment.PRACTICE,
-        alias="123invalid"
+        alias="123invalid",
     )
 except ValidationError as e:
     # Handle validation errors

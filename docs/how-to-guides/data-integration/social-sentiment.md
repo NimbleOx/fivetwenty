@@ -307,8 +307,8 @@ class MultiPlatformSentimentProvider:
 
         # Platform weights for aggregation
         self.platform_weights = {
-            'twitter': 0.6,
-            'reddit': 0.4
+            "twitter": 0.6,
+            "reddit": 0.4,
         }
 
     async def get_aggregated_sentiment(self, currencies: List[str], hours_back: int = 24) -> Dict[str, Dict]:
@@ -330,8 +330,8 @@ class MultiPlatformSentimentProvider:
             reddit_data = reddit_sentiment.get(currency, {})
 
             # Weighted sentiment calculation
-            twitter_weight = self.platform_weights['twitter']
-            reddit_weight = self.platform_weights['reddit'] if reddit_data else 0
+            twitter_weight = self.platform_weights["twitter"]
+            reddit_weight = self.platform_weights["reddit"] if reddit_data else 0
 
             # Normalize weights if Reddit not available
             total_weight = twitter_weight + reddit_weight
@@ -341,27 +341,27 @@ class MultiPlatformSentimentProvider:
 
             # Calculate weighted sentiment
             weighted_sentiment = (
-                twitter_data.get('sentiment', 0) * twitter_weight +
-                reddit_data.get('sentiment', 0) * reddit_weight
+                twitter_data.get("sentiment", 0) * twitter_weight +
+                reddit_data.get("sentiment", 0) * reddit_weight
             )
 
             # Combined confidence
             combined_confidence = (
-                twitter_data.get('confidence', 0) * twitter_weight +
-                reddit_data.get('confidence', 0) * reddit_weight
+                twitter_data.get("confidence", 0) * twitter_weight +
+                reddit_data.get("confidence", 0) * reddit_weight
             )
 
             aggregated_sentiment[currency] = {
-                'sentiment': weighted_sentiment,
-                'confidence': combined_confidence,
-                'sources': {
-                    'twitter': twitter_data,
-                    'reddit': reddit_data
+                "sentiment": weighted_sentiment,
+                "confidence": combined_confidence,
+                "sources": {
+                    "twitter": twitter_data,
+                    "reddit": reddit_data,
                 },
-                'total_mentions': (
-                    twitter_data.get('tweet_count', 0) +
-                    reddit_data.get('post_count', 0)
-                )
+                "total_mentions": (
+                    twitter_data.get("tweet_count", 0) +
+                    reddit_data.get("post_count", 0)
+                ),
             }
 
         return aggregated_sentiment
@@ -538,20 +538,20 @@ class CentralBankSentimentAnalyzer:
 
         # Central bank accounts and their currencies
         self.central_banks = {
-            'federalreserve': 'USD',
-            'ecb': 'EUR',
-            'bankofengland': 'GBP',
-            'boj_en': 'JPY',
-            'bankofcanada': 'CAD',
-            'rba_gov': 'AUD',
-            'snb_ch': 'CHF'
+            "federalreserve": "USD",
+            "ecb": "EUR",
+            "bankofengland": "GBP",
+            "boj_en": "JPY",
+            "bankofcanada": "CAD",
+            "rba_gov": "AUD",
+            "snb_ch": "CHF",
         }
 
         # High-impact keywords
         self.policy_keywords = [
-            'interest rate', 'monetary policy', 'inflation target',
-            'quantitative easing', 'tightening', 'dovish', 'hawkish',
-            'stimulus', 'tapering', 'forward guidance'
+            "interest rate", "monetary policy", "inflation target",
+            "quantitative easing", "tightening", "dovish", "hawkish",
+            "stimulus", "tapering", "forward guidance",
         ]
 
     async def analyze_central_bank_communications(self, hours_back: int = 48) -> Dict[str, Dict]:
@@ -569,20 +569,20 @@ class CentralBankSentimentAnalyzer:
                     tweet_analyses = []
                     for tweet in tweets:
                         analysis = self._analyze_bank_tweet(tweet)
-                        if analysis['policy_relevance'] > 0.5:  # Only policy-relevant tweets
+                        if analysis["policy_relevance"] > 0.5:  # Only policy-relevant tweets
                             tweet_analyses.append(analysis)
 
                     if tweet_analyses:
                         # Aggregate analysis
-                        avg_sentiment = sum(t['sentiment'] for t in tweet_analyses) / len(tweet_analyses)
-                        avg_hawkishness = sum(t['hawkish_score'] for t in tweet_analyses) / len(tweet_analyses)
+                        avg_sentiment = sum(t["sentiment"] for t in tweet_analyses) / len(tweet_analyses)
+                        avg_hawkishness = sum(t["hawkish_score"] for t in tweet_analyses) / len(tweet_analyses)
 
                         bank_analysis[currency] = {
-                            'sentiment': avg_sentiment,
-                            'hawkish_score': avg_hawkishness,
-                            'policy_tweets_count': len(tweet_analyses),
-                            'total_tweets': len(tweets),
-                            'recent_tweets': [t['text'] for t in tweet_analyses[:3]]
+                            "sentiment": avg_sentiment,
+                            "hawkish_score": avg_hawkishness,
+                            "policy_tweets_count": len(tweet_analyses),
+                            "total_tweets": len(tweets),
+                            "recent_tweets": [t["text"] for t in tweet_analyses[:3]],
                         }
 
             except Exception as e:
@@ -599,7 +599,7 @@ class CentralBankSentimentAnalyzer:
                 self.twitter_client.get_users_tweets,
                 username=username,
                 max_results=100,
-                tweet_fields=['created_at', 'public_metrics']
+                tweet_fields=["created_at", "public_metrics"],
             ).flatten(limit=50)
 
             # Filter by time
@@ -609,9 +609,9 @@ class CentralBankSentimentAnalyzer:
             for tweet in tweets:
                 if tweet.created_at and tweet.created_at > cutoff_time:
                     recent_tweets.append({
-                        'text': tweet.text,
-                        'created_at': tweet.created_at,
-                        'metrics': tweet.public_metrics
+                        "text": tweet.text,
+                        "created_at": tweet.created_at,
+                        "metrics": tweet.public_metrics,
                     })
 
             return recent_tweets
@@ -623,18 +623,18 @@ class CentralBankSentimentAnalyzer:
     def _analyze_bank_tweet(self, tweet_data: Dict) -> Dict:
         """Analyze a single central bank tweet."""
 
-        text = tweet_data['text'].lower()
+        text = tweet_data["text"].lower()
 
         # Calculate basic sentiment
-        sentiment_scores = self.sentiment_analyzer.polarity_scores(tweet_data['text'])
-        sentiment = sentiment_scores['compound']
+        sentiment_scores = self.sentiment_analyzer.polarity_scores(tweet_data["text"])
+        sentiment = sentiment_scores["compound"]
 
         # Calculate policy relevance
         policy_relevance = sum(1 for keyword in self.policy_keywords if keyword in text) / len(self.policy_keywords)
 
         # Calculate hawkish/dovish bias
-        hawkish_terms = ['tightening', 'hawkish', 'raise rates', 'combat inflation', 'reduce stimulus']
-        dovish_terms = ['easing', 'dovish', 'lower rates', 'support economy', 'increase stimulus']
+        hawkish_terms = ["tightening", "hawkish", "raise rates", "combat inflation", "reduce stimulus"]
+        dovish_terms = ["easing", "dovish", "lower rates", "support economy", "increase stimulus"]
 
         hawkish_count = sum(1 for term in hawkish_terms if term in text)
         dovish_count = sum(1 for term in dovish_terms if term in text)
@@ -647,12 +647,12 @@ class CentralBankSentimentAnalyzer:
             hawkish_score = 0
 
         return {
-            'text': tweet_data['text'],
-            'sentiment': sentiment,
-            'hawkish_score': hawkish_score,
-            'policy_relevance': policy_relevance,
-            'created_at': tweet_data['created_at'],
-            'engagement': tweet_data.get('metrics', {}).get('like_count', 0)
+            "text": tweet_data["text"],
+            "sentiment": sentiment,
+            "hawkish_score": hawkish_score,
+            "policy_relevance": policy_relevance,
+            "created_at": tweet_data["created_at"],
+            "engagement": tweet_data.get("metrics", {}).get("like_count", 0),
         }
 ```
 
@@ -731,13 +731,13 @@ class SentimentValidator:
 
     def __init__(self):
         self.financial_positive_terms = [
-            'bullish', 'optimistic', 'strong', 'growth', 'recovery',
-            'positive', 'confident', 'robust', 'healthy', 'improving'
+            "bullish", "optimistic", "strong", "growth", "recovery",
+            "positive", "confident", "robust", "healthy", "improving",
         ]
 
         self.financial_negative_terms = [
-            'bearish', 'pessimistic', 'weak', 'decline', 'recession',
-            'negative', 'concerned', 'fragile', 'deteriorating', 'crisis'
+            "bearish", "pessimistic", "weak", "decline", "recession",
+            "negative", "concerned", "fragile", "deteriorating", "crisis",
         ]
 
     def enhance_financial_sentiment(self, text: str, base_sentiment: float) -> float:

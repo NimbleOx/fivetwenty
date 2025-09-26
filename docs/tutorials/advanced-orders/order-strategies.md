@@ -38,11 +38,11 @@ class BracketOrderManager:
         instrument: str,
         entry_type: str,  # "LIMIT" or "MARKET" or "STOP"
         units: int,
-        entry_price: Optional[Decimal] = None,
+        entry_price: Decimal | None = None,
         stop_loss_price: Decimal = None,
         take_profit_price: Decimal = None,
-        risk_reward_ratio: Optional[Decimal] = None
-    ) -> Dict[str, str]:
+        risk_reward_ratio: Decimal | None = None,
+    ) -> dict[str, str]:
         """Place a complete bracket order with entry, stop, and target."""
 
         bracket_id = f"bracket_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
@@ -59,7 +59,7 @@ class BracketOrderManager:
 
         # 1. Place entry order
         entry_order_id = await self._place_entry_order(
-            instrument, entry_type, units, entry_price
+            instrument, entry_type, units, entry_price,
         )
 
         # Store bracket configuration
@@ -73,7 +73,7 @@ class BracketOrderManager:
             "entry_filled": False,
             "stop_order_id": None,
             "target_order_id": None,
-            "status": "PENDING_ENTRY"
+            "status": "PENDING_ENTRY",
         }
 
         self.active_brackets[bracket_id] = bracket_config
@@ -89,7 +89,7 @@ class BracketOrderManager:
         instrument: str,
         entry_type: str,
         units: int,
-        entry_price: Optional[Decimal]
+        entry_price: Decimal | None,
     ) -> str:
         """Place the entry order component."""
 
@@ -98,7 +98,7 @@ class BracketOrderManager:
                 account_id=self.account_id,
                 instrument=instrument,
                 units=units,
-                time_in_force="FOK"
+                time_in_force="FOK",
             )
         elif entry_type == "LIMIT":
             response = await self.client.orders.post_limit_order(
@@ -106,7 +106,7 @@ class BracketOrderManager:
                 instrument=instrument,
                 units=units,
                 price=entry_price,
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
         elif entry_type == "STOP":
             response = await self.client.orders.post_stop_order(
@@ -114,7 +114,7 @@ class BracketOrderManager:
                 instrument=instrument,
                 units=units,
                 price=entry_price,
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
         return response.order_create_transaction.id
@@ -130,7 +130,7 @@ class BracketOrderManager:
                 # Check entry order status
                 order = await self.client.orders.get_order(
                     account_id=self.account_id,
-                    order_id=entry_order_id
+                    order_id=entry_order_id,
                 )
 
                 if order.state == "FILLED":
@@ -171,7 +171,7 @@ class BracketOrderManager:
                 instrument=instrument,
                 units=-units,  # Opposite direction to close position
                 price=bracket["stop_loss_price"],
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             bracket["stop_order_id"] = stop_response.order_create_transaction.id
@@ -184,7 +184,7 @@ class BracketOrderManager:
                 instrument=instrument,
                 units=-units,  # Opposite direction to close position
                 price=bracket["take_profit_price"],
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             bracket["target_order_id"] = target_response.order_create_transaction.id
@@ -206,7 +206,7 @@ class BracketOrderManager:
                 if bracket["stop_order_id"]:
                     stop_order = await self.client.orders.get_order(
                         account_id=self.account_id,
-                        order_id=bracket["stop_order_id"]
+                        order_id=bracket["stop_order_id"],
                     )
 
                     if stop_order.state == "FILLED":
@@ -219,7 +219,7 @@ class BracketOrderManager:
                 if bracket["target_order_id"]:
                     target_order = await self.client.orders.get_order(
                         account_id=self.account_id,
-                        order_id=bracket["target_order_id"]
+                        order_id=bracket["target_order_id"],
                     )
 
                     if target_order.state == "FILLED":
@@ -251,7 +251,7 @@ class BracketOrderManager:
             try:
                 await self.client.orders.cancel_order(
                     account_id=self.account_id,
-                    order_id=order_id
+                    order_id=order_id,
                 )
             except Exception as e:
                 print(f"Failed to cancel order {order_id}: {e}")
@@ -343,7 +343,7 @@ class TrailingBracketManager(BracketOrderManager):
                 # Get current price
                 pricing = await self.client.pricing.get_pricing(
                     account_id=self.account_id,
-                    instruments=[instrument]
+                    instruments=[instrument],
                 )
 
                 if units > 0:  # Long position
@@ -380,7 +380,7 @@ class TrailingBracketManager(BracketOrderManager):
             # Cancel existing stop order
             await self.client.orders.cancel_order(
                 account_id=self.account_id,
-                order_id=bracket["stop_order_id"]
+                order_id=bracket["stop_order_id"],
             )
 
             # Place new stop order
@@ -389,7 +389,7 @@ class TrailingBracketManager(BracketOrderManager):
                 instrument=bracket["instrument"],
                 units=-bracket["units"],
                 price=new_stop_price,
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             bracket["stop_order_id"] = stop_response.order_create_transaction.id
@@ -630,7 +630,7 @@ class OCOOrderManager:
         self,
         instrument: str,
         order1_spec: Dict[str, Any],
-        order2_spec: Dict[str, Any]
+        order2_spec: Dict[str, Any],
     ) -> str:
         """Place two orders where filling one cancels the other."""
 
@@ -648,7 +648,7 @@ class OCOOrderManager:
             "order2_id": order2_id,
             "order1_spec": order1_spec,
             "order2_spec": order2_spec,
-            "status": "ACTIVE"
+            "status": "ACTIVE",
         }
 
         self.oco_groups[oco_id] = oco_config
@@ -669,12 +669,12 @@ class OCOOrderManager:
                 # Check both orders
                 order1 = await self.client.orders.get_order(
                     account_id=self.account_id,
-                    order_id=oco["order1_id"]
+                    order_id=oco["order1_id"],
                 )
 
                 order2 = await self.client.orders.get_order(
                     account_id=self.account_id,
-                    order_id=oco["order2_id"]
+                    order_id=oco["order2_id"],
                 )
 
                 # If order1 fills, cancel order2
@@ -706,7 +706,7 @@ class OCOOrderManager:
         try:
             await self.client.orders.cancel_order(
                 account_id=self.account_id,
-                order_id=order_id
+                order_id=order_id,
             )
         except Exception as e:
             print(f"Failed to cancel order {order_id}: {e}")
@@ -904,7 +904,7 @@ class PortfolioHedgeManager:
         """Calculate current portfolio exposure by currency."""
 
         positions = await self.client.positions.get_positions(
-            account_id=self.account_id
+            account_id=self.account_id,
         )
 
         exposure = {"USD": Decimal("0"), "EUR": Decimal("0"), "GBP": Decimal("0"), "JPY": Decimal("0")}
@@ -940,7 +940,7 @@ class PortfolioHedgeManager:
                 hedges_needed.append({
                     "currency": currency,
                     "exposure": net_exposure,
-                    "hedge_amount": -net_exposure * Decimal("0.7")  # Hedge 70%
+                    "hedge_amount": -net_exposure * Decimal("0.7"),  # Hedge 70%
                 })
 
         # Place hedge orders
@@ -972,7 +972,7 @@ class PortfolioHedgeManager:
                     account_id=self.account_id,
                     instrument=hedge_instrument,
                     units=int(hedge_units),
-                    time_in_force="FOK"
+                    time_in_force="FOK",
                 )
 
                 print(f"Portfolio hedge placed: {hedge_instrument} {hedge_units}")

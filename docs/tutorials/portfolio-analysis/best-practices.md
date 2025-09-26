@@ -35,7 +35,7 @@ from typing import Dict
 class PortfolioConfig:
     """Production portfolio configuration."""
 
-    target_weights: Dict[str, float]
+    target_weights: dict[str, float]
     rebalancing_threshold: float = 0.05
     max_position_size: float = 0.4
     risk_limit_var: float = 0.02
@@ -54,11 +54,11 @@ class ProductionPortfolioManager:
     def _setup_logging(self) -> logging.Logger:
         """Setup comprehensive logging."""
 
-        logger = logging.getLogger('portfolio_manager')
+        logger = logging.getLogger("portfolio_manager")
         logger.setLevel(logging.INFO)
 
         # File handler for persistent logs
-        file_handler = logging.FileHandler('portfolio_manager.log')
+        file_handler = logging.FileHandler("portfolio_manager.log")
         file_handler.setLevel(logging.INFO)
 
         # Console handler for immediate feedback
@@ -67,7 +67,7 @@ class ProductionPortfolioManager:
 
         # Detailed formatter
         formatter = logging.Formatter(
-            '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
         )
         file_handler.setFormatter(formatter)
         console_handler.setFormatter(formatter)
@@ -155,14 +155,14 @@ class RiskManagementFramework:
         """Set comprehensive risk limits."""
 
         default_limits = {
-            'portfolio_var_95': 0.02,           # 2% daily VaR
-            'portfolio_var_99': 0.035,          # 3.5% daily VaR
-            'max_drawdown': 0.10,               # 10% maximum drawdown
-            'concentration_limit': 0.30,         # 30% max single position
-            'leverage_limit': 1.0,               # No leverage
-            'correlation_limit': 0.80,           # Max correlation between positions
-            'tracking_error': 0.05,              # 5% tracking error vs benchmark
-            'liquidity_reserve': 0.05            # 5% cash reserve
+            "portfolio_var_95": 0.02,           # 2% daily VaR
+            "portfolio_var_99": 0.035,          # 3.5% daily VaR
+            "max_drawdown": 0.10,               # 10% maximum drawdown
+            "concentration_limit": 0.30,         # 30% max single position
+            "leverage_limit": 1.0,               # No leverage
+            "correlation_limit": 0.80,           # Max correlation between positions
+            "tracking_error": 0.05,              # 5% tracking error vs benchmark
+            "liquidity_reserve": 0.05,            # 5% cash reserve
         }
 
         self.risk_limits.update(default_limits)
@@ -173,21 +173,21 @@ class RiskManagementFramework:
         """Check risk limits before executing trades."""
 
         risk_checks = {
-            'var_limit': True,
-            'concentration_limit': True,
-            'correlation_limit': True,
-            'liquidity_limit': True
+            "var_limit": True,
+            "concentration_limit": True,
+            "correlation_limit": True,
+            "liquidity_limit": True,
         }
 
         # Simulate portfolio after trades
         simulated_portfolio = self._simulate_post_trade_portfolio(
-            proposed_trades, current_portfolio
+            proposed_trades, current_portfolio,
         )
 
         # Check each risk limit
         for check_name in risk_checks:
             risk_checks[check_name] = self._check_individual_limit(
-                check_name, simulated_portfolio
+                check_name, simulated_portfolio,
             )
 
         return risk_checks

@@ -17,7 +17,7 @@ async def create_order(
     account_id: str,
     order: OrderRequest,
     *,
-    timeout: Optional[float] = None
+    timeout: Optional[float] = None,
 ) -> OrderResponse:
     """Create an order with proper typing."""
     pass
@@ -39,7 +39,7 @@ from typing import Union
 # ✅ Good - Decimal for financial values
 def calculate_position_value(
     units: int,
-    price: Decimal
+    price: Decimal,
 ) -> Decimal:
     return Decimal(str(units)) * price
 
@@ -70,7 +70,7 @@ async def get_account(self, account_id: str) -> AccountSummary:
     except httpx.HTTPError as e:
         raise FiveTwentyError(
             message=f"Failed to get account {account_id}",
-            response=e.response if hasattr(e, 'response') else None
+            response=e.response if hasattr(e, "response") else None,
         ) from e
 
 # ❌ Bad - Generic exceptions
@@ -94,13 +94,13 @@ class AccountsEndpoint:
         self,
         account_id: str,
         *,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> AccountSummary:
         """Get account summary (async method)."""
         response = await self._client._request(
             "GET",
             f"/accounts/{account_id}",
-            timeout=timeout
+            timeout=timeout,
         )
         return AccountSummary.model_validate(response.json())
 
@@ -110,11 +110,11 @@ class SyncAccountsEndpoint:
         self,
         account_id: str,
         *,
-        timeout: Optional[float] = None
+        timeout: Optional[float] = None,
     ) -> AccountSummary:
         """Get account summary (sync wrapper)."""
         return self._client._run_async(
-            self._async_endpoint.get_summary(account_id, timeout=timeout)
+            self._async_endpoint.get_summary(account_id, timeout=timeout),
         )
 ```
 
@@ -195,14 +195,14 @@ async def post_market_order(
     self,
     account_id: str,
     instrument: str,
-    units: int
+    units: int,
 ) -> OrderResponse:
     pass
 
 async def stream_pricing(
     self,
     account_id: str,
-    instruments: list[str]
+    instruments: list[str],
 ) -> AsyncIterator[Price]:
     pass
 
@@ -355,7 +355,7 @@ async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Pri
     try:
         response = await self._request("GET", "/pricing", params={
             "accountID": account_id,
-            "instruments": ",".join(instruments)
+            "instruments": ",".join(instruments),
         })
 
         pricing_data = response.json()
@@ -366,31 +366,31 @@ async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Pri
             raise FiveTwentyError(
                 message=f"Account {account_id} not found",
                 error_code="ACCOUNT_NOT_EXIST",
-                response=e.response
+                response=e.response,
             ) from e
         elif e.response.status_code == 400:
             raise FiveTwentyError(
                 message="Invalid instruments specified",
                 error_code="INVALID_INSTRUMENTS",
-                response=e.response
+                response=e.response,
             ) from e
         else:
             raise FiveTwentyError(
                 message=f"Pricing request failed: {e.response.status_code}",
-                response=e.response
+                response=e.response,
             ) from e
 
     except httpx.TimeoutException as e:
         raise FiveTwentyError(
             message="Pricing request timed out",
-            error_code="REQUEST_TIMEOUT"
+            error_code="REQUEST_TIMEOUT",
         ) from e
 
 # ✅ Good - Streaming-specific error handling
 async def stream_pricing(
     self,
     account_id: str,
-    instruments: list[str]
+    instruments: list[str],
 ) -> AsyncIterator[Union[Price, PricingHeartbeat]]:
     """Stream pricing with reconnection logic."""
     last_heartbeat = time.monotonic()
@@ -403,7 +403,7 @@ async def stream_pricing(
         if time.monotonic() - last_heartbeat > HEARTBEAT_TIMEOUT:
             raise StreamStall(
                 message="Pricing stream stalled - no heartbeat received",
-                last_heartbeat_time=datetime.fromtimestamp(last_heartbeat)
+                last_heartbeat_time=datetime.fromtimestamp(last_heartbeat),
             )
 
         try:
@@ -431,12 +431,12 @@ def create_order_request(
     instrument: str,
     units: int,
     order_type: str,
-    **kwargs
+    **kwargs,
 ) -> OrderRequest:
     """Create validated order request."""
 
     # Validate instrument format
-    if not re.match(r'^[A-Z]{3}_[A-Z]{3}$', instrument):
+    if not re.match(r"^[A-Z]{3}_[A-Z]{3}$", instrument):
         raise ValueError(f"Invalid instrument format: {instrument}")
 
     # Validate units
@@ -451,7 +451,7 @@ def create_order_request(
         "instrument": instrument,
         "units": str(units),
         "type": order_type.upper(),
-        **kwargs
+        **kwargs,
     }
 
     try:
@@ -545,7 +545,7 @@ class TestAccountsIntegration:
         """Create client with real credentials."""
         return AsyncClient(
             token=os.environ["TEST_OANDA_TOKEN"],
-            environment=Environment.PRACTICE  # Always practice for tests
+            environment=Environment.PRACTICE,  # Always practice for tests
         )
 
     @pytest.mark.asyncio
@@ -590,7 +590,7 @@ async def trading_session(config: AccountConfig):
 # ✅ Good - Concurrent operations
 async def get_multiple_accounts(
     client: AsyncClient,
-    account_ids: list[str]
+    account_ids: list[str],
 ) -> list[AccountSummary]:
     """Fetch multiple accounts concurrently."""
 
@@ -619,7 +619,7 @@ async def process_price_stream(
     client: AsyncClient,
     account_id: str,
     instruments: list[str],
-    max_buffer_size: int = 1000
+    max_buffer_size: int = 1000,
 ) -> None:
     """Process price stream with memory management."""
 
@@ -690,7 +690,7 @@ def log_trade_result(trade: Trade, config: AccountConfig) -> None:
     logger.info(
         f"Trade executed: {trade.instrument} "
         f"{trade.units} units at {trade.price} "
-        f"(account: {config.summary()})"  # Safe summary only
+        f"(account: {config.summary()})",  # Safe summary only
     )
 
 # ❌ Bad - Exposes credentials

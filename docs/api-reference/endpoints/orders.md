@@ -20,9 +20,9 @@ async def main():
         account_id="123-456-789",
         order_request=MarketOrderRequest(
             instrument="EUR_USD",
-            units=1000
+            units=1000,
         ),
-        client_request_id="my-order-123"
+        client_request_id="my-order-123",
     )
 
 asyncio.run(main())
@@ -67,7 +67,7 @@ async def main():
         instrument="EUR_USD",
         units=1000,
         take_profit=Decimal("1.1500"),
-        stop_loss=Decimal("1.1200")
+        stop_loss=Decimal("1.1200"),
     )
 
 asyncio.run(main())

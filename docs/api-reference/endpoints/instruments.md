@@ -23,7 +23,7 @@ async def main():
     candles = await client.instruments.get_instrument_candles(
         instrument="EUR_USD",
         granularity="H1",
-        count=100
+        count=100,
     )
 
 asyncio.run(main())

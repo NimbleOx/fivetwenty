@@ -25,14 +25,14 @@ class HighPerformanceStreamer:
     def __init__(self, client: AsyncClient, buffer_size: int = 10000):
         self.client = client
         self.buffer_size = buffer_size
-        self.price_buffers: Dict[str, deque] = {}
-        self.callbacks: Dict[str, List[Callable]] = {}
+        self.price_buffers: dict[str, deque] = {}
+        self.callbacks: dict[str, List[Callable]] = {}
         self.streaming_active = False
         self.stats = {
-            'messages_received': 0,
-            'callbacks_executed': 0,
-            'start_time': None,
-            'last_price_time': {}
+            "messages_received": 0,
+            "callbacks_executed": 0,
+            "start_time": None,
+            "last_price_time": {},
         }
 
     def add_price_callback(self, instrument: str, callback: Callable):
@@ -47,7 +47,7 @@ class HighPerformanceStreamer:
         """Start high-performance streaming with minimal latency."""
 
         self.streaming_active = True
-        self.stats['start_time'] = time.perf_counter()
+        self.stats["start_time"] = time.perf_counter()
 
         print(f"🚀 Starting HFT streaming for {len(instruments)} instruments")
 
@@ -73,16 +73,16 @@ class HighPerformanceStreamer:
         current_time = time.perf_counter()
 
         # Update statistics
-        self.stats['messages_received'] += 1
-        self.stats['last_price_time'][instrument] = current_time
+        self.stats["messages_received"] += 1
+        self.stats["last_price_time"][instrument] = current_time
 
         # Store in buffer
         if instrument in self.price_buffers:
             self.price_buffers[instrument].append({
-                'price': price,
-                'timestamp': current_time,
-                'bid': price.bids[0].price if price.bids else None,
-                'ask': price.asks[0].price if price.asks else None
+                "price": price,
+                "timestamp": current_time,
+                "bid": price.bids[0].price if price.bids else None,
+                "ask": price.asks[0].price if price.asks else None,
             })
 
         # Execute callbacks asynchronously (non-blocking)
@@ -90,7 +90,7 @@ class HighPerformanceStreamer:
             for callback in self.callbacks[instrument]:
                 # Fire and forget - don't await to maintain speed
                 asyncio.create_task(self._safe_callback_execution(callback, price))
-                self.stats['callbacks_executed'] += 1
+                self.stats["callbacks_executed"] += 1
 
     async def _safe_callback_execution(self, callback: Callable, price: ClientPrice):
         """Execute callback safely without blocking main stream."""
@@ -107,26 +107,26 @@ class HighPerformanceStreamer:
         # Minimal heartbeat processing for HFT
         pass
 
-    def get_latest_price(self, instrument: str) -> Optional[Dict]:
+    def get_latest_price(self, instrument: str) -> dict | None:
         """Get latest price from buffer with zero-copy access."""
         if instrument in self.price_buffers and self.price_buffers[instrument]:
             return self.price_buffers[instrument][-1]
         return None
 
-    def get_streaming_stats(self) -> Dict:
+    def get_streaming_stats(self) -> dict:
         """Get streaming performance statistics."""
-        if self.stats['start_time']:
-            runtime = time.perf_counter() - self.stats['start_time']
+        if self.stats["start_time"]:
+            runtime = time.perf_counter() - self.stats["start_time"]
             return {
-                'runtime_seconds': runtime,
-                'messages_received': self.stats['messages_received'],
-                'messages_per_second': self.stats['messages_received'] / runtime if runtime > 0 else 0,
-                'callbacks_executed': self.stats['callbacks_executed'],
-                'instruments_tracked': len(self.price_buffers),
-                'buffer_utilization': {
+                "runtime_seconds": runtime,
+                "messages_received": self.stats["messages_received"],
+                "messages_per_second": self.stats["messages_received"] / runtime if runtime > 0 else 0,
+                "callbacks_executed": self.stats["callbacks_executed"],
+                "instruments_tracked": len(self.price_buffers),
+                "buffer_utilization": {
                     inst: len(buf) / self.buffer_size
                     for inst, buf in self.price_buffers.items()
-                }
+                },
             }
         return {}
 
@@ -139,12 +139,12 @@ async def hft_price_callback(price: ClientPrice):
     """Ultra-fast price processing callback."""
 
     # Minimal processing for maximum speed
-    bid = Decimal(str(price.bids[0].price)) if price.bids else Decimal('0')
-    ask = Decimal(str(price.asks[0].price)) if price.asks else Decimal('0')
+    bid = Decimal(str(price.bids[0].price)) if price.bids else Decimal("0")
+    ask = Decimal(str(price.asks[0].price)) if price.asks else Decimal("0")
     spread = ask - bid
 
     # Only log significant moves (reduce I/O)
-    if spread > Decimal('0.0010'):  # 1 pip threshold
+    if spread > Decimal("0.0010"):  # 1 pip threshold
         print(f"⚡ {price.instrument}: {bid}/{ask} (spread: {spread:.5f})")
 
 # Usage
@@ -158,7 +158,7 @@ async def optimize_streaming_example(client: AsyncClient, account_id: str):
 
     # Start streaming
     streaming_task = asyncio.create_task(
-        streamer.start_optimized_streaming(account_id, major_pairs)
+        streamer.start_optimized_streaming(account_id, major_pairs),
     )
 
     # Monitor performance

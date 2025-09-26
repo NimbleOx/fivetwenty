@@ -54,7 +54,7 @@ client = AsyncClient(
     proxies=str | None,
     verify=True,
     cert=str | None,
-    logger=Optional[Logger] | None
+    logger=Optional[Logger] | None,
 )
 ```
 
@@ -278,7 +278,7 @@ try:
         token="",  # Empty token
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="123invalid"  # Invalid alias
+        alias="123invalid",  # Invalid alias
     )
 except ValidationError as e:
     print(f"Configuration error: {e}")

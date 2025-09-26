@@ -35,12 +35,12 @@ class OrderRule(ABC):
         self.enabled = True
 
     @abstractmethod
-    async def evaluate(self, context: Dict[str, Any]) -> bool:
+    async def evaluate(self, context: dict[str, Any]) -> bool:
         """Evaluate if the rule condition is met."""
         pass
 
     @abstractmethod
-    async def execute(self, context: Dict[str, Any]) -> Dict[str, Any]:
+    async def execute(self, context: dict[str, Any]) -> dict[str, Any]:
         """Execute the rule action."""
         pass
 
@@ -48,7 +48,7 @@ class RuleBasedOrderManager:
     def __init__(self, client: AsyncClient, account_id: str):
         self.client = client
         self.account_id = account_id
-        self.rules: List[OrderRule] = []
+        self.rules: list[OrderRule] = []
         self.execution_log = []
 
     def add_rule(self, rule: OrderRule):
@@ -57,7 +57,7 @@ class RuleBasedOrderManager:
         # Sort by priority (higher priority first)
         self.rules.sort(key=lambda r: r.priority, reverse=True)
 
-    async def evaluate_and_execute_rules(self, context: Dict[str, Any]):
+    async def evaluate_and_execute_rules(self, context: dict[str, Any]):
         """Evaluate all rules and execute applicable ones."""
         executed_rules = []
 
@@ -71,7 +71,7 @@ class RuleBasedOrderManager:
                     executed_rules.append({
                         "rule_name": rule.name,
                         "execution_time": datetime.utcnow(),
-                        "result": result
+                        "result": result,
                     })
 
                     # Log execution
@@ -236,9 +236,9 @@ class MaxPositionRule(OrderRule):
 
         total_exposure = Decimal("0")
         for position in positions.positions:
-            if hasattr(position, 'long') and position.long.units != "0":
+            if hasattr(position, "long") and position.long.units != "0":
                 total_exposure += abs(Decimal(position.long.units))
-            if hasattr(position, 'short') and position.short.units != "0":
+            if hasattr(position, "short") and position.short.units != "0":
                 total_exposure += abs(Decimal(position.short.units))
 
         context["current_exposure"] = total_exposure
@@ -258,7 +258,7 @@ class MaxPositionRule(OrderRule):
                 try:
                     await client.orders.cancel_order(
                         account_id=account_id,
-                        order_id=order.id
+                        order_id=order.id,
                     )
                     cancelled_orders.append(order.id)
                 except Exception:
@@ -268,7 +268,7 @@ class MaxPositionRule(OrderRule):
             "action": "exposure_limit_exceeded",
             "current_exposure": context["current_exposure"],
             "max_exposure": self.max_total_exposure,
-            "cancelled_orders": cancelled_orders
+            "cancelled_orders": cancelled_orders,
         }
 
 class StopLossProtectionRule(OrderRule):
@@ -318,7 +318,7 @@ class StopLossProtectionRule(OrderRule):
                 # Get current price for stop calculation
                 pricing = await client.pricing.get_pricing(
                     account_id=account_id,
-                    instruments=[position.instrument]
+                    instruments=[position.instrument],
                 )
 
                 current_price = Decimal(pricing.prices[0].asks[0].price)
@@ -339,13 +339,13 @@ class StopLossProtectionRule(OrderRule):
                     instrument=position.instrument,
                     units=units,
                     price=stop_price,
-                    time_in_force="GTC"
+                    time_in_force="GTC",
                 )
 
                 placed_stops.append({
                     "instrument": position.instrument,
                     "order_id": stop_response.order_create_transaction.id,
-                    "stop_price": stop_price
+                    "stop_price": stop_price,
                 })
 
             except Exception as e:
@@ -353,7 +353,7 @@ class StopLossProtectionRule(OrderRule):
 
         return {
             "action": "place_protective_stops",
-            "placed_stops": placed_stops
+            "placed_stops": placed_stops,
         }
 ```
 
@@ -398,7 +398,7 @@ class OrderMonitoringEngine:
         context = {
             "client": self.client,
             "account_id": self.account_id,
-            "current_time": current_time
+            "current_time": current_time,
         }
 
         # Check order timeouts
@@ -413,7 +413,7 @@ class OrderMonitoringEngine:
     async def _check_order_timeouts(self, context: Dict[str, Any]):
         """Check for orders that have been pending too long."""
         orders = await self.client.orders.get_orders(
-            account_id=self.account_id
+            account_id=self.account_id,
         )
 
         timeout_threshold = timedelta(hours=2)  # 2-hour timeout
@@ -421,7 +421,7 @@ class OrderMonitoringEngine:
         for order in orders.orders:
             if order.state == "PENDING":
                 order_age = context["current_time"] - datetime.fromisoformat(
-                    order.create_time.replace('Z', '+00:00')
+                    order.create_time.replace("Z", "+00:00"),
                 )
 
                 if order_age > timeout_threshold:
@@ -429,13 +429,13 @@ class OrderMonitoringEngine:
                         "type": "order_timeout",
                         "order_id": order.id,
                         "instrument": order.instrument,
-                        "age_hours": order_age.total_seconds() / 3600
+                        "age_hours": order_age.total_seconds() / 3600,
                     })
 
     async def _check_position_risks(self, context: Dict[str, Any]):
         """Check for high-risk position situations."""
         positions = await self.client.positions.get_positions(
-            account_id=self.account_id
+            account_id=self.account_id,
         )
 
         for position in positions.positions:
@@ -458,7 +458,7 @@ class OrderMonitoringEngine:
                         "instrument": position.instrument,
                         "unrealized_pl": unrealized_pl,
                         "risk_threshold": risk_threshold,
-                        "position_size": position_size
+                        "position_size": position_size,
                     })
 
     async def _check_market_conditions(self, context: Dict[str, Any]):
@@ -468,7 +468,7 @@ class OrderMonitoringEngine:
         for instrument in instruments:
             pricing = await self.client.pricing.get_pricing(
                 account_id=self.account_id,
-                instruments=[instrument]
+                instruments=[instrument],
             )
 
             spread = (
@@ -484,7 +484,7 @@ class OrderMonitoringEngine:
                     "type": "wide_spread",
                     "instrument": instrument,
                     "current_spread": spread,
-                    "threshold": normal_spread_threshold
+                    "threshold": normal_spread_threshold,
                 })
 
     async def _trigger_alert(self, alert_data: Dict[str, Any]):
@@ -620,7 +620,7 @@ class EventDrivenOrderSystem:
                 # Wait for events with timeout
                 event = await asyncio.wait_for(
                     self.event_queue.get(),
-                    timeout=1.0
+                    timeout=1.0,
                 )
 
                 await self._process_event(event)
@@ -813,10 +813,10 @@ class TradingLogger:
         # Order activity logger
         self.order_logger = logging.getLogger("orders")
         order_handler = logging.FileHandler(
-            self.log_directory / "orders.log"
+            self.log_directory / "orders.log",
         )
         order_handler.setFormatter(logging.Formatter(
-            '%(asctime)s - %(levelname)s - %(message)s'
+            "%(asctime)s - %(levelname)s - %(message)s",
         ))
         self.order_logger.addHandler(order_handler)
         self.order_logger.setLevel(logging.INFO)
@@ -824,10 +824,10 @@ class TradingLogger:
         # Error logger
         self.error_logger = logging.getLogger("errors")
         error_handler = logging.FileHandler(
-            self.log_directory / "errors.log"
+            self.log_directory / "errors.log",
         )
         error_handler.setFormatter(logging.Formatter(
-            '%(asctime)s - %(levelname)s - %(message)s'
+            "%(asctime)s - %(levelname)s - %(message)s",
         ))
         self.error_logger.addHandler(error_handler)
         self.error_logger.setLevel(logging.ERROR)
@@ -835,10 +835,10 @@ class TradingLogger:
         # Performance logger
         self.performance_logger = logging.getLogger("performance")
         perf_handler = logging.FileHandler(
-            self.log_directory / "performance.log"
+            self.log_directory / "performance.log",
         )
         perf_handler.setFormatter(logging.Formatter(
-            '%(asctime)s - %(message)s'
+            "%(asctime)s - %(message)s",
         ))
         self.performance_logger.addHandler(perf_handler)
         self.performance_logger.setLevel(logging.INFO)
@@ -848,7 +848,7 @@ class TradingLogger:
         log_entry = {
             "action": action,
             "timestamp": datetime.utcnow().isoformat(),
-            "order_data": order_data
+            "order_data": order_data,
         }
 
         self.order_logger.info(json.dumps(log_entry))
@@ -859,7 +859,7 @@ class TradingLogger:
             "error_type": type(error).__name__,
             "error_message": str(error),
             "timestamp": datetime.utcnow().isoformat(),
-            "context": context
+            "context": context,
         }
 
         self.error_logger.error(json.dumps(log_entry))
@@ -870,7 +870,7 @@ class TradingLogger:
             "metric": metric_name,
             "value": value,
             "timestamp": datetime.utcnow().isoformat(),
-            "metadata": metadata or {}
+            "metadata": metadata or {},
         }
 
         self.performance_logger.info(json.dumps(log_entry))
@@ -883,20 +883,20 @@ logger.log_order_action("order_placed", {
     "order_id": "12345",
     "instrument": "EUR_USD",
     "units": 10000,
-    "price": "1.0850"
+    "price": "1.0850",
 })
 
 # Log error
 logger.log_error(Exception("Insufficient margin"), {
     "operation": "place_order",
     "instrument": "EUR_USD",
-    "requested_units": 50000
+    "requested_units": 50000,
 })
 
 # Log performance metric
 logger.log_performance_metric("order_fill_time", 1.2, {
     "instrument": "EUR_USD",
-    "order_type": "LIMIT"
+    "order_type": "LIMIT",
 })
 ```
 

@@ -38,7 +38,7 @@ class ProductionTradingSystem:
 
     def __init__(self, config: TradingSystemConfig):
         self.config = config
-        self.client: Optional[AsyncClient] = None
+        self.client: AsyncClient | None = None
         self.positions = {}
         self.daily_pnl = 0.0
         self.is_running = False
@@ -52,7 +52,7 @@ class ProductionTradingSystem:
             environment=Environment.LIVE,  # Production!
             timeout=self.config.order_timeout,
             max_retries=5,  # More retries for production
-            logger=self.setup_logger()
+            logger=self.setup_logger(),
         )
 
         # Start components
@@ -61,7 +61,7 @@ class ProductionTradingSystem:
             self.monitor_health(),
             self.stream_prices(),
             self.manage_risk(),
-            return_exceptions=True
+            return_exceptions=True,
         )
 ```
 
@@ -137,7 +137,7 @@ class PositionSizer:
         client: AsyncClient,
         account_id: str,
         instrument: str,
-        stop_distance: Decimal
+        stop_distance: Decimal,
     ) -> int:
         """Calculate position size based on risk."""
 
@@ -151,7 +151,7 @@ class PositionSizer:
         # Get instrument info for pip value
         instruments = await client.accounts.get_account_instruments(
             account_id=account_id,
-            instruments=[instrument]
+            instruments=[instrument],
         )
         pip_value = self.calculate_pip_value(instruments[0])
 
@@ -185,7 +185,7 @@ class StopLossManager:
         self,
         account_id: str,
         trade_id: str,
-        stop_price: str
+        stop_price: str,
     ):
         """Set or update stop loss."""
 
@@ -197,7 +197,7 @@ class StopLossManager:
             sl_request = StopLossOrderRequest(
                 tradeID=trade_id,
                 price=stop_price,
-                timeInForce="GTC"
+                timeInForce="GTC",
             )
             await self.client.orders.post_order(account_id, sl_request)
             print(f"Stop loss set at {stop_price} for trade {trade_id}")
@@ -213,7 +213,7 @@ class StopLossManager:
         self,
         account_id: str,
         trade_id: str,
-        distance: Decimal
+        distance: Decimal,
     ):
         """Implement trailing stop."""
 
@@ -335,7 +335,7 @@ class StateManager:
             "positions": {},
             "pending_orders": [],
             "daily_pnl": 0.0,
-            "last_update": None
+            "last_update": None,
         }
 
     def save_state(self):
@@ -343,7 +343,7 @@ class StateManager:
 
         self.state["last_update"] = datetime.now().isoformat()
 
-        with open(self.state_file, 'w') as f:
+        with open(self.state_file, "w") as f:
             json.dump(self.state, f, indent=2)
 
     async def recover_positions(self, client: AsyncClient, account_id: str):
@@ -416,7 +416,7 @@ class CachedDataProvider:
         self,
         account_id: str,
         instrument: str,
-        cache_duration: int = 3600
+        cache_duration: int = 3600,
     ):
         """Get instrument info with caching."""
 
@@ -431,7 +431,7 @@ class CachedDataProvider:
         # Fetch fresh data
         data = await self.client.accounts.get_account_instruments(
             account_id=account_id,
-            instruments=[instrument]
+            instruments=[instrument],
         )
 
         # Update cache
@@ -455,7 +455,7 @@ class HealthMonitor:
             "api_calls": 0,
             "errors": 0,
             "last_heartbeat": None,
-            "stream_status": "unknown"
+            "stream_status": "unknown",
         }
 
     async def health_check(self) -> dict:
@@ -464,7 +464,7 @@ class HealthMonitor:
         health = {
             "timestamp": datetime.now().isoformat(),
             "status": "healthy",
-            "checks": {}
+            "checks": {},
         }
 
         # Check API connectivity
@@ -520,7 +520,7 @@ class AlertManager:
         # Always log
         logger.log(
             getattr(logging, severity),
-            f"Alert: {subject} - {message}"
+            f"Alert: {subject} - {message}",
         )
 
     async def send_email(self, subject: str, body: str):
@@ -581,7 +581,7 @@ async def test_account_balance_check(mock_client):
         balance=Decimal("10000.00"),
         currency="USD",
         margin_used=Decimal("2000.00"),
-        margin_available=Decimal("8000.00")
+        margin_available=Decimal("8000.00"),
     )
     mock_client.accounts.get.return_value = mock_account
 
@@ -599,7 +599,7 @@ async def test_order_error_handling(mock_client):
     mock_client.orders.post_market_order.side_effect = FiveTwentyError(
         status_code=400,
         code=FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
-        message="Insufficient margin"
+        message="Insufficient margin",
     )
 
     # Test error handling
@@ -607,7 +607,7 @@ async def test_order_error_handling(mock_client):
         await mock_client.orders.post_market_order(
             account_id="test-account",
             instrument="EUR_USD",
-            units=1000000  # Too large
+            units=1000000,  # Too large
         )
 
     assert exc_info.value.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS
@@ -625,21 +625,21 @@ from fivetwenty import AsyncClient, Environment
 
 # Configure VCR for sensitive data
 my_vcr = vcr.VCR(
-    serializer='yaml',
-    cassette_library_dir='tests/fixtures/vcr_cassettes',
-    record_mode='once',
-    filter_headers=['authorization'],  # Remove sensitive headers
-    filter_query_parameters=['access_token'],
+    serializer="yaml",
+    cassette_library_dir="tests/fixtures/vcr_cassettes",
+    record_mode="once",
+    filter_headers=["authorization"],  # Remove sensitive headers
+    filter_query_parameters=["access_token"],
 )
 
 @pytest.mark.integration
-@my_vcr.use_cassette('account_retrieval.yaml')
+@my_vcr.use_cassette("account_retrieval.yaml")
 async def test_account_retrieval():
     """Test real account retrieval with recorded response."""
 
     async with AsyncClient(
         token=os.environ["TEST_OANDA_TOKEN"],
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
         accounts = await client.accounts.get_accounts()
 
@@ -647,13 +647,13 @@ async def test_account_retrieval():
         assert accounts[0].currency in ["USD", "EUR", "GBP"]
 
 @pytest.mark.integration
-@my_vcr.use_cassette('full_trade_lifecycle.yaml')
+@my_vcr.use_cassette("full_trade_lifecycle.yaml")
 async def test_full_trade_lifecycle():
     """Test complete trade lifecycle."""
 
     async with AsyncClient(
         token=os.environ["TEST_OANDA_TOKEN"],
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
         account_id = os.environ["TEST_OANDA_ACCOUNT"]
 
@@ -661,7 +661,7 @@ async def test_full_trade_lifecycle():
         order = await client.orders.post_market_order(
             account_id=account_id,
             instrument="EUR_USD",
-            units=1000
+            units=1000,
         )
 
         assert order.order_fill_transaction
@@ -694,7 +694,7 @@ from hypothesis import strategies as st
 
 @given(
     units=st.integers(min_value=1, max_value=100000),
-    price=st.decimals(min_value=Decimal("0.01"), max_value=Decimal("10.00"), places=5)
+    price=st.decimals(min_value=Decimal("0.01"), max_value=Decimal("10.00"), places=5),
 )
 async def test_position_size_calculation(mock_client, units, price):
     """Test position size calculations with various inputs."""
@@ -710,8 +710,8 @@ async def test_position_size_calculation(mock_client, units, price):
         st.sampled_from(["EUR_USD", "GBP_USD", "USD_JPY", "AUD_USD"]),
         min_size=1,
         max_size=10,
-        unique=True
-    )
+        unique=True,
+    ),
 )
 async def test_pricing_request(mock_client, instruments):
     """Test pricing requests with various instrument combinations."""
@@ -743,7 +743,7 @@ async def test_concurrent_requests():
 
     async with AsyncClient(
         token=os.environ["TEST_OANDA_TOKEN"],
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
         account_id = os.environ["TEST_OANDA_ACCOUNT"]
 
@@ -797,8 +797,8 @@ from fivetwenty import AsyncClient, Environment
 # Configure detailed logging
 logging.basicConfig(
     level=logging.DEBUG,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-    stream=sys.stdout
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+    stream=sys.stdout,
 )
 
 # Enable httpx debug logging
@@ -809,7 +809,7 @@ async def debug_api_calls():
 
     async with AsyncClient(
         token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
         # This will log all HTTP details
         accounts = await client.accounts.get_accounts()
@@ -837,7 +837,7 @@ def debug_model_validation(raw_data: dict):
         print("❌ Validation failed:")
 
         for error in e.errors():
-            field_path = " -> ".join(str(x) for x in error['loc'])
+            field_path = " -> ".join(str(x) for x in error["loc"])
             print(f"  Field: {field_path}")
             print(f"  Error: {error['msg']}")
             print(f"  Input: {error['input']}")
@@ -852,7 +852,7 @@ def debug_model_validation(raw_data: dict):
 raw_account_data = {
     "id": "123-456-789",
     "balance": "invalid_number",  # This will cause validation error
-    "currency": "USD"
+    "currency": "USD",
 }
 
 try:
@@ -878,14 +878,14 @@ async def debug_connection_issues():
     timeout = aiohttp.ClientTimeout(
         total=30,      # Total request timeout
         connect=10,    # Connection timeout
-        sock_read=10   # Socket read timeout
+        sock_read=10,   # Socket read timeout
     )
 
     try:
         async with AsyncClient(
             token=os.environ["FIVETWENTY_OANDA_TOKEN"],
             environment=Environment.PRACTICE,
-            timeout=timeout
+            timeout=timeout,
         ) as client:
 
             start_time = asyncio.get_event_loop().time()
@@ -1024,7 +1024,7 @@ async def main():
     async with AsyncClient(
         token=token,
         environment=Environment.PRACTICE,
-        connector=connector  # Custom connector
+        connector=connector,  # Custom connector
     ) as client:
         # This will bypass SSL verification (DANGEROUS)
         pass
@@ -1075,7 +1075,7 @@ import pytest
 def trading_system_mocks():
     """Comprehensive mocks for trading system testing."""
 
-    with patch('fivetwenty.AsyncClient') as mock_client_class:
+    with patch("fivetwenty.AsyncClient") as mock_client_class:
         mock_client = AsyncMock()
         mock_client_class.return_value.__aenter__.return_value = mock_client
 
@@ -1085,7 +1085,7 @@ def trading_system_mocks():
         ]
 
         mock_client.orders.post_market_order.return_value = {
-            "order_fill_transaction": {"id": "123", "trade_opened_id": "456"}
+            "order_fill_transaction": {"id": "123", "trade_opened_id": "456"},
         }
 
         yield mock_client

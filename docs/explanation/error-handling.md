@@ -32,7 +32,7 @@ async def safe_trade(client, account_id):
         order = await client.orders.post_market_order(
             account_id=account_id,
             instrument="EUR_USD",
-            units=1000
+            units=1000,
         )
         print(f"Order placed: {order.order_fill_transaction.id}")
 
@@ -61,7 +61,7 @@ async def handle_specific_errors(client, account_id):
         result = await client.orders.post_market_order(
             account_id=account_id,
             instrument="EUR_USD",
-            units=1000000  # Large position
+            units=1000000,  # Large position
         )
 
     except BadRequest as e:
@@ -113,7 +113,7 @@ async def handle_trading_errors(client, account_id):
         order = await client.orders.post_market_order(
             account_id=account_id,
             instrument="EUR_USD",
-            units=1000000
+            units=1000000,
         )
     except FiveTwentyError as e:
         match e.code:
@@ -154,21 +154,21 @@ def categorize_error(error: FiveTwentyError) -> str:
         FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
         FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE,
         FiveTwentyErrorCode.ACCOUNT_LOCKED,
-        FiveTwentyErrorCode.INSUFFICIENT_MARGIN
+        FiveTwentyErrorCode.INSUFFICIENT_MARGIN,
     }
 
     # Market errors
     market_errors = {
         FiveTwentyErrorCode.MARKET_HALTED,
         FiveTwentyErrorCode.INVALID_INSTRUMENT,
-        FiveTwentyErrorCode.INSTRUMENT_NOT_TRADEABLE
+        FiveTwentyErrorCode.INSTRUMENT_NOT_TRADEABLE,
     }
 
     # Order errors
     order_errors = {
         FiveTwentyErrorCode.INVALID_ORDER,
         FiveTwentyErrorCode.ORDER_DOESNT_EXIST,
-        FiveTwentyErrorCode.PENDING_ORDER_ALREADY_EXISTS
+        FiveTwentyErrorCode.PENDING_ORDER_ALREADY_EXISTS,
     }
 
     if error.code in account_errors:
@@ -194,13 +194,13 @@ from collections.abc import Callable
 from decimal import Decimal
 from typing import TypeVar
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 async def retry_with_backoff(
     func: Callable[[], T],
     max_retries: int = 3,
     base_delay: float = 1.0,
-    max_delay: float = 60.0
+    max_delay: float = 60.0,
 ) -> T:
     """Retry with exponential backoff."""
 
@@ -238,8 +238,8 @@ async def place_order_with_retry():
         lambda: client.orders.post_market_order(
             account_id=account_id,
             instrument="EUR_USD",
-            units=1000
-        )
+            units=1000,
+        ),
     )
 ```
 
@@ -264,7 +264,7 @@ class CircuitBreaker:
         self,
         failure_threshold: int = 5,
         recovery_timeout: int = 60,
-        expected_exception: type = FiveTwentyError
+        expected_exception: type = FiveTwentyError,
     ):
         self.failure_threshold = failure_threshold
         self.recovery_timeout = recovery_timeout
@@ -317,7 +317,7 @@ async def protected_trade():
         client.orders.post_market_order,
         account_id=account_id,
         instrument="EUR_USD",
-        units=1000
+        units=1000,
     )
 ```
 
@@ -401,7 +401,7 @@ class StatefulTrader:
                 # Try to recover based on error
                 if e.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
                     # Reduce position size and retry
-                    order['units'] = order['units'] // 2
+                    order["units"] = order["units"] // 2
                     self.pending_orders.append(order)
 
         # Retry pending orders
@@ -443,7 +443,7 @@ class ErrorLogger:
             "error_message": error.message,
             "severity": self._get_severity(error),
             "context": context,
-            "stack_trace": traceback.format_exc()
+            "stack_trace": traceback.format_exc(),
         }
 
         # Log based on severity
@@ -461,7 +461,7 @@ class ErrorLogger:
         critical_errors = {
             FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE,
             FiveTwentyErrorCode.ACCOUNT_LOCKED,
-            FiveTwentyErrorCode.INSUFFICIENT_FUNDS
+            FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
         }
 
         if error.code in critical_errors:
@@ -542,7 +542,7 @@ async def test_insufficient_funds_handling():
     mock_client = AsyncMock()
     mock_client.orders.post_market_order.side_effect = FiveTwentyError(
         code=FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
-        message="Not enough margin"
+        message="Not enough margin",
     )
 
     # Test error handling
@@ -561,7 +561,7 @@ async def test_retry_on_server_error():
     mock_client.orders.post_market_order.side_effect = [
         InternalServerError("Server error"),
         InternalServerError("Server error"),
-        {"order_fill_transaction": {"id": "123"}}
+        {"order_fill_transaction": {"id": "123"}},
     ]
 
     result = await place_order_with_retry(mock_client, "account", "EUR_USD", 1000)

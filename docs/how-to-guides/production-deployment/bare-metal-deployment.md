@@ -796,8 +796,8 @@ class ProductionConfig:
     max_concurrent_connections: int = 50
 
     # Monitoring & Alerting
-    sentry_dsn: Optional[str] = None
-    slack_webhook_url: Optional[str] = None
+    sentry_dsn: str | None = None
+    slack_webhook_url: str | None = None
     enable_metrics: bool = True
 
 def load_production_config() -> ProductionConfig:
@@ -811,8 +811,8 @@ def load_production_config() -> ProductionConfig:
 
     # Validate required environment variables
     required_vars = [
-        'FIVETWENTY_LIVE_TOKEN',
-        'FIVETWENTY_OANDA_ACCOUNT'
+        "FIVETWENTY_LIVE_TOKEN",
+        "FIVETWENTY_OANDA_ACCOUNT",
     ]
 
     missing_vars = [var for var in required_vars if not os.getenv(var)]
@@ -820,26 +820,26 @@ def load_production_config() -> ProductionConfig:
         raise ValueError(f"Missing required environment variables: {missing_vars}")
 
     # Determine environment
-    env_name = os.getenv('FIVETWENTY_OANDA_ENVIRONMENT', 'PRACTICE').upper()
-    if env_name == 'LIVE':
+    env_name = os.getenv("FIVETWENTY_OANDA_ENVIRONMENT", "PRACTICE").upper()
+    if env_name == "LIVE":
         oanda_env = Environment.LIVE
     else:
         oanda_env = Environment.PRACTICE
 
     return ProductionConfig(
-        fivetwenty_token=os.getenv('FIVETWENTY_LIVE_TOKEN'),
+        fivetwenty_token=os.getenv("FIVETWENTY_LIVE_TOKEN"),
         fivetwenty_environment=oanda_env,
-        account_id=os.getenv('FIVETWENTY_OANDA_ACCOUNT'),
-        log_level=os.getenv('LOG_LEVEL', 'INFO'),
-        max_position_size=int(os.getenv('MAX_POSITION_SIZE', '1000000')),
-        daily_loss_limit=Decimal(os.getenv('DAILY_LOSS_LIMIT', '5000.0')),
-        cycle_time_ms=int(os.getenv('CYCLE_TIME_MS', '100')),
-        redis_url=os.getenv('REDIS_URL', 'redis://localhost:6379'),
-        database_url=os.getenv('DATABASE_URL', 'postgresql://trading:password@localhost/trading_prod'),
-        metrics_port=int(os.getenv('METRICS_PORT', '8080')),
-        health_check_port=int(os.getenv('HEALTH_PORT', '8081')),
-        sentry_dsn=os.getenv('SENTRY_DSN'),
-        slack_webhook_url=os.getenv('SLACK_WEBHOOK_URL')
+        account_id=os.getenv("FIVETWENTY_OANDA_ACCOUNT"),
+        log_level=os.getenv("LOG_LEVEL", "INFO"),
+        max_position_size=int(os.getenv("MAX_POSITION_SIZE", "1000000")),
+        daily_loss_limit=Decimal(os.getenv("DAILY_LOSS_LIMIT", "5000.0")),
+        cycle_time_ms=int(os.getenv("CYCLE_TIME_MS", "100")),
+        redis_url=os.getenv("REDIS_URL", "redis://localhost:6379"),
+        database_url=os.getenv("DATABASE_URL", "postgresql://trading:password@localhost/trading_prod"),
+        metrics_port=int(os.getenv("METRICS_PORT", "8080")),
+        health_check_port=int(os.getenv("HEALTH_PORT", "8081")),
+        sentry_dsn=os.getenv("SENTRY_DSN"),
+        slack_webhook_url=os.getenv("SLACK_WEBHOOK_URL"),
     )
 ```
 

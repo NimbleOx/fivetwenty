@@ -662,27 +662,27 @@ class TechnicalSignalTradingSystem:
         print(f"Multi-TF Signal: {mtf_signal['action']} (Strength: {mtf_signal['strength']:.2f})")
 
         # Check signal alignment and strength
-        primary_strong = signal_data['strength'] >= min_signal_strength
-        mtf_strong = mtf_signal['strength'] >= 0.3
-        signals_aligned = signal_data['signal'] == mtf_signal['action']
+        primary_strong = signal_data["strength"] >= min_signal_strength
+        mtf_strong = mtf_signal["strength"] >= 0.3
+        signals_aligned = signal_data["signal"] == mtf_signal["action"]
 
         if not (primary_strong and mtf_strong and signals_aligned):
             print("Insufficient signal strength or alignment - no trade")
             return None
 
         # Calculate position size based on signal strength
-        signal_multiplier = (signal_data['strength'] + mtf_signal['strength']) / 2
+        signal_multiplier = (signal_data["strength"] + mtf_signal["strength"]) / 2
         adjusted_units = int(base_units * signal_multiplier)
 
         # Apply signal direction
-        if signal_data['signal'] == 'SELL':
+        if signal_data["signal"] == "SELL":
             adjusted_units = -adjusted_units
 
         try:
             response = await self.fivetwenty_client.orders.post_market_order(
                 account_id=account_id,
                 instrument=instrument,
-                units=adjusted_units
+                units=adjusted_units,
             )
 
             if response.order_fill_transaction:
@@ -690,11 +690,11 @@ class TechnicalSignalTradingSystem:
                 print(f"Technical signal trade executed: {instrument} {adjusted_units} @ {fill.price}")
 
                 return {
-                    'trade_id': fill.trade_opened.trade_id if fill.trade_opened else None,
-                    'signal': signal_data['signal'],
-                    'strength': signal_data['strength'],
-                    'units': adjusted_units,
-                    'reasons': signal_data['reasons']
+                    "trade_id": fill.trade_opened.trade_id if fill.trade_opened else None,
+                    "signal": signal_data["signal"],
+                    "strength": signal_data["strength"],
+                    "units": adjusted_units,
+                    "reasons": signal_data["reasons"],
                 }
 
         except Exception as e:
@@ -768,13 +768,13 @@ class SignalPerformanceTracker:
         """Record a signal and its outcome."""
 
         record = {
-            'timestamp': datetime.now(timezone.utc),
-            'instrument': instrument,
-            'signal': signal_data['signal'],
-            'strength': signal_data['strength'],
-            'reasons': signal_data['reasons'],
-            'trade_executed': trade_result is not None,
-            'trade_result': trade_result
+            "timestamp": datetime.now(timezone.utc),
+            "instrument": instrument,
+            "signal": signal_data["signal"],
+            "strength": signal_data["strength"],
+            "reasons": signal_data["reasons"],
+            "trade_executed": trade_result is not None,
+            "trade_result": trade_result,
         }
 
         self.signal_history.append(record)
@@ -785,23 +785,23 @@ class SignalPerformanceTracker:
         cutoff_date = datetime.now(timezone.utc) - timedelta(days=days_back)
         recent_signals = [
             s for s in self.signal_history
-            if s['timestamp'] > cutoff_date and s['trade_executed']
+            if s["timestamp"] > cutoff_date and s["trade_executed"]
         ]
 
         if not recent_signals:
-            return {'accuracy': 0, 'total_signals': 0}
+            return {"accuracy": 0, "total_signals": 0}
 
         # This would need to be implemented based on your trade tracking
         # For demonstration, assume we track PnL in trade_result
         profitable_trades = sum(
             1 for s in recent_signals
-            if s['trade_result'] and s['trade_result'].get('pnl', 0) > 0
+            if s["trade_result"] and s["trade_result"].get("pnl", 0) > 0
         )
 
         return {
-            'accuracy': profitable_trades / len(recent_signals) * 100,
-            'total_signals': len(recent_signals),
-            'profitable_trades': profitable_trades
+            "accuracy": profitable_trades / len(recent_signals) * 100,
+            "total_signals": len(recent_signals),
+            "profitable_trades": profitable_trades,
         }
 ```
 

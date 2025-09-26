@@ -329,10 +329,10 @@ def validate_data_quality(price_data: Dict[str, pd.DataFrame]) -> Dict[str, Dict
 
     for instrument, df in price_data.items():
         quality_report[instrument] = {
-            'total_periods': len(df),
-            'missing_periods': df.isnull().sum().sum(),
-            'date_range': (df.index.min(), df.index.max()),
-            'completeness': 1 - (df.isnull().sum().sum() / (len(df) * len(df.columns)))
+            "total_periods": len(df),
+            "missing_periods": df.isnull().sum().sum(),
+            "date_range": (df.index.min(), df.index.max()),
+            "completeness": 1 - (df.isnull().sum().sum() / (len(df) * len(df.columns))),
         }
 
     return quality_report

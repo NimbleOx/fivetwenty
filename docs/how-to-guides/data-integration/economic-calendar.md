@@ -251,7 +251,7 @@ class RealTimeEconomicMonitor:
         """Check for events in the next hour."""
         for instrument in self.active_positions:
             events = await self.trading_system.get_upcoming_events(
-                instrument, hours_ahead=1
+                instrument, hours_ahead=1,
             )
 
             high_impact_events = [
@@ -307,7 +307,7 @@ EVENT_IMPACT_RULES = {
     "manufacturing_pmi": "MEDIUM",
 
     # Default for unknown events
-    "default": "LOW"
+    "default": "LOW",
 }
 
 def classify_event_impact(event_title: str) -> str:
@@ -327,7 +327,7 @@ def classify_event_impact(event_title: str) -> str:
 def calculate_event_adjusted_position_size(
     base_size: int,
     event_impact: str,
-    time_to_event_minutes: int
+    time_to_event_minutes: int,
 ) -> int:
     """Adjust position size based on upcoming events."""
 

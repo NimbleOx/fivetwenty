@@ -20,7 +20,7 @@ async def main():
     transactions = await client.transactions.get_transactions(
         account_id="123-456-789",
         page_size=50,
-        transaction_type=["ORDER_FILL", "MARKET_ORDER"]
+        transaction_type=["ORDER_FILL", "MARKET_ORDER"],
     )
 
 asyncio.run(main())

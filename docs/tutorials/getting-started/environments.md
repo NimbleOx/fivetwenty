@@ -91,7 +91,7 @@ async def practice_trading():
 
     async with AsyncClient(
         token=os.environ["OANDA_PRACTICE_TOKEN"],
-        environment=Environment.PRACTICE  # Always practice for testing!
+        environment=Environment.PRACTICE,  # Always practice for testing!
     ) as client:
         # Get practice account
         accounts = await client.accounts.get_accounts()
@@ -104,7 +104,7 @@ async def practice_trading():
         order = await client.orders.post_market_order(
             account_id=account.id,
             instrument="EUR_USD",
-            units=10000  # Large position - it's just practice!
+            units=10000,  # Large position - it's just practice!
         )
 
         print("Practice trade executed!")
@@ -154,7 +154,7 @@ async def live_trading_with_safeguards():
 
     async with AsyncClient(
         token=os.environ["FIVETWENTY_LIVE_TOKEN"],
-        environment=Environment.LIVE  # ⚠️ REAL MONEY
+        environment=Environment.LIVE,  # ⚠️ REAL MONEY
     ) as client:
         try:
             # Get account info
@@ -176,8 +176,8 @@ async def live_trading_with_safeguards():
                 units=int(max_units),
                 stop_loss_on_fill={
                     "price": "1.0850",  # Always use stop loss!
-                    "time_in_force": "GTC"
-                }
+                    "time_in_force": "GTC",
+                },
             )
 
             print(f"Live trade executed: {order.order_fill_transaction.id}")
@@ -232,13 +232,13 @@ def create_client():
         print("⚠️  WARNING: Using LIVE environment")
         return AsyncClient(
             token=os.environ["FIVETWENTY_LIVE_TOKEN"],
-            environment=Environment.LIVE
+            environment=Environment.LIVE,
         )
     else:
         print("✅ Using PRACTICE environment")
         return AsyncClient(
             token=os.environ["OANDA_PRACTICE_TOKEN"],
-            environment=Environment.PRACTICE
+            environment=Environment.PRACTICE,
         )
 
 # Automatically selects based on FIVETWENTY_OANDA_ENVIRONMENT
@@ -270,13 +270,13 @@ async def test_practice_only(environment):
     """Tests that should only run in practice."""
     client = AsyncClient(
         token=test_token,
-        environment=environment
+        environment=environment,
     )
     # Test risky operations
 
 @pytest.mark.skipif(
     os.environ.get("FIVETWENTY_OANDA_ENVIRONMENT") != "live",
-    reason="Live environment tests disabled"
+    reason="Live environment tests disabled",
 )
 async def test_live_systems():
     """Tests for live trading systems."""

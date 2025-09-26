@@ -197,17 +197,17 @@ class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
         """Advanced market condition analysis."""
 
         conditions = {
-            'trend': 'neutral',
-            'volatility': 'normal',
-            'spread': 'normal',
-            'tradeable': True
+            "trend": "neutral",
+            "volatility": "normal",
+            "spread": "normal",
+            "tradeable": True,
         }
 
         try:
             # Check spread conditions
             pricing = await client.pricing.get_pricing(
                 self.account_id,
-                [self.instrument]
+                [self.instrument],
             )
 
             if pricing.prices:
@@ -217,8 +217,8 @@ class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
                 spread = ask - bid
 
                 if spread > 0.0005:  # 5 pips
-                    conditions['spread'] = 'wide'
-                    conditions['tradeable'] = False
+                    conditions["spread"] = "wide"
+                    conditions["tradeable"] = False
 
                 # Add more sophisticated analysis here:
                 # - Volatility measurement
@@ -227,7 +227,7 @@ class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
                 # - Multi-timeframe analysis
 
         except Exception:
-            conditions['tradeable'] = False
+            conditions["tradeable"] = False
 
         return conditions
 
@@ -319,13 +319,13 @@ class StrategyMonitor:
         stats = self.strategy.strategy_stats
 
         metrics = {
-            'runtime_hours': runtime,
-            'total_trades': stats['total_trades'],
-            'winning_trades': stats['winning_trades'],
-            'total_pnl': stats['total_pnl'],
-            'win_rate': (stats['winning_trades'] / max(stats['total_trades'], 1)) * 100,
-            'trades_per_hour': stats['total_trades'] / max(runtime, 1),
-            'pnl_per_hour': stats['total_pnl'] / max(runtime, 1)
+            "runtime_hours": runtime,
+            "total_trades": stats["total_trades"],
+            "winning_trades": stats["winning_trades"],
+            "total_pnl": stats["total_pnl"],
+            "win_rate": (stats["winning_trades"] / max(stats["total_trades"], 1)) * 100,
+            "trades_per_hour": stats["total_trades"] / max(runtime, 1),
+            "pnl_per_hour": stats["total_pnl"] / max(runtime, 1),
         }
 
         return metrics
@@ -345,9 +345,9 @@ class StrategyMonitor:
         print(f"💵 P&L/Hour: ${metrics['pnl_per_hour']:+.2f}")
 
         # Performance indicators
-        if metrics['total_pnl'] > 0:
+        if metrics["total_pnl"] > 0:
             print(f"📈 Status: PROFITABLE")
-        elif metrics['total_pnl'] < -100:
+        elif metrics["total_pnl"] < -100:
             print(f"⚠️  Status: REVIEW NEEDED")
         else:
             print(f"➡️ Status: MONITORING")

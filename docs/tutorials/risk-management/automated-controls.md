@@ -853,18 +853,18 @@ Test your understanding of automated risk management:
 ```python
 # WRONG: Automating everything without human oversight
 auto_responses = {
-    'close_all_positions': True,     # Too aggressive
-    'halt_trading': True,
-    'reduce_sizes': True,
-    'send_alerts': False             # No human notification
+    "close_all_positions": True,     # Too aggressive
+    "halt_trading": True,
+    "reduce_sizes": True,
+    "send_alerts": False,             # No human notification
 }
 
 # RIGHT: Balanced automation with human oversight
 auto_responses = {
-    'close_all_positions': False,    # Manual decision
-    'halt_trading': True,            # Automated safety
-    'reduce_sizes': True,            # Automated risk reduction
-    'send_alerts': True              # Always notify humans
+    "close_all_positions": False,    # Manual decision
+    "halt_trading": True,            # Automated safety
+    "reduce_sizes": True,            # Automated risk reduction
+    "send_alerts": True,              # Always notify humans
 }
 ```
 
@@ -872,12 +872,12 @@ auto_responses = {
 ```python
 # WRONG: Using untested thresholds
 thresholds = {
-    'daily_loss': 10.0  # Never tested what happens at this level
+    "daily_loss": 10.0,  # Never tested what happens at this level
 }
 
 # RIGHT: Well-tested thresholds
 thresholds = {
-    'daily_loss': 5.0   # Tested in simulation, known to be appropriate
+    "daily_loss": 5.0,   # Tested in simulation, known to be appropriate
 }
 ```
 
@@ -914,18 +914,18 @@ class MLRiskPredictor:
         
         # Simplified example - in practice use trained ML model
         risk_factors = {
-            'volatility_spike': self._assess_volatility_risk(market_data),
-            'correlation_breakdown': self._assess_correlation_risk(portfolio_state),
-            'liquidity_crisis': self._assess_liquidity_risk(market_data)
+            "volatility_spike": self._assess_volatility_risk(market_data),
+            "correlation_breakdown": self._assess_correlation_risk(portfolio_state),
+            "liquidity_crisis": self._assess_liquidity_risk(market_data),
         }
         
         # Calculate overall risk score
         risk_score = sum(risk_factors.values()) / len(risk_factors)
         
         return {
-            'overall_risk_score': risk_score,
-            'risk_factors': risk_factors,
-            'recommended_action': self._recommend_action(risk_score)
+            "overall_risk_score": risk_score,
+            "risk_factors": risk_factors,
+            "recommended_action": self._recommend_action(risk_score),
         }
     
     def _assess_volatility_risk(self, market_data: dict) -> float:
@@ -961,8 +961,8 @@ class AdaptiveThresholds:
     
     def __init__(self):
         self.base_thresholds = {
-            'daily_loss': 5.0,
-            'portfolio_risk': 15.0
+            "daily_loss": 5.0,
+            "portfolio_risk": 15.0,
         }
         self.current_thresholds = self.base_thresholds.copy()
     

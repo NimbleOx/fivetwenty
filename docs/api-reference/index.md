@@ -54,7 +54,7 @@ async def post_order(
     account_id: str,
     order: OrderRequest,
     *,
-    timeout: Optional[float] = None
+    timeout: Optional[float] = None,
 ) -> OrderResponse:
     pass
 ```

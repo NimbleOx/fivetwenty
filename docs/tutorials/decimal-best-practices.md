@@ -31,13 +31,13 @@ print(balance)  # 1000.9999999999999 (should be 1001.00)
 from decimal import Decimal
 
 # ✅ Decimal arithmetic is exact
-decimal_sum = Decimal('0.1') + Decimal('0.2')
+decimal_sum = Decimal("0.1") + Decimal("0.2")
 print(decimal_sum)  # 0.3 (exact!)
 
 # Financial calculations maintain precision
-balance = Decimal('1000.00')
+balance = Decimal("1000.00")
 for i in range(100):
-    balance += Decimal('0.01')
+    balance += Decimal("0.01")
 print(balance)  # 1001.00 (exact!)
 ```
 
@@ -110,7 +110,7 @@ async def calculate_position_size(
     account_balance: str,
     risk_percentage: Decimal,
     stop_loss_pips: int,
-    pip_value: Decimal
+    pip_value: Decimal,
 ) -> Decimal:
     """Calculate position size with exact precision."""
     balance = Decimal(account_balance)
@@ -118,16 +118,16 @@ async def calculate_position_size(
     risk_per_unit = stop_loss_pips * pip_value
 
     position_size = risk_amount / risk_per_unit
-    return position_size.quantize(Decimal('1'))  # Round to whole units
+    return position_size.quantize(Decimal("1"))  # Round to whole units
 
 # Usage example
 async def position_sizing_example():
     account = await client.accounts.get_account(account_id)
     position_size = await calculate_position_size(
         account_balance=account.balance,
-        risk_percentage=Decimal('2'),     # 2% risk
+        risk_percentage=Decimal("2"),     # 2% risk
         stop_loss_pips=20,
-        pip_value=Decimal('0.10')         # For EUR/USD standard lot
+        pip_value=Decimal("0.10"),         # For EUR/USD standard lot
     )
 
     order = MarketOrderRequest(
@@ -160,13 +160,13 @@ async def calculate_trade_performance(trade_id: str, account_id: str) -> dict:
     units_closed = initial_units - current_units
 
     # Per-unit performance (avoid division by zero)
-    pl_per_unit = total_pl / initial_units if initial_units != 0 else Decimal('0')
+    pl_per_unit = total_pl / initial_units if initial_units != 0 else Decimal("0")
 
     return {
-        'total_pl': total_pl,
-        'pl_per_unit': pl_per_unit,
-        'units_closed': units_closed,
-        'close_percentage': (units_closed / initial_units * 100) if initial_units != 0 else Decimal('0')
+        "total_pl": total_pl,
+        "pl_per_unit": pl_per_unit,
+        "units_closed": units_closed,
+        "close_percentage": (units_closed / initial_units * 100) if initial_units != 0 else Decimal("0"),
     }
 ```
 
@@ -179,7 +179,7 @@ def calculate_total_trading_costs(
     base_units: Decimal,
     spread_pips: int,
     pip_value: Decimal,
-    commission_per_unit: Decimal = Decimal('0')
+    commission_per_unit: Decimal = Decimal("0"),
 ) -> Decimal:
     """Calculate total trading costs with precision."""
 
@@ -192,13 +192,13 @@ def calculate_total_trading_costs(
     # Total cost
     total_cost = spread_cost + commission_cost
 
-    return total_cost.quantize(Decimal('0.01'))  # Round to cents
+    return total_cost.quantize(Decimal("0.01"))  # Round to cents
 
 # Usage
-units = Decimal('10000')  # 1 standard lot
+units = Decimal("10000")  # 1 standard lot
 spread = 2  # 2 pip spread
-pip_val = Decimal('1.00')  # EUR/USD pip value for standard lot
-commission = Decimal('0.05')  # $0.05 per 1000 units
+pip_val = Decimal("1.00")  # EUR/USD pip value for standard lot
+commission = Decimal("0.05")  # $0.05 per 1000 units
 
 total_cost = calculate_total_trading_costs(units, spread, pip_val, commission)
 print(f"Total trading cost: ${total_cost}")  # Exact cost calculation
@@ -212,7 +212,7 @@ from decimal import Decimal
 async def rebalance_portfolio(
     target_weights: dict[str, Decimal],
     total_capital: Decimal,
-    account_id: str
+    account_id: str,
 ) -> list[dict]:
     """Rebalance portfolio with exact precision."""
 
@@ -223,14 +223,14 @@ async def rebalance_portfolio(
     for position in positions.positions:
         if position.instrument in target_weights:
             # Calculate current position value
-            long_units = position.long.units if position.long.units != "0" else Decimal('0')
-            short_units = position.short.units if position.short.units != "0" else Decimal('0')
+            long_units = position.long.units if position.long.units != "0" else Decimal("0")
+            short_units = position.short.units if position.short.units != "0" else Decimal("0")
             net_units = long_units + short_units
 
             # Get current price
             pricing = await client.pricing.get_pricing(
                 account_id=account_id,
-                instruments=[position.instrument]
+                instruments=[position.instrument],
             )
             current_price = Decimal(pricing.prices[0].asks[0].price)
 
@@ -240,24 +240,24 @@ async def rebalance_portfolio(
     trades = []
     for instrument, target_weight in target_weights.items():
         target_value = total_capital * target_weight
-        current_value = current_values.get(instrument, Decimal('0'))
+        current_value = current_values.get(instrument, Decimal("0"))
         value_difference = target_value - current_value
 
-        if abs(value_difference) > Decimal('10'):  # Minimum trade threshold
+        if abs(value_difference) > Decimal("10"):  # Minimum trade threshold
             # Get current price for unit calculation
             pricing = await client.pricing.get_pricing(
                 account_id=account_id,
-                instruments=[instrument]
+                instruments=[instrument],
             )
             current_price = Decimal(pricing.prices[0].asks[0].price)
 
             # Calculate exact units needed
-            units_to_trade = (value_difference / current_price).quantize(Decimal('1'))
+            units_to_trade = (value_difference / current_price).quantize(Decimal("1"))
 
             trades.append({
-                'instrument': instrument,
-                'units': units_to_trade,
-                'value_difference': value_difference
+                "instrument": instrument,
+                "units": units_to_trade,
+                "value_difference": value_difference,
             })
 
     return trades
@@ -273,12 +273,12 @@ def calculate_stop_levels(
     direction: str,    # "long" or "short"
     stop_pips: int,
     target_pips: int,
-    pip_location: int = 4  # Decimal places for price
+    pip_location: int = 4,  # Decimal places for price
 ) -> tuple[str, str]:
     """Calculate exact stop loss and take profit levels."""
 
     entry = Decimal(entry_price)
-    pip_value = Decimal('10') ** (-pip_location)
+    pip_value = Decimal("10") ** (-pip_location)
 
     if direction.lower() == "long":
         stop_loss = entry - (stop_pips * pip_value)
@@ -291,7 +291,7 @@ def calculate_stop_levels(
     price_format = f"{{:.{pip_location}f}}"
     return (
         price_format.format(stop_loss),
-        price_format.format(take_profit)
+        price_format.format(take_profit),
     )
 
 # Usage with a trade
@@ -304,7 +304,7 @@ async def demo_stop_loss_calculation():
         direction=direction,
         stop_pips=20,
         target_pips=40,
-        pip_location=5  # EUR/USD uses 5 decimal places
+        pip_location=5,  # EUR/USD uses 5 decimal places
     )
 
     # Create stop loss order
@@ -314,7 +314,7 @@ async def demo_stop_loss_calculation():
     sl_request = StopLossOrderRequest(
         tradeID=trade_id,
         price=str(stop_price),
-        timeInForce="GTC"
+        timeInForce="GTC",
     )
     stop_order = await client.orders.post_order(account_id, sl_request)
     return stop_order
@@ -337,11 +337,11 @@ getcontext().prec = 28  # High precision for financial calculations
 def safe_divide(numerator: Decimal, denominator: Decimal) -> Decimal:
     """Division with zero check and precision control."""
     if denominator == 0:
-        return Decimal('0')
+        return Decimal("0")
 
     # Perform division with specific precision
     result = numerator / denominator
-    return result.quantize(Decimal('0.00000001'))  # 8 decimal places
+    return result.quantize(Decimal("0.00000001"))  # 8 decimal places
 ```
 
 ### 2. Currency Conversion Precision
@@ -353,7 +353,7 @@ async def convert_currency_precise(
     amount: Decimal,
     from_currency: str,
     to_currency: str,
-    account_id: str
+    account_id: str,
 ) -> Decimal:
     """Convert currency with exchange rate precision."""
 
@@ -365,7 +365,7 @@ async def convert_currency_precise(
     try:
         pricing = await client.pricing.get_pricing(
             account_id=account_id,
-            instruments=[pair]
+            instruments=[pair],
         )
         rate = Decimal(pricing.prices[0].asks[0].price)
     except:
@@ -373,12 +373,12 @@ async def convert_currency_precise(
         reverse_pair = f"{to_currency}_{from_currency}"
         pricing = await client.pricing.get_pricing(
             account_id=account_id,
-            instruments=[reverse_pair]
+            instruments=[reverse_pair],
         )
-        rate = Decimal('1') / Decimal(pricing.prices[0].bids[0].price)
+        rate = Decimal("1") / Decimal(pricing.prices[0].bids[0].price)
 
     converted = amount * rate
-    return converted.quantize(Decimal('0.01'))  # Round to cents
+    return converted.quantize(Decimal("0.01"))  # Round to cents
 ```
 
 ### 3. Performance Metrics with Exact Math
@@ -388,15 +388,15 @@ from decimal import Decimal
 
 def calculate_sharpe_ratio(
     returns: list[Decimal],
-    risk_free_rate: Decimal = Decimal('0.02')
+    risk_free_rate: Decimal = Decimal("0.02"),
 ) -> Decimal:
     """Calculate Sharpe ratio with Decimal precision."""
 
     if not returns:
-        return Decimal('0')
+        return Decimal("0")
 
     # Convert annual risk-free rate to period rate
-    periods_per_year = Decimal('252')  # Trading days
+    periods_per_year = Decimal("252")  # Trading days
     period_risk_free = risk_free_rate / periods_per_year
 
     # Calculate excess returns
@@ -410,11 +410,11 @@ def calculate_sharpe_ratio(
     std_dev = variance.sqrt()  # Decimal has sqrt method
 
     if std_dev == 0:
-        return Decimal('0')
+        return Decimal("0")
 
     # Annualized Sharpe ratio
     sharpe = (mean_excess / std_dev) * periods_per_year.sqrt()
-    return sharpe.quantize(Decimal('0.0001'))
+    return sharpe.quantize(Decimal("0.0001"))
 ```
 
 ## Common Pitfalls and Solutions
@@ -424,7 +424,7 @@ def calculate_sharpe_ratio(
 from decimal import Decimal
 
 # This can introduce precision errors
-price = Decimal('1.1000')
+price = Decimal("1.1000")
 adjustment = 0.0001  # float
 result = price + adjustment  # Decimal + float = float!
 ```
@@ -433,8 +433,8 @@ result = price + adjustment  # Decimal + float = float!
 ```python
 from decimal import Decimal
 
-price = Decimal('1.1000')
-adjustment = Decimal('0.0001')
+price = Decimal("1.1000")
+adjustment = Decimal("0.0001")
 result = price + adjustment  # Both Decimal = exact result
 ```
 
@@ -450,8 +450,8 @@ result = Decimal('10') / Decimal('3')  # 3.333333333...
 ```python
 from decimal import Decimal
 
-result = Decimal('10') / Decimal('3')
-display_result = result.quantize(Decimal('0.01'))  # 3.33
+result = Decimal("10") / Decimal("3")
+display_result = result.quantize(Decimal("0.01"))  # 3.33
 ```
 
 ### ❌ Don't: Convert unnecessarily
@@ -469,7 +469,7 @@ from decimal import Decimal
 from fivetwenty.models import MarketOrderRequest
 
 order = MarketOrderRequest(units=1000, instrument="EUR_USD")
-calculation = order.units * Decimal('1.5')  # Direct Decimal arithmetic
+calculation = order.units * Decimal("1.5")  # Direct Decimal arithmetic
 ```
 
 ## Summary

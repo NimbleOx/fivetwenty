@@ -127,13 +127,13 @@ async def direct_config_example():
             token=SecretStr("practice-token-1"),
             account_id=SecretStr("practice-account-1"),
             environment=Environment.PRACTICE,
-            alias="strategy_a"
+            alias="strategy_a",
         ),
         AccountConfig(
             token=SecretStr("live-token-1"),
             account_id=SecretStr("live-account-1"),
             environment=Environment.LIVE,
-            alias="live_trading"
+            alias="live_trading",
         ),
     ]
 
@@ -173,7 +173,7 @@ async def mixed_approach():
         token=SecretStr("test-token"),
         account_id=SecretStr("test-account"),
         environment=Environment.PRACTICE,
-        alias="testing"
+        alias="testing",
     )
 
     async with AsyncClient(config=primary_config) as primary:

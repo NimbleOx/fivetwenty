@@ -908,24 +908,24 @@ class CloudSecretsManager:
         self.client = None
 
         if self.cloud_provider == "aws":
-            self.client = boto3.client('secretsmanager')
+            self.client = boto3.client("secretsmanager")
         elif self.cloud_provider == "gcp":
             self.client = secretmanager.SecretManagerServiceClient()
         elif self.cloud_provider == "azure":
             credential = DefaultAzureCredential()
-            vault_url = os.getenv('AZURE_KEY_VAULT_URL')
+            vault_url = os.getenv("AZURE_KEY_VAULT_URL")
             self.client = SecretClient(vault_url=vault_url, credential=credential)
 
-    async def get_secret(self, secret_name: str) -> Optional[str]:
+    async def get_secret(self, secret_name: str) -> str | None:
         """Retrieve secret from cloud provider."""
 
         try:
             if self.cloud_provider == "aws":
                 response = self.client.get_secret_value(SecretId=secret_name)
-                return response['SecretString']
+                return response["SecretString"]
 
             elif self.cloud_provider == "gcp":
-                project_id = os.getenv('GOOGLE_CLOUD_PROJECT')
+                project_id = os.getenv("GOOGLE_CLOUD_PROJECT")
                 name = f"projects/{project_id}/secrets/{secret_name}/versions/latest"
                 response = self.client.access_secret_version(request={"name": name})
                 return response.payload.data.decode("UTF-8")
@@ -942,17 +942,17 @@ class CloudTradingApplication:
     """Cloud-native FiveTwenty trading application."""
 
     def __init__(self):
-        self.cloud_provider = os.getenv('CLOUD_PROVIDER', 'aws').lower()
+        self.cloud_provider = os.getenv("CLOUD_PROVIDER", "aws").lower()
         self.secrets_manager = CloudSecretsManager(self.cloud_provider)
-        self.client: Optional[AsyncClient] = None
+        self.client: AsyncClient | None = None
         self.running = False
 
     async def initialize(self):
         """Initialize cloud application."""
 
         # Get secrets from cloud provider
-        live_token = await self.secrets_manager.get_secret('fivetwenty-live-token')
-        account_id = await self.secrets_manager.get_secret('fivetwenty-account-id')
+        live_token = await self.secrets_manager.get_secret("fivetwenty-live-token")
+        account_id = await self.secrets_manager.get_secret("fivetwenty-account-id")
 
         if not live_token or not account_id:
             raise ValueError("Failed to retrieve required secrets")
@@ -961,7 +961,7 @@ class CloudTradingApplication:
         self.client = AsyncClient(
             token=live_token,
             environment=Environment.LIVE,
-            timeout=30.0
+            timeout=30.0,
         )
 
         await self.client.__aenter__()
@@ -975,14 +975,14 @@ class CloudTradingApplication:
         """Start health check server for cloud load balancers."""
 
         app = aiohttp.web.Application()
-        app.router.add_get('/health', self.health_check)
-        app.router.add_get('/ready', self.readiness_check)
+        app.router.add_get("/health", self.health_check)
+        app.router.add_get("/ready", self.readiness_check)
 
         runner = aiohttp.web.AppRunner(app)
         await runner.setup()
 
-        port = int(os.getenv('HEALTH_PORT', '8081'))
-        site = aiohttp.web.TCPSite(runner, '0.0.0.0', port)
+        port = int(os.getenv("HEALTH_PORT", "8081"))
+        site = aiohttp.web.TCPSite(runner, "0.0.0.0", port)
         await site.start()
 
         logging.info(f"Health server started on port {port}")
@@ -995,7 +995,7 @@ class CloudTradingApplication:
         else:
             return aiohttp.web.json_response(
                 {"status": "unhealthy"},
-                status=503
+                status=503,
             )
 
     async def readiness_check(self, request):
@@ -1006,7 +1006,7 @@ class CloudTradingApplication:
         else:
             return aiohttp.web.json_response(
                 {"status": "not ready"},
-                status=503
+                status=503,
             )
 
     async def run(self):
@@ -1034,7 +1034,7 @@ async def main():
     """Cloud application entry point."""
 
     # Configure cloud logging
-    if os.getenv('CLOUD_PROVIDER') == 'gcp':
+    if os.getenv("CLOUD_PROVIDER") == "gcp":
         import google.cloud.logging
         client = google.cloud.logging.Client()
         client.setup_logging()

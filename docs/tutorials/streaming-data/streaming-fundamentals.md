@@ -65,7 +65,7 @@ class StreamProducer:
                 yield data
 
                 # Control flow rate
-                await asyncio.sleep(self.config.get('poll_interval', 0.1))
+                await asyncio.sleep(self.config.get("poll_interval", 0.1))
 
             except Exception as e:
                 await self._handle_error(e)
@@ -312,9 +312,9 @@ class StreamMultiplexer:
         """Consume individual stream."""
         async for data in stream:
             enriched_data = {
-                'stream_name': name,
-                'timestamp': datetime.now(),
-                'data': data
+                "stream_name": name,
+                "timestamp": datetime.now(),
+                "data": data,
             }
             await self.output_queue.put(enriched_data)
 

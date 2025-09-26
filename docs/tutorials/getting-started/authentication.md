@@ -163,7 +163,7 @@ async def main():
         token=os.environ["PRACTICE_TOKEN"],
         account_id=os.environ["PRACTICE_ACCOUNT"],
         environment=Environment.PRACTICE,
-        alias="practice_testing"
+        alias="practice_testing",
     )
 
     # Live account for production
@@ -171,7 +171,7 @@ async def main():
         token=os.environ["LIVE_TOKEN"],
         account_id=os.environ["LIVE_ACCOUNT"],
         environment=Environment.LIVE,
-        alias="live_trading"
+        alias="live_trading",
     )
 
     # Test strategy on practice first
@@ -230,10 +230,10 @@ The library automatically protects sensitive information:
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token='your-api-token-here',
+    token="your-api-token-here",
     account_id="secret-account-123",
     environment=Environment.PRACTICE,
-    alias="my_account"
+    alias="my_account",
 )
 
 # Secrets are automatically masked in logs
@@ -259,7 +259,7 @@ try:
         token="   ",  # Empty token - rejected
         account_id="123-456-789",
         environment=Environment.PRACTICE,
-        alias="my_account"
+        alias="my_account",
     )
 except ValidationError as e:
     print("Invalid configuration:", e)
@@ -269,7 +269,7 @@ try:
         token="valid-token",
         account_id="valid-account",
         environment=Environment.PRACTICE,
-        alias="123invalid"  # Invalid alias - starts with number
+        alias="123invalid",  # Invalid alias - starts with number
     )
 except ValidationError as e:
     print("Invalid alias:", e)
@@ -292,7 +292,7 @@ async def test_authentication():
     try:
         async with AsyncClient(
             token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-            environment=Environment.PRACTICE
+            environment=Environment.PRACTICE,
         ) as client:
             # Test authentication by listing accounts
             accounts = await client.accounts.get_accounts()
@@ -325,7 +325,7 @@ config = AccountConfig(
     token=os.environ["FIVETWENTY_OANDA_TOKEN"],
     account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE,
-    alias="test_account"
+    alias="test_account",
 )
 
 # Validate configuration
@@ -356,7 +356,7 @@ async def main():
     async with AsyncClient(
         token="your-token",
         environment=Environment.PRACTICE,
-        proxies="http://proxy.example.com:8080"
+        proxies="http://proxy.example.com:8080",
     ) as client:
         accounts = await client.accounts.get_accounts()
 
@@ -365,7 +365,7 @@ async def main():
     async with AsyncClient(
         token="your-token",
         environment=Environment.PRACTICE,
-        proxies=proxy_url
+        proxies=proxy_url,
     ) as client:
         accounts = await client.accounts.get_accounts()
 
@@ -423,21 +423,21 @@ async def main():
             connect=5.0,
             read=60.0,
             write=10.0,
-            pool=60.0
+            pool=60.0,
         ),
         limits=httpx.Limits(
             max_connections=100,
-            max_keepalive_connections=20
+            max_keepalive_connections=20,
         ),
         http2=False,
-        trust_env=True
+        trust_env=True,
     )
 
     # Use with FiveTwenty client
     async with AsyncClient(
         token="your-token",
         environment=Environment.PRACTICE,
-        transport=transport
+        transport=transport,
     ) as client:
         accounts = await client.accounts.get_accounts()
 
@@ -636,7 +636,7 @@ config = AccountConfig(
     token="token",
     account_id="account-id",
     environment=Environment.PRACTICE,
-    alias="my_account"
+    alias="my_account",
 )
 client = AsyncClient(config=config)
 ```

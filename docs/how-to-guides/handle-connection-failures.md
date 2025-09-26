@@ -269,7 +269,7 @@ def validate_environment_setup(token: str, expected_env: Environment):
 
     # Practice tokens typically start with specific patterns
     if expected_env == Environment.PRACTICE:
-        if not any(indicator in token.lower() for indicator in ['practice', 'demo', 'sandbox']):
+        if not any(indicator in token.lower() for indicator in ["practice", "demo", "sandbox"]):
             print("⚠️ Warning: Token may not be for practice environment")
             print("   • Double-check you're using practice token")
             print("   • Live tokens in practice environment will fail")

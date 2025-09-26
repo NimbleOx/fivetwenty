@@ -118,18 +118,18 @@ def load_live_config(config_path: str = "live_config.json"):
 
     # Ensure file has restricted permissions
     file_stat = config_file.stat()
-    if oct(file_stat.st_mode)[-3:] != '600':
+    if oct(file_stat.st_mode)[-3:] != "600":
         print("⚠️ WARNING: Config file should have 600 permissions")
 
-    with open(config_file, 'r') as f:
+    with open(config_file, "r") as f:
         config = json.load(f)
 
-    required_fields = ['live_token', 'live_account_id']
+    required_fields = ["live_token", "live_account_id"]
     for field in required_fields:
         if field not in config:
             raise ValueError(f"Required field '{field}' missing from config")
 
-    return config['live_token'], config['live_account_id']
+    return config["live_token"], config["live_account_id"]
 
 # Example config file (live_config.json):
 # {
@@ -443,7 +443,7 @@ async def emergency_stop_trading(account_id: str):
 
     async with AsyncClient(
         token=LIVE_TOKEN,
-        environment=Environment.LIVE
+        environment=Environment.LIVE,
     ) as client:
         try:
             # Cancel all pending orders
