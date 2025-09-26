@@ -102,7 +102,6 @@ The simplest way to configure the client:
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -125,7 +124,6 @@ For more structured configuration:
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
@@ -162,7 +160,6 @@ export FIVETWENTY_OANDA_ACCOUNT_ALIAS="my_account"
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -188,7 +185,6 @@ Best for: Basic scripts, getting started, testing
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -229,7 +225,6 @@ Best for: Production applications, multiple accounts, reusable configurations
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
@@ -282,7 +277,6 @@ The library automatically loads these environment variables:
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -305,9 +299,7 @@ For multiple accounts or microservices:
 
 ```python
 import asyncio
-import os
-from typing import Any
-from fivetwenty import AccountConfigLoader, AsyncClient, Environment
+from fivetwenty import AccountConfigLoader, AsyncClient
 
 
 async def main() -> None:
@@ -356,7 +348,6 @@ When multiple configuration methods are used, the priority is:
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AsyncClient, AccountConfig, Environment
 
 
@@ -394,7 +385,6 @@ The library automatically protects sensitive information:
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
@@ -429,7 +419,6 @@ The library validates configuration values:
 
 ```python
 import os
-from typing import Any
 from pydantic import ValidationError
 from fivetwenty import AccountConfig, Environment
 
@@ -462,7 +451,6 @@ Use the validator to check configuration:
 
 ```python
 import os
-from typing import Any
 from fivetwenty import ConfigValidator, AccountConfig, Environment
 
 config = AccountConfig(
@@ -486,7 +474,6 @@ else:
 ```python
 import asyncio
 import os
-from typing import Any
 import httpx
 from fivetwenty import AsyncClient, Environment
 
@@ -516,7 +503,6 @@ For advanced HTTP configuration:
 ```python
 import asyncio
 import os
-from typing import Any
 import httpx
 from fivetwenty import AsyncClient, Environment
 
@@ -557,7 +543,6 @@ asyncio.run(main())
 import asyncio
 import logging
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -586,7 +571,6 @@ The sync `Client` supports the same configuration patterns:
 
 ```python
 import os
-from typing import Any
 from fivetwenty import Client, AccountConfig, Environment
 
 # Direct parameters
@@ -697,7 +681,6 @@ spec:
 ```python
 import asyncio
 import os
-from typing import Any
 import boto3
 from fivetwenty import AsyncClient, Environment
 
@@ -743,7 +726,6 @@ if __name__ == "__main__":
 ```python
 import json
 import os
-from typing import Any
 from fivetwenty import AccountConfig, Environment
 
 
@@ -1116,7 +1098,6 @@ logging.info(f"Audit: {audit_entry}")
 ### Common Configuration Errors
 ```python
 import os
-from typing import Any
 from pydantic import ValidationError
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
@@ -1161,7 +1142,6 @@ except ValidationError as e:
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment, ConfigValidator
 
 
@@ -1196,7 +1176,6 @@ If you were using the previous configuration format:
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment, AccountConfig
 
 

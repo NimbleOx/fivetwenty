@@ -589,14 +589,13 @@ class StateManager:
 ```python
 import asyncio
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
 async def main() -> None:
     # Setup example variables for connection pool
-    config = None  # Configuration would be loaded here
-    print(f"Configuration placeholder: {config}")
+    # config = None  # Configuration would be loaded here
+    print("Configuration placeholder: None")
 
 
     class ConnectionPool:
@@ -613,7 +612,7 @@ async def main() -> None:
             #     raise ValueError("No configuration found for connection pool")
 
             # Placeholder config for example
-            config = None  # Replace with actual config loading
+            # config = None  # Replace with actual config loading
 
             print(f"Configuration loaded for connection pool of size {size}")
 
@@ -820,6 +819,8 @@ def bad_calculation(units: Decimal) -> float:
 ### Position Sizing with Precision
 
 ```python
+from decimal import Decimal
+
 async def calculate_risk_position_size(
     account_balance: str,  # AccountUnits from OANDA
     risk_percentage: Decimal,

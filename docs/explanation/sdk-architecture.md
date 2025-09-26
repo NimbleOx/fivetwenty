@@ -519,6 +519,13 @@ class CustomAccount(Account):
 Clients can be extended with custom endpoints:
 
 ```python
+from fivetwenty import AsyncClient
+
+# Assume CustomAnalyticsEndpoint is defined elsewhere
+class CustomAnalyticsEndpoint:
+    def __init__(self, client):
+        self.client = client
+
 class ExtendedClient(AsyncClient):
     def __init__(self, token: str, **kwargs):
         super().__init__(token=token, **kwargs)
@@ -569,14 +576,16 @@ When APIs change:
 **Example**:
 ```python
 import asyncio
+from fivetwenty import AsyncClient
 
 
 async def main():
-    # New preferred method
-    await client.accounts.get_accounts()
+    async with AsyncClient(token="demo-token") as client:
+        # New preferred method
+        await client.accounts.get_accounts()
 
-    # Deprecated (shows warning)
-    await client.get_accounts()  # Deprecated: use accounts.get_accounts()
+        # Deprecated (shows warning)
+        await client.get_accounts()  # Deprecated: use accounts.get_accounts()
 
 asyncio.run(main())
 ```
