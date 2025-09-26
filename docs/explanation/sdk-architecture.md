@@ -326,7 +326,8 @@ async def stream_prices():
 from fivetwenty.exceptions import FiveTwentyError
 
 
-class FiveTwentyError(Exception):
+class FiveTwentyErrorStructure:
+    """Example structure of FiveTwentyError - not a redefinition."""
     status_code: int           # HTTP level
     error_code: str           # OANDA-specific code
     message: str              # Human-readable
@@ -471,10 +472,12 @@ live_client = AsyncClient(token=token, environment=Environment.LIVE)
 All network operations go through a single `_request` method:
 
 ```python
+from typing import Any
+
 from httpx import Response
 
 class AsyncClient:
-    async def _request(self, method: str, path: str, **kwargs) -> Response:
+    async def _request(self, method: str, path: str, **kwargs: Any) -> Response:
         # Single point for all HTTP operations
         pass
 ```
@@ -527,7 +530,7 @@ class CustomAnalyticsEndpoint:
         self.client = client
 
 class ExtendedClient(AsyncClient):
-    def __init__(self, token: str, **kwargs):
+    def __init__(self, token: str, **kwargs: Any) -> None:
         super().__init__(token=token, **kwargs)
         self.analytics = CustomAnalyticsEndpoint(self)
 ```
@@ -735,14 +738,17 @@ async def main():
     price=Decimal("1.1234") + 0.0001
 
     # Right
-    price = Decimal("1.1234") + Decimal("0.0001")
+    _price = Decimal("1.1234") + Decimal("0.0001")
+    print(f"Calculated price: {_price}")
 
     # The SDK handles serialization automatically
-    order = await client.orders.post_market_order(
-        account_id=account_id,
-        instrument="EUR_USD",
-        units=Decimal("10000"),  # Automatically converted to string for API
-    )
+    # Note: client would be initialized from context
+    # order = await client.orders.post_market_order(
+    #     account_id=account_id,
+    #     instrument="EUR_USD",
+    #     units=Decimal("10000"),  # Automatically converted to string for API
+    # )
+    print("Order placement example - would use proper client context")
 
 asyncio.run(main())
 ```

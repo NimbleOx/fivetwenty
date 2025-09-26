@@ -113,6 +113,7 @@ async def process_price(price: Any) -> Any:
     """Process price updates asynchronously."""
     # Can do other async operations while streaming continues
     await asyncio.sleep(0.01)  # Simulate processing
+    return price  # Return the processed price
 ```
 
 ## Client (Sync)
@@ -162,7 +163,11 @@ def stream_prices_sync(client: Any, account_id: str) -> Any:
             print(f"Price: {price.asks[0].price}")
 
         # Blocking - can't do other operations
-        process_price_sync(price)
+        _process_price_sync(price)
+
+def _process_price_sync(price: Any) -> None:
+    """Synchronous price processing function."""
+    print(f"Processing price synchronously: {price}")
 ```
 
 ## Detailed Comparison
@@ -232,12 +237,16 @@ async def async_error_handling() -> Any:
 #### Sync Error Handling
 
 ```python
+import os
 from typing import Any
 from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty import Environment, Client
 
 
 def sync_error_handling() -> Any:
+    token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-token")
+    account_id = "your-account-id"
+
     with Client(token=token, environment=Environment.PRACTICE) as client:
         try:
             order = client.orders.post_market_order(account_id, "EUR_USD", 1000)
@@ -280,7 +289,13 @@ If you need to call async from sync code:
 
 ```python
 import asyncio
+from typing import Any
 
+
+async def async_function() -> Any:
+    """Example async function."""
+    await asyncio.sleep(0.1)
+    return "async result"
 
 
 def sync_wrapper() -> Any:
@@ -291,8 +306,7 @@ def sync_wrapper() -> Any:
 
     try:
         # Run async function
-        result = loop.run_until_complete(async_function())
-        return result
+        return loop.run_until_complete(async_function())
     finally:
         loop.close()
 
