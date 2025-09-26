@@ -33,10 +33,12 @@ from decimal import Decimal
 
 from fivetwenty import AsyncClient, Environment
 
+
+"""Comprehensive module for trading operations."""
 class PortfolioRebalancer:
     """Dynamic portfolio rebalancing with transaction cost optimization."""
 
-    def __init__(self, client: AsyncClient, account_id: str, target_weights: Dict[str, float]):
+    def __init__(self, client: AsyncClient, account_id: str, target_weights: Dict[str, float]: Any) -> None:
         self.client = client
         self.account_id = account_id
         self.target_weights = target_weights
@@ -188,7 +190,7 @@ class PortfolioRebalancer:
         else:
             return False
 
-    async def monitor_and_rebalance(self, check_interval_hours: int = 24):
+    async def monitor_and_rebalance(self, check_interval_hours: int = 24) -> Any:
         """Continuous monitoring and rebalancing."""
 
         print("Starting portfolio monitoring and rebalancing...")
@@ -241,7 +243,7 @@ class PortfolioRebalancer:
 class TransactionCostOptimizer:
     """Optimize rebalancing considering transaction costs."""
 
-    def __init__(self, spread_costs: Dict[str, float], commission_rates: Dict[str, float]):
+    def __init__(self, spread_costs: Dict[str, float]: Any, commission_rates: Dict[str, float]: Any) -> None:
         self.spread_costs = spread_costs  # Spread cost per unit
         self.commission_rates = commission_rates  # Commission as % of trade value
 
@@ -286,7 +288,7 @@ class TransactionCostOptimizer:
 class AdaptiveRebalancer:
     """Adaptive rebalancing based on market conditions."""
 
-    def __init__(self, base_rebalancer: PortfolioRebalancer):
+    def __init__(self, base_rebalancer: PortfolioRebalancer) -> None:
         self.base_rebalancer = base_rebalancer
         self.market_conditions = {}
 

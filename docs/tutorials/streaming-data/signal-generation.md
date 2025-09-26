@@ -15,6 +15,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 from enum import Enum
 
+
+"""Comprehensive module for trading operations."""
 class SignalType(Enum):
     BUY = "BUY"
     SELL = "SELL"
@@ -32,11 +34,11 @@ class TradingSignal:
 class RealTimeIndicators:
     """Calculate technical indicators in real-time."""
 
-    def __init__(self, window_size: int = 20):
+    def __init__(self, window_size: int = 20) -> None:
         self.window_size = window_size
         self.price_windows = {}
 
-    async def update_price(self, instrument: str, price: Decimal):
+    async def update_price(self, instrument: str, price: Decimal) -> Any:
         """Update price and calculate indicators."""
 
         if instrument not in self.price_windows:
@@ -91,12 +93,12 @@ class RealTimeIndicators:
 class LiveSignalGenerator:
     """Generate trading signals from real-time data."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.indicators = RealTimeIndicators()
         self.signal_history = {}
         self.signal_callbacks = []
 
-    async def process_price_update(self, instrument: str, bid: Decimal, ask: Decimal):
+    async def process_price_update(self, instrument: str, bid: Decimal, ask: Decimal) -> Any:
         """Process price update and generate signals."""
 
         mid_price = (bid + ask) / 2
@@ -185,17 +187,17 @@ class LiveSignalGenerator:
 
         return None
 
-    def add_signal_callback(self, callback: Callable):
+    def add_signal_callback(self, callback: Callable) -> Any:
         """Add callback for signal notifications."""
         self.signal_callbacks.append(callback)
 
 # Signal event handlers
-async def signal_logger(signal: TradingSignal):
+async def signal_logger(signal: TradingSignal) -> Any:
     """Log trading signals."""
     print(f"SIGNAL: {signal.instrument} {signal.signal_type.value} "
           f"(Strength: {signal.strength:.2f}) - {signal.reason}")
 
-async def signal_trader(signal: TradingSignal):
+async def signal_trader(signal: TradingSignal) -> Any:
     """Execute trades based on signals."""
     if signal.strength >= 0.7:  # High confidence threshold
         print(f"EXECUTING: {signal.instrument} {signal.signal_type.value}")

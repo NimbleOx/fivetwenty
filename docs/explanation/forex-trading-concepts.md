@@ -11,6 +11,8 @@ This guide explains forex trading concepts and how they're represented in the Fi
 In forex trading, you're always trading one currency against another. The FiveTwenty represents this through **instruments**:
 
 ```python
+"""Forex trading concepts - currency pairs and instruments."""
+
 # EUR/USD means: Euro vs. US Dollar
 instrument = "EUR_USD"
 
@@ -48,10 +50,18 @@ Understanding the distinction between positions and trades is crucial:
 A **trade** is a single order execution:
 
 ```python
+"""Understanding trades vs positions in forex trading."""
 import asyncio
+from typing import Any
+
+from fivetwenty import AsyncClient
 
 
-async def main():
+async def main() -> Any:
+    """Example showing individual trades."""
+    client = AsyncClient()
+    account_id = "your-account-id"
+
     # Each order creates a separate trade
     trade1 = await client.orders.post_market_order(account_id, "EUR_USD", 10000)   # Buy 10k EUR
     trade2 = await client.orders.post_market_order(account_id, "EUR_USD", 15000)   # Buy 15k EUR
@@ -60,7 +70,9 @@ async def main():
     # Results in 3 separate Trade objects
     trades = await client.trades.get_open_trades(account_id)  # Returns 3 trades
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 **Trade Properties**:
@@ -76,16 +88,25 @@ asyncio.run(main())
 A **position** is the net exposure for an instrument:
 
 ```python
-# After the trades above, you have:
-position = await client.positions.get_position(account_id, "EUR_USD")
+"""Understanding positions as aggregated exposure."""
+from fivetwenty import AsyncClient
 
-# Position shows NET exposure:
-# Long: 25,000 EUR (10k + 15k)
-# Short: 5,000 EUR
-# Net: 20,000 EUR long
 
-print(position.long.units)   # 25000
-print(position.short.units)  # -5000 (negative indicates short)
+async def check_position() -> None:
+    """Example showing position aggregation."""
+    client = AsyncClient()
+    account_id = "your-account-id"
+
+    # After the trades above, you have:
+    position = await client.positions.get_position(account_id, "EUR_USD")
+
+    # Position shows NET exposure:
+    # Long: 25,000 EUR (10k + 15k)
+    # Short: 5,000 EUR
+    # Net: 20,000 EUR long
+
+    print(position.long.units)   # 25000
+    print(position.short.units)  # -5000 (negative indicates short)
 ```
 
 **Position Properties**:
@@ -119,22 +140,38 @@ Trade 3: Sell 5,000 EUR @ 1.1250             │                         │
 
 **For Risk Management**:
 ```python
-# Trades - individual risk exposure
-for trade in trades:
-    individual_risk = trade.current_units * stop_loss_distance
+"""Risk management calculations using trades and positions."""
+from typing import Any
 
-# Position - total instrument exposure
-total_exposure = abs(position.long.units) + abs(position.short.units)
-net_exposure = position.long.units + position.short.units  # short.units is negative
+
+def calculate_risk_exposure(trades: list, position: Any, stop_loss_distance: float) -> None:
+    """Calculate individual and total risk exposure."""
+    # Trades - individual risk exposure
+    for trade in trades:
+        individual_risk = trade.current_units * stop_loss_distance
+        print(f"Trade {trade.id} risk: {individual_risk}")
+
+    # Position - total instrument exposure
+    total_exposure = abs(position.long.units) + abs(position.short.units)
+    net_exposure = position.long.units + position.short.units  # short.units is negative
+    print(f"Total exposure: {total_exposure}, Net: {net_exposure}")
 ```
 
 **For P/L Tracking**:
 ```python
-# Trade-level P/L (useful for strategy analysis)
-trade_performance = [(t.id, t.unrealized_pl) for t in trades]
+"""P/L tracking at trade and position levels."""
+from typing import Any
 
-# Position-level P/L (useful for risk management)
-total_instrument_pl = position.unrealized_pl
+
+def analyze_pnl(trades: list, position: Any) -> None:
+    """Analyze P/L at different levels."""
+    # Trade-level P/L (useful for strategy analysis)
+    trade_performance = [(t.id, t.unrealized_pl) for t in trades]
+    print(f"Individual trade P/L: {trade_performance}")
+
+    # Position-level P/L (useful for risk management)
+    total_instrument_pl = position.unrealized_pl
+    print(f"Total instrument P/L: {total_instrument_pl}")
 ```
 
 ---
@@ -204,6 +241,8 @@ stop_order = await client.orders.post_stop_order(
 )
 ```
 
+
+"""Comprehensive module for trading operations."""
 **Common Strategies**:
 
 - **Stop Buy Above Market**: Momentum/breakout trading
@@ -217,7 +256,6 @@ stop_order = await client.orders.post_stop_order(
 ### How Forex Margin Works
 
 Unlike stocks, forex trading uses **leverage** - you can control large positions with small amounts:
-
 ```text
                     Leverage & Margin Example
                         (30:1 Leverage)
@@ -395,6 +433,8 @@ for bucket in order_book.price_buckets[:5]:
         print(f"Ask: {bucket.price} ({bucket.liquidity} units)")
 ```
 
+
+"""Comprehensive module for trading operations."""
 **Market Depth Insights**:
 
 - **Liquidity**: How much volume available at each price
@@ -408,7 +448,6 @@ for bucket in order_book.price_buckets[:5]:
 ### Position Sizing
 
 Never risk more than a small percentage of your account:
-
 ```python
 from decimal import Decimal
 
@@ -565,6 +604,8 @@ await client.orders.post_market_order(
 )
 ```
 
+from decimal import Decimal
+
 ---
 
 ## SDK-Specific Considerations
@@ -572,7 +613,6 @@ await client.orders.post_market_order(
 ### Decimal Precision
 
 The SDK uses `Decimal` for financial accuracy:
-
 ```python
 from decimal import ROUND_HALF_UP, Decimal
 

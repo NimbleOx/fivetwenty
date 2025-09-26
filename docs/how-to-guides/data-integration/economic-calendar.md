@@ -28,6 +28,8 @@ from typing import Dict, List, Optional
 from dataclasses import dataclass
 from fivetwenty import AsyncClient, Environment
 
+
+"""Comprehensive module for trading operations."""
 @dataclass
 class EconomicEvent:
     """Economic calendar event data."""
@@ -43,7 +45,7 @@ class EconomicEvent:
 class EconomicCalendarProvider:
     """Integration with economic calendar APIs."""
 
-    def __init__(self, api_key: str):
+    def __init__(self, api_key: str) -> None:
         self.api_key = api_key
         self.base_url = "https://api.forexfactory.com/v1"
 
@@ -89,7 +91,7 @@ class EconomicCalendarProvider:
 class EconomicAwareTradingSystem:
     """Trading system that considers economic events."""
 
-    def __init__(self, client: AsyncClient, calendar: EconomicCalendarProvider):
+    def __init__(self, client: AsyncClient, calendar: EconomicCalendarProvider) -> None:
         self.client = client
         self.calendar = calendar
         self.event_blackout_minutes = {
@@ -129,13 +131,7 @@ class EconomicAwareTradingSystem:
 
         return True, None
 
-    async def place_order_with_economic_check(
-        self,
-        account_id: str,
-        instrument: str,
-        units: int,
-        order_type: str = "MARKET"
-    ):
+    async def place_order_with_economic_check(self, account_id: str, instrument: str, units: int, order_type: str = "MARKET") -> Any:
         """Place order only if no conflicting economic events."""
         safe_to_trade, conflicting_event = await self.is_safe_to_trade(instrument)
 
@@ -228,12 +224,12 @@ For production systems, implement real-time monitoring:
 class RealTimeEconomicMonitor:
     """Real-time economic event monitoring."""
 
-    def __init__(self, trading_system: EconomicAwareTradingSystem):
+    def __init__(self, trading_system: EconomicAwareTradingSystem) -> None:
         self.trading_system = trading_system
         self.active_positions = {}
         self.monitoring = False
 
-    async def start_monitoring(self):
+    async def start_monitoring(self) -> Any:
         """Start real-time economic event monitoring."""
         self.monitoring = True
 
@@ -247,7 +243,7 @@ class RealTimeEconomicMonitor:
                 print(f"Monitoring error: {e}")
                 await asyncio.sleep(60)  # Retry in 1 minute
 
-    async def _check_imminent_events(self):
+    async def _check_imminent_events(self) -> Any:
         """Check for events in the next hour."""
         for instrument in self.active_positions:
             events = await self.trading_system.get_upcoming_events(
@@ -262,7 +258,7 @@ class RealTimeEconomicMonitor:
             if high_impact_events:
                 await self._handle_imminent_event(instrument, high_impact_events[0])
 
-    async def _handle_imminent_event(self, instrument: str, event: EconomicEvent):
+    async def _handle_imminent_event(self, instrument: str, event: EconomicEvent) -> Any:
         """Handle imminent high-impact economic event."""
         print(f"High-impact event approaching for {instrument}: {event.event}")
 
@@ -275,7 +271,7 @@ class RealTimeEconomicMonitor:
         # Option 3: Tighten stop losses
         # await self._tighten_stop_losses(instrument, tighter_percentage=0.5)
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> Any:
         """Stop monitoring."""
         self.monitoring = False
 ```

@@ -62,7 +62,9 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 from fivetwenty.models import CandlestickGranularity
 
-async def get_historical_data(instrument: str, count: int = 100):
+
+"""Comprehensive module for trading operations."""
+async def get_historical_data(instrument: str, count: int = 100) -> Any:
     """Get historical candlestick data."""
 
     async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:

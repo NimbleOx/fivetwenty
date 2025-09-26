@@ -17,12 +17,16 @@ from collections import deque
 from collections.abc import Callable
 from decimal import Decimal
 from typing import Dict, Optional
+from fivetwenty import AsyncClient
 
 
+
+
+"""Comprehensive module for trading operations."""
 class HighPerformanceStreamer:
     """Optimized streaming client for HFT applications."""
 
-    def __init__(self, client: AsyncClient, buffer_size: int = 10000):
+    def __init__(self, client: AsyncClient, buffer_size: int = 10000) -> None:
         self.client = client
         self.buffer_size = buffer_size
         self.price_buffers: dict[str, deque] = {}
@@ -35,7 +39,7 @@ class HighPerformanceStreamer:
             "last_price_time": {},
         }
 
-    def add_price_callback(self, instrument: str, callback: Callable):
+    def add_price_callback(self, instrument: str, callback: Callable) -> Any:
         """Add callback for specific instrument price updates."""
         if instrument not in self.callbacks:
             self.callbacks[instrument] = []
@@ -43,7 +47,7 @@ class HighPerformanceStreamer:
 
         self.callbacks[instrument].append(callback)
 
-    async def start_optimized_streaming(self, account_id: str, instruments: List[str]):
+    async def start_optimized_streaming(self, account_id: str, instruments: List[str]) -> Any:
         """Start high-performance streaming with minimal latency."""
 
         self.streaming_active = True
@@ -66,7 +70,7 @@ class HighPerformanceStreamer:
         finally:
             self.streaming_active = False
 
-    async def _process_price_update(self, price: ClientPrice):
+    async def _process_price_update(self, price: ClientPrice) -> Any:
         """Process price update with minimal latency."""
 
         instrument = price.instrument
@@ -92,7 +96,7 @@ class HighPerformanceStreamer:
                 asyncio.create_task(self._safe_callback_execution(callback, price))
                 self.stats["callbacks_executed"] += 1
 
-    async def _safe_callback_execution(self, callback: Callable, price: ClientPrice):
+    async def _safe_callback_execution(self, callback: Callable, price: ClientPrice) -> Any:
         """Execute callback safely without blocking main stream."""
         try:
             if asyncio.iscoroutinefunction(callback):
@@ -102,7 +106,7 @@ class HighPerformanceStreamer:
         except Exception as e:
             print(f"⚠️ Callback error: {e}")
 
-    async def _process_heartbeat(self):
+    async def _process_heartbeat(self) -> Any:
         """Process heartbeat efficiently."""
         # Minimal heartbeat processing for HFT
         pass
@@ -130,12 +134,12 @@ class HighPerformanceStreamer:
             }
         return {}
 
-    def stop_streaming(self):
+    def stop_streaming(self) -> Any:
         """Stop streaming gracefully."""
         self.streaming_active = False
 
 # High-frequency callback implementation
-async def hft_price_callback(price: ClientPrice):
+async def hft_price_callback(price: ClientPrice) -> Any:
     """Ultra-fast price processing callback."""
 
     # Minimal processing for maximum speed
@@ -182,6 +186,8 @@ Execute callbacks without blocking the main stream:
 # Good: Non-blocking callback execution
 
 from typing import Any
+
+"""Comprehensive module for trading operations."""
 async def _process_price_update(self, price) -> Any:
     # Store data first (fast)
     self.store_price_data(price)
@@ -220,6 +226,8 @@ Filter messages at the earliest point:
 """Module docstring."""
 
 from typing import Any
+from decimal import Decimal
+
 async def _process_price_update(self, price) -> Any:
     # Filter early to reduce processing
     if not self._should_process_price(price):
@@ -267,8 +275,12 @@ Understand latency sources:
 ```python
 # Use NamedTuple for memory efficiency
 from typing import NamedTuple
+from decimal import Decimal
 
 
+
+
+"""Comprehensive module for trading operations."""
 class FastPrice(NamedTuple):
     """Class docstring."""
     bid: float

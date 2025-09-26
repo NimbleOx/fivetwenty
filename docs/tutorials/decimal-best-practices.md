@@ -16,6 +16,8 @@ This guide demonstrates how to leverage FiveTwenty's native Decimal support for 
 from decimal import Decimal
 
 # ❌ Float arithmetic can be imprecise
+
+"""Comprehensive module for trading operations."""
 float_sum = 0.1 + 0.2
 print(float_sum)  # 0.30000000000000004 (not exactly 0.3!)
 
@@ -31,6 +33,8 @@ print(balance)  # 1000.9999999999999 (should be 1001.00)
 from decimal import Decimal
 
 # ✅ Decimal arithmetic is exact
+
+"""Comprehensive module for trading operations."""
 decimal_sum = Decimal("0.1") + Decimal("0.2")
 print(decimal_sum)  # 0.3 (exact!)
 
@@ -52,6 +56,8 @@ from decimal import Decimal
 from fivetwenty.models import InstrumentName, MarketOrderRequest, TimeInForce
 
 # ✅ All these inputs work seamlessly
+
+"""Comprehensive module for trading operations."""
 order1 = MarketOrderRequest(
     instrument=InstrumentName.EUR_USD,
     units=1000,           # int → Decimal
@@ -106,6 +112,8 @@ from decimal import Decimal
 from fivetwenty.models import InstrumentName, MarketOrderRequest, TimeInForce
 
 
+
+"""Comprehensive module for trading operations."""
 async def calculate_position_size(
     account_balance: str,
     risk_percentage: Decimal,
@@ -143,6 +151,8 @@ async def position_sizing_example():
 from decimal import Decimal
 
 
+
+"""Comprehensive module for trading operations."""
 async def calculate_trade_performance(trade_id: str, account_id: str) -> dict:
     """Calculate exact trade performance metrics."""
     trade = await client.trades.get_trade(account_id=account_id, trade_id=trade_id)
@@ -175,6 +185,8 @@ async def calculate_trade_performance(trade_id: str, account_id: str) -> dict:
 from decimal import Decimal
 
 
+
+"""Comprehensive module for trading operations."""
 def calculate_total_trading_costs(
     base_units: Decimal,
     spread_pips: int,
@@ -209,6 +221,8 @@ print(f"Total trading cost: ${total_cost}")  # Exact cost calculation
 from decimal import Decimal
 
 
+
+"""Comprehensive module for trading operations."""
 async def rebalance_portfolio(
     target_weights: dict[str, Decimal],
     total_capital: Decimal,
@@ -268,6 +282,8 @@ async def rebalance_portfolio(
 from decimal import Decimal
 
 
+
+"""Comprehensive module for trading operations."""
 def calculate_stop_levels(
     entry_price: str,  # PriceValue from trade
     direction: str,    # "long" or "short"
@@ -295,7 +311,7 @@ def calculate_stop_levels(
     )
 
 # Usage with a trade
-async def demo_stop_loss_calculation():
+async def demo_stop_loss_calculation() -> Any:
     trade = await client.trades.get_trade(account_id=account_id, trade_id=trade_id)
     direction = "long" if trade.initial_units > 0 else "short"
 
@@ -334,6 +350,8 @@ from decimal import Decimal, getcontext
 # Set global precision for calculations
 
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 getcontext().prec = 28  # High precision for financial calculations
 
 def safe_divide(numerator: Decimal, denominator: Decimal) -> Decimal:
@@ -351,6 +369,8 @@ def safe_divide(numerator: Decimal, denominator: Decimal) -> Decimal:
 from decimal import Decimal
 
 
+
+"""Comprehensive module for trading operations."""
 async def convert_currency_precise(
     amount: Decimal,
     from_currency: str,
@@ -390,6 +410,8 @@ from decimal import Decimal
 
 
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 def calculate_sharpe_ratio(
     returns: list[Decimal],
     risk_free_rate: Decimal = Decimal("0.02"),

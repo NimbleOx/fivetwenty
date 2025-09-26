@@ -12,11 +12,15 @@ Minimize order execution latency:
 
 ```python
 from decimal import Decimal
+from fivetwenty import AsyncClient
 
+
+
+"""Comprehensive module for trading operations."""
 class LowLatencyOrderManager:
     """Optimized order execution for HFT."""
 
-    def __init__(self, client: AsyncClient):
+    def __init__(self, client: AsyncClient) -> None:
         self.client = client
         self.order_queue = asyncio.Queue(maxsize=1000)
         self.execution_stats = {
@@ -169,6 +173,8 @@ Configure timeouts for optimal latency:
 """Module docstring."""
 
 from typing import Any
+from fivetwenty import AsyncClient
+
 class AdaptiveTimeoutManager:
     """Class docstring."""
     """Dynamically adjust timeouts based on network conditions."""
@@ -247,10 +253,15 @@ class AdaptiveLowLatencyOrderManager(LowLatencyOrderManager):
 Optimize pre-trade checks for speed:
 
 ```python
+from fivetwenty import AsyncClient
+from decimal import Decimal
+
+
+"""Comprehensive module for trading operations."""
 class FastPreTradeValidator:
     """Ultra-fast pre-trade validation."""
 
-    def __init__(self, client: AsyncClient):
+    def __init__(self, client: AsyncClient) -> None:
         self.client = client
         self.account_cache = {}
         self.instrument_cache = {}
@@ -398,11 +409,15 @@ Implement efficient order queuing:
 import heapq
 from dataclasses import dataclass, field
 from typing import Any
+from fivetwenty import AsyncClient
+
 
 
 
 """Module docstring."""
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 @dataclass
 class PriorityOrder:
     """Class docstring."""
@@ -556,17 +571,21 @@ async def queued_execution_example(client: AsyncClient, account_id: str) -> Any:
 Monitor and analyze execution latency:
 
 ```python
+from fivetwenty import AsyncClient
+
+
+"""Comprehensive module for trading operations."""
 class LatencyMonitor:
     """Monitor and analyze order execution latency."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.latency_data = {
             'order_latencies': deque(maxlen=1000),
             'network_latencies': deque(maxlen=1000),
             'processing_latencies': deque(maxlen=1000)
         }
 
-    def record_order_latency(self, total_ms: float, network_ms: float, processing_ms: float):
+    def record_order_latency(self, total_ms: float, network_ms: float, processing_ms: float) -> Any:
         """Record comprehensive latency data."""
 
         self.latency_data['order_latencies'].append({
@@ -639,8 +658,7 @@ class LatencyMonitor:
 # Integration example
 latency_monitor = LatencyMonitor()
 
-async def monitored_order_execution(client: AsyncClient, account_id: str,
-                                  instrument: str, units: int):
+async def monitored_order_execution(client: AsyncClient, account_id: str, instrument: str, units: int) -> Any:
     """Execute order with comprehensive latency monitoring."""
 
     total_start = time.perf_counter()

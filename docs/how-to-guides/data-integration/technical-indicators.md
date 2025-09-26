@@ -470,7 +470,7 @@ For more robust signals, analyze multiple timeframes:
 class MultiTimeframeAnalysis:
     """Analyze multiple timeframes for stronger signals."""
 
-    def __init__(self, ta_provider: TechnicalAnalysisProvider):
+    def __init__(self, ta_provider: TechnicalAnalysisProvider) -> None:
         self.ta_provider = ta_provider
         self.timeframes = ["M5", "M15", "H1", "H4", "D"]
         self.timeframe_weights = {
@@ -768,6 +768,8 @@ Track the performance of your technical signals:
 """Module docstring."""
 
 from typing import Any
+from datetime import datetime
+
 class SignalPerformanceTracker:
     """Class docstring."""
     """Track performance of technical signals."""

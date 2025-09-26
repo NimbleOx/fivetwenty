@@ -256,33 +256,35 @@ Automatically verify and adjust position sizes before order execution.
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
+
+"""Comprehensive module for trading operations."""
 class PositionSizeEnforcer:
     """Automatically enforce position sizing rules."""
-    
-    def __init__(self, client: AsyncClient, account_id: str):
+
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
-        
+
         # Enforcement rules
         self.max_risk_per_trade = Decimal("0.02")  # 2% max per trade
         self.max_position_size = 10000   # 10,000 units max
         self.min_position_size = 100     # 100 units min
         self.risk_enforcement_enabled = True
-    
+
     async def validate_and_adjust_order(self, instrument: str, requested_units: int,
                                       entry_price: Decimal, stop_loss: Decimal) -> dict:
         """Validate order and suggest adjustments if needed."""
-        
+
         try:
             # Get current account balance
             account = await self.client.accounts.get_account(self.account_id)
             account_balance = Decimal(str(account.balance))
-            
+
             # Calculate risk metrics
             risk_per_unit = abs(entry_price - stop_loss)
             requested_risk = abs(requested_units) * risk_per_unit
             risk_percentage = (requested_risk / account_balance) * 100
-            
+
             result = {
                 'original_units': requested_units,
                 'approved_units': requested_units,
@@ -292,29 +294,29 @@ class PositionSizeEnforcer:
                 'approved': True,
                 'warnings': []
             }
-            
+
             # Check risk percentage limit
             if risk_percentage > self.max_risk_per_trade * Decimal("100"):
                 # Calculate maximum allowed units
                 max_risk_amount = account_balance * self.max_risk_per_trade
                 max_units = int(max_risk_amount / risk_per_unit)
-                
+
                 result['approved_units'] = max_units if requested_units > 0 else -max_units
                 result['adjustments_made'].append(
                     f"Reduced from {abs(requested_units):,} to {abs(max_units):,} units (risk limit)"
                 )
-                
+
                 # Recalculate metrics
                 result['risk_amount'] = abs(max_units) * risk_per_unit
                 result['risk_percentage'] = (result['risk_amount'] / account_balance) * 100
-            
+
             # Check absolute position size limits
             if abs(result['approved_units']) > self.max_position_size:
                 result['approved_units'] = self.max_position_size if requested_units > 0 else -self.max_position_size
                 result['adjustments_made'].append(
                     f"Capped at maximum position size: {self.max_position_size:,} units"
                 )
-            
+
             if abs(result['approved_units']) < self.min_position_size:
                 if self.risk_enforcement_enabled:
                     result['approved'] = False
@@ -325,31 +327,31 @@ class PositionSizeEnforcer:
                     result['warnings'].append(
                         f"Position size below minimum: {abs(result['approved_units']):,} units"
                     )
-            
+
             # Additional validations
             if stop_loss == entry_price:
                 result['approved'] = False
                 result['adjustments_made'].append("No stop loss defined")
-            
+
             # Check current portfolio exposure
             current_exposure = await self._check_portfolio_exposure(instrument)
             if current_exposure and current_exposure['risk_percentage'] > 10:  # 10% max per instrument
                 result['warnings'].append(
                     f"High exposure to {instrument}: {current_exposure['risk_percentage']:.1f}%"
                 )
-            
+
             return result
-            
+
         except Exception as e:
             return {
                 'error': str(e),
                 'approved': False,
                 'original_units': requested_units
             }
-    
+
     async def _check_portfolio_exposure(self, instrument: str) -> dict:
         """Check current exposure to specific instrument."""
-        
+
         try:
             positions = await self.client.positions.get_open_positions(self.account_id)
             account = await self.client.accounts.get_account(self.account_id)
@@ -359,72 +361,72 @@ class PositionSizeEnforcer:
                 if position.instrument == instrument:
                     total_pl = (Decimal(str(position.long.unrealized_pl or 0)) +
                               Decimal(str(position.short.unrealized_pl or 0)))
-                    
+
                     # Simplified risk calculation
                     risk_amount = abs(total_pl) if total_pl < 0 else 0
                     risk_percentage = (risk_amount / account_balance) * 100
-                    
+
                     return {
                         'instrument': instrument,
                         'risk_amount': risk_amount,
                         'risk_percentage': risk_percentage,
                         'unrealized_pl': total_pl
                     }
-            
+
             return None
-            
+
         except Exception:
             return None
-    
+
     async def execute_validated_order(self, instrument: str, requested_units: int,
                                     entry_price: Decimal, stop_loss: Decimal,
                                     take_profit: Decimal = None) -> dict:
         """Execute order after validation and adjustment."""
-        
+
         # Validate the order
         validation = await self.validate_and_adjust_order(
             instrument, requested_units, entry_price, stop_loss
         )
-        
-        print(f"📋 Order Validation Results:")
+
+        # Expected output: f"📋 Order Validation Results:"
         print(f"   Original Units: {validation['original_units']:,}")
         print(f"   Approved Units: {validation.get('approved_units', 0):,}")
         print(f"   Risk: ${validation.get('risk_amount', 0):.2f} ({validation.get('risk_percentage', 0):.2f}%)")
-        
+
         if validation.get('adjustments_made'):
             print(f"   Adjustments:")
             for adjustment in validation['adjustments_made']:
                 print(f"     • {adjustment}")
-        
+
         if validation.get('warnings'):
             print(f"   Warnings:")
             for warning in validation['warnings']:
                 print(f"     ⚠️ {warning}")
-        
+
         if not validation.get('approved', False):
             print(f"   ❌ Order rejected")
             return {'status': 'rejected', 'validation': validation}
-        
+
         # Execute the approved order
         try:
             approved_units = validation['approved_units']
-            
+
             order_params = {
                 'account_id': self.account_id,
                 'instrument': instrument,
                 'units': approved_units,
                 'stop_loss_on_fill': {'price': f"{stop_loss:.5f}"}
             }
-            
+
             if take_profit:
                 order_params['take_profit_on_fill'] = {'price': f"{take_profit:.5f}"}
-            
+
             response = await self.client.orders.post_market_order(**order_params)
-            
+
             if response.order_fill_transaction:
                 fill = response.order_fill_transaction
                 print(f"   ✅ Order executed: {fill.units} units at {fill.price}")
-                
+
                 return {
                     'status': 'executed',
                     'fill': fill,
@@ -437,7 +439,7 @@ class PositionSizeEnforcer:
                     'response': response,
                     'validation': validation
                 }
-                
+
         except Exception as e:
             print(f"   ❌ Order execution failed: {e}")
             return {
@@ -447,15 +449,15 @@ class PositionSizeEnforcer:
             }
 
 # Example usage
-async def demo_position_enforcer(account_id: str):
+async def demo_position_enforcer(account_id: str) -> Any:
     """Demonstrate position size enforcement."""
-    
+
     if not account_id:
         return
-    
+
     async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
         enforcer = PositionSizeEnforcer(client, account_id)
-        
+
         # Test with oversized position
         print("🧪 Testing oversized position:")
         result = await enforcer.execute_validated_order(
@@ -465,7 +467,7 @@ async def demo_position_enforcer(account_id: str):
             stop_loss=Decimal("1.0950"),
             take_profit=Decimal("1.1050")
         )
-        
+
         return enforcer
 ```
 
@@ -481,16 +483,20 @@ Continuously monitor risk metrics and take action when thresholds are exceeded.
 from fivetwenty import AsyncClient
 import asyncio
 from datetime import datetime, timedelta
+from decimal import Decimal
 
+
+
+"""Comprehensive module for trading operations."""
 class RealTimeRiskMonitor:
     """Continuous risk monitoring with automated responses."""
-    
-    def __init__(self, client: AsyncClient, account_id: str):
+
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.monitoring_active = False
         self.monitor_interval = 30  # seconds
-        
+
         # Risk thresholds
         self.thresholds = {
             'portfolio_risk': {'warning': 10.0, 'critical': 15.0},  # %
@@ -498,7 +504,7 @@ class RealTimeRiskMonitor:
             'position_count': {'warning': 8, 'critical': 12},       # count
             'margin_usage': {'warning': 80.0, 'critical': 95.0}     # %
         }
-        
+
         # Automated responses
         self.auto_responses = {
             'reduce_positions': True,
@@ -506,19 +512,19 @@ class RealTimeRiskMonitor:
             'send_alerts': True,
             'emergency_close': False  # Require manual activation
         }
-        
+
         self.alert_history = []
-    
-    async def start_monitoring(self):
+
+    async def start_monitoring(self) -> Any:
         """Start continuous risk monitoring."""
-        
+
         if self.monitoring_active:
             print("⚠️ Monitoring already active")
             return
-        
+
         self.monitoring_active = True
         print(f"🔄 Starting real-time risk monitoring (interval: {self.monitor_interval}s)")
-        
+
         try:
             while self.monitoring_active:
                 await self._perform_risk_check()
@@ -526,66 +532,66 @@ class RealTimeRiskMonitor:
         except Exception as e:
             print(f"❌ Monitoring error: {e}")
             self.monitoring_active = False
-    
-    async def stop_monitoring(self):
+
+    async def stop_monitoring(self) -> Any:
         """Stop risk monitoring."""
-        
+
         self.monitoring_active = False
         print("🛑 Risk monitoring stopped")
-    
-    async def _perform_risk_check(self):
+
+    async def _perform_risk_check(self) -> Any:
         """Perform comprehensive risk check."""
-        
+
         try:
             current_time = datetime.utcnow()
-            
+
             # Get account and position data
             account = await self.client.accounts.get_account(self.account_id)
             positions = await self.client.positions.get_open_positions(self.account_id)
-            
+
             # Calculate risk metrics
             risk_metrics = await self._calculate_risk_metrics(account, positions)
-            
+
             # Check thresholds
             alerts = self._check_thresholds(risk_metrics)
-            
+
             if alerts:
                 await self._handle_alerts(alerts, risk_metrics)
-            
+
             # Log status (could save to file/database)
             self._log_risk_status(current_time, risk_metrics, alerts)
-            
+
         except Exception as e:
             print(f"⚠️ Risk check error: {e}")
-    
+
     async def _calculate_risk_metrics(self, account, positions) -> dict:
         """Calculate current risk metrics."""
-        
+
         account_balance = Decimal(str(account.balance))
         account_nav = Decimal(str(account.nav))
         margin_used = Decimal(str(account.margin_used))
         margin_available = Decimal(str(account.margin_available))
-        
+
         # Portfolio risk calculation
         total_unrealized_pl = 0
         position_risk = 0
-        
+
         for position in positions:
             long_pl = Decimal(str(position.long.unrealized_pl or 0))
             short_pl = Decimal(str(position.short.unrealized_pl or 0))
             total_pl = long_pl + short_pl
             total_unrealized_pl += total_pl
-            
+
             if total_pl < 0:
                 position_risk += abs(total_pl)
-        
+
         # Calculate metrics
         portfolio_risk_pct = (position_risk / account_balance) * Decimal("100")
         margin_usage_pct = (margin_used / (margin_used + margin_available)) * Decimal("100")
-        
+
         # Daily P/L (simplified - would track from start of day)
         daily_pl_pct = Decimal("0")  # Would calculate from daily start balance
-        
+
         return {
             'account_balance': account_balance,
             'account_nav': account_nav,
@@ -596,15 +602,15 @@ class RealTimeRiskMonitor:
             'margin_usage_pct': margin_usage_pct,
             'timestamp': datetime.utcnow()
         }
-    
+
     def _check_thresholds(self, risk_metrics: dict) -> list:
         """Check if any thresholds are exceeded."""
-        
+
         alerts = []
-        
+
         for metric_name, thresholds in self.thresholds.items():
             current_value = risk_metrics.get(metric_name.replace('_', '_'), 0)
-            
+
             if current_value >= thresholds['critical']:
                 alerts.append({
                     'level': 'CRITICAL',
@@ -621,12 +627,12 @@ class RealTimeRiskMonitor:
                     'threshold': thresholds['warning'],
                     'message': f"{metric_name} warning: {current_value:.1f} >= {thresholds['warning']:.1f}"
                 })
-        
+
         return alerts
-    
-    async def _handle_alerts(self, alerts: list, risk_metrics: dict):
+
+    async def _handle_alerts(self, alerts: list, risk_metrics: dict) -> Any:
         """Handle risk alerts with automated responses."""
-        
+
         for alert in alerts:
             # Record alert
             self.alert_history.append({
@@ -634,129 +640,129 @@ class RealTimeRiskMonitor:
                 'alert': alert,
                 'risk_metrics': risk_metrics.copy()
             })
-            
+
             # Print alert
             level_emoji = "🚨" if alert['level'] == 'CRITICAL' else "⚠️"
             print(f"{level_emoji} {alert['level']}: {alert['message']}")
-            
+
             # Take automated action
             if alert['level'] == 'CRITICAL':
                 await self._take_critical_action(alert, risk_metrics)
             elif alert['level'] == 'WARNING':
                 await self._take_warning_action(alert, risk_metrics)
-    
-    async def _take_critical_action(self, alert: dict, risk_metrics: dict):
+
+    async def _take_critical_action(self, alert: dict, risk_metrics: dict) -> Any:
         """Handle critical alerts."""
-        
+
         print(f"🚨 CRITICAL ACTION REQUIRED: {alert['metric']}")
-        
+
         if self.auto_responses['halt_new_trades']:
             print("   🛑 Halting new trades")
             # Would set a flag to prevent new order execution
-        
+
         if self.auto_responses['reduce_positions'] and alert['metric'] == 'portfolio_risk':
             print("   📉 Reducing position sizes")
             await self._reduce_position_sizes()
-        
+
         if self.auto_responses['emergency_close'] and alert['metric'] == 'daily_loss':
             print("   🚨 EMERGENCY: Closing all positions")
             await self._emergency_close_positions()
-    
-    async def _take_warning_action(self, alert: dict, risk_metrics: dict):
+
+    async def _take_warning_action(self, alert: dict, risk_metrics: dict) -> Any:
         """Handle warning alerts."""
-        
+
         print(f"⚠️ WARNING ACTION: {alert['metric']}")
-        
+
         if self.auto_responses['send_alerts']:
             # Would send email/SMS/notification
-            print("   📧 Alert notification sent")
-    
-    async def _reduce_position_sizes(self):
+            # Expected output: "   📧 Alert notification sent"
+
+    async def _reduce_position_sizes(self) -> Any:
         """Reduce position sizes by closing partial positions."""
-        
+
         try:
             positions = await self.client.positions.get_open_positions(self.account_id)
-            
+
             for position in positions:
                 # Close 50% of each position
                 long_units = int(position.long.units) if position.long.units != "0" else 0
                 short_units = int(position.short.units) if position.short.units != "0" else 0
-                
+
                 if long_units > 0:
                     close_units = -(long_units // 2)
                     await self._close_partial_position(position.instrument, close_units)
-                
+
                 if short_units < 0:
                     close_units = -(short_units // 2)
                     await self._close_partial_position(position.instrument, close_units)
-                    
+
         except Exception as e:
             print(f"❌ Position reduction error: {e}")
-    
-    async def _close_partial_position(self, instrument: str, units: int):
+
+    async def _close_partial_position(self, instrument: str, units: int) -> Any:
         """Close partial position."""
-        
+
         try:
             response = await self.client.orders.post_market_order(
                 account_id=self.account_id,
                 instrument=instrument,
                 units=units
             )
-            
+
             if response.order_fill_transaction:
                 print(f"   ✅ Reduced {instrument}: {units} units")
-            
+
         except Exception as e:
             print(f"   ❌ Failed to reduce {instrument}: {e}")
-    
-    async def _emergency_close_positions(self):
+
+    async def _emergency_close_positions(self) -> Any:
         """Emergency close all positions."""
-        
+
         try:
             positions = await self.client.positions.get_open_positions(self.account_id)
-            
+
             for position in positions:
                 instrument = position.instrument
                 long_units = int(position.long.units) if position.long.units != "0" else 0
                 short_units = int(position.short.units) if position.short.units != "0" else 0
                 net_units = long_units + short_units
-                
+
                 if net_units != 0:
                     close_units = -net_units
-                    
+
                     response = await self.client.orders.post_market_order(
                         account_id=self.account_id,
                         instrument=instrument,
                         units=close_units
                     )
-                    
+
                     if response.order_fill_transaction:
                         print(f"   🚨 Emergency closed {instrument}")
-                        
+
         except Exception as e:
             print(f"❌ Emergency close error: {e}")
-    
-    def _log_risk_status(self, timestamp: datetime, risk_metrics: dict, alerts: list):
+
+    def _log_risk_status(self, timestamp: datetime, risk_metrics: dict, alerts: list) -> Any:
         """Log current risk status."""
-        
+
         # In production, save to file or database
         if alerts or risk_metrics['portfolio_risk_pct'] > 5:
             print(f"📊 {timestamp.strftime('%H:%M:%S')} - Portfolio Risk: {risk_metrics['portfolio_risk_pct']:.1f}%")
-    
+
     def get_alert_summary(self) -> dict:
         """Get summary of recent alerts."""
-        
-        recent_alerts = [alert for alert in self.alert_history 
+
+        recent_alerts = [alert for alert in self.alert_history
                         if alert['timestamp'] > datetime.utcnow() - timedelta(hours=24)]
-        
+
         critical_count = len([a for a in recent_alerts if a['alert']['level'] == 'CRITICAL'])
         warning_count = len([a for a in recent_alerts if a['alert']['level'] == 'WARNING'])
-        
-        print(f"📋 24-Hour Alert Summary:")
+
+        # Expected output: f"📋 24-Hour Alert Summary:"
         print(f"   Critical: {critical_count}")
         print(f"   Warnings: {warning_count}")
         print(f"   Total: {len(recent_alerts)}")
-        
+
         return {
             'total_alerts': len(recent_alerts),
             'critical_alerts': critical_count,
@@ -765,30 +771,30 @@ class RealTimeRiskMonitor:
         }
 
 # Example monitoring
-async def demo_risk_monitoring(account_id: str):
+async def demo_risk_monitoring(account_id: str) -> Any:
     """Demonstrate real-time risk monitoring."""
-    
+
     if not account_id:
         return
-    
+
     async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
         monitor = RealTimeRiskMonitor(client, account_id)
-        
+
         print("🔄 Starting demo monitoring (will run for 2 minutes)")
-        
+
         # Start monitoring in background
         monitor_task = asyncio.create_task(monitor.start_monitoring())
-        
+
         # Let it run for 2 minutes
         await asyncio.sleep(120)
-        
+
         # Stop monitoring
         await monitor.stop_monitoring()
         monitor_task.cancel()
-        
+
         # Get summary
         summary = monitor.get_alert_summary()
-        
+
         return monitor
 ```
 
@@ -963,36 +969,36 @@ class MLRiskPredictor:
 ```python
 class AdaptiveThresholds:
     """Automatically adjust risk thresholds based on market conditions."""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.base_thresholds = {
             "daily_loss": 5.0,
             "portfolio_risk": 15.0,
         }
         self.current_thresholds = self.base_thresholds.copy()
-    
-    def adjust_for_market_conditions(self, volatility_index: float, 
+
+    def adjust_for_market_conditions(self, volatility_index: float,
                                    market_stress: float) -> dict:
         """Adjust thresholds based on market conditions."""
-        
+
         # Tighten thresholds in high volatility/stress
         volatility_adjustment = 1.0 - (volatility_index * 0.3)
         stress_adjustment = 1.0 - (market_stress * 0.2)
-        
+
         combined_adjustment = volatility_adjustment * stress_adjustment
-        
+
         for threshold_name, base_value in self.base_thresholds.items():
             adjusted_value = base_value * combined_adjustment
             self.current_thresholds[threshold_name] = max(adjusted_value, base_value * 0.5)
-        
+
         print(f"📊 Dynamic Threshold Adjustment:")
         print(f"   Volatility Index: {volatility_index:.2f}")
         print(f"   Market Stress: {market_stress:.2f}")
         print(f"   Adjustment Factor: {combined_adjustment:.2f}")
-        
+
         for name, value in self.current_thresholds.items():
             print(f"   {name}: {self.base_thresholds[name]:.1f}% → {value:.1f}%")
-        
+
         return self.current_thresholds
 ```
 

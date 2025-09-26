@@ -815,6 +815,8 @@ Test your understanding of portfolio-level risk management:
 ```python
 
 """Module docstring."""
+from decimal import Decimal
+
 class RiskLimitFramework:
     """Class docstring."""
     """Comprehensive risk limit management system."""

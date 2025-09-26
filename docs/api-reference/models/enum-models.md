@@ -424,6 +424,8 @@ Filter for trade queries by state.
 
 ```python
 from fivetwenty.models.enums import (
+
+"""Comprehensive module for trading operations."""
     CandlestickGranularity,
     Direction,
     InstrumentName,

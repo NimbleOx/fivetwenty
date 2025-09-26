@@ -25,11 +25,18 @@ You need to create, monitor, and manage trading orders efficiently using FiveTwe
 
     **OnFill Pattern (Recommended)**: Set TP/SL when creating orders
     ```python
+"""Order management with automatic risk controls."""
 import asyncio
+from decimal import Decimal
+from typing import Any
+
+from fivetwenty import AsyncClient
 
 
-async def main():
-    from decimal import Decimal
+async def main() -> Any:
+    """Example of OnFill pattern."""
+    client = AsyncClient()
+    account_id = "your-account-id"
 
     # Risk management activates automatically when order fills
     await client.orders.post_market_order(
@@ -40,24 +47,34 @@ async def main():
         stop_loss=Decimal("1.0900"),     # Automatic SL
     )
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
     ```
 
     **Post-Trade Pattern**: Add TP/SL to existing trades
     ```python
-# First create trade, then add risk management
+"""Post-trade risk management pattern."""
+from fivetwenty import AsyncClient
 from fivetwenty.models import TakeProfitOrderRequest
 
-market_response = await client.orders.post_market_order(
-    account_id=account_id,
-    instrument="EUR_USD",
-    units=1000
-)
-trade_info = market_response.order_fill_transaction["tradeOpened"]
-trade_id = trade_info["tradeID"]
 
-tp_request = TakeProfitOrderRequest(tradeID=trade_id, price="1.1100")
-await client.orders.post_order(account_id, tp_request)
+async def post_trade_example() -> None:
+    """Example of post-trade pattern."""
+    client = AsyncClient()
+    account_id = "your-account-id"
+
+    # First create trade, then add risk management
+    market_response = await client.orders.post_market_order(
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=1000
+    )
+    trade_info = market_response.order_fill_transaction["tradeOpened"]
+    trade_id = trade_info["tradeID"]
+
+    tp_request = TakeProfitOrderRequest(tradeID=trade_id, price="1.1100")
+    await client.orders.post_order(account_id, tp_request)
     ```
 
     **When to Use Each:**
@@ -73,14 +90,18 @@ await client.orders.post_order(account_id, tp_request)
 #### Step-by-Step Post-Trade Risk Management
 
 ```python
+"""Comprehensive module for trading operations."""
 from decimal import Decimal
+from typing import Any
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import (
     AccountID, TakeProfitOrderRequest, StopLossOrderRequest,
     TrailingStopLossOrderRequest, GuaranteedStopLossOrderRequest
 )
 
-async def implement_post_trade_risk_management():
+
+async def implement_post_trade_risk_management() -> Any:
     """Comprehensive post-trade risk management implementation."""
 
     async with AsyncClient() as client:
@@ -129,8 +150,14 @@ async def implement_post_trade_risk_management():
 #### Distance-Based Stop Loss
 
 ```python
+"""Distance-based stop loss implementation."""
+from typing import Any
+
+from fivetwenty.models import StopLossOrderRequest
+
+
 # Alternative: Distance-based stop loss (dynamic pricing)
-async def add_distance_based_stop_loss(client, account_id, trade_id):
+async def add_distance_based_stop_loss(client: Any, account_id: str, trade_id: str) -> Any:
     """Add stop loss based on distance rather than fixed price."""
 
     distance_sl_request = StopLossOrderRequest(
@@ -146,7 +173,13 @@ async def add_distance_based_stop_loss(client, account_id, trade_id):
 #### Trailing Stop Loss
 
 ```python
-async def add_trailing_stop_loss(client, account_id, trade_id):
+"""Trailing stop loss implementation."""
+from typing import Any
+
+from fivetwenty.models import TrailingStopLossOrderRequest
+
+
+async def add_trailing_stop_loss(client: Any, account_id: str, trade_id: str) -> Any:
     """Add trailing stop loss that follows favorable price movement."""
 
     tsl_request = TrailingStopLossOrderRequest(
@@ -163,7 +196,13 @@ async def add_trailing_stop_loss(client, account_id, trade_id):
 #### Guaranteed Stop Loss
 
 ```python
-async def add_guaranteed_stop_loss(client, account_id, trade_id):
+"""Guaranteed stop loss implementation."""
+from typing import Any
+
+from fivetwenty.models import GuaranteedStopLossOrderRequest, StopLossOrderRequest
+
+
+async def add_guaranteed_stop_loss(client: Any, account_id: str, trade_id: str) -> Any:
     """Add guaranteed stop loss with premium cost."""
 
     try:
@@ -186,15 +225,30 @@ async def add_guaranteed_stop_loss(client, account_id, trade_id):
         print(f"GSL not available: {e}")
         # Fallback to regular stop loss
         return await add_regular_stop_loss(client, account_id, trade_id)
+
+
+async def add_regular_stop_loss(client: Any, account_id: str, trade_id: str) -> Any:
+    """Add regular stop loss as fallback."""
+    sl_request = StopLossOrderRequest(
+        tradeID=trade_id,
+        price="1.0900",
+        timeInForce="GTC",
+    )
+    response = await client.orders.post_order(account_id, sl_request)
+    return response.order_create_transaction["id"]
 ```
 
 #### Error Handling for Post-Trade Orders
 
 ```python
+"""Comprehensive module for trading operations."""
+from typing import Any
+
 from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.models import TakeProfitOrderRequest
 
 
-async def robust_post_trade_setup(client, account_id, trade_id):
+async def robust_post_trade_setup(client: Any, account_id: str, trade_id: str) -> Any:
     """Add risk management with comprehensive error handling."""
 
     try:
@@ -250,7 +304,9 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
 
 
-async def place_market_order():
+
+"""Comprehensive module for trading operations."""
+async def place_market_order() -> Any:
     async with AsyncClient() as client:
         # Basic market order
         response = await client.orders.post_market_order(
@@ -284,7 +340,9 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
 
 
-async def place_limit_order():
+
+"""Comprehensive module for trading operations."""
+async def place_limit_order() -> Any:
     async with AsyncClient() as client:
         response = await client.orders.post_limit_order(
             account_id=AccountID("101-004-12345678"),
@@ -310,7 +368,9 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
 
 
-async def place_stop_order():
+
+"""Comprehensive module for trading operations."""
+async def place_stop_order() -> Any:
     async with AsyncClient() as client:
         # Buy stop order - enter long when price breaks above resistance
         response = await client.orders.post_stop_order(
@@ -339,7 +399,9 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
 
 
-async def place_market_if_touched_order():
+
+"""Comprehensive module for trading operations."""
+async def place_market_if_touched_order() -> Any:
     async with AsyncClient() as client:
         # MIT order - buy when price touches support level
         response = await client.orders.post_market_if_touched_order(
@@ -364,9 +426,13 @@ async def place_market_if_touched_order():
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.models import LimitOrderRequest, MarketOrderRequest, StopOrderRequest, TimeInForce
+from decimal import Decimal
 
 
-async def create_order_by_type(order_type: str, price: Decimal = None):
+
+
+"""Comprehensive module for trading operations."""
+async def create_order_by_type(order_type: str, price: Decimal = None) -> Any:
     async with AsyncClient() as client:
         account_id = AccountID("101-004-12345678")
         instrument = InstrumentName("USD_JPY")
@@ -411,7 +477,9 @@ async def create_order_by_type(order_type: str, price: Decimal = None):
 from fivetwenty import AsyncClient
 
 
-async def monitor_order_execution(account_id: AccountID, order_id: str):
+
+"""Comprehensive module for trading operations."""
+async def monitor_order_execution(account_id: AccountID, order_id: str) -> Any:
     async with AsyncClient() as client:
         # Get current order status
         order = await client.orders.get_order(account_id, order_id)
@@ -444,13 +512,9 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID, InstrumentName
 from fivetwenty.exceptions import FiveTwentyError
 
-async def place_validated_order(
-    account_id: AccountID,
-    instrument: InstrumentName,
-    units: int,
-    order_type: str = "market",
-    price: Decimal = None
-):
+
+"""Comprehensive module for trading operations."""
+async def place_validated_order(account_id: AccountID, instrument: InstrumentName, units: int, order_type: str = "market", price: Decimal = None) -> Any:
     async with AsyncClient() as client:
         try:
             # Validate account has sufficient balance
@@ -516,9 +580,13 @@ async def place_validated_order(
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
+from datetime import datetime
 
 
-async def manage_pending_orders(account_id: AccountID):
+
+
+"""Comprehensive module for trading operations."""
+async def manage_pending_orders(account_id: AccountID) -> Any:
     async with AsyncClient() as client:
         # Get all pending orders
         pending_response = await client.orders.get_pending_orders(account_id)
@@ -553,16 +621,13 @@ async def manage_pending_orders(account_id: AccountID):
 import asyncio
 
 from fivetwenty import AsyncClient
+from decimal import Decimal
 
 
-async def create_bracket_order(
-    account_id: AccountID,
-    instrument: InstrumentName,
-    entry_price: Decimal,
-    take_profit: Decimal,
-    stop_loss: Decimal,
-    units: int,
-):
+
+
+"""Comprehensive module for trading operations."""
+async def create_bracket_order(account_id: AccountID, instrument: InstrumentName, entry_price: Decimal, take_profit: Decimal, stop_loss: Decimal, units: int) -> Any:
     """Create a bracket order: entry + take profit + stop loss"""
     async with AsyncClient() as client:
 
@@ -681,6 +746,8 @@ tradeable_instruments = [i for i in instruments if i.tradeable]
 from fivetwenty._internal.utils import quantize_price
 
 # Get instrument precision
+
+"""Comprehensive module for trading operations."""
 instrument_info = await client.accounts.get_account_instruments(
     account_id,
     instruments=[instrument]
@@ -714,7 +781,7 @@ from asyncio import Semaphore
 # Limit concurrent requests
 semaphore = Semaphore(5)  # Max 5 concurrent orders
 
-async def rate_limited_order(order_params):
+async def rate_limited_order(order_params: Any) -> Any:
     async with semaphore:
         return await client.orders.post_order(**order_params)
 ```
@@ -724,7 +791,9 @@ async def rate_limited_order(order_params):
 from fivetwenty.exceptions import FiveTwentyError
 
 
-async def robust_order_placement(order_params, max_retries=3):
+
+"""Comprehensive module for trading operations."""
+async def robust_order_placement(order_params: Any, max_retries: int = 3) -> Any:
     for attempt in range(max_retries):
         try:
             return await client.orders.post_order(**order_params)
@@ -751,6 +820,8 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID
 
 
+
+"""Comprehensive module for trading operations."""
 class OrderState(Enum):
     CREATED = "created"
     PENDING = "pending"
@@ -759,11 +830,11 @@ class OrderState(Enum):
     REJECTED = "rejected"
 
 class OrderManager:
-    def __init__(self, client: AsyncClient):
+    def __init__(self, client: AsyncClient) -> None:
         self.client = client
         self.orders = {}
 
-    async def track_order(self, account_id: AccountID, order_id: str):
+    async def track_order(self, account_id: AccountID, order_id: str) -> Any:
         """Track order through its lifecycle"""
         while True:
             order = await self.client.orders.get_order(account_id, order_id)
@@ -789,13 +860,15 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID
 
 
+
+"""Comprehensive module for trading operations."""
 class RiskManagedOrderSystem:
-    def __init__(self, client: AsyncClient, max_daily_loss: Decimal):
+    def __init__(self, client: AsyncClient, max_daily_loss: Decimal) -> None:
         self.client = client
         self.max_daily_loss = max_daily_loss
         self.daily_loss = Decimal("0")
 
-    async def place_order_with_risk_check(self, account_id: AccountID, **order_params):
+    async def place_order_with_risk_check(self, account_id: AccountID, **order_params: Any) -> Any:
         # Check daily loss limit
         if self.daily_loss >= self.max_daily_loss:
             raise ValueError("Daily loss limit exceeded")

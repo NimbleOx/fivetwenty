@@ -22,16 +22,18 @@ from typing import Dict, List, Optional
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import ClientPrice
 
+
+"""Comprehensive module for trading operations."""
 class BasicPriceStreamer:
     """Basic implementation of price streaming."""
 
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.is_streaming = False
         self.price_cache = {}
 
-    async def stream_prices(self, instruments: List[str]):
+    async def stream_prices(self, instruments: List[str]) -> Any:
         """Stream real-time prices for instruments."""
 
         print(f"Starting price stream for: {', '.join(instruments)}")
@@ -51,7 +53,7 @@ class BasicPriceStreamer:
             print(f"Streaming error: {e}")
             await self._handle_streaming_error(e)
 
-    async def _process_price_update(self, price: ClientPrice):
+    async def _process_price_update(self, price: ClientPrice) -> Any:
         """Process incoming price update."""
 
         # Cache the latest price
@@ -65,7 +67,7 @@ class BasicPriceStreamer:
         # Basic processing example
         await self._analyze_price_movement(price)
 
-    async def _analyze_price_movement(self, price: ClientPrice):
+    async def _analyze_price_movement(self, price: ClientPrice) -> Any:
         """Basic price movement analysis."""
 
         instrument = price.instrument
@@ -76,7 +78,7 @@ class BasicPriceStreamer:
         # Example: detect significant price moves
         # Implementation would include more sophisticated analysis
 
-    async def _handle_streaming_error(self, error: Exception):
+    async def _handle_streaming_error(self, error: Exception) -> Any:
         """Handle streaming errors with reconnection."""
 
         print(f"Stream error: {error}")
@@ -86,7 +88,7 @@ class BasicPriceStreamer:
             print("Attempting to reconnect...")
             # Implement reconnection logic
 
-    def stop_streaming(self):
+    def stop_streaming(self) -> Any:
         """Stop the price stream."""
         self.is_streaming = False
         print("Price streaming stopped")
@@ -115,15 +117,17 @@ async def basic_streaming_example():
 from fivetwenty import AsyncClient
 from fivetwenty import Environment
 
+
+"""Comprehensive module for trading operations."""
 class AccountStreamer:
     """Stream account changes and transactions."""
 
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.is_streaming = False
 
-    async def stream_account_changes(self):
+    async def stream_account_changes(self) -> Any:
         """Stream account and transaction updates."""
 
         print("Starting account stream...")
@@ -141,7 +145,7 @@ class AccountStreamer:
         except Exception as e:
             print(f"Account streaming error: {e}")
 
-    async def _process_transaction(self, transaction):
+    async def _process_transaction(self, transaction: Any) -> Any:
         """Process account transaction updates."""
 
         print(f"Transaction: {transaction.type} - {transaction.id}")
@@ -150,7 +154,7 @@ class AccountStreamer:
         if hasattr(transaction, 'order_fill_transaction'):
             await self._handle_order_fill(transaction.order_fill_transaction)
 
-    async def _handle_order_fill(self, fill_transaction):
+    async def _handle_order_fill(self, fill_transaction: Any) -> Any:
         """Handle order fill transactions."""
 
         print(f"Order filled: {fill_transaction.instrument} "

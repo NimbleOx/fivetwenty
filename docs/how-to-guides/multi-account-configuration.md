@@ -187,6 +187,10 @@ async def mixed_approach():
 
 ## Environment Variable Pattern
 
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 The pattern for custom prefixes follows: `{PREFIX}_FIVETWENTY_OANDA_{VARIABLE}`
 
 ### Examples:
@@ -219,7 +223,6 @@ The pattern for custom prefixes follows: `{PREFIX}_FIVETWENTY_OANDA_{VARIABLE}`
 ### Error Handling
 
 Always validate that configurations were loaded successfully:
-
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.configuration import AccountConfigLoader

@@ -11,9 +11,13 @@ FiveTwenty follows strict code quality standards to ensure maintainability, secu
 All code must pass mypy strict mode with no errors:
 
 ```python
-# ✅ Good - Full type annotations
+"""Code style examples for type annotations."""
+from typing import Any, Optional
 
-from typing import Any
+from fivetwenty.models import OrderRequest, OrderResponse
+
+
+# ✅ Good - Full type annotations
 async def create_order(
     self,
     account_id: str,
@@ -24,8 +28,10 @@ async def create_order(
     """Create an order with proper typing."""
     pass
 
+
 # ❌ Bad - Missing type annotations
-async def create_order(self, account_id, order, timeout=None) -> Any:
+async def create_order_bad(self, account_id, order, timeout=None) -> Any:
+    """Bad example with missing annotations."""
     pass
 ```
 
@@ -34,25 +40,29 @@ async def create_order(self, account_id, order, timeout=None) -> Any:
 **Critical**: Always use `Decimal` for financial calculations:
 
 ```python
+"""Module docstring for financial calculations."""
 from decimal import Decimal
 from typing import Union
 
 
 # ✅ Good - Decimal for financial values
-
-"""Module docstring."""
 def calculate_position_value(
     units: int,
     price: Decimal,
 ) -> Decimal:
+    """Calculate position value with proper decimal precision."""
     return Decimal(str(units)) * price
 
+
 # ❌ Bad - Float causes precision errors
-def calculate_position_value(units: int, price: Decimal) -> Decimal:
+def calculate_position_value_bad(units: int, price: Decimal) -> Decimal:
+    """Bad example with precision loss."""
     return units * price  # Precision loss!
+
 
 # ✅ Good - Accept Decimal or convert from string/int
 def parse_price(value: Union[str, int, Decimal]) -> Decimal:
+    """Parse price from various input types to Decimal."""
     if isinstance(value, Decimal):
         return value
     return Decimal(str(value))
@@ -63,13 +73,18 @@ def parse_price(value: Union[str, int, Decimal]) -> Decimal:
 Use FiveTwenty's exception hierarchy:
 
 ```python
+"""Module docstring for error handling examples."""
+from typing import Any
+
+import httpx
+
 from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.models import AccountSummary
 
 
 # ✅ Good - Specific exception types
-
-"""Module docstring."""
 async def get_account(self, account_id: str) -> AccountSummary:
+    """Get account with proper error handling."""
     try:
         response = await self._request("GET", f"/accounts/{account_id}")
         return AccountSummary.model_validate(response.json())
@@ -79,10 +94,17 @@ async def get_account(self, account_id: str) -> AccountSummary:
             response=e.response if hasattr(e, "response") else None,
         ) from e
 
+
 # ❌ Bad - Generic exceptions
-async def get_account(self, account_id: str) -> AccountSummary:
+async def get_account_bad(self, account_id: str) -> AccountSummary:
+    """Bad example without proper error handling."""
     response = await self._request("GET", f"/accounts/{account_id}")
     return AccountSummary.model_validate(response.json())  # May raise various exceptions
+
+
+async def _request(self, method: str, url: str) -> Any:
+    """Mock request method."""
+    pass
 ```
 
 ---
@@ -94,8 +116,19 @@ async def get_account(self, account_id: str) -> AccountSummary:
 async client is the primary interface, Client is a sync wrapper:
 
 ```python
+"""Architecture patterns for async-first design."""
+from typing import Any, Optional
+
+from fivetwenty.models import AccountSummary
+
+
 # ✅ Good - async client method
 class AccountsEndpoint:
+    """Accounts endpoint implementation."""
+
+    def __init__(self, client: Any) -> None:
+        self._client = client
+
     async def get_summary(
         self,
         account_id: str,
@@ -110,8 +143,15 @@ class AccountsEndpoint:
         )
         return AccountSummary.model_validate(response.json())
 
+
 # ✅ Good - Sync wrapper delegates to async
 class SyncAccountsEndpoint:
+    """Sync wrapper for accounts endpoint."""
+
+    def __init__(self, client: Any, async_endpoint: AccountsEndpoint) -> None:
+        self._client = client
+        self._async_endpoint = async_endpoint
+
     def get_summary(
         self,
         account_id: str,
@@ -129,10 +169,18 @@ class SyncAccountsEndpoint:
 Group related methods into endpoint classes:
 
 ```python
+"""Endpoint organization patterns."""
+from typing import Any
+
+from fivetwenty.models import Order, OrderRequest, OrderResponse
+
+
 # ✅ Good - Organized by OANDA API endpoints
 class OrdersEndpoint:
-    """Class docstring."""
     """Order management operations."""
+
+    def __init__(self, client: Any) -> None:
+        self._client = client
 
     async def list_orders(self, account_id: str) -> list[Order]:
         """List pending orders."""
@@ -146,9 +194,18 @@ class OrdersEndpoint:
         """Get specific order."""
         pass
 
+
+class TradesEndpoint:
+    """Trades management operations."""
+
+    def __init__(self, client: Any) -> None:
+        self._client = client
+
+
 # Attach to client
 class AsyncClient:
-    """Class docstring."""
+    """Main async client."""
+
     def __init__(self) -> None:
         self.orders = OrdersEndpoint(self)
         self.accounts = AccountsEndpoint(self)
@@ -160,19 +217,16 @@ class AsyncClient:
 Use Pydantic models for all API data:
 
 ```python
+"""Module docstring for model validation patterns."""
 from datetime import datetime
 from decimal import Decimal
+from typing import Optional
 
 from pydantic import BaseModel, Field
 
 
 # ✅ Good - Complete Pydantic model
-
-
-"""Module docstring."""
-"""Module docstring."""
 class Order(BaseModel):
-    """Class docstring."""
     """Represents an OANDA order."""
 
     id: str = Field(alias="id", description="Order ID")
@@ -188,8 +242,10 @@ class Order(BaseModel):
         # Use enum values in serialization
         use_enum_values = True
 
+
 # ✅ Good - Model usage with validation
 def parse_order_response(data: dict) -> Order:
+    """Parse order response data into model."""
     return Order.model_validate(data)
 ```
 
@@ -334,6 +390,8 @@ async def post_limit_order(
 ```python
 
 """Module docstring."""
+from decimal import Decimal
+
 class Position(BaseModel):
     """Class docstring."""
     """Represents a trading position for a specific instrument.
@@ -497,16 +555,18 @@ from unittest.mock import AsyncMock, Mock, patch
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
 
+
+"""Comprehensive module for trading operations."""
 class TestAccountsEndpoint:
     """Test suite for accounts endpoint."""
 
     @pytest.fixture
-    def client(self):
+    def client(self) -> Any:
         """Create test client with mocked HTTP."""
         return AsyncClient(token="test-token", account_id="your-account-id", environment="practice")
 
     @pytest.mark.asyncio
-    async def test_get_accounts_success(self, client):
+    async def test_get_accounts_success(self, client: Any) -> Any:
         """Test successful account summary retrieval."""
         # Arrange
         expected_response = {
@@ -532,7 +592,7 @@ class TestAccountsEndpoint:
             mock_request.assert_called_once_with("GET", "/accounts/123-456-789")
 
     @pytest.mark.asyncio
-    async def test_get_accounts_not_found(self, client):
+    async def test_get_accounts_not_found(self, client: Any) -> Any:
         """Test account not found error handling."""
         with patch.object(client, '_request') as mock_request:
             mock_request.side_effect = httpx.HTTPStatusError(
@@ -559,12 +619,14 @@ import pytest
 from fivetwenty import AsyncClient, Environment
 
 
+
+"""Comprehensive module for trading operations."""
 @pytest.mark.integration
 class TestAccountsIntegration:
     """Integration tests for accounts endpoint."""
 
     @pytest.fixture
-    def client(self):
+    def client(self) -> Any:
         """Create client with real credentials."""
         return AsyncClient(
             token=os.environ["TEST_OANDA_TOKEN"],
@@ -572,7 +634,7 @@ class TestAccountsIntegration:
         )
 
     @pytest.mark.asyncio
-    async def test_get_accounts_real_api(self, client, vcr):
+    async def test_get_accounts_real_api(self, client: Any, vcr: Any) -> Any:
         """Test against real OANDA API (recorded with VCR)."""
         account_id = os.environ["TEST_OANDA_ACCOUNT"]
 

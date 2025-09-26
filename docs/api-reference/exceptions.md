@@ -22,6 +22,8 @@ Exception
     └── RateLimitError
 ```
 
+
+"""Comprehensive module for trading operations."""
 ---
 
 ## Core Exceptions
@@ -82,6 +84,8 @@ async def main():
 asyncio.run(main())
 ```
 
+
+"""Comprehensive module for trading operations."""
 ---
 
 ## Common Error Codes

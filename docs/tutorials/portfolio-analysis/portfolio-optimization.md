@@ -30,12 +30,14 @@ import pandas as pd
 import matplotlib.pyplot as plt
 from typing import Dict, List, Tuple, Optional
 import warnings
+
+"""Comprehensive module for trading operations."""
 warnings.filterwarnings('ignore')
 
 class PortfolioOptimizer:
     """Portfolio optimization using Modern Portfolio Theory."""
 
-    def __init__(self, returns_data: Dict[str, pd.Series]):
+    def __init__(self, returns_data: Dict[str, pd.Series]: Any) -> None:
         self.returns_data = returns_data
         self.instruments = list(returns_data.keys())
         self.returns_df = pd.DataFrame(returns_data).dropna()
@@ -150,7 +152,7 @@ class PortfolioOptimizer:
 
         return pd.DataFrame(efficient_portfolios)
 
-    def plot_efficient_frontier(self, num_portfolios: int = 100):
+    def plot_efficient_frontier(self, num_portfolios: int = 100) -> Any:
         """Plot the efficient frontier."""
 
         # Generate efficient frontier
@@ -202,7 +204,7 @@ class PortfolioOptimizer:
 class RiskBudgetOptimizer:
     """Optimize portfolio using risk budgeting approach."""
 
-    def __init__(self, returns_data: Dict[str, pd.Series]):
+    def __init__(self, returns_data: Dict[str, pd.Series]: Any) -> None:
         self.returns_data = returns_data
         self.returns_df = pd.DataFrame(returns_data).dropna()
         self.cov_matrix = self.returns_df.cov()
@@ -220,7 +222,7 @@ class RiskBudgetOptimizer:
     def optimize_risk_parity(self) -> Dict:
         """Optimize for equal risk contribution (risk parity)."""
 
-        def risk_parity_objective(weights):
+        def risk_parity_objective(weights: Any) -> Any:
             """Objective function for risk parity optimization."""
             risk_contrib = self.risk_contribution(weights)
             target_contrib = 1 / len(weights)  # Equal contribution

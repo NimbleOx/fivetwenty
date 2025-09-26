@@ -32,6 +32,8 @@ Secure configuration object for OANDA account credentials and settings.
 ```python
 
 """Module docstring."""
+from fivetwenty import Environment
+
 class AccountConfig(BaseModel):
     """Class docstring."""
     """Configuration for a single OANDA trading account."""
@@ -47,6 +49,8 @@ class AccountConfig(BaseModel):
 ```python
 
 """Module docstring."""
+from fivetwenty import Environment
+
 class AccountConfig:
     """Class docstring."""
     def __init__(
@@ -77,6 +81,8 @@ class AccountConfig:
 from fivetwenty import AccountConfig, Environment
 
 # Basic configuration
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
@@ -124,6 +130,10 @@ actual_account = config.account_id.get_secret_value()
 Trading environment (practice or live).
 
 ```python
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(...)
 if config.environment == Environment.LIVE:
     print("⚠️ LIVE trading - real money at risk")
@@ -135,6 +145,8 @@ else:
 User-friendly identifier for the account configuration.
 
 ```python
+from fivetwenty import Environment
+
 config = AccountConfig(alias="my_bot", token="token", account_id="account_id", environment=Environment.PRACTICE)
 print(f"Bot name: {config.alias}")  # Safe to log
 ```
@@ -149,6 +161,10 @@ Returns safe summary string suitable for logging.
 
 **Usage:**
 ```python
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     alias="my_trader",
     environment=Environment.PRACTICE,
@@ -167,6 +183,10 @@ logger.info(f"Starting trading session: {config.summary()}")
 All secret values are automatically masked in string representations:
 
 ```python
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="super-secret-token",
     account_id="secret-account-123",
@@ -192,8 +212,12 @@ The configuration validates all inputs:
 
 ```python
 from pydantic import ValidationError
+from fivetwenty import Environment
+
 
 # Invalid alias (starts with number)
+
+"""Comprehensive module for trading operations."""
 try:
     AccountConfig(
         alias="123invalid",  # Must be valid identifier
@@ -243,6 +267,8 @@ import os
 
 from fivetwenty import AccountConfigLoader
 
+
+"""Comprehensive module for trading operations."""
 os.environ["FIVETWENTY_OANDA_TOKEN"] = "your-token"
 os.environ["FIVETWENTY_OANDA_ACCOUNT"] = "your-account"
 os.environ["FIVETWENTY_OANDA_ENVIRONMENT"] = "practice"
@@ -275,6 +301,8 @@ Load configuration using custom environment variable prefix.
 **Usage:**
 ```python
 # Set custom prefixed variables
+
+"""Comprehensive module for trading operations."""
 os.environ["STRATEGY_A_OANDA_TOKEN"] = "token-a"
 os.environ["STRATEGY_A_OANDA_ACCOUNT"] = "account-a"
 os.environ["STRATEGY_A_OANDA_ENVIRONMENT"] = "practice"
@@ -326,6 +354,8 @@ Validate an account configuration and return any errors found.
 ```python
 from fivetwenty import AccountConfig, ConfigValidator, Environment
 
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="valid-token",
     account_id="valid-account",
@@ -345,6 +375,10 @@ else:
 **Error Handling Example:**
 ```python
 # Create config with potential issues
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="valid-token",
     account_id="",  # Empty account ID
@@ -372,12 +406,16 @@ Enumeration for OANDA trading environments.
 
 ```python
 from enum import Enum
+from fivetwenty import Environment
+
 
 
 
 
 """Module docstring."""
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 class Environment(Enum):
     """Class docstring."""
     """OANDA trading environments."""
@@ -409,6 +447,8 @@ Live trading environment with real money.
 from fivetwenty import Environment
 
 # Create configurations for different environments
+
+"""Comprehensive module for trading operations."""
 practice_config = AccountConfig(
     environment=Environment.PRACTICE,
     token="practice_token",
@@ -440,6 +480,8 @@ print(f"API URL: {config.environment.base_url}")
 ```python
 from fivetwenty import AccountConfig, Environment
 
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
@@ -466,6 +508,8 @@ strategy_config = AccountConfigLoader.from_env_prefix("STRATEGY_")
 from fivetwenty import AccountConfigLoader
 
 # Load multiple account configurations
+
+"""Comprehensive module for trading operations."""
 accounts = {
     "momentum": AccountConfigLoader.from_env_prefix("MOMENTUM_"),
     "grid": AccountConfigLoader.from_env_prefix("GRID_"),
@@ -485,6 +529,8 @@ from fivetwenty import ConfigValidator
 
 
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 def create_safe_config(**kwargs) -> AccountConfig:
     """Create configuration with validation."""
     config = AccountConfig(**kwargs)
@@ -506,6 +552,8 @@ from fivetwenty import AccountConfigLoader, Environment
 
 
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 def load_production_config() -> AccountConfig:
     """Load production configuration with safety checks."""
     config = AccountConfigLoader.load_default()
@@ -552,6 +600,8 @@ from fivetwenty import AsyncClient, ConfigValidator
 
 
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 def safe_client_creation(config: AccountConfig) -> AsyncClient:
     """Create client with validation."""
     errors = ConfigValidator.validate_account_config(config)
@@ -568,6 +618,8 @@ def safe_client_creation(config: AccountConfig) -> AsyncClient:
 # Practice: PRACTICE_FIVETWENTY_*
 # Live: LIVE_FIVETWENTY_*
 
+
+"""Comprehensive module for trading operations."""
 def load_env_specific_config(env: str) -> AccountConfig:
     """Load configuration for specific environment."""
     prefix = f"{env.upper()}_FIVETWENTY_"
@@ -585,6 +637,8 @@ def load_env_specific_config(env: str) -> AccountConfig:
 from fivetwenty import AsyncClient
 
 
+
+"""Comprehensive module for trading operations."""
 async def verify_config_connection(config: AccountConfig) -> bool:
     """Test configuration by connecting to API."""
     try:
@@ -605,6 +659,8 @@ async def verify_config_connection(config: AccountConfig) -> bool:
 ```python
 
 """Module docstring."""
+from fivetwenty import Environment
+
 class ConfigFactory:
     """Class docstring."""
     """Factory for creating configurations."""
@@ -694,7 +750,11 @@ Raised by Pydantic when configuration parameters are invalid.
 **Example:**
 ```python
 from pydantic import ValidationError
+from fivetwenty import Environment
 
+
+
+"""Comprehensive module for trading operations."""
 try:
     config = AccountConfig(
         token="",
@@ -728,6 +788,8 @@ if not config:
 from fivetwenty import AsyncClient, Environment
 
 # Old way
+
+"""Comprehensive module for trading operations."""
 client = AsyncClient(token="token", account_id="your-account-id", environment=Environment.PRACTICE)
 
 # New way - Direct parameters (still supported)

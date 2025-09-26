@@ -14,6 +14,8 @@ from dataclasses import dataclass
 from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
+
+"""Comprehensive module for trading operations."""
 @dataclass
 class TradingConfig:
     max_position_size: float = 10000
@@ -25,7 +27,7 @@ class TradingConfig:
 class LiveTradingEngine:
     """Complete automated trading engine with streaming integration."""
 
-    def __init__(self, client: AsyncClient, account_id: str, config: TradingConfig):
+    def __init__(self, client: AsyncClient, account_id: str, config: TradingConfig) -> None:
         self.client = client
         self.account_id = account_id
         self.config = config
@@ -35,7 +37,7 @@ class LiveTradingEngine:
         self.signal_generator = None
         self.risk_manager = None
 
-    async def start_trading(self, instruments: List[str]):
+    async def start_trading(self, instruments: List[str]) -> Any:
         """Start the automated trading engine."""
 
         print("Starting automated trading engine...")
@@ -51,7 +53,7 @@ class LiveTradingEngine:
             self._daily_reset_task()
         )
 
-    async def _initialize_components(self, instruments: List[str]):
+    async def _initialize_components(self, instruments: List[str]) -> Any:
         """Initialize trading components."""
 
         # Initialize signal generator (from previous tutorial)
@@ -65,7 +67,7 @@ class LiveTradingEngine:
         # Get current positions
         await self._update_positions()
 
-    async def _stream_prices(self, instruments: List[str]):
+    async def _stream_prices(self, instruments: List[str]) -> Any:
         """Stream prices and generate signals."""
 
         try:
@@ -91,7 +93,7 @@ class LiveTradingEngine:
                 await asyncio.sleep(5)
                 await self._stream_prices(instruments)  # Restart
 
-    async def _handle_trading_signal(self, signal):
+    async def _handle_trading_signal(self, signal: Any) -> Any:
         """Handle trading signals from signal generator."""
 
         # Check trading conditions
@@ -157,7 +159,7 @@ class LiveTradingEngine:
 
         return units
 
-    async def _execute_trade(self, signal, units: int):
+    async def _execute_trade(self, signal: Any, units: int) -> Any:
         """Execute trading order."""
 
         try:
@@ -187,7 +189,7 @@ class LiveTradingEngine:
         except Exception as e:
             print(f"Trade execution error: {e}")
 
-    async def _place_protective_orders(self, instrument: str, entry_price: Decimal, units: int):
+    async def _place_protective_orders(self, instrument: str, entry_price: Decimal, units: int) -> Any:
         """Place stop loss and take profit orders."""
 
         try:
@@ -217,7 +219,7 @@ class LiveTradingEngine:
         except Exception as e:
             print(f"Error placing protective orders: {e}")
 
-    async def _monitor_positions(self):
+    async def _monitor_positions(self) -> Any:
         """Monitor open positions for management."""
 
         while self.is_running:
@@ -230,7 +232,7 @@ class LiveTradingEngine:
                 print(f"Position monitoring error: {e}")
                 await asyncio.sleep(30)
 
-    async def _update_positions(self):
+    async def _update_positions(self) -> Any:
         """Update current position information."""
 
         try:
@@ -249,7 +251,7 @@ class LiveTradingEngine:
         except Exception as e:
             print(f"Error updating positions: {e}")
 
-    async def _update_position_pnl(self, instrument: str, bid: float, ask: float):
+    async def _update_position_pnl(self, instrument: str, bid: float, ask: float) -> Any:
         """Update position P&L with current prices."""
 
         if instrument in self.positions:
@@ -269,7 +271,7 @@ class LiveTradingEngine:
                 position['current_pnl'] = pnl
                 position['current_price'] = current_price
 
-    async def _check_position_management(self):
+    async def _check_position_management(self) -> Any:
         """Check positions for management actions."""
 
         for instrument, position in self.positions.items():
@@ -281,7 +283,7 @@ class LiveTradingEngine:
                 if current_pnl < -1000:  # $1000 loss threshold
                     await self._emergency_close_position(instrument)
 
-    async def _emergency_close_position(self, instrument: str):
+    async def _emergency_close_position(self, instrument: str) -> Any:
         """Emergency position closure."""
 
         try:
@@ -299,7 +301,7 @@ class LiveTradingEngine:
         except Exception as e:
             print(f"Emergency close error: {e}")
 
-    async def _daily_reset_task(self):
+    async def _daily_reset_task(self) -> Any:
         """Reset daily counters."""
 
         while self.is_running:
@@ -308,7 +310,7 @@ class LiveTradingEngine:
             self.daily_trades = 0
             print("Daily trade counter reset")
 
-    def stop_trading(self):
+    def stop_trading(self) -> Any:
         """Stop the trading engine."""
         self.is_running = False
         print("Trading engine stopped")
@@ -316,7 +318,7 @@ class LiveTradingEngine:
 class RiskManager:
     """Risk management for automated trading."""
 
-    def __init__(self, config: TradingConfig):
+    def __init__(self, config: TradingConfig) -> None:
         self.config = config
 
     async def check_pre_trade_risk(self, signal) -> bool:

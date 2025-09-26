@@ -406,10 +406,14 @@ async def unified_trading_system_example():
 Coordinate real-time updates from all data sources:
 
 ```python
+from datetime import datetime
+
+
+"""Comprehensive module for trading operations."""
 class RealTimeDataOrchestrator:
     """Orchestrate real-time updates from multiple data sources."""
 
-    def __init__(self, unified_system: UnifiedTradingSystem):
+    def __init__(self, unified_system: UnifiedTradingSystem) -> None:
         self.unified_system = unified_system
         self.monitoring = False
         self.update_intervals = {
@@ -421,7 +425,7 @@ class RealTimeDataOrchestrator:
         }
         self.last_updates = {}
 
-    async def start_orchestration(self):
+    async def start_orchestration(self) -> Any:
         """Start coordinated real-time data updates."""
 
         self.monitoring = True
@@ -456,7 +460,7 @@ class RealTimeDataOrchestrator:
                 print(f"Orchestration error: {e}")
                 await asyncio.sleep(60)
 
-    def _create_update_task(self, source: str):
+    def _create_update_task(self, source: str) -> Any:
         """Create update task for a specific data source."""
 
         if source == 'news':
@@ -470,7 +474,7 @@ class RealTimeDataOrchestrator:
 
         return None
 
-    def stop_orchestration(self):
+    def stop_orchestration(self) -> Any:
         """Stop real-time orchestration."""
         self.monitoring = False
         print("Real-time data orchestration stopped")
@@ -672,6 +676,8 @@ Monitor the performance and efficiency of the data pipeline:
 """Module docstring."""
 
 from typing import Any
+from datetime import datetime
+
 class PipelinePerformanceMonitor:
     """Class docstring."""
     """Monitor performance of the unified data pipeline."""
@@ -773,7 +779,7 @@ Centralize configuration for all data sources:
 class DataSourceConfig:
     """Centralized configuration for all data sources."""
 
-    def __init__(self, config_file: str = None):
+    def __init__(self, config_file: str = None) -> None:
         self.config = self._load_config(config_file) if config_file else {}
 
     def _load_config(self, config_file: str) -> Dict:
@@ -817,10 +823,15 @@ class DataSourceConfig:
 Implement robust error handling for production use:
 
 ```python
+from decimal import Decimal
+from datetime import datetime
+
+
+"""Comprehensive module for trading operations."""
 class ResilientDataPipeline:
     """Resilient wrapper for unified trading system."""
 
-    def __init__(self, unified_system: UnifiedTradingSystem):
+    def __init__(self, unified_system: UnifiedTradingSystem) -> None:
         self.unified_system = unified_system
         self.fallback_modes = {
             "economic": True,   # Can trade without economic data

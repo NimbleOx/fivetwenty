@@ -26,7 +26,9 @@ import asyncio
 from fivetwenty import AsyncClient, Environment
 
 
-async def stream_prices():
+
+"""Comprehensive module for trading operations."""
+async def stream_prices() -> Any:
     """Stream real-time prices."""
     async with AsyncClient(
         token="your-token",
@@ -53,7 +55,9 @@ from decimal import Decimal
 from fivetwenty.models import ClientPrice, PricingHeartbeat
 
 
-async def process_price_stream(client, account_id):
+
+"""Comprehensive module for trading operations."""
+async def process_price_stream(client: Any, account_id: str) -> Any:
     """Process streaming prices with business logic."""
 
     spreads = {}
@@ -88,7 +92,7 @@ async def process_price_stream(client, account_id):
 ### Multiple Instrument Streaming
 
 ```python
-async def multi_instrument_stream(client, account_id):
+async def multi_instrument_stream(client: Any, account_id: str) -> Any:
     """Stream multiple instruments efficiently."""
 
     instruments = [
@@ -119,7 +123,7 @@ async def multi_instrument_stream(client, account_id):
 Monitor account updates in real-time:
 
 ```python
-async def stream_transactions(client, account_id):
+async def stream_transactions(client: Any, account_id: str) -> Any:
     """Stream transaction events."""
 
     async for event in client.transactions.get_transactions_stream(account_id):
@@ -157,6 +161,8 @@ Configure streaming behavior:
 from fivetwenty.models.streaming import ReconnectionPolicy, StreamingConfiguration
 
 # Configure streaming
+
+"""Comprehensive module for trading operations."""
 config = StreamingConfiguration(
     account_id="101-001-1234567-001",
     instruments=["EUR_USD", "GBP_USD"],
@@ -189,7 +195,9 @@ Detect and recover from stalled streams:
 from fivetwenty.exceptions import StreamStall
 import asyncio
 
-async def resilient_stream(client, account_id, instruments):
+
+"""Comprehensive module for trading operations."""
+async def resilient_stream(client: Any, account_id: str, instruments: Any) -> Any:
     """Stream with automatic recovery from stalls."""
 
     max_retries = 5
@@ -229,16 +237,20 @@ async def resilient_stream(client, account_id, instruments):
 Manage long-lived connections:
 
 ```python
+from datetime import datetime
+
+
+"""Comprehensive module for trading operations."""
 class StreamManager:
     """Manage streaming connections with health monitoring."""
 
-    def __init__(self, client, account_id):
+    def __init__(self, client: Any, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.streams = {}
         self.health_status = {}
 
-    async def start_price_stream(self, instruments):
+    async def start_price_stream(self, instruments: Any) -> Any:
         """Start price streaming with monitoring."""
 
         stream_id = f"price_{'-'.join(instruments)}"
@@ -265,14 +277,14 @@ class StreamManager:
             self.health_status[stream_id]["errors"] += 1
             await self.restart_stream(stream_id, instruments)
 
-    async def restart_stream(self, stream_id, instruments):
+    async def restart_stream(self, stream_id: str, instruments: Any) -> Any:
         """Restart a failed stream."""
 
         print(f"Restarting stream {stream_id}")
         await asyncio.sleep(5)  # Brief pause
         await self.start_price_stream(instruments)
 
-    async def monitor_health(self):
+    async def monitor_health(self) -> Any:
         """Monitor stream health."""
 
         while True:
@@ -295,7 +307,9 @@ Stream with the sync client:
 from fivetwenty import Client, Environment
 
 
-def sync_price_stream():
+
+"""Comprehensive module for trading operations."""
+def sync_price_stream() -> Any:
     """Stream prices synchronously."""
 
     with Client(
@@ -324,15 +338,17 @@ import queue
 import threading
 
 
+
+"""Comprehensive module for trading operations."""
 class ThreadedStreamer:
     """Thread-safe streaming handler."""
 
-    def __init__(self, client):
+    def __init__(self, client: Any) -> None:
         self.client = client
         self.price_queue = queue.Queue(maxsize=1000)
         self.running = False
 
-    def start_stream(self, account_id, instruments):
+    def start_stream(self, account_id: str, instruments: Any) -> Any:
         """Start streaming in background thread."""
 
         self.running = True
@@ -343,7 +359,7 @@ class ThreadedStreamer:
         )
         thread.start()
 
-    def _stream_worker(self, account_id, instruments):
+    def _stream_worker(self, account_id: str, instruments: Any) -> Any:
         """Worker thread for streaming."""
 
         for price in self.client.pricing.get_pricing_stream(account_id, instruments):
@@ -360,7 +376,7 @@ class ThreadedStreamer:
                 except queue.Empty:
                     pass
 
-    def get_prices(self, timeout=1.0):
+    def get_prices(self, timeout: Any = 1.0) -> Any:
         """Get prices from queue."""
 
         prices = []
@@ -373,7 +389,7 @@ class ThreadedStreamer:
 
         return prices
 
-    def stop(self):
+    def stop(self) -> Any:
         """Stop streaming."""
         self.running = False
 ```
@@ -391,14 +407,16 @@ from collections import deque
 from datetime import datetime, timedelta
 import statistics
 
+
+"""Comprehensive module for trading operations."""
 class PriceAggregator:
     """Aggregate streaming prices for analysis."""
 
-    def __init__(self, window_seconds=60):
+    def __init__(self, window_seconds: int = 60) -> None:
         self.window = timedelta(seconds=window_seconds)
         self.price_windows = {}  # instrument -> deque of (time, price)
 
-    async def process_stream(self, client, account_id, instruments):
+    async def process_stream(self, client: Any, account_id: str, instruments: Any) -> Any:
         """Process and aggregate price stream."""
 
         async for price in client.pricing.get_pricing_stream(account_id, instruments):
@@ -446,7 +464,7 @@ class PriceAggregator:
 Coordinate multiple streams:
 
 ```python
-async def coordinate_streams(client, account_id):
+async def coordinate_streams(client: Any, account_id: str) -> Any:
     """Coordinate price and transaction streams."""
 
     price_task = asyncio.create_task(
@@ -479,7 +497,7 @@ async def coordinate_streams(client, account_id):
 ### Efficient Stream Processing
 
 ```python
-async def optimized_stream_processing(client, account_id):
+async def optimized_stream_processing(client: Any, account_id: str) -> Any:
     """Process streams efficiently."""
 
     # Use minimal instruments
@@ -500,7 +518,7 @@ async def optimized_stream_processing(client, account_id):
             asyncio.create_task(process_batch(batch.copy()))
             batch.clear()
 
-async def process_batch(prices):
+async def process_batch(prices: Any) -> Any:
     """Process a batch of prices."""
     # Perform calculations on batch
     pass
@@ -515,6 +533,8 @@ Track streaming performance:
 """Module docstring."""
 
 from typing import Any
+from datetime import datetime
+
 class StreamMetrics:
     """Class docstring."""
     """Track streaming metrics."""

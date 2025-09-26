@@ -16,17 +16,19 @@ from typing import Optional
 from fivetwenty import AsyncClient, Environment
 
 
+
+"""Comprehensive module for trading operations."""
 class OptimizedTradingClient:
     """High-performance OANDA client for HFT applications."""
 
-    def __init__(self, token: str, environment: Environment, max_connections: int = 10):
+    def __init__(self, token: str, environment: Environment, max_connections: int = 10) -> None:
         self.token = token
         self.environment = environment
         self.max_connections = max_connections
         self.client: AsyncClient | None = None
         self._connection_pool_initialized = False
 
-    async def initialize(self):
+    async def initialize(self) -> Any:
         """Initialize optimized client with persistent connections."""
 
         # Create client with optimized settings
@@ -44,21 +46,21 @@ class OptimizedTradingClient:
         self._connection_pool_initialized = True
         print(f"✅ Optimized client initialized with {self.max_connections} connections")
 
-    async def close(self):
+    async def close(self) -> Any:
         """Clean up connections."""
         if self.client:
             await self.client.__aexit__(None, None, None)
             self._connection_pool_initialized = False
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Any:
         await self.initialize()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> Any:
         await self.close()
 
 # Usage with optimized settings
-async def setup_hft_client():
+async def setup_hft_client() -> Any:
     async with OptimizedTradingClient(
         token="your-token",
         environment=Environment.PRACTICE,
@@ -74,10 +76,14 @@ async def setup_hft_client():
 Batch multiple operations to reduce round trips:
 
 ```python
+from fivetwenty import AsyncClient
+
+
+"""Comprehensive module for trading operations."""
 class BatchRequestManager:
     """Batch multiple requests for improved throughput."""
 
-    def __init__(self, client: AsyncClient, batch_size: int = 10):
+    def __init__(self, client: AsyncClient, batch_size: int = 10) -> None:
         self.client = client
         self.batch_size = batch_size
         self.pending_requests: List = []

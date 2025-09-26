@@ -43,6 +43,8 @@ print(fivetwenty.__version__)
 
 ## Dependencies
 
+from fivetwenty import Environment
+
 The SDK automatically installs these minimal core dependencies:
 
 - **httpx** - Modern async HTTP client with connection pooling
@@ -53,7 +55,6 @@ The SDK automatically installs these minimal core dependencies:
 ### Virtual Environment (Recommended)
 
 Always use a virtual environment to avoid dependency conflicts:
-
 ```bash
 # Create virtual environment
 python -m venv venv

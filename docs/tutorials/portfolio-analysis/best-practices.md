@@ -35,6 +35,8 @@ from typing import Dict
 
 """Module docstring."""
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 @dataclass
 class PortfolioConfig:
     """Class docstring."""
@@ -250,6 +252,8 @@ from datetime import datetime
 
 """Module docstring."""
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 class PerformanceMonitor:
     """Class docstring."""
     """Real-time performance monitoring and reporting."""

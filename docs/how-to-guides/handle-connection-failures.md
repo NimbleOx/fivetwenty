@@ -25,7 +25,9 @@ import asyncio
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
-async def validate_credentials(token: str, environment: Environment):
+
+"""Comprehensive module for trading operations."""
+async def validate_credentials(token: str, environment: Environment) -> Any:
     """Validate OANDA credentials before use."""
 
     try:
@@ -68,7 +70,9 @@ import asyncio
 from httpx import TimeoutException, ConnectError
 from fivetwenty import AsyncClient, Environment
 
-async def robust_connection(token: str, timeout: float = 30.0):
+
+"""Comprehensive module for trading operations."""
+async def robust_connection(token: str, timeout: float = 30.0) -> Any:
     """Create connection with custom timeout and error handling."""
 
     try:
@@ -114,14 +118,16 @@ from typing import Optional
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
+
+"""Comprehensive module for trading operations."""
 class RetryConfig:
     """Configuration for retry logic."""
-    def __init__(self, max_attempts: int = 3, base_delay: float = 1.0, max_delay: float = 60.0):
+    def __init__(self, max_attempts: int = 3, base_delay: float = 1.0, max_delay: float = 60.0) -> None:
         self.max_attempts = max_attempts
         self.base_delay = base_delay
         self.max_delay = max_delay
 
-async def retry_with_backoff(func, retry_config: RetryConfig, *args, **kwargs):
+async def retry_with_backoff(func: Any, retry_config: RetryConfig, *args: Any, **kwargs: Any) -> Any:
     """Execute function with exponential backoff retry."""
 
     for attempt in range(retry_config.max_attempts):
@@ -158,10 +164,10 @@ async def retry_with_backoff(func, retry_config: RetryConfig, *args, **kwargs):
             print(f"⏳ API error on attempt {attempt + 1}, retrying...")
             await asyncio.sleep(retry_config.base_delay)
 
-async def get_accounts_with_retry(token: str):
+async def get_accounts_with_retry(token: str) -> Any:
     """Get accounts with retry logic."""
 
-    async def _get_accounts():
+    async def _get_accounts() -> Any:
         async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
             return await client.accounts.get_accounts()
 
@@ -186,6 +192,8 @@ except Exception as e:
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
+
+"""Comprehensive module for trading operations."""
 async def healthcheck_connection(client: AsyncClient, account_id: str) -> bool:
     """Check if connection is healthy."""
 
@@ -208,8 +216,7 @@ async def healthcheck_connection(client: AsyncClient, account_id: str) -> bool:
         print(f"❌ Connection test failed: {e}")
         return False
 
-async def monitor_connection_health(client: AsyncClient, account_id: str,
-                                 interval: int = 30):
+async def monitor_connection_health(client: AsyncClient, account_id: str, interval: int = 30) -> Any:
     """Monitor connection health continuously."""
 
     consecutive_failures = 0
@@ -240,7 +247,7 @@ async def monitor_connection_health(client: AsyncClient, account_id: str,
             await asyncio.sleep(interval)
 
 # Usage
-async def main():
+async def main() -> Any:
     async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
         accounts = await client.accounts.get_accounts()
         if accounts:
@@ -264,7 +271,11 @@ async def main():
 ### Practice vs Live Environment
 
 ```python
-def validate_environment_setup(token: str, expected_env: Environment):
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
+def validate_environment_setup(token: str, expected_env: Environment) -> Any:
     """Validate token matches expected environment."""
 
     # Practice tokens typically start with specific patterns
@@ -327,24 +338,26 @@ await handle_ssl_issues("your-token")
 ```python
 from fivetwenty import AsyncClient, Environment
 
+
+"""Comprehensive module for trading operations."""
 class ResilientClient:
     """Client wrapper with automatic reconnection."""
 
-    def __init__(self, token: str, environment: Environment):
+    def __init__(self, token: str, environment: Environment) -> None:
         self.token = token
         self.environment = environment
         self.client: Optional[AsyncClient] = None
         self.retry_config = RetryConfig(max_attempts=3, base_delay=1.0)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> Any:
         await self.connect()
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> Any:
         if self.client:
             await self.client.__aexit__(exc_type, exc_val, exc_tb)
 
-    async def connect(self):
+    async def connect(self) -> Any:
         """Establish connection with retry logic."""
         try:
             self.client = AsyncClient(
@@ -358,12 +371,12 @@ class ResilientClient:
             print(f"❌ Connection failed: {e}")
             raise
 
-    async def ensure_connected(self):
+    async def ensure_connected(self) -> Any:
         """Ensure client is connected before operations."""
         if not self.client:
             await self.connect()
 
-    async def safe_request(self, func, *args, **kwargs):
+    async def safe_request(self, func: Any, *args: Any, **kwargs: Any) -> Any:
         """Execute request with automatic reconnection."""
         try:
             await self.ensure_connected()

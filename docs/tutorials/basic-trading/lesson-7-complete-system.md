@@ -181,10 +181,12 @@ from fivetwenty import AsyncClient
 
 
 # Enhanced strategy concepts (for further learning)
+
+"""Comprehensive module for trading operations."""
 class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
     """Enhanced strategy with additional features."""
 
-    def __init__(self, account_id: str, instrument: str = "EUR_USD"):
+    def __init__(self, account_id: str, instrument: str = "EUR_USD") -> None:
         super().__init__(account_id, instrument)
 
         # Enhanced features

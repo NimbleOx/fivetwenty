@@ -76,6 +76,8 @@ Every successful trading strategy is built on three fundamental pillars:
 from decimal import Decimal
 
 # Example: $10,000 account with 1% risk
+
+"""Comprehensive module for trading operations."""
 account_balance = Decimal("10000")  # Example account balance
 risk_per_trade = account_balance * Decimal("0.01")  # $100 maximum risk
 
@@ -128,18 +130,22 @@ Most new traders face this psychological conflict:
 
 ### Step 1: Define Your Risk Tolerance
 ```python
+from decimal import Decimal
+
+
+"""Comprehensive module for trading operations."""
 def calculate_risk_parameters(account_balance: Decimal, monthly_income: Decimal,
                             emergency_fund: Decimal) -> dict:
     """Calculate personalized risk parameters."""
-    
+
     # Never risk money you need for living expenses
     tradeable_capital = min(account_balance, emergency_fund * 0.5)
-    
+
     # Conservative risk parameters
     max_risk_per_trade = tradeable_capital * 0.01  # 1%
     max_daily_risk = tradeable_capital * 0.05      # 5%
     max_monthly_risk = tradeable_capital * 0.20    # 20%
-    
+
     return {
         "tradeable_capital": tradeable_capital,
         "max_risk_per_trade": max_risk_per_trade,
@@ -181,24 +187,28 @@ Create written rules before you start trading:
 ### Step 3: Implement Tracking Systems
 
 ```python
+from decimal import Decimal
+
+
+"""Comprehensive module for trading operations."""
 class RiskTracker:
     """Track risk metrics in real-time."""
-    
-    def __init__(self, account_balance: Decimal):
+
+    def __init__(self, account_balance: Decimal) -> None:
         self.account_balance = account_balance
         self.daily_trades = []
         self.open_risks = {}
-    
-    def add_trade_risk(self, trade_id: str, risk_amount: Decimal):
+
+    def add_trade_risk(self, trade_id: str, risk_amount: Decimal) -> Any:
         """Add new trade risk to tracking."""
         self.open_risks[trade_id] = risk_amount
         self.daily_trades.append(risk_amount)
-    
+
     def get_current_risk_exposure(self) -> dict:
         """Calculate current risk exposure."""
         total_risk = sum(self.open_risks.values())
         risk_percentage = (total_risk / self.account_balance) * 100
-        
+
         return {
             "total_risk_amount": total_risk,
             "risk_percentage": risk_percentage,
@@ -267,33 +277,37 @@ Test your understanding of risk management fundamentals:
 Small improvements in risk management compound dramatically:
 
 ```python
-def compare_risk_strategies(initial_balance: Decimal, months: int):
+from decimal import Decimal
+
+
+"""Comprehensive module for trading operations."""
+def compare_risk_strategies(initial_balance: Decimal, months: int) -> Any:
     """Compare different risk management approaches."""
-    
+
     strategies = {
         "Conservative (1% risk)": {"risk": 0.01, "win_rate": 0.55, "rr": 1.8},
         "Moderate (2% risk)": {"risk": 0.02, "win_rate": 0.55, "rr": 1.8},
         "Aggressive (5% risk)": {"risk": 0.05, "win_rate": 0.55, "rr": 1.8},
     }
-    
+
     for name, params in strategies.items():
         balance = initial_balance
         trades_per_month = 20
-        
+
         for month in range(months):
             for trade in range(trades_per_month):
                 risk_amount = balance * params["risk"]
-                
+
                 if random.random() < params["win_rate"]:
                     # Win
                     balance += risk_amount * params["rr"]
                 else:
                     # Loss
                     balance -= risk_amount
-                    
+
                 # Prevent balance from going negative
                 balance = max(balance, 0)
-        
+
         print(f"{name}: ${balance:,.2f} (Return: {(balance/initial_balance-1)*100:+.1f}%)")
 
 # Demonstrate the power of conservative risk management

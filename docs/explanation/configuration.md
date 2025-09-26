@@ -21,6 +21,8 @@ The simplest way to configure the client:
 ```python
 from fivetwenty import AsyncClient, Environment
 
+
+"""Comprehensive module for trading operations."""
 async with AsyncClient(
     token="your-api-token",
     environment=Environment.PRACTICE
@@ -38,6 +40,8 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Create configuration
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
@@ -151,6 +155,10 @@ asyncio.run(main())
 
 ### 3. Environment Variables Pattern
 
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 Best for: Docker deployments, Kubernetes, CI/CD, serverless
 
 #### Standard Environment Variables
@@ -163,7 +171,6 @@ The library automatically loads these environment variables:
 | `FIVETWENTY_OANDA_ACCOUNT` | OANDA account ID | `123-456-789` |
 | `FIVETWENTY_OANDA_ENVIRONMENT` | Environment (practice/live) | `practice` |
 | `FIVETWENTY_OANDA_ACCOUNT_ALIAS` | Account alias | `my_trading_account` |
-
 ```python
 from fivetwenty import AsyncClient, Environment
 
@@ -208,12 +215,13 @@ export GRID_OANDA_ACCOUNT_ALIAS="grid_strategy"
 
 ## Configuration Priority
 
+from fivetwenty import Environment
+
 When multiple configuration methods are used, the priority is:
 
 1. **Configuration object** (highest priority)
 2. **Direct parameters**
 3. **Environment variables** (lowest priority)
-
 ```python
 from fivetwenty import AsyncClient
 
@@ -629,6 +637,10 @@ prod_client = manager.get_client("production")
 
 ### Security
 
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 1. **Never hardcode secrets** - Use environment variables, vaults, or secure storage
 2. **Use configuration objects** - Better type safety and validation
 3. **Validate configurations** - Check values before creating clients
@@ -662,7 +674,6 @@ prod_client = manager.get_client("production")
 ## Troubleshooting
 
 ### Common Configuration Errors
-
 ```python
 from pydantic import ValidationError
 

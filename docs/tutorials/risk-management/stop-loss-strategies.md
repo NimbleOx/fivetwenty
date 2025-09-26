@@ -31,8 +31,9 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
-async def place_order_with_fixed_stop(account_id: str, instrument: str, units: int,
-                                     stop_pips: Decimal, take_profit_pips: Decimal = None):
+
+"""Comprehensive module for trading operations."""
+async def place_order_with_fixed_stop(account_id: str, instrument: str, units: int, stop_pips: Decimal, take_profit_pips: Decimal = None) -> Any:
     """Place order with fixed pip-based stop loss."""
 
     async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
@@ -115,6 +116,8 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
+
+"""Comprehensive module for trading operations."""
 async def place_order_with_percentage_stop(account_id: str, instrument: str, units: int,
                                           stop_percentage: Decimal = Decimal("1.0")):
     """Place order with percentage-based stop loss."""
@@ -178,13 +181,15 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import CandlestickGranularity
 import numpy as np
 
+
+"""Comprehensive module for trading operations."""
 class ATRStopCalculator:
     """Calculate stop losses based on Average True Range."""
-    
+
     async def calculate_atr_stop(self, client: AsyncClient, instrument: str,
                                atr_multiplier: Decimal = Decimal("2.0"), periods: int = 14) -> dict:
         """Calculate ATR-based stop loss level."""
-        
+
         try:
             # Get historical data
             candles = await client.instruments.get_instrument_candles(
@@ -192,11 +197,11 @@ class ATRStopCalculator:
                 count=periods + 20,  # Extra data for stable calculation
                 granularity=CandlestickGranularity.H4
             )
-            
+
             if len(candles.candles) < periods + 1:
                 print(f"❌ Insufficient data for ATR calculation")
                 return None
-            
+
             # Calculate True Range for each period
             true_ranges = []
             for i in range(1, len(candles.candles)):
@@ -227,7 +232,7 @@ class ATRStopCalculator:
 
             pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
             atr_pips = atr_distance / pip_value
-            
+
             result = {
                 'current_price': current_price,
                 'atr': atr,
@@ -237,16 +242,16 @@ class ATRStopCalculator:
                 'long_stop': current_price - atr_distance,
                 'short_stop': current_price + atr_distance
             }
-            
+
             print(f"📊 ATR Stop Calculation:")
             print(f"   Current Price: {current_price:.5f}")
             print(f"   ATR ({periods} periods): {atr:.5f}")
             print(f"   ATR Distance: {atr_distance:.5f} ({atr_pips:.1f} pips)")
             print(f"   Long Stop: {result['long_stop']:.5f}")
             print(f"   Short Stop: {result['short_stop']:.5f}")
-            
+
             return result
-            
+
         except Exception as e:
             print(f"❌ ATR calculation error: {e}")
             return None
@@ -254,23 +259,23 @@ class ATRStopCalculator:
 async def place_order_with_atr_stop(account_id: str, instrument: str, units: int,
                                    atr_multiplier: Decimal = Decimal("2.0")):
     """Place order with ATR-based stop loss."""
-    
+
     async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
         calculator = ATRStopCalculator()
-        
+
         # Calculate ATR stop
         atr_data = await calculator.calculate_atr_stop(client, instrument, atr_multiplier)
-        
+
         if not atr_data:
             print("❌ Could not calculate ATR stop")
             return None
-        
+
         # Determine stop price based on position direction
         if units > 0:  # Long position
             stop_price = atr_data['long_stop']
         else:  # Short position
             stop_price = atr_data['short_stop']
-        
+
         try:
             response = await client.orders.post_market_order(
                 account_id=account_id,
@@ -278,14 +283,14 @@ async def place_order_with_atr_stop(account_id: str, instrument: str, units: int
                 units=units,
                 stop_loss_on_fill={'price': f"{stop_price:.5f}"}
             )
-            
+
             if response.order_fill_transaction:
                 fill = response.order_fill_transaction
                 print(f"✅ ATR stop order executed!")
                 print(f"   Fill Price: {fill.price}")
                 print(f"   ATR Stop: {stop_price:.5f}")
                 return fill
-                
+
         except FiveTwentyError as e:
             print(f"❌ ATR stop order error: {e.message}")
             return None
@@ -310,17 +315,20 @@ Capture more profit by moving stops in your favor as price moves.
 
 ```python
 from fivetwenty import AsyncClient, Environment
+from decimal import Decimal
 
+
+
+"""Comprehensive module for trading operations."""
 class TrailingStopManager:
     """Advanced trailing stop management system."""
 
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.active_trails = {}
 
-    async def set_trailing_stop(self, trade_id: str, trail_distance_pips: Decimal,
-                               breakeven_pips: Decimal = None):
+    async def set_trailing_stop(self, trade_id: str, trail_distance_pips: Decimal, breakeven_pips: Decimal = None) -> Any:
         """Set trailing stop with optional break-even protection."""
 
         try:
@@ -357,7 +365,7 @@ class TrailingStopManager:
             print(f"❌ Trailing stop error: {e}")
             return False
 
-    async def update_trailing_stops(self):
+    async def update_trailing_stops(self) -> Any:
         """Update all active trailing stops."""
 
         for trade_id, trail_info in list(self.active_trails.items()):
@@ -439,7 +447,7 @@ class TrailingStopManager:
             except Exception as e:
                 print(f"❌ Error updating trail for {trade_id}: {e}")
 
-    async def monitor_trailing_stops(self, update_interval: int = 30):
+    async def monitor_trailing_stops(self, update_interval: int = 30) -> Any:
         """Continuously monitor and update trailing stops."""
 
         print(f"🔄 Starting trailing stop monitoring (interval: {update_interval}s)")
@@ -451,7 +459,7 @@ class TrailingStopManager:
         print(f"🛁 No more active trailing stops - monitoring stopped")
 
 # Demo trailing stops
-async def demo_trailing_stops(account_id: str):
+async def demo_trailing_stops(account_id: str) -> Any:
     """Demonstrate trailing stop functionality."""
 
     if not account_id:
@@ -498,17 +506,21 @@ Place stops based on key technical levels rather than arbitrary distances.
 
 ```python
 from fivetwenty import AsyncClient
+from decimal import Decimal
 
+
+
+"""Comprehensive module for trading operations."""
 class TechnicalStopCalculator:
     """Calculate stops based on support/resistance levels."""
-    
-    def __init__(self, buffer_pips: int = 5):
+
+    def __init__(self, buffer_pips: int = 5) -> None:
         self.buffer_pips = buffer_pips
-    
-    async def find_support_resistance_levels(self, client: AsyncClient, 
+
+    async def find_support_resistance_levels(self, client: AsyncClient,
                                            instrument: str) -> dict:
         """Find key support and resistance levels."""
-        
+
         try:
             # Get recent price data
             candles = await client.instruments.get_instrument_candles(
@@ -516,49 +528,49 @@ class TechnicalStopCalculator:
                 count=100,
                 granularity=CandlestickGranularity.H4
             )
-            
+
             if len(candles.candles) < 20:
                 return None
-            
+
             # Extract price data
             highs = [Decimal(str(c.mid.h)) for c in candles.candles if c.mid]
             lows = [Decimal(str(c.mid.l)) for c in candles.candles if c.mid]
             closes = [Decimal(str(c.mid.c)) for c in candles.candles if c.mid]
-            
+
             current_price = closes[-1]
-            
+
             # Simple support/resistance calculation
             # Find recent significant highs and lows
             recent_high = max(highs[-20:])  # Highest high in last 20 periods
             recent_low = min(lows[-20:])    # Lowest low in last 20 periods
-            
+
             # Find price levels that have been tested multiple times
             price_levels = []
-            
+
             # Look for levels within small ranges that price has touched multiple times
             for i in range(len(closes) - 10):
                 level = closes[i]
                 touches = 0
-                
+
                 # Count how many times price came close to this level
                 for j in range(max(0, i-10), min(len(closes), i+10)):
                     if abs(closes[j] - level) < Decimal("0.0020"):  # Within 20 pips
                         touches += 1
-                
+
                 if touches >= 3:  # Level tested at least 3 times
                     price_levels.append(level)
-            
+
             # Remove duplicates and sort
             price_levels = sorted(list(set([round(p, 5) for p in price_levels])))
-            
+
             # Classify levels as support or resistance
             support_levels = [level for level in price_levels if level < current_price]
             resistance_levels = [level for level in price_levels if level > current_price]
-            
+
             # Find nearest levels
             nearest_support = max(support_levels) if support_levels else recent_low
             nearest_resistance = min(resistance_levels) if resistance_levels else recent_high
-            
+
             result = {
                 'current_price': current_price,
                 'nearest_support': nearest_support,
@@ -568,61 +580,61 @@ class TechnicalStopCalculator:
                 'recent_high': recent_high,
                 'recent_low': recent_low
             }
-            
+
             print(f"📈 Support/Resistance Analysis:")
             print(f"   Current Price: {current_price:.5f}")
             print(f"   Nearest Support: {nearest_support:.5f}")
             print(f"   Nearest Resistance: {nearest_resistance:.5f}")
-            
+
             return result
-            
+
         except Exception as e:
             print(f"❌ S/R calculation error: {e}")
             return None
-    
+
     def calculate_technical_stop(self, levels_data: dict, is_long: bool,
                                instrument: str) -> Decimal:
         """Calculate stop based on technical levels."""
-        
+
         pip_value = Decimal("0.01") if instrument.endswith('JPY') else Decimal("0.0001")
         buffer = Decimal(str(self.buffer_pips)) * pip_value
-        
+
         if is_long:
             # For long positions, place stop below nearest support
             stop_price = levels_data['nearest_support'] - buffer
         else:
             # For short positions, place stop above nearest resistance
             stop_price = levels_data['nearest_resistance'] + buffer
-        
+
         print(f"🎯 Technical Stop Calculation:")
         print(f"   Position: {'Long' if is_long else 'Short'}")
         print(f"   Key Level: {levels_data['nearest_support'] if is_long else levels_data['nearest_resistance']:.5f}")
         print(f"   Buffer: {self.buffer_pips} pips")
         print(f"   Stop Price: {stop_price:.5f}")
-        
+
         return stop_price
 
 # Example usage
-async def demo_technical_stops(account_id: str, instrument: str = "EUR_USD"):
+async def demo_technical_stops(account_id: str, instrument: str = "EUR_USD") -> Any:
     """Demonstrate technical stop calculation."""
-    
+
     async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
         calculator = TechnicalStopCalculator(buffer_pips=5)
-        
+
         # Find support/resistance levels
         levels = await calculator.find_support_resistance_levels(client, instrument)
-        
+
         if levels:
             # Calculate stops for both directions
             long_stop = calculator.calculate_technical_stop(levels, is_long=True, instrument=instrument)
             short_stop = calculator.calculate_technical_stop(levels, is_long=False, instrument=instrument)
-            
+
             return {
                 'levels': levels,
                 'long_stop': long_stop,
                 'short_stop': short_stop
             }
-        
+
         return None
 ```
 
@@ -761,29 +773,28 @@ appropriate_stop = Decimal("1.0975")  # 25 pips - allows for normal volatility
 ```python
 class ScalingStopManager:
     """Manage stops with position scaling."""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.position_scales = {}
-    
-    def setup_scaling_stops(self, trade_id: str, total_position: int,
-                          scale_levels: list):
+
+    def setup_scaling_stops(self, trade_id: str, total_position: int, scale_levels: list) -> Any:
         """Setup stops for scaled position management."""
-        
+
         # Example: Scale out 1/3 at each level
         position_per_scale = total_position // len(scale_levels)
-        
+
         self.position_scales[trade_id] = {
             "remaining_position": total_position,
             "scale_levels": scale_levels,
             "position_per_scale": position_per_scale,
             "stops_hit": [],
         }
-        
+
         print(f"🔄 Scaling Stops Setup:")
         print(f"   Total Position: {total_position:,} units")
         print(f"   Scale Levels: {len(scale_levels)}")
         print(f"   Position per Scale: {position_per_scale:,} units")
-        
+
         return self.position_scales[trade_id]
 
 # Example scaling setup
@@ -801,40 +812,42 @@ scaling_setup = scaling_manager.setup_scaling_stops(
 from datetime import datetime, timedelta
 
 
+
+"""Comprehensive module for trading operations."""
 class TimeBasedStopManager:
     """Manage stops based on time in trade."""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.time_stops = {}
-    
-    def set_time_stop(self, trade_id: str, max_hours: int = 24):
+
+    def set_time_stop(self, trade_id: str, max_hours: int = 24) -> Any:
         """Set maximum time limit for trade."""
-        
+
         entry_time = datetime.utcnow()
         exit_time = entry_time + timedelta(hours=max_hours)
-        
+
         self.time_stops[trade_id] = {
             "entry_time": entry_time,
             "exit_time": exit_time,
             "max_hours": max_hours,
         }
-        
+
         print(f"⏰ Time Stop Set:")
         print(f"   Trade ID: {trade_id}")
         print(f"   Max Duration: {max_hours} hours")
         print(f"   Exit Time: {exit_time.strftime('%Y-%m-%d %H:%M:%S')}")
-    
-    def check_time_stops(self):
+
+    def check_time_stops(self) -> Any:
         """Check if any time stops should be triggered."""
-        
+
         current_time = datetime.utcnow()
         expired_trades = []
-        
+
         for trade_id, stop_info in self.time_stops.items():
             if current_time >= stop_info["exit_time"]:
                 expired_trades.append(trade_id)
                 print(f"⏰ Time stop triggered for {trade_id}")
-        
+
         return expired_trades
 
 # Example time-based stop

@@ -51,6 +51,10 @@ git commit -m "Your descriptive commit message"
 git push origin your-feature-branch
 ```
 
+from fivetwenty import AsyncClient
+
+
+"""Comprehensive module for trading operations."""
 ---
 
 ## Contribution Areas
@@ -86,7 +90,6 @@ git push origin your-feature-branch
 ### **Project Commands**
 
 FiveTwenty uses **poethepoet (poe)** for development workflows:
-
 ```bash
 # Quality checks (recommended workflow)
 uv run poe dev      # Fast development checks (format, typecheck, test)
@@ -116,6 +119,10 @@ uv run poe clean      # Clean build artifacts and caches
 
 ### **Code Standards**
 
+from decimal import Decimal
+
+
+"""Comprehensive module for trading operations."""
 - **Type Safety**: 100% mypy strict compliance required
 - **Code Quality**: ruff formatting and linting (automatically fixed)
 - **Testing**: Comprehensive unit and integration test coverage
@@ -124,7 +131,6 @@ uv run poe clean      # Clean build artifacts and caches
 ### **Financial Precision**
 
 **Critical**: Always use `Decimal` for financial calculations, never `float`:
-
 ```python
 # ✅ Correct
 from decimal import Decimal

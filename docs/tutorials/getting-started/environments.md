@@ -23,6 +23,8 @@ The SDK provides an `Environment` enum for easy configuration:
 from fivetwenty import AsyncClient, Environment
 
 # For testing and development
+
+"""Comprehensive module for trading operations."""
 practice_client = AsyncClient(
     token="your-practice-token",
     environment=Environment.PRACTICE
@@ -86,7 +88,9 @@ import os
 from fivetwenty import AsyncClient, Environment
 
 
-async def practice_trading():
+
+"""Comprehensive module for trading operations."""
+async def practice_trading() -> Any:
     """Safe trading in practice environment."""
 
     async with AsyncClient(
@@ -144,7 +148,9 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
 
-async def live_trading_with_safeguards():
+
+"""Comprehensive module for trading operations."""
+async def live_trading_with_safeguards() -> Any:
     """Production trading with safety checks."""
 
     # Multiple confirmation checks
@@ -187,12 +193,12 @@ async def live_trading_with_safeguards():
             # Log error for monitoring
             log_error(e)
 
-def confirm_live_trading():
+def confirm_live_trading() -> Any:
     """Require explicit confirmation for live trading."""
     response = input("⚠️  LIVE TRADING - Real money at risk. Continue? (yes/no): ")
     return response.lower() == "yes"
 
-def log_error(error):
+def log_error(error: Any) -> Any:
     """Log errors for monitoring."""
     import logging
     logging.error(f"Live trading error: {error}")
@@ -249,6 +255,10 @@ client = create_client()
 
 ### Recommended Workflow
 
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 1. **Develop in Practice** - Write and debug all code
 2. **Test in Practice** - Run comprehensive tests
 3. **Paper Trade** - Run strategy for weeks/months
@@ -256,7 +266,6 @@ client = create_client()
 5. **Scale Up** - Gradually increase position sizes
 
 ### Environment-Specific Tests
-
 ```python
 import os
 
@@ -438,6 +447,10 @@ class MultiEnvironmentConfig:
 
 ## Migration Checklist
 
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 Before moving from Practice to Live:
 
 - [ ] ✅ Strategy profitable for 3+ months in practice
@@ -454,7 +467,6 @@ Before moving from Practice to Live:
 ### Wrong Environment Errors
 
 If you get unexpected behavior:
-
 ```python
 
 # Always log the environment

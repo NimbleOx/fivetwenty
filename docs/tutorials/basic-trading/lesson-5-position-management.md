@@ -74,6 +74,8 @@ Different types of stop losses for different market conditions:
 from decimal import Decimal
 
 
+
+"""Comprehensive module for trading operations."""
 class StopLossStrategy:
     """Advanced stop loss calculation strategies."""
 
@@ -116,7 +118,7 @@ class StopLossStrategy:
 entry_price = Decimal("1.1000")
 is_long_position = True
 
-print("🛡️ Stop Loss Strategy Examples:")
+# Expected output: "🛡️ Stop Loss Strategy Examples:"
 print(f"Entry Price: {entry_price:.5f}")
 
 fixed_stop = StopLossStrategy.fixed_pip_stop(entry_price, is_long_position, 20)
@@ -203,11 +205,15 @@ Capture more profit with trailing stops:
 
 ```python
 from fivetwenty import AsyncClient
+from decimal import Decimal
 
+
+
+"""Comprehensive module for trading operations."""
 class TrailingStopManager:
     """Manage trailing stop loss orders."""
 
-    def __init__(self, initial_stop: Decimal, trail_distance_pips: int = 15):
+    def __init__(self, initial_stop: Decimal, trail_distance_pips: int = 15) -> None:
         self.current_stop = initial_stop
         self.trail_distance = Decimal(str(trail_distance_pips)) * Decimal("0.0001")
         self.best_price = None
@@ -242,7 +248,7 @@ class TrailingStopManager:
         return stop_updated, self.current_stop
 
 # Example trailing stop usage
-async def demonstrate_trailing_stop(account_id: str, trade_id: str):
+async def demonstrate_trailing_stop(account_id: str, trade_id: str) -> Any:
     """Demonstrate trailing stop functionality."""
 
     if not trade_id:

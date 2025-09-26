@@ -54,6 +54,9 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 ```python
 
 """Module docstring."""
+from decimal import Decimal
+from datetime import datetime
+
 class Account(ApiModel):
     """Class docstring."""
     balance: Decimal  # Validated at runtime
@@ -83,12 +86,14 @@ The SDK provides two client types addressing different use cases:
 ```python
 from fivetwenty import AsyncClient, Environment
 
+
+"""Comprehensive module for trading operations."""
 class Client:
-    def __init__(self, token: str):
+    def __init__(self, token: str) -> None:
         self._async_client = AsyncClient(token=token, account_id="your-account-id")
         self._executor = ThreadPoolExecutor(max_workers=1)
 
-    def accounts_list(self):
+    def accounts_list(self) -> Any:
         # Delegates to async client via thread pool
         return self._run_async(self._async_client.accounts.get_accounts())
 ```
@@ -126,6 +131,8 @@ client.positions.*   # Position aggregation
 client.pricing.*     # Market data
 ```
 
+
+"""Comprehensive module for trading operations."""
 **Benefits**:
 - **Intuitive**: Matches trader mental model
 - **Discoverability**: Related operations grouped together
@@ -156,7 +163,6 @@ All endpoints follow consistent patterns:
 ### Hierarchical Model Design
 
 Models follow a clear inheritance hierarchy:
-
 ```text
 ApiModel (base)
 ├── Account Models
@@ -188,6 +194,8 @@ class Account(ApiModel):
     margin_used: Decimal = Field(alias="marginUsed")
 ```
 
+
+"""Comprehensive module for trading operations."""
 **Why This Approach?**:
 
 - **Python Conventions**: snake_case in Python code
@@ -206,7 +214,6 @@ Trading applications require robust, always-on data streams:
 **Challenge**: Network connections fail, markets close, servers restart
 
 **Solution**: Comprehensive reconnection and health monitoring
-
 ```python
 class StreamingConfiguration:
     heartbeat_interval: int = 30  # Detect stale connections
@@ -228,6 +235,8 @@ async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
     process_price(price)
 ```
 
+
+"""Comprehensive module for trading operations."""
 **Benefits**:
 - **Familiar**: Uses standard Python patterns
 - **Backpressure**: Natural flow control
@@ -243,7 +252,6 @@ async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
 **Problem**: HTTP status codes are insufficient for financial APIs
 
 **Solution**: Rich, structured error information
-
 ```python
 from fivetwenty.exceptions import FiveTwentyError
 
@@ -356,6 +364,10 @@ from fivetwenty import AsyncClient, Environment
 client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], account_id="your-account-id", environment=Environment.PRACTICE)
 ```
 
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 **Benefits**:
 - **No Accidental Commits**: Tokens never in source code
 - **Explicit**: Clear where credentials are used
@@ -364,7 +376,6 @@ client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], account_id="you
 ### Environment Separation
 
 Practice and live environments are fully isolated:
-
 ```python
 from fivetwenty import AsyncClient, Environment
 
@@ -431,6 +442,8 @@ class ExtendedClient(AsyncClient):
         self.analytics = CustomAnalyticsEndpoint(self)
 ```
 
+
+"""Comprehensive module for trading operations."""
 ---
 
 ## Design Trade-offs
@@ -584,6 +597,8 @@ poe test-integration --record-mode=new_episodes
 
 #### Adding New Endpoints
 
+
+"""Comprehensive module for trading operations."""
 1. **Plan the implementation**:
    ```bash
    # Use TodoWrite for complex features
@@ -618,7 +633,6 @@ poe test-integration --record-mode=new_episodes
    ```
 
 #### Working with Financial Data
-
 ```python
 import asyncio
 

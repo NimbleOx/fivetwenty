@@ -13,10 +13,12 @@ Let's build a simple but complete moving average crossover strategy:
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
+
+"""Comprehensive module for trading operations."""
 class SimpleMovingAverageCrossover:
     """A complete trading strategy with risk management."""
 
-    def __init__(self, account_id: str, instrument: str = "EUR_USD"):
+    def __init__(self, account_id: str, instrument: str = "EUR_USD") -> None:
         self.account_id = account_id
         self.instrument = instrument
         self.position_size = 1000  # Conservative size
@@ -77,7 +79,7 @@ class SimpleMovingAverageCrossover:
         # Sell signal: fast MA crosses below slow MA
         return (prev_fast_ma >= prev_slow_ma) and (fast_ma < slow_ma)
 
-    async def update_prices(self, client: AsyncClient):
+    async def update_prices(self, client: AsyncClient) -> Any:
         """Update price history for strategy calculations."""
         try:
             # Get recent historical data

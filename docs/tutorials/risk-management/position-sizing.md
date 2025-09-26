@@ -31,6 +31,8 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 # Configuration
+
+"""Comprehensive module for trading operations."""
 TOKEN = "your-api-token-here"
 ENVIRONMENT = Environment.PRACTICE
 
@@ -89,7 +91,7 @@ class PositionSizer:
         return True
 
 # Example usage
-async def demo_position_sizing(account_id: str):
+async def demo_position_sizing(account_id: str) -> Any:
     """Demonstrate position sizing calculations."""
 
     if not account_id:
@@ -144,6 +146,8 @@ from fivetwenty import AsyncClient, Environment
 import numpy as np
 from fivetwenty.models import CandlestickGranularity
 
+
+"""Comprehensive module for trading operations."""
 class VolatilityPositionSizer(PositionSizer):
     """Position sizing based on market volatility (ATR)."""
 
@@ -209,7 +213,7 @@ class VolatilityPositionSizer(PositionSizer):
             return 0
 
 # Example ATR position sizing
-async def demo_atr_position_sizing(account_id: str):
+async def demo_atr_position_sizing(account_id: str) -> Any:
     """Demonstrate ATR-based position sizing."""
 
     if not account_id:
@@ -254,10 +258,14 @@ The most mathematically sophisticated approach to position sizing.
 ### The Kelly Formula
 
 ```python
+from decimal import Decimal
+
+
+"""Comprehensive module for trading operations."""
 class KellyPositionSizer:
     """Position sizing using Kelly Criterion."""
 
-    def __init__(self, win_rate: Decimal, avg_win: Decimal, avg_loss: Decimal):
+    def __init__(self, win_rate: Decimal, avg_win: Decimal, avg_loss: Decimal) -> None:
         self.win_rate = win_rate / Decimal("100")  # Convert percentage to decimal
         self.lose_rate = Decimal("1") - self.win_rate
         self.avg_win = avg_win
@@ -316,7 +324,7 @@ class KellyPositionSizer:
         return position_size
 
 # Demo Kelly sizing
-def demo_kelly_sizing():
+def demo_kelly_sizing() -> Any:
     """Demonstrate Kelly criterion position sizing."""
 
     # Example trading statistics
@@ -363,6 +371,8 @@ Adjust position sizes based on recent performance and market conditions.
 ```python
 from decimal import Decimal
 
+
+"""Comprehensive module for trading operations."""
 class AdaptivePositionSizer:
     """Position sizer that adapts based on recent performance."""
 
@@ -371,88 +381,88 @@ class AdaptivePositionSizer:
         self.recent_trades = []  # Track last 20 trades
         self.max_trades_tracked = 20
 
-    def add_trade_result(self, profit_loss: Decimal):
+    def add_trade_result(self, profit_loss: Decimal) -> Any:
         """Add trade result to performance tracking."""
         self.recent_trades.append(profit_loss)
-        
+
         # Keep only recent trades
         if len(self.recent_trades) > self.max_trades_tracked:
             self.recent_trades = self.recent_trades[-self.max_trades_tracked:]
 
     def calculate_adaptive_risk(self) -> Decimal:
         """Calculate risk percentage based on recent performance."""
-        
+
         if len(self.recent_trades) < 5:
             return self.base_risk_percent
-        
+
         # Calculate recent performance metrics
         recent_pnl = sum(self.recent_trades)
         winning_trades = len([t for t in self.recent_trades if t > 0])
         win_rate = Decimal(str(winning_trades)) / Decimal(str(len(self.recent_trades)))
-        
+
         # Adjust risk based on performance
         risk_multiplier = Decimal("1.0")
-        
+
         # Reduce risk after losses
         if recent_pnl < 0:
             risk_multiplier *= Decimal("0.75")  # Reduce by 25%
         elif recent_pnl > 0:
             risk_multiplier *= Decimal("1.1")   # Increase by 10%
-        
+
         # Adjust based on win rate
         if win_rate < Decimal("0.4"):
             risk_multiplier *= Decimal("0.8")   # Reduce for low win rate
         elif win_rate > Decimal("0.6"):
             risk_multiplier *= Decimal("1.05")  # Small increase for high win rate
-        
+
         # Calculate adjusted risk
         adjusted_risk = self.base_risk_percent * risk_multiplier
-        
+
         # Apply safety limits
         adjusted_risk = max(Decimal("0.25"), min(adjusted_risk, Decimal("2.0")))  # 0.25% - 2% range
-        
+
         print(f"🎯 Adaptive Risk Calculation:")
         print(f"   Base Risk: {self.base_risk_percent:.2f}%")
         print(f"   Recent P/L: ${recent_pnl:+.2f}")
         print(f"   Win Rate: {win_rate:.1%}")
         print(f"   Risk Multiplier: {risk_multiplier:.2f}")
         print(f"   Adjusted Risk: {adjusted_risk:.2f}%")
-        
+
         return adjusted_risk
 
     def get_position_size(self, account_balance: Decimal, entry_price: Decimal,
                          stop_loss: Decimal) -> int:
         """Get adaptive position size."""
-        
+
         risk_percent = self.calculate_adaptive_risk()
         risk_amount = account_balance * (risk_percent / Decimal("100"))
         risk_per_unit = abs(entry_price - stop_loss)
-        
+
         position_size = int(risk_amount / risk_per_unit) if risk_per_unit > 0 else 0
-        
+
         return position_size
 
 # Example adaptive sizing
-def demo_adaptive_sizing():
+def demo_adaptive_sizing() -> Any:
     """Demonstrate adaptive position sizing."""
-    
+
     sizer = AdaptivePositionSizer(base_risk_percent=Decimal("1.0"))
-    
+
     # Simulate some trade results
     trade_results = [Decimal("-50"), Decimal("100"), Decimal("-75"), Decimal("150"), Decimal("-25"), Decimal("200"), Decimal("-100"), Decimal("80")]
-    
+
     for result in trade_results:
         sizer.add_trade_result(result)
-    
+
     # Calculate position size with example values
     position_size = sizer.get_position_size(
         account_balance=Decimal("10000"),  # Example account balance
         entry_price=Decimal("1.1000"),    # Example entry price
         stop_loss=Decimal("1.0950")       # Example stop loss
     )
-    
+
     print(f"   Recommended Position Size: {position_size:,} units")
-    
+
     return sizer
 ```
 
@@ -538,22 +548,24 @@ Test your understanding of position sizing strategies:
 from decimal import Decimal
 
 
+
+"""Comprehensive module for trading operations."""
 def validate_position_size_decision(account_balance: Decimal, position_size: int,
                                    entry_price: Decimal, stop_loss: Decimal,
                                    instrument: str) -> dict:
     """Comprehensive position size validation."""
-    
+
     validation = {
         "checks": [],
         "warnings": [],
         "errors": [],
         "approved": True,
     }
-    
+
     # Calculate risk metrics
     risk_amount = Decimal(str(abs(position_size))) * abs(entry_price - stop_loss)
     risk_percent = (risk_amount / account_balance) * Decimal("100")
-    
+
     # Risk percentage check
     if risk_percent <= Decimal("1.0"):
         validation["checks"].append(f"✅ Risk {risk_percent:.2f}% within 1% limit")
@@ -562,7 +574,7 @@ def validate_position_size_decision(account_balance: Decimal, position_size: int
     else:
         validation["errors"].append(f"❌ Risk {risk_percent:.2f}% exceeds safe limits")
         validation["approved"] = False
-    
+
     # Position size reasonableness
     if abs(position_size) <= 10000:  # Example: 10,000 units threshold
         validation["checks"].append("✅ Position size reasonable")
@@ -571,14 +583,14 @@ def validate_position_size_decision(account_balance: Decimal, position_size: int
     else:
         validation["errors"].append("❌ Excessive position size")
         validation["approved"] = False
-    
+
     # Stop loss presence
     if stop_loss != entry_price:
         validation["checks"].append("✅ Stop loss defined")
     else:
         validation["errors"].append("❌ No stop loss defined")
         validation["approved"] = False
-    
+
     return validation
 
 # Example validation with sample values

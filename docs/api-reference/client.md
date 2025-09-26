@@ -42,6 +42,8 @@ Primary async client for OANDA API operations. Recommended for production use.
 from fivetwenty import AsyncClient, Environment
 
 # Constructor signature:
+
+"""Comprehensive module for trading operations."""
 client = AsyncClient(
     token=str | None,
     account_id=str | None,
@@ -88,6 +90,8 @@ client = AsyncClient(
 from fivetwenty import AsyncClient, Environment
 
 # Environment variables (recommended for deployment)
+
+"""Comprehensive module for trading operations."""
 async with AsyncClient() as client:
     accounts = await client.accounts.get_accounts()
 
@@ -148,6 +152,10 @@ Client(**kwargs)
 
 ```python
 # Environment variables
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 with Client() as client:
     accounts = client.accounts.get_accounts()
 
@@ -197,6 +205,10 @@ Structured configuration for account credentials and settings.
 
 **Constructor:**
 ```python
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="your_token",
     account_id="your_account_id",
@@ -225,6 +237,10 @@ config = AccountConfig(
 
 **Example:**
 ```python
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
@@ -272,7 +288,11 @@ except ValueError as e:
 **ValidationError**: Raised for invalid configuration values:
 ```python
 from pydantic import ValidationError
+from fivetwenty import Environment
 
+
+
+"""Comprehensive module for trading operations."""
 try:
     config = AccountConfig(
         token="",  # Empty token

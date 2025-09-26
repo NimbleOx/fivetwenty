@@ -29,11 +29,12 @@ import pandas as pd
 from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 
+
+"""Comprehensive module for trading operations."""
 class PerformanceAttributionAnalyzer:
     """Advanced performance attribution analysis."""
 
-    def __init__(self, portfolio_returns: pd.Series, benchmark_returns: pd.Series,
-                 factor_returns: Dict[str, pd.Series] = None):
+    def __init__(self, portfolio_returns: pd.Series, benchmark_returns: pd.Series, factor_returns: Dict[str, pd.Series]: Any = None) -> None:
         self.portfolio_returns = portfolio_returns
         self.benchmark_returns = benchmark_returns
         self.factor_returns = pd.DataFrame(factor_returns) if factor_returns else None
@@ -41,7 +42,7 @@ class PerformanceAttributionAnalyzer:
         # Align all data
         self._align_data()
 
-    def _align_data(self):
+    def _align_data(self) -> Any:
         """Align all return series to common dates."""
         common_index = self.portfolio_returns.index.intersection(self.benchmark_returns.index)
 
@@ -177,7 +178,7 @@ class PerformanceAttributionAnalyzer:
         benchmark_variance = np.var(benchmark_returns)
         return covariance / benchmark_variance if benchmark_variance > 0 else 0
 
-    def plot_performance_attribution(self):
+    def plot_performance_attribution(self) -> Any:
         """Plot performance attribution analysis."""
 
         fig, axes = plt.subplots(2, 2, figsize=(15, 12))
@@ -229,7 +230,7 @@ class PerformanceAttributionAnalyzer:
 class BenchmarkConstructor:
     """Construct custom benchmarks for attribution analysis."""
 
-    def __init__(self, instrument_returns: Dict[str, pd.Series]):
+    def __init__(self, instrument_returns: Dict[str, pd.Series]: Any) -> None:
         self.instrument_returns = pd.DataFrame(instrument_returns).dropna()
 
     def equal_weight_benchmark(self) -> pd.Series:

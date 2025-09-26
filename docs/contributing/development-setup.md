@@ -192,6 +192,10 @@ uv run poe markdown-check
 uv run poe markdown-format
 ```
 
+from fivetwenty import Environment
+
+
+"""Comprehensive module for trading operations."""
 ---
 
 ## IDE Configuration
@@ -237,7 +241,6 @@ The project includes `.vscode/` configuration:
 ### **Development Environment**
 
 Create `.env` file for development:
-
 ```bash
 # OANDA API credentials (practice account only)
 FIVETWENTY_OANDA_TOKEN=your-practice-token
@@ -268,6 +271,12 @@ VCR_RECORD_MODE=once  # once, new_episodes, all, none
 
 ### **Security Notes**
 
+from fivetwenty import AsyncClient
+from decimal import Decimal
+from datetime import datetime
+
+
+"""Comprehensive module for trading operations."""
 - **Never use live trading accounts** for development/testing
 - **Never commit credentials** to version control
 - **Use practice accounts only** for all development work

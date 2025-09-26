@@ -37,7 +37,9 @@ import asyncio
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def place_market_order():
+
+"""Comprehensive module for trading operations."""
+async def place_market_order() -> Any:
     async with AsyncClient() as client:
         # Buy 10,000 EUR/USD at market price
         response = await client.orders.post_market_order(
@@ -72,7 +74,9 @@ async def place_market_order():
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def place_limit_order():
+
+"""Comprehensive module for trading operations."""
+async def place_limit_order() -> Any:
     async with AsyncClient() as client:
         # Buy EUR/USD only if price drops to 1.0850 or lower
         response = await client.orders.post_limit_order(
@@ -108,7 +112,9 @@ async def place_limit_order():
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def place_stop_order():
+
+"""Comprehensive module for trading operations."""
+async def place_stop_order() -> Any:
     async with AsyncClient() as client:
         # Sell EUR/USD if price falls to 1.0800 (stop loss)
         response = await client.orders.post_stop_order(
@@ -144,7 +150,9 @@ async def place_stop_order():
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def place_mit_order():
+
+"""Comprehensive module for trading operations."""
+async def place_mit_order() -> Any:
     async with AsyncClient() as client:
         # Take profit when EUR/USD rises to 1.0950
         response = await client.orders.post_market_if_touched_order(
@@ -199,6 +207,8 @@ All orders require these fundamental parameters:
 from decimal import Decimal
 
 # Common order parameters
+
+"""Comprehensive module for trading operations."""
 order_params = {
     "instrument": "EUR_USD",           # Trading pair
     "units": 10000,                   # Position size (+ buy, - sell)
@@ -220,8 +230,12 @@ Control how long orders remain active:
 ```python
 from decimal import Decimal
 from fivetwenty import AsyncClient
+from datetime import datetime
 
-async def order_with_time_controls():
+
+
+"""Comprehensive module for trading operations."""
+async def order_with_time_controls() -> Any:
     from datetime import datetime, timedelta
 
     async with AsyncClient() as client:
@@ -256,7 +270,9 @@ Orders progress through predictable states:
 ```python
 from fivetwenty import AsyncClient
 
-async def monitor_order_status(order_id: str):
+
+"""Comprehensive module for trading operations."""
+async def monitor_order_status(order_id: str) -> Any:
     async with AsyncClient() as client:
         # Check current order status
         order = await client.orders.get_order(
@@ -282,7 +298,9 @@ async def monitor_order_status(order_id: str):
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def modify_pending_order(order_id: str, new_price: Decimal):
+
+"""Comprehensive module for trading operations."""
+async def modify_pending_order(order_id: str, new_price: Decimal) -> Any:
     async with AsyncClient() as client:
         # Update order price
         response = await client.orders.put_order(
@@ -335,7 +353,9 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import VeeTwentyError
 
-async def robust_order_placement():
+
+"""Comprehensive module for trading operations."""
+async def robust_order_placement() -> Any:
     async with AsyncClient() as client:
         try:
             response = await client.orders.post_limit_order(
@@ -373,6 +393,8 @@ from decimal import Decimal
 
 
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 def validate_order_params(instrument: str, units: int, price: Decimal) -> Any:
     # Check minimum/maximum units
     if abs(units) < 1:
@@ -395,6 +417,8 @@ from decimal import Decimal
 
 
 """Module docstring."""
+
+"""Comprehensive module for trading operations."""
 async def calculate_position_size(risk_amount: Decimal, stop_distance: Decimal) -> int:
     """Calculate position size based on risk management rules."""
 

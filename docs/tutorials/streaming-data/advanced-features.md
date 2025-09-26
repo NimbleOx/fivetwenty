@@ -13,10 +13,12 @@ from typing import Optional, Callable, Dict, Any
 from fivetwenty import AsyncClient
 from fivetwenty.models import StreamingConfiguration, ReconnectionPolicy
 
+
+"""Comprehensive module for trading operations."""
 class AdvancedStreamManager:
     """Advanced streaming with robust connection management."""
 
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.is_streaming = False
@@ -28,7 +30,7 @@ class AdvancedStreamManager:
         self.stream_callbacks = {}
         self.connection_state = "disconnected"
 
-    async def start_resilient_streaming(self, instruments: list, stream_type: str = "pricing"):
+    async def start_resilient_streaming(self, instruments: list, stream_type: str = "pricing") -> Any:
         """Start streaming with automatic reconnection."""
 
         self.is_streaming = True
@@ -44,7 +46,7 @@ class AdvancedStreamManager:
                 else:
                     break
 
-    async def _establish_stream(self, instruments: list, stream_type: str):
+    async def _establish_stream(self, instruments: list, stream_type: str) -> Any:
         """Establish streaming connection."""
 
         self.connection_state = "connecting"
@@ -72,7 +74,7 @@ class AdvancedStreamManager:
                 self.connection_state = "connected"
                 await self._process_stream_data("transactions", data)
 
-    async def _process_stream_data(self, stream_type: str, data: Any):
+    async def _process_stream_data(self, stream_type: str, data: Any) -> Any:
         """Process incoming stream data."""
 
         # Call registered callbacks
@@ -83,7 +85,7 @@ class AdvancedStreamManager:
                 except Exception as e:
                     print(f"Callback error: {e}")
 
-    def register_callback(self, stream_type: str, callback: Callable):
+    def register_callback(self, stream_type: str, callback: Callable) -> Any:
         """Register callback for stream data."""
 
         if stream_type not in self.stream_callbacks:
@@ -101,14 +103,14 @@ class AdvancedStreamManager:
 class HAStreamingCluster:
     """High-availability streaming with multiple connections."""
 
-    def __init__(self, clients: list, account_id: str):
+    def __init__(self, clients: list, account_id: str) -> None:
         self.clients = clients
         self.account_id = account_id
         self.active_streams = {}
         self.backup_streams = {}
         self.is_running = False
 
-    async def start_ha_streaming(self, instruments: list):
+    async def start_ha_streaming(self, instruments: list) -> Any:
         """Start high-availability streaming."""
 
         self.is_running = True
@@ -132,7 +134,7 @@ class HAStreamingCluster:
 
         await asyncio.gather(*tasks, return_exceptions=True)
 
-    async def _run_primary_stream(self, client: AsyncClient, instruments: list):
+    async def _run_primary_stream(self, client: AsyncClient, instruments: list) -> Any:
         """Run primary streaming connection."""
 
         try:
@@ -150,7 +152,7 @@ class HAStreamingCluster:
             print(f"Primary stream failed: {e}")
             await self._failover_to_backup()
 
-    async def _run_backup_stream(self, client: AsyncClient, instruments: list, backup_id: int):
+    async def _run_backup_stream(self, client: AsyncClient, instruments: list, backup_id: int) -> Any:
         """Run backup streaming connection."""
 
         # Keep backup connection warm but don't process data unless needed
@@ -158,7 +160,7 @@ class HAStreamingCluster:
 
         pass
 
-    async def _failover_to_backup(self):
+    async def _failover_to_backup(self) -> Any:
         """Failover to backup stream."""
 
         print("Failing over to backup stream...")
@@ -168,12 +170,12 @@ class HAStreamingCluster:
 class StreamMultiplexer:
     """Multiplex multiple streams with synchronization."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.streams = {}
         self.output_queue = asyncio.Queue()
         self.sync_window = 1.0  # 1 second sync window
 
-    async def add_stream_source(self, name: str, stream_generator: Callable):
+    async def add_stream_source(self, name: str, stream_generator: Callable) -> Any:
         """Add stream source to multiplexer."""
 
         self.streams[name] = {
@@ -185,7 +187,7 @@ class StreamMultiplexer:
         # Start consuming stream
         asyncio.create_task(self._consume_stream(name))
 
-    async def _consume_stream(self, name: str):
+    async def _consume_stream(self, name: str) -> Any:
         """Consume individual stream."""
 
         stream_info = self.streams[name]
@@ -202,7 +204,7 @@ class StreamMultiplexer:
             # Trigger synchronization
             await self._synchronize_streams()
 
-    async def _synchronize_streams(self):
+    async def _synchronize_streams(self) -> Any:
         """Synchronize data from multiple streams."""
 
         # Find common time window
@@ -234,7 +236,7 @@ class StreamMultiplexer:
                 'streams': synchronized_data
             })
 
-    async def get_synchronized_stream(self):
+    async def get_synchronized_stream(self) -> Any:
         """Get synchronized output stream."""
 
         while True:
@@ -245,7 +247,7 @@ class StreamMultiplexer:
 class StreamPerformanceMonitor:
     """Monitor streaming system performance."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.metrics = {
             'messages_processed': 0,
             'processing_times': [],
@@ -254,7 +256,7 @@ class StreamPerformanceMonitor:
             'last_message_time': None
         }
 
-    async def record_message_processing(self, processing_time: float):
+    async def record_message_processing(self, processing_time: float) -> Any:
         """Record message processing metrics."""
 
         self.metrics['messages_processed'] += 1

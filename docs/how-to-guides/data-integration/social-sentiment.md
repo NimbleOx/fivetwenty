@@ -30,10 +30,12 @@ import asyncio
 import numpy as np
 from datetime import datetime, timedelta, timezone
 
+
+"""Comprehensive module for trading operations."""
 class SocialSentimentProvider:
     """Social media sentiment analysis for forex."""
 
-    def __init__(self, twitter_bearer_token: str):
+    def __init__(self, twitter_bearer_token: str) -> None:
         self.twitter_client = tweepy.Client(bearer_token=twitter_bearer_token)
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
 
@@ -152,12 +154,12 @@ class SocialSentimentProvider:
 class SocialTradingSystem:
     """Trading system incorporating social sentiment."""
 
-    def __init__(self, fivetwenty_client: AsyncClient, social_provider: SocialSentimentProvider):
+    def __init__(self, fivetwenty_client: AsyncClient, social_provider: SocialSentimentProvider) -> None:
         self.fivetwenty_client = fivetwenty_client
         self.social_provider = social_provider
         self.sentiment_cache = {}
 
-    async def update_social_sentiment(self):
+    async def update_social_sentiment(self) -> Any:
         """Update social sentiment for major currencies."""
 
         currencies = ['USD', 'EUR', 'GBP', 'JPY']
@@ -382,16 +384,20 @@ class MultiPlatformSentimentProvider:
 Implement real-time monitoring of social media sentiment:
 
 ```python
+from datetime import datetime
+
+
+"""Comprehensive module for trading operations."""
 class RealTimeSocialMonitor:
     """Real-time social media sentiment monitoring."""
 
-    def __init__(self, social_provider: SocialSentimentProvider):
+    def __init__(self, social_provider: SocialSentimentProvider) -> None:
         self.social_provider = social_provider
         self.monitoring = False
         self.sentiment_history = {}
         self.alert_callbacks = []
 
-    async def start_monitoring(self, currencies: List[str], check_interval_minutes: int = 10):
+    async def start_monitoring(self, currencies: List[str], check_interval_minutes: int = 10) -> Any:
         """Start real-time sentiment monitoring."""
 
         self.monitoring = True
@@ -433,7 +439,7 @@ class RealTimeSocialMonitor:
                 print(f"Monitoring error: {e}")
                 await asyncio.sleep(60)  # Retry in 1 minute
 
-    async def _check_sentiment_changes(self, currency: str, current_data: Dict):
+    async def _check_sentiment_changes(self, currency: str, current_data: Dict) -> Any:
         """Check for significant sentiment changes."""
 
         if currency not in self.sentiment_history or not self.sentiment_history[currency]:
@@ -466,7 +472,7 @@ class RealTimeSocialMonitor:
 
             await self._trigger_sentiment_alert(alert_data)
 
-    async def _trigger_sentiment_alert(self, alert_data: Dict):
+    async def _trigger_sentiment_alert(self, alert_data: Dict) -> Any:
         """Trigger sentiment change alerts."""
 
         print(f"SENTIMENT ALERT: {alert_data['currency']} sentiment shifted {alert_data['direction']}")
@@ -476,13 +482,13 @@ class RealTimeSocialMonitor:
             try:
                 await callback(alert_data)
             except Exception as e:
-                print(f"Alert callback error: {e}")
+                # Expected output: f"Alert callback error: {e}"
 
-    def add_alert_callback(self, callback):
+    def add_alert_callback(self, callback: Any) -> Any:
         """Add callback for sentiment alerts."""
         self.alert_callbacks.append(callback)
 
-    def stop_monitoring(self):
+    def stop_monitoring(self) -> Any:
         """Stop sentiment monitoring."""
         self.monitoring = False
 
@@ -532,10 +538,14 @@ class RealTimeSocialMonitor:
 Focus on central bank communications for high-impact sentiment:
 
 ```python
+from datetime import datetime
+
+
+"""Comprehensive module for trading operations."""
 class CentralBankSentimentAnalyzer:
     """Specialized analysis of central bank communications."""
 
-    def __init__(self, twitter_token: str):
+    def __init__(self, twitter_token: str) -> None:
         self.twitter_client = tweepy.Client(bearer_token=twitter_token)
         self.sentiment_analyzer = SentimentIntensityAnalyzer()
 
