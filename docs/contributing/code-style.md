@@ -11,8 +11,7 @@ FiveTwenty follows strict code quality standards to ensure maintainability, secu
 All code must pass mypy strict mode with no errors:
 
 ```python
-"""Code style examples for type annotations."""
-from typing import Any, Optional
+from typing import Optional
 
 from fivetwenty.models import OrderRequest, OrderResponse
 
@@ -30,7 +29,7 @@ async def create_order(
 
 
 # ❌ Bad - Missing type annotations
-async def create_order_bad(self, account_id, order, timeout=None) -> Any:
+async def create_order_bad(self, account_id, order, timeout=None) -> None:
     """Bad example with missing annotations."""
     pass
 ```
@@ -40,9 +39,7 @@ async def create_order_bad(self, account_id, order, timeout=None) -> Any:
 **Critical**: Always use `Decimal` for financial calculations:
 
 ```python
-"""Module docstring for financial calculations."""
 from decimal import Decimal
-from typing import Union
 
 
 # ✅ Good - Decimal for financial values
@@ -61,7 +58,7 @@ def calculate_position_value_bad(units: int, price: Decimal) -> Decimal:
 
 
 # ✅ Good - Accept Decimal or convert from string/int
-def parse_price(value: Union[str, int, Decimal]) -> Decimal:
+def parse_price(value: str | int | Decimal) -> Decimal:
     """Parse price from various input types to Decimal."""
     if isinstance(value, Decimal):
         return value
@@ -73,9 +70,6 @@ def parse_price(value: Union[str, int, Decimal]) -> Decimal:
 Use FiveTwenty's exception hierarchy:
 
 ```python
-"""Module docstring for error handling examples."""
-from typing import Any
-
 import httpx
 
 from fivetwenty.exceptions import FiveTwentyError
@@ -102,7 +96,7 @@ async def get_account_bad(self, account_id: str) -> AccountSummary:
     return AccountSummary.model_validate(response.json())  # May raise various exceptions
 
 
-async def _request(self, method: str, url: str) -> Any:
+async def _request(self, method: str, url: str) -> httpx.Response:
     """Mock request method."""
     pass
 ```
@@ -116,8 +110,7 @@ async def _request(self, method: str, url: str) -> Any:
 async client is the primary interface, Client is a sync wrapper:
 
 ```python
-"""Architecture patterns for async-first design."""
-from typing import Any, Optional
+from typing import Optional
 
 from fivetwenty.models import AccountSummary
 
@@ -126,7 +119,8 @@ from fivetwenty.models import AccountSummary
 class AccountsEndpoint:
     """Accounts endpoint implementation."""
 
-    def __init__(self, client: Any) -> None:
+    def __init__(self, client) -> None:
+        """Initialize accounts endpoint."""
         self._client = client
 
     async def get_summary(
@@ -148,7 +142,8 @@ class AccountsEndpoint:
 class SyncAccountsEndpoint:
     """Sync wrapper for accounts endpoint."""
 
-    def __init__(self, client: Any, async_endpoint: AccountsEndpoint) -> None:
+    def __init__(self, client, async_endpoint: AccountsEndpoint) -> None:
+        """Initialize sync accounts endpoint."""
         self._client = client
         self._async_endpoint = async_endpoint
 
@@ -169,9 +164,6 @@ class SyncAccountsEndpoint:
 Group related methods into endpoint classes:
 
 ```python
-"""Endpoint organization patterns."""
-from typing import Any
-
 from fivetwenty.models import Order, OrderRequest, OrderResponse
 
 
@@ -179,7 +171,8 @@ from fivetwenty.models import Order, OrderRequest, OrderResponse
 class OrdersEndpoint:
     """Order management operations."""
 
-    def __init__(self, client: Any) -> None:
+    def __init__(self, client) -> None:
+        """Initialize orders endpoint."""
         self._client = client
 
     async def list_orders(self, account_id: str) -> list[Order]:
@@ -198,7 +191,8 @@ class OrdersEndpoint:
 class TradesEndpoint:
     """Trades management operations."""
 
-    def __init__(self, client: Any) -> None:
+    def __init__(self, client) -> None:
+        """Initialize trades endpoint."""
         self._client = client
 
 
@@ -207,6 +201,7 @@ class AsyncClient:
     """Main async client."""
 
     def __init__(self) -> None:
+        """Initialize async client."""
         self.orders = OrdersEndpoint(self)
         self.accounts = AccountsEndpoint(self)
         self.trades = TradesEndpoint(self)
@@ -217,7 +212,6 @@ class AsyncClient:
 Use Pydantic models for all API data:
 
 ```python
-"""Module docstring for model validation patterns."""
 from datetime import datetime
 from decimal import Decimal
 from typing import Optional
@@ -256,9 +250,16 @@ def parse_order_response(data: dict) -> Order:
 ### **Methods and Functions**
 
 ```python
+from typing import AsyncIterator
+
+from fivetwenty.models import AccountSummary, OrderResponse, Price
+
+
 # ✅ Good - Clear, descriptive names
 async def get_accounts(self, account_id: str) -> AccountSummary:
+    """Get account summary."""
     pass
+
 
 async def post_market_order(
     self,
@@ -266,26 +267,38 @@ async def post_market_order(
     instrument: str,
     units: int,
 ) -> OrderResponse:
+    """Post market order."""
     pass
+
 
 async def stream_pricing(
     self,
     account_id: str,
     instruments: list[str],
 ) -> AsyncIterator[Price]:
+    """Stream pricing data."""
     pass
+
 
 # ❌ Bad - Unclear abbreviations
 async def get_acct(self, id: str) -> AccountSummary:
+    """Bad example with unclear abbreviations."""
     pass
 
+
 async def mk_ord(self, acct: str, instr: str, u: int) -> OrderResponse:
+    """Bad example with unclear abbreviations."""
     pass
 ```
 
 ### **Variables and Parameters**
 
 ```python
+from typing import Optional
+
+from fivetwenty.models import OrderRequest
+
+
 # ✅ Good - Full words, clear purpose
 account_id: str
 instrument_name: str
@@ -304,24 +317,33 @@ req_id: Optional[str]
 ### **Model Classes**
 
 ```python
+from pydantic import BaseModel
+
+
 # ✅ Good - Descriptive, matches OANDA terminology
 class AccountSummary(BaseModel):
-    """Class docstring."""
+    """Account summary information."""
     pass
+
 
 class MarketOrderRequest(BaseModel):
-    """Class docstring."""
+    """Market order request."""
     pass
 
+
 class PricingHeartbeat(BaseModel):
-    """Class docstring."""
+    """Pricing heartbeat message."""
     pass
+
 
 # ❌ Bad - Generic or unclear names
 class Account(BaseModel):  # Too generic - summary? details?
+    """Bad example - too generic."""
     pass
 
+
 class Request(BaseModel):  # What kind of request?
+    """Bad example - too generic."""
     pass
 ```
 
@@ -335,7 +357,11 @@ All public methods require comprehensive docstrings:
 
 ```python
 from decimal import Decimal
+from typing import Optional
+
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.models import OrderResponse
+
 
 async def post_limit_order(
     self,
@@ -383,17 +409,19 @@ async def post_limit_order(
         - Use positive units for buy orders, negative for sell orders
         - Price precision depends on instrument (typically 4-5 decimal places)
     """
+    pass
 ```
 
 ### **Model Documentation**
 
 ```python
-
-"""Module docstring."""
 from decimal import Decimal
 
+from pydantic import BaseModel, Field
+from fivetwenty.models import PositionSide
+
+
 class Position(BaseModel):
-    """Class docstring."""
     """Represents a trading position for a specific instrument.
 
     A position aggregates all trades for an instrument into long and short sides,
@@ -423,19 +451,24 @@ class Position(BaseModel):
 ### **Exception Hierarchy Usage**
 
 ```python
+import httpx
+
 from fivetwenty.exceptions import FiveTwentyError, StreamStall
+from fivetwenty.models import Price
 
 
 # ✅ Good - Appropriate exception types
-
-"""Module docstring."""
 async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Price]:
     """Get current pricing with proper error handling."""
     try:
-        response = await self._request("GET", "/pricing", params={
-            "accountID": account_id,
-            "instruments": ",".join(instruments),
-        })
+        response = await self._request(
+            "GET",
+            "/pricing",
+            params={
+                "accountID": account_id,
+                "instruments": ",".join(instruments),
+            },
+        )
 
         pricing_data = response.json()
         return [Price.model_validate(price) for price in pricing_data["prices"]]
@@ -466,11 +499,25 @@ async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Pri
         ) from e
 
 # ✅ Good - Streaming-specific error handling
+import json
+import logging
+import time
+from datetime import datetime
+from typing import AsyncIterator
+
+from pydantic import ValidationError
+
+from fivetwenty.models import Price, PricingHeartbeat
+
+HEARTBEAT_TIMEOUT = 30
+logger = logging.getLogger(__name__)
+
+
 async def stream_pricing(
     self,
     account_id: str,
     instruments: list[str],
-) -> AsyncIterator[Union[Price, PricingHeartbeat]]:
+) -> AsyncIterator[Price | PricingHeartbeat]:
     """Stream pricing with reconnection logic."""
     last_heartbeat = time.monotonic()
 
@@ -502,12 +549,14 @@ async def stream_pricing(
 ### **Validation Patterns**
 
 ```python
+import re
+
 from pydantic import ValidationError
+
+from fivetwenty.models import OrderRequest
 
 
 # ✅ Good - Validate inputs early
-
-"""Module docstring."""
 def create_order_request(
     instrument: str,
     units: int,
@@ -515,17 +564,19 @@ def create_order_request(
     **kwargs,
 ) -> OrderRequest:
     """Create validated order request."""
-
     # Validate instrument format
     if not re.match(r"^[A-Z]{3}_[A-Z]{3}$", instrument):
-        raise ValueError(f"Invalid instrument format: {instrument}")
+        msg = f"Invalid instrument format: {instrument}"
+        raise ValueError(msg)
 
     # Validate units
     if units == 0:
-        raise ValueError("Order units cannot be zero")
+        msg = "Order units cannot be zero"
+        raise ValueError(msg)
 
     if abs(units) > 100_000_000:
-        raise ValueError(f"Order size too large: {abs(units)}")
+        msg = f"Order size too large: {abs(units)}"
+        raise ValueError(msg)
 
     # Build request data
     request_data = {
@@ -538,7 +589,8 @@ def create_order_request(
     try:
         return OrderRequest.model_validate(request_data)
     except ValidationError as e:
-        raise ValueError(f"Invalid order parameters: {e}") from e
+        msg = f"Invalid order parameters: {e}"
+        raise ValueError(msg) from e
 ```
 
 ---
@@ -549,35 +601,40 @@ def create_order_request(
 
 ```python
 from decimal import Decimal
-
-import pytest
 from unittest.mock import AsyncMock, Mock, patch
+
+import httpx
+import pytest
+
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
 
 
-"""Comprehensive module for trading operations."""
 class TestAccountsEndpoint:
     """Test suite for accounts endpoint."""
 
     @pytest.fixture
-    def client(self) -> Any:
+    def client(self) -> AsyncClient:
         """Create test client with mocked HTTP."""
-        return AsyncClient(token="test-token", account_id="your-account-id", environment="practice")
+        return AsyncClient(
+            token="test-token",
+            account_id="your-account-id",
+            environment="practice",
+        )
 
     @pytest.mark.asyncio
-    async def test_get_accounts_success(self, client: Any) -> Any:
+    async def test_get_accounts_success(self, client: AsyncClient) -> None:
         """Test successful account summary retrieval."""
         # Arrange
         expected_response = {
             "account": {
                 "id": "123-456-789",
                 "currency": "USD",
-                "balance": "10000.00"
+                "balance": "10000.00",
             }
         }
 
-        with patch.object(client, '_request') as mock_request:
+        with patch.object(client, "_request") as mock_request:
             mock_response = Mock()
             mock_response.json.return_value = expected_response
             mock_request.return_value = mock_response
@@ -592,13 +649,13 @@ class TestAccountsEndpoint:
             mock_request.assert_called_once_with("GET", "/accounts/123-456-789")
 
     @pytest.mark.asyncio
-    async def test_get_accounts_not_found(self, client: Any) -> Any:
+    async def test_get_accounts_not_found(self, client: AsyncClient) -> None:
         """Test account not found error handling."""
-        with patch.object(client, '_request') as mock_request:
+        with patch.object(client, "_request") as mock_request:
             mock_request.side_effect = httpx.HTTPStatusError(
                 message="Not Found",
                 request=Mock(),
-                response=Mock(status_code=404)
+                response=Mock(status_code=404),
             )
 
             with pytest.raises(FiveTwentyError) as exc_info:
@@ -619,14 +676,12 @@ import pytest
 from fivetwenty import AsyncClient, Environment
 
 
-
-"""Comprehensive module for trading operations."""
 @pytest.mark.integration
 class TestAccountsIntegration:
     """Integration tests for accounts endpoint."""
 
     @pytest.fixture
-    def client(self) -> Any:
+    def client(self) -> AsyncClient:
         """Create client with real credentials."""
         return AsyncClient(
             token=os.environ["TEST_OANDA_TOKEN"],
@@ -634,7 +689,7 @@ class TestAccountsIntegration:
         )
 
     @pytest.mark.asyncio
-    async def test_get_accounts_real_api(self, client: Any, vcr: Any) -> Any:
+    async def test_get_accounts_real_api(self, client: AsyncClient, vcr) -> None:
         """Test against real OANDA API (recorded with VCR)."""
         account_id = os.environ["TEST_OANDA_ACCOUNT"]
 
@@ -656,9 +711,13 @@ class TestAccountsIntegration:
 
 ```python
 import asyncio
+import logging
 from contextlib import asynccontextmanager
 
 from fivetwenty import AsyncClient
+from fivetwenty.models import AccountConfig, AccountSummary
+
+logger = logging.getLogger(__name__)
 
 
 # ✅ Good - Proper async context management
@@ -672,16 +731,15 @@ async def trading_session(config: AccountConfig):
     finally:
         await client.__aexit__(None, None, None)
 
+
 # ✅ Good - Concurrent operations
 async def get_multiple_accounts(
     client: AsyncClient,
     account_ids: list[str],
 ) -> list[AccountSummary]:
     """Fetch multiple accounts concurrently."""
-
     tasks = [
-        client.accounts.get_accounts(account_id)
-        for account_id in account_ids
+        client.accounts.get_accounts(account_id) for account_id in account_ids
     ]
 
     results = await asyncio.gather(*tasks, return_exceptions=True)
@@ -707,7 +765,6 @@ async def process_price_stream(
     max_buffer_size: int = 1000,
 ) -> None:
     """Process price stream with memory management."""
-
     buffer: list[Price] = []
 
     async for price in client.pricing.get_pricing_stream(account_id, instruments):
@@ -725,6 +782,7 @@ async def process_price_stream(
     if buffer:
         await process_price_batch(buffer)
 
+
 async def process_price_batch(prices: list[Price]) -> None:
     """Process batch of prices efficiently."""
     # Batch processing logic here
@@ -738,16 +796,17 @@ async def process_price_batch(prices: list[Price]) -> None:
 ### **Credential Handling**
 
 ```python
-from pydantic import SecretStr
+import logging
+
+from pydantic import BaseModel, SecretStr
+
+from fivetwenty.models import Environment, Trade
+
+logger = logging.getLogger(__name__)
 
 
 # ✅ Good - Secure credential handling
-
-
-"""Module docstring."""
-"""Module docstring."""
 class AccountConfig(BaseModel):
-    """Class docstring."""
     """Secure account configuration."""
 
     token: SecretStr  # Never logged or printed
@@ -774,6 +833,7 @@ class AccountConfig(BaseModel):
             f")"
         )
 
+
 # ✅ Good - Safe logging practices
 def log_trade_result(trade: Trade, config: AccountConfig) -> None:
     """Log trade result safely."""
@@ -783,8 +843,10 @@ def log_trade_result(trade: Trade, config: AccountConfig) -> None:
         f"(account: {config.summary()})",  # Safe summary only
     )
 
+
 # ❌ Bad - Exposes credentials
 def bad_logging(trade: Trade, config: AccountConfig) -> None:
+    """Bad example that may expose secrets."""
     logger.info(f"Trade: {trade} Config: {config}")  # May expose secrets!
 ```
 

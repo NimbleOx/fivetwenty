@@ -30,7 +30,6 @@ from typing import Dict, List, Tuple
 import matplotlib.pyplot as plt
 
 
-"""Comprehensive module for trading operations."""
 class PerformanceAttributionAnalyzer:
     """Advanced performance attribution analysis."""
 

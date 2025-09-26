@@ -212,7 +212,6 @@ def _display_brief_issues_summary(summary: ValidationSummary) -> None:
     console.print("   💡 See detailed analysis in the generated validation report")
 
 
-
 def _display_validator_summaries(summary: ValidationSummary) -> None:
     """Display per-validator summary statistics."""
     if not summary.validator_summaries:

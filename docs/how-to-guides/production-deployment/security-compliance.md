@@ -35,16 +35,17 @@ graph TB
 ### Multi-Factor Authentication
 
 ```python
-# security/auth.py
 import asyncio
 import hashlib
 import secrets
-import pyotp
-from datetime import datetime, timedelta
-from typing import Optional, Dict, List
 from dataclasses import dataclass
-from cryptography.fernet import Fernet
+from datetime import datetime, timedelta
+from typing import Optional
+
 import jwt
+import pyotp
+from cryptography.fernet import Fernet
+
 from fivetwenty import AsyncClient
 
 @dataclass
@@ -52,7 +53,7 @@ class UserSession:
     user_id: str
     session_token: str
     expires_at: datetime
-    permissions: List[str]
+    permissions: list[str]
     ip_address: str
     user_agent: str
 
@@ -62,8 +63,8 @@ class SecureAuthenticationManager:
     def __init__(self, secret_key: bytes, jwt_secret: str):
         self.cipher = Fernet(secret_key)
         self.jwt_secret = jwt_secret
-        self.active_sessions: Dict[str, UserSession] = {}
-        self.failed_attempts: Dict[str, List[datetime]] = {}
+        self.active_sessions: dict[str, UserSession] = {}
+        self.failed_attempts: dict[str, list[datetime]] = {}
         self.max_failed_attempts = 5
         self.lockout_duration = timedelta(minutes=30)
 
@@ -99,7 +100,7 @@ class SecureAuthenticationManager:
             session = UserSession(
                 user_id=username,
                 session_token=self._generate_session_token(),
-                expires_at=datetime.utcnow() + timedelta(hours=8),
+                expires_at=datetime.now(datetime.timezone.utc) + timedelta(hours=8),
                 permissions=permissions,
                 ip_address=ip_address,
                 user_agent=user_agent
@@ -126,7 +127,7 @@ class SecureAuthenticationManager:
             raise SecurityException("Invalid or expired session")
 
         # Check expiration
-        if datetime.utcnow() > session.expires_at:
+        if datetime.now(datetime.timezone.utc) > session.expires_at:
             del self.active_sessions[session_token]
             raise SecurityException("Session expired")
 
@@ -150,7 +151,7 @@ class SecureAuthenticationManager:
         if not stored_hash:
             return False
 
-        return bcrypt.checkpw(password.encode('utf-8'), stored_hash.encode('utf-8'))
+        return bcrypt.checkpw(password.encode("utf-8"), stored_hash.encode("utf-8"))
 
     async def _verify_totp(self, username: str, totp_code: str) -> bool:
         """Verify TOTP code."""
@@ -168,7 +169,7 @@ class SecureAuthenticationManager:
 
         recent_failures = [
             attempt for attempt in self.failed_attempts[username]
-            if datetime.utcnow() - attempt < self.lockout_duration
+            if datetime.now(datetime.timezone.utc) - attempt < self.lockout_duration
         ]
 
         return len(recent_failures) >= self.max_failed_attempts
@@ -178,10 +179,10 @@ class SecureAuthenticationManager:
         if username not in self.failed_attempts:
             self.failed_attempts[username] = []
 
-        self.failed_attempts[username].append(datetime.utcnow())
+        self.failed_attempts[username].append(datetime.now(datetime.timezone.utc))
 
         # Clean old attempts
-        cutoff = datetime.utcnow() - self.lockout_duration
+        cutoff = datetime.now(datetime.timezone.utc) - self.lockout_duration
         self.failed_attempts[username] = [
             attempt for attempt in self.failed_attempts[username]
             if attempt > cutoff
@@ -190,7 +191,9 @@ class SecureAuthenticationManager:
     async def _log_authentication_event(self, username: str, event_type: str, ip_address: str, details: str = None):
         """Log authentication events for audit trail."""
         # This would integrate with your audit logging system
-        pass
+        print(f"Auth event: {username} - {event_type} from {ip_address}")
+        if details:
+            print(f"Details: {details}")
 
 class SecurityException(Exception):
     """Security-related exception."""
@@ -200,14 +203,14 @@ class SecurityException(Exception):
 ### Role-Based Access Control (RBAC)
 
 ```python
-# security/rbac.py
 from dataclasses import dataclass
 from datetime import datetime
 from enum import Enum
-from typing import Dict, List, Set
 
 
 class Permission(Enum):
+    """Trading system permissions."""
+
     # Trading permissions
     TRADE_EXECUTE = "trade:execute"
     TRADE_VIEW = "trade:view"
@@ -230,32 +233,36 @@ class Permission(Enum):
 
 @dataclass
 class Role:
+    """User role definition."""
+
     name: str
-    permissions: Set[Permission]
+    permissions: set[Permission]
     description: str
     is_active: bool = True
 
 @dataclass
 class User:
+    """User account definition."""
+
     username: str
-    roles: Set[str]
+    roles: set[str]
     is_active: bool
     created_at: datetime
     last_login: datetime
-    trading_limits: Dict[str, float]
+    trading_limits: dict[str, float]
 
 class RBACManager:
     """Role-Based Access Control manager."""
 
-    def __init__(self):
-        self.roles: Dict[str, Role] = {}
-        self.users: Dict[str, User] = {}
+    def __init__(self) -> None:
+        self.roles: dict[str, Role] = {}
+        self.users: dict[str, User] = {}
 
         # Initialize default roles
         self._setup_default_roles()
 
-    def _setup_default_roles(self):
-        """Setup default roles and permissions."""
+    def _setup_default_roles(self) -> None:
+        """Set up default roles and permissions."""
 
         # Trader role
         self.roles["trader"] = Role(
@@ -266,9 +273,9 @@ class RBACManager:
                 Permission.TRADE_CANCEL,
                 Permission.POSITION_VIEW,
                 Permission.POSITION_CLOSE,
-                Permission.ACCOUNT_VIEW
+                Permission.ACCOUNT_VIEW,
             },
-            description="Standard trading user"
+            description="Standard trading user",
         )
 
         # Senior trader role
@@ -282,9 +289,9 @@ class RBACManager:
                 Permission.POSITION_CLOSE,
                 Permission.POSITION_MODIFY,
                 Permission.ACCOUNT_VIEW,
-                Permission.SYSTEM_MONITOR
+                Permission.SYSTEM_MONITOR,
             },
-            description="Senior trading user with extended permissions"
+            description="Senior trading user with extended permissions",
         )
 
         # Risk manager role
@@ -296,16 +303,16 @@ class RBACManager:
                 Permission.POSITION_CLOSE,
                 Permission.ACCOUNT_VIEW,
                 Permission.SYSTEM_MONITOR,
-                Permission.SYSTEM_AUDIT
+                Permission.SYSTEM_AUDIT,
             },
-            description="Risk management and monitoring"
+            description="Risk management and monitoring",
         )
 
         # Administrator role
         self.roles["administrator"] = Role(
             name="administrator",
             permissions=set(Permission),  # All permissions
-            description="System administrator"
+            description="System administrator",
         )
 
         # Read-only analyst role
@@ -315,9 +322,9 @@ class RBACManager:
                 Permission.TRADE_VIEW,
                 Permission.POSITION_VIEW,
                 Permission.ACCOUNT_VIEW,
-                Permission.SYSTEM_MONITOR
+                Permission.SYSTEM_MONITOR,
             },
-            description="Read-only analysis and reporting"
+            description="Read-only analysis and reporting",
         )
 
     def check_permission(self, username: str, required_permission: Permission) -> bool:
@@ -336,7 +343,7 @@ class RBACManager:
 
         return required_permission in user_permissions
 
-    def get_user_permissions(self, username: str) -> Set[Permission]:
+    def get_user_permissions(self, username: str) -> set[Permission]:
         """Get all permissions for a user."""
 
         user = self.users.get(username)
@@ -351,15 +358,15 @@ class RBACManager:
 
         return user_permissions
 
-    def add_user(self, username: str, roles: List[str], trading_limits: Dict[str, float] = None):
+    def add_user(self, username: str, roles: list[str], trading_limits: dict[str, float] | None = None) -> None:
         """Add new user with specified roles."""
 
         self.users[username] = User(
             username=username,
             roles=set(roles),
             is_active=True,
-            created_at=datetime.utcnow(),
-            last_login=datetime.utcnow(),
+            created_at=datetime.now(datetime.timezone.utc),
+            last_login=datetime.now(datetime.timezone.utc),
             trading_limits=trading_limits or {}
         )
 
@@ -682,7 +689,7 @@ class AuditLogger:
         """Log audit event."""
 
         event = AuditEvent(
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(datetime.timezone.utc),
             event_type=event_type,
             user_id=user_id,
             session_id=session_id,
@@ -963,7 +970,7 @@ class GDPRComplianceManager:
             user_id=user_id,
             consent_type=consent_type,
             granted=granted,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(datetime.timezone.utc),
             ip_address=ip_address,
             consent_version=consent_version
         )
@@ -1006,7 +1013,7 @@ class GDPRComplianceManager:
         result = {
             "request_type": request_type,
             "user_id": user_id,
-            "timestamp": datetime.utcnow(),
+            "timestamp": datetime.now(datetime.timezone.utc),
             "status": "processing"
         }
 
@@ -1080,7 +1087,7 @@ class GDPRComplianceManager:
 
         return {
             "status": "erased",
-            "erasure_date": datetime.utcnow(),
+            "erasure_date": datetime.now(datetime.timezone.utc),
             "retained_data": "Minimal data required for regulatory compliance"
         }
 
@@ -1103,7 +1110,7 @@ class GDPRComplianceManager:
 
         for category, policy in self.retention_policies.items():
             if policy.auto_delete:
-                cutoff_date = datetime.utcnow() - timedelta(days=policy.retention_period_days)
+                cutoff_date = datetime.now(datetime.timezone.utc) - timedelta(days=policy.retention_period_days)
 
                 # Find records older than retention period
                 expired_records = await self._find_expired_records(category, cutoff_date)
@@ -1226,7 +1233,7 @@ class SIEMManager:
         """Check for specific threat patterns in events."""
 
         timeframe = timedelta(minutes=pattern_config["timeframe_minutes"])
-        cutoff_time = datetime.utcnow() - timeframe
+        cutoff_time = datetime.now(datetime.timezone.utc) - timeframe
 
         if pattern_name == "brute_force":
             await self._detect_brute_force(pattern_config, events, cutoff_time)
@@ -1280,11 +1287,11 @@ class SIEMManager:
     ):
         """Create and process security alert."""
 
-        alert_id = f"{category}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
+        alert_id = f"{category}_{datetime.now(datetime.timezone.utc).strftime('%Y%m%d_%H%M%S')}"
 
         alert = SecurityAlert(
             alert_id=alert_id,
-            timestamp=datetime.utcnow(),
+            timestamp=datetime.now(datetime.timezone.utc),
             threat_level=threat_level,
             category=category,
             description=description,

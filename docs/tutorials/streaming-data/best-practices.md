@@ -17,7 +17,6 @@ from contextlib import asynccontextmanager
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 @dataclass
 class ProductionConfig:
     """Production-ready configuration."""
@@ -448,10 +447,7 @@ from fivetwenty import AsyncClient, Environment
 
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 class SecureCredentialManager:
     """Class docstring."""
     """Secure credential management for production."""
@@ -510,9 +506,7 @@ from fivetwenty import AsyncClient, Environment
 
 
 
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 def create_secure_client_with_tls() -> AsyncClient:
     """Create client with enhanced TLS security."""
 
@@ -549,7 +543,6 @@ import psutil
 
 
 
-"""Comprehensive module for trading operations."""
 class MemoryOptimizer:
     """Optimize memory usage for long-running streams."""
 
@@ -617,10 +610,7 @@ from typing import Any, Dict
 
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 class HealthCheckServer:
     """Class docstring."""
     """Health check server for monitoring."""

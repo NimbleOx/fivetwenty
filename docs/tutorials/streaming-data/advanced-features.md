@@ -14,7 +14,6 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import StreamingConfiguration, ReconnectionPolicy
 
 
-"""Comprehensive module for trading operations."""
 class AdvancedStreamManager:
     """Advanced streaming with robust connection management."""
 

@@ -551,7 +551,6 @@ Create custom indicators for specific strategies:
 
 ```python
 
-"""Module docstring."""
 class CustomIndicators:
     """Class docstring."""
     """Custom technical indicators for specific strategies."""
@@ -713,7 +712,6 @@ Always validate your indicators before live trading:
 
 ```python
 
-"""Module docstring."""
 class IndicatorValidator:
     """Class docstring."""
     """Validate technical indicators and signals."""
@@ -765,7 +763,6 @@ Track the performance of your technical signals:
 
 ```python
 
-"""Module docstring."""
 
 from typing import Any
 from datetime import datetime

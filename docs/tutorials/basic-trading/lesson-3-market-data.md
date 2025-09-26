@@ -63,7 +63,6 @@ from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 from fivetwenty.models import CandlestickGranularity
 
 
-"""Comprehensive module for trading operations."""
 async def get_historical_data(instrument: str, count: int = 100) -> Any:
     """Get historical candlestick data."""
 

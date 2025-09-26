@@ -45,7 +45,6 @@ from collections.abc import AsyncIterator, Callable
 
 
 
-"""Comprehensive module for trading operations."""
 class StreamProducer:
     """Base producer for streaming data."""
 
@@ -111,7 +110,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class StreamEventType(Enum):
     PRICE_UPDATE = "price_update"
     HEARTBEAT = "heartbeat"
@@ -173,7 +171,6 @@ import random
 from typing import Optional
 
 
-"""Comprehensive module for trading operations."""
 class ReconnectionPolicy:
     """Manages reconnection attempts with exponential backoff."""
 
@@ -256,7 +253,6 @@ from datetime import datetime
 
 
 
-"""Comprehensive module for trading operations."""
 class StallDetector:
     """Detect streaming connection stalls."""
 
@@ -307,10 +303,7 @@ from datetime import datetime
 
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 class StreamMultiplexer:
     """Class docstring."""
     """Multiplex multiple streams into single output."""

@@ -27,7 +27,6 @@ from fivetwenty import AsyncClient, Environment
 
 
 
-"""Comprehensive module for trading operations."""
 async def stream_prices() -> Any:
     """Stream real-time prices."""
     async with AsyncClient(
@@ -56,7 +55,6 @@ from fivetwenty.models import ClientPrice, PricingHeartbeat
 
 
 
-"""Comprehensive module for trading operations."""
 async def process_price_stream(client: Any, account_id: str) -> Any:
     """Process streaming prices with business logic."""
 
@@ -162,7 +160,6 @@ from fivetwenty.models.streaming import ReconnectionPolicy, StreamingConfigurati
 
 # Configure streaming
 
-"""Comprehensive module for trading operations."""
 config = StreamingConfiguration(
     account_id="101-001-1234567-001",
     instruments=["EUR_USD", "GBP_USD"],
@@ -196,7 +193,6 @@ from fivetwenty.exceptions import StreamStall
 import asyncio
 
 
-"""Comprehensive module for trading operations."""
 async def resilient_stream(client: Any, account_id: str, instruments: Any) -> Any:
     """Stream with automatic recovery from stalls."""
 
@@ -240,7 +236,6 @@ Manage long-lived connections:
 from datetime import datetime
 
 
-"""Comprehensive module for trading operations."""
 class StreamManager:
     """Manage streaming connections with health monitoring."""
 
@@ -308,7 +303,6 @@ from fivetwenty import Client, Environment
 
 
 
-"""Comprehensive module for trading operations."""
 def sync_price_stream() -> Any:
     """Stream prices synchronously."""
 
@@ -339,7 +333,6 @@ import threading
 
 
 
-"""Comprehensive module for trading operations."""
 class ThreadedStreamer:
     """Thread-safe streaming handler."""
 
@@ -408,7 +401,6 @@ from datetime import datetime, timedelta
 import statistics
 
 
-"""Comprehensive module for trading operations."""
 class PriceAggregator:
     """Aggregate streaming prices for analysis."""
 
@@ -530,7 +522,6 @@ Track streaming performance:
 
 ```python
 
-"""Module docstring."""
 
 from typing import Any
 from datetime import datetime

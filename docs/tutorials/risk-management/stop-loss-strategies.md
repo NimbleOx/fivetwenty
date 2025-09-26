@@ -32,7 +32,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 
-"""Comprehensive module for trading operations."""
 async def place_order_with_fixed_stop(account_id: str, instrument: str, units: int, stop_pips: Decimal, take_profit_pips: Decimal = None) -> Any:
     """Place order with fixed pip-based stop loss."""
 
@@ -117,7 +116,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 
-"""Comprehensive module for trading operations."""
 async def place_order_with_percentage_stop(account_id: str, instrument: str, units: int,
                                           stop_percentage: Decimal = Decimal("1.0")):
     """Place order with percentage-based stop loss."""
@@ -182,7 +180,6 @@ from fivetwenty.models import CandlestickGranularity
 import numpy as np
 
 
-"""Comprehensive module for trading operations."""
 class ATRStopCalculator:
     """Calculate stop losses based on Average True Range."""
 
@@ -319,7 +316,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class TrailingStopManager:
     """Advanced trailing stop management system."""
 
@@ -510,7 +506,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class TechnicalStopCalculator:
     """Calculate stops based on support/resistance levels."""
 
@@ -813,7 +808,6 @@ from datetime import datetime, timedelta
 
 
 
-"""Comprehensive module for trading operations."""
 class TimeBasedStopManager:
     """Manage stops based on time in trade."""
 

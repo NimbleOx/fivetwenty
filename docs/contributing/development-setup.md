@@ -195,7 +195,6 @@ uv run poe markdown-format
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 ---
 
 ## IDE Configuration
@@ -276,7 +275,6 @@ from decimal import Decimal
 from datetime import datetime
 
 
-"""Comprehensive module for trading operations."""
 - **Never use live trading accounts** for development/testing
 - **Never commit credentials** to version control
 - **Use practice accounts only** for all development work

@@ -30,7 +30,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class ValidationSeverity(Enum):
     INFO = "info"
     WARNING = "warning"
@@ -163,10 +162,7 @@ from typing import Any
 
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 class MaxPositionSizeValidator(OrderValidator):
     """Class docstring."""
     """Validate order doesn't exceed maximum position size limits."""
@@ -341,10 +337,7 @@ from typing import Any
 
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 class SpreadValidator(OrderValidator):
     """Class docstring."""
     """Validate spread isn't too wide for order execution."""
@@ -453,10 +446,7 @@ from typing import Any
 
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 class PriceValidityValidator(OrderValidator):
     """Class docstring."""
     """Validate order price is reasonable relative to current market."""
@@ -602,14 +592,15 @@ Build robust error handling systems for production trading.
 ```python
 from datetime import datetime
 from fivetwenty import AsyncClient
+from fivetwenty.exceptions import VeeTwentyError
 from enum import Enum
-from typing import Callable, Optional
+from typing import Callable, Optional, Dict
 import traceback
+import asyncio
 from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class ErrorCategory(Enum):
     NETWORK = "network"
     AUTHENTICATION = "authentication"
@@ -800,14 +791,12 @@ Implement comprehensive risk controls for trading operations.
 ```python
 from datetime import datetime
 from decimal import Decimal
+from typing import Any, Dict, List
+import asyncio
 
 from fivetwenty import AsyncClient
-from typing import Any
 
 
-
-
-"""Comprehensive module for trading operations."""
 class RealTimeRiskMonitor:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -816,7 +805,7 @@ class RealTimeRiskMonitor:
         self.monitoring_active = False
         self.risk_violations = []
 
-    def set_risk_limits(self, limits: Dict[str, Any]: Any) -> Any:
+    def set_risk_limits(self, limits: Dict[str, Any]) -> Any:
         """Set risk limits for monitoring."""
         self.risk_limits.update(limits)
 
@@ -892,7 +881,7 @@ class RealTimeRiskMonitor:
 
         return metrics
 
-    async def _handle_risk_violation(self, violation: Dict[str, Any]: Any) -> Any:
+    async def _handle_risk_violation(self, violation: Dict[str, Any]) -> Any:
         """Handle risk limit violation."""
 
         print(f"RISK VIOLATION: {violation['limit_name']} = {violation['current_value']} "
@@ -1134,8 +1123,13 @@ class OrderSystemTestFramework:
 
 # Usage
 async def run_tests():
+    """Run all test suites."""
     test_framework = OrderSystemTestFramework()
     await test_framework.run_all_tests()
+
+
+if __name__ == "__main__":
+    asyncio.run(run_tests())
 ```
 
 ## Production Monitoring and Alerting
@@ -1147,14 +1141,12 @@ Establish comprehensive monitoring for production trading systems.
 ```python
 from datetime import datetime
 from decimal import Decimal
+from typing import Any, Dict
+import asyncio
 
 from fivetwenty import AsyncClient
-from typing import Any
 
 
-
-
-"""Comprehensive module for trading operations."""
 class ProductionMonitoringSystem:
     """Comprehensive monitoring system for production trading."""
 
@@ -1250,7 +1242,7 @@ class ProductionMonitoringSystem:
 
             await asyncio.sleep(300)  # Check every 5 minutes
 
-    async def _send_alert(self, alert_data: Dict[str, Any]: Any) -> Any:
+    async def _send_alert(self, alert_data: Dict[str, Any]) -> Any:
         """Send alert through all configured channels."""
 
         for channel in self.alert_channels:
@@ -1261,10 +1253,10 @@ class ProductionMonitoringSystem:
 
 # Alert channel implementations
 class EmailAlertChannel:
-    def __init__(self, email_config: Dict[str, str]: Any) -> None:
+    def __init__(self, email_config: Dict[str, str]) -> None:
         self.email_config = email_config
 
-    async def send_alert(self, alert_data: Dict[str, Any]: Any) -> Any:
+    async def send_alert(self, alert_data: Dict[str, Any]) -> Any:
         """Send alert via email."""
         # Implementation would integrate with email service
         print(f"EMAIL ALERT: {alert_data}")
@@ -1273,7 +1265,7 @@ class SlackAlertChannel:
     def __init__(self, webhook_url: str) -> None:
         self.webhook_url = webhook_url
 
-    async def send_alert(self, alert_data: Dict[str, Any]: Any) -> Any:
+    async def send_alert(self, alert_data: Dict[str, Any]) -> Any:
         """Send alert via Slack."""
         # Implementation would integrate with Slack API
         print(f"SLACK ALERT: {alert_data}")

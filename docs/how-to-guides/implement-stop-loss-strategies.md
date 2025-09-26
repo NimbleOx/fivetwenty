@@ -28,7 +28,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
 
-"""Comprehensive module for trading operations."""
 async def place_order_with_stop_loss(account_id: str, instrument: str, units: int, stop_loss_price: Decimal) -> Any:
     """Place market order with immediate stop-loss protection."""
 
@@ -81,7 +80,6 @@ from fivetwenty import AsyncClient, Environment
 from decimal import Decimal
 
 
-"""Comprehensive module for trading operations."""
 def calculate_stop_loss_price(entry_price: Decimal, units: int, pip_distance: int,
                             instrument: str) -> Decimal:
     """Calculate stop-loss price based on pip distance."""
@@ -157,7 +155,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def percentage_based_stop_loss(account_id: str, instrument: str,
                                    units: int, risk_percentage: Decimal = Decimal("0.02")):
     """Implement stop-loss based on account risk percentage."""
@@ -241,7 +238,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def implement_trailing_stop_loss(account_id: str, instrument: str, units: int, trail_distance_pips: int = 50) -> Any:
     """Implement trailing stop-loss that moves with favorable price action."""
 
@@ -310,7 +306,6 @@ import pandas as pd
 import numpy as np
 
 
-"""Comprehensive module for trading operations."""
 async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
                                 atr_multiplier: Decimal = Decimal("2.0"), atr_period: int = 14):
     """Calculate stop-loss based on Average True Range volatility."""
@@ -402,7 +397,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
 
-"""Comprehensive module for trading operations."""
 async def modify_stop_loss(account_id: str, trade_id: str, new_stop_price: Decimal) -> Any:
     """Modify stop-loss on existing trade."""
 
@@ -442,7 +436,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def move_to_breakeven(account_id: str, trade_id: str, trigger_pips: int = 20) -> Any:
     """Move stop-loss to break-even after price moves favorably."""
 
@@ -509,7 +502,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def implement_tiered_stop_loss(account_id: str, instrument: str, units: int) -> Any:
     """Implement tiered stop-loss with multiple exit levels."""
 

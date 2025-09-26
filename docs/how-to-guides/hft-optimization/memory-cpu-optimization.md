@@ -19,7 +19,6 @@ from decimal import Decimal
 import array
 
 
-"""Comprehensive module for trading operations."""
 class FastPrice(NamedTuple):
     """Memory-efficient price representation."""
     bid: float
@@ -153,7 +152,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class TradingObjectPool:
     """Object pool for common trading objects to reduce allocations."""
 
@@ -237,7 +235,6 @@ async def process_price_data(price_obj: Dict[str, Any]: Any) -> Any:
 
 from typing import Any
 
-"""Comprehensive module for trading operations."""
 def fast_spread_calculation(price) -> Any:
     return price.asks[0].price - price.bids[0].price
 
@@ -255,7 +252,6 @@ def slow_spread_calculation(price) -> Any:
 
 from typing import Any
 
-"""Comprehensive module for trading operations."""
 async def optimized_price_processing(price) -> Any:
     bids = price.bids
     asks = price.asks
@@ -286,9 +282,7 @@ import numpy as np
 
 
 
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 def calculate_multiple_spreads(prices_array) -> Any:
     """Calculate spreads for multiple prices efficiently."""
 
@@ -322,7 +316,6 @@ from typing import WeakSet
 
 
 
-"""Comprehensive module for trading operations."""
 class MemoryEfficientSubscriptionManager:
     """Manage price subscriptions without memory leaks."""
 
@@ -366,7 +359,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class BoundedDataStorage:
     """Storage with automatic size limits."""
 
@@ -423,7 +415,6 @@ import time
 
 
 
-"""Comprehensive module for trading operations."""
 def benchmark_function(func: Any) -> Any:
     """Decorator to benchmark function execution time."""
 
@@ -473,7 +464,6 @@ import psutil
 
 
 
-"""Comprehensive module for trading operations."""
 class MemoryProfiler:
     """Monitor memory usage during HFT operations."""
 

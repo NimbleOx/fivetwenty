@@ -22,7 +22,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class HighPerformanceStreamer:
     """Optimized streaming client for HFT applications."""
 
@@ -187,7 +186,6 @@ Execute callbacks without blocking the main stream:
 
 from typing import Any
 
-"""Comprehensive module for trading operations."""
 async def _process_price_update(self, price) -> Any:
     # Store data first (fast)
     self.store_price_data(price)
@@ -223,7 +221,6 @@ Filter messages at the earliest point:
 
 ```python
 
-"""Module docstring."""
 
 from typing import Any
 from decimal import Decimal
@@ -280,7 +277,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class FastPrice(NamedTuple):
     """Class docstring."""
     bid: float
@@ -301,7 +297,6 @@ Process multiple updates together when possible:
 
 ```python
 
-"""Module docstring."""
 
 from typing import Any
 async def batch_process_prices(self, prices: List[ClientPrice]) -> Any:

@@ -26,7 +26,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
 
-"""Comprehensive module for trading operations."""
 async def validate_credentials(token: str, environment: Environment) -> Any:
     """Validate OANDA credentials before use."""
 
@@ -71,7 +70,6 @@ from httpx import TimeoutException, ConnectError
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def robust_connection(token: str, timeout: float = 30.0) -> Any:
     """Create connection with custom timeout and error handling."""
 
@@ -119,7 +117,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
 
-"""Comprehensive module for trading operations."""
 class RetryConfig:
     """Configuration for retry logic."""
     def __init__(self, max_attempts: int = 3, base_delay: float = 1.0, max_delay: float = 60.0) -> None:
@@ -193,7 +190,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 
-"""Comprehensive module for trading operations."""
 async def healthcheck_connection(client: AsyncClient, account_id: str) -> bool:
     """Check if connection is healthy."""
 
@@ -274,7 +270,6 @@ async def main() -> Any:
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 def validate_environment_setup(token: str, expected_env: Environment) -> Any:
     """Validate token matches expected environment."""
 
@@ -339,7 +334,6 @@ await handle_ssl_issues("your-token")
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 class ResilientClient:
     """Client wrapper with automatic reconnection."""
 

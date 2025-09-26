@@ -201,8 +201,6 @@ class CodeTypingValidator(BaseValidator):
 
         return issues
 
-
-
     def _get_suggestion_for_error(self, error_code: str | None, message: str) -> str:
         """Get suggestion for fixing a mypy error."""
         return f"Fix type issue: {message}"

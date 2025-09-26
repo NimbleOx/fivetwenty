@@ -36,7 +36,6 @@ import os
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def get_live_accounts() -> Any:
     """Get your live trading account information."""
 
@@ -83,7 +82,6 @@ from fivetwenty import AsyncClient, Environment
 # FIVETWENTY_LIVE_ACCOUNT=your-account-id-here
 
 
-"""Comprehensive module for trading operations."""
 def get_live_config() -> Any:
     """Get live trading configuration from environment."""
 
@@ -113,7 +111,6 @@ from pathlib import Path
 
 
 
-"""Comprehensive module for trading operations."""
 def load_live_config(config_path: str = "live_config.json") -> Any:
     """Load live trading configuration from secure file."""
 
@@ -157,7 +154,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class LiveTradingValidator:
     """Safety validator for live trading operations."""
 
@@ -198,7 +194,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def place_live_order_safely(account_id: str, instrument: str, units: int, stop_loss: Decimal = None, take_profit: Decimal = None) -> Any:
     """Place order in live environment with safety checks."""
 
@@ -325,7 +320,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class LiveTradingRiskManager:
     """Comprehensive risk management for live trading."""
 
@@ -448,7 +442,6 @@ from fivetwenty import AsyncClient, Environment
 
 
 
-"""Comprehensive module for trading operations."""
 async def emergency_stop_trading(account_id: str) -> Any:
     """Emergency procedure to stop all trading activity."""
 

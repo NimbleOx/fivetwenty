@@ -31,7 +31,6 @@ import numpy as np
 from datetime import datetime, timedelta, timezone
 
 
-"""Comprehensive module for trading operations."""
 class SocialSentimentProvider:
     """Social media sentiment analysis for forex."""
 
@@ -301,7 +300,6 @@ Combine sentiment from multiple social platforms:
 
 ```python
 
-"""Module docstring."""
 class MultiPlatformSentimentProvider:
     """Class docstring."""
     """Aggregate sentiment from multiple social platforms."""
@@ -387,7 +385,6 @@ Implement real-time monitoring of social media sentiment:
 from datetime import datetime
 
 
-"""Comprehensive module for trading operations."""
 class RealTimeSocialMonitor:
     """Real-time social media sentiment monitoring."""
 
@@ -541,7 +538,6 @@ Focus on central bank communications for high-impact sentiment:
 from datetime import datetime
 
 
-"""Comprehensive module for trading operations."""
 class CentralBankSentimentAnalyzer:
     """Specialized analysis of central bank communications."""
 
@@ -677,7 +673,6 @@ Ensure high-quality social media data:
 
 ```python
 
-"""Module docstring."""
 class SocialDataFilter:
     """Class docstring."""
     """Filter and validate social media data quality."""
@@ -743,7 +738,6 @@ Validate sentiment analysis results:
 
 ```python
 
-"""Module docstring."""
 class SentimentValidator:
     """Class docstring."""
     """Validate and improve sentiment analysis accuracy."""

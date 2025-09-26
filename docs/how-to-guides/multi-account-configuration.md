@@ -190,7 +190,6 @@ async def mixed_approach():
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 The pattern for custom prefixes follows: `{PREFIX}_FIVETWENTY_OANDA_{VARIABLE}`
 
 ### Examples:

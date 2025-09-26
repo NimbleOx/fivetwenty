@@ -33,8 +33,8 @@ graph TB
 ### Custom Metrics Implementation
 
 ```python
-# monitoring/metrics.py
 import functools
+import sys
 import time
 from decimal import Decimal
 
@@ -42,79 +42,79 @@ from prometheus_client import Counter, Gauge, Histogram, Info
 
 # Business Metrics
 TRADES_TOTAL = Counter(
-    'fivetwenty_trades_total',
-    'Total number of trades executed',
-    ['instrument', 'direction', 'status']
+    "fivetwenty_trades_total",
+    "Total number of trades executed",
+    ["instrument", "direction", "status"],
 )
 
 TRADE_VOLUME = Histogram(
-    'fivetwenty_trade_volume',
-    'Trade volume distribution',
-    ['instrument', 'direction'],
-    buckets=[100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000]
+    "fivetwenty_trade_volume",
+    "Trade volume distribution",
+    ["instrument", "direction"],
+    buckets=[100, 500, 1000, 5000, 10000, 50000, 100000, 500000, 1000000],
 )
 
 ACCOUNT_BALANCE = Gauge(
-    'fivetwenty_account_balance',
-    'Current account balance',
-    ['account_id', 'currency']
+    "fivetwenty_account_balance",
+    "Current account balance",
+    ["account_id", "currency"],
 )
 
 UNREALIZED_PL = Gauge(
-    'fivetwenty_unrealized_pl',
-    'Unrealized profit/loss',
-    ['account_id', 'instrument']
+    "fivetwenty_unrealized_pl",
+    "Unrealized profit/loss",
+    ["account_id", "instrument"],
 )
 
 ACTIVE_POSITIONS = Gauge(
-    'fivetwenty_active_positions',
-    'Number of active positions',
-    ['account_id', 'instrument']
+    "fivetwenty_active_positions",
+    "Number of active positions",
+    ["account_id", "instrument"],
 )
 
 # Technical Metrics
 API_REQUEST_DURATION = Histogram(
-    'fivetwenty_api_request_duration_seconds',
-    'Time spent on API requests',
-    ['endpoint', 'method', 'status'],
-    buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0]
+    "fivetwenty_api_request_duration_seconds",
+    "Time spent on API requests",
+    ["endpoint", "method", "status"],
+    buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0],
 )
 
 API_REQUESTS_TOTAL = Counter(
-    'fivetwenty_api_requests_total',
-    'Total API requests',
-    ['endpoint', 'method', 'status']
+    "fivetwenty_api_requests_total",
+    "Total API requests",
+    ["endpoint", "method", "status"],
 )
 
 CONNECTION_POOL_SIZE = Gauge(
-    'fivetwenty_connection_pool_size',
-    'Current connection pool size',
-    ['pool_type']
+    "fivetwenty_connection_pool_size",
+    "Current connection pool size",
+    ["pool_type"],
 )
 
 STREAMING_LATENCY = Histogram(
-    'fivetwenty_streaming_latency_seconds',
-    'Streaming data latency',
-    ['stream_type'],
-    buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0]
+    "fivetwenty_streaming_latency_seconds",
+    "Streaming data latency",
+    ["stream_type"],
+    buckets=[0.001, 0.005, 0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1.0],
 )
 
 # System Metrics
 SYSTEM_INFO = Info(
-    'fivetwenty_system_info',
-    'System information'
+    "fivetwenty_system_info",
+    "System information",
 )
 
 ERROR_RATE = Counter(
-    'fivetwenty_errors_total',
-    'Total number of errors',
-    ['error_type', 'component']
+    "fivetwenty_errors_total",
+    "Total number of errors",
+    ["error_type", "component"],
 )
 
 CIRCUIT_BREAKER_STATE = Gauge(
-    'fivetwenty_circuit_breaker_state',
-    'Circuit breaker state (0=closed, 1=open, 2=half-open)',
-    ['circuit_name']
+    "fivetwenty_circuit_breaker_state",
+    "Circuit breaker state (0=closed, 1=open, 2=half-open)",
+    ["circuit_name"],
 )
 
 class MetricsCollector:
@@ -126,9 +126,9 @@ class MetricsCollector:
 
         # Set system information
         SYSTEM_INFO.info({
-            'app_name': app_name,
-            'version': version,
-            'python_version': f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}"
+            "app_name": app_name,
+            "version": version,
+            "python_version": f"{sys.version_info.major}.{sys.version_info.minor}.{sys.version_info.micro}",
         })
 
     def track_trade(self, instrument: str, direction: str, volume: Decimal, status: str):
@@ -195,7 +195,7 @@ class MetricsCollector:
         """Track application errors."""
         ERROR_RATE.labels(
             error_type=error_type,
-            component=component
+            component=component,
         ).inc()
 
     def update_connection_pool_size(self, pool_type: str, size: int):
@@ -295,7 +295,7 @@ class PerformanceMonitor:
         memory_available = memory.available
 
         # Disk metrics
-        disk = psutil.disk_usage('/')
+        disk = psutil.disk_usage("/")
         disk_usage = disk.percent
 
         # Network metrics
@@ -303,10 +303,10 @@ class PerformanceMonitor:
 
         # Garbage collection stats
         gc_stats = {
-            'gen0_collections': gc.get_stats()[0]['collections'],
-            'gen1_collections': gc.get_stats()[1]['collections'],
-            'gen2_collections': gc.get_stats()[2]['collections'],
-            'total_objects': len(gc.get_objects())
+            "gen0_collections": gc.get_stats()[0]["collections"],
+            "gen1_collections": gc.get_stats()[1]["collections"],
+            "gen2_collections": gc.get_stats()[2]["collections"],
+            "total_objects": len(gc.get_objects()),
         }
 
         # Active connections (approximate)
@@ -345,14 +345,14 @@ class PerformanceMonitor:
         """Update Prometheus metrics with performance data."""
 
         # System metrics
-        SYSTEM_CPU_USAGE = Gauge('system_cpu_usage_percent', 'CPU usage percentage')
-        SYSTEM_MEMORY_USAGE = Gauge('system_memory_usage_percent', 'Memory usage percentage')
-        SYSTEM_MEMORY_AVAILABLE = Gauge('system_memory_available_bytes', 'Available memory in bytes')
-        SYSTEM_DISK_USAGE = Gauge('system_disk_usage_percent', 'Disk usage percentage')
-        SYSTEM_NETWORK_BYTES_SENT = Counter('system_network_bytes_sent_total', 'Total network bytes sent')
-        SYSTEM_NETWORK_BYTES_RECV = Counter('system_network_bytes_recv_total', 'Total network bytes received')
-        SYSTEM_GC_COLLECTIONS = Counter('system_gc_collections_total', 'Total garbage collections', ['generation'])
-        SYSTEM_ACTIVE_CONNECTIONS = Gauge('system_active_connections', 'Number of active network connections')
+        SYSTEM_CPU_USAGE = Gauge("system_cpu_usage_percent", "CPU usage percentage")
+        SYSTEM_MEMORY_USAGE = Gauge("system_memory_usage_percent", "Memory usage percentage")
+        SYSTEM_MEMORY_AVAILABLE = Gauge("system_memory_available_bytes", "Available memory in bytes")
+        SYSTEM_DISK_USAGE = Gauge("system_disk_usage_percent", "Disk usage percentage")
+        SYSTEM_NETWORK_BYTES_SENT = Counter("system_network_bytes_sent_total", "Total network bytes sent")
+        SYSTEM_NETWORK_BYTES_RECV = Counter("system_network_bytes_recv_total", "Total network bytes received")
+        SYSTEM_GC_COLLECTIONS = Counter("system_gc_collections_total", "Total garbage collections", ["generation"])
+        SYSTEM_ACTIVE_CONNECTIONS = Gauge("system_active_connections", "Number of active network connections")
 
         SYSTEM_CPU_USAGE.set(snapshot.cpu_usage)
         SYSTEM_MEMORY_USAGE.set(snapshot.memory_usage)
@@ -361,11 +361,11 @@ class PerformanceMonitor:
         SYSTEM_ACTIVE_CONNECTIONS.set(snapshot.active_connections)
 
         # Network I/O (incremental)
-        SYSTEM_NETWORK_BYTES_SENT._value._value = snapshot.network_io['bytes_sent']
-        SYSTEM_NETWORK_BYTES_RECV._value._value = snapshot.network_io['bytes_recv']
+        SYSTEM_NETWORK_BYTES_SENT._value._value = snapshot.network_io["bytes_sent"]
+        SYSTEM_NETWORK_BYTES_RECV._value._value = snapshot.network_io["bytes_recv"]
 
         # GC stats
-        for gen, collections in enumerate(['gen0_collections', 'gen1_collections', 'gen2_collections']):
+        for gen, collections in enumerate(["gen0_collections", "gen1_collections", "gen2_collections"]):
             SYSTEM_GC_COLLECTIONS.labels(generation=str(gen))._value._value = snapshot.gc_stats[collections]
 
     async def _check_performance_anomalies(self, snapshot: PerformanceMetrics):
@@ -544,7 +544,7 @@ class TracingManager:
                         result = await func(*args, **kwargs)
 
                         # Add result information
-                        if hasattr(result, '__dict__'):
+                        if hasattr(result, "__dict__"):
                             span.set_attribute("result.type", type(result).__name__)
 
                         span.set_status(trace.Status(trace.StatusCode.OK))
@@ -582,7 +582,7 @@ class TracingManager:
                         result = await func(*args, **kwargs)
 
                         # Add response information
-                        if hasattr(result, 'status_code'):
+                        if hasattr(result, "status_code"):
                             span.set_attribute("http.status_code", result.status_code)
 
                         span.set_status(trace.Status(trace.StatusCode.OK))
@@ -635,7 +635,7 @@ class TracingManager:
                     result = await func(*args, **kwargs)
 
                     # Extract trade details from result
-                    if hasattr(result, 'order_fill_transaction'):
+                    if hasattr(result, "order_fill_transaction"):
                         fill_transaction = result.order_fill_transaction
                         api_span.set_attribute("trade.fill_price", str(fill_transaction.price))
                         api_span.set_attribute("trade.fill_time", str(fill_transaction.time))
@@ -664,7 +664,7 @@ class TracingManager:
 
         span = trace.get_current_span()
         if span and span.get_span_context().is_valid:
-            return format(span.get_span_context().trace_id, '032x')
+            return format(span.get_span_context().trace_id, "032x")
         return None
 
     def get_current_span_id(self) -> Optional[str]:

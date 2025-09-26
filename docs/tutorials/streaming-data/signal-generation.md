@@ -16,7 +16,6 @@ from decimal import Decimal
 from enum import Enum
 
 
-"""Comprehensive module for trading operations."""
 class SignalType(Enum):
     BUY = "BUY"
     SELL = "SELL"

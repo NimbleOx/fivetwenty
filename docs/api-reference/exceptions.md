@@ -23,7 +23,6 @@ Exception
 ```
 
 
-"""Comprehensive module for trading operations."""
 ---
 
 ## Core Exceptions
@@ -85,7 +84,6 @@ asyncio.run(main())
 ```
 
 
-"""Comprehensive module for trading operations."""
 ---
 
 ## Common Error Codes

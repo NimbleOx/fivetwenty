@@ -575,7 +575,6 @@ if __name__ == "__main__":
 ### Sync vs Async: When to Use What
 
 
-"""Comprehensive module for trading operations."""
 | Use Async Client When: | Use Sync Client When: |
 |----------------------|---------------------|
 | Building web applications | Writing scripts or tools |
@@ -686,7 +685,6 @@ config = AccountConfig(
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 - **Test on practice first** - always validate strategies in practice environment
 - **Use proper logging** - log trades but never log credentials
 - **Handle network issues** - implement retry logic for transient failures

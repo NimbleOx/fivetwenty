@@ -32,7 +32,6 @@ from fivetwenty import AsyncClient, Environment
 
 # Configuration
 
-"""Comprehensive module for trading operations."""
 TOKEN = "your-api-token-here"
 ENVIRONMENT = Environment.PRACTICE
 
@@ -147,7 +146,6 @@ import numpy as np
 from fivetwenty.models import CandlestickGranularity
 
 
-"""Comprehensive module for trading operations."""
 class VolatilityPositionSizer(PositionSizer):
     """Position sizing based on market volatility (ATR)."""
 
@@ -261,7 +259,6 @@ The most mathematically sophisticated approach to position sizing.
 from decimal import Decimal
 
 
-"""Comprehensive module for trading operations."""
 class KellyPositionSizer:
     """Position sizing using Kelly Criterion."""
 
@@ -372,7 +369,6 @@ Adjust position sizes based on recent performance and market conditions.
 from decimal import Decimal
 
 
-"""Comprehensive module for trading operations."""
 class AdaptivePositionSizer:
     """Position sizer that adapts based on recent performance."""
 
@@ -549,7 +545,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 def validate_position_size_decision(account_balance: Decimal, position_size: int,
                                    entry_price: Decimal, stop_loss: Decimal,
                                    instrument: str) -> dict:

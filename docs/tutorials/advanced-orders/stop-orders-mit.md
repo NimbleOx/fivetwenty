@@ -25,7 +25,6 @@ from datetime import datetime, timedelta
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def breakout_stop_strategy() -> Any:
     """Implement basic breakout strategy using stop orders."""
     async with AsyncClient() as client:
@@ -71,7 +70,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def dynamic_breakout_levels() -> Any:
     """Calculate breakout levels based on recent price action."""
     async with AsyncClient() as client:
@@ -130,7 +128,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class MultiTimeframeBreakout:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -210,7 +207,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def mean_reversion_mit_strategy() -> Any:
     """Implement mean reversion using MIT orders."""
     async with AsyncClient() as client:
@@ -259,7 +255,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def bollinger_band_reversion() -> Any:
     """Mean reversion strategy using Bollinger Band levels."""
     async with AsyncClient() as client:
@@ -311,7 +306,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class RSIMeanReversion:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -382,7 +376,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def volatility_adjusted_triggers() -> Any:
     """Adjust order triggers based on current market volatility."""
     async with AsyncClient() as client:
@@ -444,7 +437,6 @@ from datetime import datetime
 
 
 
-"""Comprehensive module for trading operations."""
 async def time_based_trigger_strategy() -> Any:
     """Adjust trigger sensitivity based on trading session."""
     from datetime import datetime, timezone
@@ -508,7 +500,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 class MomentumBreakout:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -595,7 +586,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def stop_mit_combination_strategy() -> Any:
     """Use both stop and MIT orders for complete market approach."""
     async with AsyncClient() as client:
@@ -671,7 +661,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def intelligent_order_management() -> Any:
     """Manage order lifecycle based on market conditions."""
     async with AsyncClient() as client:
@@ -730,7 +719,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def efficient_trigger_placement() -> Any:
     """Optimize order placement for fast market response."""
     async with AsyncClient() as client:

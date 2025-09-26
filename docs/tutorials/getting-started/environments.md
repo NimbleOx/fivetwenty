@@ -24,7 +24,6 @@ from fivetwenty import AsyncClient, Environment
 
 # For testing and development
 
-"""Comprehensive module for trading operations."""
 practice_client = AsyncClient(
     token="your-practice-token",
     environment=Environment.PRACTICE
@@ -89,7 +88,6 @@ from fivetwenty import AsyncClient, Environment
 
 
 
-"""Comprehensive module for trading operations."""
 async def practice_trading() -> Any:
     """Safe trading in practice environment."""
 
@@ -149,7 +147,6 @@ from fivetwenty.exceptions import FiveTwentyError
 
 
 
-"""Comprehensive module for trading operations."""
 async def live_trading_with_safeguards() -> Any:
     """Production trading with safety checks."""
 
@@ -258,7 +255,6 @@ client = create_client()
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 1. **Develop in Practice** - Write and debug all code
 2. **Test in Practice** - Run comprehensive tests
 3. **Paper Trade** - Run strategy for weeks/months
@@ -450,7 +446,6 @@ class MultiEnvironmentConfig:
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 Before moving from Practice to Live:
 
 - [ ] ✅ Strategy profitable for 3+ months in practice

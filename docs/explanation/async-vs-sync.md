@@ -36,7 +36,6 @@ from fivetwenty import AsyncClient, Environment
 
 
 
-"""Comprehensive module for trading operations."""
 async def async_example():
     """Async client example."""
     async with AsyncClient(
@@ -129,7 +128,6 @@ from fivetwenty import Client, Environment
 
 # Sync client - simpler but slower
 
-"""Comprehensive module for trading operations."""
 with Client(
     token="your-token",
     environment=Environment.PRACTICE,
@@ -167,7 +165,6 @@ from fivetwenty import AsyncClient, Client, Environment
 
 # ASYNC: Fast concurrent requests
 
-"""Comprehensive module for trading operations."""
 async def async_performance_test() -> Any:
     async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
         start = time.time()
@@ -198,7 +195,6 @@ def sync_performance_test() -> Any:
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def async_error_handling() -> Any:
     async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
         try:
@@ -228,7 +224,6 @@ from fivetwenty import Environment
 
 
 
-"""Comprehensive module for trading operations."""
 def sync_error_handling() -> Any:
     with Client(token=token, environment=Environment.PRACTICE) as client:
         try:
@@ -249,7 +244,6 @@ If you have sync code and want to upgrade:
 ```python
 # OLD: Synchronous code
 
-"""Comprehensive module for trading operations."""
 def get_account_sync(client: Any, account_id: str) -> Any:
     account = client.accounts.get_account(account_id)
     positions = client.positions.get_open_positions(account_id)
@@ -273,7 +267,6 @@ import asyncio
 
 
 
-"""Comprehensive module for trading operations."""
 def sync_wrapper() -> Any:
     """Call async code from sync context."""
     # Create new event loop
@@ -301,7 +294,6 @@ from fastapi import FastAPI
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 app = FastAPI()
 client = AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE)
 
@@ -329,7 +321,6 @@ from flask import Flask, jsonify
 from fivetwenty import Client, Environment
 
 
-"""Comprehensive module for trading operations."""
 app = Flask(__name__)
 
 def get_client() -> Any:
@@ -358,7 +349,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty import Client, Environment
 
 
-"""Comprehensive module for trading operations."""
 client = Client(token=token, environment=Environment.PRACTICE)
 accounts = client.accounts.get_accounts()
 print(accounts)
@@ -389,10 +379,7 @@ from fivetwenty import AsyncClient, Environment
 # Good: Consistent async throughout
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 class TradingSystem:
     """Class docstring."""
     def __init__(self) -> None:
@@ -447,7 +434,6 @@ from fivetwenty import AsyncClient, Environment
 
 # Async with custom timeout
 
-"""Comprehensive module for trading operations."""
 async_client = AsyncClient(
     token=token,
     environment=Environment.PRACTICE,
@@ -476,7 +462,6 @@ sync_client = Client(
 
 from typing import Any
 
-"""Comprehensive module for trading operations."""
 async def efficient_async(client, account_ids) -> Any:
     """Process multiple accounts efficiently."""
     async with asyncio.TaskGroup() as tg:

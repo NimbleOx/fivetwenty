@@ -325,7 +325,6 @@ async def demo_portfolio_analysis(account_id: str):
 ```python
 # Check for missing data
 
-"""Comprehensive module for trading operations."""
 def validate_data_quality(price_data: Dict[str, pd.DataFrame]) -> Dict[str, Dict]:
     quality_report = {}
 

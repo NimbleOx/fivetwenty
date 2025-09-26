@@ -25,7 +25,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def place_gtd_limit_order() -> Any:
     async with AsyncClient() as client:
         # Order expires at market close Friday
@@ -54,7 +53,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def session_based_orders() -> Any:
     """Place orders that align with trading sessions."""
     from datetime import timezone
@@ -86,7 +84,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def ioc_limit_strategy() -> Any:
     """Use IOC for immediate execution with price protection."""
     async with AsyncClient() as client:
@@ -117,7 +114,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def protected_limit_entry() -> Any:
     """Place limit order with immediate stop-loss protection."""
     async with AsyncClient() as client:
@@ -162,7 +158,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class BracketOrder:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -225,7 +220,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def dynamic_limit_pricing() -> Any:
     """Adjust limit order prices based on market movement."""
     async with AsyncClient() as client:
@@ -271,7 +265,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class IcebergOrder:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -336,7 +329,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def conditional_limit_strategy() -> Any:
     """Place limit orders based on technical levels."""
     async with AsyncClient() as client:
@@ -381,7 +373,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def volume_based_limit_orders() -> Any:
     """Adjust limit order strategy based on market activity."""
     async with AsyncClient() as client:
@@ -430,7 +421,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def handle_partial_fills() -> Any:
     """Monitor and manage partial order fills."""
     async with AsyncClient() as client:
@@ -496,7 +486,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def batch_limit_orders() -> Any:
     """Place multiple related limit orders efficiently."""
     async with AsyncClient() as client:
@@ -542,7 +531,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def smart_limit_routing() -> Any:
     """Route limit orders based on current market conditions."""
     async with AsyncClient() as client:
@@ -593,7 +581,6 @@ from fivetwenty import AsyncClient
 from fivetwenty.exceptions import VeeTwentyError
 
 
-"""Comprehensive module for trading operations."""
 async def validated_limit_order(instrument: str, units: int, price: Decimal, max_spread_pips: int = 3) -> Any:
     """Place limit order with comprehensive validation."""
     async with AsyncClient() as client:

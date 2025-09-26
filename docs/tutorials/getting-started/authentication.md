@@ -52,7 +52,6 @@ from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Create secure configuration
 
-"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
@@ -521,7 +520,6 @@ jobs:
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 1. **Never commit tokens** - Use environment variables or secret management
 2. **Rotate tokens regularly** - Generate new tokens periodically
 3. **Use separate tokens** - Different tokens for different environments

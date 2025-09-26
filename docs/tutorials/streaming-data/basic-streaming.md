@@ -23,7 +23,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import ClientPrice
 
 
-"""Comprehensive module for trading operations."""
 class BasicPriceStreamer:
     """Basic implementation of price streaming."""
 
@@ -118,7 +117,6 @@ from fivetwenty import AsyncClient
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 class AccountStreamer:
     """Stream account changes and transactions."""
 

@@ -28,7 +28,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class BracketOrderManager:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -268,7 +267,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def scaling_bracket_strategy() -> Any:
     """Implement scaling bracket orders with multiple entry and exit levels."""
     async with AsyncClient() as client:
@@ -320,7 +318,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class TrailingBracketManager(BracketOrderManager):
     """Bracket manager with trailing stop functionality."""
 
@@ -421,7 +418,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class ConditionalOrderChain:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -633,7 +629,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class OCOOrderManager:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -743,7 +738,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 class PairsTradingStrategy:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -913,7 +907,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class PortfolioHedgeManager:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client

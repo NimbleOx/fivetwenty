@@ -33,7 +33,6 @@ from datetime import datetime, timedelta, timezone
 from dataclasses import dataclass
 
 
-"""Comprehensive module for trading operations."""
 @dataclass
 class NewsItem:
     """Financial news item."""
@@ -438,7 +437,6 @@ Implement continuous news monitoring:
 from datetime import datetime
 
 
-"""Comprehensive module for trading operations."""
 class RealTimeNewsMonitor:
     """Monitor news in real-time with alerts."""
 
@@ -516,7 +514,6 @@ class RealTimeNewsMonitor:
 
 ```python
 
-"""Module docstring."""
 class EnhancedSentimentAnalyzer:
     """Class docstring."""
     """Enhanced sentiment analysis with financial context."""
@@ -566,7 +563,6 @@ class EnhancedSentimentAnalyzer:
 
 ```python
 
-"""Module docstring."""
 def calculate_news_adjusted_position_size(
     base_size: int,
     sentiment_score: float,

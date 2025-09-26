@@ -77,7 +77,6 @@ from decimal import Decimal
 
 # Example: $10,000 account with 1% risk
 
-"""Comprehensive module for trading operations."""
 account_balance = Decimal("10000")  # Example account balance
 risk_per_trade = account_balance * Decimal("0.01")  # $100 maximum risk
 
@@ -133,7 +132,6 @@ Most new traders face this psychological conflict:
 from decimal import Decimal
 
 
-"""Comprehensive module for trading operations."""
 def calculate_risk_parameters(account_balance: Decimal, monthly_income: Decimal,
                             emergency_fund: Decimal) -> dict:
     """Calculate personalized risk parameters."""
@@ -190,7 +188,6 @@ Create written rules before you start trading:
 from decimal import Decimal
 
 
-"""Comprehensive module for trading operations."""
 class RiskTracker:
     """Track risk metrics in real-time."""
 
@@ -280,7 +277,6 @@ Small improvements in risk management compound dramatically:
 from decimal import Decimal
 
 
-"""Comprehensive module for trading operations."""
 def compare_risk_strategies(initial_balance: Decimal, months: int) -> Any:
     """Compare different risk management approaches."""
 

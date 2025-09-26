@@ -257,7 +257,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 class PositionSizeEnforcer:
     """Automatically enforce position sizing rules."""
 
@@ -487,7 +486,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class RealTimeRiskMonitor:
     """Continuous risk monitoring with automated responses."""
 
@@ -911,7 +909,6 @@ class RiskSystem:
 
 ```python
 
-"""Module docstring."""
 class MLRiskPredictor:
     """Class docstring."""
     """Use machine learning to predict risk scenarios."""

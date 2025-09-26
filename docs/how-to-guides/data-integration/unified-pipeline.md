@@ -409,7 +409,6 @@ Coordinate real-time updates from all data sources:
 from datetime import datetime
 
 
-"""Comprehensive module for trading operations."""
 class RealTimeDataOrchestrator:
     """Orchestrate real-time updates from multiple data sources."""
 
@@ -673,7 +672,6 @@ Monitor the performance and efficiency of the data pipeline:
 
 ```python
 
-"""Module docstring."""
 
 from typing import Any
 from datetime import datetime
@@ -827,7 +825,6 @@ from decimal import Decimal
 from datetime import datetime
 
 
-"""Comprehensive module for trading operations."""
 class ResilientDataPipeline:
     """Resilient wrapper for unified trading system."""
 

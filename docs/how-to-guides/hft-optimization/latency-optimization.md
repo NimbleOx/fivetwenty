@@ -16,7 +16,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class LowLatencyOrderManager:
     """Optimized order execution for HFT."""
 
@@ -170,7 +169,6 @@ Configure timeouts for optimal latency:
 
 ```python
 
-"""Module docstring."""
 
 from typing import Any
 from fivetwenty import AsyncClient
@@ -257,7 +255,6 @@ from fivetwenty import AsyncClient
 from decimal import Decimal
 
 
-"""Comprehensive module for trading operations."""
 class FastPreTradeValidator:
     """Ultra-fast pre-trade validation."""
 
@@ -414,10 +411,7 @@ from fivetwenty import AsyncClient
 
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 @dataclass
 class PriorityOrder:
     """Class docstring."""
@@ -574,7 +568,6 @@ Monitor and analyze execution latency:
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 class LatencyMonitor:
     """Monitor and analyze order execution latency."""
 

@@ -38,7 +38,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def place_market_order() -> Any:
     async with AsyncClient() as client:
         # Buy 10,000 EUR/USD at market price
@@ -75,7 +74,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def place_limit_order() -> Any:
     async with AsyncClient() as client:
         # Buy EUR/USD only if price drops to 1.0850 or lower
@@ -113,7 +111,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def place_stop_order() -> Any:
     async with AsyncClient() as client:
         # Sell EUR/USD if price falls to 1.0800 (stop loss)
@@ -151,7 +148,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def place_mit_order() -> Any:
     async with AsyncClient() as client:
         # Take profit when EUR/USD rises to 1.0950
@@ -208,7 +204,6 @@ from decimal import Decimal
 
 # Common order parameters
 
-"""Comprehensive module for trading operations."""
 order_params = {
     "instrument": "EUR_USD",           # Trading pair
     "units": 10000,                   # Position size (+ buy, - sell)
@@ -234,7 +229,6 @@ from datetime import datetime
 
 
 
-"""Comprehensive module for trading operations."""
 async def order_with_time_controls() -> Any:
     from datetime import datetime, timedelta
 
@@ -271,7 +265,6 @@ Orders progress through predictable states:
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def monitor_order_status(order_id: str) -> Any:
     async with AsyncClient() as client:
         # Check current order status
@@ -299,7 +292,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def modify_pending_order(order_id: str, new_price: Decimal) -> Any:
     async with AsyncClient() as client:
         # Update order price
@@ -354,7 +346,6 @@ from fivetwenty import AsyncClient
 from fivetwenty.exceptions import VeeTwentyError
 
 
-"""Comprehensive module for trading operations."""
 async def robust_order_placement() -> Any:
     async with AsyncClient() as client:
         try:
@@ -392,9 +383,7 @@ from decimal import Decimal
 
 
 
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 def validate_order_params(instrument: str, units: int, price: Decimal) -> Any:
     # Check minimum/maximum units
     if abs(units) < 1:
@@ -416,9 +405,7 @@ from decimal import Decimal
 
 
 
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 async def calculate_position_size(risk_amount: Decimal, stop_distance: Decimal) -> int:
     """Calculate position size based on risk management rules."""
 

@@ -75,7 +75,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class StopLossStrategy:
     """Advanced stop loss calculation strategies."""
 
@@ -209,7 +208,6 @@ from decimal import Decimal
 
 
 
-"""Comprehensive module for trading operations."""
 class TrailingStopManager:
     """Manage trailing stop loss orders."""
 

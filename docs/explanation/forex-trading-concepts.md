@@ -11,7 +11,6 @@ This guide explains forex trading concepts and how they're represented in the Fi
 In forex trading, you're always trading one currency against another. The FiveTwenty represents this through **instruments**:
 
 ```python
-"""Forex trading concepts - currency pairs and instruments."""
 
 # EUR/USD means: Euro vs. US Dollar
 instrument = "EUR_USD"
@@ -50,7 +49,6 @@ Understanding the distinction between positions and trades is crucial:
 A **trade** is a single order execution:
 
 ```python
-"""Understanding trades vs positions in forex trading."""
 import asyncio
 from typing import Any
 
@@ -88,7 +86,6 @@ if __name__ == "__main__":
 A **position** is the net exposure for an instrument:
 
 ```python
-"""Understanding positions as aggregated exposure."""
 from fivetwenty import AsyncClient
 
 
@@ -140,7 +137,6 @@ Trade 3: Sell 5,000 EUR @ 1.1250             │                         │
 
 **For Risk Management**:
 ```python
-"""Risk management calculations using trades and positions."""
 from typing import Any
 
 
@@ -159,7 +155,6 @@ def calculate_risk_exposure(trades: list, position: Any, stop_loss_distance: flo
 
 **For P/L Tracking**:
 ```python
-"""P/L tracking at trade and position levels."""
 from typing import Any
 
 
@@ -183,6 +178,12 @@ def analyze_pnl(trades: list, position: Any) -> None:
 Execute immediately at current market price:
 
 ```python
+from fivetwenty import AsyncClient
+
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
+
 # Market order - executes now
 order = await client.orders.post_market_order(
     account_id=account_id,
@@ -207,6 +208,11 @@ Execute only at specified price or better:
 
 ```python
 from decimal import Decimal
+from fivetwenty import AsyncClient
+
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
 
 # Current EUR_USD price: 1.1050
 # Place buy limit at 1.1000 (below market)
@@ -230,6 +236,11 @@ Triggered when market reaches specified price:
 
 ```python
 from decimal import Decimal
+from fivetwenty import AsyncClient
+
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
 
 # Current EUR_USD: 1.1050
 # Stop buy at 1.1100 (above market) - breakout strategy
@@ -242,7 +253,6 @@ stop_order = await client.orders.post_stop_order(
 ```
 
 
-"""Comprehensive module for trading operations."""
 **Common Strategies**:
 
 - **Stop Buy Above Market**: Momentum/breakout trading
@@ -278,6 +288,11 @@ Unlike stocks, forex trading uses **leverage** - you can control large positions
 
 ```python
 from decimal import Decimal
+from fivetwenty import AsyncClient
+
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
 
 # Check your account margin situation
 account = await client.accounts.get_account(account_id)
@@ -303,6 +318,11 @@ print(f"Margin Available: {account.margin_available}")  # Available for new trad
 
 ```python
 from decimal import Decimal
+from fivetwenty import AsyncClient
+
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
 
 # Account-level margin
 account = await client.accounts.get_account(account_id)
@@ -434,7 +454,6 @@ for bucket in order_book.price_buckets[:5]:
 ```
 
 
-"""Comprehensive module for trading operations."""
 **Market Depth Insights**:
 
 - **Liquidity**: How much volume available at each price
@@ -603,8 +622,6 @@ await client.orders.post_market_order(
     units=hedge_position  # Negative = short EUR
 )
 ```
-
-from decimal import Decimal
 
 ---
 

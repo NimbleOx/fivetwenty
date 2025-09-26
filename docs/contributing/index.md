@@ -54,7 +54,6 @@ git push origin your-feature-branch
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 ---
 
 ## Contribution Areas
@@ -122,7 +121,6 @@ uv run poe clean      # Clean build artifacts and caches
 from decimal import Decimal
 
 
-"""Comprehensive module for trading operations."""
 - **Type Safety**: 100% mypy strict compliance required
 - **Code Quality**: ruff formatting and linting (automatically fixed)
 - **Testing**: Comprehensive unit and integration test coverage

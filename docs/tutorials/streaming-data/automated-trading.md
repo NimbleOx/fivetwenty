@@ -15,7 +15,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 @dataclass
 class TradingConfig:
     max_position_size: float = 10000

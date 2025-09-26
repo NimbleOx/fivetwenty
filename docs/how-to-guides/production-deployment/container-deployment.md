@@ -25,7 +25,6 @@ from fivetwenty import Environment
 
 
 
-"""Comprehensive module for trading operations."""
 @dataclass
 class ProductionConfig:
     """Production configuration management."""

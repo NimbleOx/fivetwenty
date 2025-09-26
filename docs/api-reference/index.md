@@ -50,7 +50,6 @@ Complete method signatures with parameter types and return values:
 
 ```python
 
-"""Module docstring."""
 async def post_order(
     self,
     account_id: str,

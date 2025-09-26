@@ -14,7 +14,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 class SimpleMovingAverageCrossover:
     """A complete trading strategy with risk management."""
 

@@ -31,7 +31,6 @@ import pandas as pd
 
 
 
-"""Comprehensive module for trading operations."""
 class RiskAttributionAnalyzer:
     """Advanced risk attribution and decomposition analysis."""
 

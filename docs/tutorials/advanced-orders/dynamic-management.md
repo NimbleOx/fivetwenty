@@ -27,7 +27,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class TrailingStopManager:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -137,7 +136,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 async def volatility_adjusted_trailing() -> Any:
     """Implement trailing stops that adapt to market volatility."""
     async with AsyncClient() as client:
@@ -183,7 +181,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class AcceleratedTrailing:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -246,7 +243,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class ScaleInStrategy:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -355,7 +351,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class ScaleOutStrategy:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -451,7 +446,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 class AdaptivePositionManager:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -543,7 +537,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 class DynamicRiskManager:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -627,7 +620,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class OrderPerformanceAnalyzer:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client

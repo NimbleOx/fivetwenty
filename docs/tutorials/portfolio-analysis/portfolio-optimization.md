@@ -31,7 +31,6 @@ import matplotlib.pyplot as plt
 from typing import Dict, List, Tuple, Optional
 import warnings
 
-"""Comprehensive module for trading operations."""
 warnings.filterwarnings('ignore')
 
 class PortfolioOptimizer:
@@ -305,7 +304,6 @@ async def portfolio_optimization_example():
 ### Black-Litterman Model
 ```python
 
-"""Module docstring."""
 
 from typing import Any
 def black_litterman_optimization(returns_data, market_caps, tau=0.05) -> Any:
@@ -322,7 +320,6 @@ def black_litterman_optimization(returns_data, market_caps, tau=0.05) -> Any:
 ### Dynamic Optimization
 ```python
 
-"""Module docstring."""
 
 from typing import Any
 def dynamic_portfolio_optimization(returns_data, rebalance_frequency="monthly") -> Any:

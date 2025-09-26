@@ -22,7 +22,6 @@ The simplest way to configure the client:
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async with AsyncClient(
     token="your-api-token",
     environment=Environment.PRACTICE
@@ -41,7 +40,6 @@ from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Create configuration
 
-"""Comprehensive module for trading operations."""
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
@@ -150,7 +148,9 @@ async def main():
         # Execute live trades
         await execute_trades(live_client)
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### 3. Environment Variables Pattern
@@ -158,7 +158,6 @@ asyncio.run(main())
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 Best for: Docker deployments, Kubernetes, CI/CD, serverless
 
 #### Standard Environment Variables
@@ -640,7 +639,6 @@ prod_client = manager.get_client("production")
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 1. **Never hardcode secrets** - Use environment variables, vaults, or secure storage
 2. **Use configuration objects** - Better type safety and validation
 3. **Validate configurations** - Check values before creating clients

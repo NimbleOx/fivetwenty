@@ -26,7 +26,6 @@ from fivetwenty import Environment
 
 # Configuration - Replace with your actual values
 
-"""Comprehensive module for trading operations."""
 TOKEN = "your-api-token-here"  # Get this from your OANDA account
 ENVIRONMENT = Environment.PRACTICE  # ALWAYS start with PRACTICE!
 

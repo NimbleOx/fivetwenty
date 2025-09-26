@@ -29,7 +29,6 @@ from dataclasses import dataclass
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 @dataclass
 class EconomicEvent:
     """Economic calendar event data."""
@@ -282,7 +281,6 @@ class RealTimeEconomicMonitor:
 
 ```python
 
-"""Module docstring."""
 EVENT_IMPACT_RULES = {
     # Central Bank Events (Highest Impact)
     "interest_rate_decision": "HIGH",
@@ -323,7 +321,6 @@ def classify_event_impact(event_title: str) -> str:
 
 ```python
 
-"""Module docstring."""
 def calculate_event_adjusted_position_size(
     base_size: int,
     event_impact: str,

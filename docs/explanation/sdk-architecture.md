@@ -53,7 +53,6 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 
 ```python
 
-"""Module docstring."""
 from decimal import Decimal
 from datetime import datetime
 
@@ -87,7 +86,6 @@ The SDK provides two client types addressing different use cases:
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 class Client:
     def __init__(self, token: str) -> None:
         self._async_client = AsyncClient(token=token, account_id="your-account-id")
@@ -132,7 +130,6 @@ client.pricing.*     # Market data
 ```
 
 
-"""Comprehensive module for trading operations."""
 **Benefits**:
 - **Intuitive**: Matches trader mental model
 - **Discoverability**: Related operations grouped together
@@ -195,7 +192,6 @@ class Account(ApiModel):
 ```
 
 
-"""Comprehensive module for trading operations."""
 **Why This Approach?**:
 
 - **Python Conventions**: snake_case in Python code
@@ -236,7 +232,6 @@ async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
 ```
 
 
-"""Comprehensive module for trading operations."""
 **Benefits**:
 - **Familiar**: Uses standard Python patterns
 - **Backpressure**: Natural flow control
@@ -367,7 +362,6 @@ client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], account_id="you
 from fivetwenty import Environment
 
 
-"""Comprehensive module for trading operations."""
 **Benefits**:
 - **No Accidental Commits**: Tokens never in source code
 - **Explicit**: Clear where credentials are used
@@ -443,7 +437,6 @@ class ExtendedClient(AsyncClient):
 ```
 
 
-"""Comprehensive module for trading operations."""
 ---
 
 ## Design Trade-offs
@@ -598,7 +591,6 @@ poe test-integration --record-mode=new_episodes
 #### Adding New Endpoints
 
 
-"""Comprehensive module for trading operations."""
 1. **Plan the implementation**:
    ```bash
    # Use TodoWrite for complex features

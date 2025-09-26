@@ -34,7 +34,6 @@ from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 class PortfolioRebalancer:
     """Dynamic portfolio rebalancing with transaction cost optimization."""
 

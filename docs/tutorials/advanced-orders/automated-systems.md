@@ -27,7 +27,6 @@ from fivetwenty import AsyncClient
 
 
 
-"""Comprehensive module for trading operations."""
 class OrderRule(ABC):
     """Base class for order management rules."""
 
@@ -97,7 +96,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class SpreadThresholdRule(OrderRule):
     """Cancel orders when spread becomes too wide."""
 
@@ -228,7 +226,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class MaxPositionRule(OrderRule):
     """Enforce maximum position size limits."""
 
@@ -383,7 +380,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class OrderMonitoringEngine:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -527,7 +523,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class BaseAlertHandler(ABC):
     """Base class for alert handlers."""
 
@@ -599,7 +594,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class EventType(Enum):
     ORDER_FILLED = "order_filled"
     ORDER_CANCELLED = "order_cancelled"
@@ -716,7 +710,6 @@ from typing import Any
 
 
 
-"""Comprehensive module for trading operations."""
 class ErrorRecoveryManager:
     def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
@@ -829,10 +822,7 @@ from pathlib import Path
 
 
 
-"""Module docstring."""
-"""Module docstring."""
 
-"""Comprehensive module for trading operations."""
 class TradingLogger:
     """Class docstring."""
     def __init__(self, log_directory: str = "trading_logs") -> None:

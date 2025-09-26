@@ -232,7 +232,7 @@ class MarkdownReporter:
         content = ["## 🔍 Detailed Issue Analysis", ""]
 
         # First, show most problematic files
-        content.extend([f"### Most Problematic Files", "", f"*Showing up to {max_issues_per_file} issues per file for files with the most issues.*", ""])
+        content.extend(["### Most Problematic Files", "", f"*Showing up to {max_issues_per_file} issues per file for files with the most issues.*", ""])
 
         # Sort files by issue count and show top files
         sorted_files = sorted(issues_by_file.items(), key=lambda x: len(x[1]), reverse=True)
@@ -278,39 +278,36 @@ class MarkdownReporter:
         for issues in issues_by_file.values():
             for issue in issues:
                 # Extract validator name from rule_id (e.g., "markdown_syntax_list_spacing" -> "markdown_syntax")
-                validator_name = issue.rule_id.split('_')[0:2]  # Take first two parts for compound names
+                validator_name = issue.rule_id.split("_")[0:2]  # Take first two parts for compound names
                 if len(validator_name) >= 2:
-                    validator_key = '_'.join(validator_name)
+                    validator_key = "_".join(validator_name)
                 else:
-                    validator_key = validator_name[0] if validator_name else 'unknown'
+                    validator_key = validator_name[0] if validator_name else "unknown"
 
                 issues_by_validator[validator_key].append(issue)
 
         # Define validator display names and priorities
         validator_priorities = {
-            'markdown_syntax': ('📝 Markdown Syntax', 1),
-            'code_linting': ('🔍 Code Linting', 2),
-            'code_typing': ('🔧 Type Checking', 3),
-            'python_syntax': ('🐍 Python Syntax', 4),
-            'cross_references': ('🔗 Cross References', 5),
-            'sdk_methods': ('📚 SDK Methods', 6),
-            'security': ('🔒 Security', 7),
-            'financial_precision': ('💰 Financial Precision', 8),
-            'code_executability': ('⚡ Code Executability', 9),
-            'external_links': ('🌐 External Links', 10),
+            "markdown_syntax": ("📝 Markdown Syntax", 1),
+            "code_linting": ("🔍 Code Linting", 2),
+            "code_typing": ("🔧 Type Checking", 3),
+            "python_syntax": ("🐍 Python Syntax", 4),
+            "cross_references": ("🔗 Cross References", 5),
+            "sdk_methods": ("📚 SDK Methods", 6),
+            "security": ("🔒 Security", 7),
+            "financial_precision": ("💰 Financial Precision", 8),
+            "code_executability": ("⚡ Code Executability", 9),
+            "external_links": ("🌐 External Links", 10),
         }
 
         # Sort validators by priority, ensuring markdown_syntax appears first
-        sorted_validators = sorted(
-            issues_by_validator.items(),
-            key=lambda x: validator_priorities.get(x[0], (x[0], 999))[1]
-        )
+        sorted_validators = sorted(issues_by_validator.items(), key=lambda x: validator_priorities.get(x[0], (x[0], 999))[1])
 
         for validator_key, validator_issues in sorted_validators:
             if not validator_issues:
                 continue
 
-            display_name = validator_priorities.get(validator_key, (validator_key.replace('_', ' ').title(), 999))[0]
+            display_name = validator_priorities.get(validator_key, (validator_key.replace("_", " ").title(), 999))[0]
 
             # Show up to 2 examples from this validator
             example_issues = validator_issues[:2]

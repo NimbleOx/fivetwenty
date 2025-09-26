@@ -182,7 +182,6 @@ from fivetwenty import AsyncClient
 
 # Enhanced strategy concepts (for further learning)
 
-"""Comprehensive module for trading operations."""
 class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
     """Enhanced strategy with additional features."""
 

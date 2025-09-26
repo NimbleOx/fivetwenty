@@ -54,6 +54,7 @@ class CodeLintingValidator(BaseValidator):
                                 code_block_lines,
                                 code_block_start + 1,
                                 file_info.path,
+                                options,
                             )
                         )
 
@@ -66,7 +67,7 @@ class CodeLintingValidator(BaseValidator):
 
         return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues)
 
-    def _lint_python_code(self, code_lines: list[str], start_line: int, file_path: Path) -> list[ValidationIssue]:
+    def _lint_python_code(self, code_lines: list[str], start_line: int, file_path: Path, options: dict[str, Any]) -> list[ValidationIssue]:
         """Lint Python code using ruff."""
         issues: list[ValidationIssue] = []
 
@@ -92,8 +93,17 @@ class CodeLintingValidator(BaseValidator):
             temp_path = temp_file.name
 
         try:
-            # Run ruff check in strict mode with JSON output - capture all issues
-            result = subprocess.run(["ruff", "check", "--output-format=json", "--select=ALL", temp_path], check=False, capture_output=True, text=True, timeout=10)
+            # Build ruff command with options
+            ruff_cmd = ["ruff", "check", "--output-format=json", "--select=ALL", temp_path]
+
+            # Add ignore rules if specified in options
+            ignore_rules = options.get("ignore_rules", [])
+            if ignore_rules:
+                ignore_str = ",".join(ignore_rules)
+                ruff_cmd.extend(["--ignore", ignore_str])
+
+            # Run ruff check
+            result = subprocess.run(ruff_cmd, check=False, capture_output=True, text=True, timeout=10)
 
             if result.returncode == 0:
                 # No linting issues
@@ -167,7 +177,6 @@ class CodeLintingValidator(BaseValidator):
                 issues.append(ValidationIssue(message=f"Linting: {message} ({rule_code})", file_path=file_path, line=doc_line, severity=severity, rule_id=f"code_lint_{rule_code.lower()}", context=context, suggestion=self._get_suggestion_for_rule(rule_code, message)))
 
         return issues
-
 
     def _get_suggestion_for_rule(self, rule_code: str, message: str) -> str:
         """Get suggestion for fixing a rule violation."""

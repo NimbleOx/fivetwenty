@@ -31,7 +31,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
 
-"""Comprehensive module for trading operations."""
 async def close_position(account_id: str, instrument: str) -> Any:
     """Close all positions for a specific instrument."""
 
@@ -102,7 +101,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 
-"""Comprehensive module for trading operations."""
 async def close_partial_position(account_id: str, instrument: str, units_to_close: int) -> Any:
     """Close specific units of a position."""
 
@@ -209,7 +207,6 @@ from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 
-"""Comprehensive module for trading operations."""
 async def emergency_close_all(account_id: str) -> Any:
     """Emergency close all open positions."""
 
@@ -286,7 +283,6 @@ After closing positions, verify the operation:
 from fivetwenty import AsyncClient, Environment
 
 
-"""Comprehensive module for trading operations."""
 async def verify_position_closed(account_id: str, instrument: str) -> Any:
     """Verify a position was successfully closed."""
 

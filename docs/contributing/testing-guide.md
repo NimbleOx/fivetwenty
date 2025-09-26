@@ -22,7 +22,6 @@ FiveTwenty follows a balanced testing approach:
 ### **Test Categories**
 
 
-"""Comprehensive module for trading operations."""
 - **Unit Tests** - Fast, isolated tests with mocked dependencies
 - **Integration Tests** - Tests against real OANDA API (recorded with VCR.py)
 - **Static Analysis** - Type checking, linting, and code quality

@@ -17,7 +17,6 @@ from fivetwenty import AsyncClient, Environment
 
 
 
-"""Comprehensive module for trading operations."""
 class OptimizedTradingClient:
     """High-performance OANDA client for HFT applications."""
 
@@ -79,7 +78,6 @@ Batch multiple operations to reduce round trips:
 from fivetwenty import AsyncClient
 
 
-"""Comprehensive module for trading operations."""
 class BatchRequestManager:
     """Batch multiple requests for improved throughput."""
 

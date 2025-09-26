@@ -7,12 +7,11 @@ This guide provides production-ready best practices for using the FiveTwenty in 
 ### System Design
 
 ```python
-"""Comprehensive module for trading operations."""
 import asyncio
 import os
 from dataclasses import dataclass
 from decimal import Decimal
-from typing import Any, Optional
+from typing import Optional
 
 from fivetwenty import AsyncClient, Environment
 
@@ -44,7 +43,7 @@ class ProductionTradingSystem:
         self.daily_pnl = 0.0
         self.is_running = False
 
-    async def start(self) -> Any:
+    async def start(self) -> None:
         """Start the trading system."""
         import logging
 
@@ -66,31 +65,39 @@ class ProductionTradingSystem:
             return_exceptions=True,
         )
 
-    async def setup_logger(self) -> Any:
+    async def setup_logger(self) -> None:
         """Set up logging."""
-        return None
+        import logging
+        logging.basicConfig(level=logging.INFO)
 
-    async def monitor_health(self) -> Any:
+    async def monitor_health(self) -> None:
         """Monitor system health."""
-        pass
+        while self.is_running:
+            await asyncio.sleep(self.config.health_check_interval)
 
-    async def stream_prices(self) -> Any:
+    async def stream_prices(self) -> None:
         """Stream price data."""
-        pass
+        if self.client:
+            # Implement price streaming
+            await asyncio.sleep(1)
 
-    async def manage_risk(self) -> Any:
+    async def manage_risk(self) -> None:
         """Manage risk."""
-        pass
+        while self.is_running:
+            await asyncio.sleep(60)
+
 ```
 
 ### Separation of Concerns
 
 ```python
-"""Comprehensive module for trading operations."""
 from decimal import Decimal
-from typing import Any
 
 from fivetwenty import AsyncClient
+
+# Setup example variables for code snippets
+client = AsyncClient()
+account_id = "your-account-id"
 
 
 class DataLayer:
@@ -103,8 +110,13 @@ class DataLayer:
 
     async def get_price(self, instrument: str) -> Decimal:
         """Get current price with caching."""
-        # Implementation
-        pass
+        if instrument in self.price_cache:
+            return self.price_cache[instrument]
+
+        # Default price for example
+        price = Decimal("1.1234")
+        self.price_cache[instrument] = price
+        return price
 
 
 class TradingLogic:
@@ -115,8 +127,9 @@ class TradingLogic:
 
     async def should_trade(self, instrument: str) -> bool:
         """Determine if we should trade."""
-        # Strategy logic
-        pass
+        # Example strategy logic
+        current_price = await self.data.get_price(instrument)
+        return current_price > Decimal("1.1000")
 
 
 class RiskManager:
@@ -127,8 +140,8 @@ class RiskManager:
 
     def validate_order(self, order: dict) -> bool:
         """Validate order against risk limits."""
-        # Risk checks
-        pass
+        units = abs(int(order.get("units", 0)))
+        return units <= self.config.max_position_size
 
 
 class OrderExecutor:
@@ -138,12 +151,13 @@ class OrderExecutor:
         self.client = client
         self.risk = risk
 
-    async def execute_order(self, order: dict) -> Any:
+    async def execute_order(self, order: dict) -> dict:
         """Execute order with risk checks."""
         if not self.risk.validate_order(order):
             raise ValueError("Order failed risk checks")
 
         return await self.client.orders.post_market_order(**order)
+
 ```
 
 ## Risk Management
@@ -151,11 +165,13 @@ class OrderExecutor:
 ### Position Sizing
 
 ```python
-"""Comprehensive module for trading operations."""
 from decimal import Decimal
-from typing import Any
 
 from fivetwenty import AsyncClient
+
+# Setup example variables for code snippets
+client = AsyncClient()
+account_id = "your-account-id"
 
 
 class PositionSizer:
@@ -193,26 +209,29 @@ class PositionSizer:
         # Round to valid increment
         return self.round_to_increment(position_size, instruments[0])
 
-    def calculate_pip_value(self, instrument: Any) -> Any:
+    def calculate_pip_value(self, instrument: dict) -> float:
         """Calculate pip value for instrument."""
-        # Implementation based on instrument
-        pass
+        # Standard pip value for most pairs
+        return 0.0001
 
-    def round_to_increment(self, position_size: Decimal, instrument: Any) -> int:
+    def round_to_increment(self, position_size: Decimal, instrument: dict) -> int:
         """Round position size to valid increment."""
-        # Implementation
-        return int(position_size)
+        increment = int(instrument.get("minimumTradeSize", 1))
+        return int(position_size // increment) * increment
+
 ```
 
 ### Stop Loss Management
 
 ```python
-"""Comprehensive module for trading operations."""
 from decimal import Decimal
-from typing import Any
 
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+
+# Setup example variables for code snippets
+client = AsyncClient()
+account_id = "your-account-id"
 
 
 class StopLossManager:
@@ -221,14 +240,13 @@ class StopLossManager:
     def __init__(self, client: AsyncClient) -> None:
         self.client = client
 
-    async def set_stop_loss(self, account_id: str, trade_id: str, stop_price: str) -> Any:
+    async def set_stop_loss(self, account_id: str, trade_id: str, stop_price: str) -> None:
         """Set or update stop loss."""
+        from fivetwenty.models import StopLossOrderRequest
 
         try:
             # Update stop loss
             # Create stop loss using post_order with StopLossOrderRequest
-            from fivetwenty.models import StopLossOrderRequest
-
             sl_request = StopLossOrderRequest(
                 tradeID=trade_id,
                 price=stop_price,
@@ -244,9 +262,8 @@ class StopLossManager:
             else:
                 raise
 
-    async def trailing_stop(self, account_id: str, trade_id: str, distance: Decimal) -> Any:
+    async def trailing_stop(self, account_id: str, trade_id: str, distance: Decimal) -> None:
         """Implement trailing stop."""
-
         # Get current trade
         trade = await self.client.trades.get_trade(account_id, trade_id)
 
@@ -260,21 +277,39 @@ class StopLossManager:
         if self.is_better_stop(trade, new_stop):
             await self.set_stop_loss(account_id, trade_id, str(new_stop))
 
-    async def update_stop_loss(self, account_id: str, trade_id: str, stop_price: str) -> Any:
+    async def update_stop_loss(self, account_id: str, trade_id: str, stop_price: str) -> None:
         """Update existing stop loss."""
-        pass
+        # Implementation for updating existing stop loss
+        from fivetwenty.models import StopLossOrderRequest
+        sl_request = StopLossOrderRequest(
+            tradeID=trade_id,
+            price=stop_price,
+            timeInForce="GTC",
+        )
+        await self.client.orders.post_order(account_id, sl_request)
 
-    def is_better_stop(self, trade: Any, new_stop: Decimal) -> bool:
+
+    def is_better_stop(self, trade: dict, new_stop: Decimal) -> bool:
         """Check if new stop is better."""
-        return True
+        current_stop = trade.get("stopLoss", {}).get("price")
+        if not current_stop:
+            return True
+
+        # For long positions, higher stop is better
+        if float(trade.get("currentUnits", 0)) > 0:
+            return new_stop > Decimal(current_stop)
+        # For short positions, lower stop is better
+        return new_stop < Decimal(current_stop)
+
 ```
 
 ### Daily Loss Limits
 
 ```python
-"""Comprehensive module for trading operations."""
 from decimal import Decimal
-from typing import Any
+
+# Setup example variables
+max_daily_loss = Decimal("1000.0")
 
 
 class DailyLossLimiter:
@@ -285,9 +320,8 @@ class DailyLossLimiter:
         self.daily_pnl = Decimal("0.0")
         self.trading_enabled = True
 
-    async def update_pnl(self, pnl: Decimal) -> Any:
+    async def update_pnl(self, pnl: Decimal) -> None:
         """Update daily P&L and check limits."""
-
         self.daily_pnl += pnl
 
         if self.daily_pnl <= -self.max_daily_loss:
@@ -306,11 +340,14 @@ class DailyLossLimiter:
 
     async def close_all_positions(self) -> None:
         """Close all open positions."""
-        pass
+        # Implementation would close all positions
+        print("Emergency: Closing all positions due to daily loss limit")
+
 
     async def send_alert(self, message: str) -> None:
         """Send alert message."""
-        print(message)
+        print(f"ALERT: {message}")
+
 ```
 
 ## Error Recovery
@@ -318,13 +355,14 @@ class DailyLossLimiter:
 ### Resilient Operations
 
 ```python
-"""Comprehensive module for trading operations."""
 import asyncio
 import logging
-from typing import Any
 
 from fivetwenty import AsyncClient
 
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
 
 logger = logging.getLogger(__name__)
 
@@ -368,9 +406,8 @@ class ResilientClient:
         self.client = client
         self.circuit_breaker = CircuitBreaker()
 
-    async def safe_order(self, **kwargs: Any) -> Any:
+    async def safe_order(self, **kwargs) -> dict:
         """Place order with full error handling."""
-
         try:
             # Check circuit breaker
             if self.circuit_breaker.is_open():
@@ -405,21 +442,27 @@ class ResilientClient:
 
     def validate_order(self, kwargs: dict) -> None:
         """Validate order parameters."""
-        pass
+        required_fields = ["account_id", "instrument", "units"]
+        for field in required_fields:
+            if field not in kwargs:
+                raise ValueError(f"Missing required field: {field}")
+
 ```
 
 ### State Persistence
 
 ```python
 import json
-from pathlib import Path
-from fivetwenty import AsyncClient
 from datetime import datetime
+from pathlib import Path
+
+from fivetwenty import AsyncClient
+
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
 
 
-
-
-"""Comprehensive module for trading operations."""
 class StateManager:
     """Persist and recover system state."""
 
@@ -441,17 +484,15 @@ class StateManager:
             "last_update": None,
         }
 
-    def save_state(self) -> Any:
+    def save_state(self) -> None:
         """Save current state."""
-
         self.state["last_update"] = datetime.now().isoformat()
 
         with open(self.state_file, "w") as f:
             json.dump(self.state, f, indent=2)
 
-    async def recover_positions(self, client: AsyncClient, account_id: str) -> Any:
+    async def recover_positions(self, client: AsyncClient, account_id: str) -> None:
         """Recover positions after restart."""
-
         # Get current positions
         current = await client.positions.get_open_positions(account_id)
 
@@ -460,6 +501,12 @@ class StateManager:
             if position.instrument not in self.state["positions"]:
                 print(f"New position detected: {position.instrument}")
                 # Handle unexpected position
+                self._handle_unexpected_position(position)
+
+    def _handle_unexpected_position(self, position) -> None:
+        """Handle unexpected position found during recovery."""
+        print(f"Warning: Unexpected position found: {position}")
+
 ```
 
 ## Performance Optimization
@@ -469,9 +516,10 @@ class StateManager:
 ```python
 from fivetwenty import AsyncClient
 
+# Setup example variables for connection pool
+config = None  # Configuration would be loaded here
 
 
-"""Comprehensive module for trading operations."""
 class ConnectionPool:
     """Manage multiple client connections."""
 
@@ -496,23 +544,25 @@ class ConnectionPool:
         self.current = (self.current + 1) % len(self.clients)
         return client
 
-    async def close_all(self) -> Any:
+    async def close_all(self) -> None:
         """Close all clients."""
-
         for client in self.clients:
             await client.aclose()
+
 ```
 
 ### Caching Strategy
 
 ```python
 from datetime import datetime, timedelta
+
 from fivetwenty import AsyncClient
 
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
 
 
-
-"""Comprehensive module for trading operations."""
 class CachedDataProvider:
     """Cache frequently accessed data."""
 
@@ -521,9 +571,8 @@ class CachedDataProvider:
         self.cache = {}
         self.cache_times = {}
 
-    async def get_instrument_info(self, account_id: str, instrument: str, cache_duration: int = 3600) -> Any:
+    async def get_instrument_info(self, account_id: str, instrument: str, cache_duration: int = 3600) -> dict:
         """Get instrument info with caching."""
-
         cache_key = f"{account_id}:{instrument}"
 
         # Check cache
@@ -543,6 +592,7 @@ class CachedDataProvider:
         self.cache_times[cache_key] = datetime.now()
 
         return data[0]
+
 ```
 
 ## Monitoring and Alerting
@@ -550,11 +600,14 @@ class CachedDataProvider:
 ### Health Checks
 
 ```python
-from fivetwenty import AsyncClient
 from datetime import datetime
 
+from fivetwenty import AsyncClient
 
-"""Comprehensive module for trading operations."""
+# Setup example variables
+client = AsyncClient()
+
+
 class HealthMonitor:
     """Monitor system health."""
 
@@ -601,32 +654,34 @@ class HealthMonitor:
                 health["status"] = "degraded"
 
         return health
+
 ```
 
 ### Alerting System
 
 ```python
-
-from typing import Any
 import smtplib
 from email.mime.text import MIMEText
 
+# Setup example variables
+email_config = {
+    "from": "alerts@example.com",
+    "to": "trader@example.com",
+    "smtp_server": "smtp.example.com"
+}
 
 
-
-"""Module docstring."""
-"""Module docstring."""
-
-"""Comprehensive module for trading operations."""
 class AlertManager:
-    """Class docstring."""
     """Send alerts for critical events."""
 
     def __init__(self, email_config: dict) -> None:
         self.email_config = email_config
 
-    async def send_alert(self, subject: str, message: str, severity: str = "INFO") -> Any:
+    async def send_alert(self, subject: str, message: str, severity: str = "INFO") -> None:
         """Send alert via email."""
+        import logging
+
+        logger = logging.getLogger(__name__)
 
         if severity not in ["INFO", "WARNING", "CRITICAL"]:
             severity = "INFO"
@@ -641,9 +696,8 @@ class AlertManager:
             f"Alert: {subject} - {message}",
         )
 
-    async def send_email(self, subject: str, body: str) -> Any:
+    async def send_email(self, subject: str, body: str) -> None:
         """Send email alert."""
-
         msg = MIMEText(body)
         msg["Subject"] = f"[Trading Alert] {subject}"
         msg["From"] = self.email_config["from"]
@@ -651,6 +705,7 @@ class AlertManager:
 
         with smtplib.SMTP(self.email_config["smtp_server"]) as server:
             server.send_message(msg)
+
 ```
 
 ## Testing Strategies
@@ -683,6 +738,9 @@ import pytest
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 from fivetwenty.models import Account
+
+# Setup test variables
+mock_client = AsyncMock(spec=AsyncClient)
 
 
 @pytest.fixture
@@ -736,10 +794,15 @@ async def test_order_error_handling(mock_client):
 Integration tests use VCR.py to record real API interactions:
 
 ```python
+import os
+
 import pytest
 import vcr
 
 from fivetwenty import AsyncClient, Environment
+
+# Setup test variables
+account_id = os.environ.get("TEST_OANDA_ACCOUNT", "your-account-id")
 
 # Configure VCR for sensitive data
 my_vcr = vcr.VCR(
@@ -754,7 +817,6 @@ my_vcr = vcr.VCR(
 @my_vcr.use_cassette("account_retrieval.yaml")
 async def test_account_retrieval():
     """Test real account retrieval with recorded response."""
-
     async with AsyncClient(
         token=os.environ["TEST_OANDA_TOKEN"],
         environment=Environment.PRACTICE,
@@ -768,7 +830,6 @@ async def test_account_retrieval():
 @my_vcr.use_cassette("full_trade_lifecycle.yaml")
 async def test_full_trade_lifecycle():
     """Test complete trade lifecycle."""
-
     async with AsyncClient(
         token=os.environ["TEST_OANDA_TOKEN"],
         environment=Environment.PRACTICE,
@@ -808,6 +869,11 @@ from decimal import Decimal
 
 from hypothesis import given
 from hypothesis import strategies as st
+
+# Setup test variables
+mock_client = None
+units = 1000
+price = Decimal("1.1234")
 
 
 @given(
@@ -850,10 +916,13 @@ import asyncio
 import time
 from statistics import mean, median
 
+# Setup test variables
+account_id = os.environ.get("TEST_OANDA_ACCOUNT", "your-account-id")
+token = os.environ.get("TEST_OANDA_TOKEN", "your-token")
+
 
 async def test_concurrent_requests():
     """Test SDK performance under concurrent load."""
-
     async def make_request(client, account_id):
         start = time.time()
         await client.accounts.get_account(account_id)
@@ -877,26 +946,24 @@ async def test_concurrent_requests():
 ### Error Scenario Testing
 ```python
 
-"""Comprehensive module for trading operations."""
 @pytest.mark.parametrize("error_code,expected_behavior", [
     (FiveTwentyErrorCode.INSUFFICIENT_FUNDS, "reduce_position_size"),
     (FiveTwentyErrorCode.MARKET_HALTED, "wait_for_market"),
     (FiveTwentyErrorCode.INVALID_INSTRUMENT, "validation_error"),
 ])
-async def test_error_handling_scenarios(mock_client: Any, error_code: Any, expected_behavior: Any) -> Any:
+async def test_error_handling_scenarios(mock_client, error_code, expected_behavior) -> None:
     """Test various error scenarios and expected responses."""
-
     mock_client.orders.post_market_order.side_effect = FiveTwentyError(
         status_code=400,
         code=error_code,
-        message=f"Test error: {error_code}"
+        message=f"Test error: {error_code}",
     )
 
     with pytest.raises(FiveTwentyError) as exc_info:
         await mock_client.orders.post_market_order(
             account_id="test",
             instrument="EUR_USD",
-            units=1000
+            units=1000,
         )
 
     assert exc_info.value.code == error_code
@@ -913,6 +980,9 @@ import sys
 
 from fivetwenty import AsyncClient, Environment
 
+# Setup example variables
+token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-token")
+
 # Configure detailed logging
 logging.basicConfig(
     level=logging.DEBUG,
@@ -925,7 +995,6 @@ logging.getLogger("httpx").setLevel(logging.DEBUG)
 
 async def debug_api_calls():
     """Debug API calls with full request/response logging."""
-
     async with AsyncClient(
         token=os.environ["FIVETWENTY_OANDA_TOKEN"],
         environment=Environment.PRACTICE,
@@ -933,6 +1002,7 @@ async def debug_api_calls():
         # This will log all HTTP details
         accounts = await client.accounts.get_accounts()
         print(f"Found {len(accounts)} accounts")
+
 ```
 
 ### Model Validation Debugging
@@ -944,10 +1014,12 @@ from pydantic import ValidationError
 
 from fivetwenty.models import Account
 
+# Setup example variables
+raw_data = {"id": "123", "balance": "10000.00", "currency": "USD"}
+
 
 def debug_model_validation(raw_data: dict):
     """Debug model validation issues."""
-
     try:
         account = Account.model_validate(raw_data)
         print("✅ Validation successful")
@@ -978,6 +1050,7 @@ try:
     account = debug_model_validation(raw_account_data)
 except ValidationError:
     print("Fix the data and try again")
+
 ```
 
 ### Connection and Network Debugging
@@ -989,10 +1062,12 @@ import aiohttp
 
 from fivetwenty import AsyncClient
 
+# Setup example variables
+token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-token")
+
 
 async def debug_connection_issues():
     """Debug connection and timeout issues."""
-
     # Custom timeout configuration for debugging
     timeout = aiohttp.ClientTimeout(
         total=30,      # Total request timeout
@@ -1006,7 +1081,6 @@ async def debug_connection_issues():
             environment=Environment.PRACTICE,
             timeout=timeout,
         ) as client:
-
             start_time = asyncio.get_event_loop().time()
             accounts = await client.accounts.get_accounts()
             end_time = asyncio.get_event_loop().time()
@@ -1018,18 +1092,21 @@ async def debug_connection_issues():
     except Exception as e:
         print(f"❌ Connection error: {type(e).__name__}: {e}")
 
+
 ### Performance Profiling
 ```python
 import cProfile
 import asyncio
 from fivetwenty import AsyncClient, Environment
 
+# Setup example variables
+token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-token")
+account_id = "your-account-id"
 
-"""Comprehensive module for trading operations."""
-def profile_async_function(func: Any) -> Any:
+
+def profile_async_function(func):
     """Profile an async function."""
-
-    def wrapper(*args: Any, **kwargs: Any) -> Any:
+    def wrapper(*args, **kwargs):
         pr = cProfile.Profile()
         pr.enable()
 
@@ -1037,27 +1114,25 @@ def profile_async_function(func: Any) -> Any:
         result = asyncio.run(func(*args, **kwargs))
 
         pr.disable()
-        pr.print_stats(sort='cumulative')
+        pr.print_stats(sort="cumulative")
 
         return result
 
     return wrapper
 
 @profile_async_function
-async def performance_test() -> Any:
+async def performance_test():
     """Profile SDK performance."""
-
     async with AsyncClient(
         token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
-
         # Multiple concurrent operations
         results = await asyncio.gather(
             client.accounts.get_accounts(),
             client.accounts.get_account("your-account-id"),
             client.pricing.get_pricing("your-account-id", ["EUR_USD", "GBP_USD"]),
-            return_exceptions=True
+            return_exceptions=True,
         )
 
         return results
@@ -1072,19 +1147,19 @@ import tracemalloc
 import asyncio
 from fivetwenty import AsyncClient, Environment
 
+# Setup example variables
+token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-token")
 
-"""Comprehensive module for trading operations."""
-async def memory_usage_test() -> Any:
+
+async def memory_usage_test() -> None:
     """Monitor memory usage during SDK operations."""
-
     # Start memory tracing
     tracemalloc.start()
 
     async with AsyncClient(
         token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     ) as client:
-
         # Take snapshot before
         snapshot1 = tracemalloc.take_snapshot()
 
@@ -1096,11 +1171,12 @@ async def memory_usage_test() -> Any:
         snapshot2 = tracemalloc.take_snapshot()
 
         # Compare snapshots
-        top_stats = snapshot2.compare_to(snapshot1, 'lineno')
+        top_stats = snapshot2.compare_to(snapshot1, "lineno")
 
         print("Top 10 memory allocations:")
         for stat in top_stats[:10]:
             print(stat)
+
 
 ### Common Issues and Solutions
 
@@ -1108,13 +1184,17 @@ async def memory_usage_test() -> Any:
 ```python
 from fivetwenty import AsyncClient, Environment
 
+# Setup example variables
+client = AsyncClient()
+
 # Solution 1: Use nest_asyncio (for Jupyter)
 import nest_asyncio
 nest_asyncio.apply()
 
 # Solution 2: Use asyncio.create_task() instead of asyncio.run()
 async def main():
-    async with AsyncClient(...) as client:
+    """Main function example."""
+    async with AsyncClient() as client:
         result = await client.accounts.get_accounts()
     return result
 
@@ -1128,8 +1208,12 @@ result = await task
 ```python
 import asyncio
 
+# Setup example variables
+token = "your-token"
+
 
 async def main():
+    """SSL bypass example - development only."""
     # For development/testing only - never in production
     import ssl
 
@@ -1144,7 +1228,7 @@ async def main():
     connector = aiohttp.TCPConnector(ssl=ssl_context)
 
     async with AsyncClient(
-        token=token,
+        token="token",
         environment=Environment.PRACTICE,
         connector=connector,  # Custom connector
     ) as client:
@@ -1152,6 +1236,7 @@ async def main():
         pass
 
 asyncio.run(main())
+
 ```
 
 #### Issue: Rate Limiting
@@ -1160,9 +1245,12 @@ asyncio.run(main())
 from fivetwenty.exceptions import TooManyRequests
 import asyncio
 
+# Setup example variables
+client = None
+operations = []
+
 async def rate_limited_operation(client, operations):
     """Handle rate limiting gracefully."""
-
     results = []
 
     for operation in operations:
@@ -1172,7 +1260,7 @@ async def rate_limited_operation(client, operations):
 
         except TooManyRequests as e:
             # Respect the retry-after header
-            retry_after = getattr(e, 'retry_after', 60)
+            retry_after = getattr(e, "retry_after", 60)
             print(f"Rate limited, waiting {retry_after} seconds...")
             await asyncio.sleep(retry_after)
 
@@ -1181,6 +1269,7 @@ async def rate_limited_operation(client, operations):
             results.append(result)
 
     return results
+
 ```
 
 ### Mock Testing for Development
@@ -1192,11 +1281,13 @@ from unittest.mock import AsyncMock, patch
 
 import pytest
 
+# Setup mock variables
+mock_client = AsyncMock()
+
 
 @pytest.fixture
 def trading_system_mocks():
     """Comprehensive mocks for trading system testing."""
-
     with patch("fivetwenty.AsyncClient") as mock_client_class:
         mock_client = AsyncMock()
         mock_client_class.return_value.__aenter__.return_value = mock_client
@@ -1214,10 +1305,10 @@ def trading_system_mocks():
 
 async def test_trading_strategy(trading_system_mocks):
     """Test trading strategy with full mocks."""
-
     # Your trading strategy can now be tested
     # without any real API calls
     pass
+
 ```
 
 ## Security Best Practices
@@ -1225,8 +1316,13 @@ async def test_trading_strategy(trading_system_mocks):
 ### Credential Management
 
 ```python
+import json
+
 import keyring
 from cryptography.fernet import Fernet
+
+# Setup example variables
+service_name = "oanda_trading"
 
 
 class SecureCredentials:
@@ -1250,9 +1346,8 @@ class SecureCredentials:
 
         return token
 
-    def encrypt_config(self, config: dict) -> bytes:
+    def encrypt_config(self, config: dict) -> tuple[bytes, bytes]:
         """Encrypt configuration."""
-
         key = Fernet.generate_key()
         cipher = Fernet(key)
 
@@ -1267,7 +1362,15 @@ class SecureCredentials:
 ### Code Documentation
 
 ```python
+from typing import Optional
+
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+
+# Setup example variables
+client = AsyncClient()
+account_id = "your-account-id"
+
 
 async def place_order_with_risk_management(
     client: AsyncClient,
@@ -1275,8 +1378,8 @@ async def place_order_with_risk_management(
     instrument: str,
     units: int,
     stop_loss: Optional[str] = None,
-    take_profit: Optional[str] = None
-) -> OrderResponse:
+    take_profit: Optional[str] = None,
+) -> dict:
     """
     Place an order with comprehensive risk management.
 
@@ -1314,8 +1417,6 @@ async def place_order_with_risk_management(
 
 ## Deployment Checklist
 
-
-"""Comprehensive module for trading operations."""
 Before deploying to production:
 
 - [ ] ✅ All tests passing
@@ -1360,8 +1461,6 @@ uv run python validation/cli.py run links syntax security
 
 #### Key Validation Areas
 
-
-"""Comprehensive module for trading operations."""
 **Accuracy Validators:**
 - **Endpoint Documentation**: Validates that all documented endpoints match the actual SDK implementation
 - **Model Documentation**: Ensures all model fields are correctly documented with proper types and requirements
