@@ -60,6 +60,10 @@ asyncio.run(async_example())
 Async shines with multiple concurrent operations:
 
 ```python
+import asyncio
+from typing import Any
+
+
 async def concurrent_operations(client: Any, account_id: str) -> Any:
     """Execute multiple operations simultaneously."""
 
@@ -90,6 +94,10 @@ async def concurrent_operations(client: Any, account_id: str) -> Any:
 Async streaming is natural and efficient:
 
 ```python
+import asyncio
+from typing import Any
+
+
 async def stream_prices(client: Any, account_id: str) -> Any:
     """Stream real-time prices."""
     async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
@@ -144,6 +152,9 @@ with Client(
 Sync client provides streaming via iterator:
 
 ```python
+from typing import Any
+
+
 def stream_prices_sync(client: Any, account_id: str) -> Any:
     """Stream prices synchronously."""
     for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
@@ -161,6 +172,7 @@ def stream_prices_sync(client: Any, account_id: str) -> Any:
 ```python
 import time
 import asyncio
+from typing import Any
 from fivetwenty import AsyncClient, Client, Environment
 
 # ASYNC: Fast concurrent requests
@@ -192,6 +204,8 @@ def sync_performance_test() -> Any:
 #### Async Error Handling
 
 ```python
+import asyncio
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -218,10 +232,9 @@ async def async_error_handling() -> Any:
 #### Sync Error Handling
 
 ```python
+from typing import Any
 from fivetwenty.exceptions import FiveTwentyError
-from fivetwenty import Environment
-
-
+from fivetwenty import Environment, Client
 
 
 def sync_error_handling() -> Any:
@@ -242,6 +255,9 @@ def sync_error_handling() -> Any:
 If you have sync code and want to upgrade:
 
 ```python
+import asyncio
+from typing import Any
+
 # OLD: Synchronous code
 
 def get_account_sync(client: Any, account_id: str) -> Any:
@@ -480,6 +496,8 @@ async def efficient_async(client, account_ids) -> Any:
 3. **Caching**: Cache frequently accessed data
 
 ```python
+from typing import Any
+
 # Efficient sync pattern
 def efficient_sync(client: Any, instruments: Any) -> Any:
     """Cache frequently accessed data."""

@@ -24,9 +24,9 @@ Exception
 
 ```python
 from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty import AsyncClient
 
-
-async def safe_trade(client, account_id):
+async def safe_trade(client: AsyncClient, account_id: str) -> None:
     """Place a trade with error handling."""
     try:
         order = await client.orders.post_market_order(
@@ -52,13 +52,14 @@ Handle different errors differently:
 ```python
 import asyncio
 
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import BadRequest, Forbidden, InternalServerError, NotFound, TooManyRequests, Unauthorized
 
 
-async def handle_specific_errors(client, account_id):
+async def handle_specific_errors(client: AsyncClient, account_id: str) -> None:
     """Handle specific error types."""
     try:
-        result = await client.orders.post_market_order(
+        _ = await client.orders.post_market_order(
             account_id=account_id,
             instrument="EUR_USD",
             units=1000000,  # Large position
@@ -70,7 +71,7 @@ async def handle_specific_errors(client, account_id):
         if "INSUFFICIENT_FUNDS" in str(e):
             print("Not enough margin available")
 
-    except Unauthorized as e:
+    except Unauthorized:
         # Invalid or expired token
         print("Authentication failed - check your token")
         # Note: Implement token refresh logic based on your auth system
@@ -104,13 +105,14 @@ The SDK includes 67 specific OANDA error codes:
 ### Common Trading Errors
 
 ```python
-from fivetwenty.exceptions import FiveTwentyErrorCode
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 
 # Check for specific error codes
-async def handle_trading_errors(client, account_id):
+async def handle_trading_errors(client: AsyncClient, account_id: str) -> None:
     try:
-        order = await client.orders.post_market_order(
+        _ = await client.orders.post_market_order(
             account_id=account_id,
             instrument="EUR_USD",
             units=1000000,
@@ -192,12 +194,14 @@ import asyncio
 import random
 from collections.abc import Callable
 from decimal import Decimal
-from typing import TypeVar
+from typing import Awaitable, TypeVar
+
+from fivetwenty.exceptions import TooManyRequests, InternalServerError
 
 T = TypeVar("T")
 
 async def retry_with_backoff(
-    func: Callable[[], T],
+    func: Callable[[], Awaitable[T]],
     max_retries: int = 3,
     base_delay: float = 1.0,
     max_delay: float = 60.0,
@@ -210,11 +214,11 @@ async def retry_with_backoff(
 
         except TooManyRequests as e:
             # Use server's retry-after if available
-            delay = e.retry_after or (base_delay * (2 ** attempt))
+            delay = getattr(e, 'retry_after', None) or (base_delay * (2 ** attempt))
             delay = min(delay, max_delay)
 
             # Add jitter
-            delay += random.uniform(0, delay * Decimal("0.1"))
+            delay += random.uniform(0, float(delay * Decimal("0.1")))
 
             if attempt == max_retries - 1:
                 raise
@@ -222,7 +226,7 @@ async def retry_with_backoff(
             print(f"Retry {attempt + 1}/{max_retries} after {delay:.1f}s")
             await asyncio.sleep(delay)
 
-        except (InternalServerError, httpx.TimeoutException) as e:
+        except InternalServerError:
             # Retry on server errors and timeouts
             if attempt == max_retries - 1:
                 raise
@@ -234,6 +238,10 @@ async def retry_with_backoff(
 
 # Usage
 async def place_order_with_retry():
+    from fivetwenty import AsyncClient
+    client = AsyncClient(token="your-token", account_id="your-account")
+    account_id = "your-account-id"
+
     return await retry_with_backoff(
         lambda: client.orders.post_market_order(
             account_id=account_id,
@@ -248,8 +256,10 @@ async def place_order_with_retry():
 Implement circuit breaker pattern for system protection:
 
 ```python
+import asyncio
 from datetime import datetime, timedelta
 from enum import Enum
+from typing import Any, Callable
 
 from fivetwenty.exceptions import FiveTwentyError
 
@@ -273,7 +283,7 @@ class CircuitBreaker:
         self.last_failure_time = None
         self.state = CircuitState.CLOSED
 
-    async def call(self, func, *args, **kwargs):
+    async def call(self, func: Callable[..., Any], *args: Any, **kwargs: Any) -> Any:
         """Execute function with circuit breaker protection."""
 
         if self.state == CircuitState.OPEN:
@@ -328,13 +338,17 @@ async def protected_trade():
 Implement automatic recovery for common issues:
 
 ```python
+import asyncio
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import Unauthorized, TooManyRequests, InternalServerError, StreamStall
+
 class TradingSystem:
-    def __init__(self, client):
+    def __init__(self, client: AsyncClient) -> None:
         self.client = client
         self.reconnect_attempts = 0
         self.max_reconnects = 5
 
-    async def place_order_with_recovery(self, account_id, instrument, units):
+    async def place_order_with_recovery(self, account_id: str, instrument: str, units: int) -> Any:
         """Place order with automatic recovery."""
 
         while self.reconnect_attempts < self.max_reconnects:
@@ -361,12 +375,20 @@ class TradingSystem:
 
         raise Exception("Max recovery attempts exceeded")
 
-    async def refresh_authentication(self):
+    async def _place_order(self, account_id: str, instrument: str, units: int) -> Any:
+        """Place order implementation."""
+        return await self.client.orders.post_market_order(
+            account_id=account_id,
+            instrument=instrument,
+            units=units,
+        )
+
+    async def refresh_authentication(self) -> None:
         """Refresh authentication token."""
         print("Refreshing authentication...")
         # Implement token refresh logic
 
-    async def reconnect_stream(self):
+    async def reconnect_stream(self) -> None:
         """Reconnect to streaming endpoint."""
         print("Reconnecting stream...")
         # Implement stream reconnection
@@ -377,15 +399,18 @@ class TradingSystem:
 Recover state after errors:
 
 ```python
+import asyncio
+from typing import Any
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 
 class StatefulTrader:
-    def __init__(self):
-        self.pending_orders = []
-        self.completed_orders = []
+    def __init__(self) -> None:
+        self.pending_orders: list[dict[str, Any]] = []
+        self.completed_orders: list[Any] = []
 
-    async def execute_orders(self, client, orders):
+    async def execute_orders(self, client: AsyncClient, orders: list[dict[str, Any]]) -> None:
         """Execute orders with state recovery."""
 
         for order in orders:
@@ -408,7 +433,7 @@ class StatefulTrader:
         if self.pending_orders:
             await self.retry_pending_orders(client)
 
-    async def retry_pending_orders(self, client):
+    async def retry_pending_orders(self, client: AsyncClient) -> None:
         """Retry failed orders."""
         retry_orders = self.pending_orders.copy()
         self.pending_orders.clear()
@@ -424,16 +449,18 @@ class StatefulTrader:
 ```python
 import json
 import logging
+import traceback
 from datetime import datetime
+from typing import Any
 
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode, Unauthorized, Forbidden
 
 
 class ErrorLogger:
-    def __init__(self):
+    def __init__(self) -> None:
         self.logger = logging.getLogger(__name__)
 
-    def log_error(self, error: FiveTwentyError, context: dict):
+    def log_error(self, error: FiveTwentyError, context: dict[str, Any]) -> None:
         """Log errors with structured context."""
 
         error_data = {
@@ -471,7 +498,7 @@ class ErrorLogger:
         else:
             return "WARNING"
 
-    def send_alert(self, error_data):
+    def send_alert(self, error_data: dict[str, Any]) -> None:
         """Send alerts for critical errors."""
         # Implement alerting (email, SMS, Slack, etc.)
         pass
@@ -482,18 +509,18 @@ class ErrorLogger:
 Track error patterns:
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
-
 from collections import Counter, deque
 from datetime import datetime, timedelta
 
-class ErrorMetrics:
-    def __init__(self, window_minutes: int = 60):
-        self.window = timedelta(minutes=window_minutes)
-        self.errors = deque()
-        self.error_counts = Counter()
+from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
-    def record_error(self, error: FiveTwentyError):
+class ErrorMetrics:
+    def __init__(self, window_minutes: int = 60) -> None:
+        self.window = timedelta(minutes=window_minutes)
+        self.errors: deque[tuple[datetime, FiveTwentyError]] = deque()
+        self.error_counts: Counter[str] = Counter()
+
+    def record_error(self, error: FiveTwentyError) -> None:
         """Record error for metrics."""
         now = datetime.now()
 
@@ -512,7 +539,7 @@ class ErrorMetrics:
         """Get errors per minute."""
         return len(self.errors) / (self.window.total_seconds() / 60)
 
-    def get_top_errors(self, n: int = 5) -> list:
+    def get_top_errors(self, n: int = 5) -> list[tuple[str, int]]:
         """Get most common errors."""
         return self.error_counts.most_common(n)
 
@@ -531,11 +558,28 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode, InternalServerError
 
+
+async def place_order(client: AsyncClient, account_id: str, instrument: str, units: int) -> dict:
+    """Place order (stub for testing)."""
+    return await client.orders.post_market_order(
+        account_id=account_id,
+        instrument=instrument,
+        units=units,
+    )
+
+async def place_order_with_retry(client: AsyncClient, account_id: str, instrument: str, units: int) -> dict:
+    """Place order with retry (stub for testing)."""
+    return await client.orders.post_market_order(
+        account_id=account_id,
+        instrument=instrument,
+        units=units,
+    )
 
 @pytest.mark.asyncio
-async def test_insufficient_funds_handling():
+async def test_insufficient_funds_handling() -> None:
     """Test handling of insufficient funds error."""
 
     # Mock client to raise error
@@ -552,7 +596,7 @@ async def test_insufficient_funds_handling():
     assert exc_info.value.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS
 
 @pytest.mark.asyncio
-async def test_retry_on_server_error():
+async def test_retry_on_server_error() -> None:
     """Test retry logic for server errors."""
 
     mock_client = AsyncMock()

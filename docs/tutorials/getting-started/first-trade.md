@@ -30,7 +30,7 @@ Then use zero-config initialization:
 import asyncio
 
 
-async def main():
+async def main() -> None:
     from fivetwenty import AsyncClient
 
     async with AsyncClient() as client:
@@ -43,6 +43,7 @@ asyncio.run(main())
 
 Pass credentials directly to the client:
 ```python
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 async with AsyncClient(
@@ -77,7 +78,9 @@ async with AsyncClient(config=config) as client:
 Before trading, verify your account status and available funds:
 
 ```python
-async def check_account(client):
+from typing import Any
+
+async def check_account(client: Any) -> Any:
     """Check account balance and trading capacity."""
     # Get account list (we'll use the first one)
     accounts = await client.accounts.get_accounts()
@@ -102,7 +105,7 @@ async def check_account(client):
 Check current market prices before placing orders:
 
 ```python
-async def get_price(client, instrument="EUR_USD"):
+async def get_price(client: Any, instrument: str = "EUR_USD") -> Any:
     """Get current pricing for an instrument."""
     # The SDK automatically uses the configured account ID
     prices = await client.pricing.get_pricing(
@@ -125,7 +128,7 @@ async def get_price(client, instrument="EUR_USD"):
 Place your first market order using the configured account:
 
 ```python
-async def place_market_order(client, instrument="EUR_USD", units=1000):
+async def place_market_order(client: Any, instrument: str = "EUR_USD", units: int = 1000) -> Any:
     """Place a market order."""
     print(f"\n🛒 Placing {('BUY' if units > 0 else 'SELL')} order:")
     print(f"   📈 Instrument: {instrument}")
@@ -169,7 +172,7 @@ import asyncio
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
-async def first_trade_example():
+async def first_trade_example() -> None:
     """Complete first trade example using FiveTwenty."""
 
     # Using environment variables (recommended approach)
@@ -219,7 +222,7 @@ async def first_trade_example():
             print(f"❌ Unexpected error: {e}")
             print("   Check your configuration and network connection")
 
-async def check_position(client, instrument):
+async def check_position(client: Any, instrument: str) -> None:
     """Check open position for an instrument."""
     positions = await client.positions.get_open_positions(client.account_id)
 
@@ -254,9 +257,10 @@ If you prefer to pass credentials directly:
 
 ```python
 import asyncio
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
-async def first_trade_direct_params():
+async def first_trade_direct_params() -> None:
     """First trade using direct parameter configuration."""
 
     async with AsyncClient(
@@ -284,9 +288,9 @@ Once you have an open position, you can close it by placing an opposite order:
 
 ```python
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
 
-async def close_position(client, instrument="EUR_USD"):
+async def close_position(client: Any, instrument: str = "EUR_USD") -> Any:
     """Close an open position for the specified instrument."""
 
     print(f"\n🔄 Closing position for {instrument}...")
@@ -303,6 +307,7 @@ async def close_position(client, instrument="EUR_USD"):
     units_to_close = 0
     if position.long.units != "0":
         # Close long position (sell)
+        from decimal import Decimal
         units_to_close = -int(Decimal(str(position.long.units)))
         print(f"   📉 Closing LONG position of {position.long.units} units")
     elif position.short.units != "0":
@@ -335,7 +340,7 @@ async def close_position(client, instrument="EUR_USD"):
         return None
 
 # Example usage
-async def close_position_example():
+async def close_position_example() -> None:
     """Example of closing a position."""
 
     async with AsyncClient() as client:
@@ -366,9 +371,9 @@ Place an order to execute at a specific price level:
 
 ```python
 from decimal import Decimal
+from typing import Any
 
-
-async def place_limit_order(client, instrument="EUR_USD"):
+async def place_limit_order(client: Any, instrument: str = "EUR_USD") -> Any:
     """Place a limit order to buy at a specific price."""
 
     # Get current price for reference
@@ -401,7 +406,7 @@ Protect your positions with automatic stop losses:
 from decimal import Decimal
 
 
-async def place_order_with_stop_loss(client, instrument="EUR_USD"):
+async def place_order_with_stop_loss(client: Any, instrument: str = "EUR_USD") -> Any:
     """Place market order with protective stop loss."""
 
     # Get current price to calculate stop loss
@@ -438,7 +443,7 @@ Set profit targets for your trades:
 from decimal import Decimal
 
 
-async def place_order_with_take_profit(client, instrument="EUR_USD"):
+async def place_order_with_take_profit(client: Any, instrument: str = "EUR_USD") -> Any:
     """Place market order with take profit target."""
 
     # Get current price
@@ -475,7 +480,7 @@ Combine stop loss and take profit for complete risk management:
 from decimal import Decimal
 
 
-async def place_protected_trade(client, instrument="EUR_USD", units=1000):
+async def place_protected_trade(client: Any, instrument: str = "EUR_USD", units: int = 1000) -> Any:
     """Place a trade with both stop loss and take profit."""
 
     # Get current price
@@ -515,10 +520,11 @@ async def place_protected_trade(client, instrument="EUR_USD", units=1000):
 If you prefer synchronous code, use the sync `Client` class:
 
 ```python
+from typing import Any
 from fivetwenty import Client, Environment
 
 # Sync client supports same configuration patterns
-def sync_trading_example():
+def sync_trading_example() -> None:
     """Synchronous trading example."""
 
     # Using environment variables (recommended)
@@ -556,7 +562,7 @@ def sync_trading_example():
         print("🎉 Sync trading complete!")
 
 # Alternative: Direct parameter configuration
-def sync_direct_params_example():
+def sync_direct_params_example() -> None:
     """Sync client with direct parameters."""
 
     with Client(
@@ -589,7 +595,7 @@ from fivetwenty import AsyncClient, Client
 
 
 # Async: Better for multiple concurrent operations
-async def async_advantage():
+async def async_advantage() -> None:
     async with AsyncClient() as client:
         # These run concurrently
         accounts_task = client.accounts.get_accounts()
@@ -598,7 +604,7 @@ async def async_advantage():
         accounts, prices = await asyncio.gather(accounts_task, prices_task)
 
 # Sync: Better for simple sequential operations
-def sync_advantage():
+def sync_advantage() -> None:
     with Client() as client:
         # Simple, readable sequential flow
         account = client.accounts.get_account(client.account_id)
@@ -636,7 +642,7 @@ client = AsyncClient()  # Loads from FIVETWENTY_* env vars
 
 ```python
 # Calculate position size based on account balance
-async def calculate_position_size(client, expected_loss_per_unit):
+async def calculate_position_size(client: Any, expected_loss_per_unit: Any) -> int:
     account = await client.accounts.get_account(client.account_id)
     max_risk = Decimal(str(account.balance)) * Decimal("0.02")  # 2% risk per trade
     position_size = min(1000, int(max_risk / expected_loss_per_unit))
@@ -650,7 +656,7 @@ async def calculate_position_size(client, expected_loss_per_unit):
 - **Implement proper error handling**
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
 
 try:
     order = await client.orders.post_market_order(...)
@@ -682,8 +688,6 @@ config = AccountConfig(
 ```
 
 ### 5. **Development Workflow**
-from fivetwenty import Environment
-
 
 - **Test on practice first** - always validate strategies in practice environment
 - **Use proper logging** - log trades but never log credentials
@@ -708,7 +712,8 @@ except ValueError as e:
 
 **Invalid Token:**
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from typing import Any
+from fivetwenty.exceptions import FiveTwentyError
 
 # Error: Authentication failed
 try:
@@ -724,7 +729,7 @@ except FiveTwentyError as e:
 **Insufficient Margin:**
 ```python
 # Check margin before trading
-async def check_margin_requirements(client, units, instrument="EUR_USD"):
+async def check_margin_requirements(client: Any, units: int, instrument: str = "EUR_USD") -> bool:
     account = await client.accounts.get_account(client.account_id)
     margin_available = float(account.margin_available)
 
@@ -740,18 +745,19 @@ async def check_margin_requirements(client, units, instrument="EUR_USD"):
     return True
 
 # Use before placing orders (inside an async function)
-async def trading_example(client):
+async def trading_example(client: Any) -> None:
     if await check_margin_requirements(client, 10000):
         order = await client.orders.post_market_order(...)
 ```
 
 **Market Closed:**
 ```python
+from typing import Any
 from fivetwenty.exceptions import FiveTwentyError
 
 
 # Check trading hours
-async def check_market_hours(client, instrument="EUR_USD"):
+async def check_market_hours(client: Any, instrument: str = "EUR_USD") -> bool:
     try:
         # Try to get current price
         prices = await client.pricing.get_pricing(
@@ -769,7 +775,7 @@ async def check_market_hours(client, instrument="EUR_USD"):
 **Invalid Units:**
 ```python
 # Validate units before trading
-async def validate_trade_size(client, units, instrument="EUR_USD"):
+async def validate_trade_size(client: Any, units: int, instrument: str = "EUR_USD") -> bool:
     instruments = await client.accounts.get_account_instruments(
         account_id=client.account_id,
         instruments=[instrument]
@@ -799,7 +805,7 @@ async def validate_trade_size(client, units, instrument="EUR_USD"):
 import asyncio
 from fivetwenty.exceptions import FiveTwentyError
 
-async def robust_api_call(client, operation):
+async def robust_api_call(client: Any, operation: Any) -> Any:
     """Make API call with retry logic."""
     max_retries = 3
 
@@ -817,7 +823,7 @@ async def robust_api_call(client, operation):
     raise Exception(f"Failed after {max_retries} attempts")
 
 # Usage (inside an async function)
-async def api_example(client):
+async def api_example(client: Any) -> Any:
     accounts = await robust_api_call(
         client,
         lambda: client.accounts.get_accounts()
@@ -828,13 +834,12 @@ async def api_example(client):
 **Connection Issues:**
 ```python
 import asyncio
+import httpx
+from typing import Any
+from fivetwenty import AsyncClient
 
-
-async def main():
+async def main() -> None:
     # Handle connection problems
-    import httpx
-
-    from fivetwenty import AsyncClient
 
     try:
         async with AsyncClient() as client:

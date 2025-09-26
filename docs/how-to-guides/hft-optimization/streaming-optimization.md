@@ -16,7 +16,7 @@ import time
 from collections import deque
 from collections.abc import Callable
 from decimal import Decimal
-from typing import Dict, Optional
+from typing import Optional, Any
 from fivetwenty import AsyncClient
 
 
@@ -29,7 +29,7 @@ class HighPerformanceStreamer:
         self.client = client
         self.buffer_size = buffer_size
         self.price_buffers: dict[str, deque] = {}
-        self.callbacks: dict[str, List[Callable]] = {}
+        self.callbacks: dict[str, list[Callable]] = {}
         self.streaming_active = False
         self.stats = {
             "messages_received": 0,
@@ -46,7 +46,7 @@ class HighPerformanceStreamer:
 
         self.callbacks[instrument].append(callback)
 
-    async def start_optimized_streaming(self, account_id: str, instruments: List[str]) -> Any:
+    async def start_optimized_streaming(self, account_id: str, instruments: list[str]) -> Any:
         """Start high-performance streaming with minimal latency."""
 
         self.streaming_active = True

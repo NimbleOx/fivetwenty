@@ -106,7 +106,7 @@ class CodeTypingValidator(BaseValidator):
             mypy_args.append(temp_path)
 
             # Run mypy
-            result = subprocess.run(mypy_args, check=False, capture_output=True, text=True, timeout=15)
+            result = subprocess.run(mypy_args, check=False, capture_output=True, text=True, timeout=8)
 
             if result.returncode == 0:
                 # No type issues

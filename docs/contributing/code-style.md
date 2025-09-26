@@ -11,6 +11,7 @@ FiveTwenty follows strict code quality standards to ensure maintainability, secu
 All code must pass mypy strict mode with no errors:
 
 ```python
+from typing import Any
 from fivetwenty.models import OrderRequest, OrderResponse
 
 
@@ -27,7 +28,7 @@ async def create_order(
 
 
 # ❌ Bad - Missing type annotations
-async def create_order_bad(self, account_id, order, timeout=None) -> None:
+async def create_order_bad(self, account_id: Any, order: Any, timeout: Any = None) -> None:
     """Bad example with missing annotations."""
     pass
 ```
@@ -69,7 +70,6 @@ Use FiveTwenty's exception hierarchy:
 
 ```python
 import httpx
-
 from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import AccountSummary
 
@@ -108,6 +108,7 @@ async def _request(self, method: str, url: str) -> httpx.Response:
 async client is the primary interface, Client is a sync wrapper:
 
 ```python
+from typing import Any
 from fivetwenty.models import AccountSummary
 
 
@@ -115,7 +116,7 @@ from fivetwenty.models import AccountSummary
 class AccountsEndpoint:
     """Accounts endpoint implementation."""
 
-    def __init__(self, client) -> None:
+    def __init__(self, client: Any) -> None:
         """Initialize accounts endpoint."""
         self._client = client
 
@@ -138,7 +139,7 @@ class AccountsEndpoint:
 class SyncAccountsEndpoint:
     """Sync wrapper for accounts endpoint."""
 
-    def __init__(self, client, async_endpoint: AccountsEndpoint) -> None:
+    def __init__(self, client: Any, async_endpoint: AccountsEndpoint) -> None:
         """Initialize sync accounts endpoint."""
         self._client = client
         self._async_endpoint = async_endpoint
@@ -160,6 +161,7 @@ class SyncAccountsEndpoint:
 Group related methods into endpoint classes:
 
 ```python
+from typing import Any
 from fivetwenty.models import Order, OrderRequest, OrderResponse
 
 
@@ -167,7 +169,7 @@ from fivetwenty.models import Order, OrderRequest, OrderResponse
 class OrdersEndpoint:
     """Order management operations."""
 
-    def __init__(self, client) -> None:
+    def __init__(self, client: Any) -> None:
         """Initialize orders endpoint."""
         self._client = client
 
@@ -187,7 +189,7 @@ class OrdersEndpoint:
 class TradesEndpoint:
     """Trades management operations."""
 
-    def __init__(self, client) -> None:
+    def __init__(self, client: Any) -> None:
         """Initialize trades endpoint."""
         self._client = client
 
@@ -210,7 +212,7 @@ Use Pydantic models for all API data:
 ```python
 from datetime import datetime
 from decimal import Decimal
-
+from typing import Any
 from pydantic import BaseModel, Field
 
 
@@ -233,7 +235,7 @@ class Order(BaseModel):
 
 
 # ✅ Good - Model usage with validation
-def parse_order_response(data: dict) -> Order:
+def parse_order_response(data: Any) -> Order:
     """Parse order response data into model."""
     return Order.model_validate(data)
 ```
@@ -246,7 +248,6 @@ def parse_order_response(data: dict) -> Order:
 
 ```python
 from collections.abc import AsyncIterator
-
 from fivetwenty.models import AccountSummary, OrderResponse, Price
 
 
@@ -350,8 +351,6 @@ All public methods require comprehensive docstrings:
 
 ```python
 from decimal import Decimal
-
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 from fivetwenty.models import OrderResponse
 
 
@@ -408,7 +407,6 @@ async def post_limit_order(
 
 ```python
 from decimal import Decimal
-
 from pydantic import BaseModel, Field
 from fivetwenty.models import PositionSide
 
@@ -444,8 +442,7 @@ class Position(BaseModel):
 
 ```python
 import httpx
-
-from fivetwenty.exceptions import FiveTwentyError, StreamStall
+from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import Price
 
 
@@ -498,7 +495,7 @@ from datetime import datetime
 from typing import AsyncIterator
 
 from pydantic import ValidationError
-
+from fivetwenty.exceptions import StreamStall
 from fivetwenty.models import Price, PricingHeartbeat
 
 HEARTBEAT_TIMEOUT = 30
@@ -542,9 +539,9 @@ async def stream_pricing(
 
 ```python
 import re
+from typing import Any
 
 from pydantic import ValidationError
-
 from fivetwenty.models import OrderRequest
 
 
@@ -553,7 +550,7 @@ def create_order_request(
     instrument: str,
     units: int,
     order_type: str,
-    **kwargs,
+    **kwargs: Any,
 ) -> OrderRequest:
     """Create validated order request."""
     # Validate instrument format
@@ -593,7 +590,7 @@ def create_order_request(
 
 ```python
 from decimal import Decimal
-from unittest.mock import AsyncMock, Mock, patch
+from unittest.mock import Mock, patch
 
 import httpx
 import pytest
@@ -662,6 +659,7 @@ class TestAccountsEndpoint:
 ```python
 import os
 from decimal import Decimal
+from typing import Any
 
 import pytest
 
@@ -681,7 +679,7 @@ class TestAccountsIntegration:
         )
 
     @pytest.mark.asyncio
-    async def test_get_accounts_real_api(self, client: AsyncClient, vcr) -> None:
+    async def test_get_accounts_real_api(self, client: AsyncClient, vcr: Any) -> None:
         """Test against real OANDA API (recorded with VCR)."""
         account_id = os.environ["TEST_OANDA_ACCOUNT"]
 
@@ -705,6 +703,7 @@ class TestAccountsIntegration:
 import asyncio
 import logging
 from contextlib import asynccontextmanager
+from typing import AsyncIterator
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountConfig, AccountSummary
@@ -714,7 +713,7 @@ logger = logging.getLogger(__name__)
 
 # ✅ Good - Proper async context management
 @asynccontextmanager
-async def trading_session(config: AccountConfig):
+async def trading_session(config: AccountConfig) -> AsyncIterator[AsyncClient]:
     """Managed trading session with proper cleanup."""
     client = AsyncClient(config=config)
     try:
@@ -750,6 +749,12 @@ async def get_multiple_accounts(
 
 ```python
 # ✅ Good - Streaming with backpressure
+from typing import Any
+
+from fivetwenty import AsyncClient
+from fivetwenty.models import PricingHeartbeat
+
+
 async def process_price_stream(
     client: AsyncClient,
     account_id: str,
@@ -757,7 +762,7 @@ async def process_price_stream(
     max_buffer_size: int = 1000,
 ) -> None:
     """Process price stream with memory management."""
-    buffer: list[Price] = []
+    buffer: list[Any] = []
 
     async for price in client.pricing.get_pricing_stream(account_id, instruments):
         if isinstance(price, PricingHeartbeat):
@@ -775,7 +780,7 @@ async def process_price_stream(
         await process_price_batch(buffer)
 
 
-async def process_price_batch(prices: list[Price]) -> None:
+async def process_price_batch(prices: list[Any]) -> None:
     """Process batch of prices efficiently."""
     # Batch processing logic here
     pass
@@ -791,7 +796,6 @@ async def process_price_batch(prices: list[Price]) -> None:
 import logging
 
 from pydantic import BaseModel, SecretStr
-
 from fivetwenty.models import Environment, Trade
 
 logger = logging.getLogger(__name__)

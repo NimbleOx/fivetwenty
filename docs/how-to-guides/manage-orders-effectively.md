@@ -26,14 +26,18 @@ You need to create, monitor, and manage trading orders efficiently using FiveTwe
     **OnFill Pattern (Recommended)**: Set TP/SL when creating orders
     ```python
 import asyncio
+import os
 from decimal import Decimal
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 
 
 async def main() -> None:
     """Demonstrate OnFill pattern."""
-    client = AsyncClient()
+    client = AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    )
     account_id = "your-account-id"
 
     # Risk management activates automatically when order fills
@@ -53,12 +57,17 @@ if __name__ == "__main__":
     **Post-Trade Pattern**: Add TP/SL to existing trades
     ```python
 import asyncio
-from fivetwenty import AsyncClient
+import os
+
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import TakeProfitOrderRequest
 
 async def post_trade_example() -> None:
     """Demonstrate post-trade pattern."""
-    client = AsyncClient()
+    client = AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    )
     account_id = "your-account-id"
 
     # First create trade, then add risk management
@@ -89,9 +98,9 @@ async def post_trade_example() -> None:
 
 ```python
 import asyncio
-from decimal import Decimal
+import os
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import (
     AccountID,
     GuaranteedStopLossOrderRequest,
@@ -102,7 +111,10 @@ from fivetwenty.models import (
 
 async def implement_post_trade_risk_management() -> None:
     """Implement comprehensive post-trade risk management implementation."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         account_id = AccountID("your-account-id")
 
         # Step 1: Create initial trade without risk management
@@ -242,11 +254,12 @@ async def add_regular_stop_loss(client: AsyncClient, account_id: str, trade_id: 
 #### Error Handling for Post-Trade Orders
 
 ```python
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import TakeProfitOrderRequest
 
 
-async def robust_post_trade_setup(client, account_id: str, trade_id: str) -> None:
+async def robust_post_trade_setup(client: AsyncClient, account_id: str, trade_id: str) -> None:
     """Add risk management with comprehensive error handling."""
     try:
         # Attempt to add take profit
@@ -297,15 +310,18 @@ async def robust_post_trade_setup(client, account_id: str, trade_id: str) -> Non
 **Problem:** Execute trades immediately at current market price.
 
 ```python
-import asyncio
+import os
 from decimal import Decimal
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
 
 async def place_market_order() -> None:
     """Demonstrate placing market orders."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         # Basic market order
         response = await client.orders.post_market_order(
             account_id=AccountID("101-004-12345678"),
@@ -334,15 +350,19 @@ async def place_market_order() -> None:
 **Problem:** Enter positions only when price reaches your target level.
 
 ```python
+import os
 from decimal import Decimal
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
 
 
 async def place_limit_order() -> None:
     """Demonstrate placing limit orders."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         response = await client.orders.post_limit_order(
             account_id=AccountID("101-004-12345678"),
             instrument=InstrumentName("GBP_USD"),
@@ -361,15 +381,19 @@ async def place_limit_order() -> None:
 **Problem:** Enter positions when price breaks above/below key levels.
 
 ```python
+import os
 from decimal import Decimal
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
 
 
 async def place_stop_order() -> None:
     """Demonstrate placing stop orders."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         # Buy stop order - enter long when price breaks above resistance
         response = await client.orders.post_stop_order(
             account_id=AccountID("101-004-12345678"),
@@ -391,15 +415,19 @@ async def place_stop_order() -> None:
 **Problem:** Enter positions when price touches support/resistance levels.
 
 ```python
+import os
 from decimal import Decimal
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
 
 
 async def place_market_if_touched_order() -> None:
     """Demonstrate placing market-if-touched orders."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         # MIT order - buy when price touches support level
         response = await client.orders.post_market_if_touched_order(
             account_id=AccountID("101-004-12345678"),
@@ -421,10 +449,12 @@ async def place_market_if_touched_order() -> None:
 **Problem:** Need to create different order types programmatically based on strategy logic.
 
 ```python
+import os
 import time
 from decimal import Decimal
+from typing import Any
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import (
     AccountID,
     InstrumentName,
@@ -435,9 +465,12 @@ from fivetwenty.models import (
 )
 
 
-async def create_order_by_type(order_type: str, price: Decimal | None = None) -> dict:
+async def create_order_by_type(order_type: str, price: Decimal | None = None) -> Any:
     """Create orders dynamically by type."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         account_id = AccountID("101-004-12345678")
         instrument = InstrumentName("USD_JPY")
         units = 1000
@@ -484,13 +517,18 @@ async def create_order_by_type(order_type: str, price: Decimal | None = None) ->
 **Problem:** Track order execution and handle different outcomes.
 
 ```python
-from fivetwenty import AsyncClient
+import os
+
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID
 
 
 async def monitor_order_execution(account_id: AccountID, order_id: str) -> None:
     """Monitor order execution status."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         # Get current order status
         order = await client.orders.get_order(account_id, order_id)
         state = order["state"]
@@ -518,10 +556,12 @@ async def monitor_order_execution(account_id: AccountID, order_id: str) -> None:
 **Problem:** Robust order validation to prevent common errors.
 
 ```python
+import os
 import time
 from decimal import Decimal
+from typing import Any
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import AccountID, InstrumentName
 
@@ -532,9 +572,12 @@ async def place_validated_order(
     units: int,
     order_type: str = "market",
     price: Decimal | None = None,
-) -> dict:
+) -> Any:
     """Place validated order with comprehensive checks."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         try:
             # Validate account has sufficient balance
             account = await client.accounts.get_account(account_id)
@@ -607,16 +650,20 @@ async def place_validated_order(
 **Problem:** Manage pending orders by cancelling or replacing them.
 
 ```python
+import os
 from datetime import datetime, timedelta, timezone
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import AccountID
 
 
 async def manage_pending_orders(account_id: AccountID) -> None:
     """Manage pending orders with cancellation logic."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         # Get all pending orders
         pending_response = await client.orders.get_pending_orders(account_id)
         pending_orders = pending_response["orders"]
@@ -652,10 +699,11 @@ async def manage_pending_orders(account_id: AccountID) -> None:
 
 ```python
 import asyncio
+import os
 import time
 from decimal import Decimal
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
 
 
@@ -666,9 +714,12 @@ async def create_bracket_order(
     take_profit: Decimal,
     stop_loss: Decimal,
     units: int,
-) -> dict:
+) -> Any:
     """Create a bracket order: entry + take profit + stop loss."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         # Create entry order
         entry_order = await client.orders.post_limit_order(
             account_id=account_id,
@@ -732,6 +783,26 @@ async def create_bracket_order(
 
 ### Confirm Order Creation
 ```python
+import os
+
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import AccountID
+
+# Example setup for demonstration
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
+account_id = AccountID("101-004-12345678")
+order_type = "market"
+
+# Create example response
+response = await client.orders.post_market_order(
+    account_id=account_id,
+    instrument="EUR_USD",
+    units=1000
+)
+
 # Check order was created successfully
 if response.order_create_transaction is None:
     raise ValueError("Order transaction is None")
@@ -747,6 +818,21 @@ if order_type == "market":
 
 ### Verify Order Parameters
 ```python
+import os
+
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import AccountID, InstrumentName
+
+# Example setup for demonstration
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
+account_id = AccountID("101-004-12345678")
+order_id = "12345"  # Example order ID
+instrument = InstrumentName("EUR_USD")
+units = 1000
+
 # Confirm order details match your request
 order_details = await client.orders.get_order(account_id, order_id)
 print(f"Order details retrieved for {order_id}")
@@ -758,7 +844,18 @@ if int(order_details["units"]) != units:
 
 ### Monitor Account Impact
 ```python
+import os
 from decimal import Decimal
+
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import AccountID
+
+# Example setup for demonstration
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
+account_id = AccountID("101-004-12345678")
 
 # Check account balance and positions after order
 account = await client.accounts.get_account(account_id)
@@ -773,7 +870,19 @@ print("Unrealized P&L retrieved")
 
 **"INSUFFICIENT_MARGIN" Error:**
 ```python
+import os
 from decimal import Decimal
+
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import AccountID
+
+# Example setup for demonstration
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
+account_id = AccountID("101-004-12345678")
+required_margin = Decimal("1000.00")  # Example required margin
 
 # Check available margin before placing order
 account = await client.accounts.get_account(account_id)
@@ -785,6 +894,18 @@ if available_margin < required_margin:
 
 **"INSTRUMENT_NOT_TRADEABLE" Error:**
 ```python
+import os
+
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import AccountID
+
+# Example setup for demonstration
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
+account_id = AccountID("101-004-12345678")
+
 # Verify instrument is currently tradeable
 instruments = await client.accounts.get_account_instruments(account_id)
 tradeable_instruments = [i for i in instruments if i.tradeable]
@@ -794,7 +915,21 @@ print(f"Found {len(tradeable_instruments)} tradeable instruments out of {len(ins
 **"PRICE_PRECISION_EXCEEDED" Error:**
 ```python
 # Use proper price precision for instrument
+import os
+from decimal import Decimal
+
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import AccountID, InstrumentName
 from fivetwenty._internal.utils import quantize_price
+
+# Example setup for demonstration
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
+account_id = AccountID("101-004-12345678")
+instrument = InstrumentName("EUR_USD")
+your_price = Decimal("1.10555")
 
 # Get instrument precision
 instrument_info = await client.accounts.get_account_instruments(
@@ -827,12 +962,15 @@ print(f"Price quantized from {your_price} to {quantized_price}")
 **Rate Limiting:**
 ```python
 from asyncio import Semaphore
+from typing import Any
+
+from fivetwenty import AsyncClient
 
 # Limit concurrent requests
 MAX_CONCURRENT_ORDERS = 5
 semaphore = Semaphore(MAX_CONCURRENT_ORDERS)
 
-async def rate_limited_order(client: AsyncClient, order_params: dict) -> dict:
+async def rate_limited_order(client: AsyncClient, order_params: Any) -> Any:
     """Place orders with rate limited order placement."""
     async with semaphore:
         result = await client.orders.post_order(**order_params)
@@ -843,13 +981,14 @@ async def rate_limited_order(client: AsyncClient, order_params: dict) -> dict:
 **Error Recovery:**
 ```python
 import asyncio
+from typing import Any
 
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
 
 DEFAULT_MAX_RETRIES = 3
 
-async def robust_order_placement(client: AsyncClient, order_params: dict, max_retries: int = DEFAULT_MAX_RETRIES) -> dict:
+async def robust_order_placement(client: AsyncClient, order_params: Any, max_retries: int = DEFAULT_MAX_RETRIES) -> Any:
     """Place orders with robust order placement with retry logic."""
     for attempt in range(max_retries):
         try:
@@ -876,6 +1015,7 @@ async def robust_order_placement(client: AsyncClient, order_params: dict, max_re
 import asyncio
 from datetime import datetime
 from enum import Enum
+from typing import Any
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID
@@ -897,7 +1037,7 @@ class OrderManager:
     def __init__(self, client: AsyncClient) -> None:
         """Initialize order manager."""
         self.client = client
-        self.orders = {}
+        self.orders: dict[str, dict[str, Any]] = {}
 
     async def track_order(self, account_id: AccountID, order_id: str) -> None:
         """Track order through its lifecycle."""
@@ -926,8 +1066,8 @@ class OrderManager:
 
 ### Risk Management Integration
 ```python
-import asyncio
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import AccountID
@@ -942,8 +1082,8 @@ class RiskManagedOrderSystem:
         self.daily_loss = Decimal("0")
 
     async def place_order_with_risk_check(
-        self, account_id: AccountID, **order_params
-    ) -> dict:
+        self, account_id: AccountID, **order_params: Any
+    ) -> Any:
         """Place order with risk checks."""
         # Check daily loss limit
         if self.daily_loss >= self.max_daily_loss:
@@ -966,7 +1106,7 @@ class RiskManagedOrderSystem:
         print(f"Risk-managed order placed: {result.order_create_transaction['id']}")
         return result
 
-    def _calculate_potential_loss(self, order_params: dict) -> Decimal:
+    def _calculate_potential_loss(self, order_params: Any) -> Decimal:
         """Calculate potential loss for order."""
         # Placeholder implementation
         potential_loss = Decimal("0")

@@ -8,9 +8,11 @@ This guide provides production-ready best practices for using the FiveTwenty in 
 
 ```python
 import asyncio
+import logging
 import os
 from dataclasses import dataclass
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient, Environment
 
@@ -38,21 +40,19 @@ class ProductionTradingSystem:
     def __init__(self, config: TradingSystemConfig) -> None:
         self.config = config
         self.client: AsyncClient | None = None
-        self.positions: dict = {}
+        self.positions: dict[str, Any] = {}
         self.daily_pnl = 0.0
         self.is_running = False
 
     async def start(self) -> None:
         """Start the trading system."""
-        import logging
-
         # Initialize client
-        PRODUCTION_MAX_RETRIES = 5
+        production_max_retries = 5
         self.client = AsyncClient(
             token=os.environ["FIVETWENTY_OANDA_TOKEN"],
             environment=Environment.LIVE,  # Production!
             timeout=self.config.order_timeout,
-            max_retries=PRODUCTION_MAX_RETRIES,  # More retries for production
+            max_retries=production_max_retries,  # More retries for production
             logger=logging.getLogger(__name__),
         )
 
@@ -67,7 +67,6 @@ class ProductionTradingSystem:
 
     async def setup_logger(self) -> None:
         """Set up logging."""
-        import logging
         logging.basicConfig(level=logging.INFO)
 
     async def monitor_health(self) -> None:
@@ -79,14 +78,14 @@ class ProductionTradingSystem:
         """Stream price data."""
         if self.client:
             # Implement price streaming
-            PRICE_STREAM_DELAY = 1
-            await asyncio.sleep(PRICE_STREAM_DELAY)
+            price_stream_delay = 1
+            await asyncio.sleep(price_stream_delay)
 
     async def manage_risk(self) -> None:
         """Manage risk."""
         while self.is_running:
-            RISK_CHECK_INTERVAL = 60
-            await asyncio.sleep(RISK_CHECK_INTERVAL)
+            risk_check_interval = 60
+            await asyncio.sleep(risk_check_interval)
 
 ```
 
@@ -94,6 +93,7 @@ class ProductionTradingSystem:
 
 ```python
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient
 
@@ -108,7 +108,7 @@ class DataLayer:
 
     def __init__(self, client: AsyncClient) -> None:
         self.client = client
-        self.price_cache: dict = {}
+        self.price_cache: dict[str, Any] = {}
         self.account_cache = None
 
     async def get_price(self, instrument: str) -> Decimal:
@@ -141,7 +141,7 @@ class RiskManager:
     def __init__(self, config: TradingSystemConfig) -> None:
         self.config = config
 
-    def validate_order(self, order: dict) -> bool:
+    def validate_order(self, order: dict[str, Any]) -> bool:
         """Validate order against risk limits."""
         units = abs(int(order.get("units", 0)))
         return units <= self.config.max_position_size
@@ -154,7 +154,7 @@ class OrderExecutor:
         self.client = client
         self.risk = risk
 
-    async def execute_order(self, order: dict) -> dict:
+    async def execute_order(self, order: dict[str, Any]) -> dict[str, Any]:
         """Execute order with risk checks."""
         if not self.risk.validate_order(order):
             msg = "Order failed risk checks"
@@ -169,12 +169,17 @@ class OrderExecutor:
 ### Position Sizing
 
 ```python
+import os
 from decimal import Decimal
+from typing import Any
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 
 # Setup example variables for code snippets
-client = AsyncClient()
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
 account_id = "your-account-id"
 print(f"Position sizing setup for account: {account_id}")
 
@@ -222,13 +227,13 @@ class PositionSizer:
         print(f"Rounded to valid increment: {rounded_size}")
         return rounded_size
 
-    def calculate_pip_value(self, instrument: dict) -> float:
+    def calculate_pip_value(self, instrument: Any) -> float:
         """Calculate pip value for instrument."""
         # Standard pip value for most pairs
         STANDARD_PIP_VALUE = 0.0001
         return STANDARD_PIP_VALUE
 
-    def round_to_increment(self, position_size: Decimal, instrument: dict) -> int:
+    def round_to_increment(self, position_size: Decimal, instrument: Any) -> int:
         """Round position size to valid increment."""
         increment = int(instrument.get("minimumTradeSize", 1))
         rounded = int(position_size // increment) * increment
@@ -240,13 +245,17 @@ class PositionSizer:
 ### Stop Loss Management
 
 ```python
+import os
 from decimal import Decimal
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 # Setup example variables for code snippets
-client = AsyncClient()
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
 account_id = "your-account-id"
 
 
@@ -309,7 +318,7 @@ class StopLossManager:
         print(f"Stop loss updated to {stop_price} for trade {trade_id}: Order {order_id}")
 
 
-    def is_better_stop(self, trade: dict, new_stop: Decimal) -> bool:
+    def is_better_stop(self, trade: Any, new_stop: Decimal) -> bool:
         """Check if new stop is better."""
         current_stop = trade.get("stopLoss", {}).get("price")
         if not current_stop:
@@ -377,11 +386,16 @@ class DailyLossLimiter:
 ```python
 import asyncio
 import logging
+import os
+from typing import Any
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 
 # Setup example variables
-client = AsyncClient()
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
 account_id = "your-account-id"
 
 logger = logging.getLogger(__name__)
@@ -426,7 +440,7 @@ class ResilientClient:
         self.client = client
         self.circuit_breaker = CircuitBreaker()
 
-    async def safe_order(self, **kwargs) -> dict:
+    async def safe_order(self, **kwargs: Any) -> Any:
         """Place order with full error handling."""
         try:
             # Check circuit breaker
@@ -464,7 +478,7 @@ class ResilientClient:
             logger.error(f"Order failed: {e}")
             raise
 
-    def validate_order(self, kwargs: dict) -> None:
+    def validate_order(self, kwargs: Any) -> None:
         """Validate order parameters."""
         required_fields = ["account_id", "instrument", "units"]
         for field in required_fields:
@@ -478,13 +492,18 @@ class ResilientClient:
 
 ```python
 import json
+import os
 from datetime import datetime
 from pathlib import Path
+from typing import Any
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 
 # Setup example variables
-client = AsyncClient()
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
 account_id = "your-account-id"
 
 
@@ -495,7 +514,7 @@ class StateManager:
         self.state_file = Path(state_file)
         self.state = self.load_state()
 
-    def load_state(self) -> dict:
+    def load_state(self) -> Any:
         """Load state from file."""
 
         if self.state_file.exists():
@@ -529,7 +548,7 @@ class StateManager:
                 # Handle unexpected position
                 self._handle_unexpected_position(position)
 
-    def _handle_unexpected_position(self, position) -> None:
+    def _handle_unexpected_position(self, position: Any) -> None:
         """Handle unexpected position found during recovery."""
         print(f"Warning: Unexpected position found: {position}")
 
@@ -540,7 +559,10 @@ class StateManager:
 ### Connection Pooling
 
 ```python
-from fivetwenty import AsyncClient
+import os
+from typing import Any
+
+from fivetwenty import AsyncClient, Environment
 
 # Setup example variables for connection pool
 config = None  # Configuration would be loaded here
@@ -553,16 +575,22 @@ class ConnectionPool:
         self.clients = []
         self.current = 0
 
-        # Load secure configuration
-        from fivetwenty import AccountConfigLoader
-        config = AccountConfigLoader.load_default()
-        if not config:
-            raise ValueError("No configuration found for connection pool")
+        # Load secure configuration - this is a placeholder for the example
+        # from fivetwenty import AccountConfigLoader
+        # config = AccountConfigLoader.load_default()
+        # if not config:
+        #     raise ValueError("No configuration found for connection pool")
+
+        # Placeholder config for example
+        config = None  # Replace with actual config loading
 
         print(f"Configuration loaded for connection pool of size {size}")
 
         for _ in range(size):
-            client = AsyncClient(config=config)
+            client = AsyncClient(
+                token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+                environment=Environment.PRACTICE
+            )
             self.clients.append(client)
 
     def get_client(self) -> AsyncClient:
@@ -584,12 +612,17 @@ class ConnectionPool:
 ### Caching Strategy
 
 ```python
+import os
 from datetime import datetime, timedelta
+from typing import Any
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 
 # Setup example variables
-client = AsyncClient()
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
 account_id = "your-account-id"
 
 
@@ -601,7 +634,7 @@ class CachedDataProvider:
         self.cache = {}
         self.cache_times = {}
 
-    async def get_instrument_info(self, account_id: str, instrument: str, cache_duration: int = 3600) -> dict:
+    async def get_instrument_info(self, account_id: str, instrument: str, cache_duration: int = 3600) -> Any:
         """Get instrument info with caching."""
         cache_key = f"{account_id}:{instrument}"
 
@@ -632,12 +665,17 @@ class CachedDataProvider:
 ### Health Checks
 
 ```python
+import os
 from datetime import datetime
+from typing import Any
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 
 # Setup example variables
-client = AsyncClient()
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
 
 
 class HealthMonitor:
@@ -652,7 +690,7 @@ class HealthMonitor:
             "stream_status": "unknown",
         }
 
-    async def health_check(self) -> dict:
+    async def health_check(self) -> Any:
         """Perform health check."""
 
         health = {
@@ -673,8 +711,8 @@ class HealthMonitor:
         # Check stream status
         if self.metrics["last_heartbeat"]:
             heartbeat_age = datetime.now() - self.metrics["last_heartbeat"]
-            HEARTBEAT_TIMEOUT_SECONDS = 60
-            if heartbeat_age.total_seconds() > HEARTBEAT_TIMEOUT_SECONDS:
+            heartbeat_timeout_seconds = 60
+            if heartbeat_age.total_seconds() > heartbeat_timeout_seconds:
                 health["checks"]["stream"] = "stale"
                 health["status"] = "degraded"
             else:
@@ -683,8 +721,8 @@ class HealthMonitor:
         # Check error rate
         if self.metrics["api_calls"] > 0:
             error_rate = self.metrics["errors"] / self.metrics["api_calls"]
-            ERROR_RATE_THRESHOLD = 0.05
-            if error_rate > ERROR_RATE_THRESHOLD:  # 5% error rate
+            error_rate_threshold = 0.05
+            if error_rate > error_rate_threshold:  # 5% error rate
                 health["checks"]["errors"] = f"high: {error_rate:.2%}"
                 health["status"] = "degraded"
             else:
@@ -699,6 +737,7 @@ class HealthMonitor:
 ```python
 import smtplib
 from email.mime.text import MIMEText
+from typing import Any
 
 # Setup example variables
 email_config = {
@@ -711,7 +750,7 @@ email_config = {
 class AlertManager:
     """Send alerts for critical events."""
 
-    def __init__(self, email_config: dict) -> None:
+    def __init__(self, email_config: Any) -> None:
         self.email_config = email_config
 
     async def send_alert(self, subject: str, message: str, severity: str = "INFO") -> None:
@@ -784,11 +823,11 @@ mock_client = AsyncMock(spec=AsyncClient)
 
 
 @pytest.fixture
-def mock_client():
+def mock_client() -> Any:
     """Create a mocked AsyncClient for testing."""
     return AsyncMock(spec=AsyncClient)
 
-async def test_account_balance_check(mock_client):
+async def test_account_balance_check(mock_client: Any) -> None:
     """Test account balance validation."""
 
     # Setup mock response
@@ -809,7 +848,7 @@ async def test_account_balance_check(mock_client):
     assert account.margin_available == Decimal("8000.00")
     mock_client.accounts.get_account.assert_called_once_with("test-account")
 
-async def test_order_error_handling(mock_client):
+async def test_order_error_handling(mock_client: Any) -> None:
     """Test error handling in order placement."""
 
     # Setup mock to raise error
@@ -836,6 +875,7 @@ Integration tests use VCR.py to record real API interactions:
 
 ```python
 import os
+from typing import Any
 
 import pytest
 import vcr
@@ -856,7 +896,7 @@ my_vcr = vcr.VCR(
 
 @pytest.mark.integration
 @my_vcr.use_cassette("account_retrieval.yaml")
-async def test_account_retrieval():
+async def test_account_retrieval() -> None:
     """Test real account retrieval with recorded response."""
     async with AsyncClient(
         token=os.environ["TEST_OANDA_TOKEN"],
@@ -871,7 +911,7 @@ async def test_account_retrieval():
 
 @pytest.mark.integration
 @my_vcr.use_cassette("full_trade_lifecycle.yaml")
-async def test_full_trade_lifecycle():
+async def test_full_trade_lifecycle() -> None:
     """Test complete trade lifecycle."""
     async with AsyncClient(
         token=os.environ["TEST_OANDA_TOKEN"],
@@ -914,6 +954,7 @@ Use Hypothesis for robust testing with random data:
 
 ```python
 from decimal import Decimal
+from typing import Any
 
 from hypothesis import given
 from hypothesis import strategies as st
@@ -928,7 +969,7 @@ price = Decimal("1.1234")
     units=st.integers(min_value=1, max_value=100000),
     price=st.decimals(min_value=Decimal("0.01"), max_value=Decimal("10.00"), places=5),
 )
-async def test_position_size_calculation(mock_client, units, price):
+async def test_position_size_calculation(mock_client: Any, units: int, price: Decimal) -> None:
     """Test position size calculations with various inputs."""
 
     position_value = Decimal(str(units)) * price
@@ -946,7 +987,7 @@ async def test_position_size_calculation(mock_client, units, price):
         unique=True,
     ),
 )
-async def test_pricing_request(mock_client, instruments):
+async def test_pricing_request(mock_client: Any, instruments: list[str]) -> None:
     """Test pricing requests with various instrument combinations."""
 
     # Mock successful response
@@ -962,17 +1003,21 @@ async def test_pricing_request(mock_client, instruments):
 
 ```python
 import asyncio
+import os
 import time
 from statistics import mean, median
+from typing import Any
+
+from fivetwenty import AsyncClient, Environment
 
 # Setup test variables
 account_id = os.environ.get("TEST_OANDA_ACCOUNT", "your-account-id")
 token = os.environ.get("TEST_OANDA_TOKEN", "your-token")
 
 
-async def test_concurrent_requests():
+async def test_concurrent_requests() -> None:
     """Test SDK performance under concurrent load."""
-    async def make_request(client, account_id):
+    async def make_request(client: Any, account_id: str) -> float:
         start = time.time()
         await client.accounts.get_account(account_id)
         return time.time() - start
@@ -1001,7 +1046,7 @@ async def test_concurrent_requests():
     (FiveTwentyErrorCode.MARKET_HALTED, "wait_for_market"),
     (FiveTwentyErrorCode.INVALID_INSTRUMENT, "validation_error"),
 ])
-async def test_error_handling_scenarios(mock_client, error_code, expected_behavior) -> None:
+async def test_error_handling_scenarios(mock_client: Any, error_code: Any, expected_behavior: Any) -> None:
     """Test various error scenarios and expected responses."""
     mock_client.orders.post_market_order.side_effect = FiveTwentyError(
         status_code=400,
@@ -1027,6 +1072,7 @@ Enable detailed logging to see all API interactions:
 import logging
 import os
 import sys
+from typing import Any
 
 from fivetwenty import AsyncClient, Environment
 
@@ -1043,7 +1089,7 @@ logging.basicConfig(
 # Enable httpx debug logging
 logging.getLogger("httpx").setLevel(logging.DEBUG)
 
-async def debug_api_calls():
+async def debug_api_calls() -> None:
     """Debug API calls with full request/response logging."""
     async with AsyncClient(
         token=os.environ["FIVETWENTY_OANDA_TOKEN"],
@@ -1069,7 +1115,7 @@ from fivetwenty.models import Account
 raw_data = {"id": "123", "balance": "10000.00", "currency": "USD"}
 
 
-def debug_model_validation(raw_data: dict):
+def debug_model_validation(raw_data: Any) -> Any:
     """Debug model validation issues."""
     try:
         account = Account.model_validate(raw_data)
@@ -1110,16 +1156,17 @@ except ValidationError as e:
 
 ```python
 import asyncio
+import os
 
 import aiohttp
 
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 
 # Setup example variables
 token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-token")
 
 
-async def debug_connection_issues():
+async def debug_connection_issues() -> None:
     """Debug connection and timeout issues."""
     # Custom timeout configuration for debugging
     timeout = aiohttp.ClientTimeout(
@@ -1150,8 +1197,11 @@ async def debug_connection_issues():
 
 ### Performance Profiling
 ```python
-import cProfile
 import asyncio
+import cProfile
+import os
+from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 
 # Setup example variables
@@ -1159,9 +1209,9 @@ token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-token")
 account_id = "your-account-id"
 
 
-def profile_async_function(func):
+def profile_async_function(func: Any) -> Any:
     """Profile an async function."""
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         pr = cProfile.Profile()
         pr.enable()
 
@@ -1177,7 +1227,7 @@ def profile_async_function(func):
     return wrapper
 
 @profile_async_function
-async def performance_test():
+async def performance_test() -> None:
     """Profile SDK performance."""
     async with AsyncClient(
         token=os.environ["FIVETWENTY_OANDA_TOKEN"],
@@ -1200,8 +1250,11 @@ async def performance_test():
 
 ### Memory Usage Debugging
 ```python
-import tracemalloc
 import asyncio
+import os
+import tracemalloc
+from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 
 # Setup example variables
@@ -1241,19 +1294,28 @@ async def memory_usage_test() -> None:
 
 #### Issue: "RuntimeError: This event loop is already running"
 ```python
+import os
+from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 
 # Setup example variables
-client = AsyncClient()
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
 
 # Solution 1: Use nest_asyncio (for Jupyter)
 import nest_asyncio
 nest_asyncio.apply()
 
 # Solution 2: Use asyncio.create_task() instead of asyncio.run()
-async def main():
+async def main() -> Any:
     """Main function example."""
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         result = await client.accounts.get_accounts()
     return result
 
@@ -1267,12 +1329,14 @@ print(f"Task completed: {result}")
 
 ```python
 import asyncio
+import os
+from typing import Any
 
 # Setup example variables
 token = "your-token"
 
 
-async def main():
+async def main() -> None:
     """SSL bypass example - development only."""
     # For development/testing only - never in production
     import ssl
@@ -1302,14 +1366,16 @@ asyncio.run(main())
 #### Issue: Rate Limiting
 
 ```python
-from fivetwenty.exceptions import TooManyRequests
 import asyncio
+from typing import Any
+
+from fivetwenty.exceptions import TooManyRequests
 
 # Setup example variables
 client = None
 operations = []
 
-async def rate_limited_operation(client, operations):
+async def rate_limited_operation(client: Any, operations: list[Any]) -> Any:
     """Handle rate limiting gracefully."""
     results = []
 
@@ -1337,6 +1403,7 @@ async def rate_limited_operation(client, operations):
 Mock testing allows rapid development without API calls:
 
 ```python
+from typing import Any
 from unittest.mock import AsyncMock, patch
 
 import pytest
@@ -1346,7 +1413,7 @@ mock_client = AsyncMock()
 
 
 @pytest.fixture
-def trading_system_mocks():
+def trading_system_mocks() -> Any:
     """Comprehensive mocks for trading system testing."""
     with patch("fivetwenty.AsyncClient") as mock_client_class:
         mock_client = AsyncMock()
@@ -1364,7 +1431,7 @@ def trading_system_mocks():
 
         yield mock_client
 
-async def test_trading_strategy(trading_system_mocks):
+async def test_trading_strategy(trading_system_mocks: Any) -> None:
     """Test trading strategy with full mocks."""
     # Your trading strategy can now be tested
     # without any real API calls
@@ -1378,6 +1445,7 @@ async def test_trading_strategy(trading_system_mocks):
 
 ```python
 import json
+from typing import Any
 
 import keyring
 from cryptography.fernet import Fernet
@@ -1389,10 +1457,10 @@ service_name = "oanda_trading"
 class SecureCredentials:
     """Secure credential storage."""
 
-    def __init__(self, service_name: str = "oanda_trading"):
+    def __init__(self, service_name: str = "oanda_trading") -> None:
         self.service = service_name
 
-    def store_token(self, token: str, username: str = "default"):
+    def store_token(self, token: str, username: str = "default") -> None:
         """Store token securely."""
 
         # Use system keyring
@@ -1410,7 +1478,7 @@ class SecureCredentials:
         print(f"Token retrieved for user: {username}")
         return token
 
-    def encrypt_config(self, config: dict) -> tuple[bytes, bytes]:
+    def encrypt_config(self, config: Any) -> tuple[bytes, bytes]:
         """Encrypt configuration."""
         key = Fernet.generate_key()
         cipher = Fernet(key)
@@ -1427,11 +1495,17 @@ class SecureCredentials:
 ### Code Documentation
 
 ```python
-from fivetwenty import AsyncClient
+import os
+from typing import Any
+
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
 # Setup example variables
-client = AsyncClient()
+client = AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+)
 account_id = "your-account-id"
 print(f"Documentation standards setup for account: {account_id}")
 
@@ -1441,9 +1515,9 @@ async def place_order_with_risk_management(
     account_id: str,
     instrument: str,
     units: int,
-    stop_loss: Optional[str] = None,
-    take_profit: Optional[str] = None,
-) -> dict:
+    stop_loss: str | None = None,
+    take_profit: str | None = None,
+) -> Any:
     """
     Place an order with comprehensive risk management.
 
@@ -1508,77 +1582,6 @@ Before deploying to production:
 - [ ] ✅ Circuit breakers configured
 - [ ] ✅ State persistence enabled
 - [ ] ✅ Health checks running
-
-## Documentation Quality Assurance
-
-### Validation Framework
-
-The FiveTwenty project includes a comprehensive documentation validation framework to ensure accuracy and completeness. This framework achieves:
-
-- **100% Model Documentation Accuracy** (66/66 models)
-- **100% Endpoint Documentation Accuracy** (39/39 endpoints)
-
-#### Using the Validation Framework
-```bash
-# Navigate to the docs-tooling directory
-cd docs-tooling
-
-# Run all validators with quality gates and reporting
-uv run python validation/cli.py run --parallel --gates --report
-
-# Run specific accuracy audits
-uv run python validation/cli.py run endpoint-accuracy model-accuracy
-
-# Run common validators during development
-uv run python validation/cli.py run links syntax security
-```
-
-#### Key Validation Areas
-
-**Accuracy Validators:**
-- **Endpoint Documentation**: Validates that all documented endpoints match the actual SDK implementation
-- **Model Documentation**: Ensures all model fields are correctly documented with proper types and requirements
-- **SDK Method Names**: Checks for deprecated method patterns and ensures current SDK methods are used
-
-**Quality Validators:**
-- **Link Validation**: Verifies all internal and external links work correctly
-- **Syntax Validation**: Ensures markdown syntax is correct and consistent
-- **Security Scanning**: Detects potential security issues in documentation
-- **Prose Quality**: Style validation using Vale for professional documentation
-
-#### Integration with Development Workflow
-```bash
-# Quick validation checks during development
-uv run python validation/cli.py run links syntax
-
-# Accuracy audits before commits
-uv run python validation/cli.py run endpoint-accuracy model-accuracy
-
-# Full validation suite before major releases
-uv run python validation/cli.py run --parallel --gates --report
-```
-
-**Pre-commit Hook Example:**
-```yaml
-# .pre-commit-config.yaml
-repos:
-  - repo: local
-    hooks:
-      - id: docs-validation
-        name: Documentation Validation
-        entry: uv run python docs-tooling/validation/cli.py run links syntax security
-        language: system
-        pass_filenames: false
-```
-
-#### Benefits for Production Systems
-
-- **Prevents Documentation Debt**: Automatic detection of outdated documentation
-- **Ensures API Accuracy**: Documentation always matches actual implementation
-- **Maintains Quality Standards**: Consistent formatting and style across all docs
-- **Reduces Support Load**: Accurate documentation means fewer user issues
-
-The validation framework is particularly important for trading systems where accurate documentation can prevent costly implementation mistakes.
 
 ## Summary
 

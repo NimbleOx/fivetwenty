@@ -34,7 +34,7 @@ import pandas as pd
 class RiskAttributionAnalyzer:
     """Advanced risk attribution and decomposition analysis."""
 
-    def __init__(self, returns_data: dict[str, pd.Series]: Any, portfolio_weights: dict[str, float]: Any) -> None:
+    def __init__(self, returns_data: dict[str, pd.Series], portfolio_weights: dict[str, float]) -> None:
         self.returns_data = returns_data
         self.returns_df = pd.DataFrame(returns_data).dropna()
         self.portfolio_weights = portfolio_weights

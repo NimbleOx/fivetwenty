@@ -11,10 +11,12 @@
 Use optimized data structures for HFT:
 
 ```python
+import asyncio
 import numpy as np
+import time
 from collections import defaultdict
 from dataclasses import dataclass
-from typing import NamedTuple
+from typing import NamedTuple, Optional, Any
 from decimal import Decimal
 import array
 
@@ -80,7 +82,7 @@ class OptimizedPriceManager:
     """High-performance price management for HFT."""
 
     def __init__(self, buffer_size: int = 1000) -> None:
-        self.buffers: Dict[str, CircularBuffer] = {}
+        self.buffers: dict[str, CircularBuffer] = {}
         self.buffer_size = buffer_size
         self.update_counts = defaultdict(int)
         self.last_update_times = {}
@@ -123,6 +125,17 @@ class OptimizedPriceManager:
 # Integration with streaming
 price_manager = OptimizedPriceManager(buffer_size=5000)
 
+# Example price object structure for demonstration
+class ClientPrice:
+    def __init__(self, instrument: str, bids: list, asks: list):
+        self.instrument = instrument
+        self.bids = bids
+        self.asks = asks
+
+class PriceLevel:
+    def __init__(self, price: str):
+        self.price = price
+
 async def optimized_price_callback(price: ClientPrice) -> Any:
     """Optimized callback using efficient data structures."""
 
@@ -146,8 +159,9 @@ async def optimized_price_callback(price: ClientPrice) -> Any:
 Pre-allocate objects to reduce allocation overhead:
 
 ```python
+import time
 from collections import deque
-from typing import Any, Dict, List
+from typing import Any
 from decimal import Decimal
 
 
@@ -165,13 +179,13 @@ class TradingObjectPool:
             self.price_objects.append({'bid': 0.0, 'ask': 0.0, 'timestamp': 0.0, 'instrument': ''})
             self.order_objects.append({'instrument': '', 'units': 0, 'price': 0.0})
 
-    def get_price_object(self) -> Dict[str, Any]:
+    def get_price_object(self) -> dict[str, Any]:
         """Get pre-allocated price object."""
         if self.price_objects:
             return self.price_objects.popleft()
         return {'bid': 0.0, 'ask': 0.0, 'timestamp': 0.0, 'instrument': ''}
 
-    def return_price_object(self, obj: Dict[str, Any]) -> Any:
+    def return_price_object(self, obj: dict[str, Any]) -> Any:
         """Return object to pool."""
         # Clear object data
         obj.clear()
@@ -180,13 +194,13 @@ class TradingObjectPool:
         if len(self.price_objects) < self.pool_size:
             self.price_objects.append(obj)
 
-    def get_order_object(self) -> Dict[str, Any]:
+    def get_order_object(self) -> dict[str, Any]:
         """Get pre-allocated order object."""
         if self.order_objects:
             return self.order_objects.popleft()
         return {'instrument': '', 'units': 0, 'price': 0.0}
 
-    def return_order_object(self, obj: Dict[str, Any]: Any) -> Any:
+    def return_order_object(self, obj: dict[str, Any]) -> Any:
         """Return order object to pool."""
         obj.clear()
         obj.update({'instrument': '', 'units': 0, 'price': 0.0})
@@ -217,7 +231,7 @@ async def efficient_price_processing(price: ClientPrice) -> Any:
         # Return object to pool
         object_pool.return_price_object(price_obj)
 
-async def process_price_data(price_obj: Dict[str, Any]: Any) -> Any:
+async def process_price_data(price_obj: dict[str, Any]) -> Any:
     """Process price data (your trading logic here)."""
     spread = price_obj['ask'] - price_obj['bid']
     if spread < 0.0005:
@@ -238,6 +252,18 @@ from typing import Any
 def fast_spread_calculation(price) -> Any:
     return price.asks[0].price - price.bids[0].price
 
+def get_ask_price(price) -> float:
+    """Extract ask price from price object."""
+    return price.asks[0].price if price.asks else 0.0
+
+def get_bid_price(price) -> float:
+    """Extract bid price from price object."""
+    return price.bids[0].price if price.bids else 0.0
+
+def calculate_spread(ask: float, bid: float) -> float:
+    """Calculate spread between ask and bid."""
+    return ask - bid
+
 # Less efficient: Multiple function calls
 def slow_spread_calculation(price) -> Any:
     ask = get_ask_price(price)
@@ -251,6 +277,10 @@ def slow_spread_calculation(price) -> Any:
 # Efficient: Cache frequently accessed attributes
 
 from typing import Any
+
+async def handle_price_update(instrument: str, bid_price: Decimal, ask_price: Decimal, spread: Decimal) -> None:
+    """Handle price update processing."""
+    print(f"Price update: {instrument} bid={bid_price:.5f} ask={ask_price:.5f} spread={spread:.5f}")
 
 async def optimized_price_processing(price) -> Any:
     bids = price.bids
@@ -312,7 +342,7 @@ def detect_price_movements(prices, threshold=0.0001) -> Any:
 
 ```python
 import weakref
-from typing import WeakSet
+from typing import WeakSet, Any
 
 
 
@@ -353,8 +383,10 @@ subscription_manager.subscribe(price_callback)
 ### Limit Buffer Growth
 
 ```python
+import time
 from collections import deque
 from decimal import Decimal
+from typing import Any
 
 
 
@@ -410,8 +442,11 @@ async def store_price_efficiently(price: Any) -> Any:
 ### Measure Execution Time
 
 ```python
+import asyncio
 import functools
+import numpy as np
 import time
+from typing import Any
 
 
 
@@ -442,6 +477,11 @@ def benchmark_function(func: Any) -> Any:
 
     return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
 
+async def analyze_price_data(price: Any) -> None:
+    """Analyze price data (example implementation)."""
+    # Simulate some analysis work
+    await asyncio.sleep(0.001)  # Simulate 1ms processing time
+
 # Usage
 @benchmark_function
 async def process_price_update(price: Any) -> Any:
@@ -459,6 +499,8 @@ def calculate_technical_indicator(prices: Any) -> Any:
 
 ```python
 import os
+import time
+from typing import Any
 
 import psutil
 
@@ -515,6 +557,13 @@ class MemoryProfiler:
 # Usage
 memory_profiler = MemoryProfiler()
 
+async def simulate_price_processing() -> Any:
+    """Simulate price processing for profiling."""
+    # Create and process some data
+    data = [{"price": i * 0.0001, "timestamp": time.time()} for i in range(100)]
+    processed = [d["price"] * 1.1 for d in data]
+    return processed
+
 async def profiled_hft_operation() -> Any:
     """HFT operation with memory profiling."""
 
@@ -533,13 +582,6 @@ async def profiled_hft_operation() -> Any:
     # Generate report
     report = memory_profiler.get_memory_report()
     print(f"Memory Report: {report}")
-
-async def simulate_price_processing() -> Any:
-    """Simulate price processing for profiling."""
-    # Create and process some data
-    data = [{"price": i * 0.0001, "timestamp": time.time()} for i in range(100)]
-    processed = [d["price"] * 1.1 for d in data]
-    return processed
 ```
 
 ---

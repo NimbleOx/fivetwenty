@@ -33,10 +33,11 @@
 ```python
 import asyncio
 import os
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
-async def get_live_accounts() -> Any:
+async def get_live_accounts() -> list[Any]:
     """Get your live trading account information."""
 
     async with AsyncClient(
@@ -62,7 +63,7 @@ async def get_live_accounts() -> Any:
             return []
 
 # Get your live account details
-live_accounts = await get_live_accounts()
+# live_accounts = await get_live_accounts()
 ```
 
 ---
@@ -75,6 +76,7 @@ Set up secure environment variables for live trading:
 
 ```python
 import os
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 # Set environment variables (add to your .env file or system environment)
@@ -82,7 +84,7 @@ from fivetwenty import AsyncClient, Environment
 # FIVETWENTY_LIVE_ACCOUNT=your-account-id-here
 
 
-def get_live_config() -> Any:
+def get_live_config() -> tuple[str, str]:
     """Get live trading configuration from environment."""
 
     live_token = os.getenv('FIVETWENTY_LIVE_TOKEN')
@@ -108,10 +110,10 @@ except ValueError as e:
 ```python
 import json
 from pathlib import Path
+from typing import Any
 
 
-
-def load_live_config(config_path: str = "live_config.json") -> Any:
+def load_live_config(config_path: str = "live_config.json") -> tuple[str, str]:
     """Load live trading configuration from secure file."""
 
     config_file = Path(config_path)
@@ -151,17 +153,17 @@ def load_live_config(config_path: str = "live_config.json") -> Any:
 
 ```python
 from decimal import Decimal
-
+from typing import Any
 
 
 class LiveTradingValidator:
     """Safety validator for live trading operations."""
 
-    def __init__(self, max_position_size: int = 10000, daily_loss_limit: Decimal = Decimal("500.0")):
+    def __init__(self, max_position_size: int = 10000, daily_loss_limit: Decimal = Decimal("500.0")) -> None:
         self.max_position_size = max_position_size
         self.daily_loss_limit = daily_loss_limit
 
-    async def validate_order(self, client: Any, account_id: str, instrument: str, units: int) -> Any:
+    async def validate_order(self, client: Any, account_id: str, instrument: str, units: int) -> bool:
         """Validate order before execution in live environment."""
 
         # Check position size limits
@@ -191,10 +193,11 @@ validator = LiveTradingValidator(max_position_size=5000, daily_loss_limit=Decima
 
 ```python
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
-async def place_live_order_safely(account_id: str, instrument: str, units: int, stop_loss: Decimal = None, take_profit: Decimal = None) -> Any:
+async def place_live_order_safely(account_id: str, instrument: str, units: int, stop_loss: Decimal | None = None, take_profit: Decimal | None = None) -> Any:
     """Place order in live environment with safety checks."""
 
     async with AsyncClient(
@@ -245,13 +248,13 @@ async def place_live_order_safely(account_id: str, instrument: str, units: int, 
             return None
 
 # Usage with safety checks
-live_fill = await place_live_order_safely(
-    account_id=LIVE_ACCOUNT,
-    instrument="EUR_USD",
-    units=1000,
-    stop_loss=Decimal("1.0900"),
-    take_profit=Decimal("1.1100")
-)
+# live_fill = await place_live_order_safely(
+#     account_id=LIVE_ACCOUNT,
+#     instrument="EUR_USD",
+#     units=1000,
+#     stop_loss=Decimal("1.0900"),
+#     take_profit=Decimal("1.1100")
+# )
 ```
 
 ---
@@ -261,9 +264,11 @@ live_fill = await place_live_order_safely(
 ### Real-Time Account Monitoring
 
 ```python
+import asyncio
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
-async def monitor_live_account(account_id: str, check_interval: int = 30):
+async def monitor_live_account(account_id: str, check_interval: int = 30) -> None:
     """Monitor live account for risk management."""
 
     async with AsyncClient(
@@ -317,7 +322,7 @@ async def monitor_live_account(account_id: str, check_interval: int = 30):
 
 ```python
 from decimal import Decimal
-
+from typing import Any
 
 
 class LiveTradingRiskManager:
@@ -357,9 +362,10 @@ safe_position_size = risk_manager.calculate_position_size(stop_loss_pips=50, pip
 ### Dry Run Test
 
 ```python
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
-async def test_live_configuration():
+async def test_live_configuration() -> None:
     """Test live trading configuration without placing orders."""
 
     print("🧪 Testing live trading configuration...")
@@ -394,7 +400,7 @@ async def test_live_configuration():
         print("💡 Fix issues before attempting live trading")
 
 # Run configuration test
-await test_live_configuration()
+# await test_live_configuration()
 ```
 
 ---
@@ -438,11 +444,11 @@ Before starting live trading:
 ### Immediate Stop Trading
 
 ```python
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
-
-async def emergency_stop_trading(account_id: str) -> Any:
+async def emergency_stop_trading(account_id: str) -> None:
     """Emergency procedure to stop all trading activity."""
 
     print("🚨 EMERGENCY STOP ACTIVATED")

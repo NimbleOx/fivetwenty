@@ -12,6 +12,7 @@ A systematic approach to implementing and maintaining risk management systems.
 ### The Five-Layer Defense System
 
 ```python
+from typing import Any
 from decimal import Decimal
 
 class RiskManagementFramework:
@@ -66,7 +67,7 @@ class RiskManagementFramework:
         self.alerts_today = []
         self.violations_today = []
     
-    def validate_trade(self, trade_params: dict) -> dict:
+    def validate_trade(self, trade_params: dict[str, Any]) -> dict[str, Any]:
         """Layer 1: Validate individual trade parameters."""
         
         validation_result = {
@@ -113,7 +114,7 @@ class RiskManagementFramework:
         
         return validation_result
     
-    def check_daily_limits(self, daily_stats: dict) -> dict:
+    def check_daily_limits(self, daily_stats: dict[str, Any]) -> dict[str, Any]:
         """Layer 2: Check daily trading limits."""
         
         check_result = {
@@ -140,7 +141,7 @@ class RiskManagementFramework:
         
         return check_result
     
-    def assess_framework_health(self) -> dict:
+    def assess_framework_health(self) -> dict[str, Any]:
         """Comprehensive framework health assessment."""
         
         health_score = 100
@@ -189,7 +190,7 @@ class RiskManagementFramework:
         return result
 
 # Example framework implementation
-def demo_risk_framework():
+def demo_risk_framework() -> dict[str, Any]:
     """Demonstrate professional risk management framework."""
     
     framework = RiskManagementFramework("demo_account", 10000)  # Example: $10,000 account
@@ -315,7 +316,7 @@ class RiskValidationChecklist:
         
         self.checklist_results = {}
     
-    def evaluate_category(self, category: str, completed_checks: list) -> dict:
+    def evaluate_category(self, category: str, completed_checks: list[str]) -> dict[str, Any]:
         """Evaluate a specific validation category."""
         
         if category not in self.validation_categories:
@@ -345,7 +346,7 @@ class RiskValidationChecklist:
         self.checklist_results[category] = result
         return result
     
-    def generate_overall_assessment(self) -> dict:
+    def generate_overall_assessment(self) -> dict[str, Any]:
         """Generate overall validation assessment."""
         
         if not self.checklist_results:
@@ -385,7 +386,7 @@ class RiskValidationChecklist:
         
         return assessment
     
-    def print_validation_report(self) -> dict:
+    def print_validation_report(self) -> dict[str, Any]:
         """Print comprehensive validation report."""
         
         print(f"\n📋 RISK MANAGEMENT VALIDATION REPORT")
@@ -415,7 +416,7 @@ class RiskValidationChecklist:
         
         return assessment
     
-    def get_priority_actions(self) -> list:
+    def get_priority_actions(self) -> list[dict[str, str]]:
         """Get prioritized list of actions needed."""
         
         priority_actions = []
@@ -442,7 +443,7 @@ class RiskValidationChecklist:
         return priority_actions
 
 # Example validation process
-def demo_validation_checklist():
+def demo_validation_checklist() -> dict[str, Any]:
     """Demonstrate validation checklist process."""
     
     validator = RiskValidationChecklist()
@@ -499,8 +500,10 @@ Test your risk management under extreme conditions.
 ### Stress Test Implementation
 
 ```python
+from typing import Any
 import numpy as np
 from datetime import datetime, timedelta
+from decimal import Decimal
 
 class RiskStressTesting:
     """Comprehensive stress testing for risk management systems."""
@@ -552,7 +555,7 @@ class RiskStressTesting:
             }
         }
     
-    def run_black_swan_test(self, portfolio_positions: dict) -> dict:
+    def run_black_swan_test(self, portfolio_positions: dict[str, dict[str, Any]]) -> dict[str, Any]:
         """Test response to extreme market event."""
         
         scenario = self.stress_scenarios['black_swan']
@@ -618,7 +621,7 @@ class RiskStressTesting:
         return result
     
     def run_consecutive_loss_test(self, typical_risk_per_trade: Decimal,
-                                num_consecutive_losses: int = 10) -> dict:
+                                num_consecutive_losses: int = 10) -> dict[str, Any]:
         """Test impact of consecutive losses."""
         
         print(f"\n📉 Consecutive Loss Stress Test")
@@ -665,7 +668,7 @@ class RiskStressTesting:
         
         return result
     
-    def run_correlation_breakdown_test(self, portfolio_positions: dict) -> dict:
+    def run_correlation_breakdown_test(self, portfolio_positions: dict[str, dict[str, Any]]) -> dict[str, Any]:
         """Test what happens when correlations break down."""
         
         scenario = self.stress_scenarios['high_correlation']
@@ -705,7 +708,7 @@ class RiskStressTesting:
         
         return result
     
-    def run_comprehensive_stress_test(self, portfolio_positions: dict) -> dict:
+    def run_comprehensive_stress_test(self, portfolio_positions: dict[str, dict[str, Any]]) -> dict[str, Any]:
         """Run all stress tests and summarize results."""
         
         print(f"🔬 COMPREHENSIVE STRESS TESTING SUITE")
@@ -757,7 +760,7 @@ class RiskStressTesting:
         return summary
 
 # Example stress testing
-def demo_stress_testing():
+def demo_stress_testing() -> dict[str, Any]:
     """Demonstrate comprehensive stress testing."""
     
     # Sample portfolio with example positions
@@ -785,7 +788,7 @@ Create comprehensive documentation for your risk management system.
 ### Documentation Framework
 
 ```python
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class RiskDocumentationTemplate:
     """Template for comprehensive risk management documentation."""
@@ -1045,7 +1048,7 @@ Completed by: _________________ Date: _______
         return checklist
 
 # Example documentation generation
-def demo_risk_documentation():
+def demo_risk_documentation() -> dict[str, str]:
     """Demonstrate risk management documentation."""
     
     doc_generator = RiskDocumentationTemplate("John Trader", "EUR/USD Scalping")

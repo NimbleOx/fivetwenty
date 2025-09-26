@@ -52,15 +52,20 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 - **Documentation**: Self-documenting models with field descriptions
 
 ```python
-
 from decimal import Decimal
 from datetime import datetime
+from enum import Enum
+from pydantic import BaseModel
 
-class Account(ApiModel):
+class Currency(Enum):
+    USD = "USD"
+    EUR = "EUR"
+
+class Account(BaseModel):
     """Class docstring."""
     balance: Decimal  # Validated at runtime
     currency: Currency  # Enum validation
-    created_time: DateTime  # Proper datetime handling
+    created_time: datetime  # Proper datetime handling
 ```
 
 ---
@@ -83,6 +88,8 @@ The SDK provides two client types addressing different use cases:
 
 **Architecture Pattern**: Composition with background thread pool
 ```python
+from concurrent.futures import ThreadPoolExecutor
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -186,8 +193,12 @@ ApiModel (base)
 OANDA API uses camelCase, Python prefers snake_case:
 
 ```python
-class Account(ApiModel):
-    created_time: DateTime = Field(alias="createdTime")
+from decimal import Decimal
+from datetime import datetime
+from pydantic import BaseModel, Field
+
+class Account(BaseModel):
+    created_time: datetime = Field(alias="createdTime")
     margin_used: Decimal = Field(alias="marginUsed")
 ```
 
@@ -226,9 +237,19 @@ class ReconnectionPolicy:
 Streaming uses Python's native async iteration:
 
 ```python
-async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
-    # Natural, Pythonic streaming
-    process_price(price)
+from fivetwenty import AsyncClient
+
+# Example wrapped in async function
+async def stream_prices():
+    client = AsyncClient(token="your-token", account_id="your-account")
+    account_id = "your-account-id"
+
+    def process_price(price):
+        pass  # Your processing logic here
+
+    async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
+        # Natural, Pythonic streaming
+        process_price(price)
 ```
 
 
@@ -286,6 +307,9 @@ Exception
 The SDK provides complete type information:
 
 ```python
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 # Full type inference
 async def get_account_balance(client: AsyncClient, account_id: str) -> Decimal:
     account = await client.accounts.get_account(account_id)  # Type: Account
@@ -297,6 +321,8 @@ async def get_account_balance(client: AsyncClient, account_id: str) -> Decimal:
 Types are enforced at runtime via Pydantic:
 
 ```python
+from fivetwenty.models import MarketOrderRequest
+
 # This will raise ValidationError at runtime
 order = MarketOrderRequest(
     instrument="EUR_USD",
@@ -341,6 +367,8 @@ Models and enums are constructed only when needed:
 # Enums populated at import time but models built on demand
 from fivetwenty.models import Account  # Fast import
 
+# Example data (would come from API response)
+data = {"id": "123", "balance": "10000.00", "currency": "USD"}
 account = Account.model_validate(data)  # Validation only when needed
 ```
 
@@ -389,6 +417,8 @@ live_client = AsyncClient(token=token, environment=Environment.LIVE)
 All network operations go through a single `_request` method:
 
 ```python
+from httpx import Response
+
 class AsyncClient:
     async def _request(self, method: str, path: str, **kwargs) -> Response:
         # Single point for all HTTP operations
@@ -402,6 +432,8 @@ class AsyncClient:
 Integration tests use recorded HTTP interactions:
 
 ```python
+import pytest
+
 @pytest.mark.vcr
 async def test_account_retrieval():
     # Uses pre-recorded HTTP responses
@@ -418,6 +450,9 @@ async def test_account_retrieval():
 The base `ApiModel` can be extended:
 
 ```python
+from decimal import Decimal
+from fivetwenty.models import Account
+
 class CustomAccount(Account):
     # Add computed properties
     @property

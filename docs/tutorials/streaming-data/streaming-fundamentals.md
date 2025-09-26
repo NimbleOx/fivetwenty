@@ -41,7 +41,8 @@ Understand the basics of real-time market data streaming and the foundational co
 ### Producer-Consumer Pattern
 ```python
 import asyncio
-from collections.abc import AsyncIterator, Callable
+from typing import Any, Callable
+from collections.abc import AsyncIterator
 
 
 
@@ -53,7 +54,7 @@ class StreamProducer:
         self.is_streaming = False
         self.consumers = []
 
-    async def start_stream(self) -> AsyncIterator:
+    async def start_stream(self) -> AsyncIterator[Any]:
         """Start the data stream."""
         self.is_streaming = True
 
@@ -76,7 +77,7 @@ class StreamProducer:
         # Implementation specific to data source
         pass
 
-    async def _handle_error(self, error: Exception) -> Any:
+    async def _handle_error(self, error: Exception) -> None:
         """Handle streaming errors."""
         print(f"Stream error: {error}")
         await asyncio.sleep(1)  # Backoff before retry
@@ -88,13 +89,13 @@ class StreamConsumer:
         self.processor = processor
         self.buffer = asyncio.Queue()
 
-    async def consume_stream(self, stream: AsyncIterator) -> Any:
+    async def consume_stream(self, stream: AsyncIterator[Any]) -> None:
         """Consume data from stream."""
         async for data in stream:
             await self.buffer.put(data)
             await self._process_data()
 
-    async def _process_data(self) -> Any:
+    async def _process_data(self) -> None:
         """Process buffered data."""
         while not self.buffer.empty():
             data = await self.buffer.get()

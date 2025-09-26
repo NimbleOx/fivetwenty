@@ -28,11 +28,12 @@ The mathematically optimal approach to position sizing based on your edge.
 
 ```python
 from decimal import Decimal
+from typing import Any
 
 class KellyOptimizer:
     """Implement Kelly Criterion for optimal position sizing."""
 
-    def __init__(self, win_rate: Decimal, avg_win: Decimal, avg_loss: Decimal):
+    def __init__(self, win_rate: Decimal, avg_win: Decimal, avg_loss: Decimal) -> None:
         self.win_rate = win_rate / 100 if win_rate > 1 else win_rate  # Handle percentage input
         self.lose_rate = 1 - self.win_rate
         self.avg_win = avg_win
@@ -42,7 +43,7 @@ class KellyOptimizer:
         self.max_kelly_fraction = 0.25  # Never bet more than 25% even if Kelly suggests it
         self.min_trades_for_kelly = 30  # Need sufficient history
 
-    def calculate_kelly_fraction(self) -> dict:
+    def calculate_kelly_fraction(self) -> dict[str, Any]:
         """Calculate optimal Kelly fraction."""
 
         if self.avg_loss == 0:
@@ -94,7 +95,7 @@ class KellyOptimizer:
 
         return result
 
-    def calculate_fractional_kelly(self, fraction: float = 0.25) -> dict:
+    def calculate_fractional_kelly(self, fraction: float = 0.25) -> dict[str, Any]:
         """Calculate fractional Kelly (typically 25% of full Kelly)."""
 
         kelly_result = self.calculate_kelly_fraction()
@@ -149,7 +150,7 @@ class KellyOptimizer:
         return position_size
 
     def simulate_kelly_performance(self, trials: int = 1000,
-                                 starting_balance: Decimal = Decimal('10000')) -> dict:  # Example: 1000 trials, $10k balance
+                                 starting_balance: Decimal = Decimal('10000')) -> dict[str, Any]:  # Example: 1000 trials, $10k balance
         """Simulate Kelly performance over many trials."""
 
         import random
@@ -163,7 +164,7 @@ class KellyOptimizer:
         balances = []
         current_balance = starting_balance
 
-        for trial in range(trials):
+        for _ in range(trials):
             # Simulate win/loss
             if random.random() < self.win_rate:
                 # Win
@@ -203,7 +204,7 @@ class KellyOptimizer:
         return result
 
 # Example Kelly optimization
-def demo_kelly_optimization():
+def demo_kelly_optimization() -> dict[str, Any]:
     """Demonstrate Kelly Criterion optimization."""
 
     # Example trading statistics
@@ -249,18 +250,20 @@ Measure performance using sophisticated metrics that account for risk.
 
 ```python
 import numpy as np
+from decimal import Decimal
 from datetime import datetime, timedelta
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 class PerformanceAnalyzer:
     """Calculate advanced risk-adjusted performance metrics."""
 
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.risk_free_rate = 0.02  # 2% annual risk-free rate
 
-    async def calculate_comprehensive_metrics(self, days_back: int = 90) -> dict:
+    async def calculate_comprehensive_metrics(self, days_back: int = 90) -> dict[str, Any]:
         """Calculate comprehensive performance metrics."""
 
         try:
@@ -314,7 +317,7 @@ class PerformanceAnalyzer:
         except Exception as e:
             return {'error': str(e)}
 
-    def _calculate_basic_metrics(self, trade_results: list) -> dict:
+    def _calculate_basic_metrics(self, trade_results: list[float]) -> dict[str, Any]:
         """Calculate basic performance metrics."""
 
         total_trades = len(trade_results)
@@ -346,7 +349,7 @@ class PerformanceAnalyzer:
             'expectancy': expectancy
         }
 
-    def _calculate_risk_metrics(self, trade_results: list, account_values: list) -> dict:
+    def _calculate_risk_metrics(self, trade_results: list[float], account_values: list[Decimal]) -> dict[str, Any]:
         """Calculate risk-adjusted metrics."""
 
         if len(trade_results) < 2:
@@ -396,7 +399,7 @@ class PerformanceAnalyzer:
             'downside_deviation': downside_deviation
         }
 
-    def _calculate_advanced_metrics(self, trade_results: list, account_values: list) -> dict:
+    def _calculate_advanced_metrics(self, trade_results: list[float], account_values: list[Decimal]) -> dict[str, Any]:
         """Calculate advanced performance metrics."""
 
         returns = np.array(trade_results)
@@ -449,7 +452,7 @@ class PerformanceAnalyzer:
         kurtosis = np.mean(((returns - mean_return) / std_return) ** 4) - 3
         return kurtosis
 
-    def _calculate_streaks(self, trade_results: list) -> tuple:
+    def _calculate_streaks(self, trade_results: list[float]) -> tuple[int, int]:
         """Calculate longest winning and losing streaks."""
 
         current_win_streak = 0
@@ -469,7 +472,7 @@ class PerformanceAnalyzer:
 
         return max_win_streak, max_loss_streak
 
-    def _calculate_r_squared(self, trade_results: list) -> float:
+    def _calculate_r_squared(self, trade_results: list[float]) -> float:
         """Calculate R-squared (measure of consistency)."""
 
         if len(trade_results) < 2:
@@ -485,7 +488,7 @@ class PerformanceAnalyzer:
 
         return r_squared
 
-    def _print_performance_report(self, metrics: dict):
+    def _print_performance_report(self, metrics: dict[str, Any]) -> None:
         """Print comprehensive performance report."""
 
         print(f"\n📊 COMPREHENSIVE PERFORMANCE ANALYSIS")
@@ -529,19 +532,21 @@ class PerformanceAnalyzer:
             print(f"   Consistency (R²): {metrics['r_squared']:.2f}")
 
 # Example performance analysis
-async def demo_performance_analysis(account_id: str):
+async def demo_performance_analysis(account_id: str) -> dict[str, Any] | None:
     """Demonstrate comprehensive performance analysis."""
 
     if not account_id:
-        return
+        return None
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    # Replace with actual token and environment
+    # async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
         analyzer = PerformanceAnalyzer(client, account_id)
 
         # Calculate metrics for last 90 days
         metrics = await analyzer.calculate_comprehensive_metrics(days_back=90)
 
-        return metrics
+        # return metrics
+    return None
 ```
 
 ---
@@ -553,10 +558,12 @@ Break down returns by different factors to understand what drives performance.
 ### Attribution Implementation
 
 ```python
+from typing import Any
+
 class PerformanceAttribution:
     """Analyze what factors contribute to trading performance."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.attribution_factors = {
             "strategy": {},
             "instrument": {},
@@ -564,7 +571,7 @@ class PerformanceAttribution:
             "market_condition": {},
         }
 
-    def add_trade_attribution(self, trade_data: dict):
+    def add_trade_attribution(self, trade_data: dict[str, Any]) -> None:
         """Add trade with attribution factors."""
 
         pnl = trade_data["pnl"]
@@ -593,7 +600,7 @@ class PerformanceAttribution:
             self.attribution_factors["market_condition"][market_condition] = []
         self.attribution_factors["market_condition"][market_condition].append(pnl)
 
-    def calculate_attribution_metrics(self) -> dict:
+    def calculate_attribution_metrics(self) -> dict[str, Any]:
         """Calculate attribution metrics for each factor."""
 
         attribution_results = {}
@@ -629,7 +636,7 @@ class PerformanceAttribution:
 
         return attribution_results
 
-    def print_attribution_report(self):
+    def print_attribution_report(self) -> dict[str, Any]:
         """Print detailed attribution analysis."""
 
         attribution_results = self.calculate_attribution_metrics()
@@ -656,7 +663,7 @@ class PerformanceAttribution:
 
         return attribution_results
 
-    def identify_best_performers(self) -> dict:
+    def identify_best_performers(self) -> dict[str, Any]:
         """Identify best performing factors."""
 
         attribution_results = self.calculate_attribution_metrics()
@@ -682,7 +689,7 @@ class PerformanceAttribution:
         return best_performers
 
 # Example attribution analysis
-def demo_attribution_analysis():
+def demo_attribution_analysis() -> dict[str, Any]:
     """Demonstrate performance attribution."""
 
     # Sample trade data with attribution factors
@@ -722,19 +729,20 @@ Optimize allocation across multiple strategies and instruments.
 
 ```python
 import numpy as np
+from typing import Any
 from scipy.optimize import minimize
 
 
 class PortfolioOptimizer:
     """Optimize portfolio allocation using Modern Portfolio Theory."""
 
-    def __init__(self, strategy_returns: dict, risk_free_rate: float = 0.02):
+    def __init__(self, strategy_returns: dict[str, Any], risk_free_rate: float = 0.02) -> None:
         self.strategy_returns = strategy_returns
         self.risk_free_rate = risk_free_rate
         self.strategy_names = list(strategy_returns.keys())
         self.returns_matrix = np.array([strategy_returns[name] for name in self.strategy_names]).T
 
-    def calculate_portfolio_metrics(self, weights: np.ndarray) -> dict:
+    def calculate_portfolio_metrics(self, weights: np.ndarray) -> dict[str, Any]:
         """Calculate portfolio return and risk for given weights."""
 
         # Portfolio return
@@ -755,13 +763,13 @@ class PortfolioOptimizer:
             "weights": weights,
         }
 
-    def optimize_sharpe_ratio(self) -> dict:
+    def optimize_sharpe_ratio(self) -> dict[str, Any]:
         """Find portfolio weights that maximize Sharpe ratio."""
 
         num_strategies = len(self.strategy_names)
 
         # Objective function (negative Sharpe ratio for minimization)
-        def negative_sharpe(weights):
+        def negative_sharpe(weights: np.ndarray) -> float:
             metrics = self.calculate_portfolio_metrics(weights)
             return -metrics["sharpe_ratio"]
 
@@ -801,13 +809,13 @@ class PortfolioOptimizer:
         else:
             return {"error": "Optimization failed"}
 
-    def optimize_minimum_variance(self) -> dict:
+    def optimize_minimum_variance(self) -> dict[str, Any]:
         """Find portfolio weights that minimize variance."""
 
         num_strategies = len(self.strategy_names)
 
         # Objective function (portfolio variance)
-        def portfolio_variance(weights):
+        def portfolio_variance(weights: np.ndarray) -> float:
             cov_matrix = np.cov(self.returns_matrix.T)
             return np.dot(weights.T, np.dot(cov_matrix, weights))
 
@@ -847,7 +855,7 @@ class PortfolioOptimizer:
         else:
             return {"error": "Optimization failed"}
 
-    def calculate_efficient_frontier(self, num_points: int = 50) -> dict:
+    def calculate_efficient_frontier(self, num_points: int = 50) -> dict[str, Any]:
         """Calculate efficient frontier points."""
 
         num_strategies = len(self.strategy_names)
@@ -862,7 +870,7 @@ class PortfolioOptimizer:
 
         for target_return in target_returns:
             # Objective function (minimize variance)
-            def portfolio_variance(weights):
+            def portfolio_variance(weights: np.ndarray) -> float:
                 cov_matrix = np.cov(self.returns_matrix.T)
                 return np.dot(weights.T, np.dot(cov_matrix, weights))
 
@@ -903,7 +911,7 @@ class PortfolioOptimizer:
         }
 
 # Example portfolio optimization
-def demo_portfolio_optimization():
+def demo_portfolio_optimization() -> dict[str, Any]:
     """Demonstrate portfolio optimization."""
 
     # Sample strategy returns (daily) - replace with your actual historical returns

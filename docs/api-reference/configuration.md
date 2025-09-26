@@ -242,7 +242,7 @@ try:
         account_id="account",
         environment=Environment.PRACTICE,
     )
-except ValidationError as e:
+except ValidationError:
     print("Alias must be valid Python identifier")
 
 # Empty token
@@ -253,7 +253,7 @@ try:
         environment=Environment.PRACTICE,
         alias="valid_alias",
     )
-except ValidationError as e:
+except ValidationError:
     print("Token cannot be empty or whitespace")
 ```
 
@@ -370,7 +370,6 @@ Validate an account configuration and return any errors found.
 **Usage:**
 ```python
 from fivetwenty import AccountConfig, ConfigValidator, Environment
-
 
 config = AccountConfig(
     token="valid-token",

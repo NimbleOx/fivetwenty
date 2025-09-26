@@ -34,9 +34,11 @@ graph TB
 
 ```python
 import functools
+import logging.handlers
 import sys
 import time
 from decimal import Decimal
+from typing import Any, Optional
 
 from prometheus_client import Counter, Gauge, Histogram, Info
 
@@ -151,7 +153,7 @@ class MetricsCollector:
             currency=currency
         ).set(balance)
 
-    def update_position_metrics(self, account_id: str, positions: list):
+    def update_position_metrics(self, account_id: str, positions: list[Any]) -> None:
         """Update position-related metrics."""
         # Reset position gauges
         ACTIVE_POSITIONS.clear()
@@ -159,8 +161,8 @@ class MetricsCollector:
 
         for position in positions:
             instrument = position.instrument
-            units = float(Decimal(str(position.long.units or "0"))) + float(Decimal(str(position.short.units or "0")))
-            unrealized_pl = float(Decimal(str(position.unrealized_pl or "0")))
+            units = float(Decimal(str(getattr(position.long, 'units', '0') or "0"))) + float(Decimal(str(getattr(position.short, 'units', '0') or "0")))
+            unrealized_pl = float(Decimal(str(getattr(position, 'unrealized_pl', '0') or "0")))
 
             if units != 0:
                 ACTIVE_POSITIONS.labels(
@@ -209,12 +211,12 @@ class MetricsCollector:
             state_mapping.get(state, 0)
         )
 
-def metrics_middleware(metrics_collector: MetricsCollector):
+def metrics_middleware(metrics_collector: MetricsCollector) -> Any:
     """Middleware to automatically track API metrics."""
 
-    def decorator(func):
+    def decorator(func: Any) -> Any:
         @functools.wraps(func)
-        async def wrapper(*args, **kwargs):
+        async def wrapper(*args: Any, **kwargs: Any) -> Any:
             start_time = time.time()
             endpoint = func.__name__
             method = "ASYNC"
@@ -246,7 +248,7 @@ import asyncio
 import psutil
 import gc
 from datetime import datetime, timedelta
-from typing import Dict, List
+from typing import Any
 import aiohttp
 from dataclasses import dataclass
 
@@ -257,10 +259,10 @@ class PerformanceMetrics:
     memory_usage: float
     memory_available: float
     disk_usage: float
-    network_io: Dict[str, int]
-    gc_stats: Dict[str, int]
+    network_io: dict[str, int]
+    gc_stats: dict[str, int]
     active_connections: int
-    response_times: List[float]
+    response_times: list[float]
 
 class PerformanceMonitor:
     """Advanced performance monitoring for trading applications."""
@@ -343,6 +345,7 @@ class PerformanceMonitor:
 
     async def _update_prometheus_metrics(self, snapshot: PerformanceMetrics):
         """Update Prometheus metrics with performance data."""
+        from prometheus_client import Counter, Gauge
 
         # System metrics
         SYSTEM_CPU_USAGE = Gauge("system_cpu_usage_percent", "CPU usage percentage")
@@ -405,7 +408,7 @@ class PerformanceMonitor:
                     {"memory_trend": recent_memory}
                 )
 
-    async def _trigger_performance_alert(self, alert_type: str, message: str, details: Dict):
+    async def _trigger_performance_alert(self, alert_type: str, message: str, details: dict[str, Any]) -> None:
         """Trigger performance-related alerts."""
 
         alert_data = {
@@ -422,7 +425,7 @@ class PerformanceMonitor:
         # Would integrate with alerting system
         # await self.alert_manager.send_alert(alert_data)
 
-    def get_performance_summary(self, minutes: int = 60) -> Dict:
+    def get_performance_summary(self, minutes: int = 60) -> dict[str, Any]:
         """Get performance summary for the last N minutes."""
 
         cutoff_time = datetime.utcnow() - timedelta(minutes=minutes)
@@ -468,9 +471,10 @@ class PerformanceMonitor:
 ```python
 # monitoring/tracing.py
 import functools
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 from opentelemetry import propagate, trace
+from opentelemetry.trace import Status, StatusCode
 from opentelemetry.exporter.jaeger.thrift import JaegerExporter
 from opentelemetry.instrumentation.aiohttp_client import AioHttpClientInstrumentor
 from opentelemetry.instrumentation.asyncpg import AsyncPGInstrumentor
@@ -518,12 +522,12 @@ class TracingManager:
         AsyncPGInstrumentor().instrument()
         RedisInstrumentor().instrument()
 
-    def trace_trading_operation(self, operation_name: str):
+    def trace_trading_operation(self, operation_name: str) -> Any:
         """Decorator for tracing trading operations."""
 
-        def decorator(func):
+        def decorator(func: Any) -> Any:
             @functools.wraps(func)
-            async def wrapper(*args, **kwargs):
+            async def wrapper(*args: Any, **kwargs: Any) -> Any:
                 with self.tracer.start_as_current_span(
                     f"trading.{operation_name}",
                     attributes={
@@ -547,13 +551,13 @@ class TracingManager:
                         if hasattr(result, "__dict__"):
                             span.set_attribute("result.type", type(result).__name__)
 
-                        span.set_status(trace.Status(trace.StatusCode.OK))
+                        span.set_status(Status(StatusCode.OK))
                         return result
 
                     except Exception as e:
                         span.set_status(
-                            trace.Status(
-                                trace.StatusCode.ERROR,
+                            Status(
+                                StatusCode.ERROR,
                                 description=str(e)
                             )
                         )
@@ -564,12 +568,12 @@ class TracingManager:
             return wrapper
         return decorator
 
-    def trace_api_call(self, endpoint: str, method: str = "GET"):
+    def trace_api_call(self, endpoint: str, method: str = "GET") -> Any:
         """Decorator for tracing API calls."""
 
-        def decorator(func):
+        def decorator(func: Any) -> Any:
             @functools.wraps(func)
-            async def wrapper(*args, **kwargs):
+            async def wrapper(*args: Any, **kwargs: Any) -> Any:
                 with self.tracer.start_as_current_span(
                     f"api.{endpoint}",
                     attributes={
@@ -585,7 +589,7 @@ class TracingManager:
                         if hasattr(result, "status_code"):
                             span.set_attribute("http.status_code", result.status_code)
 
-                        span.set_status(trace.Status(trace.StatusCode.OK))
+                        span.set_status(Status(StatusCode.OK))
                         return result
 
                     except Exception as e:
@@ -593,8 +597,8 @@ class TracingManager:
                         span.set_attribute("error.type", type(e).__name__)
                         span.set_attribute("error.message", str(e))
                         span.set_status(
-                            trace.Status(
-                                trace.StatusCode.ERROR,
+                            Status(
+                                StatusCode.ERROR,
                                 description=str(e)
                             )
                         )
@@ -608,10 +612,10 @@ class TracingManager:
         instrument: str,
         units: int,
         order_type: str,
-        func,
-        *args,
-        **kwargs
-    ):
+        func: Any,
+        *args: Any,
+        **kwargs: Any
+    ) -> Any:
         """Trace a complete trade execution flow."""
 
         with self.tracer.start_as_current_span(
@@ -648,7 +652,7 @@ class TracingManager:
                     parent_span.set_attribute("trade.error", str(e))
                     raise
 
-    def create_span(self, name: str, attributes: Optional[Dict[str, Any]] = None):
+    def create_span(self, name: str, attributes: Optional[dict[str, Any]] = None) -> Any:
         """Create a new span with optional attributes."""
 
         span = self.tracer.start_span(name)
@@ -659,7 +663,7 @@ class TracingManager:
 
         return span
 
-    def get_current_trace_id(self) -> Optional[str]:
+    def get_current_trace_id(self) -> str | None:
         """Get the current trace ID for correlation."""
 
         span = trace.get_current_span()
@@ -667,7 +671,7 @@ class TracingManager:
             return format(span.get_span_context().trace_id, "032x")
         return None
 
-    def get_current_span_id(self) -> Optional[str]:
+    def get_current_span_id(self) -> str | None:
         """Get the current span ID."""
 
         span = trace.get_current_span()
@@ -683,10 +687,12 @@ class TracingManager:
 ```python
 # monitoring/logging.py
 import logging
+import logging.handlers
 import sys
 from datetime import datetime
 from enum import Enum
-from typing import Any, Dict, Optional
+from typing import Any, Optional
+from decimal import Decimal
 
 from pythonjsonlogger import jsonlogger
 
@@ -701,7 +707,7 @@ class LogLevel(Enum):
 class TradingLogFormatter(jsonlogger.JsonFormatter):
     """Custom JSON formatter for trading applications."""
 
-    def add_fields(self, log_record, record, message_dict):
+    def add_fields(self, log_record: Any, record: Any, message_dict: Any) -> None:
         super(TradingLogFormatter, self).add_fields(log_record, record, message_dict)
 
         # Add standard fields
@@ -778,7 +784,7 @@ class StructuredLogger:
         price: Optional[Decimal] = None,
         order_id: Optional[str] = None,
         user_id: Optional[str] = None,
-        additional_data: Optional[Dict[str, Any]] = None
+        additional_data: Optional[dict[str, Any]] = None
     ):
         """Log structured trading events."""
 
@@ -826,8 +832,8 @@ class StructuredLogger:
         metric_name: str,
         value: float,
         unit: str,
-        tags: Optional[Dict[str, str]] = None
-    ):
+        tags: Optional[dict[str, str]] = None
+    ) -> None:
         """Log performance metrics."""
 
         log_data = {
@@ -845,8 +851,8 @@ class StructuredLogger:
         event_type: str,
         user_id: Optional[str],
         ip_address: Optional[str],
-        details: Dict[str, Any]
-    ):
+        details: dict[str, Any]
+    ) -> None:
         """Log security-related events."""
 
         log_data = {
@@ -862,9 +868,9 @@ class StructuredLogger:
     def log_error(
         self,
         error: Exception,
-        context: Optional[Dict[str, Any]] = None,
+        context: Optional[dict[str, Any]] = None,
         user_id: Optional[str] = None
-    ):
+    ) -> None:
         """Log application errors with context."""
 
         log_data = {
@@ -880,9 +886,9 @@ class StructuredLogger:
     def log_business_event(
         self,
         event_name: str,
-        event_data: Dict[str, Any],
+        event_data: dict[str, Any],
         user_id: Optional[str] = None
-    ):
+    ) -> None:
         """Log business logic events."""
 
         log_data = {
@@ -897,10 +903,10 @@ class StructuredLogger:
 class LogCorrelationMiddleware:
     """Middleware to add correlation IDs to logs."""
 
-    def __init__(self, tracing_manager):
+    def __init__(self, tracing_manager: Any) -> None:
         self.tracing = tracing_manager
 
-    def __call__(self, record):
+    def __call__(self, record: Any) -> Any:
         """Add correlation IDs to log record."""
 
         # Add trace and span IDs
@@ -910,7 +916,7 @@ class LogCorrelationMiddleware:
         return record
 
 # Usage example
-def setup_application_logging(app_name: str, tracing_manager):
+def setup_application_logging(app_name: str, tracing_manager: Any) -> StructuredLogger:
     """Setup application-wide logging configuration."""
 
     # Create main application logger
@@ -924,6 +930,9 @@ def setup_application_logging(app_name: str, tracing_manager):
         handler.addFilter(correlation_middleware)
 
     return app_logger
+
+# Example usage
+# app_logger = setup_application_logging("trading-app", tracing_manager)
 ```
 
 ## Alerting and Notification
@@ -938,7 +947,7 @@ import smtplib
 from email.mime.text import MimeText
 from email.mime.multipart import MimeMultipart
 from datetime import datetime, timedelta
-from typing import Dict, List, Optional, Callable
+from typing import Optional, Callable, Any
 from dataclasses import dataclass
 from enum import Enum
 import json
@@ -962,10 +971,10 @@ class Alert:
     title: str
     description: str
     source: str
-    tags: Dict[str, str]
-    metrics: Dict[str, float]
+    tags: dict[str, str]
+    metrics: dict[str, float]
     resolved: bool = False
-    resolved_at: Optional[datetime] = None
+    resolved_at: datetime | None = None
 
 @dataclass
 class AlertRule:
@@ -977,17 +986,17 @@ class AlertRule:
     threshold: float
     duration_seconds: int
     severity: AlertSeverity
-    channels: List[AlertChannel]
+    channels: list[AlertChannel]
     enabled: bool = True
 
 class AlertManager:
     """Comprehensive alerting system for trading applications."""
 
-    def __init__(self, config: Dict[str, Any]):
+    def __init__(self, config: dict[str, Any]) -> None:
         self.config = config
-        self.active_alerts: Dict[str, Alert] = {}
-        self.alert_rules: Dict[str, AlertRule] = {}
-        self.alert_history: List[Alert] = []
+        self.active_alerts: dict[str, Alert] = {}
+        self.alert_rules: dict[str, AlertRule] = {}
+        self.alert_history: list[Alert] = []
         self.notification_handlers = {}
 
         # Setup notification handlers
@@ -1070,7 +1079,7 @@ class AlertManager:
         for rule in default_rules:
             self.alert_rules[rule.rule_id] = rule
 
-    async def evaluate_metrics(self, metrics: Dict[str, float]):
+    async def evaluate_metrics(self, metrics: dict[str, float]) -> None:
         """Evaluate metrics against alert rules."""
 
         for rule_id, rule in self.alert_rules.items():
@@ -1108,8 +1117,8 @@ class AlertManager:
         self,
         rule: AlertRule,
         metric_value: float,
-        all_metrics: Dict[str, float]
-    ):
+        all_metrics: dict[str, float]
+    ) -> None:
         """Handle when an alert condition is met."""
 
         alert_id = f"{rule.rule_id}_{datetime.utcnow().strftime('%Y%m%d_%H%M%S')}"
@@ -1140,7 +1149,7 @@ class AlertManager:
             # Send notifications
             await self._send_alert_notifications(alert, rule.channels)
 
-    def _get_active_alert_for_rule(self, rule_id: str) -> Optional[Alert]:
+    def _get_active_alert_for_rule(self, rule_id: str) -> Alert | None:
         """Get active alert for a specific rule."""
 
         for alert in self.active_alerts.values():
@@ -1148,7 +1157,7 @@ class AlertManager:
                 return alert
         return None
 
-    async def _send_alert_notifications(self, alert: Alert, channels: List[AlertChannel]):
+    async def _send_alert_notifications(self, alert: Alert, channels: list[AlertChannel]) -> None:
         """Send alert notifications through specified channels."""
 
         for channel in channels:
@@ -1335,7 +1344,7 @@ Tags:
         # Implementation similar to alert notifications but for resolutions
         pass
 
-    def get_alert_summary(self) -> Dict[str, Any]:
+    def get_alert_summary(self) -> dict[str, Any]:
         """Get summary of current alerts."""
 
         severity_counts = {severity.value: 0 for severity in AlertSeverity}
@@ -1486,7 +1495,7 @@ Tags:
 # monitoring/dashboard.py
 import asyncio
 from datetime import datetime, timedelta
-from typing import Dict, List, Any
+from typing import Any
 import aiohttp
 from aiohttp import web
 import json
@@ -1494,7 +1503,7 @@ import json
 class TradingDashboard:
     """Custom monitoring dashboard for FiveTwenty trading system."""
 
-    def __init__(self, metrics_collector, performance_monitor, alert_manager):
+    def __init__(self, metrics_collector: Any, performance_monitor: Any, alert_manager: Any) -> None:
         self.metrics = metrics_collector
         self.performance = performance_monitor
         self.alerts = alert_manager
@@ -1513,7 +1522,7 @@ class TradingDashboard:
         # Static files
         self.app.router.add_static('/', path='static/', name='static')
 
-    async def _dashboard_home(self, request):
+    async def _dashboard_home(self, request: Any) -> Any:
         """Dashboard home page."""
 
         html = """
@@ -1626,7 +1635,7 @@ class TradingDashboard:
 
         return web.Response(text=html, content_type='text/html')
 
-    async def _api_metrics(self, request):
+    async def _api_metrics(self, request: Any) -> Any:
         """API endpoint for metrics data."""
 
         # Collect current metrics
@@ -1641,19 +1650,19 @@ class TradingDashboard:
 
         return web.json_response(metrics_data)
 
-    async def _api_performance(self, request):
+    async def _api_performance(self, request: Any) -> Any:
         """API endpoint for performance data."""
 
         performance_summary = self.performance.get_performance_summary(minutes=60)
         return web.json_response(performance_summary)
 
-    async def _api_alerts(self, request):
+    async def _api_alerts(self, request: Any) -> Any:
         """API endpoint for alerts data."""
 
         alert_summary = self.alerts.get_alert_summary()
         return web.json_response(alert_summary)
 
-    async def _api_health(self, request):
+    async def _api_health(self, request: Any) -> Any:
         """API endpoint for health status."""
 
         health_status = {
@@ -1665,7 +1674,7 @@ class TradingDashboard:
 
         return web.json_response(health_status)
 
-    async def start_server(self, host: str = '0.0.0.0', port: int = 8090):
+    async def start_server(self, host: str = '0.0.0.0', port: int = 8090) -> None:
         """Start the dashboard server."""
 
         runner = web.AppRunner(self.app)

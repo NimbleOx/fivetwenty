@@ -229,7 +229,7 @@ class PerformanceAttributionAnalyzer:
 class BenchmarkConstructor:
     """Construct custom benchmarks for attribution analysis."""
 
-    def __init__(self, instrument_returns: Dict[str, pd.Series]: Any) -> None:
+    def __init__(self, instrument_returns: dict[str, pd.Series]) -> None:
         self.instrument_returns = pd.DataFrame(instrument_returns).dropna()
 
     def equal_weight_benchmark(self) -> pd.Series:

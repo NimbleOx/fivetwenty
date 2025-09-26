@@ -318,11 +318,11 @@ class StreamManager:
 Stream with the sync client:
 
 ```python
+from typing import Any
 from fivetwenty import Client, Environment
 
 
-
-def sync_price_stream() -> Any:
+def sync_price_stream() -> None:
     """Stream prices synchronously."""
 
     with Client(
@@ -340,6 +340,11 @@ def sync_price_stream() -> Any:
             # Can break to stop streaming
             if should_stop():
                 break
+
+
+def should_stop() -> bool:
+    """Check if streaming should stop."""
+    return False  # Placeholder logic
 ```
 
 ### Thread-Safe Streaming
@@ -349,7 +354,7 @@ Handle streams in separate threads:
 ```python
 import queue
 import threading
-
+from typing import Any
 
 
 class ThreadedStreamer:
@@ -360,7 +365,7 @@ class ThreadedStreamer:
         self.price_queue = queue.Queue(maxsize=1000)
         self.running = False
 
-    def start_stream(self, account_id: str, instruments: Any) -> Any:
+    def start_stream(self, account_id: str, instruments: list[str]) -> None:
         """Start streaming in background thread."""
 
         self.running = True
@@ -371,7 +376,7 @@ class ThreadedStreamer:
         )
         thread.start()
 
-    def _stream_worker(self, account_id: str, instruments: Any) -> Any:
+    def _stream_worker(self, account_id: str, instruments: list[str]) -> None:
         """Worker thread for streaming."""
 
         for price in self.client.pricing.get_pricing_stream(account_id, instruments):
@@ -388,7 +393,7 @@ class ThreadedStreamer:
                 except queue.Empty:
                     pass
 
-    def get_prices(self, timeout: Any = 1.0) -> Any:
+    def get_prices(self, timeout: float = 1.0) -> list[Any]:
         """Get prices from queue."""
 
         prices = []
@@ -401,7 +406,7 @@ class ThreadedStreamer:
 
         return prices
 
-    def stop(self) -> Any:
+    def stop(self) -> None:
         """Stop streaming."""
         self.running = False
 ```
@@ -414,7 +419,7 @@ Aggregate streaming data for analysis:
 
 ```python
 from decimal import Decimal
-
+from typing import Any
 from collections import deque
 from datetime import datetime, timedelta
 import statistics
@@ -427,7 +432,7 @@ class PriceAggregator:
         self.window = timedelta(seconds=window_seconds)
         self.price_windows = {}  # instrument -> deque of (time, price)
 
-    async def process_stream(self, client: Any, account_id: str, instruments: Any) -> Any:
+    async def process_stream(self, client: Any, account_id: str, instruments: list[str]) -> None:
         """Process and aggregate price stream."""
 
         async for price in client.pricing.get_pricing_stream(account_id, instruments):
@@ -468,6 +473,10 @@ class PriceAggregator:
                     # Detect unusual activity
                     if stats["stdev"] > 0.001:  # High volatility
                         await self.on_high_volatility(instrument, stats)
+
+    async def on_high_volatility(self, instrument: str, stats: dict[str, Any]) -> None:
+        """Handle high volatility detection."""
+        print(f"High volatility detected in {instrument}: {stats}")
 ```
 
 ### Multi-Stream Coordination
@@ -475,7 +484,18 @@ class PriceAggregator:
 Coordinate multiple streams:
 
 ```python
-async def coordinate_streams(client: Any, account_id: str) -> Any:
+import asyncio
+from typing import Any
+
+async def price_stream_handler(client: Any, account_id: str) -> None:
+    """Handle price stream."""
+    pass
+
+async def transaction_stream_handler(client: Any, account_id: str) -> None:
+    """Handle transaction stream."""
+    pass
+
+async def coordinate_streams(client: Any, account_id: str) -> None:
     """Coordinate price and transaction streams."""
 
     price_task = asyncio.create_task(
@@ -508,7 +528,15 @@ async def coordinate_streams(client: Any, account_id: str) -> Any:
 ### Efficient Stream Processing
 
 ```python
-async def optimized_stream_processing(client: Any, account_id: str) -> Any:
+import asyncio
+from typing import Any
+
+async def process_batch(prices: list[Any]) -> None:
+    """Process a batch of prices."""
+    # Perform calculations on batch
+    pass
+
+async def optimized_stream_processing(client: Any, account_id: str) -> None:
     """Process streams efficiently."""
 
     # Use minimal instruments
@@ -528,11 +556,6 @@ async def optimized_stream_processing(client: Any, account_id: str) -> Any:
             # Process batch asynchronously
             asyncio.create_task(process_batch(batch.copy()))
             batch.clear()
-
-async def process_batch(prices: Any) -> Any:
-    """Process a batch of prices."""
-    # Perform calculations on batch
-    pass
 ```
 
 ## Monitoring and Metrics
@@ -540,13 +563,10 @@ async def process_batch(prices: Any) -> Any:
 Track streaming performance:
 
 ```python
-
-
 from typing import Any
-from datetime import datetime
+from datetime import datetime, timedelta
 
 class StreamMetrics:
-    """Class docstring."""
     """Track streaming metrics."""
 
     def __init__(self) -> None:
@@ -559,7 +579,7 @@ class StreamMetrics:
             "stream_start_time": datetime.now(),
         }
 
-    def update(self, event_type) -> Any:
+    def update(self, event_type: str) -> None:
         """Update metrics."""
 
         self.metrics["messages_received"] += 1
@@ -568,11 +588,11 @@ class StreamMetrics:
         if event_type == "HEARTBEAT":
             self.metrics["heartbeats_received"] += 1
 
-    def get_uptime(self) -> Any:
+    def get_uptime(self) -> timedelta:
         """Get stream uptime."""
         return datetime.now() - self.metrics["stream_start_time"]
 
-    def get_message_rate(self) -> Any:
+    def get_message_rate(self) -> float:
         """Get messages per second."""
         uptime = self.get_uptime().total_seconds()
         return self.metrics["messages_received"] / uptime if uptime > 0 else 0

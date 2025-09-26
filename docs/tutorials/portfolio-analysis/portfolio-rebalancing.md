@@ -242,7 +242,7 @@ class PortfolioRebalancer:
 class TransactionCostOptimizer:
     """Optimize rebalancing considering transaction costs."""
 
-    def __init__(self, spread_costs: dict[str, float]: Any, commission_rates: dict[str, float]: Any) -> None:
+    def __init__(self, spread_costs: dict[str, float], commission_rates: dict[str, float]) -> None:
         self.spread_costs = spread_costs  # Spread cost per unit
         self.commission_rates = commission_rates  # Commission as % of trade value
 

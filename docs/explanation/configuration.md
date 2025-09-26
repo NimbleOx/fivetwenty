@@ -19,14 +19,21 @@ All approaches prioritize security by automatically masking sensitive informatio
 The simplest way to configure the client:
 
 ```python
+import asyncio
+import os
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
-async with AsyncClient(
-    token="your-api-token",
-    environment=Environment.PRACTICE
-) as client:
-    accounts = await client.accounts.get_accounts()
+async def main() -> None:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-api-token"),
+        environment=Environment.PRACTICE
+    ) as client:
+        accounts = await client.accounts.get_accounts()
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Configuration Objects
@@ -34,12 +41,15 @@ async with AsyncClient(
 For more structured configuration:
 
 ```python
+import asyncio
+import os
+from typing import Any
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Create configuration
 config = AccountConfig(
-    token="your-api-token",
-    account_id="your-account-id",
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-api-token"),
+    account_id=os.environ.get("FIVETWENTY_OANDA_ACCOUNT", "your-account-id"),
     environment=Environment.PRACTICE,
     alias="my_trading_account",
 
@@ -64,13 +74,17 @@ export FIVETWENTY_OANDA_ACCOUNT_ALIAS="my_account"
 
 ```python
 import asyncio
+import os
+from typing import Any
+from fivetwenty import AsyncClient, Environment
 
 
-async def main():
-    from fivetwenty import AsyncClient
-
+async def main() -> None:
     # No configuration needed - loads automatically
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         accounts = await client.accounts.get_accounts()
 
 asyncio.run(main())
@@ -83,24 +97,27 @@ asyncio.run(main())
 Best for: Basic scripts, getting started, testing
 
 ```python
+import asyncio
+import os
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 # Minimal configuration
 client = AsyncClient(
-    token="your-token",
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
     environment=Environment.PRACTICE
 )
 
 # With optional account ID for convenience
 client = AsyncClient(
-    token="your-token",
-    account_id="your-account-id",
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    account_id=os.environ.get("FIVETWENTY_OANDA_ACCOUNT", "demo-account"),
     environment=Environment.LIVE
 )
 
 # With additional client options
 client = AsyncClient(
-    token="your-token",
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
     environment=Environment.PRACTICE,
     timeout=60.0,
     max_retries=5,
@@ -114,23 +131,25 @@ Best for: Production applications, multiple accounts, reusable configurations
 
 ```python
 import asyncio
+import os
+from typing import Any
+from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
-async def main():
-    from fivetwenty import AccountConfig, AsyncClient, Environment
+async def main() -> None:
 
     # Create reusable configurations
     practice_config = AccountConfig(
-        token="practice-token",
-        account_id="practice-account-123",
+        token=os.environ.get("PRACTICE_OANDA_TOKEN", "practice-token"),
+        account_id=os.environ.get("PRACTICE_OANDA_ACCOUNT", "practice-account-123"),
         environment=Environment.PRACTICE,
         alias="practice_trading",
 
     )
 
     live_config = AccountConfig(
-        token="live-token",
-        account_id="live-account-456",
+        token=os.environ.get("LIVE_OANDA_TOKEN", "live-token"),
+        account_id=os.environ.get("LIVE_OANDA_ACCOUNT", "live-account-456"),
         environment=Environment.LIVE,
         alias="live_trading",
 
@@ -167,10 +186,16 @@ The library automatically loads these environment variables:
 | `FIVETWENTY_OANDA_ENVIRONMENT` | Environment (practice/live) | `practice` |
 | `FIVETWENTY_OANDA_ACCOUNT_ALIAS` | Account alias | `my_trading_account` |
 ```python
+import os
+from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 
 # Automatically loads FIVETWENTY_* variables
-async with AsyncClient() as client:
+async with AsyncClient(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+) as client:
     accounts = await client.accounts.get_accounts()
 ```
 
@@ -180,7 +205,9 @@ For multiple accounts or microservices:
 
 ```python
 import asyncio
-from fivetwenty import AccountConfigLoader, AsyncClient
+import os
+from typing import Any
+from fivetwenty import AccountConfigLoader, AsyncClient, Environment
 
 # Load with custom prefix
 momentum_config = AccountConfigLoader.from_env_prefix("MOMENTUM_")
@@ -216,18 +243,22 @@ export GRID_OANDA_ACCOUNT_ALIAS="grid_strategy"
 
 ## Configuration Priority
 
-from fivetwenty import Environment
-
 When multiple configuration methods are used, the priority is:
 
 1. **Configuration object** (highest priority)
 2. **Direct parameters**
 3. **Environment variables** (lowest priority)
 ```python
-from fivetwenty import AsyncClient
+import os
+from typing import Any
+from fivetwenty import AsyncClient, AccountConfig, Environment
 
 # Config object takes priority over direct parameters
-config = AccountConfig(token="config-token", account_id="account-id")
+config = AccountConfig(
+    token=os.environ.get("CONFIG_TOKEN", "config-token"),
+    account_id=os.environ.get("CONFIG_ACCOUNT", "account-id"),
+    environment=Environment.PRACTICE
+)
 client = AsyncClient(
     token="direct-token",  # Ignored
     config=config,  # Used
@@ -237,6 +268,7 @@ client = AsyncClient(
 # (assuming FIVETWENTY_OANDA_TOKEN is set)
 client = AsyncClient(
     token="direct-token",  # Used instead of FIVETWENTY_OANDA_TOKEN
+    environment=Environment.PRACTICE
 )
 ```
 
@@ -247,11 +279,13 @@ client = AsyncClient(
 The library automatically protects sensitive information:
 
 ```python
+import os
+from typing import Any
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 config = AccountConfig(
-    token="super-secret-token",
-    account_id="secret-account-123",
+    token=os.environ.get("SECRET_TOKEN", "super-secret-token"),
+    account_id=os.environ.get("SECRET_ACCOUNT", "secret-account-123"),
     environment=Environment.PRACTICE,
     alias="my_account",
 )
@@ -275,14 +309,16 @@ print(f"Using account: {client.account_id}")
 The library validates configuration values:
 
 ```python
+import os
+from typing import Any
 from pydantic import ValidationError
 from fivetwenty import AccountConfig, Environment
 
 # Invalid alias (starts with number)
 try:
     config = AccountConfig(
-        token="token",
-        account_id="account",
+        token=os.environ.get("TEST_TOKEN", "token"),
+        account_id=os.environ.get("TEST_ACCOUNT", "account"),
         environment=Environment.PRACTICE,
         alias="123invalid",  # Error!
     )
@@ -293,7 +329,7 @@ except ValidationError as e:
 try:
     config = AccountConfig(
         token="   ",  # Whitespace-only token
-        account_id="account",
+        account_id=os.environ.get("TEST_ACCOUNT", "account"),
         environment=Environment.PRACTICE,
         alias="valid_alias",
     )
@@ -306,9 +342,15 @@ except ValidationError as e:
 Use the validator to check configuration:
 
 ```python
-from fivetwenty import ConfigValidator
+import os
+from typing import Any
+from fivetwenty import ConfigValidator, AccountConfig, Environment
 
-config = AccountConfig(...)
+config = AccountConfig(
+    token=os.environ.get("YOUR_TOKEN", "your-token"),
+    account_id=os.environ.get("YOUR_ACCOUNT", "your-account-id"),
+    environment=Environment.PRACTICE
+)
 errors = ConfigValidator.validate_account_config(config)
 
 if errors:
@@ -323,13 +365,14 @@ else:
 ### HTTP Client Options
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
+import os
+from typing import Any
 import httpx
+from fivetwenty import AsyncClient, Environment
 
 # Custom HTTP client configuration
 async with AsyncClient(
-    token="your-token",
+    token=os.environ.get("YOUR_TOKEN", "your-token"),
     environment=Environment.PRACTICE,
     timeout=60.0,
     max_retries=5,
@@ -347,12 +390,13 @@ For advanced HTTP configuration:
 
 ```python
 import asyncio
+import os
+from typing import Any
+import httpx
+from fivetwenty import AsyncClient, Environment
 
 
-async def main():
-    import httpx
-
-    from fivetwenty import AsyncClient, Environment
+async def main() -> None:
 
     # Create custom transport
     transport = httpx.AsyncClient(
@@ -373,7 +417,7 @@ async def main():
 
     # Use with client
     async with AsyncClient(
-        token="your-token",
+        token=os.environ.get("YOUR_TOKEN", "your-token"),
         environment=Environment.PRACTICE,
         transport=transport,
     ) as client:
@@ -385,9 +429,10 @@ asyncio.run(main())
 ### Logging Configuration
 
 ```python
-from fivetwenty import AsyncClient, Environment
-
 import logging
+import os
+from typing import Any
+from fivetwenty import AsyncClient, Environment
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -395,7 +440,7 @@ logger = logging.getLogger("my_trading_app")
 
 # Pass logger to client
 async with AsyncClient(
-    token="your-token",
+    token=os.environ.get("YOUR_TOKEN", "your-token"),
     environment=Environment.PRACTICE,
     logger=logger
 ) as client:
@@ -408,19 +453,32 @@ async with AsyncClient(
 The sync `Client` supports the same configuration patterns:
 
 ```python
+import os
+from typing import Any
 from fivetwenty import Client, AccountConfig, Environment
 
 # Direct parameters
-with Client(token="your-token", environment=Environment.PRACTICE) as client:
+with Client(
+    token=os.environ.get("YOUR_TOKEN", "your-token"),
+    environment=Environment.PRACTICE
+) as client:
     accounts = client.accounts.get_accounts()
 
 # Configuration object
-config = AccountConfig(...)
+config = AccountConfig(
+    token=os.environ.get("YOUR_TOKEN", "your-token"),
+    account_id=os.environ.get("YOUR_ACCOUNT", "your-account"),
+    environment=Environment.PRACTICE,
+    alias="example_config"
+)
 with Client(config=config) as client:
     accounts = client.accounts.get_accounts()
 
 # Environment variables
-with Client() as client:  # Loads from FIVETWENTY_* variables
+with Client(
+    token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+    environment=Environment.PRACTICE
+) as client:  # Loads from FIVETWENTY_* variables
     accounts = client.accounts.get_accounts()
 ```
 
@@ -503,13 +561,15 @@ spec:
 
 ```python
 import asyncio
+import os
+from typing import Any
+import boto3
+from fivetwenty import AsyncClient, Environment
 
-async def main():
-    import os
-    import boto3
-    from fivetwenty import AsyncClient
 
-    def get_secret(secret_name):
+async def main() -> None:
+
+    def get_secret(secret_name: str) -> str:
         """Get secret from AWS Secrets Manager."""
 
         session = boto3.Session()
@@ -518,7 +578,7 @@ async def main():
         response = client.get_secret_value(SecretId=secret_name)
         return response['SecretString']
 
-    def lambda_handler(event, context):
+    def lambda_handler(event: Any, context: Any) -> dict[str, Any]:
         """Lambda handler with secure configuration."""
 
         # Load secrets from AWS Secrets Manager
@@ -545,14 +605,16 @@ asyncio.run(main())
 ### Configuration Builder
 
 ```python
+import json
 import os
+from typing import Any
 from fivetwenty import AccountConfig, Environment
 
 class ConfigBuilder:
     """Helper to build configurations from various sources."""
 
     @staticmethod
-    def from_vault(vault_client, secret_path: str, environment: str) -> AccountConfig:
+    def from_vault(vault_client: Any, secret_path: str, environment: str) -> AccountConfig:
         """Load configuration from HashiCorp Vault."""
 
         secret = vault_client.secrets.kv.v2.read_secret_version(
@@ -574,8 +636,6 @@ class ConfigBuilder:
     def from_json_file(file_path: str) -> AccountConfig:
         """Load configuration from JSON file (non-secret data only)."""
 
-        import json
-
         with open(file_path) as f:
             data = json.load(f)
 
@@ -591,17 +651,18 @@ class ConfigBuilder:
 ### Multi-Environment Manager
 
 ```python
-from typing import Optional
+import os
+from typing import Any, Optional
 from fivetwenty import AccountConfig, AccountConfigLoader, AsyncClient
 
 class ConfigManager:
     """Manage configurations for multiple environments."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.configs: dict[str, AccountConfig] = {}
         self._load_configs()
 
-    def _load_configs(self):
+    def _load_configs(self) -> None:
         """Load configurations for all environments."""
 
         environments = ["development", "staging", "production"]
@@ -613,7 +674,7 @@ class ConfigManager:
             if config:
                 self.configs[env] = config
 
-    def get_config(self, environment: str) -> Optional[AccountConfig]:
+    def get_config(self, environment: str) -> AccountConfig | None:
         """Get configuration for environment."""
         return self.configs.get(environment)
 
@@ -635,9 +696,6 @@ prod_client = manager.get_client("production")
 ## Best Practices
 
 ### Security
-
-from fivetwenty import Environment
-
 
 1. **Never hardcode secrets** - Use environment variables, vaults, or secure storage
 2. **Use configuration objects** - Better type safety and validation
@@ -673,13 +731,17 @@ from fivetwenty import Environment
 
 ### Common Configuration Errors
 ```python
+import os
+from typing import Any
 from pydantic import ValidationError
-
-from fivetwenty import AccountConfig, AsyncClient
+from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Error: Missing configuration
 try:
-    client = AsyncClient()  # No env vars set
+    client = AsyncClient(
+        token=os.environ.get("MISSING_TOKEN", ""),  # No env vars set
+        environment=Environment.PRACTICE
+    )
 except ValueError as e:
     print(f"Configuration error: {e}")
     # Fix: Set FIVETWENTY_OANDA_TOKEN and FIVETWENTY_OANDA_ACCOUNT
@@ -687,8 +749,8 @@ except ValueError as e:
 # Error: Invalid alias format
 try:
     config = AccountConfig(
-        token="token",
-        account_id="account",
+        token=os.environ.get("TEST_TOKEN", "token"),
+        account_id=os.environ.get("TEST_ACCOUNT", "account"),
         environment=Environment.PRACTICE,
         alias="123-invalid",  # Starts with number
     )
@@ -700,7 +762,7 @@ except ValidationError as e:
 try:
     config = AccountConfig(
         token="",  # Empty token
-        account_id="account",
+        account_id=os.environ.get("TEST_ACCOUNT", "account"),
         environment=Environment.PRACTICE,
         alias="my_account",
     )
@@ -712,10 +774,15 @@ except ValidationError as e:
 ### Debug Configuration
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import os
+from typing import Any
+from fivetwenty import AsyncClient, Environment, ConfigValidator
 
 # Check what configuration is being used
-client = AsyncClient(token="your-token", environment=Environment.PRACTICE)
+client = AsyncClient(
+    token=os.environ.get("YOUR_TOKEN", "your-token"),
+    environment=Environment.PRACTICE
+)
 
 print(f"Account ID: {client.account_id}")
 print(f"Environment: {client.config.environment.value}")
@@ -723,8 +790,6 @@ print(f"Alias: {client.config.alias}")
 print(f"Configuration summary: {client.config.summary()}")
 
 # Validate configuration manually
-from fivetwenty import ConfigValidator
-
 errors = ConfigValidator.validate_account_config(client.config)
 if errors:
     print("Configuration issues:", errors)
@@ -739,18 +804,23 @@ else:
 If you were using the previous configuration format:
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import os
+from typing import Any
+from fivetwenty import AsyncClient, Environment, AccountConfig
 
 # Old way (no longer supported)
-client = AsyncClient("your-token", Environment.PRACTICE)
+# client = AsyncClient("your-token", Environment.PRACTICE)
 
 # New way - Direct parameters
-client = AsyncClient(token="your-token", environment=Environment.PRACTICE)
+client = AsyncClient(
+    token=os.environ.get("YOUR_TOKEN", "your-token"),
+    environment=Environment.PRACTICE
+)
 
 # Or configuration object (recommended)
 config = AccountConfig(
-    token="your-token",
-    account_id="your-account-id",
+    token=os.environ.get("YOUR_TOKEN", "your-token"),
+    account_id=os.environ.get("YOUR_ACCOUNT", "your-account-id"),
     environment=Environment.PRACTICE,
     alias="my_account"
 )

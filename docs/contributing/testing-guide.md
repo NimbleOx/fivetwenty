@@ -121,6 +121,8 @@ tests/
 Tests are organized with pytest markers:
 
 ```python
+import pytest
+
 # Example test markers:
 @pytest.mark.unit          # Fast unit tests (default)
 @pytest.mark.integration   # Integration tests (requires API credentials)
@@ -407,7 +409,7 @@ def vcr_config():
     }
 
 @pytest.fixture
-def vcr(vcr_config):
+def vcr_fixture(vcr_config):
     """VCR fixture for recording/replaying HTTP interactions."""
     with vcr.VCR(**vcr_config) as cassette:
         yield cassette
@@ -415,9 +417,9 @@ def vcr(vcr_config):
 # Usage in test
 @pytest.mark.integration
 @pytest.mark.asyncio
-async def test_with_vcr_recording(client, vcr):
+async def test_with_vcr_recording(client, vcr_fixture):
     """Test that records HTTP interaction."""
-    with vcr.use_cassette("accounts/get_summary.yaml"):
+    with vcr_fixture.use_cassette("accounts/get_summary.yaml"):
         summary = await client.accounts.get_account_summary("123-456-789")
         assert summary.id == "123-456-789"
 ```

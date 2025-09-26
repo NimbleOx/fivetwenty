@@ -26,7 +26,7 @@ from fivetwenty import AsyncClient, Environment
 
 import re
 from textblob import TextBlob
-from typing import List, Dict, Tuple, Optional
+from typing import Any, Optional
 import asyncio
 import aiohttp
 from datetime import datetime, timedelta, timezone
@@ -41,7 +41,7 @@ class NewsItem:
     title: str
     content: str
     source: str
-    instruments_mentioned: List[str]
+    instruments_mentioned: list[str]
     sentiment_score: float
     relevance_score: float
 
@@ -63,7 +63,7 @@ class NewsProvider:
             'AUD': ['aud', 'australian dollar', 'reserve bank', 'rba']
         }
 
-    async def get_financial_news(self, hours_back: int = 24) -> List[NewsItem]:
+    async def get_financial_news(self, hours_back: int = 24) -> list[NewsItem]:
         """Fetch recent financial news."""
 
         if self.provider == "newsapi":
@@ -74,7 +74,7 @@ class NewsProvider:
             print(f"Unknown news provider: {self.provider}")
             return []
 
-    async def _fetch_newsapi_data(self, hours_back: int) -> List[NewsItem]:
+    async def _fetch_newsapi_data(self, hours_back: int) -> list[NewsItem]:
         """Fetch from NewsAPI."""
 
         from_date = (datetime.now() - timedelta(hours=hours_back)).isoformat()
@@ -102,7 +102,7 @@ class NewsProvider:
                 print(f"News request failed: {e}")
                 return []
 
-    def _parse_newsapi_response(self, data: Dict) -> List[NewsItem]:
+    def _parse_newsapi_response(self, data: dict[str, Any]) -> list[NewsItem]:
         """Parse NewsAPI response."""
 
         news_items = []
@@ -154,7 +154,7 @@ class NewsProvider:
         except Exception:
             return 0.0  # Neutral if analysis fails
 
-    def _find_relevant_instruments(self, text: str) -> List[str]:
+    def _find_relevant_instruments(self, text: str) -> list[str]:
         """Find currency pairs mentioned in text."""
 
         text_lower = text.lower()
@@ -184,7 +184,7 @@ class NewsProvider:
 
         return list(set(instruments))  # Remove duplicates
 
-    def _calculate_relevance(self, text: str, instruments: List[str]) -> float:
+    def _calculate_relevance(self, text: str, instruments: list[str]) -> float:
         """Calculate relevance score (0-1)."""
 
         relevance_keywords = [
@@ -231,7 +231,7 @@ class NewsSentimentTrading:
                 sentiment = "POSITIVE" if news.sentiment_score > 0 else "NEGATIVE"
                 print(f"{sentiment} news: {news.title[:50]}... (Score: {news.sentiment_score:.2f})")
 
-    def get_instrument_sentiment(self, instrument: str) -> Dict[str, float]:
+    def get_instrument_sentiment(self, instrument: str) -> dict[str, float]:
         """Get aggregated sentiment for an instrument."""
 
         relevant_news = [
@@ -273,7 +273,7 @@ class NewsSentimentTrading:
         }
 
     async def sentiment_informed_trading(self, account_id: str, instrument: str,
-                                       base_units: int) -> Optional[Dict]:
+                                       base_units: int) -> dict[str, Any] | None:
         """Place trades informed by news sentiment."""
 
         sentiment_data = self.get_instrument_sentiment(instrument)
@@ -330,7 +330,7 @@ class NewsSentimentTrading:
             return None
 
 # Usage example
-async def news_sentiment_trading_example():
+async def news_sentiment_trading_example() -> list[dict[str, Any]]:
     """Example of trading with news sentiment analysis."""
 
     async with AsyncClient(token="your-token", environment=Environment.PRACTICE) as fivetwenty_client:
@@ -365,16 +365,42 @@ async def news_sentiment_trading_example():
 For production systems, combine multiple news sources:
 
 ```python
+import asyncio
+from typing import Any
+from dataclasses import dataclass
+from datetime import datetime
+
+
+@dataclass
+class NewsItem:
+    title: str
+    content: str
+    timestamp: datetime
+    source: str
+    url: str
+    sentiment: float = 0.0
+
+
+class NewsProvider:
+    def __init__(self, api_key: str, provider_name: str) -> None:
+        self.api_key = api_key
+        self.provider_name = provider_name
+
+    async def get_financial_news(self, hours_back: int) -> list[NewsItem]:
+        # Placeholder implementation
+        return []
+
+
 class MultiSourceNewsProvider:
     """Aggregate news from multiple sources."""
 
-    def __init__(self, news_apis: Dict[str, str]) -> None:
+    def __init__(self, news_apis: dict[str, str]) -> None:
         self.providers = {}
 
         for provider_name, api_key in news_apis.items():
             self.providers[provider_name] = NewsProvider(api_key, provider_name)
 
-    async def get_aggregated_news(self, hours_back: int = 24) -> List[NewsItem]:
+    async def get_aggregated_news(self, hours_back: int = 24) -> list[NewsItem]:
         """Get news from all configured providers."""
 
         all_news = []
@@ -394,7 +420,7 @@ class MultiSourceNewsProvider:
         # Remove duplicates based on title similarity
         return self._deduplicate_news(all_news)
 
-    def _deduplicate_news(self, news_items: List[NewsItem]) -> List[NewsItem]:
+    def _deduplicate_news(self, news_items: list[NewsItem]) -> list[NewsItem]:
         """Remove duplicate news items."""
 
         unique_news = []
@@ -434,7 +460,8 @@ class MultiSourceNewsProvider:
 Implement continuous news monitoring:
 
 ```python
-from datetime import datetime
+from datetime import datetime, timezone
+from typing import Any
 
 
 class RealTimeNewsMonitor:
@@ -497,8 +524,7 @@ class RealTimeNewsMonitor:
             try:
                 await callback(alert_data)
             except Exception as e:
-                # Expected output: f"Alert callback error: {e}"
-                pass
+                print(f"Alert callback error: {e}")
 
     def add_alert_callback(self, callback: Any) -> Any:
         """Add callback for news alerts."""
@@ -514,9 +540,10 @@ class RealTimeNewsMonitor:
 ### Sentiment Analysis Enhancement
 
 ```python
+from textblob import TextBlob
+from typing import Any
 
 class EnhancedSentimentAnalyzer:
-    """Class docstring."""
     """Enhanced sentiment analysis with financial context."""
 
     def __init__(self) -> None:
@@ -531,7 +558,7 @@ class EnhancedSentimentAnalyzer:
             ],
         }
 
-    def analyze_financial_sentiment(self, text: str) -> Dict[str, float]:
+    def analyze_financial_sentiment(self, text: str) -> dict[str, float]:
         """Analyze sentiment with financial context."""
 
         # Basic TextBlob sentiment
@@ -563,6 +590,7 @@ class EnhancedSentimentAnalyzer:
 ### Position Sizing with News Impact
 
 ```python
+from typing import Any
 
 def calculate_news_adjusted_position_size(
     base_size: int,

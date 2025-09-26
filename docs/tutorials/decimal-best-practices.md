@@ -22,7 +22,7 @@ print(float_sum)  # 0.30000000000000004 (not exactly 0.3!)
 
 # This imprecision compounds in financial calculations
 balance = Decimal("1000.00")
-for i in range(100):
+for _ in range(100):
     balance += 0.01  # Adding 1 cent 100 times
 print(balance)  # 1000.9999999999999 (should be 1001.00)
 ```
@@ -38,7 +38,7 @@ print(decimal_sum)  # 0.3 (exact!)
 
 # Financial calculations maintain precision
 balance = Decimal("1000.00")
-for i in range(100):
+for _ in range(100):
     balance += Decimal("0.01")
 print(balance)  # 1001.00 (exact!)
 ```
@@ -126,6 +126,9 @@ async def calculate_position_size(
 
 # Usage example
 async def position_sizing_example():
+    from fivetwenty import AsyncClient
+    client = AsyncClient(token="your-token", account_id="your-account")
+    account_id = "your-account-id"
     account = await client.accounts.get_account(account_id)
     position_size = await calculate_position_size(
         account_balance=account.balance,
@@ -150,6 +153,8 @@ from decimal import Decimal
 
 async def calculate_trade_performance(trade_id: str, account_id: str) -> dict:
     """Calculate exact trade performance metrics."""
+    from fivetwenty import AsyncClient
+    client = AsyncClient(token="your-token", account_id="your-account")
     trade = await client.trades.get_trade(account_id=account_id, trade_id=trade_id)
 
     # Decimal fields are already Decimal
@@ -222,6 +227,8 @@ async def rebalance_portfolio(
     account_id: str,
 ) -> list[dict]:
     """Rebalance portfolio with exact precision."""
+    from fivetwenty import AsyncClient
+    client = AsyncClient(token="your-token", account_id="your-account")
 
     # Get current positions
     positions = await client.positions.get_positions(account_id=account_id)
@@ -304,6 +311,11 @@ def calculate_stop_levels(
 
 # Usage with a trade
 async def demo_stop_loss_calculation() -> Any:
+    from fivetwenty import AsyncClient
+    from typing import Any
+    client = AsyncClient(token="your-token", account_id="your-account")
+    account_id = "your-account-id"
+    trade_id = "your-trade-id"
     trade = await client.trades.get_trade(account_id=account_id, trade_id=trade_id)
     direction = "long" if trade.initial_units > 0 else "short"
 
@@ -367,6 +379,8 @@ async def convert_currency_precise(
     account_id: str,
 ) -> Decimal:
     """Convert currency with exchange rate precision."""
+    from fivetwenty import AsyncClient
+    client = AsyncClient(token="your-token", account_id="your-account")
 
     if from_currency == to_currency:
         return amount
@@ -470,8 +484,13 @@ display_result = result.quantize(Decimal("0.01"))  # 3.33
 ### ❌ Don't: Convert unnecessarily
 ```python
 # Unnecessary conversion
+from fivetwenty.models import MarketOrderRequest, InstrumentName, TimeInForce
 
-order = MarketOrderRequest(units=1000, instrument="EUR_USD")
+order = MarketOrderRequest(
+    units=1000,
+    instrument=InstrumentName.EUR_USD,
+    time_in_force=TimeInForce.GTC,
+)
 units_float = float(order.units)  # Why convert to less precise type?
 ```
 
@@ -479,9 +498,13 @@ units_float = float(order.units)  # Why convert to less precise type?
 ```python
 from decimal import Decimal
 
-from fivetwenty.models import MarketOrderRequest
+from fivetwenty.models import MarketOrderRequest, InstrumentName, TimeInForce
 
-order = MarketOrderRequest(units=1000, instrument="EUR_USD")
+order = MarketOrderRequest(
+    units=1000,
+    instrument=InstrumentName.EUR_USD,
+    time_in_force=TimeInForce.GTC,
+)
 calculation = order.units * Decimal("1.5")  # Direct Decimal arithmetic
 ```
 

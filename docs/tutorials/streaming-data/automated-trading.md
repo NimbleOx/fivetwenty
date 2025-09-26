@@ -8,7 +8,7 @@ Build complete automated trading engines that integrate streaming data, signal g
 
 ```python
 import asyncio
-from typing import Dict, List, Optional
+from typing import Optional, Any
 from datetime import datetime
 from dataclasses import dataclass
 from decimal import Decimal
@@ -36,7 +36,7 @@ class LiveTradingEngine:
         self.signal_generator = None
         self.risk_manager = None
 
-    async def start_trading(self, instruments: List[str]) -> Any:
+    async def start_trading(self, instruments: list[str]) -> Any:
         """Start the automated trading engine."""
 
         print("Starting automated trading engine...")
