@@ -709,6 +709,238 @@ prod_client = manager.get_client("production")
 2. **Document configurations** - Comment your configuration logic
 3. **Environment-specific settings** - Different timeouts/retries per environment
 4. **Version configurations** - Track configuration changes
+
+#### Descriptive Configuration Aliases
+
+```python
+from fivetwenty import AccountConfig, Environment
+
+# Good - Clear purpose and environment
+momentum_config = AccountConfig(
+    token=os.environ["MOMENTUM_TOKEN"],
+    account_id=os.environ["MOMENTUM_ACCOUNT"],
+    environment=Environment.PRACTICE,
+    alias="momentum_strategy_testing",  # Clear purpose
+)
+
+scalping_config = AccountConfig(
+    token=os.environ["SCALPING_TOKEN"],
+    account_id=os.environ["SCALPING_ACCOUNT"],
+    environment=Environment.LIVE,
+    alias="live_scalping_production",  # Environment + purpose
+)
+
+# Bad - Unclear purpose
+config1 = AccountConfig(
+    token=token,
+    account_id=account,
+    environment=Environment.PRACTICE,
+    alias="config1",  # Not descriptive
+)
+```
+
+#### Environment-Specific Configuration
+
+```python
+import os
+from typing import Dict, Any
+from fivetwenty import AccountConfig, Environment
+
+class ConfigurationManager:
+    """Manage environment-specific configurations."""
+
+    @staticmethod
+    def get_environment_configs() -> Dict[str, AccountConfig]:
+        """Get configurations for different environments."""
+
+        # Development environment - more lenient settings
+        dev_config = AccountConfig(
+            token=os.environ["DEV_OANDA_TOKEN"],
+            account_id=os.environ["DEV_OANDA_ACCOUNT"],
+            environment=Environment.PRACTICE,
+            alias="development_testing",
+            # Development-specific settings would go in client config
+        )
+
+        # Staging environment - production-like settings
+        staging_config = AccountConfig(
+            token=os.environ["STAGING_OANDA_TOKEN"],
+            account_id=os.environ["STAGING_OANDA_ACCOUNT"],
+            environment=Environment.PRACTICE,
+            alias="staging_validation",
+        )
+
+        # Production environment - strict settings
+        prod_config = AccountConfig(
+            token=os.environ["PROD_OANDA_TOKEN"],
+            account_id=os.environ["PROD_OANDA_ACCOUNT"],
+            environment=Environment.LIVE,
+            alias="production_trading",
+        )
+
+        return {
+            "development": dev_config,
+            "staging": staging_config,
+            "production": prod_config,
+        }
+
+# Usage
+configs = ConfigurationManager.get_environment_configs()
+current_env = os.environ.get("DEPLOY_ENV", "development")
+config = configs[current_env]
+print(f"Using {current_env} configuration: {config.summary()}")
+```
+
+#### Configuration Documentation
+
+```python
+from dataclasses import dataclass
+from typing import Optional
+from fivetwenty import AccountConfig, Environment
+
+@dataclass
+class DocumentedConfiguration:
+    """Well-documented configuration with purpose and constraints."""
+
+    # Core configuration
+    config: AccountConfig
+
+    # Documentation
+    purpose: str
+    max_position_size: int
+    risk_tolerance: str
+    update_frequency: str
+    maintainer: str
+    last_reviewed: str
+
+    # Validation rules
+    daily_loss_limit: Optional[float] = None
+    max_open_positions: Optional[int] = None
+
+# Example documented configurations
+MOMENTUM_CONFIG = DocumentedConfiguration(
+    config=AccountConfig(
+        token=os.environ["MOMENTUM_TOKEN"],
+        account_id=os.environ["MOMENTUM_ACCOUNT"],
+        environment=Environment.PRACTICE,
+        alias="momentum_strategy_v2",
+    ),
+    purpose="High-frequency momentum trading strategy testing",
+    max_position_size=50000,
+    risk_tolerance="Medium - 2% per trade",
+    update_frequency="Weekly strategy review",
+    maintainer="Trading Team Alpha",
+    last_reviewed="2024-01-15",
+    daily_loss_limit=1000.0,
+    max_open_positions=10,
+)
+
+def print_configuration_summary(doc_config: DocumentedConfiguration) -> None:
+    """Print comprehensive configuration documentation."""
+    config = doc_config.config
+    print(f"Configuration: {config.alias}")
+    print(f"Environment: {config.environment.value}")
+    print(f"Purpose: {doc_config.purpose}")
+    print(f"Risk Profile: {doc_config.risk_tolerance}")
+    print(f"Maintainer: {doc_config.maintainer}")
+    print(f"Last Review: {doc_config.last_reviewed}")
+    if doc_config.daily_loss_limit:
+        print(f"Daily Loss Limit: ${doc_config.daily_loss_limit:,.2f}")
+```
+
+#### Testing Configuration Setup
+
+```python
+import os
+from typing import Dict, Any
+from fivetwenty import AccountConfig, Environment
+
+class TestConfigurationFactory:
+    """Factory for creating test configurations."""
+
+    @staticmethod
+    def create_unit_test_config() -> AccountConfig:
+        """Configuration for unit tests (mock/stub environment)."""
+        return AccountConfig(
+            token="mock-token-for-testing",
+            account_id="mock-account-123",
+            environment=Environment.PRACTICE,
+            alias="unit_test_mock",
+        )
+
+    @staticmethod
+    def create_integration_test_config() -> AccountConfig:
+        """Configuration for integration tests (practice environment)."""
+        return AccountConfig(
+            token=os.environ.get("TEST_OANDA_TOKEN", "demo-token"),
+            account_id=os.environ.get("TEST_OANDA_ACCOUNT", "demo-account"),
+            environment=Environment.PRACTICE,
+            alias="integration_test_practice",
+        )
+
+    @staticmethod
+    def create_load_test_config() -> AccountConfig:
+        """Configuration for load testing."""
+        return AccountConfig(
+            token=os.environ["LOAD_TEST_TOKEN"],
+            account_id=os.environ["LOAD_TEST_ACCOUNT"],
+            environment=Environment.PRACTICE,
+            alias="load_test_performance",
+        )
+
+# Usage in tests
+def test_trading_strategy():
+    """Example test using appropriate configuration."""
+    config = TestConfigurationFactory.create_unit_test_config()
+    # Use config in test...
+    assert config.alias == "unit_test_mock"
+```
+
+#### Safe Configuration Logging
+
+```python
+import logging
+from typing import Dict, Any
+from fivetwenty import AccountConfig
+
+def log_configuration_safely(config: AccountConfig) -> None:
+    """Log configuration without exposing sensitive information."""
+
+    # Safe to log - no sensitive data
+    logging.info(f"Configuration loaded: {config.summary()}")
+    logging.info(f"Environment: {config.environment.value}")
+
+    # NEVER log these - contains sensitive data
+    # logging.info(f"Token: {config.token}")  # ❌ NEVER
+    # logging.info(f"Account ID: {config.account_id}")  # ❌ NEVER
+
+    # Safe audit information
+    logging.info(f"Configuration validation: {'PASSED' if config else 'FAILED'}")
+
+def create_audit_log_entry(config: AccountConfig, operation: str) -> Dict[str, Any]:
+    """Create audit log entry with safe information."""
+    return {
+        "timestamp": "2024-01-15T10:30:00Z",
+        "operation": operation,
+        "environment": config.environment.value,
+        "alias": config.alias or "unnamed",
+        "token_hint": f"***{str(config.token)[-4:]}" if config.token else "none",
+        "validation_status": "valid",
+    }
+
+# Example usage
+config = AccountConfig(
+    token="secret-token-12345",
+    account_id="secret-account-789",
+    environment=Environment.PRACTICE,
+    alias="trading_bot_v1",
+)
+
+# Safe logging
+log_configuration_safely(config)
+audit_entry = create_audit_log_entry(config, "client_initialization")
+logging.info(f"Audit: {audit_entry}")
+```
 5. **Test configurations** - Validate before deployment
 
 ### Performance

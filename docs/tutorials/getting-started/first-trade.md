@@ -363,7 +363,7 @@ if __name__ == "__main__":
     asyncio.run(close_position_example())
 ```
 
-## Advanced Order Types
+## Additional Order Types
 
 ### Limit Order
 

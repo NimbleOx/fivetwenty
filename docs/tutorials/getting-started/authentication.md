@@ -385,211 +385,19 @@ else:
     print("✅ Configuration is valid")
 ```
 
-## Advanced HTTP Configuration
+## Security Considerations
 
-### Proxy Configuration
+Always follow these critical security guidelines:
 
-If you need to use a proxy:
+- **Never commit tokens to version control** - Use environment variables
+- **Use separate tokens for different environments** - Practice vs live
+- **Validate configurations before deployment** - Catch issues early
 
-```python
-import asyncio
+!!! tip "Comprehensive Security Guide"
+    For complete security best practices, token rotation strategies, and production deployment patterns, see [Best Practices Guide](../../explanation/best-practices.md#authentication-security).
 
-
-async def main():
-    from fivetwenty import AsyncClient, Environment
-
-    # Simple proxy
-    async with AsyncClient(
-        token="your-token",
-        environment=Environment.PRACTICE,
-        proxies="http://proxy.example.com:8080",
-    ) as client:
-        accounts = await client.accounts.get_accounts()
-        print(f"Retrieved {len(accounts)} accounts via simple proxy")
-
-    # Authenticated proxy
-    proxy_url = "http://username:password@proxy.example.com:8080"
-    async with AsyncClient(
-        token="your-token",
-        environment=Environment.PRACTICE,
-        proxies=proxy_url,
-    ) as client:
-        accounts = await client.accounts.get_accounts()
-        print(f"Retrieved {len(accounts)} accounts via authenticated proxy")
-
-asyncio.run(main())
-```
-
-### Custom SSL Configuration
-
-For corporate environments:
-
-```python
-from fivetwenty import AsyncClient, Environment
-
-# Custom CA bundle
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE,
-    verify="/path/to/ca-bundle.crt"
-) as client:
-    accounts = await client.accounts.get_accounts()
-    print(f"Retrieved {len(accounts)} accounts with custom CA bundle")
-
-# Client certificate authentication
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE,
-    cert="/path/to/client-cert.pem"
-) as client:
-    accounts = await client.accounts.get_accounts()
-    print(f"Retrieved {len(accounts)} accounts with client certificate")
-
-# Disable SSL verification (not recommended)
-async with AsyncClient(
-    token="your-token",
-    environment=Environment.PRACTICE,
-    verify=False
-) as client:
-    accounts = await client.accounts.get_accounts()
-    print(f"Retrieved {len(accounts)} accounts with SSL verification disabled")
-```
-
-### Custom HTTP Transport
-
-For advanced HTTP configuration:
-
-```python
-import asyncio
-
-
-async def main():
-    import httpx
-
-    from fivetwenty import AsyncClient, Environment
-
-    # Create custom HTTP client
-    transport = httpx.AsyncClient(
-        timeout=httpx.Timeout(
-            connect=5.0,
-            read=60.0,
-            write=10.0,
-            pool=60.0,
-        ),
-        limits=httpx.Limits(
-            max_connections=100,
-            max_keepalive_connections=20,
-        ),
-        http2=False,
-        trust_env=True,
-    )
-    print("Custom HTTP transport configured")
-
-    # Use with FiveTwenty client
-    async with AsyncClient(
-        token="your-token",
-        environment=Environment.PRACTICE,
-        transport=transport,
-    ) as client:
-        accounts = await client.accounts.get_accounts()
-        print(f"Retrieved {len(accounts)} accounts with custom transport")
-
-asyncio.run(main())
-```
-
-## Production Deployment
-
-### Docker Configuration
-
-```dockerfile
-FROM python:3.11-slim
-
-COPY requirements.txt .
-RUN pip install -r requirements.txt
-
-COPY . /app
-WORKDIR /app
-
-# Set non-secret environment variables
-ENV FIVETWENTY_OANDA_ENVIRONMENT=live
-ENV FIVETWENTY_OANDA_ACCOUNT_ALIAS=docker_trading
-
-# Never set secrets in Dockerfile
-# ENV FIVETWENTY_OANDA_TOKEN=""  # NO!
-# ENV FIVETWENTY_OANDA_ACCOUNT=""  # NO!
-
-CMD ["python", "main.py"]
-```
-
-```bash
-# Pass secrets at runtime
-docker run -e FIVETWENTY_OANDA_TOKEN="$SECRET_TOKEN" \
-           -e FIVETWENTY_OANDA_ACCOUNT="$SECRET_ACCOUNT" \
-           my-trading-app
-# This way secrets are never stored in the image
-```
-
-### CI/CD Configuration
-
-For GitHub Actions:
-
-```yaml
-# .github/workflows/deploy.yml
-name: Deploy Trading Bot
-
-on:
-  push:
-    branches: [main]
-
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-
-      - name: Test Authentication
-        env:
-          FIVETWENTY_OANDA_TOKEN: ${{ secrets.FIVETWENTY_OANDA_TOKEN }}
-          FIVETWENTY_OANDA_ACCOUNT: ${{ secrets.FIVETWENTY_OANDA_ACCOUNT }}
-          FIVETWENTY_OANDA_ENVIRONMENT: practice
-        run: |
-          python test_auth.py
-
-      - name: Deploy to Production
-        env:
-          FIVETWENTY_OANDA_TOKEN: ${{ secrets.FIVETWENTY_LIVE_TOKEN }}
-          FIVETWENTY_OANDA_ACCOUNT: ${{ secrets.OANDA_LIVE_ACCOUNT }}
-          FIVETWENTY_OANDA_ENVIRONMENT: live
-        run: |
-          echo "Deploying to production environment"
-          python deploy.py
-```
-
-## Best Practices
-
-### Security
-
-1. **Never commit tokens** - Use environment variables or secret management
-2. **Rotate tokens regularly** - Generate new tokens periodically
-3. **Use separate tokens** - Different tokens for different environments
-4. **Validate configurations** - Check settings before deployment
-5. **Monitor token usage** - Track API usage and anomalies
-
-### Organization
-
-1. **Use descriptive aliases** - Make account purposes clear
-2. **Document configurations** - Comment your setup
-3. **Environment-specific settings** - Different configs per environment
-4. **Test authentication** - Verify setup before deploying
-5. **Log safely** - Never log tokens or secrets
-
-### Performance
-
-1. **Reuse clients** - Don't create new clients for each request
-2. **Configure timeouts** - Set appropriate timeout values
-3. **Use connection pooling** - Optimize for high-frequency trading
-4. **Handle rate limits** - Implement proper backoff strategies
-5. **Cache configurations** - Load once, use many times
+!!! info "Advanced Configuration"
+    For environment-specific settings, organizational patterns, and performance optimization, see [Configuration Guide](../../explanation/configuration.md).
 
 ## Troubleshooting
 
@@ -671,36 +479,6 @@ async with AsyncClient(
 ) as client:
     accounts = await client.accounts.get_accounts()
     print(f"Retrieved {len(accounts)} accounts with retry configuration")
-```
-
-## Migration from Previous Versions
-
-If upgrading from an older version:
-
-```python
-# Old way (deprecated)
-from fivetwenty import AsyncClient, Environment
-
-client = AsyncClient("token", Environment.PRACTICE)
-print("Old-style client created (deprecated)")
-
-# New way - Direct parameters
-from fivetwenty import AsyncClient, Environment
-
-client = AsyncClient(token="token", environment=Environment.PRACTICE)
-print("New-style client created with direct parameters")
-
-# New way - Configuration object (recommended)
-from fivetwenty import AccountConfig, AsyncClient, Environment
-
-config = AccountConfig(
-    token="token",
-    account_id="account-id",
-    environment=Environment.PRACTICE,
-    alias="my_account",
-)
-client = AsyncClient(config=config)
-print(f"New-style client created with config object: {config.summary()}")
 ```
 
 ## Next Steps

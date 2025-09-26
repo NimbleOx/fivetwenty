@@ -660,6 +660,96 @@ class CachedDataProvider:
 
 ```
 
+### Authentication Performance
+
+Optimize authentication and client management for high-performance trading:
+
+1. **Reuse clients** - Don't create new clients for each request; use singleton pattern
+2. **Configure timeouts** - Set appropriate timeout values for your use case
+3. **Use connection pooling** - Optimize for high-frequency trading scenarios
+4. **Handle rate limits** - Implement proper backoff strategies and respect API limits
+5. **Cache configurations** - Load configuration once, use multiple times
+
+```python
+import asyncio
+import os
+from typing import Any
+
+from fivetwenty import AsyncClient, Environment
+
+class OptimizedClientManager:
+    """Manage clients efficiently for high-performance trading."""
+
+    _instance = None
+    _client = None
+
+    def __new__(cls) -> "OptimizedClientManager":
+        """Singleton pattern for client management."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+        return cls._instance
+
+    async def get_client(self) -> AsyncClient:
+        """Get optimized client instance."""
+        if self._client is None:
+            self._client = AsyncClient(
+                token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+                environment=Environment.PRACTICE,
+                # Optimized timeouts for high-frequency trading
+                timeout=2.0,          # Fast timeout for quick operations
+                max_retries=3,        # Limited retries for speed
+                retry_delay=0.1,      # Quick retry delay
+            )
+        return self._client
+
+    async def close_client(self) -> None:
+        """Clean up client connection."""
+        if self._client:
+            await self._client.aclose()
+            self._client = None
+
+# Usage example
+async def high_frequency_operation() -> Any:
+    """Example of optimized client usage."""
+    manager = OptimizedClientManager()
+    client = await manager.get_client()
+
+    # Reuse the same client for multiple operations
+    accounts = await client.accounts.get_accounts()
+    pricing = await client.pricing.get_pricing("account-id", ["EUR_USD"])
+
+    return {"accounts": len(accounts), "prices": len(pricing)}
+
+class RateLimitHandler:
+    """Handle rate limiting with exponential backoff."""
+
+    def __init__(self) -> None:
+        self.request_count = 0
+        self.rate_limit_delay = 0.1  # Start with 100ms delay
+
+    async def execute_with_rate_limit(self, operation: Any) -> Any:
+        """Execute operation with rate limiting."""
+        try:
+            # Implement pre-emptive rate limiting
+            if self.request_count % 10 == 0:  # Every 10th request
+                await asyncio.sleep(self.rate_limit_delay)
+
+            result = await operation()
+            self.request_count += 1
+
+            # Reset delay on success
+            self.rate_limit_delay = max(0.1, self.rate_limit_delay * 0.9)
+            return result
+
+        except Exception as e:
+            # Exponential backoff on rate limit errors
+            if "rate limit" in str(e).lower():
+                self.rate_limit_delay = min(5.0, self.rate_limit_delay * 2)
+                await asyncio.sleep(self.rate_limit_delay)
+                return await self.execute_with_rate_limit(operation)
+            raise
+```
+
 ## Monitoring and Alerting
 
 ### Health Checks
@@ -1488,6 +1578,89 @@ class SecureCredentials:
         print(f"Configuration encrypted: {len(encrypted)} bytes")
 
         return encrypted, key
+```
+
+### Authentication Security
+
+Follow these critical security practices for API authentication:
+
+1. **Never commit tokens** - Use environment variables or secret management systems
+2. **Rotate tokens regularly** - Generate new tokens periodically to reduce exposure risk
+3. **Use separate tokens** - Different tokens for different environments (practice/live)
+4. **Validate configurations** - Check settings before deployment to prevent misconfigurations
+5. **Monitor token usage** - Track API usage and detect anomalies or unauthorized access
+
+```python
+import os
+from typing import Any
+
+from fivetwenty import AccountConfig, Environment
+
+# ✅ GOOD: Secure token management
+def create_secure_config() -> AccountConfig:
+    """Create configuration with proper security practices."""
+
+    # Load from secure sources only
+    token = os.environ.get("FIVETWENTY_OANDA_TOKEN")
+    if not token:
+        raise ValueError("FIVETWENTY_OANDA_TOKEN environment variable not set")
+
+    # Use separate tokens per environment
+    environment = Environment.PRACTICE if "PRACTICE" in token else Environment.LIVE
+
+    return AccountConfig(
+        token=token,
+        account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+        environment=environment,
+        alias=f"{environment.value}_trading",  # Descriptive alias
+    )
+
+# ❌ BAD: Never do this
+def insecure_config() -> AccountConfig:
+    """Example of what NOT to do."""
+    return AccountConfig(
+        token="abc123def456",  # NEVER hardcode tokens!
+        account_id="123-456",  # NEVER hardcode account IDs!
+        environment=Environment.LIVE,  # Dangerous without proper validation
+    )
+```
+
+### Token Rotation Strategy
+
+Implement regular token rotation for enhanced security:
+
+```python
+import os
+from datetime import datetime, timedelta
+from typing import Any
+
+from fivetwenty import AccountConfig
+
+class TokenRotationManager:
+    """Manage token rotation for enhanced security."""
+
+    def __init__(self) -> None:
+        self.rotation_interval = timedelta(days=30)  # Rotate every 30 days
+        self.last_rotation = self.get_last_rotation_date()
+
+    def needs_rotation(self) -> bool:
+        """Check if token needs rotation."""
+        if not self.last_rotation:
+            return True
+        return datetime.now() - self.last_rotation > self.rotation_interval
+
+    def get_last_rotation_date(self) -> datetime | None:
+        """Get last rotation date from secure storage."""
+        # Implementation would check secure storage
+        return None
+
+    async def rotate_token_if_needed(self) -> bool:
+        """Rotate token if needed."""
+        if self.needs_rotation():
+            print("Token rotation required - contact OANDA to generate new token")
+            # Implementation would notify operators to manually rotate
+            return True
+        return False
 ```
 
 ## Documentation Standards
