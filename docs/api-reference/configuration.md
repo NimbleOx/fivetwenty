@@ -161,6 +161,7 @@ else:
 User-friendly identifier for the account configuration.
 
 ```python
+import os
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
@@ -392,6 +393,17 @@ else:
 # Create config with potential issues
 from fivetwenty import AccountConfig, Environment
 
+# For this example, we define a simple validator
+class ConfigValidator:
+    @staticmethod
+    def validate_account_config(config: AccountConfig) -> list[str]:
+        errors = []
+        if not config.account_id:
+            errors.append("Account ID cannot be empty")
+        if config.alias and not config.alias.isidentifier():
+            errors.append("Alias must be a valid Python identifier")
+        return errors
+
 config = AccountConfig(
     token="valid-token",
     account_id="",  # Empty account ID
@@ -406,7 +418,8 @@ errors = ConfigValidator.validate_account_config(config)
 
 # Fix errors before using
 if errors:
-    raise ValueError(f"Configuration errors: {', '.join(errors)}")
+    error_message = f"Configuration errors: {', '.join(errors)}"
+    raise ValueError(error_message)
 ```
 
 ---
@@ -523,15 +536,17 @@ print("Active strategies:", list(active_accounts.keys()))
 ### Configuration Validation
 
 ```python
+from typing import Any
 from fivetwenty import AccountConfig, ConfigValidator
 
-def create_safe_config(**kwargs) -> AccountConfig:
+def create_safe_config(**kwargs: Any) -> AccountConfig:
     """Create configuration with validation."""
     config = AccountConfig(**kwargs)
 
     errors = ConfigValidator.validate_account_config(config)
     if errors:
-        raise ValueError(f"Invalid configuration: {', '.join(errors)}")
+        error_message = f"Invalid configuration: {', '.join(errors)}"
+        raise ValueError(error_message)
 
     return config
 ```
