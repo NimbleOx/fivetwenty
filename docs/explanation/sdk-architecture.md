@@ -522,6 +522,8 @@ class CustomAccount(Account):
 Clients can be extended with custom endpoints:
 
 ```python
+from typing import Any
+
 from fivetwenty import AsyncClient
 
 # Assume CustomAnalyticsEndpoint is defined elsewhere
@@ -764,7 +766,7 @@ try:
 except FiveTwentyError as e:
     # Handle known OANDA errors
     match e.code:
-        case FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
+        case ErrorCode.INSUFFICIENT_FUNDS:
             # Specific handling
             pass
         case _:
@@ -873,7 +875,7 @@ Now that you understand the SDK architecture:
 
 - **Learn the async patterns**: Read [Async vs Sync Design](async-vs-sync.md) to choose the right approach
 - **Understand financial concepts**: Explore [Forex Trading Concepts](forex-trading-concepts.md) for domain knowledge
-- **Build robust systems**: Study [Error Handling](error-handling.md) for production-ready error management
+- **Build robust systems**: Study [Error Handling](../api-reference/error-handling.md) for production-ready error management
 - **Apply best practices**: Review [Best Practices](best-practices.md) for production deployment
 - **Implement real-time data**: See [Streaming Data](streaming.md) for market data integration
 - **Configure properly**: Check [Configuration](configuration.md) for secure credential management

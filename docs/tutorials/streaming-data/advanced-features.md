@@ -311,7 +311,7 @@ async def advanced_streaming_example():
 
 ## Next Steps
 
-Complete the series with [Best Practices & Production](best-practices.md) for deployment guidance.
+Complete the series with [Best Practices & Production](../../explanation/best-practices.md) for deployment guidance.
 
 ---
 

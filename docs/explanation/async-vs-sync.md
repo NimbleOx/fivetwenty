@@ -43,8 +43,25 @@ Both clients share the same API surface but differ in execution model and perfor
 AsyncClient provides native async iteration for streaming:
 
 ```python
-async for price in client.pricing.get_pricing_stream(...):
-    # Process price immediately
+import os
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+async def async_streaming_example():
+    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+        async for price in client.pricing.get_pricing_stream(
+            account_id=account_id,
+            instruments=["EUR_USD"]
+        ):
+            # Process price immediately
+            process_price(price)
+
+def process_price(price):
+    """Process incoming price data."""
+    pass
 ```
 
 Benefits:
@@ -82,8 +99,25 @@ The sync client manages:
 Sync client provides iterator-based streaming:
 
 ```python
-for price in client.pricing.get_pricing_stream(...):
-    # Process price from queue
+import os
+from fivetwenty import Client, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+def sync_streaming_example():
+    with Client(token=token, environment=Environment.PRACTICE) as client:
+        for price in client.pricing.get_pricing_stream(
+            account_id=account_id,
+            instruments=["EUR_USD"]
+        ):
+            # Process price from queue
+            process_price(price)
+
+def process_price(price):
+    """Process incoming price data."""
+    pass
 ```
 
 Characteristics:
@@ -97,20 +131,41 @@ Characteristics:
 
 **AsyncClient**: Truly concurrent using asyncio.gather()
 ```python
-# Multiple operations execute simultaneously
-account, positions, orders = await asyncio.gather(
-    client.accounts.get_account(account_id),
-    client.positions.get_positions(account_id),
-    client.orders.get_orders(account_id),
-)
+import asyncio
+import os
+from fivetwenty import AsyncClient, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+async def async_concurrent_example():
+    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+        # Multiple operations execute simultaneously
+        account, positions, orders = await asyncio.gather(
+            client.accounts.get_account(account_id),
+            client.positions.get_positions(account_id),
+            client.orders.get_orders(account_id),
+        )
+        return account, positions, orders
 ```
 
 **Sync Client**: Sequential execution only
 ```python
-# Operations execute one after another
-account = client.accounts.get_account(account_id)
-positions = client.positions.get_positions(account_id)
-orders = client.orders.get_orders(account_id)
+import os
+from fivetwenty import Client, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+def sync_sequential_example():
+    with Client(token=token, environment=Environment.PRACTICE) as client:
+        # Operations execute one after another
+        account = client.accounts.get_account(account_id)
+        positions = client.positions.get_positions(account_id)
+        orders = client.orders.get_orders(account_id)
+        return account, positions, orders
 ```
 
 ### Resource Utilization
@@ -136,20 +191,52 @@ orders = client.orders.get_orders(account_id)
 
 Exceptions propagate directly through the call stack:
 ```python
-try:
-    order = await client.orders.post_market_order(...)
-except VeeTwentyError as e:
-    # Handle OANDA API error
+import os
+from fivetwenty import AsyncClient, Environment
+from fivetwenty.exceptions import VeeTwentyError
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+async def async_error_example():
+    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+        try:
+            order = await client.orders.post_market_order(
+                account_id=account_id,
+                instrument="EUR_USD",
+                units=1000
+            )
+        except VeeTwentyError as e:
+            # Handle OANDA API error
+            pass
+        return order
 ```
 
 ### Sync Client
 
 Exceptions are marshalled across thread boundaries:
 ```python
-try:
-    order = client.orders.post_market_order(...)
-except VeeTwentyError as e:
-    # Same exception, but marshalled from background thread
+import os
+from fivetwenty import Client, Environment
+from fivetwenty.exceptions import VeeTwentyError
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+account_id = "101-001-0000000-001"
+
+def sync_error_example():
+    with Client(token=token, environment=Environment.PRACTICE) as client:
+        try:
+            order = client.orders.post_market_order(
+                account_id=account_id,
+                instrument="EUR_USD",
+                units=1000
+            )
+        except VeeTwentyError as e:
+            # Same exception, but marshalled from background thread
+            pass
+        return order
 ```
 
 ## Integration Patterns
@@ -175,13 +262,23 @@ Best suited for traditional applications:
 Both clients require proper cleanup:
 
 ```python
+import os
+from fivetwenty import AsyncClient, Client, Environment
+
+# Setup
+token = os.getenv("OANDA_TOKEN")
+
 # AsyncClient
-async with AsyncClient(...) as client:
-    # Automatic cleanup of connections
+async def async_context_example():
+    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+        # Automatic cleanup of connections
+        pass
 
 # Sync Client
-with Client(...) as client:
-    # Automatic cleanup of background thread and queue
+def sync_context_example():
+    with Client(token=token, environment=Environment.PRACTICE) as client:
+        # Automatic cleanup of background thread and queue
+        pass
 ```
 
 The context managers ensure:

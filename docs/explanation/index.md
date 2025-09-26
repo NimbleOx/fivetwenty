@@ -30,7 +30,7 @@ Understand the technical decisions behind FiveTwenty.
 
 - **[SDK Architecture](sdk-architecture.md)** - Overall design philosophy and component relationships
 - **[Async vs Sync Design](./async-vs-sync.md)** - Why async-first and when to use each approach
-- **[Error Handling Philosophy](./error-handling.md)** - Approach to error management and recovery
+- **[Error Handling](../api-reference/error-handling.md)** - Approach to error management and recovery
 - **[Configuration Patterns](./configuration.md)** - How configuration works and why
 
 ### **Domain Knowledge**
@@ -151,7 +151,7 @@ Conceptual knowledge enables strategic thinking:
 4. **[Market Data & Streaming](./streaming.md)** - Grasp real-time data concepts
 
 ### **Advanced Architecture** (Mastery)
-5. **[Error Handling Philosophy](./error-handling.md)** - Build robust systems
+5. **[Error Handling](../api-reference/error-handling.md)** - Build robust systems
 6. **[Configuration Patterns](./configuration.md)** - Manage complexity
 7. **[Best Practices & Patterns](./best-practices.md)** - Apply proven approaches
 

@@ -16,8 +16,9 @@ import time
 from collections import deque
 from collections.abc import Callable
 from decimal import Decimal
-from typing import Optional, Any
+from typing import Any
 from fivetwenty import AsyncClient
+from fivetwenty.models import ClientPrice
 
 
 

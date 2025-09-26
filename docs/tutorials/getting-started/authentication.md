@@ -394,7 +394,7 @@ Always follow these critical security guidelines:
 - **Validate configurations before deployment** - Catch issues early
 
 !!! tip "Comprehensive Security Guide"
-    For complete security best practices, token rotation strategies, and production deployment patterns, see [Best Practices Guide](../../explanation/best-practices.md#authentication-security).
+    For complete security best practices, token rotation strategies, and production deployment patterns, see [Best Practices Guide](../../explanation/best-practices.md).
 
 !!! info "Advanced Configuration"
     For environment-specific settings, organizational patterns, and performance optimization, see [Configuration Guide](../../explanation/configuration.md).

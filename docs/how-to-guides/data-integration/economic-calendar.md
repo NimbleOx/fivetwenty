@@ -24,7 +24,7 @@ import asyncio
 import aiohttp
 import json
 from datetime import datetime, timedelta, timezone
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 from dataclasses import dataclass
 from fivetwenty import AsyncClient, Environment
 

@@ -681,6 +681,6 @@ async def test_retry_on_server_error() -> None:
 
 ## Next Steps
 
-- Review [streaming](streaming.md) for handling stream errors
-- Check [best practices](best-practices.md) for production systems
-- Understand [configuration](configuration.md) options
+- Review [streaming](../explanation/streaming.md) for handling stream errors
+- Check [best practices](../explanation/best-practices.md) for production systems
+- Understand [configuration](../explanation/configuration.md) options

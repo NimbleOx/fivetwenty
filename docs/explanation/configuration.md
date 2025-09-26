@@ -809,4 +809,4 @@ if __name__ == "__main__":
 - Learn about [environments](../tutorials/getting-started/environments.md) and their differences
 - See [authentication](../tutorials/getting-started/authentication.md) for getting API tokens
 - Review [best practices](best-practices.md) for production deployment
-- Check [error handling](error-handling.md) for configuration-related errors
+- Check [error handling](../api-reference/error-handling.md) for configuration-related errors

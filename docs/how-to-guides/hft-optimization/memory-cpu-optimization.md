@@ -12,13 +12,14 @@ Use optimized data structures for HFT:
 
 ```python
 import asyncio
-import numpy as np
+import array
 import time
 from collections import defaultdict
 from dataclasses import dataclass
 from typing import NamedTuple, Optional, Any
 from decimal import Decimal
-import array
+
+import numpy as np
 
 
 class FastPrice(NamedTuple):
@@ -44,7 +45,7 @@ class CircularBuffer:
         self.index = 0
         self.count = 0
 
-    def append(self, bid: float, ask: float, timestamp: float) -> Any:
+    def append(self, bid: float, ask: float, timestamp: float) -> None:
         """Add price point with O(1) complexity."""
         self.data[self.index] = [bid, ask, timestamp]
         self.index = (self.index + 1) % self.size
@@ -60,7 +61,7 @@ class CircularBuffer:
         row = self.data[latest_idx]
         return FastPrice(row[0], row[1], row[2])
 
-    def get_history(self, n: int = None) -> np.ndarray:
+    def get_history(self, n: int | None = None) -> np.ndarray:
         """Get recent history efficiently."""
         if n is None:
             n = self.count
@@ -85,9 +86,9 @@ class OptimizedPriceManager:
         self.buffers: dict[str, CircularBuffer] = {}
         self.buffer_size = buffer_size
         self.update_counts = defaultdict(int)
-        self.last_update_times = {}
+        self.last_update_times: dict[str, float] = {}
 
-    def update_price(self, instrument: str, bid: float, ask: float, timestamp: float) -> Any:
+    def update_price(self, instrument: str, bid: float, ask: float, timestamp: float) -> None:
         """Ultra-fast price update."""
 
         if instrument not in self.buffers:
@@ -185,7 +186,7 @@ class TradingObjectPool:
             return self.price_objects.popleft()
         return {'bid': 0.0, 'ask': 0.0, 'timestamp': 0.0, 'instrument': ''}
 
-    def return_price_object(self, obj: dict[str, Any]) -> Any:
+    def return_price_object(self, obj: dict[str, Any]) -> None:
         """Return object to pool."""
         # Clear object data
         obj.clear()
@@ -200,7 +201,7 @@ class TradingObjectPool:
             return self.order_objects.popleft()
         return {'instrument': '', 'units': 0, 'price': 0.0}
 
-    def return_order_object(self, obj: dict[str, Any]) -> Any:
+    def return_order_object(self, obj: dict[str, Any]) -> None:
         """Return order object to pool."""
         obj.clear()
         obj.update({'instrument': '', 'units': 0, 'price': 0.0})
@@ -211,7 +212,7 @@ class TradingObjectPool:
 # Usage example
 object_pool = TradingObjectPool(pool_size=5000)
 
-async def efficient_price_processing(price: ClientPrice) -> Any:
+async def efficient_price_processing(price: Any) -> None:  # ClientPrice placeholder
     """Process price using object pool for efficiency."""
 
     # Get reusable object from pool
@@ -231,7 +232,7 @@ async def efficient_price_processing(price: ClientPrice) -> Any:
         # Return object to pool
         object_pool.return_price_object(price_obj)
 
-async def process_price_data(price_obj: dict[str, Any]) -> Any:
+async def process_price_data(price_obj: dict[str, Any]) -> None:
     """Process price data (your trading logic here)."""
     spread = price_obj['ask'] - price_obj['bid']
     if spread < 0.0005:
@@ -249,7 +250,7 @@ async def process_price_data(price_obj: dict[str, Any]) -> Any:
 
 from typing import Any
 
-def fast_spread_calculation(price) -> Any:
+def fast_spread_calculation(price: Any) -> float:
     return price.asks[0].price - price.bids[0].price
 
 def get_ask_price(price) -> float:
@@ -265,7 +266,7 @@ def calculate_spread(ask: float, bid: float) -> float:
     return ask - bid
 
 # Less efficient: Multiple function calls
-def slow_spread_calculation(price) -> Any:
+def slow_spread_calculation(price: Any) -> float:
     ask = get_ask_price(price)
     bid = get_bid_price(price)
     return calculate_spread(ask, bid)
@@ -283,7 +284,7 @@ async def handle_price_update(instrument: str, bid_price: Decimal, ask_price: De
     """Handle price update processing."""
     print(f"Price update: {instrument} bid={bid_price:.5f} ask={ask_price:.5f} spread={spread:.5f}")
 
-async def optimized_price_processing(price) -> Any:
+async def optimized_price_processing(price: Any) -> None:
     bids = price.bids
     asks = price.asks
     instrument = price.instrument
@@ -297,7 +298,7 @@ async def optimized_price_processing(price) -> Any:
         await handle_price_update(instrument, bid_price, ask_price, spread)
 
 # Less efficient: Repeated attribute lookups
-async def unoptimized_price_processing(price) -> Any:
+async def unoptimized_price_processing(price: Any) -> None:
     if price.bids and price.asks:
         spread = price.asks[0].price - price.bids[0].price
         await handle_price_update(price.instrument, price.bids[0].price,
@@ -314,7 +315,7 @@ import numpy as np
 
 
 
-def calculate_multiple_spreads(prices_array) -> Any:
+def calculate_multiple_spreads(prices_array: np.ndarray) -> np.ndarray:
     """Calculate spreads for multiple prices efficiently."""
 
     # Vectorized calculation using numpy

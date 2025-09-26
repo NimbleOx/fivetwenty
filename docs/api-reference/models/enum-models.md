@@ -89,10 +89,10 @@ Trade direction for buy/sell operations.
 
 **OANDA Definition**: [OrderFillTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#OrderFillTransaction)
 
-| Value | Required | Description |
-|-------|----------|-------------|
-| `LONG` | ✅ | Buy direction - go long on the instrument |
-| `SHORT` | ✅ | Sell direction - go short on the instrument |
+| Value | Description |
+|-------|-------------|
+| `LONG` | Buy direction - go long on the instrument |
+| `SHORT` | Sell direction - go short on the instrument |
 
 ### TransactionType
 
@@ -182,11 +182,11 @@ Status of price data.
 
 **OANDA Definition**: [Price](https://developer.oanda.com/rest-live-v20/pricing-df/#Price)
 
-| Value | Required | Description |
-|-------|----------|-------------|
-| `tradeable` | ✅ | Price is tradeable |
-| `non-tradeable` | ✅ | Price is not tradeable |
-| `invalid` | ✅ | Price is invalid |
+| Value | Description |
+|-------|-------------|
+| `tradeable` | Price is tradeable |
+| `non-tradeable` | Price is not tradeable |
+| `invalid` | Price is invalid |
 
 ### WeeklyAlignment
 

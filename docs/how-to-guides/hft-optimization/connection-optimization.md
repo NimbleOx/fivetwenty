@@ -11,9 +11,12 @@
 Reuse connections to minimize latency:
 
 ```python
-from typing import Optional
+import asyncio
+import time
+from typing import Any
 
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import ClientPrice
 
 
 
@@ -84,9 +87,9 @@ class BatchRequestManager:
     def __init__(self, client: AsyncClient, batch_size: int = 10) -> None:
         self.client = client
         self.batch_size = batch_size
-        self.pending_requests: List = []
+        self.pending_requests: list = []
 
-    async def batch_get_prices(self, account_id: str, instrument_batches: List[List[str]]) -> List[List[ClientPrice]]:
+    async def batch_get_prices(self, account_id: str, instrument_batches: list[list[str]]) -> list[list[ClientPrice]]:
         """Get prices for multiple instrument sets concurrently."""
 
         start_time = time.perf_counter()
@@ -112,7 +115,7 @@ class BatchRequestManager:
 
         return successful_results
 
-    async def batch_market_orders(self, account_id: str, order_requests: List[Dict]) -> List:
+    async def batch_market_orders(self, account_id: str, order_requests: list[dict]) -> list:
         """Execute multiple market orders concurrently."""
 
         start_time = time.perf_counter()

@@ -31,8 +31,6 @@
 ### Identify Your Live Account ID
 
 ```python
-import asyncio
-import os
 from typing import Any
 from fivetwenty import AsyncClient, Environment
 
@@ -76,7 +74,6 @@ Set up secure environment variables for live trading:
 
 ```python
 import os
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 # Set environment variables (add to your .env file or system environment)
