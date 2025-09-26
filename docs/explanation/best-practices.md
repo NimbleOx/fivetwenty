@@ -839,6 +839,8 @@ async def calculate_risk_position_size(
 ### Price Calculation Precision
 
 ```python
+from decimal import Decimal
+
 def calculate_stop_levels(
     entry_price: str,     # PriceValue from OANDA
     direction: str,       # "long" or "short"
@@ -869,14 +871,21 @@ def calculate_stop_levels(
 ### Performance Metrics with Exact Math
 
 ```python
+from decimal import Decimal
+
+_DEFAULT_RISK_FREE_RATE = Decimal("0.02")
+
 def calculate_sharpe_ratio(
     returns: list[Decimal],
-    risk_free_rate: Decimal = Decimal("0.02"),
+    risk_free_rate: Decimal | None = None,
 ) -> Decimal:
     """Calculate Sharpe ratio with Decimal precision."""
 
     if not returns:
         return Decimal("0")
+
+    if risk_free_rate is None:
+        risk_free_rate = _DEFAULT_RISK_FREE_RATE
 
     # Convert annual risk-free rate to period rate
     periods_per_year = Decimal("252")  # Trading days

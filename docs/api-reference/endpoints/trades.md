@@ -9,20 +9,24 @@ Trade monitoring and management.
 ## get_trades
 ```python
 import asyncio
+from fivetwenty import AsyncClient
+from fivetwenty.models import TradeStateFilter
 
 
 async def main():
-    # trades.get_trades(account_id: AccountID, ids: list[TradeID] | None = None,
-    #            state: TradeStateFilter = TradeStateFilter.OPEN,
-    #            instrument: InstrumentName | None = None, count: int = 50,
-    #            before_id: TradeID | None = None) -> dict[str, Any]
+    async with AsyncClient(token="demo-token") as client:
+        # trades.get_trades(account_id: AccountID, ids: list[TradeID] | None = None,
+        #            state: TradeStateFilter = TradeStateFilter.OPEN,
+        #            instrument: InstrumentName | None = None, count: int = 50,
+        #            before_id: TradeID | None = None) -> dict[str, Any]
 
-    # Example usage:
-    trades = await client.trades.get_trades(
-        account_id="123-456-789",
-        state=TradeStateFilter.OPEN,
-        count=20,
-    )
+        # Example usage:
+        trades = await client.trades.get_trades(
+            account_id="123-456-789",
+            state=TradeStateFilter.OPEN,
+            count=20,
+        )
+        print(f"Found {len(trades.get('trades', []))} trades")
 
 asyncio.run(main())
 ```
@@ -53,10 +57,13 @@ Get a list of trades for an account.
 
 ## get_open_trades
 ```python
-# trades.get_open_trades(account_id: AccountID) -> dict[str, Any]
+async def get_open_trades_example():
+    async with AsyncClient(token="demo-token") as client:
+        # trades.get_open_trades(account_id: AccountID) -> dict[str, Any]
 
-# Example usage:
-open_trades = await client.trades.get_open_trades(account_id="123-456-789")
+        # Example usage:
+        open_trades = await client.trades.get_open_trades(account_id="123-456-789")
+        print(f"Open trades: {len(open_trades.get('trades', []))}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openTrades`
 
@@ -80,13 +87,16 @@ Get all open trades for account.
 
 ## get_trade
 ```python
-# trades.get_trade(account_id: AccountID, trade_specifier: str) -> dict[str, Any]
+async def get_trade_example():
+    async with AsyncClient(token="demo-token") as client:
+        # trades.get_trade(account_id: AccountID, trade_specifier: str) -> dict[str, Any]
 
-# Example usage:
-trade = await client.trades.get_trade(
-    account_id="123-456-789",
-    trade_specifier="12345"
-)
+        # Example usage:
+        trade = await client.trades.get_trade(
+            account_id="123-456-789",
+            trade_specifier="12345"
+        )
+        print(f"Trade: {trade.get('trade', {}).get('id', 'N/A')}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades/{tradeSpecifier}`
 
@@ -111,15 +121,18 @@ Get specific trade details.
 
 ## close_trade
 ```python
-# trades.close_trade(account_id: AccountID, trade_specifier: str,
-#             units: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]
+async def close_trade_example():
+    async with AsyncClient(token="demo-token") as client:
+        # trades.close_trade(account_id: AccountID, trade_specifier: str,
+        #             units: str | None = None, idempotency_key: str | None = None) -> dict[str, Any]
 
-# Example usage:
-result = await client.trades.close_trade(
-    account_id="123-456-789",
-    trade_specifier="12345",
-    units="1000"
-)
+        # Example usage:
+        result = await client.trades.close_trade(
+            account_id="123-456-789",
+            trade_specifier="12345",
+            units="1000"
+        )
+        print(f"Trade closed: {result.get('trade_close_transaction', {}).get('id', 'N/A')}")
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/close`
 
