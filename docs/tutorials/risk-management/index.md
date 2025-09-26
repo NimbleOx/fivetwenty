@@ -1,89 +1,274 @@
-# Risk Management Tutorial Series
+# Risk Management with FiveTwenty
 
-!!! tip "🎯 Series Goal"
-    Learn comprehensive risk management techniques to protect capital and optimize trading performance across all market conditions.
+Learn essential risk management techniques using FiveTwenty's stop loss orders, position monitoring, and account controls.
 
----
+!!! success "🎯 Practical Guide - Problem-oriented solutions"
+    **Use this guide when:** You need to protect trading capital and control position risk
 
-## Series Overview
+    **Learning outcome:** Implement risk controls using FiveTwenty SDK features
 
-Risk management is the foundation of successful trading. This tutorial series teaches you essential techniques for controlling risk, protecting capital, and maximizing risk-adjusted returns.
-
-### What You'll Learn
-
-✅ **Risk Fundamentals** - Core principles and metrics for effective risk control
-
-✅ **Position Sizing** - Calculate optimal position sizes based on risk tolerance and volatility
-
-✅ **Stop Loss Strategies** - Implement various stop loss techniques for different market conditions
-
-✅ **Portfolio Risk Management** - Monitor and control risk across multiple positions
-
-✅ **Automated Risk Controls** - Build automated systems to enforce risk limits
-
-✅ **Performance Optimization** - Use advanced techniques like Kelly Criterion for optimal sizing
-
-✅ **Best Practices** - Professional risk management frameworks and validation checklists
-
----
-
-## Tutorial Progression
-
-### Foundation (Start Here)
-1. **[Risk Management Fundamentals](fundamentals.md)** - Essential concepts and the three pillars of risk management
-2. **[Position Sizing Strategies](position-sizing.md)** - Calculate optimal position sizes with fixed dollar and volatility-based methods
-
-### Protection Techniques
-3. **[Stop Loss Strategies](stop-loss-strategies.md)** - Implement various stop loss approaches for different market conditions
-4. **[Portfolio Risk Management](portfolio-risk.md)** - Monitor and control risk across multiple positions and instruments
-
-### 🤖 Advanced Systems
-5. **[Automated Risk Controls](automated-controls.md)** - Build circuit breaker systems and automated risk enforcement
-6. **[Performance Optimization](performance-optimization.md)** - Advanced techniques including Kelly Criterion and risk-adjusted metrics
-
-### Implementation
-7. **[Best Practices & Validation](best-practices.md)** - Professional frameworks and checklists for risk management validation
-
----
+    **Time commitment:** 30-40 minutes
 
 ## Prerequisites
 
-- Basic understanding of trading concepts
-- Familiarity with the FiveTwenty SDK
-- Completion of [Basic Trading Tutorial](../basic-trading/index.md) recommended
+- Completed [Basic Trading](../basic-trading/index.md) tutorial
+- Understanding of position management concepts
+- FiveTwenty setup with live or practice account
 
----
+## Essential Risk Controls
 
-## Learning Approach
+### Stop Loss Orders
 
-Each guide in this series includes:
+```python
+import asyncio
+from decimal import Decimal
+from fivetwenty import AsyncClient
+from fivetwenty.models import (
+    MarketOrderRequest,
+    StopLossOrderRequest,
+    InstrumentName,
+    TimeInForce
+)
 
-- **Theoretical foundations** with practical examples
-- **Code implementations** using the FiveTwenty SDK
-- **Real-world scenarios** and case studies
-- **Skill checkpoints** to validate understanding
-- **Best practices** from professional trading
+async def place_order_with_stop_loss(
+    client: AsyncClient,
+    account_id: str,
+    instrument: str,
+    units: Decimal,
+    stop_loss_distance: Decimal
+) -> dict:
+    """Place market order with automatic stop loss."""
 
----
+    # Place market order
+    market_order = MarketOrderRequest(
+        instrument=instrument,
+        units=units,
+        time_in_force=TimeInForce.FOK,
+    )
 
-## Risk Management Philosophy
+    order_response = await client.orders.post_order(account_id, market_order)
 
-!!! warning "⚠️ Capital Preservation First"
-    **Rule #1**: Never risk more than you can afford to lose
+    if order_response.order_fill_transaction:
+        # Order filled, add stop loss
+        fill_price = Decimal(order_response.order_fill_transaction.price)
 
-    **Rule #2**: Protect your capital - it's easier to avoid losses than to recover from them
+        # Calculate stop loss price
+        if units > 0:  # Long position
+            stop_price = fill_price - stop_loss_distance
+        else:  # Short position
+            stop_price = fill_price + stop_loss_distance
 
-    **Rule #3**: Consistent small gains compound better than occasional large wins
+        # Create stop loss order
+        stop_loss = StopLossOrderRequest(
+            tradeID=order_response.order_fill_transaction.tradeOpened.tradeID,
+            price=str(stop_price),
+            timeInForce="GTC"
+        )
 
----
+        stop_response = await client.orders.post_order(account_id, stop_loss)
 
-## Related Resources
+        return {
+            "trade_id": order_response.order_fill_transaction.tradeOpened.tradeID,
+            "entry_price": fill_price,
+            "stop_price": stop_price,
+            "stop_order_id": stop_response.order_create_transaction.id
+        }
 
-- **[Basic Trading Tutorial](../basic-trading/index.md)** - Foundation trading skills
-- **[Position Management](../basic-trading/lesson-5-position-management.md)** - Individual position management techniques
-- **[Portfolio Analysis](../portfolio-analysis/index.md)** - Advanced portfolio analysis methods
-- **[API Reference: Orders](../../api-reference/endpoints/orders.md)** - Technical order management documentation
+    raise ValueError("Market order was not filled")
 
----
+# Usage
+async def main():
+    client = AsyncClient(token="your-token", account_id="your-account")
+    account_id = "your-account-id"
 
-**Ready to build bulletproof risk management?** Start with [Risk Management Fundamentals](fundamentals.md)! 🚀
+    result = await place_order_with_stop_loss(
+        client=client,
+        account_id=account_id,
+        instrument="EUR_USD",
+        units=Decimal("1000"),
+        stop_loss_distance=Decimal("0.0020")  # 20 pips
+    )
+
+    print(f"Trade {result['trade_id']} opened with stop at {result['stop_price']}")
+
+asyncio.run(main())
+```
+
+### Position Size Based on Risk
+
+```python
+async def calculate_risk_based_position_size(
+    client: AsyncClient,
+    account_id: str,
+    instrument: str,
+    risk_percentage: Decimal,  # e.g., Decimal("2") for 2%
+    stop_loss_pips: int
+) -> Decimal:
+    """Calculate position size based on account risk percentage."""
+
+    # Get account balance
+    account = await client.accounts.get_account(account_id)
+    balance = Decimal(account.balance)
+
+    # Calculate risk amount
+    risk_amount = balance * (risk_percentage / 100)
+
+    # Get current price to calculate pip value
+    pricing = await client.pricing.get_pricing(
+        account_id=account_id,
+        instruments=[instrument]
+    )
+
+    current_price = Decimal(pricing.prices[0].asks[0].price)
+
+    # Calculate pip value (simplified for major pairs)
+    if "JPY" in instrument:
+        pip_value = Decimal("0.01") / current_price  # Yen pairs
+    else:
+        pip_value = Decimal("0.0001") / current_price  # Major pairs
+
+    # Calculate position size
+    position_size = risk_amount / (stop_loss_pips * pip_value)
+
+    # Round to appropriate increment
+    return position_size.quantize(Decimal("1"))
+```
+
+### Account Monitoring and Limits
+
+```python
+class RiskMonitor:
+    """Monitor account risk in real-time."""
+
+    def __init__(self, client: AsyncClient, account_id: str):
+        self.client = client
+        self.account_id = account_id
+        self.max_daily_loss = Decimal("1000")  # Max $1000 daily loss
+        self.max_drawdown = Decimal("0.10")    # Max 10% drawdown
+        self.daily_start_balance = None
+
+    async def check_risk_limits(self) -> dict:
+        """Check current risk against limits."""
+        account = await self.client.accounts.get_account(self.account_id)
+        current_balance = Decimal(account.balance)
+
+        # Set daily start balance if not set
+        if self.daily_start_balance is None:
+            self.daily_start_balance = current_balance
+
+        # Calculate daily P&L
+        daily_pnl = current_balance - self.daily_start_balance
+
+        # Get all open positions for exposure calculation
+        positions = await self.client.positions.get_positions(self.account_id)
+        total_exposure = Decimal("0")
+
+        for position in positions.positions:
+            if position.long.units != "0" or position.short.units != "0":
+                long_units = abs(Decimal(position.long.units)) if position.long.units != "0" else Decimal("0")
+                short_units = abs(Decimal(position.short.units)) if position.short.units != "0" else Decimal("0")
+                total_exposure += long_units + short_units
+
+        return {
+            "current_balance": current_balance,
+            "daily_pnl": daily_pnl,
+            "daily_loss_limit_breached": daily_pnl < -self.max_daily_loss,
+            "drawdown_limit_breached": (self.daily_start_balance - current_balance) / self.daily_start_balance > self.max_drawdown,
+            "total_exposure": total_exposure,
+            "margin_used": Decimal(account.margin_used),
+            "margin_available": Decimal(account.margin_available)
+        }
+
+    async def emergency_close_all(self) -> list:
+        """Close all positions in emergency."""
+        positions = await self.client.positions.get_positions(self.account_id)
+        closed_positions = []
+
+        for position in positions.positions:
+            if position.long.units != "0" or position.short.units != "0":
+                # Close the position
+                close_response = await self.client.positions.close_position(
+                    account_id=self.account_id,
+                    instrument=position.instrument,
+                    longUnits="ALL" if position.long.units != "0" else None,
+                    shortUnits="ALL" if position.short.units != "0" else None
+                )
+                closed_positions.append({
+                    "instrument": position.instrument,
+                    "response": close_response
+                })
+
+        return closed_positions
+```
+
+### Daily Loss Circuit Breaker
+
+```python
+async def trading_circuit_breaker(
+    client: AsyncClient,
+    account_id: str,
+    max_daily_loss: Decimal
+) -> bool:
+    """Check if daily loss limit is exceeded and halt trading if needed."""
+
+    monitor = RiskMonitor(client, account_id)
+    risk_status = await monitor.check_risk_limits()
+
+    if risk_status["daily_loss_limit_breached"]:
+        print(f"⚠️ Daily loss limit exceeded: ${risk_status['daily_pnl']}")
+
+        # Close all positions
+        closed = await monitor.emergency_close_all()
+        print(f"Closed {len(closed)} positions")
+
+        return False  # Halt trading
+
+    return True  # Continue trading
+```
+
+## Key Risk Principles
+
+### 1. Position Sizing
+- Never risk more than 1-2% of account per trade
+- Use stop losses on every position
+- Calculate position size based on stop distance
+
+### 2. Diversification
+- Limit exposure to correlated currency pairs
+- Avoid concentration in single currency
+- Monitor total portfolio exposure
+
+### 3. Stop Loss Management
+- Always set stops when opening positions
+- Use trailing stops for profitable trades
+- Respect stop losses - don't move them against you
+
+### 4. Account Monitoring
+- Set daily loss limits
+- Monitor margin usage
+- Track drawdown levels
+
+## Implementation Checklist
+
+- [ ] Stop loss orders on all positions
+- [ ] Position sizing based on account risk
+- [ ] Daily loss monitoring
+- [ ] Maximum drawdown limits
+- [ ] Emergency position closing procedures
+- [ ] Risk monitoring dashboard
+
+## Best Practices
+
+1. **Risk First**: Set your stop loss before entering any trade
+2. **Size Appropriately**: Use the 1-2% rule for position sizing
+3. **Monitor Continuously**: Check risk metrics regularly
+4. **Automate Controls**: Use circuit breakers for discipline
+5. **Keep Records**: Track performance and risk metrics
+
+## Next Steps
+
+- Learn [Advanced Orders](../advanced-orders/index.md) for sophisticated risk management
+- Explore [Best Practices](../../explanation/best-practices.md) for production trading
+- See [Portfolio Management](../portfolio-analysis/index.md) for multi-position risk
+
+For comprehensive risk management theory, consider specialized finance resources alongside FiveTwenty for implementation.
