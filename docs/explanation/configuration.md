@@ -12,6 +12,87 @@ The library supports three main configuration approaches:
 
 All approaches prioritize security by automatically masking sensitive information in logs and output.
 
+## Environment Concepts
+
+OANDA provides two distinct environments for trading: **Practice** and **Live**. Understanding the differences is crucial for safe development and trading.
+
+### Environment Overview
+
+| Feature | Practice Environment | Live Environment |
+|---------|---------------------|------------------|
+| **Real Money** | No (virtual funds) | Yes (real funds) |
+| **API Endpoint** | api-fxpractice.oanda.com | api-fxtrade.oanda.com |
+| **Market Data** | Real-time | Real-time |
+| **Execution** | Simulated | Real market |
+| **Risk** | None | Real financial risk |
+| **Use Case** | Testing & Learning | Production Trading |
+
+### Practice Environment
+
+The practice environment is designed for safe development and learning:
+
+- **Virtual Funds**: Start with $100,000 in virtual money
+- **Real Market Data**: Access to live market prices for realistic testing
+- **Full API Access**: All OANDA API features available
+- **No Risk**: No real money at stake
+- **Reset Available**: Can reset account balance anytime
+- **No KYC Required**: Instant setup with just email verification
+
+**Ideal for:**
+- Learning the OANDA platform and API
+- Testing and developing trading strategies
+- Code development and debugging
+- Paper trading competitions
+- Training new traders
+
+### Live Environment
+
+The live environment is for real money trading:
+
+- **Real Money**: All transactions involve actual funds
+- **Market Execution**: Orders executed in real market conditions
+- **Full Trading Features**: Access to all OANDA trading capabilities
+- **Permanent Results**: Profits and losses are real and permanent
+
+**Requirements:**
+- Funded OANDA account
+- Completed KYC (Know Your Customer) verification
+- Understanding of trading risks
+- Production-ready, thoroughly tested code
+
+**Critical Safety Considerations:**
+- Always test thoroughly in practice before deploying to live
+- Implement proper risk management and position sizing
+- Use stop losses and take profits
+- Monitor account balance and margin requirements
+- Have emergency procedures for stopping trading
+
+### Environment URLs
+
+The SDK automatically routes requests to the correct endpoints:
+
+```python
+from fivetwenty import Environment
+
+# Practice environment
+print(Environment.PRACTICE.base_url)
+# Output: https://api-fxpractice.oanda.com/v3
+
+# Live environment
+print(Environment.LIVE.base_url)
+# Output: https://api-fxtrade.oanda.com/v3
+```
+
+### Development Workflow
+
+**Recommended development flow:**
+
+1. **Develop in Practice**: Write and test all code in practice environment
+2. **Validate Strategy**: Thoroughly test trading strategy with virtual funds
+3. **Code Review**: Review code for security, error handling, and risk management
+4. **Gradual Deployment**: Start with small position sizes in live environment
+5. **Monitor and Scale**: Monitor performance before increasing position sizes
+
 ## Quick Start
 
 ### Direct Parameters
