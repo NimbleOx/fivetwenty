@@ -11,7 +11,7 @@ A comprehensive, hands-on tutorial series that walks you through forex trading f
 
     **Learning outcome:** Confidence with basic trading operations and FiveTwenty usage
 
-    **Time commitment:** 30-45 minutes per lesson, 2-3 hours total
+    **Time commitment:** 30-45 minutes per tutorial, 2-3 hours total
 
 This progressive tutorial series takes you from complete beginner to building automated trading strategies. Each lesson builds on the previous one with checkpoints to ensure you're developing skills effectively.
 
@@ -28,17 +28,17 @@ This progressive tutorial series takes you from complete beginner to building au
 ### 📈 Your Progressive Journey
 
 !!! info "🎯 Skill Progression Framework"
-    **Level 1: Foundation** → Understand concepts and connect to API
-    **Level 2: Basic Operations** → Place your first trade
-    **Level 3: Position Management** → Monitor and manage trades
-    **Level 4: Strategy Implementation** → Build a complete trading system
+    **Foundation** → Understand forex concepts and fundamentals
+    **Market Analysis** → Analyze market data and conditions
+    **Active Trading** → Place and manage trades
+    **Strategy Development** → Build systematic trading systems
 
 ---
 
 ## Tutorial Lessons
 
-### 1. [Foundation - Forex Trading Fundamentals](lesson-1-foundation.md)
-**Level 1: Foundation Knowledge**
+### [Foundation - Forex Trading Fundamentals](foundation.md)
+**Foundation Knowledge**
 
 Learn essential forex concepts before placing your first trade:
 
@@ -51,22 +51,8 @@ Learn essential forex concepts before placing your first trade:
 
 ---
 
-### 2. [Connection & Setup](lesson-2-connection-setup.md)
-**Level 2: Basic Operations**
-
-Connect to OANDA safely and understand your trading environment:
-
-- Secure API connection setup
-- Account information analysis
-- Environment configuration (Practice vs Live)
-- Troubleshooting common connection issues
-
-**Skills gained:** Secure API usage, account management, and error handling
-
----
-
-### 3. [Market Data & Analysis](lesson-3-market-data.md)
-**Level 2: Basic Operations (Continued)**
+### [Market Data & Analysis](market-data.md)
+**Market Analysis**
 
 Understand market data before trading:
 
@@ -79,8 +65,8 @@ Understand market data before trading:
 
 ---
 
-### 4. [Your First Trade](lesson-4-first-trade.md)
-**Level 3: Position Management**
+### [Your First Trade](first-trade.md)
+**First Trading**
 
 Place and manage your first trade with comprehensive safety:
 
@@ -93,8 +79,8 @@ Place and manage your first trade with comprehensive safety:
 
 ---
 
-### 5. [Position Management Mastery](lesson-5-position-management.md)
-**Level 3: Position Management (Advanced)**
+### [Position Management](position-management.md)
+**Advanced Position Management**
 
 Learn the art of managing open positions:
 
@@ -107,8 +93,8 @@ Learn the art of managing open positions:
 
 ---
 
-### 6. [Building Trading Strategies](lesson-6-strategy-building.md)
-**Level 4: Strategy Implementation**
+### [Strategy Building](strategy-building.md)
+**Strategy Development**
 
 Develop your first complete trading strategy:
 
@@ -121,8 +107,8 @@ Develop your first complete trading strategy:
 
 ---
 
-### 7. [Complete Trading System](lesson-7-complete-system.md)
-**Level 4: Strategy Implementation (Advanced)**
+### [Complete Trading System](complete-system.md)
+**Complete System Building**
 
 Build a production-ready automated trading system:
 
@@ -154,13 +140,13 @@ Acknowledgment of achievements at each milestone
 ## Quick Start Guide
 
 ### For Complete Beginners
-Start with [Lesson 1: Foundation](lesson-1-foundation.md) and work through each lesson sequentially.
+Start with [Foundation](foundation.md) and work through each tutorial.
 
 ### For Developers New to Trading
-Begin with [Lesson 1: Foundation](lesson-1-foundation.md) to understand forex concepts, then move quickly through the technical lessons.
+Begin with [Foundation](foundation.md) to understand forex concepts, then move quickly through the technical tutorials.
 
 ### For Traders New to FiveTwenty
-Skip to [Lesson 2: Connection & Setup](lesson-2-connection-setup.md) and focus on API usage patterns.
+Skip to [Market Data & Analysis](market-data.md) and focus on API usage patterns.
 
 ---
 

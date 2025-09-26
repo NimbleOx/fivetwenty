@@ -75,13 +75,12 @@ nav:
           - Your First Trade: tutorials/getting-started/first-trade.md
       - Basic Trading:
           - tutorials/basic-trading/index.md
-          - Foundation: tutorials/basic-trading/lesson-1-foundation.md
-          - Connection & Setup: tutorials/basic-trading/lesson-2-connection-setup.md
-          - Market Data & Analysis: tutorials/basic-trading/lesson-3-market-data.md
-          - Your First Trade: tutorials/basic-trading/lesson-4-first-trade.md
-          - Position Management: tutorials/basic-trading/lesson-5-position-management.md
-          - Strategy Building: tutorials/basic-trading/lesson-6-strategy-building.md
-          - Complete System: tutorials/basic-trading/lesson-7-complete-system.md
+          - Foundation: tutorials/basic-trading/foundation.md
+          - Market Data & Analysis: tutorials/basic-trading/market-data.md
+          - Your First Trade: tutorials/basic-trading/first-trade.md
+          - Position Management: tutorials/basic-trading/position-management.md
+          - Strategy Building: tutorials/basic-trading/strategy-building.md
+          - Complete System: tutorials/basic-trading/complete-system.md
       - Advanced Orders:
           - tutorials/advanced-orders/index.md
           - Advanced Limit Orders: tutorials/advanced-orders/advanced-limit-orders.md

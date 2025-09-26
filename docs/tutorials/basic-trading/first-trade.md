@@ -1,4 +1,4 @@
-# Lesson 4: Your First Trade
+# Your First Trade
 
 !!! tip "🎯 Learning Goal"
     Place your first trade safely, monitor it in real-time, and understand the complete trade lifecycle.
@@ -295,7 +295,7 @@ Test your understanding of trade execution:
 
 ## Next Steps
 
-Continue to [Lesson 5: Position Management Mastery](lesson-5-position-management.md) to learn advanced techniques for managing your trading positions.
+Continue to [Position Management](position-management.md) to learn advanced techniques for managing your trading positions.
 
 ---
 

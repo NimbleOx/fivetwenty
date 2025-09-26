@@ -1,4 +1,4 @@
-# Lesson 7: Complete Trading System
+# Complete Trading System
 
 !!! tip "🎯 Learning Goal"
     Build a production-ready automated trading system with full automation, risk management, and performance tracking.

@@ -1,4 +1,4 @@
-# Lesson 1: Foundation - FiveTwenty Trading Setup
+# Foundation - FiveTwenty Trading Setup
 
 !!! tip "🎯 Learning Goal"
     Understand the essential FiveTwenty concepts needed to start trading with OANDA.
@@ -119,7 +119,7 @@ asyncio.run(test_fivetwenty_setup())
 
 ## Next Steps
 
-Ready to make your first trade? Continue to [Lesson 2: Connection Setup](lesson-2-connection-setup.md) where you'll learn to set up a secure client connection and execute your first market order.
+Ready to start trading? Continue to [Market Data & Analysis](market-data.md) to learn how to analyze market conditions before placing trades.
 
 ## Related Resources
 

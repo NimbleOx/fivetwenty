@@ -1,4 +1,4 @@
-# Lesson 6: Building Trading Strategies
+# Strategy Building
 
 !!! tip "🎯 Learning Goal"
     Develop your first complete trading strategy with systematic signal generation and risk management.
@@ -449,7 +449,7 @@ Test your understanding of strategy building:
 
 ## Next Steps
 
-Continue to [Lesson 7: Complete Trading System](lesson-7-complete-system.md) to build a production-ready automated trading system.
+Continue to [Complete Trading System](complete-system.md) to build a production-ready automated trading system.
 
 ---
 

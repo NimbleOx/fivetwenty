@@ -1,4 +1,4 @@
-# Lesson 5: Position Management Mastery
+# Position Management
 
 !!! tip "🎯 Learning Goal"
     Master advanced position management techniques including stop losses, take profits, and risk-to-reward optimization.
@@ -321,7 +321,7 @@ Use FiveTwenty's order management APIs to set stop losses and take profits when 
 
 ## Next Steps
 
-Continue to [Lesson 6: Building Trading Strategies](lesson-6-strategy-building.md) to learn how to combine your skills into systematic trading approaches.
+Continue to [Strategy Building](strategy-building.md) to learn how to combine your skills into systematic trading approaches.
 
 ---
 

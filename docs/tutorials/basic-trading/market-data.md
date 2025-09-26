@@ -1,4 +1,4 @@
-# Lesson 3: Market Data & Analysis
+# Market Data & Analysis
 
 !!! tip "🎯 Learning Goal"
     Understand how to retrieve and analyze market data to make informed trading decisions.
@@ -365,7 +365,7 @@ Use FiveTwenty's pricing API to check current spreads and recent price action be
 
 ## Next Steps
 
-Continue to [Lesson 4: Your First Trade](lesson-4-first-trade.md) to place your first trade using the market analysis skills you've learned.
+Continue to [Your First Trade](first-trade.md) to place your first trade using the market analysis skills you've learned.
 
 ---
 
