@@ -449,9 +449,17 @@ class Position(BaseModel):
 ### **Exception Hierarchy Usage**
 
 ```python
+import json
+import logging
+import time
+from datetime import datetime
+from typing import AsyncIterator
+
 import httpx
-from fivetwenty.exceptions import FiveTwentyError
-from fivetwenty.models import Price
+from pydantic import ValidationError
+
+from fivetwenty.exceptions import FiveTwentyError, StreamStall
+from fivetwenty.models import Price, PricingHeartbeat
 
 
 # ✅ Good - Appropriate exception types
@@ -496,16 +504,6 @@ async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Pri
         ) from e
 
 # ✅ Good - Streaming-specific error handling
-import json
-import logging
-import time
-from datetime import datetime
-from typing import AsyncIterator
-
-from pydantic import ValidationError
-from fivetwenty.exceptions import StreamStall
-from fivetwenty.models import Price, PricingHeartbeat
-
 HEARTBEAT_TIMEOUT = 30
 logger = logging.getLogger(__name__)
 
