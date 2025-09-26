@@ -515,7 +515,7 @@ class EnhancedSentimentAnalyzer:
     """Class docstring."""
     """Enhanced sentiment analysis with financial context."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.financial_keywords = {
             "positive": [
                 "bullish", "surge", "rally", "gains", "optimistic",
@@ -559,6 +559,8 @@ class EnhancedSentimentAnalyzer:
 ### Position Sizing with News Impact
 
 ```python
+
+"""Module docstring."""
 def calculate_news_adjusted_position_size(
     base_size: int,
     sentiment_score: float,

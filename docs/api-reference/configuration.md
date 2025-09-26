@@ -55,7 +55,7 @@ class AccountConfig:
         account_id: SecretStr | str,
         environment: Environment,
         alias: str,
-    ):
+    ) -> None:
         pass
 ```
 
@@ -375,6 +375,8 @@ from enum import Enum
 
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class Environment(Enum):
     """Class docstring."""
@@ -481,6 +483,8 @@ print(f"Active strategies: {list(active_accounts.keys())}")
 from fivetwenty import ConfigValidator
 
 
+
+"""Module docstring."""
 def create_safe_config(**kwargs) -> AccountConfig:
     """Create configuration with validation."""
     config = AccountConfig(**kwargs)
@@ -500,6 +504,8 @@ import os
 from fivetwenty import AccountConfigLoader, Environment
 
 
+
+"""Module docstring."""
 def load_production_config() -> AccountConfig:
     """Load production configuration with safety checks."""
     config = AccountConfigLoader.load_default()
@@ -544,6 +550,8 @@ logger.info(f"Token: {config.token.get_secret_value()}")  # DON'T DO THIS
 from fivetwenty import AsyncClient, ConfigValidator
 
 
+
+"""Module docstring."""
 def safe_client_creation(config: AccountConfig) -> AsyncClient:
     """Create client with validation."""
     errors = ConfigValidator.validate_account_config(config)
@@ -634,15 +642,17 @@ class ConfigFactory:
 ```python
 
 """Module docstring."""
+
+from typing import Any
 class ConfigManager:
     """Class docstring."""
     """Manage multiple configurations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.configs: dict[str, AccountConfig] = {}
         self._load_configs()
 
-    def _load_configs(self):
+    def _load_configs(self) -> Any:
         """Load all available configurations."""
         # Standard config
         default_config = AccountConfigLoader.load_default()

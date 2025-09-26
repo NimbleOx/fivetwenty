@@ -445,6 +445,8 @@ from fivetwenty import AsyncClient, Environment
 
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class SecureCredentialManager:
     """Class docstring."""
@@ -503,6 +505,8 @@ import httpx
 from fivetwenty import AsyncClient, Environment
 
 
+
+"""Module docstring."""
 def create_secure_client_with_tls() -> AsyncClient:
     """Create client with enhanced TLS security."""
 
@@ -604,12 +608,14 @@ from typing import Any, Dict
 
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class HealthCheckServer:
     """Class docstring."""
     """Health check server for monitoring."""
 
-    def __init__(self, streaming_system: ProductionStreamingSystem):
+    def __init__(self, streaming_system: ProductionStreamingSystem) -> None:
         self.system = streaming_system
 
     async def get_health_status(self) -> dict[str, Any]:

@@ -818,10 +818,10 @@ Test your understanding of portfolio-level risk management:
 class RiskLimitFramework:
     """Class docstring."""
     """Comprehensive risk limit management system."""
-    
-    def __init__(self, account_balance: Decimal):
+
+    def __init__(self, account_balance: Decimal) -> None:
         self.account_balance = account_balance
-        
+
         # Multi-level risk limits
         self.limits = {
             "per_trade": {
@@ -845,24 +845,24 @@ class RiskLimitFramework:
                 "alert_threshold": 30.0,     # Alert at 30%
             },
         }
-    
+
     def check_all_limits(self, current_positions: dict) -> dict:
         """Check all risk limits and return status."""
-        
+
         results = {
             "overall_status": "OK",
             "violations": [],
             "warnings": [],
             "limit_checks": {},
         }
-        
+
         # This would integrate with actual position data
         # Simplified example showing the framework
-        
+
         for limit_type, limits in self.limits.items():
             # Calculate current value for this limit type
             current_value = self._calculate_current_value(limit_type, current_positions)
-            
+
             status = "OK"
             if current_value > limits["max_risk_pct"]:
                 status = "VIOLATION"
@@ -873,23 +873,23 @@ class RiskLimitFramework:
                 results["warnings"].append(f"{limit_type} approaching limit: {current_value:.1f}%")
                 if results["overall_status"] == "OK":
                     results["overall_status"] = "WARNING"
-            
+
             results["limit_checks"][limit_type] = {
                 "current": current_value,
                 "limit": limits["max_risk_pct"],
                 "threshold": limits["alert_threshold"],
                 "status": status,
             }
-        
+
         return results
-    
+
     def _calculate_current_value(self, limit_type: str, positions: dict) -> float:
         """Calculate current value for specific limit type."""
         # Simplified calculation - would be more complex in practice
         if limit_type == "portfolio":
             total_risk = sum(pos.get("risk_amount", 0) for pos in positions.values())
             return (total_risk / self.account_balance) * 100
-        
+
         # Add other limit type calculations
         return 0.0
 ```

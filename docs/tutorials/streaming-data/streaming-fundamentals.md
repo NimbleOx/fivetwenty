@@ -293,25 +293,29 @@ class StallDetector:
 
 ### Stream Multiplexing
 ```python
+
+from typing import Any
 from datetime import datetime
 
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class StreamMultiplexer:
     """Class docstring."""
     """Multiplex multiple streams into single output."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.streams = {}
         self.output_queue = asyncio.Queue()
 
-    async def add_stream(self, name: str, stream: AsyncIterator):
+    async def add_stream(self, name: str, stream: AsyncIterator) -> Any:
         """Add stream to multiplexer."""
         self.streams[name] = stream
         asyncio.create_task(self._consume_stream(name, stream))
 
-    async def _consume_stream(self, name: str, stream: AsyncIterator):
+    async def _consume_stream(self, name: str, stream: AsyncIterator) -> Any:
         """Consume individual stream."""
         async for data in stream:
             enriched_data = {

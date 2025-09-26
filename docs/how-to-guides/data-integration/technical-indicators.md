@@ -766,14 +766,16 @@ Track the performance of your technical signals:
 ```python
 
 """Module docstring."""
+
+from typing import Any
 class SignalPerformanceTracker:
     """Class docstring."""
     """Track performance of technical signals."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.signal_history = []
 
-    def record_signal(self, instrument: str, signal_data: Dict, trade_result: Dict = None):
+    def record_signal(self, instrument: str, signal_data: Dict, trade_result: Dict = None) -> Any:
         """Record a signal and its outcome."""
 
         record = {

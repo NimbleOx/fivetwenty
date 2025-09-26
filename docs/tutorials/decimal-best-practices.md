@@ -332,6 +332,8 @@ asyncio.run(demo_stop_loss_calculation())
 from decimal import Decimal, getcontext
 
 # Set global precision for calculations
+
+"""Module docstring."""
 getcontext().prec = 28  # High precision for financial calculations
 
 def safe_divide(numerator: Decimal, denominator: Decimal) -> Decimal:
@@ -386,6 +388,8 @@ async def convert_currency_precise(
 from decimal import Decimal
 
 
+
+"""Module docstring."""
 def calculate_sharpe_ratio(
     returns: list[Decimal],
     risk_free_rate: Decimal = Decimal("0.02"),

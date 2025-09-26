@@ -158,12 +158,14 @@ class OrderValidationFramework:
 from decimal import Decimal
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class MaxPositionSizeValidator(OrderValidator):
     """Class docstring."""
     """Validate order doesn't exceed maximum position size limits."""
 
-    def __init__(self, max_units_per_instrument: int, max_total_exposure: Decimal):
+    def __init__(self, max_units_per_instrument: int, max_total_exposure: Decimal) -> None:
         super().__init__("MaxPositionSize", ValidationSeverity.ERROR)
         self.max_units_per_instrument = max_units_per_instrument
         self.max_total_exposure = max_total_exposure
@@ -274,7 +276,7 @@ class RiskPerTradeValidator(OrderValidator):
     """Class docstring."""
     """Validate risk per trade doesn't exceed limits."""
 
-    def __init__(self, max_risk_per_trade: Decimal):
+    def __init__(self, max_risk_per_trade: Decimal) -> None:
         super().__init__("RiskPerTrade", ValidationSeverity.WARNING)
         self.max_risk_per_trade = max_risk_per_trade
 
@@ -330,12 +332,14 @@ from decimal import Decimal
 
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class SpreadValidator(OrderValidator):
     """Class docstring."""
     """Validate spread isn't too wide for order execution."""
 
-    def __init__(self, max_spread_pips: Decimal):
+    def __init__(self, max_spread_pips: Decimal) -> None:
         super().__init__("SpreadValidation", ValidationSeverity.WARNING)
         self.max_spread_pips = max_spread_pips
 
@@ -393,7 +397,7 @@ class MarketHoursValidator(OrderValidator):
     """Class docstring."""
     """Validate market is open for the instrument."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("MarketHours", ValidationSeverity.WARNING)
 
     async def validate(self, order_params: Dict[str, Any], context: Dict[str, Any]) -> ValidationResult:
@@ -436,6 +440,8 @@ from decimal import Decimal
 
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class PriceValidityValidator(OrderValidator):
     """Class docstring."""
@@ -516,7 +522,7 @@ class OrderParametersValidator(OrderValidator):
     """Class docstring."""
     """Validate order parameters are properly formatted."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("OrderParameters", ValidationSeverity.ERROR)
 
     async def validate(self, order_params: Dict[str, Any], context: Dict[str, Any]) -> ValidationResult:

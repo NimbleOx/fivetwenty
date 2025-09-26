@@ -228,11 +228,13 @@ async def process_price_data(price_obj: Dict[str, Any]):
 
 ```python
 # Efficient: Direct attribute access
-def fast_spread_calculation(price):
+
+from typing import Any
+def fast_spread_calculation(price) -> Any:
     return price.asks[0].price - price.bids[0].price
 
 # Less efficient: Multiple function calls
-def slow_spread_calculation(price):
+def slow_spread_calculation(price) -> Any:
     ask = get_ask_price(price)
     bid = get_bid_price(price)
     return calculate_spread(ask, bid)
@@ -242,7 +244,9 @@ def slow_spread_calculation(price):
 
 ```python
 # Efficient: Cache frequently accessed attributes
-async def optimized_price_processing(price):
+
+from typing import Any
+async def optimized_price_processing(price) -> Any:
     bids = price.bids
     asks = price.asks
     instrument = price.instrument
@@ -256,7 +260,7 @@ async def optimized_price_processing(price):
         await handle_price_update(instrument, bid_price, ask_price, spread)
 
 # Less efficient: Repeated attribute lookups
-async def unoptimized_price_processing(price):
+async def unoptimized_price_processing(price) -> Any:
     if price.bids and price.asks:
         spread = price.asks[0].price - price.bids[0].price
         await handle_price_update(price.instrument, price.bids[0].price,
@@ -266,10 +270,14 @@ async def unoptimized_price_processing(price):
 ### Vectorized Operations
 
 ```python
+
+from typing import Any
 import numpy as np
 
 
-def calculate_multiple_spreads(prices_array):
+
+"""Module docstring."""
+def calculate_multiple_spreads(prices_array) -> Any:
     """Calculate spreads for multiple prices efficiently."""
 
     # Vectorized calculation using numpy
@@ -279,11 +287,11 @@ def calculate_multiple_spreads(prices_array):
 
     return spreads
 
-def calculate_moving_average(prices, window):
+def calculate_moving_average(prices, window) -> Any:
     """Fast moving average using numpy."""
     return np.convolve(prices, np.ones(window)/window, mode="valid")
 
-def detect_price_movements(prices, threshold=0.0001):
+def detect_price_movements(prices, threshold=0.0001) -> Any:
     """Vectorized price movement detection."""
     price_changes = np.abs(np.diff(prices))
     significant_moves = price_changes > threshold

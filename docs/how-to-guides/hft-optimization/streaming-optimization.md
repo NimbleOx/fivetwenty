@@ -180,7 +180,9 @@ Execute callbacks without blocking the main stream:
 
 ```python
 # Good: Non-blocking callback execution
-async def _process_price_update(self, price):
+
+from typing import Any
+async def _process_price_update(self, price) -> Any:
     # Store data first (fast)
     self.store_price_data(price)
 
@@ -189,7 +191,7 @@ async def _process_price_update(self, price):
         asyncio.create_task(callback(price))
 
 # Bad: Blocking callback execution
-async def _process_price_update(self, price):
+async def _process_price_update(self, price) -> Any:
     # This blocks the main stream
     for callback in self.callbacks:
         await callback(price)  # Blocks here
@@ -214,7 +216,11 @@ price_list = []  # Can grow without bounds
 Filter messages at the earliest point:
 
 ```python
-async def _process_price_update(self, price):
+
+"""Module docstring."""
+
+from typing import Any
+async def _process_price_update(self, price) -> Any:
     # Filter early to reduce processing
     if not self._should_process_price(price):
         return
@@ -222,7 +228,7 @@ async def _process_price_update(self, price):
     # Process only relevant updates
     await self._handle_price_update(price)
 
-def _should_process_price(self, price):
+def _should_process_price(self, price) -> Any:
     # Only process prices with tight spreads
     if price.bids and price.asks:
         spread = Decimal(str(price.asks[0].price)) - Decimal(str(price.bids[0].price))
@@ -282,7 +288,11 @@ price_data = FastPrice(Decimal("1.1234"), Decimal("1.1236"), time.perf_counter()
 Process multiple updates together when possible:
 
 ```python
-async def batch_process_prices(self, prices: List[ClientPrice]):
+
+"""Module docstring."""
+
+from typing import Any
+async def batch_process_prices(self, prices: List[ClientPrice]) -> Any:
     """Process multiple prices in a batch for efficiency."""
 
     # Group by instrument

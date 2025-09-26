@@ -886,13 +886,13 @@ thresholds = {
 # WRONG: No way to stop automated system
 class RiskSystem:
     """Class docstring."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.can_be_stopped = False  # Dangerous!
 
 # RIGHT: Always include emergency stops
 class RiskSystem:
     """Class docstring."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.emergency_stop_enabled = True
         self.manual_override = True
 ```
@@ -909,43 +909,43 @@ class RiskSystem:
 class MLRiskPredictor:
     """Class docstring."""
     """Use machine learning to predict risk scenarios."""
-    
-    def __init__(self):
+
+    def __init__(self) -> None:
         self.model_loaded = False
         # In practice, load trained model
-    
+
     def predict_risk_scenario(self, market_data: dict, portfolio_state: dict) -> dict:
         """Predict potential risk scenarios."""
-        
+
         # Simplified example - in practice use trained ML model
         risk_factors = {
             "volatility_spike": self._assess_volatility_risk(market_data),
             "correlation_breakdown": self._assess_correlation_risk(portfolio_state),
             "liquidity_crisis": self._assess_liquidity_risk(market_data),
         }
-        
+
         # Calculate overall risk score
         risk_score = sum(risk_factors.values()) / len(risk_factors)
-        
+
         return {
             "overall_risk_score": risk_score,
             "risk_factors": risk_factors,
             "recommended_action": self._recommend_action(risk_score),
         }
-    
+
     def _assess_volatility_risk(self, market_data: dict) -> float:
         """Assess volatility spike risk (0-1)."""
         # Simplified - real implementation would use sophisticated models
         return 0.3  # Example score
-    
+
     def _assess_correlation_risk(self, portfolio_state: dict) -> float:
         """Assess correlation breakdown risk (0-1)."""
         return 0.2  # Example score
-    
+
     def _assess_liquidity_risk(self, market_data: dict) -> float:
         """Assess liquidity crisis risk (0-1)."""
         return 0.1  # Example score
-    
+
     def _recommend_action(self, risk_score: float) -> str:
         """Recommend action based on risk score."""
         if risk_score > 0.8:

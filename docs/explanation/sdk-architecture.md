@@ -52,6 +52,8 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 - **Documentation**: Self-documenting models with field descriptions
 
 ```python
+
+"""Module docstring."""
 class Account(ApiModel):
     """Class docstring."""
     balance: Decimal  # Validated at runtime

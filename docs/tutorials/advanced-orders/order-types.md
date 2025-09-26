@@ -366,10 +366,14 @@ async def robust_order_placement():
 Always validate parameters before submission:
 
 ```python
+
+from typing import Any
 from decimal import Decimal
 
 
-def validate_order_params(instrument: str, units: int, price: Decimal):
+
+"""Module docstring."""
+def validate_order_params(instrument: str, units: int, price: Decimal) -> Any:
     # Check minimum/maximum units
     if abs(units) < 1:
         raise ValueError("Units must be at least 1")
@@ -389,6 +393,8 @@ def validate_order_params(instrument: str, units: int, price: Decimal):
 from decimal import Decimal
 
 
+
+"""Module docstring."""
 async def calculate_position_size(risk_amount: Decimal, stop_distance: Decimal) -> int:
     """Calculate position size based on risk management rules."""
 

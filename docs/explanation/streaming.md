@@ -513,11 +513,13 @@ Track streaming performance:
 ```python
 
 """Module docstring."""
+
+from typing import Any
 class StreamMetrics:
     """Class docstring."""
     """Track streaming metrics."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.metrics = {
             "messages_received": 0,
             "heartbeats_received": 0,
@@ -527,7 +529,7 @@ class StreamMetrics:
             "stream_start_time": datetime.now(),
         }
 
-    def update(self, event_type):
+    def update(self, event_type) -> Any:
         """Update metrics."""
 
         self.metrics["messages_received"] += 1
@@ -536,11 +538,11 @@ class StreamMetrics:
         if event_type == "HEARTBEAT":
             self.metrics["heartbeats_received"] += 1
 
-    def get_uptime(self):
+    def get_uptime(self) -> Any:
         """Get stream uptime."""
         return datetime.now() - self.metrics["stream_start_time"]
 
-    def get_message_rate(self):
+    def get_message_rate(self) -> Any:
         """Get messages per second."""
         uptime = self.get_uptime().total_seconds()
         return self.metrics["messages_received"] / uptime if uptime > 0 else 0

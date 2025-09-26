@@ -793,6 +793,8 @@ Implement detailed logging for compliance and analysis.
 ### Advanced Logging System
 
 ```python
+
+from typing import Any
 import json
 import logging
 from datetime import datetime
@@ -800,17 +802,19 @@ from pathlib import Path
 
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class TradingLogger:
     """Class docstring."""
-    def __init__(self, log_directory: str = "trading_logs"):
+    def __init__(self, log_directory: str = "trading_logs") -> None:
         self.log_directory = Path(log_directory)
         self.log_directory.mkdir(exist_ok=True)
 
         # Set up different loggers for different purposes
         self.setup_loggers()
 
-    def setup_loggers(self):
+    def setup_loggers(self) -> Any:
         """Set up specialized loggers for different trading activities."""
 
         # Order activity logger
@@ -846,7 +850,7 @@ class TradingLogger:
         self.performance_logger.addHandler(perf_handler)
         self.performance_logger.setLevel(logging.INFO)
 
-    def log_order_action(self, action: str, order_data: Dict[str, Any]):
+    def log_order_action(self, action: str, order_data: Dict[str, Any]) -> Any:
         """Log order-related actions."""
         log_entry = {
             "action": action,
@@ -856,7 +860,7 @@ class TradingLogger:
 
         self.order_logger.info(json.dumps(log_entry))
 
-    def log_error(self, error: Exception, context: Dict[str, Any]):
+    def log_error(self, error: Exception, context: Dict[str, Any]) -> Any:
         """Log errors with context."""
         log_entry = {
             "error_type": type(error).__name__,
@@ -867,7 +871,7 @@ class TradingLogger:
 
         self.error_logger.error(json.dumps(log_entry))
 
-    def log_performance_metric(self, metric_name: str, value: Any, metadata: Dict[str, Any] = None):
+    def log_performance_metric(self, metric_name: str, value: Any, metadata: Dict[str, Any] = None) -> Any:
         """Log performance metrics."""
         log_entry = {
             "metric": metric_name,

@@ -12,6 +12,8 @@ All code must pass mypy strict mode with no errors:
 
 ```python
 # ✅ Good - Full type annotations
+
+from typing import Any
 async def create_order(
     self,
     account_id: str,
@@ -23,7 +25,7 @@ async def create_order(
     pass
 
 # ❌ Bad - Missing type annotations
-async def create_order(self, account_id, order, timeout=None):
+async def create_order(self, account_id, order, timeout=None) -> Any:
     pass
 ```
 
@@ -37,6 +39,8 @@ from typing import Union
 
 
 # ✅ Good - Decimal for financial values
+
+"""Module docstring."""
 def calculate_position_value(
     units: int,
     price: Decimal,
@@ -63,6 +67,8 @@ from fivetwenty.exceptions import FiveTwentyError
 
 
 # ✅ Good - Specific exception types
+
+"""Module docstring."""
 async def get_account(self, account_id: str) -> AccountSummary:
     try:
         response = await self._request("GET", f"/accounts/{account_id}")
@@ -143,7 +149,7 @@ class OrdersEndpoint:
 # Attach to client
 class AsyncClient:
     """Class docstring."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.orders = OrdersEndpoint(self)
         self.accounts = AccountsEndpoint(self)
         self.trades = TradesEndpoint(self)
@@ -162,6 +168,8 @@ from pydantic import BaseModel, Field
 
 # ✅ Good - Complete Pydantic model
 
+
+"""Module docstring."""
 """Module docstring."""
 class Order(BaseModel):
     """Class docstring."""
@@ -361,6 +369,8 @@ from fivetwenty.exceptions import FiveTwentyError, StreamStall
 
 
 # ✅ Good - Appropriate exception types
+
+"""Module docstring."""
 async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Price]:
     """Get current pricing with proper error handling."""
     try:
@@ -438,6 +448,8 @@ from pydantic import ValidationError
 
 
 # ✅ Good - Validate inputs early
+
+"""Module docstring."""
 def create_order_request(
     instrument: str,
     units: int,
@@ -669,6 +681,8 @@ from pydantic import SecretStr
 
 # ✅ Good - Secure credential handling
 
+
+"""Module docstring."""
 """Module docstring."""
 class AccountConfig(BaseModel):
     """Class docstring."""

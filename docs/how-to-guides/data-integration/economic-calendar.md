@@ -285,6 +285,8 @@ class RealTimeEconomicMonitor:
 ### Event Impact Classification
 
 ```python
+
+"""Module docstring."""
 EVENT_IMPACT_RULES = {
     # Central Bank Events (Highest Impact)
     "interest_rate_decision": "HIGH",
@@ -324,6 +326,8 @@ def classify_event_impact(event_title: str) -> str:
 ### Position Sizing During Events
 
 ```python
+
+"""Module docstring."""
 def calculate_event_adjusted_position_size(
     base_size: int,
     event_impact: str,

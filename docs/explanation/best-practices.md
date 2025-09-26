@@ -240,16 +240,18 @@ class StopLossManager:
 ```python
 
 """Module docstring."""
+
+from typing import Any
 class DailyLossLimiter:
     """Class docstring."""
     """Enforce daily loss limits."""
 
-    def __init__(self, max_daily_loss: Decimal):
+    def __init__(self, max_daily_loss: Decimal) -> None:
         self.max_daily_loss = max_daily_loss
         self.daily_pnl = Decimal("0.0")
         self.trading_enabled = True
 
-    async def update_pnl(self, pnl: Decimal):
+    async def update_pnl(self, pnl: Decimal) -> Any:
         """Update daily P&L and check limits."""
 
         self.daily_pnl += pnl
@@ -263,7 +265,7 @@ class DailyLossLimiter:
         """Check if trading is allowed."""
         return self.trading_enabled
 
-    def reset_daily(self):
+    def reset_daily(self) -> Any:
         """Reset for new trading day."""
         self.daily_pnl = 0.0
         self.trading_enabled = True
@@ -504,20 +506,24 @@ class HealthMonitor:
 ### Alerting System
 
 ```python
+
+from typing import Any
 import smtplib
 from email.mime.text import MIMEText
 
 
 
+
+"""Module docstring."""
 """Module docstring."""
 class AlertManager:
     """Class docstring."""
     """Send alerts for critical events."""
 
-    def __init__(self, email_config: dict):
+    def __init__(self, email_config: dict) -> None:
         self.email_config = email_config
 
-    async def send_alert(self, subject: str, message: str, severity: str = "INFO"):
+    async def send_alert(self, subject: str, message: str, severity: str = "INFO") -> Any:
         """Send alert via email."""
 
         if severity not in ["INFO", "WARNING", "CRITICAL"]:
@@ -533,7 +539,7 @@ class AlertManager:
             f"Alert: {subject} - {message}",
         )
 
-    async def send_email(self, subject: str, body: str):
+    async def send_email(self, subject: str, body: str) -> Any:
         """Send email alert."""
 
         msg = MIMEText(body)

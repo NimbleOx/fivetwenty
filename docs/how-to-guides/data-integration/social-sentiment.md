@@ -304,7 +304,7 @@ class MultiPlatformSentimentProvider:
     """Class docstring."""
     """Aggregate sentiment from multiple social platforms."""
 
-    def __init__(self, twitter_token: str, reddit_credentials: Dict = None):
+    def __init__(self, twitter_token: str, reddit_credentials: Dict = None) -> None:
         self.twitter_provider = SocialSentimentProvider(twitter_token)
         self.reddit_credentials = reddit_credentials
 
@@ -738,7 +738,7 @@ class SentimentValidator:
     """Class docstring."""
     """Validate and improve sentiment analysis accuracy."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.financial_positive_terms = [
             "bullish", "optimistic", "strong", "growth", "recovery",
             "positive", "confident", "robust", "healthy", "improving",

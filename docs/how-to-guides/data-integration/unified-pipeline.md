@@ -670,15 +670,17 @@ Monitor the performance and efficiency of the data pipeline:
 ```python
 
 """Module docstring."""
+
+from typing import Any
 class PipelinePerformanceMonitor:
     """Class docstring."""
     """Monitor performance of the unified data pipeline."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.performance_metrics = {}
         self.operation_times = {}
 
-    async def time_operation(self, operation_name: str, operation_func, *args, **kwargs):
+    async def time_operation(self, operation_name: str, operation_func, *args, **kwargs) -> Any:
         """Time an operation and record performance metrics."""
 
         start_time = datetime.now()

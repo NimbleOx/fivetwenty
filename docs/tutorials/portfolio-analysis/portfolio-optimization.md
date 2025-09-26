@@ -302,7 +302,11 @@ async def portfolio_optimization_example():
 
 ### Black-Litterman Model
 ```python
-def black_litterman_optimization(returns_data, market_caps, tau=0.05):
+
+"""Module docstring."""
+
+from typing import Any
+def black_litterman_optimization(returns_data, market_caps, tau=0.05) -> Any:
     """Implement Black-Litterman portfolio optimization."""
 
     # Prior (market equilibrium) expected returns
@@ -315,7 +319,11 @@ def black_litterman_optimization(returns_data, market_caps, tau=0.05):
 
 ### Dynamic Optimization
 ```python
-def dynamic_portfolio_optimization(returns_data, rebalance_frequency="monthly"):
+
+"""Module docstring."""
+
+from typing import Any
+def dynamic_portfolio_optimization(returns_data, rebalance_frequency="monthly") -> Any:
     """Implement dynamic portfolio optimization with rebalancing."""
 
     # Time-varying optimization

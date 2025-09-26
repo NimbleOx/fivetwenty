@@ -360,28 +360,32 @@ await notebook_async()  # Jupyter supports top-level await
 Stick to one pattern throughout your application:
 
 ```python
+
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 # Good: Consistent async throughout
 
+
+"""Module docstring."""
 """Module docstring."""
 class TradingSystem:
     """Class docstring."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.client = AsyncClient(...)
 
-    async def analyze(self):
+    async def analyze(self) -> Any:
         # All methods async
         pass
 
-    async def trade(self):
+    async def trade(self) -> Any:
         # All methods async
         pass
 
 # Bad: Mixed patterns
 class MixedSystem:
     """Class docstring."""
-    def __init__(self):
+    def __init__(self) -> None:
         self.async_client = AsyncClient(...)
         self.sync_client = Client(...)
 
@@ -443,7 +447,9 @@ sync_client = Client(
 
 ```python
 # Efficient async pattern
-async def efficient_async(client, account_ids):
+
+from typing import Any
+async def efficient_async(client, account_ids) -> Any:
     """Process multiple accounts efficiently."""
     async with asyncio.TaskGroup() as tg:
         tasks = [tg.create_task(process_account(client, aid))

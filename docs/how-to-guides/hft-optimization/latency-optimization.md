@@ -167,20 +167,22 @@ Configure timeouts for optimal latency:
 ```python
 
 """Module docstring."""
+
+from typing import Any
 class AdaptiveTimeoutManager:
     """Class docstring."""
     """Dynamically adjust timeouts based on network conditions."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.network_latencies = deque(maxlen=100)
         self.success_rates = deque(maxlen=50)
         self.current_timeout = 100  # Start with 100ms
 
-    def record_network_latency(self, latency_ms: float):
+    def record_network_latency(self, latency_ms: float) -> Any:
         """Record network latency measurement."""
         self.network_latencies.append(latency_ms)
 
-    def record_order_result(self, success: bool, latency_ms: float):
+    def record_order_result(self, success: bool, latency_ms: float) -> Any:
         """Record order execution result."""
         self.success_rates.append(success)
         self.record_network_latency(latency_ms)
@@ -217,7 +219,7 @@ class AdaptiveLowLatencyOrderManager(LowLatencyOrderManager):
     """Class docstring."""
     """Order manager with adaptive timeout optimization."""
 
-    def __init__(self, client: AsyncClient):
+    def __init__(self, client: AsyncClient) -> None:
         super().__init__(client)
         self.timeout_manager = AdaptiveTimeoutManager()
 
@@ -398,6 +400,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 
+
+"""Module docstring."""
 """Module docstring."""
 @dataclass
 class PriorityOrder:
@@ -407,7 +411,7 @@ class PriorityOrder:
     timestamp: float
     order_data: Dict[str, Any] = field(compare=False)
 
-    def __lt__(self, other):
+    def __lt__(self, other) -> None:
         # Higher priority orders first, then by timestamp
         if self.priority != other.priority:
             return self.priority > other.priority
@@ -417,7 +421,7 @@ class PriorityOrderQueue:
     """Class docstring."""
     """Priority queue for order execution."""
 
-    def __init__(self, max_size: int = 1000):
+    def __init__(self, max_size: int = 1000) -> None:
         self.max_size = max_size
         self.queue = []
         self.queue_stats = {
@@ -459,7 +463,7 @@ class PriorityOrderQueue:
         """Get current queue size."""
         return len(self.queue)
 
-    def clear_old_orders(self, max_age_seconds: float = 5.0):
+    def clear_old_orders(self, max_age_seconds: float = 5.0) -> Any:
         """Remove orders that are too old."""
 
         current_time = time.perf_counter()
@@ -478,7 +482,7 @@ class QueuedOrderManager(LowLatencyOrderManager):
     """Class docstring."""
     """Order manager with priority queuing."""
 
-    def __init__(self, client: AsyncClient):
+    def __init__(self, client: AsyncClient) -> None:
         super().__init__(client)
         self.order_queue = PriorityOrderQueue()
         self.processing_orders = False
@@ -496,7 +500,7 @@ class QueuedOrderManager(LowLatencyOrderManager):
 
         return self.order_queue.add_order(order_data, priority)
 
-    async def process_order_queue(self):
+    async def process_order_queue(self) -> Any:
         """Process queued orders in priority order."""
 
         if self.processing_orders:
@@ -526,7 +530,7 @@ class QueuedOrderManager(LowLatencyOrderManager):
             self.processing_orders = False
 
 # Example usage
-async def queued_execution_example(client: AsyncClient, account_id: str):
+async def queued_execution_example(client: AsyncClient, account_id: str) -> Any:
     """Example of queued order execution."""
 
     queued_manager = QueuedOrderManager(client)
