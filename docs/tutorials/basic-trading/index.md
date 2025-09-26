@@ -143,7 +143,7 @@ Each lesson includes detailed explanations of theory before practice
 ### 💻 Hands-on Exercises
 Interactive code examples you can run and modify
 
-### ✅ Skill Checkpoints
+### Skill Checkpoints
 Knowledge verification questions to test understanding
 
 ### Progress Celebrations

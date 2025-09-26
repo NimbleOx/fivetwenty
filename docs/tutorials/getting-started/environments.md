@@ -28,7 +28,7 @@ async with AsyncClient(
 
 ## When to Use Each Environment
 
-### Practice Environment ✅
+### Practice Environment
 
 **Perfect for:**
 - Learning OANDA trading concepts
