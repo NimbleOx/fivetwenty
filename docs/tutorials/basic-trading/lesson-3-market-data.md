@@ -342,19 +342,9 @@ Test your understanding of market data:
 
 ---
 
-## Best Practices for Market Analysis
+## Using FiveTwenty for Market Analysis
 
-### Before Every Trade
-1. **Check current spreads** - Avoid trading with wide spreads
-2. **Analyze recent price action** - Understand context
-3. **Assess volatility** - Adjust position size accordingly
-4. **Check economic calendar** - Avoid major news events
-
-### Red Flags to Avoid
-- Spreads wider than 5 pips for major pairs
-- Extremely low volume periods
-- Just before major economic announcements
-- During market open/close times with high volatility
+Use FiveTwenty's pricing API to check current spreads and recent price action before placing trades. The historical data endpoints help you understand market context and volatility patterns.
 
 ---
 
