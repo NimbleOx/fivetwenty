@@ -259,4 +259,4 @@ Continue to [Lesson 3: Market Data & Analysis](lesson-3-market-data.md) to learn
 
 - [Authentication Basics](../getting-started/authentication.md) - Detailed authentication guide
 - [Environment Configuration](../getting-started/environments.md) - Practice vs Live environments
-- [Error Handling](../../explanation/error-handling.md) - Understanding and handling API errors
+- [Error Handling](../../api-reference/error-handling.md) - Understanding and handling API errors

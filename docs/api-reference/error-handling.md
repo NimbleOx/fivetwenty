@@ -1,26 +1,81 @@
-# Error Handling
+# Error Handling Reference
 
-Robust error handling is critical for production trading systems. The FiveTwenty provides comprehensive error types and handling mechanisms.
+Complete reference for FiveTwenty SDK exception types, error codes, and handling patterns.
 
-## Error Hierarchy
+## Exception Classes
 
-The SDK uses a hierarchical error system:
+### Base Exception
 
-```text
-Exception
-└── FiveTwentyError (base for all OANDA errors)
-    ├── BadRequest (400 errors)
-    ├── Unauthorized (401 errors)
-    ├── Forbidden (403 errors)
-    ├── NotFound (404 errors)
-    ├── MethodNotAllowed (405 errors)
-    ├── TooManyRequests (429 errors)
-    └── InternalServerError (500+ errors)
-```
+#### `VeeTwentyError`
 
-## Basic Error Handling
+Base exception class for all FiveTwenty SDK errors.
 
-### Basic Try-Catch
+**Attributes:**
+- `code: int` - HTTP status code
+- `message: str` - Error description
+- `details: Optional[dict]` - Additional error details from OANDA API
+
+#### `BadRequest` (HTTP 400)
+
+Invalid request parameters or malformed requests.
+
+**Common causes:**
+- Invalid instrument names
+- Malformed order parameters
+- Insufficient margin/funds
+- Invalid account ID
+
+#### `Unauthorized` (HTTP 401)
+
+Authentication failures.
+
+**Common causes:**
+- Invalid or expired API token
+- Missing authentication headers
+- Token format errors
+
+#### `Forbidden` (HTTP 403)
+
+Permission denied for the requested operation.
+
+**Common causes:**
+- Account access restrictions
+- Insufficient permissions for operation
+- Trading restrictions on account
+
+#### `NotFound` (HTTP 404)
+
+Requested resource does not exist.
+
+**Common causes:**
+- Invalid account ID
+- Order ID not found
+- Trade ID not found
+- Unsupported instrument
+
+#### `MethodNotAllowed` (HTTP 405)
+
+HTTP method not supported for the endpoint.
+
+#### `TooManyRequests` (HTTP 429)
+
+Rate limit exceeded.
+
+**Attributes:**
+- `retry_after: Optional[int]` - Seconds to wait before retrying
+
+#### `InternalServerError` (HTTP 500+)
+
+OANDA server errors.
+
+**Common causes:**
+- Temporary server issues
+- Maintenance periods
+- System overload
+
+## Error Handling Patterns
+
+### Basic Exception Handling
 
 ```python
 from fivetwenty.exceptions import FiveTwentyError

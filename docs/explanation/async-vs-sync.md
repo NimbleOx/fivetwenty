@@ -1,572 +1,209 @@
-# Async vs Sync
+# Async vs Sync Design
 
-The FiveTwenty provides both asynchronous and synchronous clients. This guide helps you choose the right approach for your application.
+Understanding FiveTwenty's dual client architecture and choosing the right approach for your application.
+
+## Client Architecture
+
+FiveTwenty provides two client interfaces:
+
+- **AsyncClient**: Primary async interface built on httpx async client
+- **Client**: Sync wrapper that runs AsyncClient in a background thread
+
+Both clients share the same API surface but differ in execution model and performance characteristics.
 
 ## Quick Comparison
 
 | Feature | AsyncClient | Client (Sync) |
 |---------|------------|---------------|
 | **Performance** | High (concurrent requests) | Lower (sequential) |
-| **Complexity** | Moderate | Straightforward |
 | **Use Case** | Production, high-frequency | Scripts, notebooks |
-| **Streaming** | Native support | Thread-based |
-| **Python Version** | 3.9+ with asyncio | 3.9+ |
+| **Streaming** | Native async iteration | Thread-based iteration |
+| **Resource Usage** | Lower memory/CPU overhead | Background thread overhead |
+| **Error Handling** | Direct exception propagation | Exception marshalling across threads |
 
-## AsyncClient (Recommended)
+## AsyncClient Architecture
 
-The `AsyncClient` is the primary interface, offering superior performance and scalability.
+### Design Principles
 
-### When to Use Async
+- **Event Loop Integration**: Uses the current asyncio event loop
+- **Connection Pooling**: Maintains persistent HTTP connections via httpx
+- **Zero-Copy Streaming**: Direct async iteration over streaming responses
+- **Context Management**: Automatic resource cleanup on exit
 
-Use `AsyncClient` when you need:
+### When to Use AsyncClient
 
-- ✅ Concurrent API requests
-- ✅ Real-time streaming data
-- ✅ High-frequency trading
-- ✅ Production trading systems
-- ✅ Web applications (FastAPI, aiohttp)
-- ✅ Multiple account management
+- Production trading systems requiring high throughput
+- Applications already using asyncio/async frameworks
+- Real-time streaming data processing
+- Multiple concurrent API operations
+- Web applications (FastAPI, aiohttp)
 
-### Basic Async Usage
+### Streaming Implementation
+
+AsyncClient provides native async iteration for streaming:
 
 ```python
-import asyncio
-
-from fivetwenty import AsyncClient, Environment
-
-
-
-async def async_example():
-    """Async client example."""
-    async with AsyncClient(
-        token="your-token",
-        environment=Environment.PRACTICE,
-    ) as client:
-        # Concurrent requests (fast!)
-        accounts, instruments = await asyncio.gather(
-            client.accounts.get_accounts(),
-            client.instruments.get_instrument_candles("101-001-1234567-001"),
-        )
-
-        print(f"Found {len(accounts)} accounts")
-        print(f"Available instruments: {len(instruments)}")
-
-# Run async function
-asyncio.run(async_example())
+async for price in client.pricing.get_pricing_stream(...):
+    # Process price immediately
 ```
+
+Benefits:
+- No buffering or queuing overhead
+- Direct backpressure to OANDA servers
+- Immediate cancellation support
+- Memory-efficient for long-running streams
+
+## Sync Client Architecture
+
+### Design Principles
+
+- **Thread Isolation**: Runs AsyncClient in dedicated background thread
+- **Queue-Based Communication**: Uses bounded queues for data transfer
+- **Iterator Interface**: Provides familiar for-loop syntax
+- **Thread Safety**: All operations are thread-safe
+
+### Implementation Details
+
+The sync client manages:
+- Background asyncio event loop in separate thread
+- Bounded queue (default 1000 items) for streaming data
+- Exception marshalling between async and sync contexts
+- Automatic cleanup when iterator exits
+
+### When to Use Sync Client
+
+- Jupyter notebooks and interactive development
+- Legacy codebases without async support
+- Simple scripts and prototypes
+- Learning and experimentation
+
+### Streaming Implementation
+
+Sync client provides iterator-based streaming:
+
+```python
+for price in client.pricing.get_pricing_stream(...):
+    # Process price from queue
+```
+
+Characteristics:
+- Bounded queue prevents memory leaks
+- Background thread handles OANDA connection
+- Natural blocking behavior for sequential processing
+
+## Performance Characteristics
 
 ### Concurrent Operations
 
-Async shines with multiple concurrent operations:
-
+**AsyncClient**: Truly concurrent using asyncio.gather()
 ```python
-import asyncio
-from typing import Any
-
-
-async def concurrent_operations(client: Any, account_id: str) -> Any:
-    """Execute multiple operations simultaneously."""
-
-    # All requests happen in parallel - much faster!
-    results = await asyncio.gather(
-        client.accounts.get_account(account_id),
-        client.positions.get_open_positions(account_id),
-        client.orders.get_pending_orders(account_id),
-        client.trades.get_open_trades(account_id),
-        client.pricing.get_pricing(account_id, ["EUR_USD", "GBP_USD", "USD_JPY"]),
-    )
-
-    account, positions, orders, trades, prices = results
-
-    return {
-        "account": account,
-        "positions": positions,
-        "orders": orders,
-        "trades": trades,
-        "prices": prices,
-    }
-
-# This takes ~200ms instead of ~1000ms sequential
+# Multiple operations execute simultaneously
+account, positions, orders = await asyncio.gather(
+    client.accounts.get_account(account_id),
+    client.positions.get_positions(account_id),
+    client.orders.get_orders(account_id),
+)
 ```
 
-### Streaming with Async
-
-Async streaming is natural and efficient:
-
+**Sync Client**: Sequential execution only
 ```python
-import asyncio
-from typing import Any
-
-
-async def stream_prices(client: Any, account_id: str) -> Any:
-    """Stream real-time prices."""
-    async for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
-        if price.type == "PRICE":
-            print(f"EUR/USD: Bid={price.bids[0].price}, Ask={price.asks[0].price}")
-        elif price.type == "HEARTBEAT":
-            print("♥ Heartbeat")
-
-        # Process prices asynchronously
-        await process_price(price)
-
-async def process_price(price: Any) -> Any:
-    """Process price updates asynchronously."""
-    # Can do other async operations while streaming continues
-    await asyncio.sleep(0.01)  # Simulate processing
-    return price  # Return the processed price
+# Operations execute one after another
+account = client.accounts.get_account(account_id)
+positions = client.positions.get_positions(account_id)
+orders = client.orders.get_orders(account_id)
 ```
 
-## Client (Sync)
+### Resource Utilization
 
-The synchronous `Client` wraps `AsyncClient` for simpler usage.
+**AsyncClient**:
+- Single thread execution
+- Event loop overhead (~1-2MB memory)
+- Direct HTTP connection management
 
-### When to Use Sync
+**Sync Client**:
+- Additional background thread
+- Queue memory overhead (bounded)
+- Thread synchronization costs
 
-Use `Client` when you have:
+### Latency Impact
 
-- ✅ Straightforward scripts
-- ✅ Jupyter notebooks
-- ✅ Quick analysis tasks
-- ✅ Legacy synchronous code
-- ✅ Learning/prototyping
+**AsyncClient**: ~10-20ms per operation
+**Sync Client**: ~15-30ms per operation (thread marshalling overhead)
 
-### Basic Sync Usage
+## Error Handling Differences
 
+### AsyncClient
+
+Exceptions propagate directly through the call stack:
 ```python
-from fivetwenty import Client, Environment
-
-# Sync client - simpler but slower
-
-with Client(
-    token="your-token",
-    environment=Environment.PRACTICE,
-) as client:
-    # Sequential requests
-    accounts = client.accounts.get_accounts()
-    account = client.accounts.get_account(accounts[0].id)
-
-    print(f"Account balance: {account.balance}")
+try:
+    order = await client.orders.post_market_order(...)
+except VeeTwentyError as e:
+    # Handle OANDA API error
 ```
 
-### Sync Streaming
+### Sync Client
 
-Sync client provides streaming via iterator:
-
+Exceptions are marshalled across thread boundaries:
 ```python
-from typing import Any
-
-
-def stream_prices_sync(client: Any, account_id: str) -> Any:
-    """Stream prices synchronously."""
-    for price in client.pricing.get_pricing_stream(account_id, ["EUR_USD"]):
-        if price.type == "PRICE":
-            print(f"Price: {price.asks[0].price}")
-
-        # Blocking - can't do other operations
-        _process_price_sync(price)
-
-def _process_price_sync(price: Any) -> None:
-    """Synchronous price processing function."""
-    print(f"Processing price synchronously: {price}")
+try:
+    order = client.orders.post_market_order(...)
+except VeeTwentyError as e:
+    # Same exception, but marshalled from background thread
 ```
 
-## Detailed Comparison
+## Integration Patterns
 
-### Performance Comparison
+### AsyncClient Integration
 
-```python
-import time
-import asyncio
-from typing import Any
-from fivetwenty import AsyncClient, Client, Environment
+Best suited for async frameworks:
+- FastAPI endpoints
+- aiohttp applications
+- asyncio-based trading systems
+- Real-time data processing pipelines
 
-# ASYNC: Fast concurrent requests
+### Sync Client Integration
 
-async def async_performance_test() -> Any:
-    async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
-        start = time.time()
+Best suited for traditional applications:
+- Flask web applications
+- Jupyter notebooks
+- Data analysis scripts
+- Legacy system integration
 
-        # 10 concurrent requests
-        results = await asyncio.gather(*[
-            client.accounts.get_accounts() for _ in range(10)
-        ])
+## Resource Management
 
-        print(f"Async time: {time.time() - start:.2f}s")  # ~0.5s
-
-# SYNC: Slow sequential requests
-def sync_performance_test() -> Any:
-    with Client(token=token, environment=Environment.PRACTICE) as client:
-        start = time.time()
-
-        # 10 sequential requests
-        results = [client.accounts.get_accounts() for _ in range(10)]
-
-        print(f"Sync time: {time.time() - start:.2f}s")  # ~5.0s
-```
-
-### Error Handling
-
-#### Async Error Handling
+Both clients require proper cleanup:
 
 ```python
-import asyncio
-from typing import Any
-from fivetwenty import AsyncClient, Environment
-
-
-async def async_error_handling() -> Any:
-    async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
-        try:
-            # Multiple operations with individual error handling
-            results = await asyncio.gather(
-                client.orders.post_market_order(account_id, "EUR_USD", 1000),
-                client.orders.post_market_order(account_id, "INVALID", 1000),
-                return_exceptions=True  # Don't fail everything
-            )
-
-            for result in results:
-                if isinstance(result, Exception):
-                    print(f"Error: {result}")
-                else:
-                    print(f"Success: {result.order_fill_transaction.id}")
-
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-```
-
-#### Sync Error Handling
-
-```python
-import os
-from typing import Any
-from fivetwenty.exceptions import FiveTwentyError
-from fivetwenty import Environment, Client
-
-
-def sync_error_handling() -> Any:
-    token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "your-token")
-    account_id = "your-account-id"
-
-    with Client(token=token, environment=Environment.PRACTICE) as client:
-        try:
-            order = client.orders.post_market_order(account_id, "EUR_USD", 1000)
-            print(f"Success: {order.order_fill_transaction.id}")
-        except FiveTwentyError as e:
-            print(f"OANDA error: {e}")
-        except Exception as e:
-            print(f"Unexpected error: {e}")
-```
-
-## Conversion Patterns
-
-### Converting Sync to Async
-
-If you have sync code and want to upgrade:
-
-```python
-import asyncio
-from typing import Any
-
-# OLD: Synchronous code
-
-def get_account_sync(client: Any, account_id: str) -> Any:
-    account = client.accounts.get_account(account_id)
-    positions = client.positions.get_open_positions(account_id)
-    return account, positions
-
-# NEW: Asynchronous code
-async def get_account_async(client: Any, account_id: str) -> Any:
-    account, positions = await asyncio.gather(
-        client.accounts.get_account(account_id),
-        client.positions.get_open_positions(account_id),
-    )
-    return account, positions
-```
-
-### Using Async in Sync Context
-
-If you need to call async from sync code:
-
-```python
-import asyncio
-from typing import Any
-
-
-async def async_function() -> Any:
-    """Example async function."""
-    await asyncio.sleep(0.1)
-    return "async result"
-
-
-def sync_wrapper() -> Any:
-    """Call async code from sync context."""
-    # Create new event loop
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-
-    try:
-        # Run async function
-        return loop.run_until_complete(async_function())
-    finally:
-        loop.close()
-
-# Or simpler in Python 3.7+
-def sync_wrapper_simple() -> Any:
-    return asyncio.run(async_function())
-```
-
-## Integration Examples
-
-### FastAPI (Async)
-
-```python
-from fastapi import FastAPI
-from fivetwenty import AsyncClient, Environment
-
-
-app = FastAPI()
-client = AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE)
-
-@app.on_event("startup")
-async def startup() -> Any:
-    """Initialize client on startup."""
-    await client.__aenter__()
-
-@app.on_event("shutdown")
-async def shutdown() -> Any:
-    """Clean up on shutdown."""
-    await client.__aexit__(None, None, None)
-
-@app.get("/account/{account_id}")
-async def get_account(account_id: str) -> Any:
-    """Async endpoint."""
-    account = await client.accounts.get_account(account_id)
-    return {"balance": account.balance, "currency": account.currency}
-```
-
-### Flask (Sync)
-
-```python
-from flask import Flask, jsonify
-from fivetwenty import Client, Environment
-
-
-app = Flask(__name__)
-
-def get_client() -> Any:
-    """Create client per request."""
-    return Client(token="your-token", environment=Environment.PRACTICE)
-
-@app.route("/account/<account_id>")
-def get_account(account_id: str) -> Any:
-    """Sync endpoint."""
-    with get_client() as client:
-        account = client.accounts.get_account(account_id)
-        return jsonify({
-            "balance": account.balance,
-            "currency": account.currency
-        })
-```
-
-### Jupyter Notebooks
-
-Both work in Jupyter, but sync is simpler:
-
-```python
-from fivetwenty import AsyncClient, Environment
-
-# Sync - Straightforward for notebooks
-from fivetwenty import Client, Environment
-
-
-client = Client(token=token, environment=Environment.PRACTICE)
-accounts = client.accounts.get_accounts()
-print(accounts)
-
-# Async - Requires nest_asyncio
-import nest_asyncio
-nest_asyncio.apply()
-
-async def notebook_async() -> Any:
-    async with AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE) as client:
-        accounts = await client.accounts.get_accounts()
-        return accounts
-
-await notebook_async()  # Jupyter supports top-level await
-```
-
-## Best Practices
-
-### 1. Choose Consistency
-
-Stick to one pattern throughout your application:
-
-```python
-
-from typing import Any
-from fivetwenty import AsyncClient, Environment
-
-# Good: Consistent async throughout
-
-
-
-class TradingSystem:
-    """Class docstring."""
-    def __init__(self) -> None:
-        self.client = AsyncClient(...)
-
-    async def analyze(self) -> Any:
-        # All methods async
-        pass
-
-    async def trade(self) -> Any:
-        # All methods async
-        pass
-
-# Bad: Mixed patterns
-class MixedSystem:
-    """Class docstring."""
-    def __init__(self) -> None:
-        self.async_client = AsyncClient(...)
-        self.sync_client = Client(...)
-
-    def analyze(self):  # Sync
-        pass
-
-    async def trade(self):  # Async
-        pass
-```
-
-### 2. Resource Management
-
-Always use context managers:
-
-```python
-from fivetwenty import AsyncClient, Environment
-
-# Good: Proper cleanup
+# AsyncClient
 async with AsyncClient(...) as client:
-    # Client automatically cleaned up
-    pass
+    # Automatic cleanup of connections
 
-# Bad: Manual management
-client = AsyncClient(...)
-# ... code ...
-# Forgot to close!
+# Sync Client
+with Client(...) as client:
+    # Automatic cleanup of background thread and queue
 ```
 
-### 3. Timeout Configuration
+The context managers ensure:
+- HTTP connections are properly closed
+- Background threads are terminated
+- Event loops are cleaned up
+- Memory is released
 
-Configure appropriate timeouts:
+## Choosing the Right Client
 
-```python
-from fivetwenty import AsyncClient, Environment
+**Use AsyncClient when**:
+- Building production trading systems
+- Need maximum performance/throughput
+- Already using async/await in your application
+- Processing real-time streaming data at scale
 
-# Async with custom timeout
+**Use Sync Client when**:
+- Prototyping or learning
+- Working in Jupyter notebooks
+- Integrating with legacy synchronous code
+- Building simple scripts or analysis tools
 
-async_client = AsyncClient(
-    token=token,
-    environment=Environment.PRACTICE,
-    timeout=60.0,  # Longer timeout for slow operations
-)
+Both clients provide identical functionality - the choice depends on your application's concurrency model and performance requirements.
 
-# Sync with custom timeout
-sync_client = Client(
-    token=token,
-    environment=Environment.PRACTICE,
-    timeout=60.0,
-)
-```
-
-## Performance Tips
-
-### Async Performance
-
-1. **Batch Operations**: Group related requests
-2. **Connection Pooling**: Reuse client instances
-3. **Avoid Blocking**: Never use blocking I/O in async
-4. **Task Management**: Use `asyncio.TaskGroup` (Python 3.11+)
-
-```python
-# Efficient async pattern
-
-from typing import Any
-
-async def efficient_async(client, account_ids) -> Any:
-    """Process multiple accounts efficiently."""
-    async with asyncio.TaskGroup() as tg:
-        tasks = [tg.create_task(process_account(client, aid))
-                 for aid in account_ids]
-
-    # All tasks complete here
-    results = [task.result() for task in tasks]
-    return results
-```
-
-### Sync Performance
-
-1. **Connection Reuse**: Keep client alive for multiple requests
-2. **Batch Processing**: Process in chunks
-3. **Caching**: Cache frequently accessed data
-
-```python
-from typing import Any
-
-# Efficient sync pattern
-def efficient_sync(client: Any, instruments: Any) -> Any:
-    """Cache frequently accessed data."""
-    cache = {}
-
-    for instrument in instruments:
-        if instrument not in cache:
-            cache[instrument] = client.pricing.get_pricing(account_id, [instrument])
-
-        process_price(cache[instrument])
-```
-
-## Troubleshooting
-
-### Common Async Issues
-
-1. **"RuntimeError: This event loop is already running"**
-   - Use `nest_asyncio` in Jupyter
-   - Don't call `asyncio.run()` inside async function
-
-2. **"coroutine was never awaited"**
-   - Always use `await` with async functions
-   - Check for missing `await` keywords
-
-### Common Sync Issues
-
-1. **Performance problems**
-   - Consider switching to async
-   - Reuse client connections
-   - Implement caching
-
-2. **Threading issues**
-   - Sync client is not thread-safe
-   - Use one client per thread
-
-## Summary
-
-- **Use async client** for production systems and when performance matters
-- **Use Client** for straightforward scripts and learning
-- **Don't mix** async and sync patterns unnecessarily
-- **Always use** context managers for proper cleanup
-- **Consider your use case** when choosing between async and sync
-
-## Next Steps
-
-After choosing your async/sync approach:
-
-- **Understand the architecture**: Read [SDK Architecture](sdk-architecture.md) for comprehensive design overview
-- **Handle errors robustly**: Study [Error Handling](error-handling.md) for production-ready error management
-- **Implement streaming**: Explore [Streaming Data](streaming.md) for real-time market data
-- **Follow best practices**: Review [Best Practices](best-practices.md) for production deployment patterns
-- **Learn forex concepts**: Check [Forex Trading Concepts](forex-trading-concepts.md) for domain knowledge
-
-## Related Resources
-
-- **[How-to Guides](../how-to-guides/index.md)**: Step-by-step implementation guides
-- **[API Reference](../api-reference/index.md)**: Detailed method documentation
-- **[Tutorials](../tutorials/index.md)**: Learn by building complete examples
+For detailed implementation examples, see the [tutorials](../tutorials/index.md) and [how-to guides](../how-to-guides/index.md).

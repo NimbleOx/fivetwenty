@@ -76,35 +76,31 @@ nav:
           - Authentication Basics: tutorials/getting-started/authentication.md
           - Your First Trade: tutorials/getting-started/first-trade.md
           - Understanding Environments: tutorials/getting-started/environments.md
-      - Guided Learning:
-          - Basic Trading:
-              - Overview: tutorials/basic-trading/index.md
-              - Foundation: tutorials/basic-trading/lesson-1-foundation.md
-              - Connection & Setup: tutorials/basic-trading/lesson-2-connection-setup.md
-              - Market Data & Analysis: tutorials/basic-trading/lesson-3-market-data.md
-              - Your First Trade: tutorials/basic-trading/lesson-4-first-trade.md
-              - Position Management: tutorials/basic-trading/lesson-5-position-management.md
-              - Strategy Building: tutorials/basic-trading/lesson-6-strategy-building.md
-              - Complete System: tutorials/basic-trading/lesson-7-complete-system.md
-          - Advanced Order Types:
-              - Overview: tutorials/advanced-orders/index.md
-              - Advanced Limit Orders: tutorials/advanced-orders/advanced-limit-orders.md
-              - Stop Orders & Market-If-Touched: tutorials/advanced-orders/stop-orders-mit.md
-              - Dynamic Order Management: tutorials/advanced-orders/dynamic-management.md
-              - Automated Order Systems: tutorials/advanced-orders/automated-systems.md
-              - Order Strategies & Combinations: tutorials/advanced-orders/order-strategies.md
-              - Validation & Best Practices: tutorials/advanced-orders/validation-best-practices.md
-          - Risk Management: tutorials/risk-management/index.md
-          - Portfolio Management: tutorials/portfolio-analysis/index.md
-          - Streaming Data:
-              - Overview: tutorials/streaming-data/index.md
-              - Streaming Fundamentals: tutorials/streaming-data/streaming-fundamentals.md
-              - Basic Streaming: tutorials/streaming-data/basic-streaming.md
-              - Advanced Data Management: tutorials/streaming-data/advanced-data-management.md
-              - Signal Generation: tutorials/streaming-data/signal-generation.md
-              - Automated Trading: tutorials/streaming-data/automated-trading.md
-              - Advanced Features: tutorials/streaming-data/advanced-features.md
-              - Best Practices: tutorials/streaming-data/best-practices.md
+      - Basic Trading:
+          - Overview: tutorials/basic-trading/index.md
+          - Foundation: tutorials/basic-trading/lesson-1-foundation.md
+          - Connection & Setup: tutorials/basic-trading/lesson-2-connection-setup.md
+          - Market Data & Analysis: tutorials/basic-trading/lesson-3-market-data.md
+          - Your First Trade: tutorials/basic-trading/lesson-4-first-trade.md
+          - Position Management: tutorials/basic-trading/lesson-5-position-management.md
+          - Strategy Building: tutorials/basic-trading/lesson-6-strategy-building.md
+          - Complete System: tutorials/basic-trading/lesson-7-complete-system.md
+      - Advanced Order Types:
+          - Overview: tutorials/advanced-orders/index.md
+          - Advanced Limit Orders: tutorials/advanced-orders/advanced-limit-orders.md
+          - Stop Orders & Market-If-Touched: tutorials/advanced-orders/stop-orders-mit.md
+          - Dynamic Order Management: tutorials/advanced-orders/dynamic-management.md
+          - Automated Order Systems: tutorials/advanced-orders/automated-systems.md
+          - Order Strategies & Combinations: tutorials/advanced-orders/order-strategies.md
+          - Validation & Best Practices: tutorials/advanced-orders/validation-best-practices.md
+      - Risk Management: tutorials/risk-management/index.md
+      - Portfolio Management: tutorials/portfolio-analysis/index.md
+      - Streaming Data:
+          - Overview: tutorials/streaming-data/index.md
+          - Streaming Fundamentals: tutorials/streaming-data/streaming-fundamentals.md
+          - Basic Streaming: tutorials/streaming-data/basic-streaming.md
+          - Automated Trading: tutorials/streaming-data/automated-trading.md
+          - Advanced Features: tutorials/streaming-data/advanced-features.md
 
   # HOW-TO GUIDES - Problem-oriented solutions
   - "How-to Guides":
@@ -114,38 +110,37 @@ nav:
           - Handle Connection Failures: how-to-guides/handle-connection-failures.md
           - Close Positions: how-to-guides/close-positions.md
           - Manage Orders Effectively: how-to-guides/manage-orders-effectively.md
-      - Advanced Operations:
-          - Implement Stop-Loss Strategies: how-to-guides/implement-stop-loss-strategies.md
-          - HFT Optimization:
-              - Overview: how-to-guides/hft-optimization/index.md
-              - Connection Optimization: how-to-guides/hft-optimization/connection-optimization.md
-              - Streaming Optimization: how-to-guides/hft-optimization/streaming-optimization.md
-              - Memory & CPU Optimization: how-to-guides/hft-optimization/memory-cpu-optimization.md
-              - Latency Optimization: how-to-guides/hft-optimization/latency-optimization.md
-          - Production Deployment:
-              - Overview: how-to-guides/production-deployment/index.md
-              - Container Deployment: how-to-guides/production-deployment/container-deployment.md
-              - Cloud Deployment: how-to-guides/production-deployment/cloud-deployment.md
-              - Kubernetes Deployment: how-to-guides/production-deployment/kubernetes-deployment.md
-              - Bare Metal Deployment: how-to-guides/production-deployment/bare-metal-deployment.md
-              - Security & Compliance: how-to-guides/production-deployment/security-compliance.md
-              - Monitoring & Observability: how-to-guides/production-deployment/monitoring-observability.md
-          - Data Integration:
-              - Overview: how-to-guides/data-integration/index.md
-              - Economic Calendar: how-to-guides/data-integration/economic-calendar.md
-              - Financial News: how-to-guides/data-integration/financial-news.md
-              - Technical Indicators: how-to-guides/data-integration/technical-indicators.md
-              - Social Sentiment: how-to-guides/data-integration/social-sentiment.md
-              - Unified Pipeline: how-to-guides/data-integration/unified-pipeline.md
+      - Implement Stop-Loss Strategies: how-to-guides/implement-stop-loss-strategies.md
+      - HFT Optimization:
+          - Overview: how-to-guides/hft-optimization/index.md
+          - Connection Optimization: how-to-guides/hft-optimization/connection-optimization.md
+          - Streaming Optimization: how-to-guides/hft-optimization/streaming-optimization.md
+          - Memory & CPU Optimization: how-to-guides/hft-optimization/memory-cpu-optimization.md
+          - Latency Optimization: how-to-guides/hft-optimization/latency-optimization.md
+      - Production Deployment:
+          - Overview: how-to-guides/production-deployment/index.md
+          - Container Deployment: how-to-guides/production-deployment/container-deployment.md
+          - Cloud Deployment: how-to-guides/production-deployment/cloud-deployment.md
+          - Kubernetes Deployment: how-to-guides/production-deployment/kubernetes-deployment.md
+          - Bare Metal Deployment: how-to-guides/production-deployment/bare-metal-deployment.md
+          - Security & Compliance: how-to-guides/production-deployment/security-compliance.md
+          - Monitoring & Observability: how-to-guides/production-deployment/monitoring-observability.md
+      - Data Integration:
+          - Overview: how-to-guides/data-integration/index.md
+          - Economic Calendar: how-to-guides/data-integration/economic-calendar.md
+          - Financial News: how-to-guides/data-integration/financial-news.md
+          - Technical Indicators: how-to-guides/data-integration/technical-indicators.md
+          - Social Sentiment: how-to-guides/data-integration/social-sentiment.md
+          - Unified Pipeline: how-to-guides/data-integration/unified-pipeline.md
   # REFERENCE - Information-oriented quick lookup
   - "API Reference":
       - Overview: api-reference/index.md
       - Core Components:
           - Client API: api-reference/client.md
-          - Order Types: api-reference/order-types.md
           - Models & Data Types: api-reference/models/index.md
           - Configuration: api-reference/configuration.md
-          - Exceptions & Error Handling: api-reference/exceptions.md
+          - Error Handling: api-reference/error-handling.md
+          - Exceptions: api-reference/exceptions.md
       - Data Models:
           - Overview: api-reference/models/index.md
           - Account Models: api-reference/models/account-models.md
@@ -169,15 +164,13 @@ nav:
   # EXPLANATIONS - Understanding-oriented deep dives
   - "Explanations":
       - Overview: explanation/index.md
-      - Architecture & Design:
-          - SDK Architecture: explanation/sdk-architecture.md
-          - Async vs Sync Design: explanation/async-vs-sync.md
-          - Error Handling Philosophy: explanation/error-handling.md
-          - Configuration Patterns: explanation/configuration.md
-      - Domain Knowledge:
-          - Forex Trading Concepts: explanation/forex-trading-concepts.md
-          - Market Data & Streaming: explanation/streaming.md
-          - Best Practices & Patterns: explanation/best-practices.md
+      - SDK Architecture: explanation/sdk-architecture.md
+      - Async vs Sync Design: explanation/async-vs-sync.md
+      - Configuration Patterns: explanation/configuration.md
+      - Forex Trading Concepts: explanation/forex-trading-concepts.md
+      - Order Types & Strategies: explanation/order-types.md
+      - Market Data & Streaming: explanation/streaming.md
+      - Best Practices & Patterns: explanation/best-practices.md
 
   # EXAMPLES - Practical demonstrations
   - "Examples":

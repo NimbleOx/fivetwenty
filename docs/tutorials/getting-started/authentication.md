@@ -488,4 +488,4 @@ Now that authentication is configured:
 - [Learn about environments](environments.md) to understand practice vs live trading
 - [Make your first trade](first-trade.md) to test your setup
 - [Review configuration options](../../explanation/configuration.md) for advanced use cases
-- [Check error handling](../../explanation/error-handling.md) for production readiness
+- [Check error handling](../../api-reference/error-handling.md) for production readiness

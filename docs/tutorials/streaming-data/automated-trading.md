@@ -369,6 +369,6 @@ Continue to [Advanced Streaming Features](advanced-features.md) for sophisticate
 
 ## Related Tutorials
 
-- [Signal Generation](signal-generation.md) - Trading signals
+- [Basic Streaming](basic-streaming.md) - Foundation concepts
 - [Advanced Features](advanced-features.md) - Advanced capabilities
-- [Best Practices](best-practices.md) - Production considerations
+- [Best Practices](../../explanation/best-practices.md) - Production considerations

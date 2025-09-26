@@ -318,5 +318,5 @@ Complete the series with [Best Practices & Production](best-practices.md) for de
 ## Related Tutorials
 
 - [Automated Trading](automated-trading.md) - Trading systems
-- [Best Practices](best-practices.md) - Production deployment
-- [Signal Generation](signal-generation.md) - Trading signals
+- [Basic Streaming](basic-streaming.md) - Foundation concepts
+- [Best Practices](../../explanation/best-practices.md) - Production deployment

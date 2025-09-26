@@ -188,12 +188,12 @@ async def combined_streaming_example():
 
 ## Next Steps
 
-Continue to [Advanced Data Management](advanced-data-management.md) to build robust data processing systems.
+Continue to [Automated Trading](automated-trading.md) to build complete trading systems.
 
 ---
 
 ## Related Tutorials
 
 - [Streaming Fundamentals](streaming-fundamentals.md) - Core concepts
-- [Advanced Data Management](advanced-data-management.md) - Data processing
-- [Signal Generation](signal-generation.md) - Trading signals
+- [Automated Trading](automated-trading.md) - Complete trading systems
+- [Advanced Features](advanced-features.md) - Advanced streaming capabilities

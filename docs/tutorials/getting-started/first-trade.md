@@ -660,8 +660,8 @@ If you encounter issues while making your first trade:
     For comprehensive error handling and troubleshooting guidance:
 
     - **Configuration issues**: See [Configuration Guide](../../explanation/configuration.md#troubleshooting)
-    - **Trading errors**: See [Error Handling Guide](../../explanation/error-handling.md#common-trading-errors)
-    - **Network problems**: See [Error Handling Guide](../../explanation/error-handling.md#retry-strategies)
+    - **Trading errors**: See [Error Handling Guide](../../api-reference/error-handling.md#common-trading-errors)
+    - **Network problems**: See [Error Handling Guide](../../api-reference/error-handling.md#retry-strategies)
 
 ## Next Steps
 
@@ -679,7 +679,7 @@ Once comfortable with basic trading:
 
 - **[Configuration Guide](../../explanation/configuration.md)** - Master all configuration patterns
 - **[Streaming Data](../../explanation/streaming.md)** - Real-time price feeds for your applications
-- **[Error Handling](../../explanation/error-handling.md)** - Production-ready error management
+- **[Error Handling](../../api-reference/error-handling.md)** - Production-ready error management
 - **[Best Practices](../../explanation/best-practices.md)** - Trading application patterns and best practices
 
 ### Building Trading Applications
@@ -702,7 +702,7 @@ Ready to build more sophisticated systems:
 If you encounter issues:
 
 - Check the [Common Issues section](#common-issues) above
-- Review the [error handling guide](../../explanation/error-handling.md)
+- Review the [error handling guide](../../api-reference/error-handling.md)
 - Consult the [API documentation](../../api-reference/index.md) for detailed references
 
 Happy trading with FiveTwenty! 🚀

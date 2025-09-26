@@ -1,52 +1,28 @@
-# Forex Trading Concepts in SDK Context
+# Forex Trading Concepts for FiveTwenty SDK
 
-This guide explains forex trading concepts and how they're represented in the FiveTwenty, helping you understand the relationship between financial markets and the SDK's data models.
-
----
+Understanding how forex market concepts map to FiveTwenty SDK models and operations.
 
 ## Currency Pairs and Instruments
 
-### Understanding Currency Pairs
+### Instrument Representation
 
-In forex trading, you're always trading one currency against another. The FiveTwenty represents this through **instruments**:
+FiveTwenty uses OANDA's instrument naming convention:
 
 ```python
-
-# EUR/USD means: Euro vs. US Dollar
-instrument = "EUR_USD"
-
-# When you buy EUR_USD, you're:
-# - Buying Euros (base currency)
-# - Selling US Dollars (quote currency)
+# Instrument format: BASE_QUOTE
+instrument = "EUR_USD"  # Euro vs US Dollar
 ```
 
-**Base Currency** (first): The currency you're buying/selling
-**Quote Currency** (second): The currency you're trading against
-**Exchange Rate**: How much quote currency needed to buy 1 unit of base currency
+Key instrument categories:
+- **Majors**: EUR_USD, GBP_USD, USD_JPY, USD_CHF, AUD_USD, USD_CAD, NZD_USD
+- **Minors**: Cross-currency pairs like EUR_GBP, GBP_JPY
+- **Exotics**: Emerging market currencies
 
-### Instrument Naming Convention
+## Positions vs Trades in the SDK
 
-The SDK uses OANDA's naming convention:
+### Trade Objects
 
-| SDK Instrument | Market Name | Meaning |
-|----------------|-------------|---------|
-| `EUR_USD` | EUR/USD | Euro vs US Dollar |
-| `GBP_JPY` | GBP/JPY | British Pound vs Japanese Yen |
-| `AUD_CAD` | AUD/CAD | Australian Dollar vs Canadian Dollar |
-| `USD_CHF` | USD/CHF | US Dollar vs Swiss Franc |
-
-**Cross Currencies**: Pairs not involving USD (like EUR_GBP, GBP_JPY)
-**Majors**: The most liquid pairs (EUR_USD, GBP_USD, USD_JPY, etc.)
-
----
-
-## Positions vs. Trades
-
-Understanding the distinction between positions and trades is crucial:
-
-### Trades (Individual Orders)
-
-A **trade** is a single order execution:
+Individual order executions represented by `Trade` models:
 
 ```python
 import asyncio

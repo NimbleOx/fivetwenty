@@ -378,5 +378,5 @@ Now that you understand the fundamentals, proceed to [Basic Streaming Implementa
 ## Related Tutorials
 
 - [Basic Streaming Implementation](basic-streaming.md) - Build first streams
-- [Advanced Data Management](advanced-data-management.md) - Data processing
-- [Best Practices](best-practices.md) - Production considerations
+- [Automated Trading](automated-trading.md) - Complete trading systems
+- [Best Practices](../../explanation/best-practices.md) - Production considerations

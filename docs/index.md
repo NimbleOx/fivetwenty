@@ -149,7 +149,7 @@ Build production trading systems with confidence:
 
 - [Configuration patterns](explanation/configuration.md) - Multi-account, multi-environment setup
 - [Best practices](explanation/best-practices.md) - Security, performance, and reliability
-- [Error handling](explanation/error-handling.md) - Robust production error management
+- [Error handling](api-reference/error-handling.md) - Robust production error management
 - [Streaming guide](explanation/streaming.md) - Real-time data processing
 
 ## Support & Community

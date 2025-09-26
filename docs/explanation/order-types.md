@@ -6,7 +6,7 @@ Complete reference for OANDA order types available through the FiveTwenty SDK.
 
 OANDA supports four primary order types, each designed for specific trading scenarios:
 
-### 1. Market Orders
+### Market Orders
 
 **Definition**: Execute immediately at the best available market price.
 
@@ -43,7 +43,7 @@ async def place_market_order() -> Any:
         return response
 ```
 
-### 2. Limit Orders
+### Limit Orders
 
 **Definition**: Execute only at a specified price or better.
 
@@ -80,7 +80,7 @@ async def place_limit_order() -> Any:
         return response
 ```
 
-### 3. Stop Orders
+### Stop Orders
 
 **Definition**: Become market orders when a specified trigger price is reached.
 
@@ -117,7 +117,7 @@ async def place_stop_order() -> Any:
         return response
 ```
 
-### 4. Market-If-Touched (MIT) Orders
+### Market-If-Touched (MIT) Orders
 
 **Definition**: Become market orders when price moves favorably to a specified level.
 
