@@ -51,7 +51,8 @@ FiveTwenty automatically handles Decimal conversion for financial fields:
 
 ```python
 from decimal import Decimal
-from fivetwenty.models import MarketOrderRequest, InstrumentName, TimeInForce
+
+from fivetwenty.models import InstrumentName, MarketOrderRequest, TimeInForce
 
 # All these inputs work seamlessly
 order1 = MarketOrderRequest(
@@ -106,9 +107,10 @@ This mixed approach ensures exact calculations where needed while preserving OAN
 - **Documentation**: Self-documenting models with field descriptions
 
 ```python
-from decimal import Decimal
 from datetime import datetime
+from decimal import Decimal
 from enum import Enum
+
 from pydantic import BaseModel
 
 class Currency(Enum):
@@ -144,7 +146,8 @@ The SDK provides two client types addressing different use cases:
 ```python
 from concurrent.futures import ThreadPoolExecutor
 from typing import Any
-from fivetwenty import AsyncClient, Environment
+
+from fivetwenty import AsyncClient
 
 
 class Client:
@@ -166,12 +169,15 @@ class Client:
 - **Best Practice Enforcement**: Makes it hard to forget resource cleanup
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
-# Correct usage - connection automatically managed
-async with AsyncClient(...) as client:
-    result = await client.accounts.get_accounts()
-# Connection automatically closed here
+
+async def example_usage():
+    # Correct usage - connection automatically managed
+    async with AsyncClient(...) as client:
+        return await client.accounts.get_accounts()
+    # Connection automatically closed here
+    return result
 ```
 
 ---
@@ -323,9 +329,6 @@ async def stream_prices():
 
 **Solution**: Rich, structured error information
 ```python
-from fivetwenty.exceptions import FiveTwentyError
-
-
 class FiveTwentyErrorStructure:
     """Example structure of FiveTwentyError - not a redefinition."""
     status_code: int           # HTTP level

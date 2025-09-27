@@ -235,8 +235,7 @@ async def safe_config_loading():
 
     # Use the validated configuration
     async with AsyncClient(config=config) as client:
-        account = await client.accounts.get_account(client.account_id)
-        return account
+        return await client.accounts.get_account(client.account_id)
 
 # Alternative: Handle missing configuration gracefully
 async def graceful_config_loading():
@@ -258,8 +257,16 @@ Always use context managers to ensure proper client cleanup:
 ```python
 import asyncio
 
+from fivetwenty import AsyncClient
+from fivetwenty.configuration import AccountConfigLoader
+
 
 async def main():
+    # Load a configuration for demonstration
+    config = AccountConfigLoader.load_default()
+    if config is None:
+        raise ValueError("No configuration found")
+
     # ✅ Correct - ensures cleanup
     async with AsyncClient(config=config) as client:
         await client.accounts.get_account(client.account_id)
@@ -277,8 +284,10 @@ Here's a complete example showing how to manage multiple accounts for different 
 
 ```python
 import asyncio
+
 from fivetwenty import AsyncClient
 from fivetwenty.configuration import AccountConfigLoader
+
 
 async def trading_system():
     """Multi-account trading system example."""
@@ -300,7 +309,7 @@ async def trading_system():
             raise ValueError(f"Configuration for {name} strategy not found. "
                            f"Please set {name.upper()}_FIVETWENTY_OANDA_* environment variables")
 
-    print(f"Loaded configurations:")
+    print("Loaded configurations:")
     for name, config in configs.items():
         print(f"  {name}: {config.summary()}")
 

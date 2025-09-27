@@ -19,12 +19,10 @@ This tutorial series explores advanced order types and management strategies tha
 Each guide builds upon previous concepts while remaining focused on specific techniques:
 
 1. **[Order Types Reference](../../guides/trading-concepts/order-types.md)** - Complete reference for all OANDA order types
-2. **[Advanced Limit Orders](advanced-limit-orders.md)** - Time controls and protective mechanisms
-3. **[Stop Orders & Market-If-Touched](stop-orders-mit.md)** - Breakout and mean reversion strategies
-4. **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
-5. **[Automated Order Systems](automated-systems.md)** - Rule-based management and monitoring
-6. **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
-7. **[Validation & Best Practices](validation-best-practices.md)** - Risk management and error handling
+2. **[Stop Orders & Market-If-Touched](stop-orders-mit.md)** - Breakout and mean reversion strategies
+3. **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
+4. **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
+5. **[Validation & Best Practices](validation-best-practices.md)** - Risk management and error handling
 
 ### Prerequisites
 

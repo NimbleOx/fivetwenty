@@ -80,12 +80,10 @@ nav:
           - Position Management: tutorials/basic-trading/position-management.md
           - Strategy Building: tutorials/basic-trading/strategy-building.md
           - Complete System: tutorials/basic-trading/complete-system.md
-      - Advanced Orders:
+      - More Trading:
           - tutorials/advanced-orders/index.md
-          - Advanced Limit Orders: tutorials/advanced-orders/advanced-limit-orders.md
           - Stop Orders & Market-If-Touched: tutorials/advanced-orders/stop-orders-mit.md
           - Dynamic Order Management: tutorials/advanced-orders/dynamic-management.md
-          - Automated Order Systems: tutorials/advanced-orders/automated-systems.md
           - Order Strategies & Combinations: tutorials/advanced-orders/order-strategies.md
           - Validation & Best Practices: tutorials/advanced-orders/validation-best-practices.md
       - Risk Management: tutorials/risk-management.md

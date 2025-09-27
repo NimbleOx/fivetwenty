@@ -70,13 +70,15 @@ The live environment executes real trades with actual money:
 from fivetwenty import AsyncClient, Environment
 
 # Live environment - real money at risk
-async with AsyncClient(
-    token="your-live-token",
-    environment=Environment.LIVE
-) as client:
-    # Real money trades - use with extreme caution
-    accounts = await client.accounts.get_accounts()
-    print(f"Live balance: {accounts[0].balance}")
+async def check_live_balance():
+    async with AsyncClient(
+        token="your-live-token",
+        environment=Environment.LIVE
+    ) as client:
+        # Real money trades - use with extreme caution
+        accounts = await client.accounts.get_accounts()
+        print(f"Live balance: {accounts[0].balance}")
+        return accounts[0].balance
 ```
 
 ---
@@ -115,6 +117,9 @@ async def development_trading():
 Validate your strategy thoroughly:
 
 ```python
+import os
+from fivetwenty import AsyncClient, Environment
+
 async def strategy_validation():
     """Validate strategy in practice environment."""
     async with AsyncClient(
@@ -130,7 +135,7 @@ async def strategy_validation():
 
         for scenario in test_scenarios:
             try:
-                order = await client.orders.post_market_order(
+                _order = await client.orders.post_market_order(
                     account_id=client.account_id,
                     **scenario
                 )
@@ -144,6 +149,9 @@ async def strategy_validation():
 Transition to live trading with small positions:
 
 ```python
+import os
+from fivetwenty import AsyncClient, Environment
+
 async def production_trading():
     """Production trading - start small."""
     async with AsyncClient(

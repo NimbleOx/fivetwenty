@@ -11,17 +11,12 @@
 Use optimized data structures for HFT:
 
 ```python
-import array
 import time
 from collections import defaultdict
-from dataclasses import dataclass
-from typing import NamedTuple, Optional, Any
 from decimal import Decimal
+from typing import Any, NamedTuple
 
 import numpy as np
-from fivetwenty import AsyncClient, Environment
-from fivetwenty.models import ClientPrice
-from fivetwenty.exceptions import VeeTwentyError
 
 
 class FastPrice(NamedTuple):
@@ -54,7 +49,7 @@ class CircularBuffer:
         if self.count < self.size:
             self.count += 1
 
-    def get_latest(self) -> Optional[FastPrice]:
+    def get_latest(self) -> FastPrice | None:
         """Get most recent price."""
         if self.count == 0:
             return None
@@ -74,9 +69,8 @@ class CircularBuffer:
 
         if self.count < self.size:
             return self.data[:self.count]
-        else:
-            # Handle circular buffer wrap-around
-            return np.concatenate([
+        # Handle circular buffer wrap-around
+        return np.concatenate([
                 self.data[self.index:],
                 self.data[:self.index]
             ])[-n:]
@@ -100,7 +94,7 @@ class OptimizedPriceManager:
         self.update_counts[instrument] += 1
         self.last_update_times[instrument] = timestamp
 
-    def get_current_price(self, instrument: str) -> Optional[FastPrice]:
+    def get_current_price(self, instrument: str) -> FastPrice | None:
         """Get current price with minimal latency."""
         buffer = self.buffers.get(instrument)
         return buffer.get_latest() if buffer else None
@@ -129,7 +123,7 @@ class OptimizedPriceManager:
 price_manager = OptimizedPriceManager(buffer_size=5000)
 
 # Example price object structure for demonstration
-class ClientPrice:
+class ExamplePriceData:
     def __init__(self, instrument: str, bids: list, asks: list):
         self.instrument = instrument
         self.bids = bids
@@ -139,7 +133,7 @@ class PriceLevel:
     def __init__(self, price: str):
         self.price = price
 
-async def optimized_price_callback(price: ClientPrice) -> Any:
+async def optimized_price_callback(price: ExamplePriceData) -> Any:
     """Optimized callback using efficient data structures."""
 
     bid = Decimal(str(price.bids[0].price)) if price.bids else Decimal('0')
@@ -323,9 +317,7 @@ def calculate_multiple_spreads(prices_array: np.ndarray) -> np.ndarray:
     # Vectorized calculation using numpy
     bids = prices_array[:, 0]
     asks = prices_array[:, 1]
-    spreads = asks - bids
-
-    return spreads
+    return asks - bids
 
 def calculate_moving_average(prices, window) -> Any:
     """Fast moving average using numpy."""
@@ -372,7 +364,7 @@ class MemoryEfficientSubscriptionManager:
 
     def cleanup_dead_references(self) -> Any:
         """Cleanup is automatic with WeakSet."""
-        pass
+        # WeakSet automatically handles cleanup\n        return None
 
 # Usage
 subscription_manager = MemoryEfficientSubscriptionManager()
@@ -434,8 +426,9 @@ async def store_price_efficiently(price: Any) -> Any:
     price_storage.add_data(price_data)
 
     # Monitor memory usage
+    memory_warning_threshold = 0.9
     stats = price_storage.get_memory_stats()
-    if stats["utilization"] > 0.9:
+    if stats["utilization"] > memory_warning_threshold:
         print(f"Warning: Price storage {stats['utilization']:.1%} full")
 ```
 
@@ -455,7 +448,7 @@ from typing import Any
 
 
 def benchmark_function(func: Any) -> Any:
-    """Decorator to benchmark function execution time."""
+    """Benchmark function execution time."""
 
     @functools.wraps(func)
     async def async_wrapper(*args: Any, **kwargs: Any) -> Any:
@@ -481,7 +474,7 @@ def benchmark_function(func: Any) -> Any:
 
     return async_wrapper if asyncio.iscoroutinefunction(func) else sync_wrapper
 
-async def analyze_price_data(price: Any) -> None:
+async def analyze_price_data(_price: Any) -> None:
     """Analyze price data (example implementation)."""
     # Simulate some analysis work
     await asyncio.sleep(0.001)  # Simulate 1ms processing time
@@ -527,8 +520,7 @@ class MemoryProfiler:
         """Take memory measurement."""
         current_memory = self.get_memory_usage()
 
-        if current_memory > self.peak_memory:
-            self.peak_memory = current_memory
+        self.peak_memory = max(current_memory, self.peak_memory)
 
         measurement = {
             "label": label,
@@ -539,8 +531,10 @@ class MemoryProfiler:
 
         self.measurements.append(measurement)
 
-        if len(self.measurements) > 1000:  # Limit measurement history
-            self.measurements = self.measurements[-500:]
+        max_measurements = 1000
+        keep_measurements = 500
+        if len(self.measurements) > max_measurements:  # Limit measurement history
+            self.measurements = self.measurements[-keep_measurements:]
 
         return measurement
 
@@ -565,8 +559,7 @@ async def simulate_price_processing() -> Any:
     """Simulate price processing for profiling."""
     # Create and process some data
     data = [{"price": i * 0.0001, "timestamp": time.time()} for i in range(100)]
-    processed = [d["price"] * 1.1 for d in data]
-    return processed
+    return [d["price"] * 1.1 for d in data]
 
 async def profiled_hft_operation() -> Any:
     """HFT operation with memory profiling."""

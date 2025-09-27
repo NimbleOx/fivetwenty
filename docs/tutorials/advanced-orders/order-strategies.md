@@ -6,84 +6,11 @@ Learn to combine FiveTwenty's order types effectively for common trading scenari
 
 By the end of this tutorial, you will:
 
-- Use market orders with automatic stop-loss and take-profit
-- Implement entry orders with protective stops
-- Combine multiple order types for complete strategies
-- Handle order fills and automatic order creation
+- Scale into and out of positions using multiple order layers
+- Implement advanced stop management techniques
+- Build conditional order logic and position reversal strategies
+- Combine multiple order types for complete trading strategies
 
-## Basic Order Combinations
-
-### Market Entry with Protective Orders
-
-Place a market order with automatic stop-loss and take-profit:
-
-```python
-from dotenv import load_dotenv
-from fivetwenty import AsyncClient
-# Setup
-# Load environment variables from .env file
-load_dotenv()
-
-async def market_order_with_protection():
-    # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
-        # Market order with both stop loss and take profit
-        order = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=10000,
-            stop_loss_on_fill={
-                "price": "1.0800",  # Risk 50 pips
-                "time_in_force": "GTC"
-            },
-            take_profit_on_fill={
-                "price": "1.0950",  # Target 100 pips (2:1 reward/risk)
-                "time_in_force": "GTC"
-            }
-        )
-
-        print(f"Order filled at: {order.order_fill_transaction.price}")
-        print(f"Stop loss: {order.order_fill_transaction.stop_loss_order_transaction.price}")
-        print(f"Take profit: {order.order_fill_transaction.take_profit_order_transaction.price}")
-
-        return order
-```
-
-### Pending Entry with Protection
-
-Set up a limit order that automatically adds stops when filled:
-
-```python
-from decimal import Decimal
-from dotenv import load_dotenv
-from fivetwenty import AsyncClient
-# Setup
-# Load environment variables from .env file
-load_dotenv()
-
-async def limit_entry_with_protection():
-    # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
-        # Limit order to buy on pullback with protective orders
-        order = await client.orders.post_limit_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=10000,
-            price=Decimal("1.0850"),  # Entry level
-            time_in_force="GTC",
-            stop_loss_on_fill={
-                "price": "1.0800",  # 50 pip stop
-                "time_in_force": "GTC"
-            },
-            take_profit_on_fill={
-                "price": "1.0950",  # 100 pip target
-                "time_in_force": "GTC"
-            }
-        )
-
-        print(f"Limit order placed at: {order.order_create_transaction.price}")
-        return order
-```
 
 ## Multiple Position Management
 
@@ -175,32 +102,6 @@ async def scale_out_of_position():
 
 ## Advanced Stop Management
 
-### Trailing Stops for Trend Following
-
-```python
-from dotenv import load_dotenv
-from fivetwenty import AsyncClient
-# Setup
-# Load environment variables from .env file
-load_dotenv()
-
-async def trailing_stop_strategy():
-    # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
-        # Enter position with trailing stop
-        entry = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=10000,
-            trailing_stop_loss_on_fill={
-                "distance": "0.0030",  # 30 pip trailing distance
-                "time_in_force": "GTC"
-            }
-        )
-
-        print(f"Trailing stop order placed with {entry.order_fill_transaction.trailing_stop_loss_order_transaction.distance} distance")
-        return entry
-```
 
 ### Stop Loss Modification
 
@@ -328,61 +229,54 @@ import asyncio
 from decimal import Decimal
 from dotenv import load_dotenv
 from fivetwenty import AsyncClient
-async def breakout_strategy():
-    """Complete breakout strategy using FiveTwenty order combinations."""
-    token = os.getenv("OANDA_TOKEN")
-    account_id = "101-001-0000000-001"
+# Setup
+# Load environment variables from .env file
+load_dotenv()
 
+async def scaling_strategy_example():
+    """Complete scaling strategy using order combinations covered in this guide."""
     # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
-        # Define breakout levels
-        breakout_high = Decimal("1.0900")
-        breakout_low = Decimal("1.0800")
-        position_size = 10000
+        # Demonstrate scaling into and out of positions
+        base_size = 5000
+        entry_prices = [Decimal("1.0850"), Decimal("1.0825"), Decimal("1.0800")]
+        exit_prices = [Decimal("1.0925"), Decimal("1.0950"), Decimal("1.0975")]
 
-        # Place buy stop above resistance
-        buy_stop = await client.orders.post_stop_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=position_size,
-            price=breakout_high,
-            time_in_force="GTC",
-            stop_loss_on_fill={
-                "price": str(breakout_high - Decimal("0.0050")),  # 50 pip stop
-                "time_in_force": "GTC"
-            },
-            take_profit_on_fill={
-                "price": str(breakout_high + Decimal("0.0100")),  # 100 pip target
-                "time_in_force": "GTC"
-            }
-        )
+        scaling_orders = []
 
-        # Place sell stop below support
-        sell_stop = await client.orders.post_stop_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=-position_size,
-            price=breakout_low,
-            time_in_force="GTC",
-            stop_loss_on_fill={
-                "price": str(breakout_low + Decimal("0.0050")),  # 50 pip stop
-                "time_in_force": "GTC"
-            },
-            take_profit_on_fill={
-                "price": str(breakout_low - Decimal("0.0100")),  # 100 pip target
-                "time_in_force": "GTC"
-            }
-        )
+        # Scale into position with multiple limit orders
+        for i, price in enumerate(entry_prices):
+            order = await client.orders.post_limit_order(
+                account_id=client.account_id,
+                instrument="EUR_USD",
+                units=base_size * (i + 1),  # Increasing size
+                price=price,
+                time_in_force="GTC",
+                stop_loss_on_fill={
+                    "price": str(price - Decimal("0.0050")),  # 50 pip stop
+                    "time_in_force": "GTC"
+                }
+            )
+            scaling_orders.append(order)
+            print(f"Entry order {i+1}: {base_size * (i + 1)} units at {price}")
 
-        print(f"Breakout strategy set:")
-        print(f"  Buy stop at: {breakout_high}")
-        print(f"  Sell stop at: {breakout_low}")
+        # Scale out of position with profit targets
+        for i, price in enumerate(exit_prices):
+            order = await client.orders.post_limit_order(
+                account_id=client.account_id,
+                instrument="EUR_USD",
+                units=-base_size,  # Partial exit
+                price=price,
+                time_in_force="GTC"
+            )
+            scaling_orders.append(order)
+            print(f"Exit order {i+1}: {base_size} units at {price}")
 
-        return {"buy_stop": buy_stop, "sell_stop": sell_stop}
+        return scaling_orders
 
 # Run the strategy
 if __name__ == "__main__":
-    asyncio.run(breakout_strategy())
+    asyncio.run(scaling_strategy_example())
 ```
 
 ## Key Takeaways
@@ -395,7 +289,6 @@ if __name__ == "__main__":
 ## Next Steps
 
 - Review [Validation Best Practices](validation-best-practices.md) for robust order handling
-- See [Automated Systems](automated-systems.md) for order monitoring
 - Check [Best Practices](../../guides/understanding/best-practices.md) for production deployment
 
 FiveTwenty provides powerful order combinations through OANDA's proven order types - use these building blocks rather than complex custom strategies.

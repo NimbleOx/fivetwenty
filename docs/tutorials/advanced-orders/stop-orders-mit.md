@@ -8,9 +8,7 @@ By the end of this guide, you will:
 
 - Implement breakout strategies with stop orders
 - Design mean reversion systems with MIT orders
-- Create adaptive trigger mechanisms
 - Build momentum and reversal detection systems
-- Handle order triggers and execution management
 
 ## Stop Orders for Breakout Strategies
 
@@ -363,130 +361,6 @@ class RSIMeanReversion:
             return None, None
 ```
 
-## Adaptive Trigger Mechanisms
-
-### Volatility-Adjusted Triggers
-
-Adjust trigger distances based on market volatility:
-
-```python
-from decimal import Decimal
-from fivetwenty import AsyncClient
-
-
-async def volatility_adjusted_triggers() -> Any:
-    """Adjust order triggers based on current market volatility."""
-    async with AsyncClient() as client:
-        # Calculate current volatility (simplified)
-        current_volatility = Decimal("0.0040")  # Example 4.0 pip volatility
-        base_trigger_distance = Decimal("0.0020")  # Base 2.0 pip distance
-
-        # Adjust trigger distance based on volatility
-        volatility_multiplier = current_volatility / Decimal("0.0030")  # Normalize to 3.0 pip base
-        adjusted_distance = base_trigger_distance * volatility_multiplier
-
-        # Ensure reasonable bounds
-        min_distance = Decimal("0.0010")  # Minimum 1.0 pip
-        max_distance = Decimal("0.0050")  # Maximum 5.0 pips
-
-        trigger_distance = max(min_distance, min(max_distance, adjusted_distance))
-
-        # Get current price for reference
-        pricing = await client.pricing.get_pricing(
-            account_id="your_account_id",
-            instruments=["EUR_USD"]
-        )
-
-        current_price = Decimal(pricing.prices[0].asks[0].price)
-
-        # Place volatility-adjusted stop orders
-        buy_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=10000,
-            price=current_price + trigger_distance,
-            time_in_force="GTC"
-        )
-
-        sell_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=-10000,
-            price=current_price - trigger_distance,
-            time_in_force="GTC"
-        )
-
-        print(f"Volatility-adjusted triggers:")
-        print(f"Distance: {trigger_distance} (volatility: {current_volatility})")
-        print(f"Buy stop: {current_price + trigger_distance}")
-        print(f"Sell stop: {current_price - trigger_distance}")
-
-        return buy_stop, sell_stop
-```
-
-### Time-Based Trigger Adjustments
-
-Modify trigger sensitivity based on time of day:
-
-```python
-from decimal import Decimal
-from fivetwenty import AsyncClient
-from datetime import datetime
-
-
-
-async def time_based_trigger_strategy() -> Any:
-    """Adjust trigger sensitivity based on trading session."""
-    from datetime import datetime, timezone
-
-    async with AsyncClient() as client:
-        current_hour = datetime.now(timezone.utc).hour
-
-        # Define session characteristics
-        if 8 <= current_hour <= 17:  # London session
-            session = "london"
-            trigger_multiplier = Decimal("1.2")  # More aggressive
-            position_size = 15000
-        elif 13 <= current_hour <= 22:  # New York session
-            session = "new_york"
-            trigger_multiplier = Decimal("1.0")  # Standard
-            position_size = 12000
-        elif 23 <= current_hour <= 8:  # Asia session
-            session = "asia"
-            trigger_multiplier = Decimal("0.8")  # More conservative
-            position_size = 8000
-        else:  # Overlap or quiet periods
-            session = "overlap"
-            trigger_multiplier = Decimal("1.5")  # Very aggressive
-            position_size = 18000
-
-        base_distance = Decimal("0.0025")  # 2.5 pips base
-        session_distance = base_distance * trigger_multiplier
-
-        pricing = await client.pricing.get_pricing(
-            account_id="your_account_id",
-            instruments=["EUR_USD"]
-        )
-
-        current_price = Decimal(pricing.prices[0].asks[0].price)
-
-        # Place session-specific orders
-        buy_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=position_size,
-            price=current_price + session_distance,
-            time_in_force="GTC"
-        )
-
-        print(f"{session.title()} session strategy:")
-        print(f"Trigger distance: {session_distance}")
-        print(f"Position size: {position_size}")
-        print(f"Buy stop: {current_price + session_distance}")
-
-        return buy_stop
-```
-
 ## Momentum Detection Systems
 
 ### Momentum Confirmation with Stop Orders
@@ -573,139 +447,6 @@ class MomentumBreakout:
         return False  # No fill yet or invalid momentum
 ```
 
-## Advanced Order Combinations
-
-### Stop-MIT Combination Strategy
-
-Combine stop and MIT orders for comprehensive market coverage:
-
-```python
-from decimal import Decimal
-from fivetwenty import AsyncClient
-
-
-async def stop_mit_combination_strategy() -> Any:
-    """Use both stop and MIT orders for complete market approach."""
-    async with AsyncClient() as client:
-        # Current market analysis
-        current_price = Decimal("1.0850")
-        volatility = Decimal("0.0035")  # 3.5 pip volatility
-
-        # Define strategy levels
-        breakout_distance = volatility * Decimal("1.5")  # 1.5x volatility
-        reversion_distance = volatility * Decimal("0.8")  # 0.8x volatility
-
-        # Breakout levels (stop orders)
-        upper_breakout = current_price + breakout_distance
-        lower_breakout = current_price - breakout_distance
-
-        # Mean reversion levels (MIT orders)
-        upper_reversion = current_price + reversion_distance
-        lower_reversion = current_price - reversion_distance
-
-        # Place stop orders for breakouts
-        buy_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=10000,
-            price=upper_breakout,
-            time_in_force="GTC"
-        )
-
-        sell_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=-10000,
-            price=lower_breakout,
-            time_in_force="GTC"
-        )
-
-        # Place MIT orders for mean reversion
-        sell_mit = await client.orders.post_market_if_touched_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=-8000,  # Smaller size for reversion
-            price=upper_reversion,
-            time_in_force="GTC"
-        )
-
-        buy_mit = await client.orders.post_market_if_touched_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=8000,
-            price=lower_reversion,
-            time_in_force="GTC"
-        )
-
-        print(f"Dual strategy deployed:")
-        print(f"Breakout stops: {upper_breakout} / {lower_breakout}")
-        print(f"Reversion MITs: {upper_reversion} / {lower_reversion}")
-
-        return {
-            "breakout_orders": [buy_stop, sell_stop],
-            "reversion_orders": [sell_mit, buy_mit]
-        }
-```
-
-## Order Trigger Management
-
-### Intelligent Order Cancellation
-
-Cancel orders based on changing market conditions:
-
-```python
-from datetime import datetime
-from decimal import Decimal
-from fivetwenty import AsyncClient
-
-
-async def intelligent_order_management() -> Any:
-    """Manage order lifecycle based on market conditions."""
-    async with AsyncClient() as client:
-        # Place initial orders
-        initial_orders = await stop_mit_combination_strategy()
-
-        # Monitor and manage orders
-        monitoring_duration = 3600  # 1 hour
-        check_interval = 60  # Check every minute
-
-        start_time = datetime.utcnow()
-
-        while (datetime.utcnow() - start_time).seconds < monitoring_duration:
-            # Get current market conditions
-            pricing = await client.pricing.get_pricing(
-                account_id="your_account_id",
-                instruments=["EUR_USD"]
-            )
-
-            current_price = Decimal(pricing.prices[0].asks[0].price)
-            current_spread = (
-                Decimal(pricing.prices[0].asks[0].price) -
-                Decimal(pricing.prices[0].bids[0].price)
-            )
-
-            # Cancel orders if market conditions change significantly
-            if current_spread > Decimal("0.0005"):  # Spread too wide
-                print("Cancelling orders due to wide spreads")
-
-                # Cancel all pending orders
-                for order_group in initial_orders.values():
-                    for order in order_group:
-                        try:
-                            await client.orders.cancel_order(
-                                account_id="your_account_id",
-                                order_id=order.order_create_transaction.id
-                            )
-                        except:
-                            pass  # Order might already be filled/cancelled
-
-                break
-
-            await asyncio.sleep(check_interval)
-
-        print("Order management cycle completed")
-```
-
 ## Performance Optimization
 
 ### Order Trigger Efficiency
@@ -765,43 +506,29 @@ async def efficient_trigger_placement() -> Any:
 
 ### Stop Order Usage
 - Place stops beyond significant levels for momentum capture
-- Use volatility-adjusted trigger distances
 - Implement momentum confirmation for quality breakouts
-- Consider time-based adjustments for session characteristics
 
 ### MIT Order Usage
 - Target mean reversion at statistical extremes
 - Combine with technical indicators (RSI, Bollinger Bands)
 - Use smaller position sizes than breakout strategies
-- Monitor reversion quality after trigger
-
-### Trigger Management
-- Validate market conditions before placement
-- Implement intelligent cancellation rules
-- Monitor order quality after execution
-- Use appropriate position sizing for strategy type
 
 ### System Design
-- Batch related orders for efficiency
 - Implement comprehensive error handling
-- Monitor and adjust based on market regime
-- Combine complementary strategies for market coverage
+- Use appropriate position sizing for strategy type
 
 ## Next Steps
 
 Advance your order management capabilities:
 
 - **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
-- **[Automated Order Systems](automated-systems.md)** - Rule-based management and monitoring
 - **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
 
 ## Key Takeaways
 
 1. **Stop orders** capture momentum and breakouts effectively
 2. **MIT orders** excel at mean reversion and profit-taking
-3. **Adaptive triggers** improve strategy performance across market conditions
-4. **Momentum confirmation** reduces false breakout signals
-5. **Intelligent management** optimizes order lifecycle and performance
-6. **Combined strategies** provide comprehensive market coverage
+3. **Momentum confirmation** reduces false breakout signals
+4. **Performance optimization** ensures efficient order placement
 
 Master these trigger-based order strategies to build sophisticated trading systems that respond intelligently to market momentum and mean reversion opportunities.

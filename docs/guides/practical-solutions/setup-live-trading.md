@@ -31,6 +31,7 @@
 ### Identify Your Live Account ID
 
 ```python
+from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -53,11 +54,11 @@ async def get_live_accounts() -> list[Any]:
                 print(f"   Open Trades: {account.open_trade_count}")
                 print()
 
-            return accounts
-
         except Exception as e:
             print(f"❌ Error accessing live accounts: {e}")
             return []
+        else:
+            return accounts
 
 # Get your live account details
 # live_accounts = await get_live_accounts()
@@ -114,20 +115,22 @@ def load_live_config(config_path: str = "live_config.json") -> tuple[str, str]:
     config_file = Path(config_path)
 
     if not config_file.exists():
-        raise FileNotFoundError(f"Configuration file {config_path} not found")
+        msg = f"Configuration file {config_path} not found"
+        raise FileNotFoundError(msg)
 
     # Ensure file has restricted permissions
     file_stat = config_file.stat()
     if oct(file_stat.st_mode)[-3:] != "600":
         print("⚠️ WARNING: Config file should have 600 permissions")
 
-    with open(config_file, "r") as f:
+    with config_file.open() as f:
         config = json.load(f)
 
     required_fields = ["live_token", "live_account_id"]
     for field in required_fields:
         if field not in config:
-            raise ValueError(f"Required field '{field}' missing from config")
+            msg = f"Required field '{field}' missing from config"
+            raise ValueError(msg)
 
     return config["live_token"], config["live_account_id"]
 
@@ -163,7 +166,8 @@ class LiveTradingValidator:
 
         # Check position size limits
         if abs(units) > self.max_position_size:
-            raise ValueError(f"Order size {abs(units)} exceeds maximum {self.max_position_size}")
+            msg = f"Order size {abs(units)} exceeds maximum {self.max_position_size}"
+            raise ValueError(msg)
 
         # Check daily loss limit
         account = await client.accounts.get_account(account_id)

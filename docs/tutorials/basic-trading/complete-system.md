@@ -1,6 +1,6 @@
 # Complete Trading System
 
-!!! tip "🎯 Learning Goal"
+!!! tip "Learning Goal"
     Build a production-ready automated trading system with full automation, risk management, and performance tracking.
 
 ---
@@ -25,7 +25,7 @@ load_dotenv()
 async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
     """Run a complete trading strategy with full automation."""
 
-    print("🤖 LAUNCHING AUTOMATED TRADING STRATEGY")
+    print("LAUNCHING AUTOMATED TRADING STRATEGY")
     print("=" * 45)
     print(f"Strategy: Moving Average Crossover")
     print(f"Instrument: {strategy.instrument}")
@@ -39,11 +39,11 @@ async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
 
         while (datetime.now() - start_time).seconds < duration_minutes * 60:
             try:
-                print(f"\n⏰ {datetime.now().strftime('%H:%M:%S')} - Strategy Check")
+                print(f"\n{datetime.now().strftime('%H:%M:%S')} - Strategy Check")
 
                 # Step 1: Update market data
                 if not await strategy.update_prices(client):
-                    print("   ⚠️ Could not update prices, skipping this cycle")
+                    print("   WARNING: Could not update prices, skipping this cycle")
                     await asyncio.sleep(60)  # Wait 1 minute before retry
                     continue
 
@@ -75,19 +75,19 @@ async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
                 if not has_position:
                     # Look for entry signals
                     if strategy.should_buy():
-                        print("   📈 BUY SIGNAL DETECTED!")
+                        print("   BUY SIGNAL DETECTED!")
                         await execute_strategy_trade(
                             client, strategy, "BUY", current_price
                         )
                     elif strategy.should_sell():
-                        print("   📉 SELL SIGNAL DETECTED!")
+                        print("   SELL SIGNAL DETECTED!")
                         await execute_strategy_trade(
                             client, strategy, "SELL", current_price
                         )
                     else:
-                        print("   ➡️ No signal - waiting")
+                        print("   No signal - waiting")
                 else:
-                    print("   💼 Managing existing position...")
+                    print("   Managing existing position...")
                     # In a real strategy, you might implement trailing stops,
                     # position sizing adjustments, or other management rules here
 
@@ -98,10 +98,10 @@ async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
                 await asyncio.sleep(60)  # Check every minute
 
             except Exception as e:
-                print(f"   ❌ Strategy error: {e}")
+                print(f"   ERROR: Strategy error: {e}")
                 await asyncio.sleep(60)
 
-        print(f"\n✅ Strategy completed after {duration_minutes} minutes")
+        print(f"\nStrategy completed after {duration_minutes} minutes")
         print_strategy_performance(strategy)
 
 async def execute_strategy_trade(client: AsyncClient, strategy,
@@ -132,19 +132,19 @@ async def execute_strategy_trade(client: AsyncClient, strategy,
             fill = response.order_fill_transaction
             strategy.strategy_stats['total_trades'] += 1
 
-            print(f"   ✅ {direction} ORDER EXECUTED!")
+            print(f"   {direction} ORDER EXECUTED!")
             print(f"      Trade ID: {fill.id}")
             print(f"      Fill Price: {fill.price}")
             print(f"      Stop Loss: {stop_loss_price:.5f}")
             print(f"      Take Profit: {take_profit_price:.5f}")
 
     except Exception as e:
-        print(f"   ❌ Trade execution failed: {e}")
+        print(f"   ERROR: Trade execution failed: {e}")
 
 def print_strategy_performance(strategy):
     """Display comprehensive strategy performance."""
 
-    print(f"\n📊 FINAL STRATEGY PERFORMANCE")
+    print(f"\nFINAL STRATEGY PERFORMANCE")
     print("=" * 35)
 
     stats = strategy.strategy_stats
@@ -157,11 +157,11 @@ def print_strategy_performance(strategy):
         print(f"Total P&L: ${stats['total_pnl']:+.2f}")
 
         if stats['total_pnl'] > 0:
-            print("🎉 Profitable strategy performance!")
+            print("Profitable strategy performance!")
         elif stats['total_pnl'] < 0:
-            print("📚 Learning opportunity - analyze what happened")
+            print("Learning opportunity - analyze what happened")
         else:
-            print("➡️ Breakeven performance")
+            print("Breakeven performance")
     else:
         print("No trades executed during this period")
 
@@ -263,7 +263,7 @@ class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
 
         return min(base_size, max_size_by_risk, 2000)  # Cap at 2000 units
 
-print("💡 Strategy Enhancement Ideas:")
+print("Strategy Enhancement Ideas:")
 print("- Add volatility filters to avoid trading in choppy markets")
 print("- Implement dynamic position sizing based on market conditions")
 print("- Add time-of-day filters (avoid trading during low liquidity)")
@@ -349,22 +349,22 @@ class StrategyMonitor:
 
         metrics = self.update_performance_metrics()
 
-        print(f"\n🎛️ STRATEGY PERFORMANCE DASHBOARD")
+        print(f"\nSTRATEGY PERFORMANCE DASHBOARD")
         print("=" * 40)
-        print(f"⏱️  Runtime: {metrics['runtime_hours']:.1f} hours")
-        print(f"📊 Total Trades: {metrics['total_trades']}")
-        print(f"🎯 Win Rate: {metrics['win_rate']:.1f}%")
-        print(f"💰 Total P&L: ${metrics['total_pnl']:+.2f}")
-        print(f"⚡ Trades/Hour: {metrics['trades_per_hour']:.1f}")
-        print(f"💵 P&L/Hour: ${metrics['pnl_per_hour']:+.2f}")
+        print(f"Runtime: {metrics['runtime_hours']:.1f} hours")
+        print(f"Total Trades: {metrics['total_trades']}")
+        print(f"Win Rate: {metrics['win_rate']:.1f}%")
+        print(f"Total P&L: ${metrics['total_pnl']:+.2f}")
+        print(f"Trades/Hour: {metrics['trades_per_hour']:.1f}")
+        print(f"P&L/Hour: ${metrics['pnl_per_hour']:+.2f}")
 
         # Performance indicators
         if metrics["total_pnl"] > 0:
-            print(f"📈 Status: PROFITABLE")
+            print(f"Status: PROFITABLE")
         elif metrics["total_pnl"] < -100:
-            print(f"⚠️  Status: REVIEW NEEDED")
+            print(f"Status: REVIEW NEEDED")
         else:
-            print(f"➡️ Status: MONITORING")
+            print(f"Status: MONITORING")
 
 # Example monitoring
 monitor = StrategyMonitor(strategy)
@@ -402,7 +402,7 @@ monitor.print_performance_dashboard()
 
 Test your understanding of complete trading systems:
 
-!!! question "🧠 Test Your Understanding"
+!!! question "Test Your Understanding"
     1. **Why is error handling crucial in automated trading systems?**
        <details>
        <summary>Click to reveal answer</summary>
@@ -433,7 +433,7 @@ Test your understanding of complete trading systems:
 
 ✅ **Performance Monitoring**: Real-time tracking and analysis of strategy performance
 
-!!! success "🎉 Trading System Mastery Complete!"
+!!! success "Trading System Mastery Complete!"
     Incredible achievement! You've built a complete automated trading system from concept to production deployment. You understand the full development lifecycle, risk management, and operational requirements for successful algorithmic trading.
 
 ---
@@ -472,7 +472,7 @@ Congratulations! You've successfully completed the comprehensive FiveTwenty trad
 
 ### Safety Reminders
 
-!!! warning "⚠️ Before Live Trading"
+!!! warning "Before Live Trading"
     1. **Practice extensively** with paper trading first
     2. **Start small** - use minimum position sizes initially
     3. **Never risk** more than you can afford to lose
@@ -481,11 +481,11 @@ Congratulations! You've successfully completed the comprehensive FiveTwenty trad
 
 ---
 
-**🎉 Congratulations on completing your trading education foundation!**
+**Congratulations on completing your trading education foundation!**
 
 Remember: **Successful trading requires practice, discipline, and continuous learning.** You've built the technical skills - now focus on developing the psychological discipline and market knowledge needed for long-term success.
 
-**Happy Trading!** 🚀
+**Happy Trading!**
 
 ---
 

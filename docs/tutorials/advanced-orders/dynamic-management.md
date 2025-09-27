@@ -716,7 +716,6 @@ class OrderPerformanceAnalyzer:
 
 Continue building advanced order management capabilities:
 
-- **[Automated Order Systems](automated-systems.md)** - Rule-based management and monitoring
 - **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
 - **[Validation & Best Practices](validation-best-practices.md)** - Risk management and error handling
 

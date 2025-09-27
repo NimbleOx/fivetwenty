@@ -33,7 +33,7 @@ async def demonstrate_position_management(trade_id: str):
         # Get current trade
         trade = await client.trades.get_trade(client.account_id, trade_id)
 
-        print(f"📊 Current Position:")
+        print("📊 Current Position:")
         print(f"   Trade ID: {trade.id}")
         print(f"   Instrument: {trade.instrument}")
         print(f"   Units: {trade.current_units}")
@@ -41,7 +41,7 @@ async def demonstrate_position_management(trade_id: str):
         print(f"   Current P&L: ${Decimal(str(trade.unrealized_pl)):+.2f}")
 
         # Demonstrate different exit strategies
-        print(f"\n🎯 Exit Strategy Options:")
+        print("\n🎯 Exit Strategy Options:")
 
         entry_price = Decimal(str(trade.price))
         is_long = int(trade.current_units) > 0
@@ -57,13 +57,13 @@ async def demonstrate_position_management(trade_id: str):
             print(f"   Stop Loss: {stop_loss_price:.5f} (20 pips above entry)")
             print(f"   Take Profit: {take_profit_price:.5f} (30 pips below entry)")
 
-        print(f"   Risk/Reward Ratio: 1:1.5 (risking 20 pips to make 30 pips)")
+        print("   Risk/Reward Ratio: 1:1.5 (risking 20 pips to make 30 pips)")
 
         # Don't actually set stop loss in tutorial - just demonstrate
-        print(f"\n💡 In real trading, you would set these levels using:")
-        print(f"   • Stop Loss orders for risk management")
-        print(f"   • Take Profit orders to secure gains")
-        print(f"   • Position monitoring for optimal exits")
+        print("\n💡 In real trading, you would set these levels using:")
+        print("   • Stop Loss orders for risk management")
+        print("   • Take Profit orders to secure gains")
+        print("   • Position monitoring for optimal exits")
 
 # Demonstrate position management
 if __name__ == "__main__":

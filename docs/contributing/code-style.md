@@ -12,7 +12,7 @@ All code must pass mypy strict mode with no errors:
 
 ```python
 from typing import Any
-from fivetwenty import AsyncClient
+
 from fivetwenty.models import OrderRequest, OrderResponse
 
 
@@ -25,13 +25,15 @@ async def create_order(
     timeout: float | None = None,
 ) -> OrderResponse:
     """Create an order with proper typing."""
-    pass
+    # Implementation would go here
+    raise NotImplementedError
 
 
 # ❌ Bad - Missing type annotations
 async def create_order_bad(self, account_id: Any, order: Any, timeout: Any = None) -> None:
     """Bad example with missing annotations."""
-    pass
+    # Implementation would go here
+    raise NotImplementedError
 ```
 
 ### **Financial Precision - Decimal Only**
@@ -518,7 +520,7 @@ async def stream_pricing(
     """Stream pricing with reconnection logic."""
     last_heartbeat = time.monotonic()
 
-    async for line in self._stream_lines(url, headers):
+    # Build streaming URL and headers\n    url = f\"/v3/accounts/{account_id}/pricing/stream\"\n    headers = {\"Authorization\": \"Bearer token\", \"Accept\": \"application/stream+json\"}\n    \n    async for line in self._stream_lines(url, headers):
         if not line.strip():
             continue
 
