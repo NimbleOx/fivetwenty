@@ -105,11 +105,12 @@ config = AccountConfig(
 Protected API token that never appears in logs or string representations.
 
 ```python
+import os
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="your-token",
-    account_id="your-account",
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE,
     alias="example"
 )
@@ -124,11 +125,12 @@ actual_token = config.token.get_secret_value()
 Protected account ID that never appears in logs or string representations.
 
 ```python
+import os
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="your-token",
-    account_id="your-account",
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE,
     alias="example"
 )
@@ -143,11 +145,12 @@ actual_account = config.account_id.get_secret_value()
 Trading environment (practice or live).
 
 ```python
+import os
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="your-token",
-    account_id="your-account",
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE,
     alias="example"
 )
@@ -194,10 +197,13 @@ config = AccountConfig(
     token="token",
     account_id="account_id",
 )
-print(config.summary())  # "my_trader (practice)"
-
-# Safe for all logging contexts
+print(config.summary())
 logger.info("Starting trading session: %s", config.summary())
+```
+
+Expected output:
+```text
+my_trader (practice)
 ```
 
 ### Security Features
@@ -206,11 +212,12 @@ logger.info("Starting trading session: %s", config.summary())
 All secret values are automatically masked in string representations:
 
 ```python
+import os
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="super-secret-token",
-    account_id="secret-account-123",
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     alias="demo_account",
     environment=Environment.PRACTICE,
 )
@@ -284,8 +291,8 @@ Load configuration from standard `FIVETWENTY_*` environment variables.
 import os
 from fivetwenty import AccountConfigLoader
 
-# Set your actual token instead of placeholder
-os.environ["FIVETWENTY_OANDA_TOKEN"] = os.getenv("ACTUAL_OANDA_TOKEN", "demo-token")
+# Load from environment (set these in your shell/deployment)
+# os.environ["FIVETWENTY_OANDA_TOKEN"] = "your-actual-token"
 os.environ["FIVETWENTY_OANDA_ACCOUNT"] = "your-account"
 os.environ["FIVETWENTY_OANDA_ENVIRONMENT"] = "practice"
 os.environ["FIVETWENTY_OANDA_ACCOUNT_ALIAS"] = "my_account"
@@ -320,8 +327,8 @@ Load configuration using custom environment variable prefix.
 import os
 from fivetwenty import AccountConfigLoader
 
-# Set your actual token instead of placeholder
-os.environ["STRATEGY_A_OANDA_TOKEN"] = os.getenv("ACTUAL_STRATEGY_A_TOKEN", "demo-token-a")
+# Load from environment (set these in your shell/deployment)
+# os.environ["STRATEGY_A_OANDA_TOKEN"] = "your-actual-token"
 os.environ["STRATEGY_A_OANDA_ACCOUNT"] = "account-a"
 os.environ["STRATEGY_A_OANDA_ENVIRONMENT"] = "practice"
 os.environ["STRATEGY_A_OANDA_ACCOUNT_ALIAS"] = "momentum_strategy"
@@ -495,11 +502,12 @@ print("API URL:", config.environment.base_url)
 ### Basic Configuration
 
 ```python
+import os
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="your-api-token",
-    account_id="your-account-id",
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE,
     alias="basic_trading"
 )

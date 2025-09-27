@@ -37,14 +37,14 @@ Continue here once you've completed the getting started section.
 1. **[Basic Trading Concepts](basic-trading/index.md)** - Learn fundamental trading operations
 2. **[Advanced Order Types](advanced-orders/index.md)** - Learn sophisticated order management
 3. **[Risk Management Fundamentals](risk-management.md)** - Protect your capital effectively
-4. **[Portfolio Analysis Basics](portfolio-analysis.md)** - Monitor and analyze your trading
+4. **[Account Management Basics](account-management.md)** - Monitor and analyze your trading
 5. **[Working with Streaming Data](streaming-data.md)** - Handle real-time market data
 
 ### **Specialized Learning** (Advanced Topics)
 Deep-dive tutorials for specific areas of trading and SDK usage.
 
 1. **[Risk Management](risk-management.md)** - Protect your trading capital using FiveTwenty controls
-2. **[Portfolio Management](portfolio-analysis.md)** - Manage multiple positions effectively
+2. **[Account Management](account-management.md)** - Manage multiple positions effectively
 3. **[Streaming Data](streaming-data.md)** - Handle real-time market feeds
 4. **[Advanced Orders](advanced-orders/index.md)** - Learn complex order types
 

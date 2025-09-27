@@ -21,7 +21,7 @@ Authentication issues are often the first barrier users encounter. This section 
 ### Configuration Errors
 
 **Missing Environment Variables**
-```
+```text
 ValueError: FIVETWENTY_OANDA_TOKEN environment variable not set
 ```
 **Cause:** The SDK cannot find your API token in environment variables.
@@ -33,7 +33,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 ```
 
 **Invalid Token Format**
-```
+```text
 ValueError: Invalid token format: token must be a non-empty string
 ```
 **Cause:** Token is empty, None, or contains only whitespace.
@@ -49,7 +49,7 @@ else:
 ```
 
 **Account ID Mismatch**
-```
+```text
 ValidationError: Account ID format invalid
 ```
 **Cause:** Account ID doesn't match OANDA's format (XXX-XXX-XXXXXXX-XXX).
@@ -58,7 +58,7 @@ ValidationError: Account ID format invalid
 ### API Authentication Errors
 
 **HTTP 401 Unauthorized**
-```
+```text
 HTTPError: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.com/v3/accounts
 ```
 **Cause:** Invalid or expired API token.
@@ -68,7 +68,7 @@ HTTPError: 401 Client Error: Unauthorized for url: https://api-fxpractice.oanda.
 - Check if your token has expired (OANDA tokens don't expire but can be revoked)
 
 **HTTP 403 Forbidden**
-```
+```text
 HTTPError: 403 Client Error: Forbidden for url: https://api-fxpractice.oanda.com/v3/accounts/101-001-XXXXXXX-001
 ```
 **Cause:** Token doesn't have access to the specified account.
@@ -80,7 +80,7 @@ HTTPError: 403 Client Error: Forbidden for url: https://api-fxpractice.oanda.com
 ### Environment Mismatch Errors
 
 **Wrong Environment URL**
-```
+```text
 HTTPError: 404 Client Error: Not Found
 ```
 **Cause:** Using a practice token with live environment or vice versa.
@@ -106,7 +106,7 @@ client = AsyncClient(
 ### Rate Limiting Issues
 
 **HTTP 429 Too Many Requests**
-```
+```text
 HTTPError: 429 Client Error: Too Many Requests
 ```
 **Cause:** Exceeded OANDA's rate limits (20 requests per second).

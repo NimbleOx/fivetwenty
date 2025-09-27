@@ -48,6 +48,9 @@ Trading functionality organized by OANDA API endpoints.
 Complete method signatures with parameter types and return values:
 
 ```python
+from typing import Optional
+
+from fivetwenty.models import OrderRequest, OrderResponse
 
 async def post_order(
     self,

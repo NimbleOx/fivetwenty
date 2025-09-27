@@ -140,6 +140,7 @@ OANDA applies rate limits to streaming connections to prevent abuse. The SDK han
 ### Health Monitoring
 
 Applications should monitor:
+
 - Message receive rates
 - Heartbeat intervals
 - Connection uptime

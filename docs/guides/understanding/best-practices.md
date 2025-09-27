@@ -10,6 +10,7 @@ Always use context managers for proper resource cleanup:
 
 ```python
 import os
+
 from fivetwenty import AsyncClient, Client, Environment
 
 # Setup
@@ -35,6 +36,7 @@ Reuse client instances across multiple operations:
 
 ```python
 import os
+
 from fivetwenty import AsyncClient, Environment
 
 # Setup
@@ -62,6 +64,7 @@ Use asyncio.gather() for concurrent API calls:
 ```python
 import asyncio
 import os
+
 from fivetwenty import AsyncClient, Environment
 
 # Setup
@@ -217,9 +220,10 @@ Implement exponential backoff for retryable errors:
 
 ```python
 import asyncio
-import random
+import secrets
 from collections.abc import Callable
 from typing import Any
+
 from fivetwenty.exceptions import InternalServerError, TooManyRequests
 
 async def retry_with_backoff(
@@ -238,7 +242,6 @@ async def retry_with_backoff(
             # Exponential backoff with jitter
             delay = base_delay * (2 ** attempt)
             # Use secrets module for cryptographically secure random
-            import secrets
             jitter = secrets.randbelow(int(0.3 * delay * 1000)) / 1000
             await asyncio.sleep(delay + jitter)
     return None  # Explicit return for all code paths
@@ -330,11 +333,12 @@ def process_price_sync(price) -> None:
 Use different settings for practice vs live:
 
 ```python
+import os
+
 from fivetwenty import AsyncClient, Environment
 
 def get_token(is_live: bool) -> str:
     """Get appropriate token for environment."""
-    import os
     if is_live:
         return os.environ["OANDA_LIVE_TOKEN"]
     return os.environ["OANDA_PRACTICE_TOKEN"]
@@ -437,7 +441,7 @@ async def bad_pattern_example():
     symbols = ["EUR_USD", "GBP_USD"]
     for symbol in symbols:
         async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:  # Expensive!
-            price = await client.pricing.get_pricing(account_id, [symbol])
+            _price = await client.pricing.get_pricing(account_id, [symbol])
 
 # ❌ Blocking operations in async context
 async def bad_async():
@@ -450,7 +454,7 @@ profit_loss = 1234.56 + 0.1  # Precision errors!
 async def bad_error_handling():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         try:
-            order = await client.orders.post_market_order(
+            _order = await client.orders.post_market_order(
                 account_id=account_id,
                 instrument="EUR_USD",
                 units=1000
@@ -486,7 +490,7 @@ async def good_pattern_example():
     symbols = ["EUR_USD", "GBP_USD"]
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         for symbol in symbols:
-            price = await client.pricing.get_pricing(account_id, [symbol])
+            _price = await client.pricing.get_pricing(account_id, [symbol])
 
 # ✅ Async operations in async context
 async def good_async():
@@ -499,7 +503,7 @@ profit_loss = Decimal("1234.56") + Decimal("0.1")
 async def good_error_handling():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         try:
-            order = await client.orders.post_market_order(
+            _order = await client.orders.post_market_order(
                 account_id=account_id,
                 instrument="EUR_USD",
                 units=1000
@@ -930,7 +934,8 @@ async def test_live_api():
     ) as client:
         # Test real API calls
         accounts = await client.accounts.get_accounts()
-        assert len(accounts) > 0
+        if len(accounts) == 0:
+            raise ValueError("Expected at least one account")
 ```
 
 ### Validation Testing
@@ -957,8 +962,10 @@ async def test_position_size_validator():
     order_params = {"instrument": "EUR_USD", "units": 60000}
     result = await validator.validate(order_params, context)
 
-    assert not result.is_valid
-    assert result.severity == ValidationSeverity.ERROR
+    if result.is_valid:
+        raise ValueError("Expected validation to fail")
+    if result.severity != ValidationSeverity.ERROR:
+        raise ValueError(f"Expected severity ERROR, got '{result.severity}'")
 ```
 
 ## Summary

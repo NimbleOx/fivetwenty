@@ -73,5 +73,5 @@ For immediate HFT optimization:
 
 ## Related Guides
 
-- [Handle Connection Failures](../../practical-solutions/handle-connection-failures.md) - Connection resilience
-- [Streaming Data Tutorials](../../../tutorials/streaming-data.md) - Streaming fundamentals
+- [Handle Connection Failures](../practical-solutions/handle-connection-failures.md) - Connection resilience
+- [Streaming Data Tutorials](../../tutorials/streaming-data.md) - Streaming fundamentals

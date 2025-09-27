@@ -18,7 +18,7 @@ from fivetwenty import AsyncClient
 # Load environment variables from .env file
 load_dotenv()
 
-async def demonstrate_position_management(trade_id: str):
+async def demonstrate_position_management(trade_id: str) -> None:
     """Learn position management techniques."""
 
     if not trade_id:

@@ -14,6 +14,7 @@ instrument = "EUR_USD"  # Euro vs US Dollar
 ```
 
 Key instrument categories:
+
 - **Majors**: EUR_USD, GBP_USD, USD_JPY, USD_CHF, AUD_USD, USD_CAD, NZD_USD
 - **Minors**: Cross-currency pairs like EUR_GBP, GBP_JPY
 - **Exotics**: Emerging market currencies

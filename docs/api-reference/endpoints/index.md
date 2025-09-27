@@ -57,27 +57,31 @@ import asyncio
 from fivetwenty import AsyncClient
 
 
-async def main():
-    async with AsyncClient() as client:
+async def main() -> None:
+    async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
         # Account operations
-        accounts = await client.accounts.get_accounts()
+        _accounts = await client.accounts.get_accounts()
 
         # Trading operations
-        order = await client.orders.post_market_order(account_id, "EUR_USD", 1000)
+        account_id = "your-account-id"
+        _order = await client.orders.post_market_order(account_id, "EUR_USD", 1000)
 
         # Market data
-        prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
+        _prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Sync Client
 ```python
 from fivetwenty import Client
 
-with Client() as client:
+with Client(token="demo-token", account_id="your-account-id") as client:
     # Same methods, synchronous execution
     accounts = client.accounts.get_accounts()
+    account_id = "your-account-id"
     order = client.orders.post_market_order(account_id, "EUR_USD", 1000)
     prices = client.pricing.get_pricing(account_id, ["EUR_USD"])
 ```

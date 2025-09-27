@@ -652,7 +652,8 @@ async def test_insufficient_funds_handling() -> None:
     with pytest.raises(FiveTwentyError) as exc_info:
         await place_order(mock_client, "account", "EUR_USD", 1000000)
 
-    assert exc_info.value.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS
+    if exc_info.value.code != FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
+        raise ValueError(f"Expected error code INSUFFICIENT_FUNDS, got '{exc_info.value.code}'")
 
 @pytest.mark.asyncio
 async def test_retry_on_server_error() -> None:
@@ -669,8 +670,10 @@ async def test_retry_on_server_error() -> None:
 
     result = await place_order_with_retry(mock_client, "account", "EUR_USD", 1000)
 
-    assert result["order_fill_transaction"]["id"] == "123"
-    assert mock_client.orders.post_market_order.call_count == 3
+    if result["order_fill_transaction"]["id"] != "123":
+        raise ValueError(f"Expected transaction id '123', got '{result['order_fill_transaction']['id']}'")
+    if mock_client.orders.post_market_order.call_count != 3:
+        raise ValueError(f"Expected 3 calls, got {mock_client.orders.post_market_order.call_count}")
 ```
 
 ## Best Practices

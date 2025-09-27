@@ -26,7 +26,9 @@ import asyncio
 import os
 from decimal import Decimal
 from typing import Any
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
@@ -87,6 +89,7 @@ Set stop-loss at fixed pip distance from entry:
 import os
 from decimal import Decimal
 from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
@@ -165,6 +168,7 @@ Limit risk to fixed percentage of account balance:
 import os
 from decimal import Decimal
 from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
@@ -259,6 +263,7 @@ Stop-loss that follows favorable price movement:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
 
@@ -331,9 +336,11 @@ Stop-loss based on market volatility using Average True Range:
 import os
 from decimal import Decimal
 from typing import Any
+
+import pandas as pd
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
-import pandas as pd
 
 
 async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
@@ -430,6 +437,7 @@ Update stop-loss on existing positions:
 import os
 from decimal import Decimal
 from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
@@ -475,6 +483,7 @@ Move stop-loss to entry price after favorable movement:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
 
@@ -546,6 +555,7 @@ Partial position closure at multiple levels:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
 
@@ -643,6 +653,7 @@ Monitor positions and stop-loss orders:
 ```python
 import asyncio
 from decimal import Decimal
+
 from fivetwenty import AsyncClient, Environment
 
 async def monitor_stop_loss_positions(account_id: str, check_interval: int = 30) -> None:

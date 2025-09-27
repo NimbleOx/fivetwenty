@@ -74,9 +74,12 @@ order3 = MarketOrderRequest(
 )
 
 # All units fields are now native Decimal objects
-assert isinstance(order1.units, Decimal)
-assert isinstance(order2.units, Decimal)
-assert isinstance(order3.units, Decimal)
+if not isinstance(order1.units, Decimal):
+    raise TypeError(f"Expected order1.units to be Decimal, got {type(order1.units)}")
+if not isinstance(order2.units, Decimal):
+    raise TypeError(f"Expected order2.units to be Decimal, got {type(order2.units)}")
+if not isinstance(order3.units, Decimal):
+    raise TypeError(f"Expected order3.units to be Decimal, got {type(order3.units)}")
 ```
 
 #### Field Type Categories

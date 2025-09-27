@@ -42,20 +42,22 @@ Base exception for all OANDA API errors.
 ```python
 import asyncio
 
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import FiveTwentyError
+
 
 async def main():
-    from fivetwenty.exceptions import FiveTwentyError
-
-    try:
-        await client.orders.post_market_order(
-            account_id="invalid-account",
-            instrument="EUR_USD",
-            units=10000,
-        )
-    except FiveTwentyError as e:
-        print(f"Error: {e.message}")
-        print(f"Code: {e.error_code}")
-        print(f"Details: {e.error_details}")
+    async with AsyncClient() as client:
+        try:
+            await client.orders.post_market_order(
+                account_id="invalid-account",
+                instrument="EUR_USD",
+                units=10000,
+            )
+        except FiveTwentyError as e:
+            print(f"Error: {e.message}")
+            print(f"Code: {e.error_code}")
+            print(f"Details: {e.error_details}")
 
 asyncio.run(main())
 ```
@@ -68,17 +70,19 @@ Raised when a streaming connection stalls or times out.
 ```python
 import asyncio
 
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import StreamStall
+
 
 async def main():
-    from fivetwenty.exceptions import StreamStall
-
-    try:
-        async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
-            pass
-    except StreamStall as e:
-        print(f"Stream stalled: {e.message}")
-        # Implement reconnection logic
-        await asyncio.sleep(5)
+    async with AsyncClient() as client:
+        try:
+            async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
+                pass
+        except StreamStall as e:
+            print(f"Stream stalled: {e.message}")
+            # Implement reconnection logic
+            await asyncio.sleep(5)
 
 asyncio.run(main())
 ```

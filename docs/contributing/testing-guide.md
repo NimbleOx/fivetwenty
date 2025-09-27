@@ -193,9 +193,12 @@ class TestAccountsEndpoint:
             result = await client.accounts.get_account_summary("123-456-789")
 
             # Verify behavior
-            assert result.id == "123-456-789"
-            assert result.currency == "USD"
-            assert result.balance == Decimal("10000.0000")
+            if result.id != "123-456-789":
+                raise ValueError(f"Expected id '123-456-789', got '{result.id}'")
+            if result.currency != "USD":
+                raise ValueError(f"Expected currency 'USD', got '{result.currency}'")
+            if result.balance != Decimal("10000.0000"):
+                raise ValueError(f"Expected balance '10000.0000', got '{result.balance}'")
 
             # Verify HTTP call
             mock_request.assert_called_once_with(
@@ -228,8 +231,10 @@ class TestAccountsEndpoint:
                 await client.accounts.get_account_summary("invalid-account")
 
             # Verify exception details
-            assert exc_info.value.error_code == "ACCOUNT_NOT_EXIST"
-            assert "account specified does not exist" in exc_info.value.message
+            if exc_info.value.error_code != "ACCOUNT_NOT_EXIST":
+                raise ValueError(f"Expected error code 'ACCOUNT_NOT_EXIST', got '{exc_info.value.error_code}'")
+            if "account specified does not exist" not in exc_info.value.message:
+                raise ValueError(f"Expected message to contain 'account specified does not exist', got '{exc_info.value.message}'")
 
     @pytest.mark.unit
     @pytest.mark.asyncio
@@ -246,7 +251,8 @@ class TestAccountsEndpoint:
                     timeout=1.0
                 )
 
-            assert "timed out" in str(exc_info.value).lower()
+            if "timed out" not in str(exc_info.value).lower():
+                raise ValueError(f"Expected error message to contain 'timed out', got '{str(exc_info.value)}'")
 ```
 
 ### **Model Testing**
@@ -279,12 +285,18 @@ class TestOrderModel:
 
         order = Order.model_validate(order_data)
 
-        assert order.id == "12345"
-        assert order.instrument == "EUR_USD"
-        assert order.units == 1000
-        assert order.price == Decimal("1.2345")
-        assert order.time_in_force == "GTC"
-        assert isinstance(order.create_time, datetime)
+        if order.id != "12345":
+            raise ValueError(f"Expected id '12345', got '{order.id}'")
+        if order.instrument != "EUR_USD":
+            raise ValueError(f"Expected instrument 'EUR_USD', got '{order.instrument}'")
+        if order.units != 1000:
+            raise ValueError(f"Expected units 1000, got '{order.units}'")
+        if order.price != Decimal("1.2345"):
+            raise ValueError(f"Expected price '1.2345', got '{order.price}'")
+        if order.time_in_force != "GTC":
+            raise ValueError(f"Expected time_in_force 'GTC', got '{order.time_in_force}'")
+        if not isinstance(order.create_time, datetime):
+            raise TypeError(f"Expected create_time to be datetime, got '{type(order.create_time)}'")
 
     @pytest.mark.unit
     def test_order_model_invalid_data(self):
@@ -300,7 +312,9 @@ class TestOrderModel:
             Order.model_validate(invalid_data)
 
         errors = exc_info.value.errors()
-        assert len(errors) >= 3  # Multiple validation errors
+        MIN_EXPECTED_ERRORS = 3
+        if len(errors) < MIN_EXPECTED_ERRORS:
+            raise ValueError(f"Expected at least {MIN_EXPECTED_ERRORS} validation errors, got {len(errors)}")
 
     @pytest.mark.unit
     def test_order_serialization_roundtrip(self):
@@ -321,9 +335,12 @@ class TestOrderModel:
         serialized = order.model_dump(by_alias=True)
 
         # Verify roundtrip consistency
-        assert serialized["id"] == original_data["id"]
-        assert serialized["instrument"] == original_data["instrument"]
-        assert serialized["timeInForce"] == original_data["timeInForce"]
+        if serialized["id"] != original_data["id"]:
+            raise ValueError(f"ID mismatch: expected '{original_data['id']}', got '{serialized['id']}'")
+        if serialized["instrument"] != original_data["instrument"]:
+            raise ValueError(f"Instrument mismatch: expected '{original_data['instrument']}', got '{serialized['instrument']}'")
+        if serialized["timeInForce"] != original_data["timeInForce"]:
+            raise ValueError(f"TimeInForce mismatch: expected '{original_data['timeInForce']}', got '{serialized['timeInForce']}'")
 ```
 
 ---
@@ -368,12 +385,21 @@ class TestAccountsIntegration:
             summary = await client.accounts.get_account_summary(account_id)
 
             # Verify response structure and types
-            assert summary.id == account_id
-            assert isinstance(summary.balance, Decimal)
-            assert summary.currency in ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD"]
-            assert summary.margin_available >= Decimal("0")
-            assert summary.margin_used >= Decimal("0")
-            assert summary.open_trade_count >= 0
+            if summary.id != account_id:
+                raise ValueError(f"Expected account id '{account_id}', got '{summary.id}'")
+            if not isinstance(summary.balance, Decimal):
+                raise TypeError(f"Expected balance to be Decimal, got '{type(summary.balance)}'")
+
+            valid_currencies = ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD"]
+            if summary.currency not in valid_currencies:
+                raise ValueError(f"Expected currency to be one of {valid_currencies}, got '{summary.currency}'")
+
+            if summary.margin_available < Decimal("0"):
+                raise ValueError(f"Expected margin_available >= 0, got '{summary.margin_available}'")
+            if summary.margin_used < Decimal("0"):
+                raise ValueError(f"Expected margin_used >= 0, got '{summary.margin_used}'")
+            if summary.open_trade_count < 0:
+                raise ValueError(f"Expected open_trade_count >= 0, got '{summary.open_trade_count}'")
 
     @pytest.mark.asyncio
     async def test_account_not_found_real_api(self, client):
@@ -382,8 +408,10 @@ class TestAccountsIntegration:
             with pytest.raises(VeeTwentyError) as exc_info:
                 await client.accounts.get_account_summary("999-999-999")
 
-            assert exc_info.value.error_code == "ACCOUNT_NOT_EXIST"
-            assert exc_info.value.response.status_code == 404
+            if exc_info.value.error_code != "ACCOUNT_NOT_EXIST":
+                raise ValueError(f"Expected error code 'ACCOUNT_NOT_EXIST', got '{exc_info.value.error_code}'")
+            if exc_info.value.response.status_code != 404:
+                raise ValueError(f"Expected status code 404, got '{exc_info.value.response.status_code}'")
 ```
 
 ### **VCR.py Configuration**
@@ -421,7 +449,8 @@ async def test_with_vcr_recording(client, vcr_fixture):
     """Test that records HTTP interaction."""
     with vcr_fixture.use_cassette("accounts/get_summary.yaml"):
         summary = await client.accounts.get_account_summary("123-456-789")
-        assert summary.id == "123-456-789"
+        if summary.id != "123-456-789":
+            raise ValueError(f"Expected account id '123-456-789', got '{summary.id}'")
 ```
 
 ### **Environment Variables for Testing**
@@ -490,10 +519,14 @@ class TestPricingStreaming:
                 if len(prices) >= 2:  # Stop after collecting test data
                     break
 
-            assert len(prices) == 2
-            assert len(heartbeats) == 1
-            assert prices[0].instrument == "EUR_USD"
-            assert prices[0].bids[0].price == Decimal("1.0850")
+            if len(prices) != 2:
+                raise ValueError(f"Expected 2 prices, got {len(prices)}")
+            if len(heartbeats) != 1:
+                raise ValueError(f"Expected 1 heartbeat, got {len(heartbeats)}")
+            if prices[0].instrument != "EUR_USD":
+                raise ValueError(f"Expected instrument 'EUR_USD', got '{prices[0].instrument}'")
+            if prices[0].bids[0].price != Decimal("1.0850"):
+                raise ValueError(f"Expected price '1.0850', got '{prices[0].bids[0].price}'")
 
     @pytest.mark.asyncio
     async def test_stream_stall_detection(self, client):
@@ -531,16 +564,21 @@ class TestStreamingIntegration:
 
                 # Verify stream item structure
                 if hasattr(item, 'instrument'):  # Price
-                    assert item.instrument in instruments
-                    assert len(item.bids) > 0
-                    assert len(item.asks) > 0
-                    assert item.bids[0].price < item.asks[0].price  # Bid < Ask
+                    if item.instrument not in instruments:
+                        raise ValueError(f"Expected instrument to be one of {instruments}, got '{item.instrument}'")
+                    if len(item.bids) == 0:
+                        raise ValueError("Expected at least one bid")
+                    if len(item.asks) == 0:
+                        raise ValueError("Expected at least one ask")
+                    if item.bids[0].price >= item.asks[0].price:
+                        raise ValueError(f"Expected bid price ({item.bids[0].price}) < ask price ({item.asks[0].price})")
 
                 # Stop after receiving some data
                 if stream_count >= 10:
                     break
 
-            assert stream_count >= 10
+            if stream_count < 10:
+                raise ValueError(f"Expected at least 10 stream items, got {stream_count}")
 ```
 
 ---
@@ -683,7 +721,10 @@ class TestMemoryUsage:
                     memory_growth = current_memory - initial_memory
 
                     # Memory growth should be reasonable (< 50MB)
-                    assert memory_growth < 50 * 1024 * 1024, f"Memory growth: {memory_growth / 1024 / 1024:.1f}MB"
+                    max_memory_mb = 50
+                    max_memory_bytes = max_memory_mb * 1024 * 1024
+                    if memory_growth >= max_memory_bytes:
+                        raise ValueError(f"Memory growth: {memory_growth / 1024 / 1024:.1f}MB exceeds {max_memory_mb}MB limit")
 
                 if stream_count >= 1000:
                     break
@@ -711,12 +752,19 @@ class TestMemoryUsage:
             end_time = asyncio.get_event_loop().time()
 
             # All requests should succeed
-            assert len(results) == 10
-            assert all(r.id == os.environ["TEST_OANDA_ACCOUNT"] for r in results)
+            if len(results) != 10:
+                raise ValueError(f"Expected 10 results, got {len(results)}")
+
+            expected_account_id = os.environ["TEST_OANDA_ACCOUNT"]
+            for i, result in enumerate(results):
+                if result.id != expected_account_id:
+                    raise ValueError(f"Result {i}: expected account id '{expected_account_id}', got '{result.id}'")
 
             # Should complete reasonably quickly (adjust threshold as needed)
             elapsed = end_time - start_time
-            assert elapsed < 5.0, f"Concurrent requests took {elapsed:.2f}s"
+            max_time = 5.0
+            if elapsed >= max_time:
+                raise ValueError(f"Concurrent requests took {elapsed:.2f}s, exceeding {max_time}s limit")
 ```
 
 ---

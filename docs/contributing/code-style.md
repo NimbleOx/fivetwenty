@@ -642,9 +642,12 @@ class TestAccountsEndpoint:
             result = await client.accounts.get_accounts("123-456-789")
 
             # Assert
-            assert result.id == "123-456-789"
-            assert result.currency == "USD"
-            assert result.balance == Decimal("10000.00")
+            if result.id != "123-456-789":
+                raise ValueError(f"Expected id '123-456-789', got '{result.id}'")
+            if result.currency != "USD":
+                raise ValueError(f"Expected currency 'USD', got '{result.currency}'")
+            if result.balance != Decimal("10000.00"):
+                raise ValueError(f"Expected balance '10000.00', got '{result.balance}'")
             mock_request.assert_called_once_with("GET", "/accounts/123-456-789")
 
     @pytest.mark.asyncio
@@ -660,8 +663,10 @@ class TestAccountsEndpoint:
             with pytest.raises(FiveTwentyError) as exc_info:
                 await client.accounts.get_accounts("invalid-id")
 
-            assert "Account invalid-id not found" in str(exc_info.value)
-            assert exc_info.value.error_code == "ACCOUNT_NOT_EXIST"
+            if "Account invalid-id not found" not in str(exc_info.value):
+                raise ValueError(f"Expected error message to contain 'Account invalid-id not found', got '{str(exc_info.value)}'")
+            if exc_info.value.error_code != "ACCOUNT_NOT_EXIST":
+                raise ValueError(f"Expected error code 'ACCOUNT_NOT_EXIST', got '{exc_info.value.error_code}'")
 ```
 
 ### **Integration Test Patterns**
@@ -697,10 +702,17 @@ class TestAccountsIntegration:
             summary = await client.accounts.get_accounts(account_id)
 
             # Verify response structure
-            assert summary.id == account_id
-            assert isinstance(summary.balance, Decimal)
-            assert summary.currency in ["USD", "EUR", "GBP", "JPY"]
-            assert summary.margin_available >= Decimal("0")
+            if summary.id != account_id:
+                raise ValueError(f"Expected account id '{account_id}', got '{summary.id}'")
+            if not isinstance(summary.balance, Decimal):
+                raise TypeError(f"Expected balance to be Decimal, got '{type(summary.balance)}'")
+
+            valid_currencies = ["USD", "EUR", "GBP", "JPY"]
+            if summary.currency not in valid_currencies:
+                raise ValueError(f"Expected currency to be one of {valid_currencies}, got '{summary.currency}'")
+            if summary.margin_available < Decimal("0"):
+                raise ValueError(f"Expected margin_available >= 0, got '{summary.margin_available}'")
+
 ```
 
 ---

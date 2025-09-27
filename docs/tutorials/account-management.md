@@ -24,7 +24,9 @@ The foundation of good account management is understanding your account's curren
 ```python
 import asyncio
 from decimal import Decimal
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
@@ -94,7 +96,9 @@ When trading with multiple OANDA accounts (such as separate accounts for differe
 
 ```python
 from decimal import Decimal
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file

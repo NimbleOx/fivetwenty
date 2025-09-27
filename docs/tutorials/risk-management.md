@@ -26,7 +26,6 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import (
     MarketOrderRequest,
     StopLossOrderRequest,
-    InstrumentName,
     TimeInForce
 )
 
@@ -99,6 +98,11 @@ if __name__ == "__main__":
 ### Position Size Based on Risk
 
 ```python
+import asyncio
+from decimal import Decimal
+
+from fivetwenty import AsyncClient
+
 async def calculate_risk_based_position_size(
     client: AsyncClient,
     account_id: str,
@@ -232,6 +236,6 @@ async def trading_circuit_breaker(
 
 - Learn [Advanced Orders](advanced-orders/index.md) for sophisticated risk management
 - Explore [Best Practices](../guides/understanding/best-practices.md) for production trading
-- See [Portfolio Management](portfolio-analysis.md) for multi-position risk
+- See [Account Management](account-management.md) for multi-position risk
 
 For comprehensive risk management theory, consider specialized finance resources alongside FiveTwenty for implementation.

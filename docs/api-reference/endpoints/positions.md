@@ -9,13 +9,15 @@ Position monitoring and management.
 ## get_positions
 ```python
 import asyncio
+from fivetwenty import AsyncClient
 
 
-async def main():
-    # positions.get_positions(account_id: AccountID) -> dict[str, Any]
+async def main() -> None:
+    async with AsyncClient() as client:
+        # positions.get_positions(account_id: AccountID) -> dict[str, Any]
 
-    # Example usage:
-    positions = await client.positions.get_positions(account_id="123-456-789")
+        # Example usage:
+        _positions = await client.positions.get_positions(account_id="123-456-789")
 
 asyncio.run(main())
 ```
@@ -41,10 +43,17 @@ Get a list of all positions for an account.
 
 ## get_open_positions
 ```python
-# positions.get_open_positions(account_id: AccountID) -> dict[str, Any]
+import asyncio
+from fivetwenty import AsyncClient
 
-# Example usage:
-open_positions = await client.positions.get_open_positions(account_id="123-456-789")
+async def main() -> None:
+    async with AsyncClient() as client:
+        # positions.get_open_positions(account_id: AccountID) -> dict[str, Any]
+
+        # Example usage:
+        _open_positions = await client.positions.get_open_positions(account_id="123-456-789")
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openPositions`
 
@@ -68,13 +77,20 @@ Get a list of all open positions for an account.
 
 ## get_position
 ```python
-# positions.get_position(account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]
+import asyncio
+from fivetwenty import AsyncClient
 
-# Example usage:
-position = await client.positions.get_position(
-    account_id="123-456-789",
-    instrument="EUR_USD"
-)
+async def main() -> None:
+    async with AsyncClient() as client:
+        # positions.get_position(account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]
+
+        # Example usage:
+        _position = await client.positions.get_position(
+            account_id="123-456-789",
+            instrument="EUR_USD"
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/positions/{instrument}`
 
@@ -100,21 +116,23 @@ Get the position for a specific instrument in an account.
 ## close_position
 ```python
 import asyncio
+from fivetwenty import AsyncClient
 
 
-async def main():
-    # positions.close_position(account_id: AccountID, instrument: InstrumentName,
-    #                long_units: str | Decimal | None = None,
-    #                short_units: str | Decimal | None = None,
-    #                long_client_extensions: ClientExtensions | dict[str, str] | None = None,
-    #                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> dict[str, Any]
+async def main() -> None:
+    async with AsyncClient() as client:
+        # positions.close_position(account_id: AccountID, instrument: InstrumentName,
+        #                long_units: str | Decimal | None = None,
+        #                short_units: str | Decimal | None = None,
+        #                long_client_extensions: ClientExtensions | dict[str, str] | None = None,
+        #                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> dict[str, Any]
 
-    # Example usage:
-    result = await client.positions.close_position(
-        account_id="123-456-789",
-        instrument="EUR_USD",
-        long_units="ALL",
-    )
+        # Example usage:
+        _result = await client.positions.close_position(
+            account_id="123-456-789",
+            instrument="EUR_USD",
+            long_units="ALL",
+        )
 
 asyncio.run(main())
 ```

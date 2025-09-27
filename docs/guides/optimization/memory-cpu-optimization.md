@@ -338,7 +338,7 @@ def detect_price_movements(prices: Any, threshold: float = 0.0001) -> Any:
 
 ```python
 import weakref
-from typing import Any
+from typing import Any, Callable, Dict, Set
 
 
 
@@ -346,8 +346,8 @@ class MemoryEfficientSubscriptionManager:
     """Manage price subscriptions without memory leaks."""
 
     def __init__(self) -> None:
-        self.subscribers = weakref.WeakSet()
-        self.active_subscriptions = {}
+        self.subscribers: Set[Callable[[Any], Any]] = weakref.WeakSet()
+        self.active_subscriptions: Dict[str, Any] = {}
 
     def subscribe(self, callback: Any) -> Any:
         """Subscribe to price updates using weak references."""
@@ -382,7 +382,7 @@ subscription_manager.subscribe(price_callback)
 import time
 from collections import deque
 from decimal import Decimal
-from typing import Any
+from typing import Any, Deque, Dict
 
 
 
@@ -392,7 +392,7 @@ class BoundedDataStorage:
 
     def __init__(self, max_size: int = 10000) -> None:
         self.max_size = max_size
-        self.data = deque(maxlen=max_size)
+        self.data: Deque[Any] = deque(maxlen=max_size)
         self.overflow_count = 0
 
     def add_data(self, item: Any) -> Any:

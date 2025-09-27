@@ -82,6 +82,7 @@ Benefits:
 ### Implementation Details
 
 The sync client manages:
+
 - Background asyncio event loop in separate thread
 - Bounded queue (default 1000 items) for streaming data
 - Exception marshalling between async and sync contexts
@@ -121,6 +122,7 @@ def process_price(price):
 ```
 
 Characteristics:
+
 - Bounded queue prevents memory leaks
 - Background thread handles OANDA connection
 - Natural blocking behavior for sequential processing
@@ -171,11 +173,13 @@ def sync_sequential_example():
 ### Resource Utilization
 
 **AsyncClient**:
+
 - Single thread execution
 - Event loop overhead (~1-2MB memory)
 - Direct HTTP connection management
 
 **Sync Client**:
+
 - Additional background thread
 - Queue memory overhead (bounded)
 - Thread synchronization costs
@@ -207,7 +211,7 @@ async def async_error_example():
                 instrument="EUR_USD",
                 units=1000
             )
-        except VeeTwentyError as e:
+        except VeeTwentyError:
             # Handle OANDA API error
             pass
         return order
@@ -233,7 +237,7 @@ def sync_error_example():
                 instrument="EUR_USD",
                 units=1000
             )
-        except VeeTwentyError as e:
+        except VeeTwentyError:
             # Same exception, but marshalled from background thread
             pass
         return order
@@ -244,6 +248,7 @@ def sync_error_example():
 ### AsyncClient Integration
 
 Best suited for async frameworks:
+
 - FastAPI endpoints
 - aiohttp applications
 - asyncio-based trading systems
@@ -252,6 +257,7 @@ Best suited for async frameworks:
 ### Sync Client Integration
 
 Best suited for traditional applications:
+
 - Flask web applications
 - Jupyter notebooks
 - Data analysis scripts
@@ -270,18 +276,19 @@ token = os.getenv("OANDA_TOKEN")
 
 # AsyncClient
 async def async_context_example():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    async with AsyncClient(token=token, environment=Environment.PRACTICE):
         # Automatic cleanup of connections
         pass
 
 # Sync Client
 def sync_context_example():
-    with Client(token=token, environment=Environment.PRACTICE) as client:
+    with Client(token=token, environment=Environment.PRACTICE):
         # Automatic cleanup of background thread and queue
         pass
 ```
 
 The context managers ensure:
+
 - HTTP connections are properly closed
 - Background threads are terminated
 - Event loops are cleaned up
@@ -290,12 +297,14 @@ The context managers ensure:
 ## Choosing the Right Client
 
 **Use AsyncClient when**:
+
 - Building production trading systems
 - Need maximum performance/throughput
 - Already using async/await in your application
 - Processing real-time streaming data at scale
 
 **Use Sync Client when**:
+
 - Prototyping or learning
 - Working in Jupyter notebooks
 - Integrating with legacy synchronous code

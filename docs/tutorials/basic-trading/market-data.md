@@ -12,9 +12,11 @@ Before placing any trade, you need to understand current market conditions:
 ```python
 import asyncio
 from decimal import Decimal
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
 
 # Load environment variables from .env file
 load_dotenv()
@@ -63,9 +65,11 @@ Understanding recent price action helps with trading decisions:
 
 ```python
 from typing import Any
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import CandlestickGranularity
 
 # Load environment variables from .env file
@@ -113,7 +117,9 @@ Let's create a comprehensive market analysis function:
 ```python
 import asyncio
 from decimal import Decimal
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
@@ -213,7 +219,9 @@ Different market conditions require different trading approaches:
 ```python
 import asyncio
 from decimal import Decimal
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
@@ -271,7 +279,9 @@ Understanding how prices move helps with entry and exit decisions:
 ```python
 import asyncio
 from decimal import Decimal
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file

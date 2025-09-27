@@ -13,7 +13,9 @@ Let's build a comprehensive automated trading system:
 import asyncio
 from datetime import datetime
 from decimal import Decimal
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
@@ -187,19 +189,29 @@ Here's an enhanced version with additional capabilities:
 
 ```python
 from decimal import Decimal
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
 load_dotenv()
 
 # Enhanced strategy concepts (for further learning)
+# Note: SimpleMovingAverageCrossover would be imported from previous lesson
 
-class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
+class EnhancedTradingStrategy:  # SimpleMovingAverageCrossover
     """Enhanced strategy with additional features."""
 
     def __init__(self, instrument: str = "EUR_USD") -> None:
-        super().__init__(instrument)
+        # super().__init__(instrument)  # Uncomment if inheriting from SimpleMovingAverageCrossover
+
+        # Basic strategy attributes (from parent class)
+        self.instrument = instrument
+        self.position_size = 1000
+        self.max_risk_per_trade = 0.02
+        self.stop_loss_pips = 20
+        self.take_profit_pips = 30
 
         # Enhanced features
         self.max_daily_trades = 5
@@ -332,9 +344,9 @@ class StrategyMonitor:
         else:
             print(f"Status: MONITORING")
 
-# Example monitoring
-monitor = StrategyMonitor(strategy)
-monitor.print_performance_dashboard()
+# Example monitoring (strategy would be defined elsewhere)
+# monitor = StrategyMonitor(strategy)
+# monitor.print_performance_dashboard()
 ```
 
 ---
@@ -408,6 +420,6 @@ Remember: **Successful trading requires practice, discipline, and continuous lea
 
 ## Related Resources
 
-- [Portfolio Analysis](../portfolio-analysis.md) - Advanced analysis techniques
+- [Account Management](../account-management.md) - Advanced analysis techniques
 - [Streaming Data](../streaming-data.md) - Real-time data processing
 - [API Reference](../../api-reference/index.md) - Complete technical documentation

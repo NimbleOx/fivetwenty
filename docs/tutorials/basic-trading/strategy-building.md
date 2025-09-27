@@ -11,7 +11,10 @@ Let's build a simple but complete moving average crossover strategy:
 
 ```python
 from decimal import Decimal
+from typing import Any
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
@@ -110,9 +113,11 @@ Test your strategy on historical data:
 
 ```python
 from decimal import Decimal
-from dotenv import load_dotenv
-from fivetwenty import AsyncClient
+
 import pandas as pd
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
 load_dotenv()
@@ -331,6 +336,7 @@ Improve your strategy through parameter optimization:
 
 ```python
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file

@@ -16,7 +16,8 @@ import time
 from collections import deque
 from collections.abc import Callable
 from decimal import Decimal
-from typing import Any
+from typing import Any, List
+
 from fivetwenty import AsyncClient
 from fivetwenty.models import ClientPrice
 
@@ -299,9 +300,6 @@ price_data = FastPrice(Decimal("1.1234"), Decimal("1.1236"), time.perf_counter()
 Process multiple updates together when possible:
 
 ```python
-
-
-from typing import Any
 async def batch_process_prices(self, prices: List[ClientPrice]) -> Any:
     """Process multiple prices in a batch for efficiency."""
 

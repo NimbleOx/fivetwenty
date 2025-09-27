@@ -27,13 +27,14 @@ The FiveTwenty library supports three secure authentication approaches:
 
 ```python
 import asyncio
+import os
 
 from fivetwenty import AsyncClient, Environment
 
-async def main():
+async def main() -> None:
     async with AsyncClient(
-        token="your-api-token",
-        account_id="your-account-id",  # Required parameter
+        token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+        account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],  # Required parameter
         environment=Environment.PRACTICE
     ) as client:
         accounts = await client.accounts.get_accounts()
@@ -81,7 +82,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 import asyncio
 
 
-async def main():
+async def main() -> None:
     from fivetwenty import AsyncClient
 
     # Zero-config - automatically loads environment variables
@@ -101,7 +102,7 @@ asyncio.run(main())
 Never hardcode tokens. Use environment variables:
 
 **❌ Bad - Never do this:**
-```python
+```text
 token = "abc123def456"  # NEVER hardcode tokens!
 ```
 
@@ -135,7 +136,7 @@ FIVETWENTY_OANDA_ACCOUNT_ALIAS=development_account
 import asyncio
 
 
-async def main():
+async def main() -> None:
     from dotenv import load_dotenv
 
     from fivetwenty import AsyncClient
@@ -169,7 +170,7 @@ import os
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
-async def main():
+async def main() -> None:
     # Long account for bullish positions
     long_config = AccountConfig(
         token=os.environ["LONG_ACCOUNT_TOKEN"],
@@ -219,11 +220,12 @@ asyncio.run(main())
 The library automatically protects sensitive information:
 
 ```python
+import os
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="your-api-token-here",
-    account_id="secret-account-123",
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE,
     alias="my_account",
 )
@@ -284,7 +286,7 @@ import os
 from fivetwenty import AsyncClient, Environment
 
 
-async def test_authentication():
+async def test_authentication() -> None:
     """Test OANDA API authentication and configuration."""
 
     try:
@@ -355,13 +357,20 @@ else:
 **Environment Mismatch**
 ```python
 # Ensure token matches environment
+import os
 from fivetwenty import AsyncClient, Environment
 
 # Practice token → Practice environment
-client = AsyncClient(token=practice_token, environment=Environment.PRACTICE)
+client = AsyncClient(
+    token=os.environ["FIVETWENTY_PRACTICE_TOKEN"],
+    environment=Environment.PRACTICE
+)
 
 # Live token → Live environment
-client = AsyncClient(token=live_token, environment=Environment.LIVE)
+client = AsyncClient(
+    token=os.environ["FIVETWENTY_LIVE_TOKEN"],
+    environment=Environment.LIVE
+)
 ```
 
 !!! info "Comprehensive Troubleshooting"

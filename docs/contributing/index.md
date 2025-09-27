@@ -202,7 +202,10 @@ tests/
 All public methods require comprehensive documentation:
 
 ```python
+from typing import Optional
+
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.models import InstrumentName, OrderResponse
 
 async def post_market_order(
     self,

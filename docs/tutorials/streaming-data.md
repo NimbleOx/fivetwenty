@@ -27,6 +27,7 @@ Real-time bid/ask prices for instruments:
 
 ```python
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
@@ -55,6 +56,7 @@ Monitor account changes and trade updates:
 
 ```python
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
@@ -89,7 +91,9 @@ async def handle_market_order(transaction):
 
 ```python
 import asyncio
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import StreamStall
 
@@ -131,7 +135,9 @@ Monitor stream health and implement reconnection logic:
 
 ```python
 import time
+
 from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
@@ -177,9 +183,12 @@ async def monitored_stream():
 ### Signal Generation from Price Streams
 
 ```python
-from decimal import Decimal
 from collections import deque
-from fivetwenty import AsyncClient, Environment
+from decimal import Decimal
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
 load_dotenv()
@@ -228,7 +237,10 @@ async def automated_trading_system():
 
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Environment
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
 
 # Load environment variables from .env file
 load_dotenv()
@@ -295,8 +307,9 @@ Here's a complete streaming trading system:
 import asyncio
 import logging
 import os
-from decimal import Decimal
 from collections import deque
+from decimal import Decimal
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import StreamStall
 

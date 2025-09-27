@@ -39,7 +39,13 @@ Primary async client for OANDA API operations. Recommended for production use.
 
 **Constructor:**
 ```python
+from logging import Logger
+from typing import Optional
+
+import httpx
+
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import AccountConfig
 
 # Constructor signature:
 
@@ -156,6 +162,8 @@ with Client() as client:
     accounts = client.accounts.get_accounts()
 
 # Direct parameters
+from fivetwenty import Client, Environment
+
 with Client(
     token="your-token",
     environment=Environment.PRACTICE
@@ -163,6 +171,8 @@ with Client(
     accounts = client.accounts.get_accounts()
 
 # Configuration object
+from fivetwenty.models import AccountConfig
+
 config = AccountConfig(...)
 with Client(config=config) as client:
     print(f"Using: {client.config.summary()}")
@@ -304,16 +314,19 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 **Example:**
 ```python
 import asyncio
+
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
 
 async def main():
-    try:
-        trade = await client.trades.get_trade(client.account_id, "invalid_id")
-    except FiveTwentyError as e:
-        print(f"Error {e.status_code}: {e.message}")
-        if e.error_code == "TRADE_NOT_FOUND":
-            # Handle specific error
-            pass
+    async with AsyncClient() as client:
+        try:
+            trade = await client.trades.get_trade(client.account_id, "invalid_id")
+        except FiveTwentyError as e:
+            print(f"Error {e.status_code}: {e.message}")
+            if e.error_code == "TRADE_NOT_FOUND":
+                # Handle specific error
+                pass
 
 asyncio.run(main())
 ```

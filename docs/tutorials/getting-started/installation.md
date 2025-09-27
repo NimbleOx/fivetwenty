@@ -46,8 +46,12 @@ Test your installation:
 ```python
 import fivetwenty
 
-print(fivetwenty.__version__)
-# Output: 0.1.1
+print(fivetwenty.__version())
+```
+
+Expected output:
+```text
+0.1.1
 ```
 
 ## Dependencies
