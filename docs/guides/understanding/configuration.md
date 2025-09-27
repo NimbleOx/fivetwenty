@@ -99,6 +99,7 @@ print(Environment.LIVE.base_url)
 
 The simplest way to configure the client:
 
+<!-- fragment: basic client configuration example with placeholder credentials -->
 ```python
 import asyncio
 import os
@@ -121,6 +122,7 @@ if __name__ == "__main__":
 
 For more structured configuration:
 
+<!-- fragment: configuration object example with placeholder credentials -->
 ```python
 import asyncio
 import os
@@ -157,6 +159,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 export FIVETWENTY_OANDA_ACCOUNT_ALIAS="my_account"
 ```
 
+<!-- fragment: environment variable configuration example with placeholder tokens -->
 ```python
 import asyncio
 import os
@@ -222,6 +225,7 @@ if __name__ == "__main__":
 
 Best for: Production applications, multiple accounts, reusable configurations
 
+<!-- fragment: multi-account configuration example with placeholder credentials -->
 ```python
 import asyncio
 import os
@@ -297,6 +301,7 @@ if __name__ == "__main__":
 
 For multiple accounts or microservices:
 
+<!-- fragment: custom environment prefix configuration example with nested context managers -->
 ```python
 import asyncio
 from fivetwenty import AccountConfigLoader, AsyncClient
@@ -345,6 +350,7 @@ When multiple configuration methods are used, the priority is:
 1. **Configuration object** (highest priority)
 2. **Direct parameters**
 3. **Environment variables** (lowest priority)
+<!-- fragment: configuration priority example with placeholder tokens -->
 ```python
 import asyncio
 import os
@@ -382,6 +388,7 @@ if __name__ == "__main__":
 
 The library automatically protects sensitive information:
 
+<!-- fragment: secret masking example with placeholder credentials -->
 ```python
 import asyncio
 import os
@@ -417,6 +424,7 @@ if __name__ == "__main__":
 
 The library validates configuration values:
 
+<!-- fragment: validation examples with placeholder credentials and error cases -->
 ```python
 import os
 from pydantic import ValidationError
@@ -499,6 +507,7 @@ if __name__ == "__main__":
 
 For advanced HTTP configuration:
 
+<!-- fragment: custom HTTP transport configuration example with unused variables -->
 ```python
 import asyncio
 import os
@@ -540,6 +549,7 @@ asyncio.run(main())
 
 ### Logging Configuration
 
+<!-- fragment: logging configuration example with unused logger variable -->
 ```python
 import asyncio
 import logging
@@ -607,6 +617,7 @@ with Client(
 
 ### Configuration Builder
 
+<!-- fragment: configuration builder utility class with file operations -->
 ```python
 import json
 import os
@@ -650,6 +661,7 @@ class ConfigBuilder:
 
 ### Multi-Environment Manager
 
+<!-- fragment: configuration manager class with unused variables and f-string exception -->
 ```python
 from fivetwenty import AccountConfig, AccountConfigLoader, AsyncClient
 
@@ -695,6 +707,7 @@ print(f"Created {len(manager.configs)} configurations")
 ## Troubleshooting
 
 ### Common Configuration Errors
+<!-- fragment: configuration error handling examples with await in non-async context -->
 ```python
 import os
 from pydantic import ValidationError
