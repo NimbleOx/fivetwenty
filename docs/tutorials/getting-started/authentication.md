@@ -49,6 +49,7 @@ asyncio.run(main())
 
 Apporpriate for running multiple clients connected to multiple accounts within the same logic (for example a short account and a long account):
 
+<!-- fragment: configuration with placeholder values -->
 ```python
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
@@ -70,6 +71,7 @@ async with AsyncClient(config=config) as client:
 
 ### 3. Environment Variables
 
+<!-- fragment: shell commands with placeholder tokens -->
 ```bash
 # Set environment variables (in your shell etc).
 export FIVETWENTY_OANDA_TOKEN="your-api-token"
@@ -78,6 +80,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 # Configuration is loaded automatically when these are set
 ```
 
+<!-- fragment: zero-config client example -->
 ```python
 import asyncio
 
@@ -102,6 +105,7 @@ asyncio.run(main())
 Never hardcode tokens. Use environment variables:
 
 **❌ Bad - Never do this:**
+<!-- fragment: bad example - intentionally wrong -->
 ```text
 token = "abc123def456"  # NEVER hardcode tokens!
 ```
@@ -124,6 +128,7 @@ For local development, install python-dotenv and create a .env file:
 uv add python-dotenv
 ```
 
+<!-- fragment: .env file template with placeholders -->
 ```bash
 # .env file (add to .gitignore!)
 FIVETWENTY_OANDA_TOKEN=your-practice-token
@@ -132,6 +137,7 @@ FIVETWENTY_OANDA_ENVIRONMENT=practice
 FIVETWENTY_OANDA_ACCOUNT_ALIAS=development_account
 ```
 
+<!-- fragment: dotenv usage example -->
 ```python
 import asyncio
 
@@ -164,6 +170,7 @@ You can create as many clients as you need to access different accounts with OAN
 
 For traders subject to US broker hedging rules, using separate long and short accounts provides a compliant way to maintain opposing positions in the same currency pair. This approach allows you to hedge positions without violating FIFO (First In, First Out) rules that prevent holding both long and short positions simultaneously in a single account. The next example shows how you might approach this.
 
+<!-- fragment: multi-account configuration with placeholder tokens -->
 ```python
 import asyncio
 import os
@@ -219,6 +226,7 @@ asyncio.run(main())
 
 The library automatically protects sensitive information:
 
+<!-- fragment: security masking example with placeholder tokens -->
 ```python
 import os
 from fivetwenty import AccountConfig, Environment
@@ -245,6 +253,7 @@ print(summary)
 
 The library validates all configuration values:
 
+<!-- fragment: validation example - designed to fail -->
 ```python
 from pydantic import ValidationError
 
@@ -279,6 +288,7 @@ Before deploying your application, it's important to verify that your authentica
 
 ### Test Your Authentication Setup
 
+<!-- fragment: authentication test example with placeholder tokens -->
 ```python
 import asyncio
 import os
@@ -337,6 +347,7 @@ If you encounter authentication issues, this section provides quick solutions fo
 ### Quick Fixes
 
 **Missing Environment Variables**
+<!-- fragment: troubleshooting commands with placeholders -->
 ```bash
 export FIVETWENTY_OANDA_TOKEN="your-api-token"
 export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
