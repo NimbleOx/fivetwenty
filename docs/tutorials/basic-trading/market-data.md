@@ -347,31 +347,6 @@ if __name__ == "__main__":
 
 ---
 
-## Skill Checkpoint: Market Data Analysis
-
-Test your understanding of market data:
-
-!!! question "🧠 Test Your Understanding"
-    1. **If EUR/USD spread is 5 pips, is this good for trading?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **No, this is a wide spread**. Normal EUR/USD spreads are 1-3 pips. Wide spreads increase your trading costs and make profitable trading more difficult.
-       </details>
-
-    2. **What does it mean if current price is at 80% of recent range?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **Near recent highs - potential resistance level**. The price may have difficulty moving higher and could reverse downward from this level.
-       </details>
-
-    3. **Why is historical data important before trading?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **Context for current conditions**. Historical data shows recent volatility, support/resistance levels, and trend direction, helping you make informed trading decisions.
-       </details>
-
----
-
 ## Using FiveTwenty for Market Analysis
 
 Use FiveTwenty's pricing API to check current spreads and recent price action before placing trades. The historical data endpoints help you understand market context and volatility patterns.

@@ -281,30 +281,6 @@ print(f"Adjusted Position: {adjusted_size} units")
 
 ---
 
-## Skill Checkpoint: Advanced Position Management
-
-Test your understanding of position management:
-
-!!! question "🧠 Test Your Understanding"
-    1. **What's the benefit of using a 2:1 risk-reward ratio?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **Profitable even with 50% win rate**. If you risk $100 to make $200, you can be wrong half the time and still be profitable overall.
-       </details>
-
-    2. **How do you optimize take profit levels?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **Use technical analysis and risk-reward ratios**. Target key resistance levels and maintain at least 1:2 risk-reward ratios for profitable trading.
-       </details>
-
-    3. **Why adjust position size based on volatility?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **Maintain consistent risk levels**. High volatility = smaller positions, low volatility = larger positions, keeping your dollar risk constant regardless of market conditions.
-       </details>
-
----
 
 ## Using FiveTwenty for Position Management
 

@@ -414,31 +414,6 @@ class StrategyOptimizer:
 
 ---
 
-## Skill Checkpoint: Strategy Development
-
-Test your understanding of strategy building:
-
-!!! question "🧠 Test Your Understanding"
-    1. **Why is backtesting important before live trading?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **Validates strategy effectiveness on historical data**. Backtesting reveals potential profitability, drawdowns, and optimal parameters before risking real money.
-       </details>
-
-    2. **What makes a moving average crossover strategy effective?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **Trend following with clear signals**. MA crossovers help identify trend changes early and provide objective entry/exit rules that remove emotional decision-making.
-       </details>
-
-    3. **How do you know if strategy parameters are overfitted?**
-       <details>
-       <summary>Click to reveal answer</summary>
-       **Test on out-of-sample data**. If optimized parameters perform poorly on new data, they're likely overfitted to historical patterns that won't repeat.
-       </details>
-
----
-
 
 ## What You've Learned
 
