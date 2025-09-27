@@ -316,7 +316,6 @@ async def place_order_with_retry():
 Implement circuit breaker pattern for system protection:
 
 ```python
-import asyncio
 from datetime import datetime, timedelta
 from enum import Enum
 from typing import Any, Callable

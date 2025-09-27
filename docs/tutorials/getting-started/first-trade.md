@@ -36,9 +36,7 @@ asyncio.run(main())
 Before trading, verify your account status and available funds:
 
 ```python
-from typing import Any
-
-async def check_account(client: Any) -> Any:
+async def check_account(client) -> None:
     """Check account balance and trading capacity."""
     # Get account list (we'll use the first one)
     accounts = await client.accounts.get_accounts()
@@ -63,9 +61,7 @@ async def check_account(client: Any) -> Any:
 Check current market prices before placing orders:
 
 ```python
-from typing import Any
-
-async def get_price(client: Any, instrument: str = "EUR_USD") -> Any:
+async def get_price(client, instrument: str = "EUR_USD"):
     """Get current pricing for an instrument."""
     # The SDK automatically uses the configured account ID
     prices = await client.pricing.get_pricing(
@@ -88,9 +84,7 @@ async def get_price(client: Any, instrument: str = "EUR_USD") -> Any:
 Place your first market order using the configured account:
 
 ```python
-from typing import Any
-
-async def place_market_order(client: Any, instrument: str = "EUR_USD", units: int = 1000) -> Any:
+async def place_market_order(client, instrument: str = "EUR_USD", units: int = 1000):
     """Place a market order."""
     print(f"\nPlacing {('BUY' if units > 0 else 'SELL')} order:")
     print(f"   Instrument: {instrument}")
@@ -187,7 +181,7 @@ async def first_trade_example() -> None:
             print(f"❌ Unexpected error: {e}")
             print("   Check your configuration and network connection")
 
-async def check_position(client: Any, instrument: str) -> None:
+async def check_position(client, instrument: str) -> None:
     """Check open position for an instrument."""
     positions = await client.positions.get_open_positions(client.account_id)
 
@@ -222,7 +216,6 @@ Once you have an open trade, you can close it using the dedicated `close_trade` 
 
 ```python
 import asyncio
-from typing import Any
 from dotenv import load_dotenv
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError

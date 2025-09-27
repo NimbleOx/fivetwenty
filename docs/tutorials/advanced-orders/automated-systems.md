@@ -20,19 +20,18 @@ FiveTwenty supports automated order management through OANDA's built-in order ty
 Place orders with automatic exit conditions:
 
 ```python
-import os
-from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-# Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def place_order_with_exits():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Market order with automatic stops
         order = await client.orders.post_market_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             stop_loss_on_fill={
@@ -57,19 +56,18 @@ async def place_order_with_exits():
 Use trailing stops to protect profits automatically:
 
 ```python
-import os
-from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-# Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def place_trailing_stop_order():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Place order with trailing stop
         order = await client.orders.post_market_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             trailing_stop_loss_on_fill={
@@ -89,13 +87,11 @@ Monitor multiple orders and implement conditional logic:
 ### Bulk Order Management
 
 ```python
-import asyncio
-import os
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-# Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def monitor_and_manage_orders():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
@@ -123,7 +119,7 @@ async def cancel_orders_by_instrument(instrument: str):
             if order.instrument == instrument and order.state == "PENDING":
                 try:
                     await client.orders.cancel_order(
-                        account_id=account_id,
+                        account_id=client.account_id,
                         order_id=order.id
                     )
                     cancelled_orders.append(order.id)
@@ -145,7 +141,7 @@ async def modify_order_price(order_id: str, new_price: Decimal):
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # Modify order price
         response = await client.orders.put_order(
-            account_id=account_id,
+            account_id=client.account_id,
             order_id=order_id,
             order={
                 "price": str(new_price),
@@ -173,7 +169,7 @@ async def robust_order_placement():
         while retry_count < max_retries:
             try:
                 order = await client.orders.post_limit_order(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instrument="EUR_USD",
                     units=10000,
                     price=Decimal("1.0850"),
@@ -206,7 +202,6 @@ Putting it all together for a simple automated trading setup:
 ```python
 import asyncio
 import os
-from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 async def automated_trading_example():
@@ -217,7 +212,7 @@ async def automated_trading_example():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # 1. Place initial order with automated exits
         order = await client.orders.post_market_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             stop_loss_on_fill={

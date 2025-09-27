@@ -43,7 +43,6 @@ Get list of all accounts for the authenticated user.
 
 ## get_account
 ```python
-import asyncio
 from fivetwenty import AsyncClient, Configuration
 
 

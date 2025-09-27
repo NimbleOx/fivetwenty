@@ -152,7 +152,6 @@ async def rate_limited_requests(token: str):
 **Error**: `401 Unauthorized` or invalid token errors
 
 ```python
-import asyncio
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
@@ -196,7 +195,6 @@ is_valid = await validate_credentials(token, Environment.PRACTICE)
 **Error**: `TimeoutError` or network connectivity problems
 
 ```python
-import asyncio
 from httpx import TimeoutException, ConnectError
 from fivetwenty import AsyncClient, Environment
 
@@ -243,7 +241,6 @@ client = await robust_connection("your-token", timeout=60.0)
 ```python
 import asyncio
 import random
-from typing import Optional
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 

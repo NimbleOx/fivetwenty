@@ -26,7 +26,6 @@
 Close all positions for one specific instrument:
 
 ```python
-import asyncio
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 

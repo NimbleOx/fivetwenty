@@ -24,15 +24,19 @@ The foundation of good account management is understanding your account's curren
 ```python
 import asyncio
 from decimal import Decimal
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient
 
-async def get_account_health(client: AsyncClient, account_id: str) -> dict:
+# Load environment variables from .env file
+load_dotenv()
+
+async def get_account_health(client: AsyncClient) -> dict:
     """Get comprehensive account health status."""
     # Get account details
-    account = await client.accounts.get_account(account_id)
+    account = await client.accounts.get_account(client.account_id)
 
     # Get all positions for risk assessment
-    positions = await client.positions.get_positions(account_id)
+    positions = await client.positions.get_positions(client.account_id)
 
     # Calculate account metrics
     total_exposure = Decimal("0")
@@ -73,10 +77,9 @@ async def get_account_health(client: AsyncClient, account_id: str) -> dict:
 
 # Usage
 async def main():
-    async with AsyncClient(token="your-token", account_id="your-account") as client:
-        account_id = "your-account-id"
-
-        health = await get_account_health(client, account_id)
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
+        health = await get_account_health(client)
         print(f"Account Balance: ${health['account_balance']}")
         print(f"Margin Used: {health['margin_ratio']:.1f}%")
         print(f"Health Status: {health['health_status']}")
@@ -90,6 +93,13 @@ asyncio.run(main())
 When trading with multiple OANDA accounts (such as separate accounts for different strategies or compliance with hedging rules), you need centralized account monitoring across all your accounts.
 
 ```python
+from decimal import Decimal
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
+
+# Load environment variables from .env file
+load_dotenv()
+
 async def monitor_multiple_accounts(account_configs: list[dict]) -> dict:
     """Monitor health across multiple trading accounts."""
 
@@ -98,13 +108,11 @@ async def monitor_multiple_accounts(account_configs: list[dict]) -> dict:
     total_margin_used = Decimal("0")
 
     for config in account_configs:
-        async with AsyncClient(
-            token=config["token"],
-            account_id=config["account_id"]
-        ) as client:
-
+        # Note: For multi-account setups, you would need separate client instances
+        # with different tokens/account configurations
+        async with AsyncClient() as client:
             # Get account health for each account
-            health = await get_account_health(client, config["account_id"])
+            health = await get_account_health(client)
 
             account_summaries[config["name"]] = {
                 "account_id": config["account_id"],
@@ -164,7 +172,14 @@ asyncio.run(main())
 Track account performance over time to understand profitability and identify areas for improvement.
 
 ```python
+import os
 from datetime import datetime, timedelta
+from decimal import Decimal
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient, Environment
+
+# Load environment variables from .env file
+load_dotenv()
 
 async def track_account_performance(
     client: AsyncClient,
@@ -216,8 +231,8 @@ async def track_account_performance(
 
 # Usage
 async def main():
-    async with AsyncClient(token="your-token", account_id="your-account") as client:
-        account_id = "your-account-id"
+    async with AsyncClient(token=os.getenv("OANDA_TOKEN"), account_id=os.getenv("OANDA_ACCOUNT_ID")) as client:
+        account_id = client.account_id
 
         performance = await track_account_performance(client, account_id, days_back=30)
 

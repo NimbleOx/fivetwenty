@@ -45,7 +45,6 @@ class AccountConfig(BaseModel):
 ### Constructor
 
 ```python
-import os
 from pydantic import SecretStr
 from fivetwenty import Environment, AccountConfig
 

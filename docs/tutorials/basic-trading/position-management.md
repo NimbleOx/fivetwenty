@@ -10,10 +10,15 @@
 Position management is the art of maximizing profits while controlling risk after entering a trade.
 
 ```python
+import asyncio
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-async def demonstrate_position_management(account_id: str, trade_id: str):
+# Load environment variables from .env file
+load_dotenv()
+
+async def demonstrate_position_management(trade_id: str):
     """Learn position management techniques."""
 
     if not trade_id:
@@ -23,9 +28,10 @@ async def demonstrate_position_management(account_id: str, trade_id: str):
     print("🎛️ POSITION MANAGEMENT TECHNIQUES")
     print("=" * 40)
 
-    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Get current trade
-        trade = await client.trades.get_trade(account_id, trade_id)
+        trade = await client.trades.get_trade(client.account_id, trade_id)
 
         print(f"📊 Current Position:")
         print(f"   Trade ID: {trade.id}")
@@ -60,8 +66,10 @@ async def demonstrate_position_management(account_id: str, trade_id: str):
         print(f"   • Position monitoring for optimal exits")
 
 # Demonstrate position management
-if trade_id:
-    await demonstrate_position_management(account_id, trade_id)
+if __name__ == "__main__":
+    # Replace with actual trade_id from your trading activity
+    trade_id = "your_trade_id_here"
+    asyncio.run(demonstrate_position_management(trade_id))
 ```
 
 ---

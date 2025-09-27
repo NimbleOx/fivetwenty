@@ -18,18 +18,18 @@ By the end of this tutorial, you will:
 Place a market order with automatic stop-loss and take-profit:
 
 ```python
-import os
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 # Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def market_order_with_protection():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Market order with both stop loss and take profit
         order = await client.orders.post_market_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             stop_loss_on_fill={
@@ -54,19 +54,19 @@ async def market_order_with_protection():
 Set up a limit order that automatically adds stops when filled:
 
 ```python
-import os
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 # Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def limit_entry_with_protection():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Limit order to buy on pullback with protective orders
         order = await client.orders.post_limit_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             price=Decimal("1.0850"),  # Entry level
@@ -92,21 +92,21 @@ async def limit_entry_with_protection():
 Build positions with multiple entries:
 
 ```python
-import os
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 # Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def scale_into_position():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         orders = []
 
         # First entry - smaller size
         order1 = await client.orders.post_limit_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=5000,  # Half position
             price=Decimal("1.0850"),
@@ -120,7 +120,7 @@ async def scale_into_position():
 
         # Second entry - lower price, larger size
         order2 = await client.orders.post_limit_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,  # Full position
             price=Decimal("1.0825"),  # Better entry
@@ -141,19 +141,19 @@ async def scale_into_position():
 Take partial profits at multiple levels:
 
 ```python
-import os
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 # Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def scale_out_of_position():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # First take partial profit at initial target
         profit1 = await client.orders.post_limit_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=-5000,  # Sell half position
             price=Decimal("1.0925"),  # First target
@@ -162,7 +162,7 @@ async def scale_out_of_position():
 
         # Second take profit at extended target
         profit2 = await client.orders.post_limit_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=-5000,  # Sell remaining
             price=Decimal("1.0975"),  # Extended target
@@ -178,18 +178,18 @@ async def scale_out_of_position():
 ### Trailing Stops for Trend Following
 
 ```python
-import os
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 # Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def trailing_stop_strategy():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Enter position with trailing stop
         entry = await client.orders.post_market_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             trailing_stop_loss_on_fill={
@@ -207,19 +207,19 @@ async def trailing_stop_strategy():
 Update stop levels as trades move in your favor:
 
 ```python
-import os
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 # Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def update_stop_loss(trade_id: str, new_stop_price: Decimal):
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Update the stop loss for an existing trade
         response = await client.trades.put_trade_orders(
-            account_id=account_id,
+            account_id=client.account_id,
             trade_id=trade_id,
             stop_loss={
                 "price": str(new_stop_price),
@@ -239,23 +239,23 @@ Simulate conditional orders with monitoring:
 
 ```python
 import asyncio
-import os
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 # Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def conditional_order_logic():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Monitor a condition and place order when met
         target_price = Decimal("1.0875")
 
         while True:
             # Get current price
             pricing = await client.pricing.get_pricing(
-                account_id=account_id,
+                account_id=client.account_id,
                 instruments=["EUR_USD"]
             )
 
@@ -266,7 +266,7 @@ async def conditional_order_logic():
             if current_price >= target_price:
                 # Place order when condition is met
                 order = await client.orders.post_market_order(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instrument="EUR_USD",
                     units=10000,
                     stop_loss_on_fill={
@@ -287,15 +287,15 @@ async def conditional_order_logic():
 Close existing position and open opposite position:
 
 ```python
-import os
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 # Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def position_reversal():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Get current positions
         positions = await client.positions.get_positions(account_id=account_id)
 
@@ -306,7 +306,7 @@ async def position_reversal():
                 new_position_size = close_size * 2  # Double to reverse
 
                 order = await client.orders.post_market_order(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instrument="EUR_USD",
                     units=-new_position_size,  # Negative to go short
                     stop_loss_on_fill={
@@ -326,14 +326,15 @@ Here's a complete breakout strategy using multiple order types:
 ```python
 import asyncio
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
-
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 async def breakout_strategy():
     """Complete breakout strategy using FiveTwenty order combinations."""
     token = os.getenv("OANDA_TOKEN")
     account_id = "101-001-0000000-001"
 
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Define breakout levels
         breakout_high = Decimal("1.0900")
         breakout_low = Decimal("1.0800")
@@ -341,7 +342,7 @@ async def breakout_strategy():
 
         # Place buy stop above resistance
         buy_stop = await client.orders.post_stop_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=position_size,
             price=breakout_high,
@@ -358,7 +359,7 @@ async def breakout_strategy():
 
         # Place sell stop below support
         sell_stop = await client.orders.post_stop_order(
-            account_id=account_id,
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=-position_size,
             price=breakout_low,

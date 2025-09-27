@@ -26,18 +26,17 @@ FiveTwenty supports three main types of streaming data:
 Real-time bid/ask prices for instruments:
 
 ```python
-import os
-import asyncio
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-# Setup
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def basic_price_stream():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         async for price in client.pricing.get_pricing_stream(
-            account_id=account_id,
+            account_id=client.account_id,
             instruments=["EUR_USD", "GBP_USD"]
         ):
             print(f"{price.instrument}: {price.bids[0].price} / {price.asks[0].price}")
@@ -55,16 +54,17 @@ async def process_price_update(price):
 Monitor account changes and trade updates:
 
 ```python
-import os
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def account_stream():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         async for transaction in client.transactions.get_transaction_stream(
-            account_id=account_id
+            account_id=client.account_id
         ):
             print(f"Transaction: {transaction.type} - {transaction.id}")
 
@@ -88,27 +88,28 @@ async def handle_market_order(transaction):
 ### Basic Stream with Error Handling
 
 ```python
-import os
 import asyncio
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import StreamStall
 
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def process_price_update(price):
     """Process incoming price data."""
     pass
 
 async def robust_price_stream():
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         max_retries = 5
         retry_count = 0
 
         while retry_count < max_retries:
             try:
                 async for price in client.pricing.get_pricing_stream(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instruments=["EUR_USD"]
                 ):
                     # Reset retry count on successful data
@@ -129,13 +130,12 @@ async def robust_price_stream():
 Monitor stream health and implement reconnection logic:
 
 ```python
-import os
 import time
-from datetime import datetime, timedelta
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def process_price_update(price):
     """Process incoming price data."""
@@ -157,9 +157,10 @@ class StreamMonitor:
 async def monitored_stream():
     monitor = StreamMonitor(stall_timeout=30.0)
 
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         async for price in client.pricing.get_pricing_stream(
-            account_id=account_id,
+            account_id=client.account_id,
             instruments=["EUR_USD"]
         ):
             monitor.on_data_received()
@@ -176,13 +177,12 @@ async def monitored_stream():
 ### Signal Generation from Price Streams
 
 ```python
-import os
 from decimal import Decimal
 from collections import deque
 from fivetwenty import AsyncClient, Environment
 
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 class MovingAverageSignal:
     def __init__(self, window_size: int = 20):
@@ -200,9 +200,10 @@ class MovingAverageSignal:
 async def automated_trading_system():
     signal = MovingAverageSignal(window_size=10)
 
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         async for price in client.pricing.get_pricing_stream(
-            account_id=account_id,
+            account_id=client.account_id,
             instruments=["EUR_USD"]
         ):
             # Calculate signal
@@ -212,7 +213,7 @@ async def automated_trading_system():
             if ma and mid_price > ma * Decimal("1.001"):  # Price 0.1% above MA
                 # Buy signal
                 await client.orders.post_market_order(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instrument="EUR_USD",
                     units=1000,
                     stop_loss_on_fill={
@@ -226,12 +227,11 @@ async def automated_trading_system():
 ### Order Management with Real-time Updates
 
 ```python
-import os
 import asyncio
 from fivetwenty import AsyncClient, Environment
 
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 class PositionManager:
     def __init__(self):
@@ -261,7 +261,8 @@ class PositionManager:
 async def managed_trading_system():
     position_manager = PositionManager()
 
-    async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Monitor both prices and transactions
         price_task = asyncio.create_task(monitor_prices(client, position_manager))
         transaction_task = asyncio.create_task(monitor_transactions(client, position_manager))
@@ -271,7 +272,7 @@ async def managed_trading_system():
 async def monitor_prices(client, position_manager):
     """Monitor price streams."""
     async for price in client.pricing.get_pricing_stream(
-        account_id=account_id,
+        account_id=client.account_id,
         instruments=["EUR_USD"]
     ):
         # Price-based logic here
@@ -280,7 +281,7 @@ async def monitor_prices(client, position_manager):
 async def monitor_transactions(client, position_manager):
     """Monitor transaction streams."""
     async for transaction in client.transactions.get_transaction_stream(
-        account_id=account_id
+        account_id=client.account_id
     ):
         await position_manager.handle_transaction(transaction)
 ```
@@ -290,12 +291,11 @@ async def monitor_transactions(client, position_manager):
 ### Stream Configuration
 
 ```python
-import os
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.streaming import StreamingConfiguration
 
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def process_price_update(price):
     """Process incoming price data."""
@@ -315,7 +315,7 @@ async def production_stream():
         streaming_config=config
     ) as client:
         async for price in client.pricing.get_pricing_stream(
-            account_id=account_id,
+            account_id=client.account_id,
             instruments=["EUR_USD", "GBP_USD", "USD_JPY"]
         ):
             await process_price_update(price)
@@ -324,14 +324,13 @@ async def production_stream():
 ### Error Recovery and Logging
 
 ```python
-import os
 import asyncio
 import logging
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import StreamStall
 
-token = os.getenv("OANDA_TOKEN")
-account_id = "101-001-0000000-001"
+# Load environment variables from .env file
+load_dotenv()
 
 async def process_price_update(price):
     """Process incoming price data."""
@@ -349,7 +348,7 @@ async def production_trading_system():
                 logger.info("Connected to streaming API")
 
                 async for price in client.pricing.get_pricing_stream(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instruments=["EUR_USD"]
                 ):
                     try:

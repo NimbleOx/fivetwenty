@@ -19,19 +19,23 @@ By the end of this guide, you will:
 GTD orders provide precise time control for strategic entries and exits:
 
 ```python
-import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timezone
 from decimal import Decimal
+from typing import Any
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient
+# Load environment variables from .env file
+load_dotenv()
 
 
 async def place_gtd_limit_order() -> Any:
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         # Order expires at market close Friday
-        friday_close = datetime(2024, 3, 15, 21, 0, 0)  # 9 PM UTC
+        friday_close = datetime(2024, 3, 15, 21, 0, 0, tzinfo=timezone.utc)  # 9 PM UTC
 
         response = await client.orders.post_limit_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             price=Decimal("1.0850"),
@@ -48,23 +52,23 @@ async def place_gtd_limit_order() -> Any:
 Align orders with specific trading sessions:
 
 ```python
-from datetime import datetime
+from datetime import datetime, timezone
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def session_based_orders() -> Any:
     """Place orders that align with trading sessions."""
-    from datetime import timezone
 
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         # London session order (8 AM - 5 PM GMT)
-        london_open = datetime.now(timezone.utc).replace(hour=8, minute=0, second=0)
         london_close = datetime.now(timezone.utc).replace(hour=17, minute=0, second=0)
 
         # Order active only during London session
         response = await client.orders.post_limit_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument="GBP_USD",
             units=15000,
             price=Decimal("1.2650"),
@@ -81,15 +85,17 @@ Use IOC for immediate partial fills in fast markets:
 
 ```python
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def ioc_limit_strategy() -> Any:
     """Use IOC for immediate execution with price protection."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         # Large order that might not fill completely
         response = await client.orders.post_limit_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=100000,  # Large size
             price=Decimal("1.0851"),  # Slightly favorable price
@@ -111,19 +117,20 @@ Combine limit orders with automatic stop-loss protection:
 
 ```python
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def protected_limit_entry() -> Any:
     """Place limit order with immediate stop-loss protection."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         entry_price = Decimal("1.0850")
         stop_price = Decimal("1.0820")  # 30 pip stop
-        target_price = Decimal("1.0920")  # 70 pip target
 
         # 1. Place limit entry order
         entry_response = await client.orders.post_limit_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             price=entry_price,
@@ -134,7 +141,7 @@ async def protected_limit_entry() -> Any:
 
         # 2. Place contingent stop-loss (only if entry fills)
         stop_response = await client.orders.post_stop_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=-10000,  # Close position
             price=stop_price,
@@ -153,6 +160,7 @@ Create comprehensive position management with entry, stop, and target:
 
 ```python
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient
 
@@ -217,18 +225,20 @@ Adjust limit prices based on market conditions:
 
 ```python
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def dynamic_limit_pricing() -> Any:
     """Adjust limit order prices based on market movement."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         instrument = "EUR_USD"
         base_price = Decimal("1.0850")
 
         # Get current market price
         pricing = await client.pricing.get_pricing(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instruments=[instrument]
         )
 
@@ -243,7 +253,7 @@ async def dynamic_limit_pricing() -> Any:
             adjusted_price = base_price
 
         response = await client.orders.post_limit_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument=instrument,
             units=10000,
             price=adjusted_price,
@@ -259,7 +269,9 @@ async def dynamic_limit_pricing() -> Any:
 Break large orders into smaller chunks to hide size:
 
 ```python
+import asyncio
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient
 
@@ -326,11 +338,13 @@ Implement sophisticated price-based conditions:
 
 ```python
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def conditional_limit_strategy() -> Any:
     """Place limit orders based on technical levels."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         instrument = "EUR_USD"
 
@@ -343,7 +357,7 @@ async def conditional_limit_strategy() -> Any:
         if current_price > support_level + Decimal("0.0020"):  # 2 pips above support
             # Place buy limit near support
             buy_response = await client.orders.post_limit_order(
-                account_id="your_account_id",
+                account_id=client.account_id,
                 instrument=instrument,
                 units=10000,
                 price=support_level + Decimal("0.0010"),  # 1 pip above support
@@ -354,7 +368,7 @@ async def conditional_limit_strategy() -> Any:
         if current_price < resistance_level - Decimal("0.0020"):  # 2 pips below resistance
             # Place sell limit near resistance
             sell_response = await client.orders.post_limit_order(
-                account_id="your_account_id",
+                account_id=client.account_id,
                 instrument=instrument,
                 units=-10000,
                 price=resistance_level - Decimal("0.0010"),  # 1 pip below resistance
@@ -368,13 +382,15 @@ async def conditional_limit_strategy() -> Any:
 Adjust orders based on market volume and activity:
 
 ```python
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def volume_based_limit_orders() -> Any:
     """Adjust limit order strategy based on market activity."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         # This would require external volume data
         # as OANDA doesn't provide tick volume in real-time
@@ -398,7 +414,7 @@ async def volume_based_limit_orders() -> Any:
         expiry_time = datetime.utcnow() + time_limit
 
         response = await client.orders.post_limit_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             price=limit_price,
@@ -417,16 +433,19 @@ async def volume_based_limit_orders() -> Any:
 Manage orders that fill partially:
 
 ```python
+import asyncio
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def handle_partial_fills() -> Any:
     """Monitor and manage partial order fills."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         # Place large limit order that might fill partially
         response = await client.orders.post_limit_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=50000,  # Large order
             price=Decimal("1.0850"),
@@ -440,7 +459,7 @@ async def handle_partial_fills() -> Any:
         while filled_units < target_units:
             # Check order status
             order = await self.client.orders.get_order(
-                account_id="your_account_id",
+                account_id=client.account_id,
                 order_id=order_id
             )
 
@@ -459,12 +478,12 @@ async def handle_partial_fills() -> Any:
                 if remaining < 10000:  # Small remainder
                     # Convert to market order for immediate fill
                     await client.orders.cancel_order(
-                        account_id="your_account_id",
+                        account_id=client.account_id,
                         order_id=order_id
                     )
 
                     market_response = await client.orders.post_market_order(
-                        account_id="your_account_id",
+                        account_id=client.account_id,
                         instrument="EUR_USD",
                         units=remaining,
                         time_in_force="FOK"
@@ -483,11 +502,13 @@ Optimize execution by batching related orders:
 
 ```python
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def batch_limit_orders() -> Any:
     """Place multiple related limit orders efficiently."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         # Define multiple levels for scaling in
         orders_to_place = [
@@ -502,7 +523,7 @@ async def batch_limit_orders() -> Any:
         # Place all orders in sequence
         for order_spec in orders_to_place:
             response = await client.orders.post_limit_order(
-                account_id="your_account_id",
+                account_id=client.account_id,
                 instrument="EUR_USD",
                 units=order_spec["units"],
                 price=order_spec["price"],
@@ -526,17 +547,19 @@ async def batch_limit_orders() -> Any:
 Route orders based on market conditions:
 
 ```python
-from datetime import datetime
+from datetime import datetime, timedelta
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 
 
 async def smart_limit_routing() -> Any:
     """Route limit orders based on current market conditions."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         # Get current market data
         pricing = await client.pricing.get_pricing(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instruments=["EUR_USD"]
         )
 
@@ -559,7 +582,7 @@ async def smart_limit_routing() -> Any:
         expiry = datetime.utcnow() + time_limit
 
         response = await client.orders.post_limit_order(
-            account_id="your_account_id",
+            account_id=client.account_id,
             instrument="EUR_USD",
             units=10000,
             price=target_price,
@@ -577,17 +600,19 @@ async def smart_limit_routing() -> Any:
 
 ```python
 from decimal import Decimal
+from typing import Any
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import VeeTwentyError
 
 
 async def validated_limit_order(instrument: str, units: int, price: Decimal, max_spread_pips: int = 3) -> Any:
     """Place limit order with comprehensive validation."""
+    # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
         try:
             # 1. Validate price is reasonable
             pricing = await client.pricing.get_pricing(
-                account_id="your_account_id",
+                account_id=client.account_id,
                 instruments=[instrument]
             )
 
@@ -614,7 +639,7 @@ async def validated_limit_order(instrument: str, units: int, price: Decimal, max
 
             # 3. Place order
             response = await client.orders.post_limit_order(
-                account_id="your_account_id",
+                account_id=client.account_id,
                 instrument=instrument,
                 units=units,
                 price=price,

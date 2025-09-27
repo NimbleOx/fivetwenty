@@ -12,7 +12,6 @@ All code must pass mypy strict mode with no errors:
 
 ```python
 from typing import Any
-from decimal import Decimal
 from fivetwenty import AsyncClient
 from fivetwenty.models import OrderRequest, OrderResponse
 
@@ -758,7 +757,6 @@ async def get_multiple_accounts(
 
 ```python
 # ✅ Good - Streaming with backpressure
-from typing import Any
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import PricingHeartbeat

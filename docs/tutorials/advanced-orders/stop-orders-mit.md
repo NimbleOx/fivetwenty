@@ -19,9 +19,7 @@ Stop orders excel at capturing momentum when price breaks through key levels.
 ### Basic Breakout Implementation
 
 ```python
-import asyncio
 from decimal import Decimal
-from datetime import datetime, timedelta
 from fivetwenty import AsyncClient
 
 

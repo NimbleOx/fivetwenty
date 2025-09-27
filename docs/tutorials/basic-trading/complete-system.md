@@ -10,15 +10,14 @@
 Let's build a comprehensive automated trading system:
 
 ```python
-import os
 import asyncio
 from datetime import datetime
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-# Setup variables
-TOKEN = os.getenv("OANDA_TOKEN")
-ENVIRONMENT = Environment.PRACTICE
+# Load environment variables from .env file
+load_dotenv()
 
 # SimpleMovingAverageCrossover would be defined elsewhere
 # (see previous lessons for implementation)
@@ -34,7 +33,8 @@ async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
     print(f"Fast MA: {strategy.fast_ma_period} periods")
     print(f"Slow MA: {strategy.slow_ma_period} periods")
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         start_time = datetime.now()
 
         while (datetime.now() - start_time).seconds < duration_minutes * 60:
@@ -63,7 +63,7 @@ async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
 
                 # Step 3: Check current position
                 open_trades = await client.trades.get_trades(
-                    strategy.account_id,
+                    client.account_id,
                     state="OPEN",
                     instrument=strategy.instrument
                 )
@@ -121,7 +121,7 @@ async def execute_strategy_trade(client: AsyncClient, strategy,
 
         # Place the trade with risk management
         response = await client.orders.post_market_order(
-            account_id=strategy.account_id,
+            account_id=client.account_id,
             instrument=strategy.instrument,
             units=units,
             stop_loss=Decimal(str(stop_loss_price)),
@@ -174,7 +174,9 @@ def print_strategy_performance(strategy):
     print(f"   Slow MA: {strategy.slow_ma_period} periods")
 
 # Run your complete strategy (uncomment to run)
-# await run_complete_trading_strategy(strategy, duration_minutes=5)
+# if __name__ == "__main__":
+#     # strategy would be initialized elsewhere
+#     asyncio.run(run_complete_trading_strategy(strategy, duration_minutes=5))
 ```
 
 ---
@@ -185,17 +187,19 @@ Here's an enhanced version with additional capabilities:
 
 ```python
 from decimal import Decimal
-
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient
 
+# Load environment variables from .env file
+load_dotenv()
 
 # Enhanced strategy concepts (for further learning)
 
 class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
     """Enhanced strategy with additional features."""
 
-    def __init__(self, account_id: str, instrument: str = "EUR_USD") -> None:
-        super().__init__(account_id, instrument)
+    def __init__(self, instrument: str = "EUR_USD") -> None:
+        super().__init__(instrument)
 
         # Enhanced features
         self.max_daily_trades = 5
@@ -216,7 +220,7 @@ class EnhancedTradingStrategy(SimpleMovingAverageCrossover):
         try:
             # Check spread conditions
             pricing = await client.pricing.get_pricing(
-                self.account_id,
+                client.account_id,
                 [self.instrument],
             )
 

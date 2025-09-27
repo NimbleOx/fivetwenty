@@ -652,8 +652,6 @@ class ConfigBuilder:
 ### Multi-Environment Manager
 
 ```python
-import os
-from typing import Any, Optional
 from fivetwenty import AccountConfig, AccountConfigLoader, AsyncClient
 
 

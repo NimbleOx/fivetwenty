@@ -150,8 +150,7 @@ Client(**kwargs)
 
 ```python
 # Environment variables
-from fivetwenty import Environment
-
+from fivetwenty import Client
 
 with Client() as client:
     accounts = client.accounts.get_accounts()
@@ -202,8 +201,7 @@ Structured configuration for account credentials and settings.
 
 **Constructor:**
 ```python
-from fivetwenty import Environment
-
+from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
     token="your_token",
@@ -233,15 +231,13 @@ config = AccountConfig(
 
 **Example:**
 ```python
-from fivetwenty import Environment
-
+from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
     environment=Environment.PRACTICE,
     alias="demo_trading",
-
 )
 
 print(config.summary())  # "demo_trading (practice)"
@@ -283,8 +279,7 @@ except ValueError as e:
 **ValidationError**: Raised for invalid configuration values:
 ```python
 from pydantic import ValidationError
-from fivetwenty import Environment
-
+from fivetwenty import AccountConfig, Environment
 
 try:
     config = AccountConfig(
@@ -309,11 +304,9 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 **Example:**
 ```python
 import asyncio
-
+from fivetwenty.exceptions import FiveTwentyError
 
 async def main():
-    from fivetwenty.exceptions import FiveTwentyError
-
     try:
         trade = await client.trades.get_trade(client.account_id, "invalid_id")
     except FiveTwentyError as e:

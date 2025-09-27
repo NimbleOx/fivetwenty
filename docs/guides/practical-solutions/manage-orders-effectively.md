@@ -30,8 +30,6 @@ import os
 import time
 import logging
 from decimal import Decimal
-from typing import Any, Optional, List, Dict
-from datetime import datetime, timedelta
 
 from fivetwenty import AsyncClient, Environment, Client
 from fivetwenty.models import (
@@ -876,7 +874,6 @@ async def verify_order_parameters() -> None:
 ### Monitor Account Impact
 ```python
 import os
-from decimal import Decimal
 
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID

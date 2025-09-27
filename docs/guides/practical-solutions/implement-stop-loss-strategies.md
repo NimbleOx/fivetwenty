@@ -24,18 +24,22 @@ Attach a stop-loss immediately when placing a trade:
 ```python
 import asyncio
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 from fivetwenty.models import StopLossDetails
 
+# Load environment variables from .env file
+load_dotenv()
 
-async def place_order_with_stop_loss(account_id: str, instrument: str, units: int, stop_loss_price: Decimal) -> Any:
+async def place_order_with_stop_loss(instrument: str, units: int, stop_loss_price: Decimal) -> Any:
     """Place market order with immediate stop-loss protection."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             # Create market order with stop-loss attached
             response = await client.orders.post_market_order(
-                account_id=account_id,
+                account_id=client.account_id,
                 instrument=instrument,
                 units=units,
                 stop_loss_on_fill=StopLossDetails(
@@ -58,12 +62,12 @@ async def place_order_with_stop_loss(account_id: str, instrument: str, units: in
             return None
 
 # Usage example
-trade_id = await place_order_with_stop_loss(
-    account_id="101-001-1234567-001",
-    instrument="EUR_USD",
-    units=10000,  # Buy 10k EUR
-    stop_loss_price=Decimal("1.0950")  # Stop at 1.0950
-)
+if __name__ == "__main__":
+    trade_id = asyncio.run(place_order_with_stop_loss(
+        instrument="EUR_USD",
+        units=10000,  # Buy 10k EUR
+        stop_loss_price=Decimal("1.0950")  # Stop at 1.0950
+    ))
 ```
 
 ---
@@ -75,7 +79,7 @@ trade_id = await place_order_with_stop_loss(
 Set stop-loss at fixed pip distance from entry:
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 from decimal import Decimal
 
@@ -101,7 +105,8 @@ def calculate_stop_loss_price(entry_price: Decimal, units: int, pip_distance: in
 async def implement_pip_based_stop_loss(account_id: str, instrument: str, units: int, pip_distance: int = 50) -> Any:
     """Implement stop-loss based on fixed pip distance."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             # Get current price to calculate entry point
             prices = await client.pricing.get_pricing(account_id, [instrument])
@@ -118,7 +123,7 @@ async def implement_pip_based_stop_loss(account_id: str, instrument: str, units:
 
             # Place order with calculated stop-loss
             response = await client.orders.post_market_order(
-                account_id=account_id,
+                account_id=client.account_id,
                 instrument=instrument,
                 units=units,
                 stop_loss_on_fill=StopLossDetails(
@@ -152,14 +157,15 @@ Limit risk to fixed percentage of account balance:
 
 ```python
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 
 async def percentage_based_stop_loss(account_id: str, instrument: str,
                                    units: int, risk_percentage: Decimal = Decimal("0.02")):
     """Implement stop-loss based on account risk percentage."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             # Get account balance
             account = await client.accounts.get_account(account_id)
@@ -196,7 +202,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
 
             # Place order
             response = await client.orders.post_market_order(
-                account_id=account_id,
+                account_id=client.account_id,
                 instrument=instrument,
                 units=units,
                 stop_loss_on_fill=StopLossDetails(
@@ -235,13 +241,14 @@ Stop-loss that follows favorable price movement:
 
 ```python
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 
 async def implement_trailing_stop_loss(account_id: str, instrument: str, units: int, trail_distance_pips: int = 50) -> Any:
     """Implement trailing stop-loss that moves with favorable price action."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             # Calculate trailing distance in price terms
             pip_size = Decimal("0.01") if "JPY" in instrument else Decimal("0.0001")
@@ -251,7 +258,7 @@ async def implement_trailing_stop_loss(account_id: str, instrument: str, units: 
 
             # Place initial market order with trailing stop
             response = await client.orders.post_market_order(
-                account_id=account_id,
+                account_id=client.account_id,
                 instrument=instrument,
                 units=units,
                 trailing_stop_loss_on_fill={
@@ -300,7 +307,7 @@ Stop-loss based on market volatility using Average True Range:
 
 ```python
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 from fivetwenty.models import StopLossDetails
 import pandas as pd
 import numpy as np
@@ -310,7 +317,8 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
                                 atr_multiplier: Decimal = Decimal("2.0"), atr_period: int = 14):
     """Calculate stop-loss based on Average True Range volatility."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             # Get historical data for ATR calculation
             candles_response = await client.instruments.get_instrument_candles(
@@ -358,7 +366,7 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
 
             # Place order with ATR-based stop
             response = await client.orders.post_market_order(
-                account_id=account_id,
+                account_id=client.account_id,
                 instrument=instrument,
                 units=units,
                 stop_loss_on_fill=StopLossDetails(
@@ -393,18 +401,19 @@ Update stop-loss on existing positions:
 
 ```python
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 from fivetwenty.models import StopLossDetails
 
 
 async def modify_stop_loss(account_id: str, trade_id: str, new_stop_price: Decimal) -> Any:
     """Modify stop-loss on existing trade."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             # Modify trade's stop-loss order
             response = await client.trades.put_trade_orders(
-                account_id=account_id,
+                account_id=client.account_id,
                 trade_id=trade_id,
                 stop_loss=StopLossDetails(
                     price=new_stop_price,
@@ -433,13 +442,14 @@ Move stop-loss to entry price after favorable movement:
 
 ```python
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 
 async def move_to_breakeven(account_id: str, trade_id: str, trigger_pips: int = 20) -> Any:
     """Move stop-loss to break-even after price moves favorably."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             # Get current trade details
             trade = await client.trades.get_trade(account_id, trade_id)
@@ -499,13 +509,14 @@ Partial position closure at multiple levels:
 
 ```python
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 
 async def implement_tiered_stop_loss(account_id: str, instrument: str, units: int) -> Any:
     """Implement tiered stop-loss with multiple exit levels."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             # Get current price
             prices = await client.pricing.get_pricing(account_id, [instrument])
@@ -527,7 +538,7 @@ async def implement_tiered_stop_loss(account_id: str, instrument: str, units: in
 
             # Place main position
             main_response = await client.orders.post_market_order(
-                account_id=account_id,
+                account_id=client.account_id,
                 instrument=instrument,
                 units=units
             )
@@ -540,7 +551,7 @@ async def implement_tiered_stop_loss(account_id: str, instrument: str, units: in
 
                 # First tier stop (25% of position)
                 await client.orders.post_stop_order(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instrument=instrument,
                     units=int(-0.25 * position_size) if units > 0 else int(0.25 * position_size),
                     price=stop1
@@ -548,7 +559,7 @@ async def implement_tiered_stop_loss(account_id: str, instrument: str, units: in
 
                 # Second tier stop (50% of position)
                 await client.orders.post_stop_order(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instrument=instrument,
                     units=int(-0.50 * position_size) if units > 0 else int(0.50 * position_size),
                     price=stop2
@@ -556,7 +567,7 @@ async def implement_tiered_stop_loss(account_id: str, instrument: str, units: in
 
                 # Third tier stop (remaining 25%)
                 await client.orders.post_stop_order(
-                    account_id=account_id,
+                    account_id=client.account_id,
                     instrument=instrument,
                     units=int(-0.25 * position_size) if units > 0 else int(0.25 * position_size),
                     price=stop3
@@ -589,7 +600,7 @@ await implement_tiered_stop_loss(
 Monitor positions and stop-loss orders:
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 async def monitor_stop_loss_positions(account_id: str, check_interval: int = 30):
     """Monitor all positions with stop-loss orders."""
@@ -742,7 +753,7 @@ StopLossRules.print_validation_results(validation)
 ### Common Stop-Loss Issues
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 async def troubleshoot_stop_loss_issues(account_id: str):
     """Diagnose common stop-loss problems."""
@@ -808,12 +819,13 @@ diagnostics = await troubleshoot_stop_loss_issues("101-001-1234567-001")
 ### Emergency Position Exit
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 async def emergency_stop_all_positions(account_id: str, reason: str = "Emergency stop"):
     """Emergency closure of all positions regardless of stop-loss orders."""
 
-    async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         print(f"🚨 EMERGENCY STOP: {reason}")
 
         try:
@@ -830,7 +842,7 @@ async def emergency_stop_all_positions(account_id: str, reason: str = "Emergency
                 try:
                     # Close entire position for this instrument
                     response = await client.positions.close_position(
-                        account_id=account_id,
+                        account_id=client.account_id,
                         instrument=position.instrument,
                         long_units="ALL",
                         short_units="ALL"

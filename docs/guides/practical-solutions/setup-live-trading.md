@@ -31,7 +31,6 @@
 ### Identify Your Live Account ID
 
 ```python
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 
@@ -107,7 +106,6 @@ except ValueError as e:
 ```python
 import json
 from pathlib import Path
-from typing import Any
 
 
 def load_live_config(config_path: str = "live_config.json") -> tuple[str, str]:
@@ -262,7 +260,6 @@ async def place_live_order_safely(account_id: str, instrument: str, units: int, 
 
 ```python
 import asyncio
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 async def monitor_live_account(account_id: str, check_interval: int = 30) -> None:
@@ -319,7 +316,6 @@ async def monitor_live_account(account_id: str, check_interval: int = 30) -> Non
 
 ```python
 from decimal import Decimal
-from typing import Any
 
 
 class LiveTradingRiskManager:
@@ -359,7 +355,6 @@ safe_position_size = risk_manager.calculate_position_size(stop_loss_pips=50, pip
 ### Dry Run Test
 
 ```python
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 async def test_live_configuration() -> None:
@@ -441,7 +436,6 @@ Before starting live trading:
 ### Immediate Stop Trading
 
 ```python
-from typing import Any
 from fivetwenty import AsyncClient, Environment
 
 

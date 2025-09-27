@@ -24,8 +24,6 @@ OANDA supports four primary order types, each designed for specific trading scen
 - High-frequency trading strategies
 
 ```python
-import asyncio
-from decimal import Decimal
 from fivetwenty import AsyncClient
 
 

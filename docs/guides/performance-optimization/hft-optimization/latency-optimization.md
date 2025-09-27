@@ -14,7 +14,6 @@ Minimize order execution latency:
 import asyncio
 import time
 from collections import deque
-from decimal import Decimal
 from typing import List, Dict
 from fivetwenty import AsyncClient
 

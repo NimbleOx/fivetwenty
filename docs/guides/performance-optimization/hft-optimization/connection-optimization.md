@@ -11,7 +11,6 @@
 Reuse connections to minimize latency:
 
 ```python
-import asyncio
 import time
 from typing import Any
 

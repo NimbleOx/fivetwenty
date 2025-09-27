@@ -12,16 +12,21 @@ Before placing any trade, you need to understand current market conditions:
 ```python
 import asyncio
 from decimal import Decimal
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
-async def get_current_prices(account_id: str, instruments: list):
+# Load environment variables from .env file
+load_dotenv()
+
+async def get_current_prices(instruments: list):
     """Fetch current market prices."""
 
-    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             prices = await client.pricing.get_pricing(
-                account_id=account_id,
+                account_id=client.account_id,
                 instruments=instruments
             )
 
@@ -47,8 +52,7 @@ async def get_current_prices(account_id: str, instruments: list):
 # Get prices for major pairs
 if __name__ == "__main__":
     instruments = ["EUR_USD", "GBP_USD", "USD_JPY"]
-    if account_id:
-        current_prices = asyncio.run(get_current_prices(account_id, instruments))
+    current_prices = asyncio.run(get_current_prices(instruments))
 ```
 
 ---
@@ -58,15 +62,20 @@ if __name__ == "__main__":
 Understanding recent price action helps with trading decisions:
 
 ```python
-from fivetwenty import AsyncClient, Environment
+from typing import Any
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 from fivetwenty.models import CandlestickGranularity
 
+# Load environment variables from .env file
+load_dotenv()
 
 async def get_historical_data(instrument: str, count: int = 100) -> Any:
     """Get historical candlestick data."""
 
-    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             candles = await client.instruments.get_instrument_candles(
                 instrument=instrument,
@@ -91,8 +100,8 @@ async def get_historical_data(instrument: str, count: int = 100) -> Any:
             return None
 
 # Get historical data
-if account_id:
-    historical_data = await get_historical_data("EUR_USD", count=50)
+if __name__ == "__main__":
+    historical_data = asyncio.run(get_historical_data("EUR_USD", count=50))
 ```
 
 ---
@@ -102,18 +111,25 @@ if account_id:
 Let's create a comprehensive market analysis function:
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import asyncio
+from decimal import Decimal
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 
-async def analyze_market_before_trading(account_id: str, instrument: str = "EUR_USD"):
+# Load environment variables from .env file
+load_dotenv()
+
+async def analyze_market_before_trading(instrument: str = "EUR_USD"):
     """Comprehensive market analysis before trading."""
 
-    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         print("🔍 MARKET ANALYSIS")
         print("=" * 30)
 
         # 1. Get current pricing
         pricing = await client.pricing.get_pricing(
-            account_id=account_id,
+            account_id=client.account_id,
             instruments=[instrument]
         )
 
@@ -170,7 +186,7 @@ async def analyze_market_before_trading(account_id: str, instrument: str = "EUR_
 
 # Analyze the market before trading
 if __name__ == "__main__":
-    current_price = asyncio.run(analyze_market_before_trading(account_id, "EUR_USD"))
+    current_price = asyncio.run(analyze_market_before_trading("EUR_USD"))
 ```
 
 ---
@@ -195,14 +211,21 @@ Different market conditions require different trading approaches:
 - Risk: Prices may gap or move erratically
 
 ```python
+import asyncio
+from decimal import Decimal
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient
 
-async def assess_market_conditions(account_id: str, instrument: str):
+# Load environment variables from .env file
+load_dotenv()
+
+async def assess_market_conditions(instrument: str):
     """Assess current market conditions for trading suitability."""
 
-    async with AsyncClient(token=TOKEN, account_id="your-account-id", environment=ENVIRONMENT) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         pricing = await client.pricing.get_pricing(
-            account_id=account_id,
+            account_id=client.account_id,
             instruments=[instrument]
         )
 
@@ -235,7 +258,7 @@ async def assess_market_conditions(account_id: str, instrument: str):
 
 # Check trading conditions
 if __name__ == "__main__":
-    market_conditions = asyncio.run(assess_market_conditions(account_id, "EUR_USD"))
+    market_conditions = asyncio.run(assess_market_conditions("EUR_USD"))
     print(f"Market suitable for trading: {market_conditions['suitable']}")
 ```
 
@@ -246,12 +269,19 @@ if __name__ == "__main__":
 Understanding how prices move helps with entry and exit decisions:
 
 ```python
+import asyncio
+from decimal import Decimal
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient
+
+# Load environment variables from .env file
+load_dotenv()
 
 async def analyze_price_movements(instrument: str, periods: int = 20):
     """Analyze recent price movements for trading insights."""
 
-    async with AsyncClient(token=TOKEN, environment=ENVIRONMENT) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         try:
             candles = await client.instruments.get_instrument_candles(
                 instrument=instrument,

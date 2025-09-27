@@ -11,14 +11,16 @@ Let's build a simple but complete moving average crossover strategy:
 
 ```python
 from decimal import Decimal
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient
 
+# Load environment variables from .env file
+load_dotenv()
 
 class SimpleMovingAverageCrossover:
     """A complete trading strategy with risk management."""
 
-    def __init__(self, account_id: str, instrument: str = "EUR_USD") -> None:
-        self.account_id = account_id
+    def __init__(self, instrument: str = "EUR_USD") -> None:
         self.instrument = instrument
         self.position_size = 1000  # Conservative size
         self.max_risk_per_trade = 0.02  # 2% risk per trade
@@ -96,9 +98,8 @@ class SimpleMovingAverageCrossover:
         return False
 
 # Create your strategy instance
-# account_id would be defined from environment or configuration
-account_id = "101-001-0000000-001"  # Example account ID
-strategy = SimpleMovingAverageCrossover(account_id, "EUR_USD")
+if __name__ == "__main__":
+    strategy = SimpleMovingAverageCrossover("EUR_USD")
 ```
 
 ---
@@ -109,9 +110,12 @@ Test your strategy on historical data:
 
 ```python
 from decimal import Decimal
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient
 import pandas as pd
-from datetime import datetime, timedelta
+
+# Load environment variables from .env file
+load_dotenv()
 
 class StrategyBacktester:
     """Backtest trading strategies on historical data."""
@@ -326,14 +330,17 @@ class StrategyBacktester:
 Improve your strategy through parameter optimization:
 
 ```python
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient
+
+# Load environment variables from .env file
+load_dotenv()
 
 class StrategyOptimizer:
     """Optimize strategy parameters through systematic testing."""
 
-    def __init__(self, strategy_class, account_id: str, instrument: str):
+    def __init__(self, strategy_class, instrument: str):
         self.strategy_class = strategy_class
-        self.account_id = account_id
         self.instrument = instrument
         self.optimization_results = []
 
@@ -359,7 +366,7 @@ class StrategyOptimizer:
             param_dict = dict(zip(param_names, params))
 
             # Create strategy with these parameters
-            strategy = self.strategy_class(self.account_id, self.instrument)
+            strategy = self.strategy_class(self.instrument)
 
             # Apply parameters
             for param_name, param_value in param_dict.items():
@@ -394,7 +401,8 @@ class StrategyOptimizer:
         return best_params, best_return
 
 # Example optimization
-# optimizer = StrategyOptimizer(SimpleMovingAverageCrossover, account_id, "EUR_USD")
+# if __name__ == "__main__":
+#     optimizer = StrategyOptimizer(SimpleMovingAverageCrossover, "EUR_USD")
 # parameter_ranges = {
 #     'fast_ma_period': [5, 10, 15],
 #     'slow_ma_period': [20, 25, 30],

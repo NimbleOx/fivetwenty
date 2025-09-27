@@ -80,23 +80,25 @@ Test your FiveTwenty setup with this simple example:
 
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Environment
+from dotenv import load_dotenv
+from fivetwenty import AsyncClient
 from fivetwenty.models import InstrumentName
+
+# Load environment variables from .env file
+load_dotenv()
 
 async def test_fivetwenty_setup():
     """Verify your FiveTwenty setup works."""
 
-    async with AsyncClient(
-        token="your-token",
-        environment=Environment.PRACTICE
-    ) as client:
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
         # Get account info
-        account = await client.accounts.get_account("your-account-id")
+        account = await client.accounts.get_account(client.account_id)
         print(f"Account balance: {account.balance}")
 
         # Get current EUR/USD price
         pricing = await client.pricing.get_pricing(
-            account_id="your-account-id",
+            account_id=client.account_id,
             instruments=[InstrumentName.EUR_USD]
         )
 

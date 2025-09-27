@@ -78,20 +78,22 @@ async def place_order_with_stop_loss(
 
 # Usage
 async def main():
-    client = AsyncClient(token="your-token", account_id="your-account")
-    account_id = "your-account-id"
-
-    result = await place_order_with_stop_loss(
-        client=client,
-        account_id=account_id,
+    # Zero-config - automatically uses environment variables
+    async with AsyncClient() as client:
+        result = await place_order_with_stop_loss(
+            client=client,
+            account_id=client.account_id,
         instrument="EUR_USD",
         units=Decimal("1000"),
         stop_loss_distance=Decimal("0.0020")  # 20 pips
     )
 
-    print(f"Trade {result['trade_id']} opened with stop at {result['stop_price']}")
+        print(f"Trade {result['trade_id']} opened with stop at {result['stop_price']}")
 
-asyncio.run(main())
+if __name__ == "__main__":
+    from dotenv import load_dotenv
+    load_dotenv()
+    asyncio.run(main())
 ```
 
 ### Position Size Based on Risk
@@ -160,7 +162,7 @@ class RiskMonitor:
         daily_pnl = current_balance - self.daily_start_balance
 
         # Get all open positions for exposure calculation
-        positions = await self.client.positions.get_positions(self.account_id)
+        positions = await self.client.positions.get_positions(self.client.account_id)
         total_exposure = Decimal("0")
 
         for position in positions.positions:
@@ -181,7 +183,7 @@ class RiskMonitor:
 
     async def emergency_close_all(self) -> list:
         """Close all positions in emergency."""
-        positions = await self.client.positions.get_positions(self.account_id)
+        positions = await self.client.positions.get_positions(self.client.account_id)
         closed_positions = []
 
         for position in positions.positions:
