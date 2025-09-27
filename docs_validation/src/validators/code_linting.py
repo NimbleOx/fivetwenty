@@ -49,14 +49,18 @@ class CodeLintingValidator(BaseValidator):
 
                     # Validate the code block if it's Python
                     if code_block_language in ["python", "py", ""] and code_block_lines:
-                        issues.extend(
-                            self._lint_python_code(
-                                code_block_lines,
-                                code_block_start + 1,
-                                file_info.path,
-                                options,
+                        # Check for validation skip comments before the code block
+                        should_skip = self._should_skip_validation(lines, code_block_start - 1)
+
+                        if not should_skip:
+                            issues.extend(
+                                self._lint_python_code(
+                                    code_block_lines,
+                                    code_block_start + 1,
+                                    file_info.path,
+                                    options,
+                                )
                             )
-                        )
 
                     # Reset for next block
                     code_block_lines = []
@@ -181,6 +185,40 @@ class CodeLintingValidator(BaseValidator):
     def _get_suggestion_for_rule(self, rule_code: str, message: str) -> str:
         """Get suggestion for fixing a rule violation."""
         return f"Fix linting issue: {message}"
+
+    def _should_skip_validation(self, lines: list[str], code_block_start_line: int) -> bool:
+        """Check if validation should be skipped based on HTML comments before code block."""
+        # Check the few lines before the code block for HTML comments
+        check_lines = 3  # Check up to 3 lines before code block
+        start_check = max(0, code_block_start_line - check_lines)
+
+        for i in range(start_check, code_block_start_line):
+            if i < len(lines):
+                line = lines[i].strip().lower()
+
+                # Check for validation skip patterns in HTML comments
+                if "<!--" in line:
+                    # Skip all validation
+                    if any(pattern in line for pattern in [
+                        "validation: skip",
+                        "validation: skip-all",
+                        "fragment:",
+                        "partial:",
+                        "example:",
+                        "skip-lint",
+                        "no-lint"
+                    ]):
+                        return True
+
+                    # Skip only linting (but allow typing)
+                    if any(pattern in line for pattern in [
+                        "validation: skip-linting",
+                        "skip-linting",
+                        "no-linting"
+                    ]):
+                        return True
+
+        return False
 
     def _is_placeholder_code(self, code: str) -> bool:
         """Check if code is clearly a placeholder/example that shouldn't be linted."""

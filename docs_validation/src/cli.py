@@ -61,10 +61,17 @@ def cli() -> None:
 )
 @click.option("--parallel/--sequential", default=True, help="Run validation in parallel")
 @click.option("--max-workers", type=int, default=4, help="Maximum number of worker threads")
+@click.option(
+    "--files",
+    multiple=True,
+    type=click.Path(exists=True, path_type=Path),
+    help="Specific files to validate (can be used multiple times)",
+)
 def validate(
     config: Path | None,
     parallel: bool,
     max_workers: int,
+    files: tuple[Path, ...],
 ) -> None:
     """Run validation on documentation files."""
 
@@ -97,20 +104,36 @@ def validate(
     engine = ValidationEngine(validation_config, project_root)
 
     # Run validation with progress indicator
-    console.print(f"🔍 Discovering files in {project_root}")
+    if files:
+        console.print(f"🔍 Validating {len(files)} specific file(s)")
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        TimeElapsedColumn(),
-        console=console,
-        transient=True,
-    ) as progress:
-        task = progress.add_task("Running validation...", total=None)
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            TimeElapsedColumn(),
+            console=console,
+            transient=True,
+        ) as progress:
+            task = progress.add_task("Running validation...", total=None)
 
-        summary = engine.validate()
+            summary = engine.validate_incremental(list(files))
 
-        progress.update(task, description="Validation complete")
+            progress.update(task, description="Validation complete")
+    else:
+        console.print(f"🔍 Discovering files in {project_root}")
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            TimeElapsedColumn(),
+            console=console,
+            transient=True,
+        ) as progress:
+            task = progress.add_task("Running validation...", total=None)
+
+            summary = engine.validate()
+
+            progress.update(task, description="Validation complete")
 
     # Display results and always generate report
     _display_results(summary)
