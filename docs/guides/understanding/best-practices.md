@@ -8,6 +8,7 @@ Essential patterns and practices for building robust applications with the FiveT
 
 Always use context managers for proper resource cleanup:
 
+<!-- fragment: client usage examples with placeholder values -->
 ```python
 import os
 
@@ -34,6 +35,7 @@ def example_sync():
 
 Reuse client instances across multiple operations:
 
+<!-- fragment: connection reuse examples with placeholder values -->
 ```python
 import os
 
@@ -94,6 +96,7 @@ async def concurrent_example():
 
 Always use Decimal for financial calculations:
 
+<!-- fragment: financial calculation examples with placeholder values -->
 ```python
 from decimal import Decimal
 
@@ -218,6 +221,7 @@ async def retry_with_backoff() -> None:
 
 Implement exponential backoff for retryable errors:
 
+<!-- fragment: retry pattern implementation example -->
 ```python
 import asyncio
 import secrets
@@ -427,6 +431,7 @@ async def batch_pricing_example():
 
 ### Avoid These Patterns
 
+<!-- fragment: bad examples - intentionally wrong patterns -->
 ```python
 import os
 import time
@@ -654,6 +659,7 @@ class OrderValidationFramework:
 
 ### Risk-Based Validators
 
+<!-- fragment: validator class example with missing imports -->
 ```python
 class MaxPositionSizeValidator(OrderValidator):
     """Validate order doesn't exceed maximum position size limits."""
@@ -884,6 +890,7 @@ class TradingErrorHandler:
 
 Use proper mocking for unit tests:
 
+<!-- fragment: test mocking examples with mock data -->
 ```python
 from unittest.mock import AsyncMock
 import pytest
@@ -942,6 +949,7 @@ async def test_live_api():
 
 Test your validation rules thoroughly:
 
+<!-- fragment: test example with undefined imports and mock objects -->
 ```python
 @pytest.mark.asyncio
 async def test_position_size_validator():
