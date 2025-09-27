@@ -120,6 +120,7 @@ tests/
 
 Tests are organized with pytest markers:
 
+<!-- fragment: pytest marker examples with test functions -->
 ```python
 import pytest
 
@@ -149,6 +150,7 @@ def test_example():
 
 ### **Mocking HTTP Responses**
 
+<!-- fragment: unit test example with mock data and placeholder credentials -->
 ```python
 from decimal import Decimal
 
@@ -257,6 +259,7 @@ class TestAccountsEndpoint:
 
 ### **Model Testing**
 
+<!-- fragment: model testing example with test data and assertion patterns -->
 ```python
 from datetime import datetime
 from decimal import Decimal
@@ -351,6 +354,7 @@ class TestOrderModel:
 
 Integration tests use real OANDA API calls recorded with VCR.py for reproducibility:
 
+<!-- fragment: integration test example with environment variables and API calls -->
 ```python
 import os
 from decimal import Decimal
@@ -418,6 +422,7 @@ class TestAccountsIntegration:
 
 VCR.py records HTTP interactions for reproducible tests:
 
+<!-- fragment: VCR configuration example with test fixtures -->
 ```python
 # conftest.py
 
@@ -474,6 +479,7 @@ export FIVETWENTY_LOG_LEVEL="DEBUG"
 
 ### **Streaming Unit Tests**
 
+<!-- fragment: streaming test example with mock data and placeholder credentials -->
 ```python
 from decimal import Decimal
 
@@ -545,6 +551,7 @@ class TestPricingStreaming:
 
 ### **Streaming Integration Tests**
 
+<!-- fragment: streaming integration test example with environment variables -->
 ```python
 @pytest.mark.streaming
 @pytest.mark.integration
@@ -587,6 +594,7 @@ class TestStreamingIntegration:
 
 ### **Common Fixtures**
 
+<!-- fragment: test fixtures with mock credentials and sample data -->
 ```python
 # conftest.py
 import os
@@ -685,6 +693,7 @@ def mock_responses():
 
 ### **Memory Usage Tests**
 
+<!-- fragment: performance test example with environment variables and memory monitoring -->
 ```python
 import pytest
 import asyncio
