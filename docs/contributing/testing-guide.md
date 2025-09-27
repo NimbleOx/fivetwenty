@@ -224,7 +224,7 @@ class TestAccountsEndpoint:
             )
 
             # Test error handling
-            with pytest.raises(FiveTwentyError) as exc_info:
+            with pytest.raises(VeeTwentyError) as exc_info:
                 await client.accounts.get_account_summary("invalid-account")
 
             # Verify exception details
@@ -240,7 +240,7 @@ class TestAccountsEndpoint:
                 message="Request timed out"
             )
 
-            with pytest.raises(FiveTwentyError) as exc_info:
+            with pytest.raises(VeeTwentyError) as exc_info:
                 await client.accounts.get_account_summary(
                     "123-456-789",
                     timeout=1.0
@@ -379,7 +379,7 @@ class TestAccountsIntegration:
     async def test_account_not_found_real_api(self, client):
         """Test account not found error with real API."""
         async with client:
-            with pytest.raises(FiveTwentyError) as exc_info:
+            with pytest.raises(VeeTwentyError) as exc_info:
                 await client.accounts.get_account_summary("999-999-999")
 
             assert exc_info.value.error_code == "ACCOUNT_NOT_EXIST"
@@ -666,7 +666,7 @@ class TestMemoryUsage:
 
         client = AsyncClient(
             token=os.environ["TEST_OANDA_TOKEN"],
-            environment="practice"
+            environment=Environment.PRACTICE
         )
 
         process = psutil.Process()
@@ -696,7 +696,7 @@ class TestMemoryUsage:
 
         client = AsyncClient(
             token=os.environ["TEST_OANDA_TOKEN"],
-            environment="practice"
+            environment=Environment.PRACTICE
         )
 
         async with client:

@@ -516,6 +516,364 @@ async def good_rate_limit_handling():
             await asyncio.sleep(e.retry_after or 60)
 ```
 
+## Order Validation Framework
+
+### Pre-Order Validation System
+
+Implement comprehensive validation to prevent costly trading errors:
+
+```python
+from abc import ABC, abstractmethod
+from dataclasses import dataclass
+from datetime import datetime
+from decimal import Decimal
+from enum import Enum
+from typing import Any
+
+from fivetwenty import AsyncClient
+
+
+class ValidationSeverity(Enum):
+    INFO = "info"
+    WARNING = "warning"
+    ERROR = "error"
+    CRITICAL = "critical"
+
+
+@dataclass
+class ValidationResult:
+    is_valid: bool
+    severity: ValidationSeverity
+    rule_name: str
+    message: str
+    details: dict[str, Any] | None = None
+
+
+class OrderValidator(ABC):
+    """Base class for order validation rules."""
+
+    def __init__(self, name: str, severity: ValidationSeverity = ValidationSeverity.ERROR) -> None:
+        self.name = name
+        self.severity = severity
+        self.enabled = True
+
+    @abstractmethod
+    async def validate(self, order_params: dict[str, Any], context: dict[str, Any]) -> ValidationResult:
+        """Validate order parameters and return result."""
+        pass
+
+
+class OrderValidationFramework:
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
+        self.client = client
+        self.account_id = account_id
+        self.validators: list[OrderValidator] = []
+        self.validation_history = []
+
+    def add_validator(self, validator: OrderValidator) -> None:
+        """Add a validator to the framework."""
+        self.validators.append(validator)
+
+    async def validate_order(
+        self,
+        order_params: dict[str, Any],
+        strict_mode: bool = True,
+    ) -> dict[str, Any]:
+        """Validate order against all registered validators."""
+        validation_session = {
+            "timestamp": datetime.utcnow(),
+            "order_params": order_params,
+            "results": [],
+            "passed": True,
+            "errors": [],
+            "warnings": [],
+        }
+
+        # Build context for validators
+        context = await self._build_validation_context()
+
+        # Run all validators
+        for validator in self.validators:
+            if not validator.enabled:
+                continue
+
+            try:
+                result = await validator.validate(order_params, context)
+                validation_session["results"].append(result)
+
+                if not result.is_valid:
+                    if result.severity in [ValidationSeverity.ERROR, ValidationSeverity.CRITICAL]:
+                        validation_session["errors"].append(result)
+                        validation_session["passed"] = False
+                    elif result.severity == ValidationSeverity.WARNING:
+                        validation_session["warnings"].append(result)
+                        if strict_mode:
+                            validation_session["passed"] = False
+
+            except Exception as e:
+                error_result = ValidationResult(
+                    is_valid=False,
+                    severity=ValidationSeverity.CRITICAL,
+                    rule_name=validator.name,
+                    message=f"Validator failed: {e}",
+                    details={"exception": str(e)},
+                )
+                validation_session["results"].append(error_result)
+                validation_session["errors"].append(error_result)
+                validation_session["passed"] = False
+
+        # Store validation history
+        self.validation_history.append(validation_session)
+        return validation_session
+
+    async def _build_validation_context(self) -> dict[str, Any]:
+        """Build context information for validators."""
+        try:
+            # Get account information
+            account = await self.client.accounts.get_account(account_id=self.account_id)
+            positions = await self.client.positions.get_positions(account_id=self.account_id)
+            orders = await self.client.orders.get_orders(account_id=self.account_id)
+
+            return {
+                "account": account,
+                "positions": positions.positions,
+                "pending_orders": orders.orders,
+                "current_time": datetime.utcnow(),
+                "account_balance": Decimal(account.balance),
+                "margin_available": Decimal(account.margin_available),
+                "margin_used": Decimal(account.margin_used),
+            }
+
+        except Exception as e:
+            return {"error": str(e)}
+```
+
+### Risk-Based Validators
+
+```python
+class MaxPositionSizeValidator(OrderValidator):
+    """Validate order doesn't exceed maximum position size limits."""
+
+    def __init__(self, max_units_per_instrument: int, max_total_exposure: Decimal) -> None:
+        super().__init__("MaxPositionSize", ValidationSeverity.ERROR)
+        self.max_units_per_instrument = max_units_per_instrument
+        self.max_total_exposure = max_total_exposure
+
+    async def validate(self, order_params: dict[str, Any], context: dict[str, Any]) -> ValidationResult:
+        """Validate position size limits."""
+        instrument = order_params.get("instrument")
+        units = int(order_params.get("units", 0))
+
+        # Check individual instrument limit
+        current_position_size = 0
+        for position in context.get("positions", []):
+            if position.instrument == instrument:
+                if position.long.units != "0":
+                    current_position_size += int(position.long.units)
+                if position.short.units != "0":
+                    current_position_size += abs(int(position.short.units))
+
+        new_position_size = current_position_size + abs(units)
+
+        if new_position_size > self.max_units_per_instrument:
+            return ValidationResult(
+                is_valid=False,
+                severity=self.severity,
+                rule_name=self.name,
+                message=f"Position size {new_position_size} exceeds limit {self.max_units_per_instrument}",
+                details={
+                    "current_size": current_position_size,
+                    "order_size": abs(units),
+                    "new_size": new_position_size,
+                    "limit": self.max_units_per_instrument
+                }
+            )
+
+        return ValidationResult(
+            is_valid=True,
+            severity=ValidationSeverity.INFO,
+            rule_name=self.name,
+            message="Position size validation passed"
+        )
+
+
+class RiskPerTradeValidator(OrderValidator):
+    """Validate risk per trade doesn't exceed limits."""
+
+    def __init__(self, max_risk_per_trade: Decimal) -> None:
+        super().__init__("RiskPerTrade", ValidationSeverity.WARNING)
+        self.max_risk_per_trade = max_risk_per_trade
+
+    async def validate(self, order_params: dict[str, Any], context: dict[str, Any]) -> ValidationResult:
+        """Validate risk per trade."""
+        units = order_params.get("units", 0)
+        entry_price = order_params.get("price")
+        stop_price = order_params.get("stop_loss_price")
+
+        if not entry_price or not stop_price:
+            return ValidationResult(
+                is_valid=True,
+                severity=ValidationSeverity.INFO,
+                rule_name=self.name,
+                message="No stop loss specified - cannot validate risk"
+            )
+
+        # Calculate risk amount
+        stop_distance = abs(Decimal(str(entry_price)) - Decimal(str(stop_price)))
+        risk_amount = abs(units) * stop_distance
+        account_balance = context.get("account_balance", Decimal("0"))
+        risk_percentage = risk_amount / account_balance if account_balance > 0 else Decimal("1")
+
+        if risk_percentage > self.max_risk_per_trade:
+            return ValidationResult(
+                is_valid=False,
+                severity=self.severity,
+                rule_name=self.name,
+                message=f"Risk {risk_percentage:.2%} exceeds limit {self.max_risk_per_trade:.2%}",
+                details={
+                    "risk_amount": risk_amount,
+                    "risk_percentage": risk_percentage,
+                    "limit": self.max_risk_per_trade,
+                    "account_balance": account_balance
+                }
+            )
+
+        return ValidationResult(
+            is_valid=True,
+            severity=ValidationSeverity.INFO,
+            rule_name=self.name,
+            message=f"Risk validation passed: {risk_percentage:.2%}"
+        )
+```
+
+### Production Error Recovery
+
+Implement comprehensive error recovery for production systems:
+
+```python
+from datetime import datetime
+from enum import Enum
+from typing import Any, Callable, Optional
+import traceback
+import asyncio
+
+from fivetwenty.exceptions import VeeTwentyError
+
+
+class ErrorCategory(Enum):
+    NETWORK = "network"
+    AUTHENTICATION = "authentication"
+    VALIDATION = "validation"
+    MARKET_DATA = "market_data"
+    ORDER_EXECUTION = "order_execution"
+    INSUFFICIENT_FUNDS = "insufficient_funds"
+    RATE_LIMITING = "rate_limiting"
+    SYSTEM = "system"
+
+
+class TradingErrorHandler:
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
+        self.client = client
+        self.account_id = account_id
+        self.error_handlers = {}
+        self.error_history = []
+        self.circuit_breaker_states = {}
+
+    def register_error_handler(
+        self,
+        error_category: ErrorCategory,
+        handler: Callable,
+        max_retries: int = 3,
+        retry_delay: int = 1
+    ) -> None:
+        """Register error handler for specific error category."""
+        self.error_handlers[error_category] = {
+            "handler": handler,
+            "max_retries": max_retries,
+            "retry_delay": retry_delay
+        }
+
+    async def handle_error(
+        self,
+        error: Exception,
+        operation_context: dict[str, Any],
+        error_category: Optional[ErrorCategory] = None
+    ) -> dict[str, Any]:
+        """Handle error with appropriate recovery strategy."""
+        if not error_category:
+            error_category = self._categorize_error(error)
+
+        # Record error
+        error_record = {
+            "timestamp": datetime.utcnow(),
+            "error_type": type(error).__name__,
+            "error_message": str(error),
+            "error_category": error_category,
+            "operation_context": operation_context,
+            "stack_trace": traceback.format_exc(),
+            "recovery_attempted": False,
+            "recovery_successful": False
+        }
+
+        self.error_history.append(error_record)
+
+        # Check circuit breaker
+        if self._should_circuit_break(error_category):
+            error_record["circuit_breaker_triggered"] = True
+            return error_record
+
+        # Attempt recovery
+        if error_category in self.error_handlers:
+            handler_config = self.error_handlers[error_category]
+
+            for attempt in range(handler_config["max_retries"]):
+                try:
+                    error_record["recovery_attempted"] = True
+                    recovery_result = await handler_config["handler"](
+                        error, operation_context, attempt
+                    )
+
+                    if recovery_result.get("success", False):
+                        error_record["recovery_successful"] = True
+                        error_record["recovery_result"] = recovery_result
+                        break
+
+                    await asyncio.sleep(handler_config["retry_delay"] * (2 ** attempt))
+
+                except Exception as recovery_error:
+                    error_record["recovery_error"] = str(recovery_error)
+
+        return error_record
+
+    def _categorize_error(self, error: Exception) -> ErrorCategory:
+        """Categorize error based on type and message."""
+        error_message = str(error).lower()
+
+        if "network" in error_message or "connection" in error_message:
+            return ErrorCategory.NETWORK
+        if "authentication" in error_message or "unauthorized" in error_message:
+            return ErrorCategory.AUTHENTICATION
+        if "insufficient" in error_message and "margin" in error_message:
+            return ErrorCategory.INSUFFICIENT_FUNDS
+        if "rate limit" in error_message or "too many requests" in error_message:
+            return ErrorCategory.RATE_LIMITING
+        if "validation" in error_message or "invalid" in error_message:
+            return ErrorCategory.VALIDATION
+        if isinstance(error, VeeTwentyError):
+            return ErrorCategory.ORDER_EXECUTION
+
+        return ErrorCategory.SYSTEM
+
+    def _should_circuit_break(self, error_category: ErrorCategory) -> bool:
+        """Determine if circuit breaker should trigger."""
+        recent_errors = [
+            err for err in self.error_history[-10:]  # Last 10 errors
+            if err["error_category"] == error_category
+            and (datetime.utcnow() - err["timestamp"]).seconds < 300  # Last 5 minutes
+        ]
+        return len(recent_errors) >= 5
+```
+
 ## Testing Considerations
 
 ### Mock Testing
@@ -575,6 +933,34 @@ async def test_live_api():
         assert len(accounts) > 0
 ```
 
+### Validation Testing
+
+Test your validation rules thoroughly:
+
+```python
+@pytest.mark.asyncio
+async def test_position_size_validator():
+    # Create validator
+    validator = MaxPositionSizeValidator(
+        max_units_per_instrument=100000,
+        max_total_exposure=Decimal("500000")
+    )
+
+    # Mock context with existing position
+    context = {
+        "positions": [
+            MockPosition(instrument="EUR_USD", long_units="50000", short_units="0")
+        ]
+    }
+
+    # Test order that would exceed limit
+    order_params = {"instrument": "EUR_USD", "units": 60000}
+    result = await validator.validate(order_params, context)
+
+    assert not result.is_valid
+    assert result.severity == ValidationSeverity.ERROR
+```
+
 ## Summary
 
 Key principles for FiveTwenty SDK usage:
@@ -586,5 +972,8 @@ Key principles for FiveTwenty SDK usage:
 5. **Implement proper retry logic** with exponential backoff
 6. **Secure token management** - never hardcode or log tokens
 7. **Test thoroughly** in practice environment before live trading
+8. **Implement comprehensive validation** - prevent costly errors before they occur
+9. **Build robust error recovery** - handle failures gracefully with circuit breakers
+10. **Monitor and categorize errors** - track patterns for system improvement
 
-Following these patterns ensures robust, maintainable, and secure trading applications.
+Following these patterns ensures robust, maintainable, and secure trading applications with comprehensive risk management and validation frameworks.

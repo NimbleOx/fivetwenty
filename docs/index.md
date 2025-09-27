@@ -145,7 +145,7 @@ Choose your learning journey based on your experience level:
 ### **New to OANDA Trading**
 1. [Install FiveTwenty](tutorials/getting-started/installation.md)
 2. [Set up authentication](tutorials/getting-started/authentication.md)
-3. [Understand environments](tutorials/getting-started/environments.md)
+3. [Understand environments](guides/understanding/environments.md)
 4. [Place your first trade](tutorials/getting-started/first-trade.md)
 
 ### **Production Applications**

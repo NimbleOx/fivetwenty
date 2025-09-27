@@ -89,12 +89,14 @@ HTTPError: 404 Client Error: Not Found
 from fivetwenty import AsyncClient, Environment
 
 # Practice token → Practice environment
+practice_token = "your-practice-token-here"  # Replace with actual practice token
 client = AsyncClient(
     token=practice_token,
     environment=Environment.PRACTICE  # Uses api-fxpractice.oanda.com
 )
 
 # Live token → Live environment
+live_token = "your-live-token-here"  # Replace with actual live token
 client = AsyncClient(
     token=live_token,
     environment=Environment.LIVE  # Uses api-fxtrade.oanda.com
@@ -195,6 +197,7 @@ is_valid = await validate_credentials(token, Environment.PRACTICE)
 **Error**: `TimeoutError` or network connectivity problems
 
 ```python
+from typing import Any
 from httpx import TimeoutException, ConnectError
 from fivetwenty import AsyncClient, Environment
 
@@ -210,7 +213,7 @@ async def robust_connection(token: str, timeout: float = 30.0) -> Any:
         ) as client:
 
             # Test with basic request
-            accounts = await client.accounts.get_accounts()
+            _accounts = await client.accounts.get_accounts()
             print("✅ Connection established successfully")
             return client
 
@@ -395,6 +398,7 @@ async def main() -> Any:
 ### Practice vs Live Environment
 
 ```python
+from typing import Any
 from fivetwenty import Environment
 
 
@@ -531,7 +535,7 @@ async def resilient_example():
 
 ```python
 import os
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 def check_configuration():
     """Comprehensive configuration check."""

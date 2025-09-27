@@ -439,13 +439,12 @@ account = Account.model_validate(data)  # Validation only when needed
 **Design Decision**: Never store tokens in the SDK itself
 
 ```python
+import os
 from fivetwenty import AsyncClient, Environment
 
 # SDK requires explicit token for each client
 client = AsyncClient(token=os.environ["FIVETWENTY_OANDA_TOKEN"], account_id="your-account-id", environment=Environment.PRACTICE)
 ```
-
-from fivetwenty import Environment
 
 
 **Benefits**:
@@ -588,7 +587,7 @@ from fivetwenty import AsyncClient
 
 
 async def main():
-    async with AsyncClient(token="demo-token") as client:
+    async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
         # New preferred method
         await client.accounts.get_accounts()
 
@@ -740,7 +739,7 @@ async def main():
     from decimal import Decimal
 
     # Wrong
-    price=Decimal("1.1234") + 0.0001
+    _price_wrong = Decimal("1.1234") + 0.0001
 
     # Right
     _price = Decimal("1.1234") + Decimal("0.0001")
@@ -748,6 +747,7 @@ async def main():
 
     # The SDK handles serialization automatically
     # Note: client would be initialized from context
+    # account_id = "your-account-id"  # Would come from configuration
     # order = await client.orders.post_market_order(
     #     account_id=account_id,
     #     instrument="EUR_USD",
@@ -761,20 +761,23 @@ asyncio.run(main())
 #### Error Handling Development
 
 ```python
-# Always handle FiveTwentyError specifically
-from fivetwenty.exceptions import FiveTwentyError, ErrorCode
+# Always handle VeeTwentyError specifically
+import logging
+from fivetwenty.exceptions import VeeTwentyError
+
+logger = logging.getLogger(__name__)
 
 try:
-    result = await client.some_operation()
-except FiveTwentyError as e:
+    # result = await client.some_operation()  # Would use actual client
+    pass
+except VeeTwentyError as e:
     # Handle known OANDA errors
-    match e.code:
-        case ErrorCode.INSUFFICIENT_FUNDS:
-            # Specific handling
-            pass
-        case _:
-            # Generic handling
-            logger.error(f"OANDA error: {e.code} - {e.message}")
+    if "INSUFFICIENT_FUNDS" in str(e.error_code):
+        # Specific handling
+        pass
+    else:
+        # Generic handling
+        logger.error(f"OANDA error: {e.error_code} - {e.message}")
 except Exception as e:
     # Handle unexpected errors
     logger.exception("Unexpected error in trading operation")
@@ -800,9 +803,11 @@ async with AsyncClient(...) as client:
 #### Model Validation Debugging
 
 ```python
+from pydantic import ValidationError
 from fivetwenty.models import Account
 
 # If you get validation errors, debug like this:
+raw_data = {}  # Would come from API response
 try:
     account = Account.model_validate(raw_data)
 except ValidationError as e:
@@ -837,7 +842,7 @@ import asyncio
 
 
 # Efficient: Run operations concurrently
-async def get_market_overview(client, account_id):
+async def get_market_overview(client, account_id: str):
     results = await asyncio.gather(
         client.accounts.get_account(account_id),
         client.positions.get_open_positions(account_id),

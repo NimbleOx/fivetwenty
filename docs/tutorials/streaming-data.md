@@ -417,6 +417,6 @@ if __name__ == "__main__":
 
 - Review [Best Practices](../guides/understanding/best-practices.md) for production deployment
 - Explore [Advanced Order Types](advanced-orders/index.md) for sophisticated strategies
-- Check [HFT Optimization](../guides/performance-optimization/hft-optimization/index.md) for performance tuning
+- Check [Performance Optimization](../guides/optimization/index.md) for performance tuning
 
 FiveTwenty provides robust streaming capabilities for real-time trading applications - focus on building reliable, maintainable systems that handle the inherent challenges of live market data.

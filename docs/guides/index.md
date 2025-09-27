@@ -34,11 +34,11 @@ Direct solutions to common problems and tasks.
 ### **Performance Optimization**
 Advanced techniques for high-performance trading systems.
 
-- **[Overview](performance-optimization/hft-optimization/index.md)** - Introduction to performance optimization strategies
-- **[Connection Optimization](performance-optimization/hft-optimization/connection-optimization.md)** - Optimize HTTP connections and reduce latency
-- **[Streaming Optimization](performance-optimization/hft-optimization/streaming-optimization.md)** - Maximize streaming data throughput
-- **[Memory & CPU Optimization](performance-optimization/hft-optimization/memory-cpu-optimization.md)** - Efficient resource utilization
-- **[Latency Optimization](performance-optimization/hft-optimization/latency-optimization.md)** - Minimize execution latency
+- **[Overview](optimization/index.md)** - Introduction to performance optimization strategies
+- **[Connection Optimization](optimization/connection-optimization.md)** - Optimize HTTP connections and reduce latency
+- **[Streaming Optimization](optimization/streaming-optimization.md)** - Maximize streaming data throughput
+- **[Memory & CPU Optimization](optimization/memory-cpu-optimization.md)** - Efficient resource utilization
+- **[Latency Optimization](optimization/latency-optimization.md)** - Minimize execution latency
 
 ## How to Use This Section
 

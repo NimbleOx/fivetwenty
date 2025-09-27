@@ -23,10 +23,11 @@ Attach a stop-loss immediately when placing a trade:
 
 ```python
 import asyncio
+import os
 from decimal import Decimal
 from typing import Any
 from dotenv import load_dotenv
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
 # Load environment variables from .env file
@@ -36,7 +37,10 @@ async def place_order_with_stop_loss(instrument: str, units: int, stop_loss_pric
     """Place market order with immediate stop-loss protection."""
 
     # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         try:
             # Create market order with stop-loss attached
             response = await client.orders.post_market_order(
@@ -55,8 +59,8 @@ async def place_order_with_stop_loss(instrument: str, units: int, stop_loss_pric
                 print(f"🛡️ Stop-loss set at {stop_loss_price}")
                 return fill.trade_opened.trade_id if fill.trade_opened else None
 
-        print("❌ Order not filled")
-        return None
+            print("❌ Order not filled")
+            return None
 
         except Exception as e:
             print(f"❌ Error placing order with stop-loss: {e}")
@@ -80,9 +84,10 @@ if __name__ == "__main__":
 Set stop-loss at fixed pip distance from entry:
 
 ```python
+import os
 from decimal import Decimal
 from typing import Any
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
 
@@ -103,7 +108,10 @@ async def implement_pip_based_stop_loss(account_id: str, instrument: str, units:
     """Implement stop-loss based on fixed pip distance."""
 
     # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         try:
             # Get current price to calculate entry point
             prices = await client.pricing.get_pricing(account_id, [instrument])
@@ -154,9 +162,10 @@ async def example_usage():
 Limit risk to fixed percentage of account balance:
 
 ```python
+import os
 from decimal import Decimal
 from typing import Any
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
 
@@ -165,7 +174,10 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
     """Implement stop-loss based on account risk percentage."""
 
     # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
+    async with AsyncClient(
+        token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
+        environment=Environment.PRACTICE
+    ) as client:
         try:
             # Get account balance
             account = await client.accounts.get_account(account_id)
@@ -316,9 +328,10 @@ async def main() -> None:
 Stop-loss based on market volatility using Average True Range:
 
 ```python
+import os
 from decimal import Decimal
 from typing import Any
-from fivetwenty import AsyncClient
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 import pandas as pd
 
@@ -393,7 +406,7 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
 
 # Usage with 2x ATR stop-loss
 async def main() -> None:
-    fill = await calculate_atr_stop_loss(
+    _fill = await calculate_atr_stop_loss(
         account_id="101-001-1234567-001",
         instrument="USD_JPY",
         units=-12000,  # Short position
@@ -414,8 +427,10 @@ async def main() -> None:
 Update stop-loss on existing positions:
 
 ```python
+import os
 from decimal import Decimal
-from fivetwenty import AsyncClient
+from typing import Any
+from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import StopLossDetails
 
 

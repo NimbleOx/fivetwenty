@@ -375,7 +375,7 @@ You now have a secure, flexible authentication setup for FiveTwenty. The SDK sup
 
 Now that authentication is configured:
 
-- [Learn about environments](environments.md) to understand practice vs live trading
+- [Learn about environments](../../guides/understanding/environments.md) to understand practice vs live trading
 - [Make your first trade](first-trade.md) to test your setup
 - [Review configuration options](../../guides/understanding/configuration.md) for advanced use cases
 - [Check error handling](../../api-reference/error-handling.md) for production readiness

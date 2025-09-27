@@ -382,7 +382,7 @@ Congratulations! You've successfully completed the comprehensive FiveTwenty trad
 **For Strategy Development:**
 - Explore [Risk Management Fundamentals](../risk-management.md)
 - Study [Advanced Order Types](../advanced-orders/index.md)
-- Learn [HFT Optimization](../../guides/performance-optimization/hft-optimization/index.md)
+- Learn [Performance Optimization](../../guides/optimization/index.md)
 
 **For Production Trading:**
 - Set up [Live Trading Safely](../../guides/practical-solutions/setup-live-trading.md)

@@ -29,7 +29,7 @@ Start here if you're new to the FiveTwenty or trading APIs.
 1. **[Installation & Setup](getting-started/installation.md)** - Set up your development environment
 2. **[Authentication Basics](getting-started/authentication.md)** - Connect to OANDA safely
 3. **[Your First Trade](getting-started/first-trade.md)** - Execute your first trade
-4. **[Understanding Environments](getting-started/environments.md)** - Practice vs Live trading
+4. **[Understanding Environments](../guides/understanding/environments.md)** - Practice vs Live trading
 
 ### **Guided Learning** (Building Core Skills)
 Continue here once you've completed the getting started section.

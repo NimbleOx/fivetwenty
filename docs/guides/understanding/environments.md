@@ -359,6 +359,6 @@ Now that you understand environments:
 **Related Guides:**
 - [Configuration Patterns](configuration.md) - Advanced environment configuration
 - [Best Practices](best-practices.md) - Production trading considerations
-- [Security Guidelines](best-practices.md#security-considerations) - Protecting your credentials
+- [Security Guidelines](best-practices.md#token-security) - Protecting your credentials
 
 **Task Complete**: Environment management provides the foundation for safe trading development and secure production deployment.

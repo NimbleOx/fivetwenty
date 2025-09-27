@@ -440,4 +440,4 @@ Continue to [Complete Trading System](complete-system.md) to build a production-
 
 - [Advanced Orders](../advanced-orders/index.md) - Complex order strategies
 - [Risk Management](../risk-management.md) - Comprehensive risk frameworks
-- [HFT Optimization](../../guides/performance-optimization/hft-optimization/index.md) - Performance optimization
+- [Performance Optimization](../../guides/optimization/index.md) - Performance optimization

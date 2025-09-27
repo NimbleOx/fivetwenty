@@ -11,7 +11,6 @@ This tutorial series explores advanced order types and management strategies tha
 - **Order Types Mastery**: Market, limit, stop, and market-if-touched orders
 - **Dynamic Management**: Trailing stops, scaling, and adaptive position sizing
 - **Automated Systems**: Rule-based order management and monitoring
-- **Risk Controls**: Validation frameworks and protective mechanisms
 - **Professional Strategies**: Bracket orders, combinations, and advanced techniques
 
 ### Tutorial Structure
@@ -22,7 +21,8 @@ Each guide builds upon previous concepts while remaining focused on specific tec
 2. **[Stop Orders & Market-If-Touched](stop-orders-mit.md)** - Breakout and mean reversion strategies
 3. **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
 4. **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
-5. **[Validation & Best Practices](validation-best-practices.md)** - Risk management and error handling
+
+For comprehensive validation frameworks and error handling patterns, see the [Best Practices Guide](../../guides/understanding/best-practices.md#order-validation-framework).
 
 ### Prerequisites
 
@@ -40,10 +40,9 @@ graph TD
     C --> D
     D --> E[Automated Systems]
     E --> F[Order Strategies]
-    F --> G[Validation & Best Practices]
 
     style A fill:#e1f5fe
-    style G fill:#f3e5f5
+    style F fill:#f3e5f5
 ```
 
 ### Key Concepts Covered

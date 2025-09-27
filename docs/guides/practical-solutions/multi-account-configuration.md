@@ -34,6 +34,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 ### Initialize Clients with Custom Prefixes
 
 ```python
+import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.configuration import AccountConfigLoader
 
@@ -70,6 +71,7 @@ async def multi_account_example():
 ### Single Account with Custom Prefix
 
 ```python
+import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.configuration import AccountConfigLoader
 
@@ -114,6 +116,7 @@ def sync_example():
 Create configurations programmatically without environment variables:
 
 ```python
+import asyncio
 from pydantic import SecretStr
 
 from fivetwenty import AsyncClient, Environment
@@ -155,6 +158,7 @@ async def direct_config_example():
 Combine environment variables with direct configuration:
 
 ```python
+import asyncio
 from pydantic import SecretStr
 
 from fivetwenty import AsyncClient, Environment
@@ -186,9 +190,6 @@ async def mixed_approach():
 ```
 
 ## Environment Variable Pattern
-
-from fivetwenty import Environment
-
 
 The pattern for custom prefixes follows: `{PREFIX}_FIVETWENTY_OANDA_{VARIABLE}`
 
@@ -223,6 +224,7 @@ The pattern for custom prefixes follows: `{PREFIX}_FIVETWENTY_OANDA_{VARIABLE}`
 
 Always validate that configurations were loaded successfully:
 ```python
+import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.configuration import AccountConfigLoader
 

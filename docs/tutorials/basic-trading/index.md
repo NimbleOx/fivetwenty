@@ -149,7 +149,7 @@ Skip to [Market Data & Analysis](market-data.md) and focus on API usage patterns
 Upon completing this tutorial series, you'll be ready for:
 
 - **Advanced Trading Guides**: [Risk Management](../risk-management.md), [Advanced Orders](../advanced-orders/index.md)
-- **Performance Optimization**: [HFT Optimization](../../guides/performance-optimization/hft-optimization/index.md)
+- **Performance Optimization**: [Performance Optimization](../../guides/optimization/index.md)
 
 ---
 

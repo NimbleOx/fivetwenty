@@ -249,11 +249,11 @@ from typing import Any
 def fast_spread_calculation(price: Any) -> float:
     return price.asks[0].price - price.bids[0].price
 
-def get_ask_price(price) -> float:
+def get_ask_price(price: Any) -> float:
     """Extract ask price from price object."""
     return price.asks[0].price if price.asks else 0.0
 
-def get_bid_price(price) -> float:
+def get_bid_price(price: Any) -> float:
     """Extract bid price from price object."""
     return price.bids[0].price if price.bids else 0.0
 
@@ -319,11 +319,11 @@ def calculate_multiple_spreads(prices_array: np.ndarray) -> np.ndarray:
     asks = prices_array[:, 1]
     return asks - bids
 
-def calculate_moving_average(prices, window) -> Any:
+def calculate_moving_average(prices: Any, window: int) -> Any:
     """Fast moving average using numpy."""
     return np.convolve(prices, np.ones(window)/window, mode="valid")
 
-def detect_price_movements(prices, threshold=0.0001) -> Any:
+def detect_price_movements(prices: Any, threshold: float = 0.0001) -> Any:
     """Vectorized price movement detection."""
     price_changes = np.abs(np.diff(prices))
     significant_moves = price_changes > threshold

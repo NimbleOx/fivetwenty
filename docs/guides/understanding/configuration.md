@@ -485,9 +485,9 @@ async def main() -> None:
         timeout=60.0,
         max_retries=5,
         user_agent="MyTradingApp/1.0",
-        proxies="http://proxy.example.com:8080",
-        verify=True,  # or "/path/to/ca-bundle.crt"
-        cert="/path/to/client-cert.pem"
+        # proxies="http://proxy.example.com:8080",  # Optional proxy config
+        # verify=True,  # or "/path/to/ca-bundle.crt" - SSL verification
+        # cert="/path/to/client-cert.pem"  # Client certificate
     ) as client:
         print(f"Connected: {client.config.summary()}")
 
@@ -531,7 +531,7 @@ async def main() -> None:
     async with AsyncClient(
         token=os.environ.get("YOUR_TOKEN", "your-token"),
         environment=Environment.PRACTICE,
-        transport=transport,
+        # transport=transport,  # Custom transport not available in current API
     ) as client:
         print(f"Client configured: {client.config.environment}")
 
@@ -552,13 +552,14 @@ async def main() -> None:
     logging.basicConfig(level=logging.INFO)
     logger = logging.getLogger("my_trading_app")
 
-    # Pass logger to client
+    # Configure logging for httpx (used by AsyncClient)
+    logging.getLogger("httpx").setLevel(logging.DEBUG)
+
     async with AsyncClient(
         token=os.environ.get("YOUR_TOKEN", "your-token"),
-        environment=Environment.PRACTICE,
-        logger=logger
+        environment=Environment.PRACTICE
     ) as client:
-        # Client operations will be logged
+        # Client operations will be logged via httpx logger
         accounts = await client.accounts.get_accounts()
         print(f"Found {len(accounts)} accounts")
 
@@ -630,8 +631,7 @@ class ConfigBuilder:
             token=data["token"],
             account_id=data["account_id"],
             environment=Environment.PRACTICE if environment == "practice" else Environment.LIVE,
-            alias=data.get("alias", "vault_account"),
-            description=data.get("description"),
+            alias=data.get("alias", "vault_account")
         )
 
     @staticmethod
@@ -644,8 +644,7 @@ class ConfigBuilder:
             token=os.environ["FIVETWENTY_OANDA_TOKEN"],  # From environment
             account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],  # From environment
             environment=Environment(data["environment"]),
-            alias=data["alias"],
-            description=data.get("description"),
+            alias=data["alias"]
         )
 ```
 
@@ -668,9 +667,10 @@ class ConfigManager:
 
         for env in environments:
             prefix = f"{env.upper()}_FIVETWENTY_"
-            config = AccountConfigLoader.from_env_prefix(prefix)
-            if config:
-                self.configs[env] = config
+            # config = AccountConfigLoader.from_env_prefix(prefix)  # Hypothetical loader
+            # if config:
+            #     self.configs[env] = config
+            pass  # Implementation would depend on actual loader availability
 
     def get_config(self, environment: str) -> AccountConfig | None:
         """Get configuration for environment."""
@@ -805,7 +805,7 @@ if __name__ == "__main__":
 
 ## Next Steps
 
-- Learn about [environments](../../tutorials/getting-started/environments.md) and their differences
+- Learn about [environments](environments.md) and their differences
 - See [authentication](../../tutorials/getting-started/authentication.md) for getting API tokens
 - Review [best practices](best-practices.md) for production deployment
 - Check [error handling](../../api-reference/error-handling.md) for configuration-related errors

@@ -39,14 +39,14 @@ async def get_account_health(client: AsyncClient) -> dict:
     positions = await client.positions.get_positions(client.account_id)
 
     # Calculate account metrics
-    total_exposure = Decimal("0")
-    unrealized_pnl = Decimal("0")
+    total_exposure = Decimal()
+    unrealized_pnl = Decimal()
     active_positions = 0
 
     for position in positions.positions:
         if position.long.units != "0" or position.short.units != "0":
-            long_units = Decimal(position.long.units) if position.long.units != "0" else Decimal("0")
-            short_units = Decimal(position.short.units) if position.short.units != "0" else Decimal("0")
+            long_units = Decimal(position.long.units) if position.long.units != "0" else Decimal()
+            short_units = Decimal(position.short.units) if position.short.units != "0" else Decimal()
             net_units = long_units + short_units
 
             if net_units != 0:
@@ -59,7 +59,7 @@ async def get_account_health(client: AsyncClient) -> dict:
     margin_used = Decimal(account.margin_used)
     margin_available = Decimal(account.margin_available)
 
-    margin_ratio = (margin_used / balance) * 100 if balance > 0 else Decimal("0")
+    margin_ratio = (margin_used / balance) * 100 if balance > 0 else Decimal()
     margin_call_level = Decimal("50")  # OANDA typically uses 50%
 
     return {
