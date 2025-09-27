@@ -7,6 +7,7 @@ Order creation, modification, and management.
 ---
 
 ## post_order
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -54,6 +55,7 @@ Create a new order using any order request type.
 ---
 
 ## post_market_order
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -105,6 +107,7 @@ Create a market order (convenience method).
 ---
 
 ## post_limit_order
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -157,6 +160,7 @@ Create a limit order (convenience method).
 ---
 
 ## post_stop_order
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -210,6 +214,7 @@ Create a stop order (convenience method).
 ---
 
 ## post_market_if_touched_order
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -263,6 +268,7 @@ Create a market-if-touched order (convenience method).
 ---
 
 ## get_orders
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -309,6 +315,7 @@ Get list of orders for account.
 ---
 
 ## get_order
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -348,6 +355,7 @@ Get order details.
 ---
 
 ## cancel_order
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -390,6 +398,7 @@ Cancel pending order.
 ---
 
 ## get_pending_orders
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -425,6 +434,7 @@ List all pending orders for an account.
 ---
 
 ## put_order
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -468,6 +478,7 @@ Replace existing order by cancelling and creating new order.
 ---
 
 ## put_order_client_extensions
+<!-- fragment: API demo with unused response variable -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient

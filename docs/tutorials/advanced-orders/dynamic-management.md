@@ -18,6 +18,7 @@ Trailing stops protect profits while allowing positions to run in favorable dire
 
 ### Basic Trailing Stop System
 
+<!-- fragment: Demo advanced order management with undefined types -->
 ```python
 import asyncio
 from datetime import datetime, timedelta
@@ -174,6 +175,7 @@ async def volatility_adjusted_trailing() -> Any:
 
 Tighten trail distance as profits increase:
 
+<!-- fragment: Demo accelerated trailing with undefined Any type -->
 ```python
 from decimal import Decimal
 
@@ -613,6 +615,7 @@ class DynamicRiskManager:
 
 ### Order Performance Analytics
 
+<!-- fragment: Demo order performance tracking with undefined types -->
 ```python
 from decimal import Decimal
 

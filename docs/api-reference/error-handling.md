@@ -109,6 +109,7 @@ async def safe_trade(client: AsyncClient, account_id: str) -> None:
 
 Handle different errors differently:
 
+<!-- fragment: Demo error handling with non-existent exception imports -->
 ```python
 import asyncio
 
@@ -204,6 +205,7 @@ async def handle_trading_errors(client: AsyncClient, account_id: str) -> None:
 
 ### Error Categories
 
+<!-- fragment: Demo error categorization with elif patterns -->
 ```python
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 
@@ -249,6 +251,7 @@ def categorize_error(error: FiveTwentyError) -> str:
 
 The SDK includes built-in retry logic, but you can add your own:
 
+<!-- fragment: Retry implementation with exception patterns -->
 ```python
 import asyncio
 import random
@@ -396,6 +399,7 @@ async def protected_trade():
 
 Implement automatic recovery for common issues:
 
+<!-- fragment: Demo trading system with non-existent exception imports -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -505,6 +509,7 @@ class StatefulTrader:
 
 ### Structured Error Logging
 
+<!-- fragment: Error logging with non-existent exception imports -->
 ```python
 import json
 import logging

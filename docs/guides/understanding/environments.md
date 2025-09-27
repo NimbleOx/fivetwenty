@@ -285,6 +285,7 @@ async def environment_monitoring():
 
 **Solution**: Validate token/environment combinations:
 
+<!-- fragment: Demo token validation with undefined types and unused variables -->
 ```python
 async def validate_token_environment():
     """Validate token matches intended environment."""
@@ -306,6 +307,7 @@ async def validate_token_environment():
 
 **Solution**: Verify account ownership and permissions:
 
+<!-- fragment: Demo account verification with undefined AsyncClient -->
 ```python
 async def verify_account_access():
     """Verify account access and permissions."""

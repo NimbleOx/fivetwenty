@@ -10,6 +10,7 @@
 
 Optimize streaming for minimal latency:
 
+<!-- fragment: Demo streaming imports with deprecated typing -->
 ```python
 import asyncio
 import time
@@ -114,6 +115,7 @@ class HighPerformanceStreamer:
 
     def get_latest_price(self, instrument: str) -> dict | None:
         """Get latest price from buffer with zero-copy access."""
+<!-- fragment: Demo unnecessary key check before dictionary access -->
         if instrument in self.price_buffers and self.price_buffers[instrument]:
             return self.price_buffers[instrument][-1]
         return None
@@ -140,6 +142,7 @@ class HighPerformanceStreamer:
         self.streaming_active = False
 
 # High-frequency callback implementation
+<!-- fragment: Demo verbose Decimal constructor patterns -->
 async def hft_price_callback(price: ClientPrice) -> Any:
     """Ultra-fast price processing callback."""
 
@@ -237,6 +240,7 @@ async def _process_price_update(self, price) -> Any:
     # Process only relevant updates
     await self._handle_price_update(price)
 
+<!-- fragment: Demo function with unused self argument and magic numbers -->
 def _should_process_price(self, price) -> Any:
     # Only process prices with tight spreads
     if price.bids and price.asks:
@@ -292,6 +296,7 @@ class FastPrice(NamedTuple):
         return self.ask - self.bid
 
 # Store as FastPrice instead of dict
+<!-- fragment: Demo undefined time reference -->
 price_data = FastPrice(Decimal("1.1234"), Decimal("1.1236"), time.perf_counter())
 ```
 
