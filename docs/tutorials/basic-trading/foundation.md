@@ -5,7 +5,7 @@
 
 ## FiveTwenty Instrument Names
 
-FiveTwenty uses standardized instrument names for currency pairs:
+FiveTwenty uses standardized instrument names for currency pairs. Here's how to work with the most common trading instruments:
 
 ```python
 from fivetwenty.models import InstrumentName

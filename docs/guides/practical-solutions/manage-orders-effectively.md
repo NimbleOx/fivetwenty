@@ -335,6 +335,8 @@ async def robust_post_trade_setup(client: AsyncClient, account_id: str, trade_id
 
 **Problem:** Execute trades immediately at current market price.
 
+The following example demonstrates how to create market orders using the FiveTwenty SDK. Market orders execute immediately at the best available price, making them ideal for quick entries and exits:
+
 <!-- fragment: Demo market order creation with index access and type assignment issues -->
 ```python
 import os
@@ -376,6 +378,8 @@ async def place_market_order() -> None:
 
 **Problem:** Enter positions only when price reaches your target level.
 
+This example shows how to create limit orders that execute only when the market reaches your specified price. Limit orders give you price control but no guarantee of execution:
+
 <!-- fragment: Demo limit order with index access patterns -->
 ```python
 import os
@@ -407,6 +411,8 @@ async def place_limit_order() -> None:
 ### Create Stop Orders for Breakout Trading
 
 **Problem:** Enter positions when price breaks above/below key levels.
+
+Here's how to create stop orders for breakout trading strategies. Stop orders become market orders when the trigger price is reached, making them ideal for momentum trading:
 
 <!-- fragment: Demo stop order with index access patterns -->
 ```python
@@ -442,6 +448,8 @@ async def place_stop_order() -> None:
 ### Create Market-If-Touched Orders for Support/Resistance Trading
 
 **Problem:** Enter positions when price touches support/resistance levels.
+
+This example demonstrates Market-If-Touched (MIT) orders, which execute at market price when a specified trigger level is reached. These are perfect for entering positions at support or resistance levels:
 
 <!-- fragment: Demo MIT order with index access patterns -->
 ```python
@@ -728,6 +736,8 @@ async def manage_pending_orders(account_id: AccountID) -> None:
 ### Implement Batch Order Operations
 
 **Problem:** Create multiple related orders efficiently.
+
+The following example shows how to create multiple related orders in a single operation. This technique is essential for complex trading strategies that require coordinated order placement:
 
 <!-- fragment: Demo bracket order creation with union attribute access and exception handling issues -->
 ```python

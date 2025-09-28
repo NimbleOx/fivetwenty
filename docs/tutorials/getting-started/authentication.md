@@ -25,6 +25,8 @@ The FiveTwenty library supports three secure authentication approaches:
 
 ### 1. Direct Parameters
 
+The most straightforward approach is to pass credentials directly to the client constructor. This example shows how to authenticate using environment variables for security:
+
 ```python
 import asyncio
 import os
@@ -47,7 +49,7 @@ asyncio.run(main())
 
 ### 2. Configuration Objects
 
-Apporpriate for running multiple clients connected to multiple accounts within the same logic (for example a short account and a long account):
+For reusable configurations and multi-account scenarios, use configuration objects. This approach is ideal when running multiple clients connected to different accounts:
 
 <!-- fragment: configuration with placeholder values -->
 ```python
@@ -71,6 +73,8 @@ async with AsyncClient(config=config) as client:
 
 ### 3. Environment Variables
 
+The most secure and convenient approach uses environment variables for zero-config authentication. First, set up your environment:
+
 <!-- fragment: shell commands with placeholder tokens -->
 ```bash
 # Set environment variables (in your shell etc).
@@ -79,6 +83,8 @@ export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
 export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 # Configuration is loaded automatically when these are set
 ```
+
+Then create clients without explicitly passing credentials - the library automatically loads configuration from environment variables:
 
 <!-- fragment: zero-config client example -->
 ```python
