@@ -42,6 +42,7 @@ Both clients share the same API surface but differ in execution model and perfor
 
 AsyncClient provides native async iteration for streaming:
 
+<!-- fragment: Demo async streaming with return type annotations and untyped call issues -->
 ```python
 import os
 from fivetwenty import AsyncClient, Environment
@@ -99,6 +100,7 @@ The sync client manages:
 
 Sync client provides iterator-based streaming:
 
+<!-- fragment: Demo sync streaming with return type annotations and untyped call patterns -->
 ```python
 import os
 from fivetwenty import Client, Environment
@@ -132,6 +134,7 @@ Characteristics:
 ### Concurrent Operations
 
 **AsyncClient**: Truly concurrent using asyncio.gather()
+<!-- fragment: Demo async concurrent operations with return type and attribute access issues -->
 ```python
 import asyncio
 import os
@@ -153,6 +156,7 @@ async def async_concurrent_example():
 ```
 
 **Sync Client**: Sequential execution only
+<!-- fragment: Demo sync sequential operations with return type patterns -->
 ```python
 import os
 from fivetwenty import Client, Environment
@@ -194,6 +198,7 @@ def sync_sequential_example():
 ### AsyncClient
 
 Exceptions propagate directly through the call stack:
+<!-- fragment: Demo async error handling with contextlib suppress and return type issues -->
 ```python
 import os
 from fivetwenty import AsyncClient, Environment
@@ -220,6 +225,7 @@ async def async_error_example():
 ### Sync Client
 
 Exceptions are marshalled across thread boundaries:
+<!-- fragment: Demo sync error handling with contextlib suppress patterns -->
 ```python
 import os
 from fivetwenty import Client, Environment
@@ -267,6 +273,7 @@ Best suited for traditional applications:
 
 Both clients require proper cleanup:
 
+<!-- fragment: Demo resource management with return type annotations -->
 ```python
 import os
 from fivetwenty import AsyncClient, Client, Environment

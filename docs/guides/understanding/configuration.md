@@ -581,6 +581,7 @@ if __name__ == "__main__":
 
 The sync `Client` supports the same configuration patterns:
 
+<!-- fragment: Demo sync client configuration with SecretStr type mismatches -->
 ```python
 import os
 from fivetwenty import Client, AccountConfig, Environment

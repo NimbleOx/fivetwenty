@@ -45,6 +45,7 @@ class AccountConfig(BaseModel):
 
 ### Constructor
 
+<!-- fragment: Demo constructor with SecretStr type compatibility issues -->
 ```python
 from pydantic import SecretStr
 from fivetwenty import Environment, AccountConfig
@@ -78,6 +79,7 @@ def create_account_config(
 
 **Examples:**
 
+<!-- fragment: Demo AccountConfig examples with string to SecretStr type mismatches -->
 ```python
 from fivetwenty import AccountConfig, Environment
 
@@ -105,6 +107,7 @@ config = AccountConfig(
 #### `token: SecretStr`
 Protected API token that never appears in logs or string representations.
 
+<!-- fragment: Demo token SecretStr field usage with string environment variable -->
 ```python
 import os
 from fivetwenty import AccountConfig, Environment
@@ -125,6 +128,7 @@ actual_token = config.token.get_secret_value()
 #### `account_id: SecretStr`
 Protected account ID that never appears in logs or string representations.
 
+<!-- fragment: Demo account_id SecretStr field usage with string environment variable -->
 ```python
 import os
 from fivetwenty import AccountConfig, Environment
@@ -145,6 +149,7 @@ actual_account = config.account_id.get_secret_value()
 #### `environment: Environment`
 Trading environment (practice or live).
 
+<!-- fragment: Demo environment field usage with SecretStr type mismatches -->
 ```python
 import os
 from fivetwenty import AccountConfig, Environment
@@ -164,6 +169,7 @@ else:
 #### `alias: str`
 User-friendly identifier for the account configuration.
 
+<!-- fragment: Demo alias field usage with SecretStr type mismatches for token and account_id -->
 ```python
 import os
 from fivetwenty import AccountConfig, Environment
@@ -186,6 +192,7 @@ Returns safe summary string suitable for logging.
 **Returns:** `str` - Format: "{alias} ({environment})"
 
 **Usage:**
+<!-- fragment: Demo summary method with string literals for SecretStr fields -->
 ```python
 from fivetwenty import AccountConfig, Environment
 import logging
@@ -212,6 +219,7 @@ my_trader (practice)
 #### Automatic Secret Masking
 All secret values are automatically masked in string representations:
 
+<!-- fragment: Demo secret masking with SecretStr type compatibility issues -->
 ```python
 import os
 from fivetwenty import AccountConfig, Environment
@@ -239,6 +247,7 @@ print(config.summary())
 
 The configuration validates all inputs:
 
+<!-- fragment: Demo validation error examples with SecretStr type mismatches -->
 ```python
 from pydantic import ValidationError
 from fivetwenty import AccountConfig, Environment
@@ -379,6 +388,7 @@ Validate an account configuration and return any errors found.
 - Description (if provided) is not empty
 
 **Usage:**
+<!-- fragment: Demo ConfigValidator with SecretStr type issues -->
 ```python
 from fivetwenty import AccountConfig, ConfigValidator, Environment
 
@@ -399,6 +409,7 @@ else:
 ```
 
 **Error Handling Example:**
+<!-- fragment: Demo validation example with SecretStr type mismatches -->
 ```python
 # Create config with potential issues
 from fivetwenty import AccountConfig, Environment
@@ -469,6 +480,7 @@ Live trading environment with real money.
 
 ### Usage
 
+<!-- fragment: Demo environment usage examples with SecretStr type compatibility issues -->
 ```python
 from fivetwenty import AccountConfig, Environment
 
@@ -502,6 +514,7 @@ print("API URL:", config.environment.base_url)
 
 ### Basic Configuration
 
+<!-- fragment: Demo basic configuration with SecretStr type mismatches -->
 ```python
 import os
 from fivetwenty import AccountConfig, Environment
@@ -601,6 +614,7 @@ def load_production_config() -> AccountConfig:
 
 ### 1. Never Log Secrets
 
+<!-- fragment: Demo security best practices with SecretStr type issues -->
 ```python
 import logging
 from fivetwenty import AccountConfig, Environment
@@ -637,6 +651,7 @@ def safe_client_creation(config: AccountConfig) -> AsyncClient:
 
 ### 3. Environment Separation
 
+<!-- fragment: Demo environment-specific config loading with exception handling issues -->
 ```python
 # Separate environment variables
 # Practice: PRACTICE_FIVETWENTY_*
@@ -656,6 +671,7 @@ def load_env_specific_config(env: str) -> AccountConfig:
 
 ### 4. Runtime Verification
 
+<!-- fragment: Demo runtime verification with exception handling patterns -->
 ```python
 import logging
 from fivetwenty import AccountConfig, AsyncClient
@@ -717,6 +733,7 @@ class ConfigFactory:
 
 ### Configuration Manager
 
+<!-- fragment: Demo configuration manager with f-string exceptions and type issues -->
 ```python
 from typing import Any
 from fivetwenty import AccountConfig, AccountConfigLoader
@@ -768,6 +785,7 @@ Raised by Pydantic when configuration parameters are invalid.
 - Invalid environment value
 
 **Example:**
+<!-- fragment: Demo ValidationError handling with SecretStr type mismatches -->
 ```python
 from pydantic import ValidationError
 from fivetwenty import AccountConfig, Environment
@@ -789,6 +807,7 @@ except ValidationError as e:
 Raised by loader methods when required environment variables are missing.
 
 **Example:**
+<!-- fragment: Demo ValueError example with string literal exception -->
 ```python
 from fivetwenty import AccountConfigLoader
 
@@ -803,6 +822,7 @@ if not config:
 
 ### From Direct Parameters
 
+<!-- fragment: Demo migration guide with SecretStr type compatibility issues -->
 ```python
 import os
 from fivetwenty import AccountConfig, AsyncClient, Environment
@@ -847,13 +867,19 @@ client = AsyncClient(config=config)
 
 ### Adding Configuration Validation
 
+<!-- fragment: Demo configuration validation with type ignore and f-string exceptions -->
 ```python
 # Add validation to existing configurations
 from fivetwenty import AccountConfig, ConfigValidator
 
-# Assume config is defined elsewhere
-config: AccountConfig  # type: ignore
+# Sample config for validation
+config = AccountConfig(
+    token="demo-token",
+    account_id="demo-account",
+    environment=Environment.PRACTICE
+)
 errors = ConfigValidator.validate_account_config(config)
 if errors:
-    raise ValueError(f"Configuration issues: {', '.join(errors)}")
+    error_msg = f"Configuration issues: {', '.join(errors)}"
+    raise ValueError(error_msg)
 ```

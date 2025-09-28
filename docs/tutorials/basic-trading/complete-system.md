@@ -9,6 +9,7 @@
 
 Let's build a comprehensive automated trading system:
 
+<!-- fragment: Demo complete trading strategy with magic numbers and attribute access patterns -->
 ```python
 import asyncio
 from datetime import datetime
@@ -187,6 +188,7 @@ def print_strategy_performance(strategy):
 
 Here's an enhanced version with additional capabilities:
 
+<!-- fragment: Demo enhanced strategy with magic numbers and decimal precision patterns -->
 ```python
 from decimal import Decimal
 
@@ -290,6 +292,7 @@ print("- Add machine learning for signal optimization")
 
 Monitor your strategy's real-time performance:
 
+<!-- fragment: Demo performance monitoring with magic numbers and calculation patterns -->
 ```python
 from datetime import datetime
 

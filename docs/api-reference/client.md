@@ -38,6 +38,7 @@ Complete reference for FiveTwenty client interfaces and configuration.
 Primary async client for OANDA API operations. Recommended for production use.
 
 **Constructor:**
+<!-- fragment: Demo AsyncClient constructor with union type and attribute access issues -->
 ```python
 from logging import Logger
 from typing import Optional
@@ -144,6 +145,7 @@ When multiple configuration sources are provided:
 Synchronous wrapper around AsyncClient. Use for scripts and basic applications.
 
 **Constructor:**
+<!-- fragment: Demo Client constructor with undefined names -->
 ```python
 Client(**kwargs)
 ```
@@ -277,6 +279,7 @@ config = AccountConfigLoader.from_env_prefix("TRADING_")
 ### Configuration Errors
 
 **ValueError**: Raised when no valid configuration is provided:
+<!-- fragment: Demo ValueError handling with unused variable patterns -->
 ```python
 from fivetwenty import AsyncClient
 
@@ -287,6 +290,7 @@ except ValueError as e:
 ```
 
 **ValidationError**: Raised for invalid configuration values:
+<!-- fragment: Demo ValidationError handling with SecretStr argument type issues -->
 ```python
 from pydantic import ValidationError
 from fivetwenty import AccountConfig, Environment
@@ -312,6 +316,7 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 - `details` (dict) - Additional error information
 
 **Example:**
+<!-- fragment: Demo FiveTwentyError handling with unused variables and return type issues -->
 ```python
 import asyncio
 
@@ -415,6 +420,7 @@ export STRATEGY_B_OANDA_ENVIRONMENT="practice"
 export STRATEGY_B_OANDA_ACCOUNT_ALIAS="grid_strategy"
 ```
 
+<!-- fragment: Demo AccountConfigLoader usage with undefined name patterns -->
 ```python
 # Load configurations
 momentum_config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")

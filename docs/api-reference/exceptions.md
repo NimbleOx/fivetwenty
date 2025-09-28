@@ -39,6 +39,7 @@ Base exception for all OANDA API errors.
 - `response` *(Optional[httpx.Response])* - Original HTTP response
 
 **Example:**
+<!-- fragment: Demo FiveTwentyError usage with attribute access and return type issues -->
 ```python
 import asyncio
 
@@ -67,6 +68,7 @@ asyncio.run(main())
 Raised when a streaming connection stalls or times out.
 
 **Example:**
+<!-- fragment: Demo StreamStall handling with loop control variables and async patterns -->
 ```python
 import asyncio
 
@@ -119,6 +121,7 @@ asyncio.run(main())
 ## Error Handling Patterns
 
 ### Basic Error Handling
+<!-- fragment: Demo basic error handling with undefined names and try-except patterns -->
 ```python
 from fivetwenty.exceptions import AuthenticationError, FiveTwentyError
 
@@ -138,6 +141,7 @@ async def safe_api_call():
 ```
 
 ### Retry with Exponential Backoff
+<!-- fragment: Demo retry logic with performance issues and security patterns -->
 ```python
 import asyncio
 import random

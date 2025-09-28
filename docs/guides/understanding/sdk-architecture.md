@@ -49,6 +49,7 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 
 FiveTwenty automatically handles Decimal conversion for financial fields:
 
+<!-- fragment: Demo Decimal conversion with type compatibility and f-string exception issues -->
 ```python
 from decimal import Decimal
 
@@ -331,6 +332,8 @@ async def stream_prices():
 **Problem**: HTTP status codes are insufficient for financial APIs
 
 **Solution**: Rich, structured error information
+
+<!-- fragment: Demo error structure with untyped dict and list annotations -->
 ```python
 class FiveTwentyErrorStructure:
     """Example structure of FiveTwentyError - not a redefinition."""
@@ -367,6 +370,7 @@ Exception
 
 The SDK provides complete type information:
 
+<!-- fragment: Demo type inference with attribute access on dict types -->
 ```python
 from decimal import Decimal
 from fivetwenty import AsyncClient
@@ -381,6 +385,7 @@ async def get_account_balance(client: AsyncClient, account_id: str) -> Decimal:
 
 Types are enforced at runtime via Pydantic:
 
+<!-- fragment: Demo runtime validation with intentional type incompatibility -->
 ```python
 from fivetwenty.models import MarketOrderRequest
 
@@ -476,6 +481,7 @@ live_client = AsyncClient(token=token, environment=Environment.LIVE)
 
 All network operations go through a single `_request` method:
 
+<!-- fragment: Demo AsyncClient class structure with redefinition and empty method body -->
 ```python
 from typing import Any
 
@@ -493,6 +499,7 @@ class AsyncClient:
 
 Integration tests use recorded HTTP interactions:
 
+<!-- fragment: Demo VCR test integration with missing return type annotation -->
 ```python
 import pytest
 
@@ -526,6 +533,7 @@ class CustomAccount(Account):
 
 Clients can be extended with custom endpoints:
 
+<!-- fragment: Demo endpoint extensions with untyped constructors and class interactions -->
 ```python
 from typing import Any
 
@@ -763,6 +771,7 @@ asyncio.run(main())
 
 #### Error Handling Development
 
+<!-- fragment: Demo error handling patterns with logging and exception variable usage -->
 ```python
 # Always handle VeeTwentyError specifically
 import logging
@@ -805,6 +814,7 @@ async with AsyncClient(...) as client:
 
 #### Model Validation Debugging
 
+<!-- fragment: Demo validation debugging with untyped dict variable -->
 ```python
 from pydantic import ValidationError
 from fivetwenty.models import Account
@@ -840,6 +850,7 @@ async def get_accounts():
 
 #### Concurrent Operations
 
+<!-- fragment: Demo concurrent operations with return statement assignment patterns -->
 ```python
 import asyncio
 

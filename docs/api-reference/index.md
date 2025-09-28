@@ -47,6 +47,7 @@ Trading functionality organized by OANDA API endpoints.
 ### **Method Signatures**
 Complete method signatures with parameter types and return values:
 
+<!-- fragment: Demo API method with type annotation and attribute access patterns -->
 ```python
 from typing import Optional
 

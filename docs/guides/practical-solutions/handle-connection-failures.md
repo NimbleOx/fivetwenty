@@ -115,6 +115,7 @@ HTTPError: 429 Client Error: Too Many Requests
 - Use built-in retry mechanisms
 - Cache data to reduce API calls
 
+<!-- fragment: Demo rate limiting with missing return type annotation patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Environment
@@ -153,6 +154,7 @@ async def rate_limited_requests(token: str):
 
 **Error**: `401 Unauthorized` or invalid token errors
 
+<!-- fragment: Demo authentication validation with await outside function and return type patterns -->
 ```python
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
@@ -196,6 +198,7 @@ is_valid = await validate_credentials(token, Environment.PRACTICE)
 
 **Error**: `TimeoutError` or network connectivity problems
 
+<!-- fragment: Demo network timeout handling with await outside function and unused variable patterns -->
 ```python
 from typing import Any
 from httpx import TimeoutException, ConnectError
@@ -241,6 +244,7 @@ client = await robust_connection("your-token", timeout=60.0)
 
 ### Exponential Backoff Retry
 
+<!-- fragment: Demo retry logic with return type annotations and magic number patterns -->
 ```python
 import asyncio
 import random
@@ -316,6 +320,7 @@ except Exception as e:
 
 ### Connection Healthcheck
 
+<!-- fragment: Demo connection healthcheck with return type and await outside function patterns -->
 ```python
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
@@ -533,6 +538,7 @@ async def resilient_example():
 
 ### Configuration Checker
 
+<!-- fragment: Demo configuration checking with return type annotations and f-string issues -->
 ```python
 import os
 from fivetwenty import AsyncClient
@@ -573,6 +579,7 @@ check_configuration()
 
 ### Connection Test
 
+<!-- fragment: Demo connection testing with asyncio.run and await outside function patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Environment
@@ -610,6 +617,7 @@ asyncio.run(test_connection())
 
 ### Comprehensive Diagnostics
 
+<!-- fragment: Demo comprehensive diagnostics with await outside function and asyncio patterns -->
 ```python
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode

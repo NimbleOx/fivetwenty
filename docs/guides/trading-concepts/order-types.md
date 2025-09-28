@@ -23,6 +23,7 @@ OANDA supports four primary order types, each designed for specific trading scen
 - Market making operations
 - High-frequency trading strategies
 
+<!-- fragment: Demo market order with return type annotation patterns -->
 ```python
 from fivetwenty import AsyncClient
 
@@ -365,6 +366,7 @@ async def robust_order_placement() -> Any:
 
 Always validate parameters before submission:
 
+<!-- fragment: Demo parameter validation with exception handling and magic number patterns -->
 ```python
 
 from typing import Any
@@ -389,6 +391,7 @@ def validate_order_params(instrument: str, units: int, price: Decimal) -> Any:
 
 ### Position Size Management
 
+<!-- fragment: Demo position size calculation with unused variable patterns -->
 ```python
 from decimal import Decimal
 

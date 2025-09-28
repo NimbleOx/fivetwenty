@@ -7,6 +7,7 @@ Trade monitoring and management.
 ---
 
 ## get_trades
+<!-- fragment: Demo get_trades with return type annotations and unused import patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -58,6 +59,7 @@ Get a list of trades for an account.
 ---
 
 ## get_open_trades
+<!-- fragment: Demo get_open_trades with missing return type annotation patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -91,6 +93,7 @@ Get all open trades for account.
 ---
 
 ## get_trade
+<!-- fragment: Demo get_trade with missing return type annotation patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -128,6 +131,7 @@ Get specific trade details.
 ---
 
 ## close_trade
+<!-- fragment: Demo close_trade with missing return type annotation patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -169,6 +173,7 @@ Close a trade (fully or partially).
 ---
 
 ## put_trade_client_extensions
+<!-- fragment: Demo put_trade_client_extensions with unused variables and return type patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -213,6 +218,7 @@ Modify client extensions for existing trade.
 ---
 
 ## put_trade_orders
+<!-- fragment: Demo put_trade_orders with unused variables and return type patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient

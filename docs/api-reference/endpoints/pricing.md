@@ -7,6 +7,7 @@ Real-time pricing data and streaming.
 ---
 
 ## get_pricing
+<!-- fragment: Demo get_pricing with unused imports and module attribute access issues -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
@@ -53,6 +54,7 @@ Get current prices for instruments.
 ---
 
 ## get_pricing_stream
+<!-- fragment: Demo get_pricing_stream with module attribute access patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
@@ -101,6 +103,7 @@ Stream real-time pricing data.
 ---
 
 ## get_instrument_candles
+<!-- fragment: Demo get_instrument_candles with unused imports and call argument issues -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
@@ -159,6 +162,7 @@ Get historical candle data for an instrument.
 ---
 
 ## get_latest_candles
+<!-- fragment: Demo get_latest_candles with unused imports and unused variable patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
@@ -209,6 +213,7 @@ Get latest candles for multiple instruments.
 ---
 
 ## get_pricing_stream_iter
+<!-- fragment: Demo get_pricing_stream_iter with module attribute access patterns -->
 ```python
 from fivetwenty import Client, Configuration
 

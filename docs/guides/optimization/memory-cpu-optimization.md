@@ -10,6 +10,7 @@
 
 Use optimized data structures for HFT:
 
+<!-- fragment: Demo efficient data structures with numpy imports and type annotations -->
 ```python
 import time
 from collections import defaultdict
@@ -241,6 +242,7 @@ async def process_price_data(price_obj: dict[str, Any]) -> None:
 
 ### Minimize Function Calls
 
+<!-- fragment: Demo CPU optimization with Any type returns and attribute access patterns -->
 ```python
 # Efficient: Direct attribute access
 
@@ -303,6 +305,7 @@ async def unoptimized_price_processing(price: Any) -> None:
 
 ### Vectorized Operations
 
+<!-- fragment: Demo vectorized operations with numpy imports and Any type returns -->
 ```python
 
 from typing import Any
@@ -336,6 +339,7 @@ def detect_price_movements(prices: Any, threshold: float = 0.0001) -> Any:
 
 ### Avoid Memory Leaks
 
+<!-- fragment: Demo memory management with deprecated typing imports and performance patterns -->
 ```python
 import weakref
 from typing import Any, Callable, Dict, Set
@@ -378,6 +382,7 @@ subscription_manager.subscribe(price_callback)
 
 ### Limit Buffer Growth
 
+<!-- fragment: Demo bounded storage with deprecated deque imports and unused Dict -->
 ```python
 import time
 from collections import deque
@@ -438,6 +443,7 @@ async def store_price_efficiently(price: Any) -> Any:
 
 ### Measure Execution Time
 
+<!-- fragment: Demo performance benchmarking with numpy imports and generic types -->
 ```python
 import asyncio
 import functools
@@ -494,6 +500,7 @@ def calculate_technical_indicator(prices: Any) -> Any:
 
 ### Memory Profiling
 
+<!-- fragment: Demo memory profiling with psutil imports and type annotations -->
 ```python
 import os
 import time

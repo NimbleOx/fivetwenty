@@ -43,6 +43,7 @@ uv sync --dev
 
 Test your installation:
 
+<!-- fragment: Demo version check with attribute access patterns -->
 ```python
 import fivetwenty
 

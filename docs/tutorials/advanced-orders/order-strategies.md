@@ -18,6 +18,7 @@ By the end of this tutorial, you will:
 
 Build positions with multiple entries:
 
+<!-- fragment: Demo scaling into positions with argument type mismatches and call argument issues -->
 ```python
 from decimal import Decimal
 from dotenv import load_dotenv
@@ -67,6 +68,7 @@ async def scale_into_position():
 
 Take partial profits at multiple levels:
 
+<!-- fragment: Demo scaling out with return type annotations and argument type issues -->
 ```python
 from decimal import Decimal
 from dotenv import load_dotenv
@@ -107,6 +109,7 @@ async def scale_out_of_position():
 
 Update stop levels as trades move in your favor:
 
+<!-- fragment: Demo stop loss modification with function return type annotations -->
 ```python
 from decimal import Decimal
 from dotenv import load_dotenv
@@ -138,6 +141,7 @@ async def update_stop_loss(trade_id: str, new_stop_price: Decimal):
 
 Simulate conditional orders with monitoring:
 
+<!-- fragment: Demo conditional logic with attribute access and argument type patterns -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -187,6 +191,7 @@ async def conditional_order_logic():
 
 Close existing position and open opposite position:
 
+<!-- fragment: Demo position reversal with undefined names and missing return statements -->
 ```python
 from dotenv import load_dotenv
 from fivetwenty import AsyncClient
@@ -224,6 +229,7 @@ async def position_reversal():
 
 Here's a complete breakout strategy using multiple order types:
 
+<!-- fragment: Demo complete scaling strategy with comprehensive argument and type issues -->
 ```python
 import asyncio
 from decimal import Decimal

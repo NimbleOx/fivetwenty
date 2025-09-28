@@ -7,6 +7,7 @@ Transaction history and monitoring.
 ---
 
 ## get_transactions
+<!-- fragment: Demo get_transactions with unused imports and assignment before return patterns -->
 ```python
 import asyncio
 from typing import Any
@@ -53,6 +54,7 @@ Get transaction history for account.
 ---
 
 ## get_transaction
+<!-- fragment: Demo get_transaction with missing return type annotation and call argument issues -->
 ```python
 # transactions.get_transaction(account_id: AccountID, transaction_id: str) -> dict[str, Any]
 
@@ -86,6 +88,7 @@ Get specific transaction details.
 ---
 
 ## get_transactions_since_id
+<!-- fragment: Demo get_transactions_since_id with missing return type annotation and call argument patterns -->
 ```python
 # transactions.get_transactions_since_id(account_id: AccountID, transaction_id: str,
 #                        transaction_type: list[str] | None = None) -> dict[str, Any]
@@ -122,6 +125,7 @@ Get transactions since specific transaction ID.
 ---
 
 ## get_transactions_stream
+<!-- fragment: Demo get_transactions_stream with missing return type annotation patterns -->
 ```python
 # transactions.get_transactions_stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
 
@@ -156,6 +160,7 @@ Stream real-time transactions.
 ---
 
 ## get_transactions_range
+<!-- fragment: Demo get_transactions_range with unused imports and assignment before return issues -->
 ```python
 import asyncio
 from typing import Any
@@ -201,6 +206,7 @@ Get transactions in ID range.
 ---
 
 ## get_transactions_deprecated
+<!-- fragment: Demo get_transactions_deprecated with unused imports and assignment patterns -->
 ```python
 import asyncio
 from typing import Any

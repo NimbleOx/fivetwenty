@@ -264,8 +264,10 @@ async def example_usage():
 
 Stop-loss that follows favorable price movement:
 
+<!-- fragment: Demo trailing stop loss with undefined Any type and API issues -->
 ```python
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient
 
@@ -486,12 +488,14 @@ async def main() -> None:
 
 Move stop-loss to entry price after favorable movement:
 
+<!-- fragment: Demo breakeven function with undefined Any type -->
 ```python
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient
 
-<!-- fragment: Demo breakeven function with undefined Any type -->
+
 async def move_to_breakeven(account_id: str, trade_id: str, trigger_pips: int = 20) -> Any:
     """Move stop-loss to break-even after price moves favorably."""
 
@@ -558,8 +562,10 @@ async def main() -> None:
 
 Partial position closure at multiple levels:
 
+<!-- fragment: Demo tiered stop loss with undefined Any type and linting violations -->
 ```python
 from decimal import Decimal
+from typing import Any
 
 from fivetwenty import AsyncClient
 
@@ -884,6 +890,7 @@ async def main() -> None:
 
 ### Emergency Position Exit
 
+<!-- fragment: Demo emergency position exit with attr-defined issues and performance overhead -->
 ```python
 from typing import Any
 from fivetwenty import AsyncClient

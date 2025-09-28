@@ -63,6 +63,7 @@ async def get_account():
 
 Use asyncio.gather() for concurrent API calls:
 
+<!-- fragment: Demo concurrent operations with undefined imports and missing type annotations -->
 ```python
 import asyncio
 import os
@@ -73,7 +74,7 @@ from fivetwenty import AsyncClient, Environment
 token = os.getenv("OANDA_TOKEN")
 account_id = "101-001-0000000-001"
 
-async def concurrent_example():
+async def concurrent_example() -> None:
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # Efficient: Concurrent requests
         account, positions, orders = await asyncio.gather(
@@ -110,7 +111,7 @@ stop_distance = Decimal("0.0050")  # 50 pips
 
 # Bad: Floating point errors (commented out)
 # position_size = 10000.0
-# risk_amount = float(account_balance) * 0.02
+# risk_amount = account_balance * Decimal("0.02")
 # stop_distance = 0.0050
 ```
 
@@ -143,6 +144,7 @@ def calculate_position_size(
 
 FiveTwenty automatically converts between Decimal and string fields:
 
+<!-- fragment: Demo order processing with union attribute issues and type mismatches -->
 ```python
 import os
 from decimal import Decimal
@@ -152,7 +154,7 @@ from fivetwenty import AsyncClient, Environment
 token = os.getenv("OANDA_TOKEN")
 account_id = "101-001-0000000-001"
 
-async def example_order():
+async def example_order() -> tuple[object, object]:
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # SDK handles conversion automatically
         order = await client.orders.post_limit_order(
@@ -173,19 +175,18 @@ async def example_order():
 
 Use specific exception types for targeted handling:
 
+<!-- fragment: Demo error handling with undefined exception imports and type issues -->
 ```python
 import asyncio
 import os
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import (
-    BadRequest, InternalServerError, TooManyRequests
-)
+from fivetwenty.exceptions import FiveTwentyError
 
 # Setup
 token = os.getenv("OANDA_TOKEN")
 account_id = "101-001-0000000-001"
 
-async def example_error_handling():
+async def example_error_handling() -> None:
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         try:
             order = await client.orders.post_market_order(
@@ -301,7 +302,7 @@ from fivetwenty import AsyncClient, Client, Environment
 token = os.getenv("OANDA_TOKEN")
 account_id = "101-001-0000000-001"
 
-async def async_stream_example():
+async def async_stream_example() -> None:
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # AsyncClient: Direct processing (no buffering)
         async for price in client.pricing.get_pricing_stream(
@@ -311,7 +312,7 @@ async def async_stream_example():
             # Process immediately - don't block the stream
             await process_price_async(price)
 
-def sync_stream_example():
+def sync_stream_example() -> None:
     with Client(token=token, environment=Environment.PRACTICE) as client:
         # Sync Client: Bounded queues prevent memory issues
         for price in client.pricing.get_pricing_stream(
@@ -321,11 +322,11 @@ def sync_stream_example():
             # Queue automatically manages backpressure
             process_price_sync(price)
 
-async def process_price_async(price) -> None:
+async def process_price_async(price: object) -> None:
     """Process price data asynchronously."""
     pass
 
-def process_price_sync(price) -> None:
+def process_price_sync(price: object) -> None:
     """Process price data synchronously."""
     pass
 ```
@@ -411,7 +412,7 @@ from fivetwenty import AsyncClient, Environment
 token = os.getenv("OANDA_TOKEN")
 account_id = "101-001-0000000-001"
 
-async def batch_pricing_example():
+async def batch_pricing_example() -> tuple[object, object, object, object]:
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # Good: Single request for multiple instruments
         prices = await client.pricing.get_pricing(
@@ -532,6 +533,7 @@ async def good_rate_limit_handling():
 
 Implement comprehensive validation to prevent costly trading errors:
 
+<!-- fragment: Demo validation framework with complex class hierarchies and attribute access -->
 ```python
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -578,7 +580,7 @@ class OrderValidationFramework:
         self.client = client
         self.account_id = account_id
         self.validators: list[OrderValidator] = []
-        self.validation_history = []
+        self.validation_history: list[object] = []
 
     def add_validator(self, validator: OrderValidator) -> None:
         """Add a validator to the framework."""

@@ -113,6 +113,7 @@ Trade 3: Sell 5,000 EUR @ 1.1250             │                         │
 ### Why This Distinction Matters
 
 **For Risk Management**:
+<!-- fragment: Demo risk calculation with generic type parameters -->
 ```python
 from typing import Any
 
@@ -131,6 +132,7 @@ def calculate_risk_exposure(trades: list, position: Any, stop_loss_distance: flo
 ```
 
 **For P/L Tracking**:
+<!-- fragment: Demo P/L analysis with generic type parameters -->
 ```python
 from typing import Any
 
@@ -585,6 +587,7 @@ async def monitor_drawdown() -> None:
 
 Forex markets trade 24/5, but activity varies:
 
+<!-- fragment: Demo market session with magic numbers and control flow patterns -->
 ```python
 from datetime import datetime, timezone
 
@@ -616,6 +619,7 @@ print(f"Current session: {current_session}")
 
 Major news events affect volatility:
 
+<!-- fragment: Demo news adjustment with assignment type patterns -->
 ```python
 def adjust_for_news() -> None:
     """Adjust trading parameters for news events."""

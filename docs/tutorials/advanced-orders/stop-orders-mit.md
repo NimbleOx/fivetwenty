@@ -117,6 +117,7 @@ async def dynamic_breakout_levels() -> Any:
 
 Combine multiple timeframe signals for robust breakouts:
 
+<!-- fragment: Demo multi-timeframe breakout with undefined Any types and unused arguments -->
 ```python
 from decimal import Decimal
 
@@ -295,6 +296,7 @@ async def bollinger_band_reversion() -> Any:
 
 Combine MIT orders with RSI signals for enhanced mean reversion:
 
+<!-- fragment: Demo RSI mean reversion with undefined Any types and magic number patterns -->
 ```python
 from decimal import Decimal
 

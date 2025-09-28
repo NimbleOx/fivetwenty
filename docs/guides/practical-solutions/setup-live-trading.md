@@ -30,6 +30,7 @@
 
 ### Identify Your Live Account ID
 
+<!-- fragment: Demo live account retrieval with attribute access issues -->
 ```python
 from typing import Any
 from fivetwenty import AsyncClient, Environment
@@ -149,6 +150,7 @@ def load_live_config(config_path: str = "live_config.json") -> tuple[str, str]:
 
 ### Pre-Trade Validation
 
+<!-- fragment: Demo LiveTradingValidator with exception patterns and attribute access issues -->
 ```python
 from decimal import Decimal
 from typing import Any
@@ -190,6 +192,7 @@ validator = LiveTradingValidator(max_position_size=5000, daily_loss_limit=Decima
 
 ### Safe Order Execution
 
+<!-- fragment: Demo safe order execution with undefined LIVE_TOKEN variable -->
 ```python
 from decimal import Decimal
 from typing import Any
@@ -318,6 +321,7 @@ async def monitor_live_account(account_id: str, check_interval: int = 30) -> Non
 
 ### Position Size Limits
 
+<!-- fragment: Demo risk management with Decimal constructor expressions -->
 ```python
 from decimal import Decimal
 
@@ -439,6 +443,7 @@ Before starting live trading:
 
 ### Immediate Stop Trading
 
+<!-- fragment: Demo emergency stop trading with undefined LIVE_TOKEN and attribute access issues -->
 ```python
 from fivetwenty import AsyncClient, Environment
 

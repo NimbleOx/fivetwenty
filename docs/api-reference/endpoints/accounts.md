@@ -7,6 +7,7 @@ Account management and information retrieval.
 ---
 
 ## get_accounts
+<!-- fragment: Demo get_accounts with module attribute access patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
@@ -42,6 +43,7 @@ Get list of all accounts for the authenticated user.
 ---
 
 ## get_account
+<!-- fragment: Demo get_account with module attribute access and dict attribute patterns -->
 ```python
 from fivetwenty import AsyncClient, Configuration
 
@@ -76,6 +78,7 @@ Get detailed information for specific account.
 ---
 
 ## get_account_summary
+<!-- fragment: Demo get_account_summary with undefined names and dict attribute access patterns -->
 ```python
 async def get_account_summary_example() -> None:
     async with AsyncClient(token="demo-token") as client:
@@ -106,6 +109,7 @@ Get condensed account information.
 ---
 
 ## get_account_instruments
+<!-- fragment: Demo get_account_instruments with unused variables and module attribute patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
@@ -146,6 +150,7 @@ Get all tradeable instruments for account.
 ---
 
 ## patch_account_configuration
+<!-- fragment: Demo patch_account_configuration with unused imports and unused variable patterns -->
 ```python
 import asyncio
 from typing import Any
@@ -189,6 +194,7 @@ Update account configuration settings.
 ---
 
 ## get_account_changes
+<!-- fragment: Demo get_account_changes with unused imports and unused variable patterns -->
 ```python
 import asyncio
 from typing import Any

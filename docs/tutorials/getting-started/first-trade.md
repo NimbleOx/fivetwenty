@@ -35,6 +35,7 @@ asyncio.run(main())
 
 Before trading, verify your account status and available funds:
 
+<!-- fragment: Demo account checking with return type annotations and exception handling -->
 ```python
 async def check_account(client) -> None:
     """Check account balance and trading capacity."""
@@ -60,6 +61,7 @@ async def check_account(client) -> None:
 
 Check current market prices before placing orders:
 
+<!-- fragment: Demo price retrieval with return type annotations and attribute access issues -->
 ```python
 async def get_price(client, instrument: str = "EUR_USD"):
     """Get current pricing for an instrument."""
@@ -83,6 +85,7 @@ async def get_price(client, instrument: str = "EUR_USD"):
 
 Place your first market order using the configured account:
 
+<!-- fragment: Demo market order placement with f-string and return type patterns -->
 ```python
 async def place_market_order(client, instrument: str = "EUR_USD", units: int = 1000):
     """Place a market order."""
@@ -123,6 +126,7 @@ async def place_market_order(client, instrument: str = "EUR_USD", units: int = 1
 
 Here's a complete example that combines all steps using the new configuration system:
 
+<!-- fragment: Demo complete first trade with attribute access and call argument issues -->
 ```python
 import asyncio
 from dotenv import load_dotenv
@@ -214,6 +218,7 @@ if __name__ == "__main__":
 
 Once you have an open trade, you can close it using the dedicated `close_trade` method:
 
+<!-- fragment: Demo trade closing with docstring format and f-string issues -->
 ```python
 import asyncio
 from dotenv import load_dotenv

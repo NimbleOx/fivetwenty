@@ -19,6 +19,7 @@ Learn essential risk management techniques using FiveTwenty's stop loss orders, 
 
 ### Stop Loss Orders
 
+<!-- fragment: Demo stop loss implementation with ternary operators and type annotation issues -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -97,6 +98,7 @@ if __name__ == "__main__":
 
 ### Position Size Based on Risk
 
+<!-- fragment: Demo position sizing with attribute access and ternary operator patterns -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -142,6 +144,7 @@ async def calculate_risk_based_position_size(
 
 ### Account Monitoring and Limits
 
+<!-- fragment: Demo risk monitoring with attribute access and union type issues -->
 ```python
 class RiskMonitor:
     """Monitor account risk in real-time."""
@@ -209,6 +212,7 @@ class RiskMonitor:
 
 ### Daily Loss Circuit Breaker
 
+<!-- fragment: Demo circuit breaker with function type annotations and argument issues -->
 ```python
 async def trading_circuit_breaker(
     client: AsyncClient,

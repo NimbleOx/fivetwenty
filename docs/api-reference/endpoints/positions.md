@@ -76,6 +76,7 @@ Get a list of all open positions for an account.
 ---
 
 ## get_position
+<!-- fragment: Demo get_position with argument type patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -114,6 +115,7 @@ Get the position for a specific instrument in an account.
 ---
 
 ## close_position
+<!-- fragment: Demo close_position with argument type patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient

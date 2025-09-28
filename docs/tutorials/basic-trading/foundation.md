@@ -41,6 +41,7 @@ print(f"Trading {InstrumentName.EUR_USD}")  # Outputs: EUR_USD
 
 FiveTwenty provides models for all major order types:
 
+<!-- fragment: Demo order models with unused imports and type argument patterns -->
 ```python
 from fivetwenty.models import (
     MarketOrderRequest,
@@ -78,6 +79,7 @@ stop_loss = StopLossOrderRequest(
 
 Test your FiveTwenty setup with this simple example:
 
+<!-- fragment: Demo setup test with return type annotations and attribute access patterns -->
 ```python
 import asyncio
 from dotenv import load_dotenv

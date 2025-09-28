@@ -115,7 +115,6 @@ class HighPerformanceStreamer:
 
     def get_latest_price(self, instrument: str) -> dict | None:
         """Get latest price from buffer with zero-copy access."""
-<!-- fragment: Demo unnecessary key check before dictionary access -->
         if instrument in self.price_buffers and self.price_buffers[instrument]:
             return self.price_buffers[instrument][-1]
         return None
@@ -142,7 +141,6 @@ class HighPerformanceStreamer:
         self.streaming_active = False
 
 # High-frequency callback implementation
-<!-- fragment: Demo verbose Decimal constructor patterns -->
 async def hft_price_callback(price: ClientPrice) -> Any:
     """Ultra-fast price processing callback."""
 
@@ -186,6 +184,7 @@ async def optimize_streaming_example(client: AsyncClient, account_id: str):
 
 Execute callbacks without blocking the main stream:
 
+<!-- fragment: Demo non-blocking callback execution with undefined self patterns -->
 ```python
 # Good: Non-blocking callback execution
 
@@ -212,6 +211,7 @@ async def _process_price_update(self, price) -> Any:
 
 Use circular buffers for memory efficiency:
 
+<!-- fragment: Demo circular buffer usage with deque patterns -->
 ```python
 from collections import deque
 
@@ -226,6 +226,7 @@ price_list = []  # Can grow without bounds
 
 Filter messages at the earliest point:
 
+<!-- fragment: Demo message filtering with undefined self and return type issues -->
 ```python
 
 
@@ -240,7 +241,6 @@ async def _process_price_update(self, price) -> Any:
     # Process only relevant updates
     await self._handle_price_update(price)
 
-<!-- fragment: Demo function with unused self argument and magic numbers -->
 def _should_process_price(self, price) -> Any:
     # Only process prices with tight spreads
     if price.bids and price.asks:
@@ -277,6 +277,7 @@ Understand latency sources:
 
 ### Memory-Efficient Data Storage
 
+<!-- fragment: Demo NamedTuple memory efficiency with missing imports and type issues -->
 ```python
 # Use NamedTuple for memory efficiency
 from typing import NamedTuple
@@ -296,7 +297,6 @@ class FastPrice(NamedTuple):
         return self.ask - self.bid
 
 # Store as FastPrice instead of dict
-<!-- fragment: Demo undefined time reference -->
 price_data = FastPrice(Decimal("1.1234"), Decimal("1.1236"), time.perf_counter())
 ```
 
@@ -304,6 +304,7 @@ price_data = FastPrice(Decimal("1.1234"), Decimal("1.1236"), time.perf_counter()
 
 Process multiple updates together when possible:
 
+<!-- fragment: Demo batch processing with undefined self and missing import patterns -->
 ```python
 async def batch_process_prices(self, prices: List[ClientPrice]) -> Any:
     """Process multiple prices in a batch for efficiency."""

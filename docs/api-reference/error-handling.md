@@ -77,6 +77,7 @@ OANDA server errors.
 
 ### Basic Exception Handling
 
+<!-- fragment: Demo basic exception handling with union attribute access and type issues -->
 ```python
 import os
 from fivetwenty import AsyncClient
@@ -165,6 +166,7 @@ The SDK includes 67 specific OANDA error codes:
 
 ### Common Trading Errors
 
+<!-- fragment: Demo trading error handling with enum attribute access and type issues -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
@@ -461,6 +463,7 @@ class TradingSystem:
 
 Recover state after errors:
 
+<!-- fragment: Demo state recovery with try-except in loop performance patterns -->
 ```python
 import asyncio
 from typing import Any
@@ -617,6 +620,7 @@ class ErrorMetrics:
 
 ### Unit Tests
 
+<!-- fragment: Demo unit tests with f-string exceptions and magic number patterns -->
 ```python
 from unittest.mock import AsyncMock
 

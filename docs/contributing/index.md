@@ -129,6 +129,8 @@ from decimal import Decimal
 ### **Financial Precision**
 
 **Critical**: Always use `Decimal` for financial calculations, never `float`:
+
+<!-- fragment: Demo financial precision with Decimal constructor patterns -->
 ```python
 # ✅ Correct
 from decimal import Decimal

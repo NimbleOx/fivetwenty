@@ -9,6 +9,7 @@
 
 Position management is the art of maximizing profits while controlling risk after entering a trade.
 
+<!-- fragment: Demo position management with trade attribute access and dict type issues -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -78,6 +79,7 @@ if __name__ == "__main__":
 
 Different types of stop losses for different market conditions:
 
+<!-- fragment: Demo stop loss strategies with docstring format and unnecessary else patterns -->
 ```python
 from decimal import Decimal
 
@@ -145,6 +147,7 @@ print(f"2x ATR stop: {atr_stop:.5f}")
 
 Maximize profits with intelligent take profit placement:
 
+<!-- fragment: Demo take profit strategies with docstring format and ternary operator patterns -->
 ```python
 from decimal import Decimal
 

@@ -9,6 +9,7 @@
 
 Before placing any trade, you need to understand current market conditions:
 
+<!-- fragment: Demo market data retrieval with attribute access and type annotation issues -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -63,6 +64,7 @@ if __name__ == "__main__":
 
 Understanding recent price action helps with trading decisions:
 
+<!-- fragment: Demo historical data analysis with f-string and return type issues -->
 ```python
 from typing import Any
 
@@ -114,6 +116,7 @@ if __name__ == "__main__":
 
 Let's create a comprehensive market analysis function:
 
+<!-- fragment: Demo comprehensive market analysis with magic numbers and attribute access ---->
 ```python
 import asyncio
 from decimal import Decimal
@@ -216,6 +219,7 @@ Different market conditions require different trading approaches:
 - Volume: Reduced trading activity
 - Risk: Prices may gap or move erratically
 
+<!-- fragment: Demo market condition assessment with magic numbers and asyncio usage -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -276,6 +280,7 @@ if __name__ == "__main__":
 
 Understanding how prices move helps with entry and exit decisions:
 
+<!-- fragment: Demo price movement analysis with attribute access and return type issues -->
 ```python
 import asyncio
 from decimal import Decimal
