@@ -91,15 +91,29 @@ class AsyncClient:
         final_config: AccountConfig | None = None
 
         if config is not None:
-            # Use provided config object
-            final_config = config
+            # Use provided config object, but allow account_id override
+            if account_id is not None:
+                # Override the account_id from config
+                from pydantic import SecretStr
+
+                final_config = AccountConfig(
+                    token=config.token,
+                    account_id=SecretStr(account_id),
+                    environment=config.environment,
+                    alias=config.alias,
+                )
+            else:
+                final_config = config
         elif token is not None:
             # Build config from direct parameters
             from pydantic import SecretStr
 
+            if account_id is None:
+                raise ValueError("account_id is required when providing token directly")
+
             final_config = AccountConfig(
                 token=SecretStr(token),
-                account_id=SecretStr(account_id or "unknown"),  # account_id is optional for client
+                account_id=SecretStr(account_id),
                 environment=environment,
                 alias="direct_params",
             )
@@ -111,7 +125,7 @@ class AsyncClient:
 
         # Extract values from final config
         self._token = final_config.token.get_secret_value()  # Never log this!
-        self._account_id = final_config.account_id.get_secret_value() if account_id is None else account_id
+        self._account_id = final_config.account_id.get_secret_value()
         self._config = final_config
         self._logger = logger
         self._environment = final_config.environment
@@ -163,12 +177,12 @@ class AsyncClient:
         self.transactions = TransactionEndpoints(self)
 
     @property
-    def account_id(self) -> str | None:
-        """Get the configured account ID (if available)."""
+    def account_id(self) -> str:
+        """Get the configured account ID."""
         return self._account_id
 
     @property
-    def config(self) -> AccountConfig | None:
+    def config(self) -> AccountConfig:
         """Get the account configuration."""
         return self._config
 
@@ -464,12 +478,12 @@ class Client:
         self.transactions = _SyncEndpointProxy(self, "transactions")
 
     @property
-    def account_id(self) -> str | None:
-        """Get the configured account ID (if available)."""
+    def account_id(self) -> str:
+        """Get the configured account ID."""
         return self._async.account_id
 
     @property
-    def config(self) -> AccountConfig | None:
+    def config(self) -> AccountConfig:
         """Get the account configuration."""
         return self._async.config
 

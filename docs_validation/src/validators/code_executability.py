@@ -97,6 +97,9 @@ class CodeExecutabilityValidator(BaseValidator):
         # Check for undefined variables (basic check)
         issues.extend(self._check_undefined_variables(code, code_lines, start_line, file_path))
 
+        # Check for FiveTwenty-specific async issues
+        issues.extend(self._check_async_patterns(code, code_lines, start_line, file_path))
+
         return issues
 
     def _is_placeholder_code(self, code: str) -> bool:
@@ -105,6 +108,8 @@ class CodeExecutabilityValidator(BaseValidator):
             r"your[-_]token[-_]here",
             r"your[-_]api[-_]key",
             r"your[-_]account[-_]id",
+            r"your[-_]practice[-_]token",
+            r"your[-_]api[-_]token",
             r"replace[-_]with[-_]your",
             r"<[^>]+>",  # HTML-like placeholders
             r"\.\.\.",  # Ellipsis indicating continuation
@@ -112,6 +117,8 @@ class CodeExecutabilityValidator(BaseValidator):
             r"# FIXME",
             r"# Your code here",
             r"pass\s*#.*example",
+            r"# File: \.env",  # .env file examples
+            r"FIVETWENTY_OANDA_TOKEN=your-",  # Environment variable examples
         ]
 
         code_lower = code.lower()
@@ -269,7 +276,7 @@ class CodeExecutabilityValidator(BaseValidator):
             "warnings",
         }
 
-        common_packages = {"numpy", "pandas", "requests", "httpx", "aiohttp", "pydantic", "pytest", "click", "rich", "tqdm", "matplotlib", "seaborn", "sklearn", "scipy", "jupyter", "IPython", "notebook"}
+        common_packages = {"numpy", "pandas", "requests", "httpx", "aiohttp", "pydantic", "pytest", "click", "rich", "tqdm", "matplotlib", "seaborn", "sklearn", "scipy", "jupyter", "IPython", "notebook", "dotenv"}
 
         return module_name in standard_modules or module_name in common_packages
 
@@ -357,6 +364,91 @@ class CodeExecutabilityValidator(BaseValidator):
         }
 
         return var_name in dir(__builtins__) or var_name in common_builtins or var_name in common_vars
+
+    def _check_async_patterns(self, code: str, code_lines: list[str], start_line: int, file_path: Path) -> list[ValidationIssue]:
+        """Check for FiveTwenty-specific async/await pattern issues."""
+        issues: list[ValidationIssue] = []
+
+        try:
+            tree = ast.parse(code)
+        except SyntaxError:
+            return issues
+
+        # Track async context and function definitions
+        has_async_with = False
+        has_await = False
+        has_async_function = False
+        has_asyncio_run = False
+
+        # Check for specific patterns
+        for node in ast.walk(tree):
+            # Check for async with statements
+            if isinstance(node, ast.AsyncWith):
+                has_async_with = True
+                # Check if it's AsyncClient usage
+                for item in node.items:
+                    if isinstance(item.context_expr, ast.Call):
+                        if isinstance(item.context_expr.func, ast.Name) and item.context_expr.func.id == "AsyncClient":
+                            # Found AsyncClient usage - check if we're in async function
+                            pass
+
+            # Check for await expressions
+            elif isinstance(node, ast.Await):
+                has_await = True
+
+            # Check for async function definitions
+            elif isinstance(node, ast.AsyncFunctionDef):
+                has_async_function = True
+
+            # Check for asyncio.run calls
+            elif isinstance(node, ast.Call):
+                if isinstance(node.func, ast.Attribute):
+                    if isinstance(node.func.value, ast.Name) and node.func.value.id == "asyncio" and node.func.attr == "run":
+                        has_asyncio_run = True
+
+        # Issue: async with or await without async function context
+        if (has_async_with or has_await) and not has_async_function and not has_asyncio_run:
+            # Find the line with async with or await
+            for line_num, line in enumerate(code_lines, 1):
+                if "async with" in line or "await " in line:
+                    error_line = start_line + line_num - 1
+                    issues.append(
+                        ValidationIssue(
+                            message="'async with' or 'await' found outside async function", file_path=file_path, line=error_line, severity=IssueSeverity.ERROR, rule_id="code_async_outside_function", context=line.strip(), suggestion="Wrap async code in 'async def main():' function and call with 'asyncio.run(main())'"
+                        )
+                    )
+                    break
+
+        # Issue: AsyncClient without account_id when providing token
+        for node in ast.walk(tree):
+            if isinstance(node, ast.Call) and isinstance(node.func, ast.Name) and node.func.id == "AsyncClient":
+                has_token = False
+                has_account_id = False
+                has_config = False
+
+                # Check arguments
+                for keyword in node.keywords:
+                    if keyword.arg == "token":
+                        has_token = True
+                    elif keyword.arg == "account_id":
+                        has_account_id = True
+                    elif keyword.arg == "config":
+                        has_config = True
+
+                # If providing token directly but no account_id or config, warn
+                if has_token and not has_account_id and not has_config:
+                    # Find line number for this call
+                    for line_num, line in enumerate(code_lines, 1):
+                        if "AsyncClient(" in line and "token=" in line:
+                            error_line = start_line + line_num - 1
+                            issues.append(
+                                ValidationIssue(
+                                    message="AsyncClient with token parameter requires account_id parameter", file_path=file_path, line=error_line, severity=IssueSeverity.ERROR, rule_id="code_missing_account_id", context=line.strip(), suggestion="Add account_id='your-account-id' parameter to AsyncClient call"
+                                )
+                            )
+                            break
+
+        return issues
 
     def get_file_patterns(self) -> list[str]:
         """Get patterns for files this validator handles."""

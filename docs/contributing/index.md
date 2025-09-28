@@ -51,6 +51,9 @@ git commit -m "Your descriptive commit message"
 git push origin your-feature-branch
 ```
 
+from fivetwenty import AsyncClient
+
+
 ---
 
 ## Contribution Areas
@@ -86,7 +89,6 @@ git push origin your-feature-branch
 ### **Project Commands**
 
 FiveTwenty uses **poethepoet (poe)** for development workflows:
-
 ```bash
 # Quality checks (recommended workflow)
 uv run poe dev      # Fast development checks (format, typecheck, test)
@@ -116,6 +118,9 @@ uv run poe clean      # Clean build artifacts and caches
 
 ### **Code Standards**
 
+from decimal import Decimal
+
+
 - **Type Safety**: 100% mypy strict compliance required
 - **Code Quality**: ruff formatting and linting (automatically fixed)
 - **Testing**: Comprehensive unit and integration test coverage
@@ -125,9 +130,11 @@ uv run poe clean      # Clean build artifacts and caches
 
 **Critical**: Always use `Decimal` for financial calculations, never `float`:
 
+<!-- fragment: Demo financial precision with Decimal constructor patterns -->
 ```python
 # ✅ Correct
 from decimal import Decimal
+
 price = Decimal("1.25435")
 units = Decimal("1000")
 value = price * units
@@ -197,7 +204,10 @@ tests/
 All public methods require comprehensive documentation:
 
 ```python
+from typing import Optional
+
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.models import InstrumentName, OrderResponse
 
 async def post_market_order(
     self,
@@ -236,12 +246,12 @@ async def post_market_order(
 
 ### **Documentation Types**
 
-Following the [Diátaxis framework](https://diataxis.fr/):
+Our documentation is organized into clear categories:
 
 - **Tutorials** - Learning-oriented, step-by-step guides
-- **How-to Guides** - Problem-oriented, practical solutions
+- **Guides** - Comprehensive guidance combining understanding and practical solutions
 - **API Reference** - Information-oriented, comprehensive specifications
-- **Explanations** - Understanding-oriented, background knowledge
+- **Examples** - Working code samples and demonstrations
 
 ---
 

@@ -6,18 +6,28 @@ Transaction history and monitoring.
 
 ---
 
-## list
+## get_transactions
+<!-- fragment: Demo get_transactions with unused imports and assignment before return patterns -->
 ```python
-# transactions.list(account_id: AccountID, from_time: str | None = None,
-#                   to_time: str | None = None, page_size: int = 100,
-#                   transaction_type: list[str] | None = None) -> dict[str, Any]
+import asyncio
+from typing import Any
+from fivetwenty import AsyncClient
 
-# Example usage:
-transactions = await client.transactions.list(
-    account_id="123-456-789",
-    page_size=50,
-    transaction_type=["ORDER_FILL", "MARKET_ORDER"]
-)
+
+async def main(client: AsyncClient) -> None:
+    # transactions.get_transactions(account_id: AccountID, from_time: str | None = None,
+    #                   to_time: str | None = None, page_size: int = 100,
+    #                   transaction_type: list[str] | None = None) -> dict[str, Any]
+
+    # Example usage:
+    transactions = await client.transactions.get_transactions(
+        account_id="123-456-789",
+        page_size=50,
+        transaction_type=["ORDER_FILL", "MARKET_ORDER"],
+    )
+    return transactions
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions`
 
@@ -43,15 +53,18 @@ Get transaction history for account.
 
 ---
 
-## get
+## get_transaction
+<!-- fragment: Demo get_transaction with missing return type annotation and call argument issues -->
 ```python
-# transactions.get(account_id: AccountID, transaction_id: str) -> dict[str, Any]
+# transactions.get_transaction(account_id: AccountID, transaction_id: str) -> dict[str, Any]
 
 # Example usage:
-transaction = await client.transactions.get(
-    account_id="123-456-789",
-    transaction_id="12345"
-)
+async def get_transaction_example(client):
+    transaction = await client.transactions.get_transaction(
+        account_id="123-456-789",
+        transaction_id="12345"
+    )
+    return transaction
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/{transactionID}`
 
@@ -74,17 +87,20 @@ Get specific transaction details.
 
 ---
 
-## list_since
+## get_transactions_since_id
+<!-- fragment: Demo get_transactions_since_id with missing return type annotation and call argument patterns -->
 ```python
-# transactions.list_since(account_id: AccountID, transaction_id: str,
+# transactions.get_transactions_since_id(account_id: AccountID, transaction_id: str,
 #                        transaction_type: list[str] | None = None) -> dict[str, Any]
 
 # Example usage:
-transactions = await client.transactions.list_since(
-    account_id="123-456-789",
-    transaction_id="100",
-    transaction_type=["ORDER_FILL"]
-)
+async def get_transactions_since_id_example(client):
+    transactions = await client.transactions.get_transactions_since_id(
+        account_id="123-456-789",
+        transaction_id="100",
+        transaction_type=["ORDER_FILL"]
+    )
+    return transactions
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/sinceid`
 
@@ -108,16 +124,18 @@ Get transactions since specific transaction ID.
 
 ---
 
-## stream
+## get_transactions_stream
+<!-- fragment: Demo get_transactions_stream with missing return type annotation patterns -->
 ```python
-# transactions.stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
+# transactions.get_transactions_stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
 
 # Example usage:
-async for transaction in client.transactions.stream(
-    account_id="123-456-789",
-    stall_timeout=60.0
-):
-    print(f"Transaction: {transaction}")
+async def stream_transactions_example(client):
+    async for transaction in client.transactions.get_transactions_stream(
+        account_id="123-456-789",
+        stall_timeout=60.0
+    ):
+        print(f"Transaction: {transaction}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/stream`
 
@@ -141,17 +159,28 @@ Stream real-time transactions.
 
 ---
 
-## get_range
+## get_transactions_range
+<!-- fragment: Demo get_transactions_range with unused imports and assignment before return issues -->
 ```python
-# transactions.get_range(account_id: AccountID, from_transaction_id: str,
-#                       to_transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
+import asyncio
+from typing import Any
+from fivetwenty import AsyncClient, Configuration
 
-# Example usage:
-transactions = await client.transactions.get_range(
-    account_id="123-456-789",
-    from_transaction_id="100",
-    to_transaction_id="200"
-)
+
+async def main() -> None:
+    # transactions.get_transactions_range(account_id: AccountID, from_transaction_id: str,
+    #                       to_transaction_id: str, transaction_type: list[str] | None = None) -> dict[str, Any]
+
+    config = Configuration(token="your-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        transactions = await client.transactions.get_transactions_range(
+            account_id="123-456-789",
+            from_transaction_id="100",
+            to_transaction_id="200"
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/idrange`
 
@@ -176,17 +205,28 @@ Get transactions in ID range.
 
 ---
 
-## get_all
+## get_transactions_deprecated
+<!-- fragment: Demo get_transactions_deprecated with unused imports and assignment patterns -->
 ```python
-# transactions.get_all(account_id: AccountID, count: int = 500,
-#                     transaction_type: list[str] | None = None) -> dict[str, Any]
+import asyncio
+from typing import Any
+from fivetwenty import AsyncClient, Configuration
 
-# Example usage:
-all_transactions = await client.transactions.get_all(
-    account_id="123-456-789",
-    count=100,
-    transaction_type=["ORDER_FILL", "MARKET_ORDER"]
-)
+
+async def main() -> None:
+    # transactions.get_transactions(account_id: AccountID, count: int = 500,
+    #                     transaction_type: list[str] | None = None) -> dict[str, Any]
+
+    config = Configuration(token="your-token", environment="practice")
+    async with AsyncClient(config=config) as client:
+        # Example usage:
+        all_transactions = await client.transactions.get_transactions(
+            account_id="123-456-789",
+            count=100,
+            transaction_type=["ORDER_FILL", "MARKET_ORDER"]
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions`
 

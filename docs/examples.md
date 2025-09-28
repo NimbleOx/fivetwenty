@@ -43,7 +43,7 @@ Interactive Jupyter notebooks for learning and experimentation:
 
 Before running any examples, make sure you have:
 
-1. **FiveTwenty installed**: `pip install fivetwenty`
+1. **FiveTwenty installed**: `uv add fivetwenty`
 2. **OANDA API credentials**: [Get your API token](tutorials/getting-started/authentication.md)
 3. **Environment configured**: Set your `FIVETWENTY_OANDA_TOKEN` and account details
 
@@ -51,7 +51,7 @@ Before running any examples, make sure you have:
 
 1. **Install FiveTwenty** (if not already installed):
    ```bash
-   pip install fivetwenty
+   uv add fivetwenty
    ```
 
 2. **Locate examples directory**:
@@ -77,7 +77,7 @@ Before running any examples, make sure you have:
 
 1. **Install Jupyter**:
    ```bash
-   pip install jupyter
+   uv add jupyter
    ```
 
 2. **Navigate to notebooks directory**:
@@ -98,9 +98,8 @@ Before running any examples, make sure you have:
 Examples complement our structured documentation:
 
 - **[Tutorials](tutorials/index.md)** - Step-by-step learning paths
-- **[How-to Guides](how-to-guides/index.md)** - Problem-solving solutions
+- **[Guides](guides/index.md)** - Comprehensive guidance and solutions
 - **[API Reference](api-reference/index.md)** - Complete API documentation
-- **[Explanations](explanation/index.md)** - Deep-dive concepts
 
 ## Contributing Examples
 

@@ -11,25 +11,23 @@ This tutorial series explores advanced order types and management strategies tha
 - **Order Types Mastery**: Market, limit, stop, and market-if-touched orders
 - **Dynamic Management**: Trailing stops, scaling, and adaptive position sizing
 - **Automated Systems**: Rule-based order management and monitoring
-- **Risk Controls**: Validation frameworks and protective mechanisms
 - **Professional Strategies**: Bracket orders, combinations, and advanced techniques
 
 ### Tutorial Structure
 
 Each guide builds upon previous concepts while remaining focused on specific techniques:
 
-1. **[Order Types Overview](order-types.md)** - Foundation concepts for all order types
-2. **[Advanced Limit Orders](advanced-limit-orders.md)** - Time controls and protective mechanisms
-3. **[Stop Orders & Market-If-Touched](stop-orders-mit.md)** - Breakout and mean reversion strategies
-4. **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
-5. **[Automated Order Systems](automated-systems.md)** - Rule-based management and monitoring
-6. **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
-7. **[Validation & Best Practices](validation-best-practices.md)** - Risk management and error handling
+1. **[Order Types Reference](../../guides/trading-concepts/order-types.md)** - Complete reference for all OANDA order types
+2. **[Stop Orders & Market-If-Touched](stop-orders-mit.md)** - Breakout and mean reversion strategies
+3. **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
+4. **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
+
+For comprehensive validation frameworks and error handling patterns, see the [Best Practices Guide](../../guides/understanding/best-practices.md#order-validation-framework).
 
 ### Prerequisites
 
 - Completion of [Basic Trading Tutorial](../basic-trading/index.md)
-- Understanding of [Risk Management Fundamentals](../risk-management/fundamentals.md)
+- Understanding of [Risk Management](../risk-management.md) concepts
 - Familiarity with OANDA API authentication and basic operations
 
 ### Series Learning Path
@@ -42,10 +40,9 @@ graph TD
     C --> D
     D --> E[Automated Systems]
     E --> F[Order Strategies]
-    F --> G[Validation & Best Practices]
 
     style A fill:#e1f5fe
-    style G fill:#f3e5f5
+    style F fill:#f3e5f5
 ```
 
 ### Key Concepts Covered
@@ -66,6 +63,6 @@ graph TD
 
 ## Getting Started
 
-Begin with [Order Types Overview](order-types.md) to establish foundational knowledge, then progress through the series based on your specific needs and trading style.
+Review the [Order Types Reference](../../guides/trading-concepts/order-types.md) to understand all available order types, then progress through the tutorials based on your specific needs and trading style.
 
 Each tutorial includes practical examples, code implementations, and real-world scenarios to ensure you can apply these concepts effectively in your trading systems.

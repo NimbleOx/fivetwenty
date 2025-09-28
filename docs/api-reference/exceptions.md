@@ -22,6 +22,7 @@ Exception
     └── RateLimitError
 ```
 
+
 ---
 
 ## Core Exceptions
@@ -38,19 +39,28 @@ Base exception for all OANDA API errors.
 - `response` *(Optional[httpx.Response])* - Original HTTP response
 
 **Example:**
+<!-- fragment: Demo FiveTwentyError usage with attribute access and return type issues -->
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+import asyncio
 
-try:
-    await client.orders.post_market_order(
-        account_id="invalid-account",
-        instrument="EUR_USD",
-        units=10000
-    )
-except FiveTwentyError as e:
-    print(f"Error: {e.message}")
-    print(f"Code: {e.error_code}")
-    print(f"Details: {e.error_details}")
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import FiveTwentyError
+
+
+async def main():
+    async with AsyncClient() as client:
+        try:
+            await client.orders.post_market_order(
+                account_id="invalid-account",
+                instrument="EUR_USD",
+                units=10000,
+            )
+        except FiveTwentyError as e:
+            print(f"Error: {e.message}")
+            print(f"Code: {e.error_code}")
+            print(f"Details: {e.error_details}")
+
+asyncio.run(main())
 ```
 
 ### `StreamStall`
@@ -58,17 +68,27 @@ except FiveTwentyError as e:
 Raised when a streaming connection stalls or times out.
 
 **Example:**
+<!-- fragment: Demo StreamStall handling with loop control variables and async patterns -->
 ```python
+import asyncio
+
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import StreamStall
 
-try:
-    async for item in client.pricing.stream_pricing("123-456-789", ["EUR_USD"]):
-        pass
-except StreamStall as e:
-    print(f"Stream stalled: {e.message}")
-    # Implement reconnection logic
-    await asyncio.sleep(5)
+
+async def main():
+    async with AsyncClient() as client:
+        try:
+            async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
+                pass
+        except StreamStall as e:
+            print(f"Stream stalled: {e.message}")
+            # Implement reconnection logic
+            await asyncio.sleep(5)
+
+asyncio.run(main())
 ```
+
 
 ---
 
@@ -101,8 +121,10 @@ except StreamStall as e:
 ## Error Handling Patterns
 
 ### Basic Error Handling
+<!-- fragment: Demo basic error handling with undefined names and try-except patterns -->
 ```python
-from fivetwenty.exceptions import FiveTwentyError, AuthenticationError
+from fivetwenty.exceptions import AuthenticationError, FiveTwentyError
+
 
 async def safe_api_call():
     try:
@@ -119,11 +141,13 @@ async def safe_api_call():
 ```
 
 ### Retry with Exponential Backoff
+<!-- fragment: Demo retry logic with performance issues and security patterns -->
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
-
 import asyncio
 import random
+
+from fivetwenty.exceptions import FiveTwentyError
+
 
 async def retry_api_call(func, max_retries: int = 3):
     """Retry API call with exponential backoff."""

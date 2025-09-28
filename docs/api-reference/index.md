@@ -18,8 +18,7 @@ API Reference documentation is **information-oriented** content that provides co
 **Don't use API reference when you:**
 
 - Want to learn how to use the SDK (use [Tutorials](../tutorials/index.md))
-- Need to solve a specific problem (use [How-to Guides](../how-to-guides/index.md))
-- Want to understand design decisions (use [Explanations](../explanation/index.md))
+- Need solutions or understanding (use [Guides](../guides/index.md))
 
 ## Reference Structure
 
@@ -48,13 +47,18 @@ Trading functionality organized by OANDA API endpoints.
 ### **Method Signatures**
 Complete method signatures with parameter types and return values:
 
+<!-- fragment: Demo API method with type annotation and attribute access patterns -->
 ```python
+from typing import Optional
+
+from fivetwenty.models import OrderRequest, OrderResponse
+
 async def post_order(
     self,
     account_id: str,
     order: OrderRequest,
     *,
-    timeout: Optional[float] = None
+    timeout: Optional[float] = None,
 ) -> OrderResponse:
     pass
 ```
@@ -89,7 +93,7 @@ Exception documentation including:
 - `client.accounts.get_account_summary(account_id)` - Get account overview
 - `client.orders.post_order(account_id, order)` - Place new order
 - `client.positions.get_positions(account_id)` - Get current positions
-- `client.pricing.stream_pricing(instruments)` - Stream live prices
+- `client.pricing.get_pricing_stream(instruments)` - Stream live prices
 
 ### **Essential Models**
 - `OrderRequest` - Order placement parameters
@@ -142,8 +146,7 @@ Exception documentation including:
 If you need more than just the technical specifications:
 
 - **Learn with [Tutorials](../tutorials/index.md)** for hands-on guidance
-- **Solve problems with [How-to Guides](../how-to-guides/index.md)** for specific solutions
-- **Understand with [Explanations](../explanation/index.md)** for background knowledge
+- **Get comprehensive guidance with [Guides](../guides/index.md)** for both solutions and understanding
 
 ---
 

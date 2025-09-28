@@ -146,55 +146,56 @@ class TestAccountConfigLoader:
 
     def test_load_from_env_success(self):
         """Test successful loading from environment variables."""
-        with patch.dict(os.environ, {"TEST_OANDA_TOKEN": "test-token-123", "TEST_OANDA_ACCOUNT": "123-456-789", "TEST_OANDA_ENVIRONMENT": "practice", "TEST_OANDA_ACCOUNT_ALIAS": "test_account"}):
+        with patch.dict(os.environ, {"TEST_FIVETWENTY_OANDA_TOKEN": "test-token-123", "TEST_FIVETWENTY_OANDA_ACCOUNT": "123-456-789", "TEST_FIVETWENTY_OANDA_ENVIRONMENT": "practice"}):
             config = AccountConfigLoader.load_from_env("TEST_")
 
             assert config is not None
             assert config.token.get_secret_value() == "test-token-123"
             assert config.account_id.get_secret_value() == "123-456-789"
             assert config.environment == Environment.PRACTICE
-            assert config.alias == "test_account"
+            assert config.alias == "test"
 
     def test_load_from_env_missing_token(self):
         """Test loading fails when token is missing."""
-        with patch.dict(os.environ, {"TEST_OANDA_ACCOUNT": "123-456-789", "TEST_OANDA_ENVIRONMENT": "practice", "TEST_OANDA_ACCOUNT_ALIAS": "test_account"}, clear=True):
+        with patch.dict(os.environ, {"TEST_FIVETWENTY_OANDA_ACCOUNT": "123-456-789", "TEST_FIVETWENTY_OANDA_ENVIRONMENT": "practice"}, clear=True):
             config = AccountConfigLoader.load_from_env("TEST_")
             assert config is None
 
     def test_load_from_env_missing_account_id(self):
         """Test loading fails when account_id is missing."""
-        with patch.dict(os.environ, {"TEST_OANDA_TOKEN": "test-token-123", "TEST_OANDA_ENVIRONMENT": "practice", "TEST_OANDA_ACCOUNT_ALIAS": "test_account"}, clear=True):
+        with patch.dict(os.environ, {"TEST_FIVETWENTY_OANDA_TOKEN": "test-token-123", "TEST_FIVETWENTY_OANDA_ENVIRONMENT": "practice"}, clear=True):
             config = AccountConfigLoader.load_from_env("TEST_")
             assert config is None
 
     def test_load_from_env_defaults(self):
         """Test loading with default values for optional fields."""
-        with patch.dict(os.environ, {"TEST_OANDA_TOKEN": "test-token-123", "TEST_OANDA_ACCOUNT": "123-456-789"}, clear=True):
+        with patch.dict(os.environ, {"TEST_FIVETWENTY_OANDA_TOKEN": "test-token-123", "TEST_FIVETWENTY_OANDA_ACCOUNT": "123-456-789"}, clear=True):
             config = AccountConfigLoader.load_from_env("TEST_")
 
             assert config is not None
             assert config.token.get_secret_value() == "test-token-123"
             assert config.account_id.get_secret_value() == "123-456-789"
             assert config.environment == Environment.PRACTICE  # default
-            assert config.alias == "default"  # default
+            assert config.alias == "test"  # generated from TEST_ prefix
 
     def test_load_from_env_live_environment(self):
         """Test loading with live environment."""
-        with patch.dict(os.environ, {"TEST_OANDA_TOKEN": "test-token-123", "TEST_OANDA_ACCOUNT": "123-456-789", "TEST_OANDA_ENVIRONMENT": "live", "TEST_OANDA_ACCOUNT_ALIAS": "live_account"}, clear=True):
+        with patch.dict(os.environ, {"TEST_FIVETWENTY_OANDA_TOKEN": "test-token-123", "TEST_FIVETWENTY_OANDA_ACCOUNT": "123-456-789", "TEST_FIVETWENTY_OANDA_ENVIRONMENT": "live"}, clear=True):
             config = AccountConfigLoader.load_from_env("TEST_")
 
             assert config is not None
             assert config.environment == Environment.LIVE
+            assert config.alias == "test"
 
     def test_load_default(self):
         """Test loading default configuration."""
-        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "default-token", "FIVETWENTY_OANDA_ACCOUNT": "default-account-id", "FIVETWENTY_OANDA_ENVIRONMENT": "practice", "FIVETWENTY_OANDA_ACCOUNT_ALIAS": "default_account"}, clear=True):
+        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "default-token", "FIVETWENTY_OANDA_ACCOUNT": "default-account-id", "FIVETWENTY_OANDA_ENVIRONMENT": "practice"}, clear=True):
             config = AccountConfigLoader.load_default()
 
             assert config is not None
             assert config.token.get_secret_value() == "default-token"
             assert config.account_id.get_secret_value() == "default-account-id"
-            assert config.alias == "default_account"
+            assert config.alias == "default"
 
     def test_load_default_missing(self):
         """Test loading default configuration when env vars are missing."""
@@ -204,24 +205,23 @@ class TestAccountConfigLoader:
 
     def test_from_env_prefix(self):
         """Test loading with custom prefix."""
-        with patch.dict(os.environ, {"CUSTOM_PREFIX_OANDA_TOKEN": "custom-token", "CUSTOM_PREFIX_OANDA_ACCOUNT": "custom-account-id", "CUSTOM_PREFIX_OANDA_ENVIRONMENT": "live", "CUSTOM_PREFIX_OANDA_ACCOUNT_ALIAS": "custom_account"}, clear=True):
+        with patch.dict(os.environ, {"CUSTOM_PREFIX_FIVETWENTY_OANDA_TOKEN": "custom-token", "CUSTOM_PREFIX_FIVETWENTY_OANDA_ACCOUNT": "custom-account-id", "CUSTOM_PREFIX_FIVETWENTY_OANDA_ENVIRONMENT": "live"}, clear=True):
             config = AccountConfigLoader.from_env_prefix("CUSTOM_PREFIX_")
 
             assert config is not None
             assert config.token.get_secret_value() == "custom-token"
             assert config.account_id.get_secret_value() == "custom-account-id"
             assert config.environment == Environment.LIVE
-            assert config.alias == "custom_account"
+            assert config.alias == "custom_prefix"
 
     def test_empty_environment_vars(self):
         """Test that empty environment variables are treated as missing."""
         with patch.dict(
             os.environ,
             {
-                "TEST_OANDA_TOKEN": "",  # empty
-                "TEST_OANDA_ACCOUNT": "123-456-789",
-                "TEST_OANDA_ENVIRONMENT": "practice",
-                "TEST_OANDA_ACCOUNT_ALIAS": "test_account",
+                "TEST_FIVETWENTY_OANDA_TOKEN": "",  # empty
+                "TEST_FIVETWENTY_OANDA_ACCOUNT": "123-456-789",
+                "TEST_FIVETWENTY_OANDA_ENVIRONMENT": "practice",
             },
             clear=True,
         ):
@@ -233,10 +233,9 @@ class TestAccountConfigLoader:
         with patch.dict(
             os.environ,
             {
-                "TEST_OANDA_TOKEN": "   ",  # whitespace only
-                "TEST_OANDA_ACCOUNT": "123-456-789",
-                "TEST_OANDA_ENVIRONMENT": "practice",
-                "TEST_OANDA_ACCOUNT_ALIAS": "test_account",
+                "TEST_FIVETWENTY_OANDA_TOKEN": "   ",  # whitespace only
+                "TEST_FIVETWENTY_OANDA_ACCOUNT": "123-456-789",
+                "TEST_FIVETWENTY_OANDA_ENVIRONMENT": "practice",
             },
             clear=True,
         ):

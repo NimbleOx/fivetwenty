@@ -4,11 +4,15 @@ OANDA REST API v20 Python SDK
 A simple, elegant Python client for OANDA's REST API v20.
 
 Usage:
+    import asyncio
     from fivetwenty import Client, AsyncClient, Environment, AccountConfig
 
     # Method 1: Direct parameters
-    async with AsyncClient(token="your-token", environment=Environment.PRACTICE) as client:
-        accounts = await client.accounts.list()
+    async def main():
+        async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
+            accounts = await client.accounts.list()
+
+    asyncio.run(main())
 
     # Method 2: Configuration object
     config = AccountConfig(
@@ -17,20 +21,33 @@ Usage:
         environment=Environment.PRACTICE,
         alias="my_account"
     )
-    async with AsyncClient(config=config) as client:
-        accounts = await client.accounts.list()
+
+    async def main():
+        async with AsyncClient(config=config) as client:
+            accounts = await client.accounts.list()
+
+    asyncio.run(main())
 
     # Method 3: Environment variables (fallback)
     # Set FIVETWENTY_OANDA_TOKEN, FIVETWENTY_OANDA_ACCOUNT, etc.
-    async with AsyncClient() as client:
-        accounts = await client.accounts.list()
+    async def main():
+        async with AsyncClient() as client:
+            accounts = await client.accounts.list()
+
+    asyncio.run(main())
 
     # Sync wrapper (same patterns)
-    with Client(token="your-token") as client:
+    with Client(token="your-token", account_id="your-account-id") as client:
         accounts = client.accounts.list()
 """
 
-__version__ = "20.1.0"
+try:
+    from importlib.metadata import version
+
+    __version__ = version("fivetwenty")
+except ImportError:
+    # Fallback for development installs
+    __version__ = "0.1.1"
 
 from ._internal.environment import Environment
 from .client import AsyncClient, Client

@@ -147,34 +147,54 @@ class AccountConfigLoader:
     """Loads account configuration with secret protection."""
 
     @classmethod
-    def load_from_env(cls, prefix: str = "FIVETWENTY_") -> AccountConfig | None:
+    def load_from_env(cls, prefix: str = "") -> AccountConfig | None:
         """Load account configuration from environment variables if available."""
 
         # Application is responsible for setting environment variables
         # Library just reads them if present
 
-        token = os.getenv(f"{prefix}OANDA_TOKEN")
-        account_id = os.getenv(f"{prefix}OANDA_ACCOUNT")
+        # Build the full variable prefix
+        # For default: "" -> "FIVETWENTY_"
+        # For custom: "MOMENTUM_" -> "MOMENTUM_FIVETWENTY_"
+        if prefix:
+            full_prefix = f"{prefix}FIVETWENTY_"
+        else:
+            full_prefix = "FIVETWENTY_"
+
+        token = os.getenv(f"{full_prefix}OANDA_TOKEN")
+        account_id = os.getenv(f"{full_prefix}OANDA_ACCOUNT")
 
         # Return None if required fields not found or are just whitespace
         if not token or not account_id or not token.strip() or not account_id.strip():
             return None
 
+        # Generate alias from prefix
+        if prefix:
+            # Remove trailing underscore and convert to lowercase for alias
+            alias = prefix.rstrip("_").lower()
+        else:
+            alias = "default"
+
         return AccountConfig(
-            alias=os.getenv(f"{prefix}OANDA_ACCOUNT_ALIAS", "default"),
+            alias=alias,
             token=SecretStr(token),
             account_id=SecretStr(account_id),
-            environment=Environment(os.getenv(f"{prefix}OANDA_ENVIRONMENT", "practice")),
+            environment=Environment(os.getenv(f"{full_prefix}OANDA_ENVIRONMENT", "practice")),
         )
 
     @classmethod
     def load_default(cls) -> AccountConfig | None:
         """Load the default account configuration."""
-        return cls.load_from_env("FIVETWENTY_")
+        return cls.load_from_env("")
 
     @classmethod
     def from_env_prefix(cls, prefix: str) -> AccountConfig | None:
-        """Load configuration with custom environment variable prefix."""
+        """Load configuration with custom environment variable prefix.
+
+        Args:
+            prefix: Custom prefix that will be prepended to FIVETWENTY_OANDA_* variables.
+                   For example, "MOMENTUM_" will look for MOMENTUM_FIVETWENTY_OANDA_TOKEN.
+        """
         return cls.load_from_env(prefix)
 
     @classmethod

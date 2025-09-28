@@ -35,7 +35,7 @@ uv run poe setup
 The `setup` command will:
 
 - Install all dependencies with `uv sync`
-- Install package in development mode with `uv pip install -e .`
+- Install package in editable development mode
 - Run type checking to verify setup
 - Run tests to ensure everything works
 
@@ -66,8 +66,8 @@ curl -LsSf https://astral.sh/uv/install.sh | sh
 # Windows
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
-# With pip
-pip install uv
+# Recommended: Use the installer script
+curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # With homebrew
 brew install uv
@@ -103,11 +103,8 @@ If needed, install dependencies manually:
 # Install all dependencies
 uv sync
 
-# Install package in development mode
-uv pip install -e .
-
-# Install with all development dependencies
-uv pip install -e .[dev]
+# Install package in development mode with all dependencies
+uv sync --dev
 ```
 
 ---
@@ -192,6 +189,9 @@ uv run poe markdown-check
 uv run poe markdown-format
 ```
 
+from fivetwenty import Environment
+
+
 ---
 
 ## IDE Configuration
@@ -237,7 +237,6 @@ The project includes `.vscode/` configuration:
 ### **Development Environment**
 
 Create `.env` file for development:
-
 ```bash
 # OANDA API credentials (practice account only)
 FIVETWENTY_OANDA_TOKEN=your-practice-token
@@ -267,6 +266,11 @@ VCR_RECORD_MODE=once  # once, new_episodes, all, none
 ```
 
 ### **Security Notes**
+
+from fivetwenty import AsyncClient
+from decimal import Decimal
+from datetime import datetime
+
 
 - **Never use live trading accounts** for development/testing
 - **Never commit credentials** to version control
@@ -343,7 +347,7 @@ uv run pytest tests/unit/test_client.py::test_specific -v
 #### **Import errors during development**
 ```bash
 # Reinstall in development mode
-uv pip install -e .
+uv sync --dev
 
 # Check Python path
 uv run python -c "import fivetwenty; print(fivetwenty.__file__)"
@@ -401,7 +405,7 @@ Once your environment is set up:
 
 1. **Explore the codebase** - Start with `fivetwenty/client.py` and `fivetwenty/models.py`
 2. **Run the examples** - Try `examples/scripts/basic_usage.py`
-3. **Read the architecture** - Check `docs/explanation/sdk-architecture.md`
+3. **Read the architecture** - Check `docs/guides/understanding/sdk-architecture.md`
 4. **Pick an issue** - Look for "good first issue" labels on GitHub
 5. **Join discussions** - Participate in GitHub Discussions
 

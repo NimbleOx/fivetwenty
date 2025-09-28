@@ -11,7 +11,7 @@ import asyncio
 
 
 # Example placeholder - implementation coming soon
-async def main():
+async def main() -> None:
     """Basic usage example - placeholder."""
     print("Basic usage example coming soon!")
 

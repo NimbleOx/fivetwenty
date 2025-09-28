@@ -39,4 +39,23 @@
 - Feature flags for new functionality
 - Gradual migration paths for any breaking changes
 
-Look at our poe commands to make sure they all work
+## Documentation Validation Framework
+
+### 🔧 Potential New Validators
+Based on spec, we could add:
+
+- [ ] **Vale prose validator** - Writing quality checking (vale integration)
+- [ ] **Link validator** - External link checking (currently internal only)
+- [ ] **Educational progression** - Tutorial learning flow validation
+- [ ] **Tutorial structure** - Tutorial organization checking
+- [ ] **Python style validator** - Code style beyond syntax (ruff integration)
+
+### Priority
+**High**: Fix CLI examples in spec (breaks copy-paste)
+**Medium**: Add prose/link validators if needed
+**Low**: Full spec rewrite
+
+
+
+Need to add a disclaimer to main page
+Need to add outline of modern tools (uv, typing) to main page

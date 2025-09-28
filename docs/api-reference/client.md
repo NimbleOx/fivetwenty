@@ -22,13 +22,13 @@ Complete reference for FiveTwenty client interfaces and configuration.
 ### Endpoint Groups
 | Endpoint | Purpose | Key Methods |
 |----------|---------|-------------|
-| [accounts](endpoints/accounts.md) | Account management | `list()`, `get()`, `summary()`, `instruments()`, `configure()`, `changes()` |
-| [orders](endpoints/orders.md) | Order operations | `post_market_order()`, `post_limit_order()`, `cancel()`, `list_pending()`, `list()`, `replace()` |
-| [trades](endpoints/trades.md) | Trade management | `list_open()`, `get()`, `close()`, `modify()`, `list()` |
-| [positions](endpoints/positions.md) | Position tracking | `list_open()`, `get()`, `close()`, `list()` |
-| [pricing](endpoints/pricing.md) | Market data | `get()`, `stream()`, `candles()`, `latest_candles()` |
-| [instruments](endpoints/instruments.md) | Instrument data | `get_all()`, `candles()`, `order_book()` |
-| [transactions](endpoints/transactions.md) | Transaction history | `list()`, `get()`, `get_range()`, `stream()`, `list_since()` |
+| [accounts](endpoints/accounts.md) | Account management | `get_accounts()`, `get_account()`, `get_account_summary()`, `get_account_instruments()`, `patch_account_configuration()`, `get_account_changes()` |
+| [orders](endpoints/orders.md) | Order operations | `post_market_order()`, `post_limit_order()`, `cancel_order()`, `get_pending_orders()`, `get_orders()`, `put_order()` |
+| [trades](endpoints/trades.md) | Trade management | `get_open_trades()`, `get_trade()`, `close_trade()`, `put_trade_orders()`, `get_trades()` |
+| [positions](endpoints/positions.md) | Position tracking | `get_open_positions()`, `get_position()`, `close_position()`, `get_positions()` |
+| [pricing](endpoints/pricing.md) | Market data | `get_pricing()`, `get_pricing_stream()`, `get_instrument_candles()`, `get_latest_candles()` |
+| [instruments](endpoints/instruments.md) | Instrument data | `get_account_instruments()`, `get_instrument_candles()` |
+| [transactions](endpoints/transactions.md) | Transaction history | `get_transactions()`, `get_transaction()`, `get_transactions_range()`, `get_transactions_stream()`, `get_transactions_since_id()` |
 
 ---
 
@@ -38,10 +38,18 @@ Complete reference for FiveTwenty client interfaces and configuration.
 Primary async client for OANDA API operations. Recommended for production use.
 
 **Constructor:**
+<!-- fragment: Demo AsyncClient constructor with union type and attribute access issues -->
 ```python
+from logging import Logger
+from typing import Optional
+
+import httpx
+
 from fivetwenty import AsyncClient, Environment
+from fivetwenty.models import AccountConfig
 
 # Constructor signature:
+
 client = AsyncClient(
     token=str | None,
     account_id=str | None,
@@ -54,7 +62,7 @@ client = AsyncClient(
     proxies=str | None,
     verify=True,
     cert=str | None,
-    logger=Optional[Logger] | None
+    logger=Optional[Logger] | None,
 )
 ```
 
@@ -88,15 +96,16 @@ client = AsyncClient(
 from fivetwenty import AsyncClient, Environment
 
 # Environment variables (recommended for deployment)
+
 async with AsyncClient() as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 
 # Direct parameters (basic scripts)
 async with AsyncClient(
     token="your-token",
     environment=Environment.PRACTICE
 ) as client:
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 
 # Configuration object (structured applications)
 from fivetwenty import AccountConfig
@@ -110,7 +119,7 @@ config = AccountConfig(
 
 async with AsyncClient(config=config) as client:
     print(f"Trading on: {client.config.summary()}")
-    accounts = await client.accounts.list()
+    accounts = await client.accounts.get_accounts()
 ```
 
 **Configuration Priority:**
@@ -136,6 +145,7 @@ When multiple configuration sources are provided:
 Synchronous wrapper around AsyncClient. Use for scripts and basic applications.
 
 **Constructor:**
+<!-- fragment: Demo Client constructor with undefined names -->
 ```python
 Client(**kwargs)
 ```
@@ -148,21 +158,27 @@ Client(**kwargs)
 
 ```python
 # Environment variables
+from fivetwenty import Client
+
 with Client() as client:
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 
 # Direct parameters
+from fivetwenty import Client, Environment
+
 with Client(
     token="your-token",
     environment=Environment.PRACTICE
 ) as client:
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 
 # Configuration object
+from fivetwenty.models import AccountConfig
+
 config = AccountConfig(...)
 with Client(config=config) as client:
     print(f"Using: {client.config.summary()}")
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
 ```
 
 **Properties:**
@@ -197,6 +213,8 @@ Structured configuration for account credentials and settings.
 
 **Constructor:**
 ```python
+from fivetwenty import AccountConfig, Environment
+
 config = AccountConfig(
     token="your_token",
     account_id="your_account_id",
@@ -225,12 +243,13 @@ config = AccountConfig(
 
 **Example:**
 ```python
+from fivetwenty import AccountConfig, Environment
+
 config = AccountConfig(
     token="your-api-token",
     account_id="your-account-id",
     environment=Environment.PRACTICE,
     alias="demo_trading",
-
 )
 
 print(config.summary())  # "demo_trading (practice)"
@@ -260,8 +279,9 @@ config = AccountConfigLoader.from_env_prefix("TRADING_")
 ### Configuration Errors
 
 **ValueError**: Raised when no valid configuration is provided:
+<!-- fragment: Demo ValueError handling with unused variable patterns -->
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 try:
     client = AsyncClient()  # No config provided
@@ -270,15 +290,17 @@ except ValueError as e:
 ```
 
 **ValidationError**: Raised for invalid configuration values:
+<!-- fragment: Demo ValidationError handling with SecretStr argument type issues -->
 ```python
 from pydantic import ValidationError
+from fivetwenty import AccountConfig, Environment
 
 try:
     config = AccountConfig(
         token="",  # Empty token
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="123invalid"  # Invalid alias
+        alias="123invalid",  # Invalid alias
     )
 except ValidationError as e:
     print(f"Configuration error: {e}")
@@ -294,16 +316,24 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 - `details` (dict) - Additional error information
 
 **Example:**
+<!-- fragment: Demo FiveTwentyError handling with unused variables and return type issues -->
 ```python
+import asyncio
+
+from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
 
-try:
-    trade = await client.trades.get(client.account_id, "invalid_id")
-except FiveTwentyError as e:
-    print(f"Error {e.status_code}: {e.message}")
-    if e.error_code == "TRADE_NOT_FOUND":
-        # Handle specific error
-        pass
+async def main():
+    async with AsyncClient() as client:
+        try:
+            trade = await client.trades.get_trade(client.account_id, "invalid_id")
+        except FiveTwentyError as e:
+            print(f"Error {e.status_code}: {e.message}")
+            if e.error_code == "TRADE_NOT_FOUND":
+                # Handle specific error
+                pass
+
+asyncio.run(main())
 ```
 
 ---
@@ -390,6 +420,7 @@ export STRATEGY_B_OANDA_ENVIRONMENT="practice"
 export STRATEGY_B_OANDA_ACCOUNT_ALIAS="grid_strategy"
 ```
 
+<!-- fragment: Demo AccountConfigLoader usage with undefined name patterns -->
 ```python
 # Load configurations
 momentum_config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")

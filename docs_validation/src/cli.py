@@ -1,9 +1,7 @@
 """Command-line interface for the validation framework."""
 
 import sys
-import time
 from pathlib import Path
-from typing import Any
 
 import click
 from rich.console import Console
@@ -14,11 +12,14 @@ from rich.text import Text
 from .base import registry
 from .config import ValidationConfig
 from .engine import ValidationEngine
-from .models import IssueSeverity, ValidationSummary
+from .models import ValidationSummary
+from .reporters import MarkdownReporter
 
 # Import and register validators
 from .validators import (
     CodeExecutabilityValidator,
+    CodeLintingValidator,
+    CodeTypingValidator,
     CrossReferenceValidator,
     ExternalLinkValidator,
     FinancialPrecisionValidator,
@@ -36,6 +37,8 @@ registry.register(PythonSyntaxValidator())
 registry.register(CrossReferenceValidator())
 registry.register(SDKMethodsValidator())
 registry.register(CodeExecutabilityValidator())
+registry.register(CodeLintingValidator())
+registry.register(CodeTypingValidator())
 registry.register(ExternalLinkValidator())
 
 console = Console()
@@ -56,36 +59,36 @@ def cli() -> None:
     type=click.Path(exists=True, path_type=Path),
     help="Path to YAML configuration file",
 )
-@click.option(
-    "--project-root",
-    type=click.Path(exists=True, file_okay=False, path_type=Path),
-    default=Path.cwd(),
-    help="Project root directory",
-)
 @click.option("--parallel/--sequential", default=True, help="Run validation in parallel")
 @click.option("--max-workers", type=int, default=4, help="Maximum number of worker threads")
-@click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
-@click.option("--quiet", "-q", is_flag=True, help="Show minimal output")
-@click.option("--fail-fast", is_flag=True, help="Exit on first error")
+@click.option(
+    "--files",
+    multiple=True,
+    type=click.Path(exists=True, path_type=Path),
+    help="Specific files to validate (can be used multiple times)",
+)
 def validate(
     config: Path | None,
-    project_root: Path,
     parallel: bool,
     max_workers: int,
-    verbose: bool,
-    quiet: bool,
-    fail_fast: bool,
+    files: tuple[Path, ...],
 ) -> None:
     """Run validation on documentation files."""
+
+    # Hardcode project root to current working directory
+    project_root = Path.cwd()
 
     # Load configuration
     if config and config.exists():
         validation_config = ValidationConfig.load_from_file(config)
     else:
-        # Try to find validation.yml in config directory first, then current directory
+        # Try to find validation.yml in docs_validation/config, then config/, then current directory
+        docs_config_path = Path("docs_validation/config/validation.yml")
         config_dir_path = Path("config/validation.yml")
         default_config_path = Path("validation.yml")
-        if config_dir_path.exists():
+        if docs_config_path.exists():
+            validation_config = ValidationConfig.load_from_file(docs_config_path)
+        elif config_dir_path.exists():
             validation_config = ValidationConfig.load_from_file(config_dir_path)
         elif default_config_path.exists():
             validation_config = ValidationConfig.load_from_file(default_config_path)
@@ -101,30 +104,39 @@ def validate(
     engine = ValidationEngine(validation_config, project_root)
 
     # Run validation with progress indicator
-    if not quiet:
-        console.print(f"🔍 Discovering files in {project_root}")
+    if files:
+        console.print(f"🔍 Validating {len(files)} specific file(s)")
 
-    start_time = time.perf_counter()
-
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        TimeElapsedColumn(),
-        console=console if not quiet else None,
-        transient=True,
-    ) as progress:
-        if not quiet:
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            TimeElapsedColumn(),
+            console=console,
+            transient=True,
+        ) as progress:
             task = progress.add_task("Running validation...", total=None)
 
-        summary = engine.validate()
+            summary = engine.validate_incremental(list(files))
 
-        if not quiet:
+            progress.update(task, description="Validation complete")
+    else:
+        console.print(f"🔍 Discovering files in {project_root}")
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            TimeElapsedColumn(),
+            console=console,
+            transient=True,
+        ) as progress:
+            task = progress.add_task("Running validation...", total=None)
+
+            summary = engine.validate()
+
             progress.update(task, description="Validation complete")
 
-    duration = time.perf_counter() - start_time
-
-    # Display results
-    _display_results(summary, duration, verbose, quiet, fail_fast)
+    # Display results and always generate report
+    _display_results(summary)
 
     # Always exit with success - this is informational validation
     sys.exit(0)
@@ -137,8 +149,7 @@ def validate(
     type=click.Path(exists=True, path_type=Path),
     help="Path to YAML configuration file",
 )
-@click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
-def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
+def check(files: tuple[Path, ...], config: Path | None) -> None:
     """Run validation on specific files (incremental mode)."""
 
     if not files:
@@ -149,10 +160,13 @@ def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
     if config and config.exists():
         validation_config = ValidationConfig.load_from_file(config)
     else:
-        # Try to find validation.yml in config directory first, then current directory
+        # Try to find validation.yml in docs_validation/config, then config/, then current directory
+        docs_config_path = Path("docs_validation/config/validation.yml")
         config_dir_path = Path("config/validation.yml")
         default_config_path = Path("validation.yml")
-        if config_dir_path.exists():
+        if docs_config_path.exists():
+            validation_config = ValidationConfig.load_from_file(docs_config_path)
+        elif config_dir_path.exists():
             validation_config = ValidationConfig.load_from_file(config_dir_path)
         elif default_config_path.exists():
             validation_config = ValidationConfig.load_from_file(default_config_path)
@@ -165,12 +179,10 @@ def check(files: tuple[Path, ...], config: Path | None, verbose: bool) -> None:
     # Run incremental validation
     console.print(f"🔍 Validating {len(files)} file(s)")
 
-    start_time = time.perf_counter()
     summary = engine.validate_incremental(list(files))
-    duration = time.perf_counter() - start_time
 
-    # Display results
-    _display_results(summary, duration, verbose, quiet=False, fail_fast=False)
+    # Display results and always generate report
+    _display_results(summary)
 
     # Always exit with success - this is informational validation
     sys.exit(0)
@@ -195,94 +207,32 @@ def list_validators() -> None:
 
 def _display_results(
     summary: ValidationSummary,
-    duration: float,
-    verbose: bool,
-    quiet: bool,
-    fail_fast: bool,  # noqa: ARG001
 ) -> None:
-    """Display validation results."""
-
-    if quiet and summary.total_issues == 0:
-        return
+    """Display validation results and always generate report."""
 
     console.print()
 
-    # Summary table
-    table = Table(title="Validation Summary")
-    table.add_column("Metric", style="cyan")
-    table.add_column("Value", style="white")
+    # Show per-validator summary (contains all necessary information)
+    _display_validator_summaries(summary)
 
-    table.add_row("Files", str(summary.total_files))
-    table.add_row("Validators", str(summary.total_validators))
-    table.add_row("Duration", f"{duration:.2f}s")
+    # Show brief issues summary if any (detailed issues are in the report)
+    if summary.total_issues > 0:
+        _display_brief_issues_summary(summary)
 
-    # Results with colors
-    if summary.passed_files == summary.total_files:
-        table.add_row("Status", Text("✅ PASSED", style="green"))
-    else:
-        table.add_row("Status", Text("❌ FAILED", style="red"))
+    # Always generate markdown report
+    _generate_markdown_report(summary)
 
-    table.add_row("Success Rate", f"{summary.success_rate:.1f}%")
-    table.add_row("Issues Found", str(summary.total_issues))
+
+def _display_brief_issues_summary(summary: ValidationSummary) -> None:
+    """Display a brief summary of issues without details."""
+    console.print(f"\n📋 Found {summary.total_issues} issues across {len([r for r in summary.results if r.issues])} files")
 
     if summary.error_count > 0:
-        table.add_row("Errors", Text(str(summary.error_count), style="red"))
+        console.print(f"   ❌ {summary.error_count} errors", style="red")
     if summary.warning_count > 0:
-        table.add_row("Warnings", Text(str(summary.warning_count), style="yellow"))
+        console.print(f"   ⚠️ {summary.warning_count} warnings", style="yellow")
 
-    console.print(table)
-
-    # Show per-validator summary if verbose or if there are issues
-    if verbose or summary.total_issues > 0:
-        _display_validator_summaries(summary)
-
-    # Show issues if any
-    if summary.total_issues > 0:
-        _display_issues(summary, verbose)
-
-
-def _display_issues(summary: ValidationSummary, verbose: bool) -> None:
-    """Display detailed issues."""
-    console.print("\n📋 Issues Found:")
-
-    # Group issues by file
-    issues_by_file: dict[Path, list[Any]] = {}
-    for result in summary.results:
-        if result.issues:
-            if result.file_path not in issues_by_file:
-                issues_by_file[result.file_path] = []
-            issues_by_file[result.file_path].extend(result.issues)
-
-    for file_path, issues in issues_by_file.items():
-        console.print(f"\n📄 {file_path}")
-
-        for issue in issues:
-            # Format issue with appropriate styling
-            severity_style = {
-                IssueSeverity.ERROR: "red",
-                IssueSeverity.WARNING: "yellow",
-                IssueSeverity.INFO: "blue",
-                IssueSeverity.SUGGESTION: "green",
-            }.get(issue.severity, "white")
-
-            severity_icon = {
-                IssueSeverity.ERROR: "❌",
-                IssueSeverity.WARNING: "⚠️",
-                IssueSeverity.INFO: "ℹ️",
-                IssueSeverity.SUGGESTION: "💡",
-            }.get(issue.severity, "•")
-
-            location = f":{issue.line}" if issue.line else ""
-
-            console.print(f"  {severity_icon} {issue.message} {location}", style=severity_style)
-
-            if verbose:
-                if issue.context:
-                    console.print(f"     Context: {issue.context}", style="dim")
-                if issue.suggestion:
-                    console.print(f"     💡 {issue.suggestion}", style="dim green")
-                if issue.rule_id:
-                    console.print(f"     Rule: {issue.rule_id}", style="dim")
+    console.print("   💡 See detailed analysis in the generated validation report")
 
 
 def _display_validator_summaries(summary: ValidationSummary) -> None:
@@ -290,7 +240,11 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
     if not summary.validator_summaries:
         return
 
-    console.print("\n📊 Per-Validator Summary:")
+    # Display overall status
+    overall_status = "✅ PASSED" if summary.passed_files == summary.total_files else "❌ FAILED"
+    status_style = "green" if summary.passed_files == summary.total_files else "red"
+
+    console.print(f"📊 Validation Results: {Text(overall_status, style=status_style)} | {summary.total_files} files | {summary.success_rate:.1f}% success rate | {summary.total_issues} issues")
 
     # Create table for validator summaries
     table = Table(show_header=True, header_style="bold magenta")
@@ -303,22 +257,62 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
     table.add_column("Duration", justify="right")
 
     for validator_summary in summary.validator_summaries:
-        # Format success rate with color
-        success_rate = f"{validator_summary.success_rate:.1f}%"
-        if validator_summary.success_rate == 100.0:
-            success_rate_text = Text(success_rate, style="green")
-        elif validator_summary.success_rate >= 80.0:
-            success_rate_text = Text(success_rate, style="yellow")
+        if not validator_summary.enabled:
+            # Disabled validator - show with disabled styling
+            table.add_row(
+                Text(validator_summary.name, style="dim"),
+                Text("—", style="dim"),  # No files checked
+                Text("DISABLED", style="dim italic"),
+                Text("—", style="dim"),  # No issues
+                Text("—", style="dim"),  # No errors
+                Text("—", style="dim"),  # No warnings
+                Text("—", style="dim"),  # No duration
+            )
         else:
-            success_rate_text = Text(success_rate, style="red")
+            # Enabled validator - show normal statistics
+            # Format success rate with color
+            success_rate = f"{validator_summary.success_rate:.1f}%"
+            if validator_summary.success_rate == 100.0:
+                success_rate_text = Text(success_rate, style="green")
+            elif validator_summary.success_rate >= 80.0:
+                success_rate_text = Text(success_rate, style="yellow")
+            else:
+                success_rate_text = Text(success_rate, style="red")
 
-        # Format errors and warnings with color
-        errors_text = Text(str(validator_summary.error_count), style="red") if validator_summary.error_count > 0 else str(validator_summary.error_count)
-        warnings_text = Text(str(validator_summary.warning_count), style="yellow") if validator_summary.warning_count > 0 else str(validator_summary.warning_count)
+            # Format errors and warnings with color
+            errors_text = Text(str(validator_summary.error_count), style="red") if validator_summary.error_count > 0 else str(validator_summary.error_count)
+            warnings_text = Text(str(validator_summary.warning_count), style="yellow") if validator_summary.warning_count > 0 else str(validator_summary.warning_count)
 
-        table.add_row(validator_summary.name, str(validator_summary.files_checked), success_rate_text, str(validator_summary.total_issues), errors_text, warnings_text, f"{validator_summary.duration_ms:.0f}ms")
+            table.add_row(validator_summary.name, str(validator_summary.files_checked), success_rate_text, str(validator_summary.total_issues), errors_text, warnings_text, f"{validator_summary.duration_ms:.0f}ms")
 
     console.print(table)
+
+
+def _generate_markdown_report(
+    summary: ValidationSummary,
+) -> None:
+    """Generate markdown validation report."""
+    # Always use the reports directory
+    reports_dir = Path(__file__).parent.parent / "reports"
+    reports_dir.mkdir(exist_ok=True)
+    output_file = reports_dir / "validation-report.md"
+
+    # Collect all issues from validation results
+    all_issues = []
+    for result in summary.results:
+        if result.issues:
+            all_issues.extend(result.issues)
+
+    try:
+        # Create markdown reporter and generate report
+        reporter = MarkdownReporter()
+        reporter.generate_report(summary=summary, all_issues=all_issues, output_path=output_file, include_detailed_issues=True)
+
+        # Display success message
+        console.print(f"\n📄 Markdown report generated: {output_file}", style="green")
+
+    except Exception as e:
+        console.print(f"\n❌ Failed to generate markdown report: {e}", style="red")
 
 
 def main() -> None:

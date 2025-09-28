@@ -53,28 +53,37 @@ Complete reference for all FiveTwenty endpoint implementations covering 100% of 
 
 ### Async Client
 ```python
+import asyncio
 from fivetwenty import AsyncClient
 
-async with AsyncClient() as client:
-    # Account operations
-    accounts = await client.accounts.list()
 
-    # Trading operations
-    order = await client.orders.post_market_order(account_id, "EUR_USD", 1000)
+async def main() -> None:
+    async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
+        # Account operations
+        _accounts = await client.accounts.get_accounts()
 
-    # Market data
-    prices = await client.pricing.get(account_id, ["EUR_USD"])
+        # Trading operations
+        account_id = "your-account-id"
+        _order = await client.orders.post_market_order(account_id, "EUR_USD", 1000)
+
+        # Market data
+        _prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Sync Client
 ```python
 from fivetwenty import Client
 
-with Client() as client:
+with Client(token="demo-token", account_id="your-account-id") as client:
     # Same methods, synchronous execution
-    accounts = client.accounts.list()
+    accounts = client.accounts.get_accounts()
+    account_id = "your-account-id"
     order = client.orders.post_market_order(account_id, "EUR_USD", 1000)
-    prices = client.pricing.get(account_id, ["EUR_USD"])
+    prices = client.pricing.get_pricing(account_id, ["EUR_USD"])
 ```
 
 ---
@@ -82,7 +91,6 @@ with Client() as client:
 ## Need More Context?
 
 - **Learn with [Tutorials](../../tutorials/index.md)** for hands-on guidance
-- **Solve problems with [How-to Guides](../../how-to-guides/index.md)** for specific solutions
-- **Understand with [Explanations](../../explanation/index.md)** for background knowledge
+- **Get comprehensive guidance with [Guides](../../guides/index.md)** for both solutions and understanding
 
 **Ready to explore?** Choose an endpoint above or browse the complete [Client API Reference](../client.md) for setup and configuration details.

@@ -21,7 +21,7 @@ class FinancialPrecisionValidator(BaseValidator):
     def validate_file(self, file_info: FileInfo, content: str, options: dict[str, Any]) -> ValidationResult:
         """Validate financial precision in file content."""
         issues: list[ValidationIssue] = []
-        strict_mode = options.get("strict_mode", False)
+        # Always use strict mode for financial precision validation
 
         lines = content.split("\n")
 
@@ -30,7 +30,7 @@ class FinancialPrecisionValidator(BaseValidator):
             issues.extend(self._check_float_usage(line, line_num, file_info.path))
 
             # Check for hardcoded financial values
-            issues.extend(self._check_hardcoded_values(line, line_num, file_info.path, strict_mode))
+            issues.extend(self._check_hardcoded_values(line, line_num, file_info.path))
 
             # Check for proper Decimal imports
             if "from decimal import Decimal" in line or "import decimal" in line:
@@ -66,31 +66,30 @@ class FinancialPrecisionValidator(BaseValidator):
 
         return issues
 
-    def _check_hardcoded_values(self, line: str, line_num: int, file_path: Path, strict_mode: bool) -> list[ValidationIssue]:
-        """Check for hardcoded financial values that should be configurable."""
+    def _check_hardcoded_values(self, line: str, line_num: int, file_path: Path) -> list[ValidationIssue]:
+        """Check for hardcoded financial values that should be configurable - always use strict mode."""
         issues: list[ValidationIssue] = []
 
-        # In strict mode, flag hardcoded monetary values
-        if strict_mode:
-            # Look for hardcoded monetary values (but allow common examples)
-            monetary_pattern = r"(?:price|amount|balance|cost|fee)\s*=\s*(\d+\.\d{5,}|\d{4,}\.?\d*)"
-            matches = re.finditer(monetary_pattern, line, re.IGNORECASE)
+        # Always flag hardcoded monetary values in strict mode
+        # Look for hardcoded monetary values (but allow common examples)
+        monetary_pattern = r"(?:price|amount|balance|cost|fee)\s*=\s*(\d+\.\d{5,}|\d{4,}\.?\d*)"
+        matches = re.finditer(monetary_pattern, line, re.IGNORECASE)
 
-            for match in matches:
-                value = match.group(1)
-                # Allow common example values
-                if value not in {"1.23456", "1000.0", "100.0", "10.0", "1.0"}:
-                    issues.append(
-                        ValidationIssue(
-                            message=f"Hardcoded financial value '{value}' should be configurable or use example values",
-                            file_path=file_path,
-                            line=line_num,
-                            severity=IssueSeverity.WARNING,
-                            rule_id="financial_precision_hardcoded",
-                            context=line.strip(),
-                            suggestion="Use configurable values or standard example amounts like 1000.0",
-                        )
+        for match in matches:
+            value = match.group(1)
+            # Allow common example values
+            if value not in {"1.23456", "1000.0", "100.0", "10.0", "1.0"}:
+                issues.append(
+                    ValidationIssue(
+                        message=f"Hardcoded financial value '{value}' should be configurable or use example values",
+                        file_path=file_path,
+                        line=line_num,
+                        severity=IssueSeverity.WARNING,
+                        rule_id="financial_precision_hardcoded",
+                        context=line.strip(),
+                        suggestion="Use configurable values or standard example amounts like 1000.0",
                     )
+                )
 
         return issues
 

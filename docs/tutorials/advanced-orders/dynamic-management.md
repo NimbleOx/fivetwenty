@@ -18,25 +18,23 @@ Trailing stops protect profits while allowing positions to run in favorable dire
 
 ### Basic Trailing Stop System
 
+<!-- fragment: Demo advanced order management with undefined types -->
 ```python
 import asyncio
-from decimal import Decimal
 from datetime import datetime, timedelta
+from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
+
+
 class TrailingStopManager:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.active_trails = {}  # Track trailing stops
 
-    async def create_trailing_stop(
-        self,
-        position_id: str,
-        initial_stop: Decimal,
-        trail_distance: Decimal,
-        instrument: str
-    ):
+    async def create_trailing_stop(self, position_id: str, initial_stop: Decimal, trail_distance: Decimal, instrument: str) -> Any:
         """Create and manage a trailing stop for a position."""
 
         # Place initial stop-loss order
@@ -45,7 +43,7 @@ class TrailingStopManager:
             instrument=instrument,
             units=-10000,  # Assume long position to close
             price=initial_stop,
-            time_in_force="GTC"
+            time_in_force="GTC",
         )
 
         # Store trailing stop configuration
@@ -56,7 +54,7 @@ class TrailingStopManager:
             "trail_distance": trail_distance,
             "stop_order_id": initial_stop_response.order_create_transaction.id,
             "highest_price": initial_stop + trail_distance,  # Starting reference
-            "direction": "long"  # Assume long position
+            "direction": "long",  # Assume long position
         }
 
         self.active_trails[position_id] = trail_config
@@ -64,14 +62,14 @@ class TrailingStopManager:
 
         return trail_config
 
-    async def update_trailing_stops(self):
+    async def update_trailing_stops(self) -> Any:
         """Update all active trailing stops based on current prices."""
 
         for position_id, config in self.active_trails.items():
             # Get current market price
             pricing = await self.client.pricing.get_pricing(
                 account_id=self.account_id,
-                instruments=[config["instrument"]]
+                instruments=[config["instrument"]],
             )
 
             current_price = Decimal(pricing.prices[0].bids[0].price)
@@ -90,13 +88,13 @@ class TrailingStopManager:
                     if new_stop > config["current_stop"]:
                         await self._update_stop_order(config, new_stop)
 
-    async def _update_stop_order(self, config: dict, new_stop: Decimal):
+    async def _update_stop_order(self, config: dict, new_stop: Decimal) -> Any:
         """Update the actual stop order price."""
         try:
             # Cancel existing stop order
             await self.client.orders.cancel_order(
                 account_id=self.account_id,
-                order_id=config["stop_order_id"]
+                order_id=config["stop_order_id"],
             )
 
             # Place new stop order at updated level
@@ -105,7 +103,7 @@ class TrailingStopManager:
                 instrument=config["instrument"],
                 units=-10000,  # Close position size
                 price=new_stop,
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             # Update configuration
@@ -117,7 +115,7 @@ class TrailingStopManager:
         except Exception as e:
             print(f"Failed to update trailing stop: {e}")
 
-    async def monitor_trailing_stops(self, monitoring_duration: int = 3600):
+    async def monitor_trailing_stops(self, monitoring_duration: int = 3600) -> Any:
         """Continuously monitor and update trailing stops."""
         end_time = datetime.utcnow() + timedelta(seconds=monitoring_duration)
 
@@ -138,7 +136,8 @@ Adjust trail distance based on market volatility:
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def volatility_adjusted_trailing():
+
+async def volatility_adjusted_trailing() -> Any:
     """Implement trailing stops that adapt to market volatility."""
     async with AsyncClient() as client:
         # Calculate current volatility (simplified ATR calculation)
@@ -176,22 +175,20 @@ async def volatility_adjusted_trailing():
 
 Tighten trail distance as profits increase:
 
+<!-- fragment: Demo accelerated trailing with undefined Any type -->
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
+
+
 class AcceleratedTrailing:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
 
-    async def create_accelerated_trail(
-        self,
-        position_id: str,
-        entry_price: Decimal,
-        initial_trail: Decimal,
-        instrument: str
-    ):
+    async def create_accelerated_trail(self, position_id: str, entry_price: Decimal, initial_trail: Decimal, instrument: str) -> Any:
         """Create trailing stop that tightens as profits increase."""
 
         config = {
@@ -204,17 +201,17 @@ class AcceleratedTrailing:
                 {"profit_pips": Decimal("0.0020"), "trail_pips": initial_trail * Decimal("0.8")},
                 {"profit_pips": Decimal("0.0040"), "trail_pips": initial_trail * Decimal("0.6")},
                 {"profit_pips": Decimal("0.0060"), "trail_pips": initial_trail * Decimal("0.4")},
-            ]
+            ],
         }
 
         return config
 
-    async def update_accelerated_trail(self, config: dict):
+    async def update_accelerated_trail(self, config: dict) -> Any:
         """Update trail distance based on profit levels."""
         # Get current price
         pricing = await self.client.pricing.get_pricing(
             account_id=self.account_id,
-            instruments=[config["instrument"]]
+            instruments=[config["instrument"]],
         )
 
         current_price = Decimal(pricing.prices[0].bids[0].price)
@@ -243,10 +240,13 @@ Build and reduce positions systematically based on market conditions.
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
+
+
 class ScaleInStrategy:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.scale_levels = []
@@ -258,7 +258,7 @@ class ScaleInStrategy:
         base_price: Decimal,
         total_units: int,
         num_levels: int = 4,
-        level_spacing: Decimal = Decimal("0.0020")
+        level_spacing: Decimal = Decimal("0.0020"),
     ):
         """Set up multiple scale-in levels below current price."""
 
@@ -272,7 +272,7 @@ class ScaleInStrategy:
                 "price": level_price,
                 "units": units_per_level,
                 "order_id": None,
-                "filled": False
+                "filled": False,
             }
 
             self.scale_levels.append(scale_level)
@@ -280,7 +280,7 @@ class ScaleInStrategy:
         # Place all scale-in limit orders
         await self._place_scale_orders(instrument)
 
-    async def _place_scale_orders(self, instrument: str):
+    async def _place_scale_orders(self, instrument: str) -> Any:
         """Place limit orders for all scale-in levels."""
 
         for level in self.scale_levels:
@@ -290,13 +290,13 @@ class ScaleInStrategy:
                     instrument=instrument,
                     units=level["units"],
                     price=level["price"],
-                    time_in_force="GTC"
+                    time_in_force="GTC",
                 )
 
                 level["order_id"] = response.order_create_transaction.id
                 print(f"Scale level {level['level']} placed: {level['units']} @ {level['price']}")
 
-    async def monitor_scale_fills(self, instrument: str):
+    async def monitor_scale_fills(self, instrument: str) -> Any:
         """Monitor scale-in orders and adjust strategy as they fill."""
 
         while len(self.filled_levels) < len(self.scale_levels):
@@ -305,7 +305,7 @@ class ScaleInStrategy:
                     # Check order status
                     order = await self.client.orders.get_order(
                         account_id=self.account_id,
-                        order_id=level["order_id"]
+                        order_id=level["order_id"],
                     )
 
                     if order.state == "FILLED":
@@ -319,7 +319,7 @@ class ScaleInStrategy:
 
             await asyncio.sleep(10)  # Check every 10 seconds
 
-    async def _adjust_stops_after_fill(self, filled_level: dict, instrument: str):
+    async def _adjust_stops_after_fill(self, filled_level: dict, instrument: str) -> Any:
         """Adjust protective stops after a scale-in level fills."""
 
         # Calculate new average entry price
@@ -338,7 +338,7 @@ class ScaleInStrategy:
             instrument=instrument,
             units=-total_units,  # Close entire accumulated position
             price=new_stop_price,
-            time_in_force="GTC"
+            time_in_force="GTC",
         )
 
         print(f"Updated stop: {new_stop_price} for {total_units} units (avg: {weighted_price})")
@@ -348,21 +348,18 @@ class ScaleInStrategy:
 
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
+
+
 class ScaleOutStrategy:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.take_profit_levels = []
 
-    async def setup_scale_out_levels(
-        self,
-        instrument: str,
-        entry_price: Decimal,
-        position_units: int,
-        profit_targets: list  # List of profit distances in pips
-    ):
+    async def setup_scale_out_levels(self, instrument: str, entry_price: Decimal, position_units: int, profit_targets: list) -> Any:
         """Set up multiple take-profit levels above entry price."""
 
         remaining_units = position_units
@@ -383,7 +380,7 @@ class ScaleOutStrategy:
                 "units": level_units,
                 "distance": target_distance,
                 "order_id": None,
-                "filled": False
+                "filled": False,
             }
 
             self.take_profit_levels.append(tp_level)
@@ -391,7 +388,7 @@ class ScaleOutStrategy:
         # Place all take-profit orders
         await self._place_take_profit_orders(instrument)
 
-    async def _place_take_profit_orders(self, instrument: str):
+    async def _place_take_profit_orders(self, instrument: str) -> Any:
         """Place limit orders for all take-profit levels."""
 
         for level in self.take_profit_levels:
@@ -400,13 +397,13 @@ class ScaleOutStrategy:
                 instrument=instrument,
                 units=-level["units"],  # Negative to close long position
                 price=level["price"],
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             level["order_id"] = response.order_create_transaction.id
             print(f"Take profit {level['level']}: {level['units']} @ {level['price']}")
 
-    async def monitor_scale_out_fills(self):
+    async def monitor_scale_out_fills(self) -> Any:
         """Monitor take-profit orders and adjust trailing stops."""
 
         filled_levels = 0
@@ -416,7 +413,7 @@ class ScaleOutStrategy:
                 if not level["filled"] and level["order_id"]:
                     order = await self.client.orders.get_order(
                         account_id=self.account_id,
-                        order_id=level["order_id"]
+                        order_id=level["order_id"],
                     )
 
                     if order.state == "FILLED":
@@ -430,7 +427,7 @@ class ScaleOutStrategy:
 
             await asyncio.sleep(15)  # Check every 15 seconds
 
-    async def _tighten_trail_after_tp(self, filled_level: dict):
+    async def _tighten_trail_after_tp(self, filled_level: dict) -> Any:
         """Tighten trailing stop after take-profit level hit."""
 
         # Calculate tighter trail based on level hit
@@ -450,13 +447,14 @@ Create systems that respond intelligently to changing market conditions.
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
+
 class AdaptivePositionManager:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.current_regime = "neutral"
 
-    async def analyze_market_conditions(self, instrument: str):
+    async def analyze_market_conditions(self, instrument: str) -> Any:
         """Analyze current market conditions to adapt strategy."""
 
         # Get current market data
@@ -490,7 +488,7 @@ class AdaptivePositionManager:
 
         return None  # No regime change
 
-    async def _adapt_to_tight_conditions(self, instrument: str):
+    async def _adapt_to_tight_conditions(self, instrument: str) -> Any:
         """Adapt strategy for tight spread conditions."""
         print("Adapting to tight spread conditions")
 
@@ -504,7 +502,7 @@ class AdaptivePositionManager:
 
         return strategy_params
 
-    async def _adapt_to_wide_conditions(self, instrument: str):
+    async def _adapt_to_wide_conditions(self, instrument: str) -> Any:
         """Adapt strategy for wide spread conditions."""
         print("Adapting to wide spread conditions")
 
@@ -518,7 +516,7 @@ class AdaptivePositionManager:
 
         return strategy_params
 
-    async def _adapt_to_normal_conditions(self, instrument: str):
+    async def _adapt_to_normal_conditions(self, instrument: str) -> Any:
         """Adapt strategy for normal market conditions."""
         print("Adapting to normal market conditions")
 
@@ -540,13 +538,14 @@ Adjust risk parameters based on account performance:
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
+
 class DynamicRiskManager:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.base_risk_per_trade = Decimal("0.02")  # 2% base risk
 
-    async def calculate_current_risk_budget(self):
+    async def calculate_current_risk_budget(self) -> Any:
         """Calculate current risk budget based on account performance."""
 
         # Get account summary
@@ -616,22 +615,26 @@ class DynamicRiskManager:
 
 ### Order Performance Analytics
 
+<!-- fragment: Demo order performance tracking with undefined types -->
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
+
+
 class OrderPerformanceAnalyzer:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.order_history = []
 
-    async def track_order_performance(self, order_id: str, strategy_type: str):
+    async def track_order_performance(self, order_id: str, strategy_type: str) -> Any:
         """Track individual order performance metrics."""
 
         order = await self.client.orders.get_order(
             account_id=self.account_id,
-            order_id=order_id
+            order_id=order_id,
         )
 
         if order.state == "FILLED":
@@ -642,7 +645,7 @@ class OrderPerformanceAnalyzer:
                 "fill_price": Decimal(order.filling_transaction.price),
                 "requested_price": Decimal(order.price),
                 "slippage": Decimal(order.filling_transaction.price) - Decimal(order.price),
-                "units": order.units
+                "units": order.units,
             }
 
             self.order_history.append(fill_data)
@@ -650,7 +653,7 @@ class OrderPerformanceAnalyzer:
 
             return fill_data
 
-    async def analyze_strategy_performance(self, strategy_type: str):
+    async def analyze_strategy_performance(self, strategy_type: str) -> Any:
         """Analyze performance metrics for a specific strategy type."""
 
         strategy_orders = [
@@ -676,7 +679,7 @@ class OrderPerformanceAnalyzer:
             "average_slippage": avg_slippage,
             "slippage_variance": slippage_variance,
             "max_slippage": max(order["slippage"] for order in strategy_orders),
-            "min_slippage": min(order["slippage"] for order in strategy_orders)
+            "min_slippage": min(order["slippage"] for order in strategy_orders),
         }
 
         print(f"Strategy {strategy_type} performance:")
@@ -716,9 +719,8 @@ class OrderPerformanceAnalyzer:
 
 Continue building advanced order management capabilities:
 
-- **[Automated Order Systems](automated-systems.md)** - Rule-based management and monitoring
 - **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
-- **[Validation & Best Practices](validation-best-practices.md)** - Risk management and error handling
+- **[Best Practices](../../guides/understanding/best-practices.md)** - Risk management and error handling
 
 ## Key Takeaways
 

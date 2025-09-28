@@ -6,20 +6,30 @@ Order creation, modification, and management.
 
 ---
 
-## create
+## post_order
+<!-- fragment: API demo with unused response variable -->
 ```python
-# orders.create(account_id: AccountID, order_request: OrderRequest,
-#              timeout: float | None = None, client_request_id: str | None = None) -> OrderResponse
+import asyncio
+from fivetwenty import AsyncClient
+from fivetwenty.models import MarketOrderRequest
 
-# Example usage:
-order_response = await client.orders.create(
-    account_id="123-456-789",
-    order_request=MarketOrderRequest(
-        instrument="EUR_USD",
-        units=1000
-    ),
-    client_request_id="my-order-123"
-)
+
+async def main():
+    # orders.create(account_id: AccountID, order_request: OrderRequest,
+    #              timeout: float | None = None, client_request_id: str | None = None) -> OrderResponse
+
+    # Example usage:
+    async with AsyncClient() as client:
+        order_response = await client.orders.post_order(
+            account_id="123-456-789",
+            order_request=MarketOrderRequest(
+                instrument="EUR_USD",
+                units=1000,
+            ),
+            client_request_id="my-order-123",
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
@@ -45,20 +55,30 @@ Create a new order using any order request type.
 ---
 
 ## post_market_order
+<!-- fragment: API demo with unused response variable -->
 ```python
-# orders.post_market_order(account_id: AccountID, instrument: InstrumentName,
-#                         units: int | Decimal | str, take_profit: Decimal | None = None,
-#                         stop_loss: Decimal | None = None, timeout: float | None = None,
-#                         client_request_id: str | None = None) -> OrderResponse
+import asyncio
+from decimal import Decimal
+from fivetwenty import AsyncClient
 
-# Example usage:
-order = await client.orders.post_market_order(
-    account_id="123-456-789",
-    instrument="EUR_USD",
-    units=1000,
-    take_profit=Decimal("1.1500"),
-    stop_loss=Decimal("1.1200")
-)
+
+async def main():
+    # orders.post_market_order(account_id: AccountID, instrument: InstrumentName,
+    #                         units: int | Decimal | str, take_profit: Decimal | None = None,
+    #                         stop_loss: Decimal | None = None, timeout: float | None = None,
+    #                         client_request_id: str | None = None) -> OrderResponse
+
+    # Example usage:
+    async with AsyncClient() as client:
+        order = await client.orders.post_market_order(
+            account_id="123-456-789",
+            instrument="EUR_USD",
+            units=1000,
+            take_profit=Decimal("1.1500"),
+            stop_loss=Decimal("1.1200"),
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
@@ -87,19 +107,29 @@ Create a market order (convenience method).
 ---
 
 ## post_limit_order
+<!-- fragment: API demo with unused response variable -->
 ```python
+import asyncio
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 # orders.post_limit_order(account_id: AccountID, instrument: InstrumentName,
 #                        units: int | Decimal | str, price: Decimal,
 #                        take_profit: Decimal | None = None, stop_loss: Decimal | None = None,
 #                        timeout: float | None = None, client_request_id: str | None = None) -> OrderResponse
 
-# Example usage:
-order = await client.orders.post_limit_order(
-    account_id="123-456-789",
-    instrument="EUR_USD",
-    units=1000,
-    price=Decimal("1.1350")
-)
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        order = await client.orders.post_limit_order(
+            account_id="123-456-789",
+            instrument="EUR_USD",
+            units=1000,
+            price=Decimal("1.1350")
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
@@ -130,19 +160,29 @@ Create a limit order (convenience method).
 ---
 
 ## post_stop_order
+<!-- fragment: API demo with unused response variable -->
 ```python
+import asyncio
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 # orders.post_stop_order(account_id: AccountID, instrument: InstrumentName,
 #                       units: int | Decimal | str, price: Decimal,
 #                       take_profit: Decimal | None = None, stop_loss: Decimal | None = None,
 #                       timeout: float | None = None, client_request_id: str | None = None) -> OrderResponse
 
-# Example usage:
-order = await client.orders.post_stop_order(
-    account_id="123-456-789",
-    instrument="EUR_USD",
-    units=1000,
-    price=Decimal("1.1200")
-)
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        order = await client.orders.post_stop_order(
+            account_id="123-456-789",
+            instrument="EUR_USD",
+            units=1000,
+            price=Decimal("1.1200")
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
@@ -174,19 +214,29 @@ Create a stop order (convenience method).
 ---
 
 ## post_market_if_touched_order
+<!-- fragment: API demo with unused response variable -->
 ```python
+import asyncio
+from decimal import Decimal
+from fivetwenty import AsyncClient
+
 # orders.post_market_if_touched_order(account_id: AccountID, instrument: InstrumentName,
 #                                    units: int | Decimal | str, price: Decimal,
 #                                    take_profit: Decimal | None = None, stop_loss: Decimal | None = None,
 #                                    timeout: float | None = None, client_request_id: str | None = None) -> OrderResponse
 
-# Example usage:
-order = await client.orders.post_market_if_touched_order(
-    account_id="123-456-789",
-    instrument="EUR_USD",
-    units=1000,
-    price=Decimal("1.1400")
-)
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        order = await client.orders.post_market_if_touched_order(
+            account_id="123-456-789",
+            instrument="EUR_USD",
+            units=1000,
+            price=Decimal("1.1400")
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
@@ -217,18 +267,27 @@ Create a market-if-touched order (convenience method).
 
 ---
 
-## list
+## get_orders
+<!-- fragment: API demo with unused response variable -->
 ```python
-# orders.list(account_id: AccountID, ids: list[str] | None = None,
+import asyncio
+from fivetwenty import AsyncClient
+
+# orders.get_orders(account_id: AccountID, ids: list[str] | None = None,
 #            state: str = "PENDING", instrument: str | None = None,
 #            count: int | None = None, before_id: str | None = None) -> dict[str, Any]
 
-# Example usage:
-orders = await client.orders.list(
-    account_id="123-456-789",
-    state="PENDING",
-    count=50
-)
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        orders = await client.orders.get_orders(
+            account_id="123-456-789",
+            state="PENDING",
+            count=50
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders`
 
@@ -255,15 +314,24 @@ Get list of orders for account.
 
 ---
 
-## get
+## get_order
+<!-- fragment: API demo with unused response variable -->
 ```python
-# orders.get(account_id: AccountID, order_specifier: str) -> dict[str, Any]
+import asyncio
+from fivetwenty import AsyncClient
 
-# Example usage:
-order = await client.orders.get(
-    account_id="123-456-789",
-    order_specifier="12345"
-)
+# orders.get_order(account_id: AccountID, order_specifier: str) -> dict[str, Any]
+
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        order = await client.orders.get_order(
+            account_id="123-456-789",
+            order_specifier="12345"
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders/{orderSpecifier}`
 
@@ -286,16 +354,25 @@ Get order details.
 
 ---
 
-## close
+## cancel_order
+<!-- fragment: API demo with unused response variable -->
 ```python
-# orders.close(account_id: AccountID, order_specifier: str,
+import asyncio
+from fivetwenty import AsyncClient
+
+# orders.cancel_order(account_id: AccountID, order_specifier: str,
 #             timeout: float | None = None, client_request_id: str | None = None) -> dict[str, Any]
 
-# Example usage:
-result = await client.orders.close(
-    account_id="123-456-789",
-    order_specifier="12345"
-)
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        result = await client.orders.cancel_order(
+            account_id="123-456-789",
+            order_specifier="12345"
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}/cancel`
 
@@ -320,12 +397,21 @@ Cancel pending order.
 
 ---
 
-## list_open
+## get_pending_orders
+<!-- fragment: API demo with unused response variable -->
 ```python
-# orders.list_open(account_id: AccountID) -> dict[str, Any]
+import asyncio
+from fivetwenty import AsyncClient
 
-# Example usage:
-open_orders = await client.orders.list_open(account_id="123-456-789")
+# orders.get_pending_orders(account_id: AccountID) -> dict[str, Any]
+
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        open_orders = await client.orders.get_pending_orders(account_id="123-456-789")
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pendingOrders`
 
@@ -347,17 +433,26 @@ List all pending orders for an account.
 
 ---
 
-## modify
+## put_order
+<!-- fragment: API demo with unused response variable -->
 ```python
-# orders.modify(account_id: AccountID, order_specifier: str,
+import asyncio
+from fivetwenty import AsyncClient
+
+# orders.put_order(account_id: AccountID, order_specifier: str,
 #              order_request: dict[str, Any], client_request_id: str | None = None) -> dict[str, Any]
 
-# Example usage:
-result = await client.orders.modify(
-    account_id="123-456-789",
-    order_specifier="12345",
-    order_request={"price": "1.1400"}
-)
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        result = await client.orders.put_order(
+            account_id="123-456-789",
+            order_specifier="12345",
+            order_request={"price": "1.1400"}
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}`
 
@@ -382,18 +477,27 @@ Replace existing order by cancelling and creating new order.
 
 ---
 
-## modify_client_extensions
+## put_order_client_extensions
+<!-- fragment: API demo with unused response variable -->
 ```python
-# orders.modify_client_extensions(account_id: AccountID, order_specifier: str,
+import asyncio
+from fivetwenty import AsyncClient
+
+# orders.put_order_client_extensions(account_id: AccountID, order_specifier: str,
 #                                client_extensions: dict[str, Any] | None = None,
 #                                trade_client_extensions: dict[str, Any] | None = None) -> dict[str, Any]
 
-# Example usage:
-result = await client.orders.modify_client_extensions(
-    account_id="123-456-789",
-    order_specifier="12345",
-    client_extensions={"comment": "Updated order"}
-)
+
+async def main():
+    # Example usage:
+    async with AsyncClient() as client:
+        result = await client.orders.put_order_client_extensions(
+            account_id="123-456-789",
+            order_specifier="12345",
+            client_extensions={"comment": "Updated order"}
+        )
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}/clientExtensions`
 

@@ -16,9 +16,8 @@ Tutorials are **learning-oriented** content designed to teach you how to use the
 
 **Don't use tutorials when you:**
 
-- Need to solve a specific problem (use [How-to Guides](../how-to-guides/index.md))
+- Need to solve a specific problem or understand concepts (use [Guides](../guides/index.md))
 - Want to look up API details (use [API Reference](../api-reference/index.md))
-- Need background understanding (use [Explanations](../explanation/index.md))
 
 ## Learning Path
 
@@ -30,25 +29,24 @@ Start here if you're new to the FiveTwenty or trading APIs.
 1. **[Installation & Setup](getting-started/installation.md)** - Set up your development environment
 2. **[Authentication Basics](getting-started/authentication.md)** - Connect to OANDA safely
 3. **[Your First Trade](getting-started/first-trade.md)** - Execute your first trade
-4. **[Understanding Environments](getting-started/environments.md)** - Practice vs Live trading
+4. **[Understanding Environments](../guides/understanding/environments.md)** - Practice vs Live trading
 
 ### **Guided Learning** (Building Core Skills)
 Continue here once you've completed the getting started section.
 
 1. **[Basic Trading Concepts](basic-trading/index.md)** - Learn fundamental trading operations
 2. **[Advanced Order Types](advanced-orders/index.md)** - Learn sophisticated order management
-3. **[Risk Management Fundamentals](risk-management/index.md)** - Protect your capital effectively
-4. **[Portfolio Analysis Basics](portfolio-analysis/index.md)** - Monitor and analyze your trading
-5. **[Working with Streaming Data](streaming-data/index.md)** - Handle real-time market data
+3. **[Risk Management Fundamentals](risk-management.md)** - Protect your capital effectively
+4. **[Account Management Basics](account-management.md)** - Monitor and analyze your trading
+5. **[Working with Streaming Data](streaming-data.md)** - Handle real-time market data
 
 ### **Specialized Learning** (Advanced Topics)
 Deep-dive tutorials for specific areas of trading and SDK usage.
 
-1. **[Decimal Best Practices](decimal-best-practices.md)** - Learn financial precision
-2. **[Risk Management](risk-management/index.md)** - Protect your trading capital
-3. **[Portfolio Analysis](portfolio-analysis/index.md)** - Monitor and analyze performance
-4. **[Streaming Data](streaming-data/index.md)** - Handle real-time market feeds
-5. **[Advanced Orders](advanced-orders/index.md)** - Learn complex order types
+1. **[Risk Management](risk-management.md)** - Protect your trading capital using FiveTwenty controls
+2. **[Account Management](account-management.md)** - Manage multiple positions effectively
+3. **[Streaming Data](streaming-data.md)** - Handle real-time market feeds
+4. **[Advanced Orders](advanced-orders/index.md)** - Learn complex order types
 
 ### **Interactive Notebooks** (Hands-On Practice)
 Apply your knowledge with Jupyter notebooks that combine code, explanation, and exercises.
@@ -95,7 +93,7 @@ While working through tutorials:
 - **Found a bug?** Check our [GitHub Issues](#)
 - **Need clarification?** Visit our [Discussions](#)
 - **Want more details?** See our [API Reference](../api-reference/index.md)
-- **Need background knowledge?** Check our [Explanations](../explanation/index.md)
+- **Need background knowledge?** Check our [Guides](../guides/index.md)
 
 ---
 

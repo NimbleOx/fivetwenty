@@ -8,9 +8,7 @@ By the end of this guide, you will:
 
 - Implement breakout strategies with stop orders
 - Design mean reversion systems with MIT orders
-- Create adaptive trigger mechanisms
 - Build momentum and reversal detection systems
-- Handle order triggers and execution management
 
 ## Stop Orders for Breakout Strategies
 
@@ -19,12 +17,11 @@ Stop orders excel at capturing momentum when price breaks through key levels.
 ### Basic Breakout Implementation
 
 ```python
-import asyncio
 from decimal import Decimal
-from datetime import datetime, timedelta
 from fivetwenty import AsyncClient
 
-async def breakout_stop_strategy():
+
+async def breakout_stop_strategy() -> Any:
     """Implement basic breakout strategy using stop orders."""
     async with AsyncClient() as client:
         # Define breakout levels
@@ -68,7 +65,8 @@ Adapt breakout levels based on market volatility:
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def dynamic_breakout_levels():
+
+async def dynamic_breakout_levels() -> Any:
     """Calculate breakout levels based on recent price action."""
     async with AsyncClient() as client:
         # Get recent price data (simplified - you'd use a proper data source)
@@ -119,17 +117,21 @@ async def dynamic_breakout_levels():
 
 Combine multiple timeframe signals for robust breakouts:
 
+<!-- fragment: Demo multi-timeframe breakout with undefined Any types and unused arguments -->
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
+
+
 class MultiTimeframeBreakout:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.active_stops = []
 
-    async def analyze_breakout_levels(self, instrument: str):
+    async def analyze_breakout_levels(self, instrument: str) -> Any:
         """Analyze breakout levels across multiple timeframes."""
         # This would integrate with your data provider
         # For demonstration, we'll use simulated levels
@@ -137,21 +139,21 @@ class MultiTimeframeBreakout:
         breakout_levels = {
             "15min": {
                 "resistance": Decimal("1.0890"),
-                "support": Decimal("1.0810")
+                "support": Decimal("1.0810"),
             },
             "1hour": {
                 "resistance": Decimal("1.0920"),
-                "support": Decimal("1.0780")
+                "support": Decimal("1.0780"),
             },
             "4hour": {
                 "resistance": Decimal("1.0950"),
-                "support": Decimal("1.0750")
-            }
+                "support": Decimal("1.0750"),
+            },
         }
 
         return breakout_levels
 
-    async def place_layered_breakout_stops(self, instrument: str):
+    async def place_layered_breakout_stops(self, instrument: str) -> Any:
         """Place stop orders at multiple timeframe levels."""
         levels = await self.analyze_breakout_levels(instrument)
 
@@ -169,7 +171,7 @@ class MultiTimeframeBreakout:
                 instrument=instrument,
                 units=scaled_units,
                 price=level_data["resistance"] + Decimal("0.0005"),
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             # Bearish breakout stop
@@ -178,12 +180,12 @@ class MultiTimeframeBreakout:
                 instrument=instrument,
                 units=-scaled_units,
                 price=level_data["support"] - Decimal("0.0005"),
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             self.active_stops.extend([
                 buy_stop.order_create_transaction.id,
-                sell_stop.order_create_transaction.id
+                sell_stop.order_create_transaction.id,
             ])
 
             print(f"{timeframe} breakout stops: {scaled_units} units")
@@ -201,7 +203,8 @@ Market-If-Touched orders are ideal for mean reversion strategies where you expec
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def mean_reversion_mit_strategy():
+
+async def mean_reversion_mit_strategy() -> Any:
     """Implement mean reversion using MIT orders."""
     async with AsyncClient() as client:
         # Define mean reversion levels
@@ -213,7 +216,7 @@ async def mean_reversion_mit_strategy():
 
         # MIT orders for mean reversion entries
         # Sell MIT when price goes too high (expect reversion down)
-        sell_mit_response = await client.orders.post_mit_order(
+        sell_mit_response = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=-10000,  # Short position
@@ -222,7 +225,7 @@ async def mean_reversion_mit_strategy():
         )
 
         # Buy MIT when price goes too low (expect reversion up)
-        buy_mit_response = await client.orders.post_mit_order(
+        buy_mit_response = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=10000,  # Long position
@@ -248,7 +251,8 @@ Use Bollinger Bands for systematic mean reversion:
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def bollinger_band_reversion():
+
+async def bollinger_band_reversion() -> Any:
     """Mean reversion strategy using Bollinger Band levels."""
     async with AsyncClient() as client:
         # Simplified Bollinger Band calculation
@@ -263,7 +267,7 @@ async def bollinger_band_reversion():
 
         # MIT orders at Bollinger Band extremes
         # Sell when price touches upper band (overbought)
-        sell_mit = await client.orders.post_mit_order(
+        sell_mit = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=-15000,
@@ -272,7 +276,7 @@ async def bollinger_band_reversion():
         )
 
         # Buy when price touches lower band (oversold)
-        buy_mit = await client.orders.post_mit_order(
+        buy_mit = await client.orders.post_market_if_touched_order(
             account_id="your_account_id",
             instrument="EUR_USD",
             units=15000,
@@ -292,19 +296,23 @@ async def bollinger_band_reversion():
 
 Combine MIT orders with RSI signals for enhanced mean reversion:
 
+<!-- fragment: Demo RSI mean reversion with undefined Any types and magic number patterns -->
 ```python
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 
+
+
 class RSIMeanReversion:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.rsi_period = 14
         self.overbought_level = 70
         self.oversold_level = 30
 
-    async def calculate_rsi_levels(self, instrument: str):
+    async def calculate_rsi_levels(self, instrument: str) -> Any:
         """Calculate price levels corresponding to RSI extremes."""
         # This would use your preferred data source for RSI calculation
         # For demonstration, we'll use simulated RSI-based price levels
@@ -315,12 +323,12 @@ class RSIMeanReversion:
         rsi_price_levels = {
             "overbought_price": Decimal("1.0920"),  # Price at RSI 70
             "oversold_price": Decimal("1.0780"),    # Price at RSI 30
-            "current_rsi": current_rsi
+            "current_rsi": current_rsi,
         }
 
         return rsi_price_levels
 
-    async def place_rsi_reversion_orders(self, instrument: str):
+    async def place_rsi_reversion_orders(self, instrument: str) -> Any:
         """Place MIT orders at RSI extreme levels."""
         rsi_data = await self.calculate_rsi_levels(instrument)
 
@@ -328,21 +336,21 @@ class RSIMeanReversion:
         if 35 < rsi_data["current_rsi"] < 65:
 
             # Sell MIT at overbought level
-            sell_mit = await self.client.orders.post_mit_order(
+            sell_mit = await self.client.orders.post_market_if_touched_order(
                 account_id=self.account_id,
                 instrument=instrument,
                 units=-12000,
                 price=rsi_data["overbought_price"],
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             # Buy MIT at oversold level
-            buy_mit = await self.client.orders.post_mit_order(
+            buy_mit = await self.client.orders.post_market_if_touched_order(
                 account_id=self.account_id,
                 instrument=instrument,
                 units=12000,
                 price=rsi_data["oversold_price"],
-                time_in_force="GTC"
+                time_in_force="GTC",
             )
 
             print(f"RSI reversion orders placed:")
@@ -355,126 +363,6 @@ class RSIMeanReversion:
             return None, None
 ```
 
-## Adaptive Trigger Mechanisms
-
-### Volatility-Adjusted Triggers
-
-Adjust trigger distances based on market volatility:
-
-```python
-from decimal import Decimal
-from fivetwenty import AsyncClient
-
-async def volatility_adjusted_triggers():
-    """Adjust order triggers based on current market volatility."""
-    async with AsyncClient() as client:
-        # Calculate current volatility (simplified)
-        current_volatility = Decimal("0.0040")  # Example 4.0 pip volatility
-        base_trigger_distance = Decimal("0.0020")  # Base 2.0 pip distance
-
-        # Adjust trigger distance based on volatility
-        volatility_multiplier = current_volatility / Decimal("0.0030")  # Normalize to 3.0 pip base
-        adjusted_distance = base_trigger_distance * volatility_multiplier
-
-        # Ensure reasonable bounds
-        min_distance = Decimal("0.0010")  # Minimum 1.0 pip
-        max_distance = Decimal("0.0050")  # Maximum 5.0 pips
-
-        trigger_distance = max(min_distance, min(max_distance, adjusted_distance))
-
-        # Get current price for reference
-        pricing = await client.pricing.get_pricing(
-            account_id="your_account_id",
-            instruments=["EUR_USD"]
-        )
-
-        current_price = Decimal(pricing.prices[0].asks[0].price)
-
-        # Place volatility-adjusted stop orders
-        buy_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=10000,
-            price=current_price + trigger_distance,
-            time_in_force="GTC"
-        )
-
-        sell_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=-10000,
-            price=current_price - trigger_distance,
-            time_in_force="GTC"
-        )
-
-        print(f"Volatility-adjusted triggers:")
-        print(f"Distance: {trigger_distance} (volatility: {current_volatility})")
-        print(f"Buy stop: {current_price + trigger_distance}")
-        print(f"Sell stop: {current_price - trigger_distance}")
-
-        return buy_stop, sell_stop
-```
-
-### Time-Based Trigger Adjustments
-
-Modify trigger sensitivity based on time of day:
-
-```python
-from decimal import Decimal
-from fivetwenty import AsyncClient
-
-async def time_based_trigger_strategy():
-    """Adjust trigger sensitivity based on trading session."""
-    from datetime import datetime, timezone
-
-    async with AsyncClient() as client:
-        current_hour = datetime.now(timezone.utc).hour
-
-        # Define session characteristics
-        if 8 <= current_hour <= 17:  # London session
-            session = "london"
-            trigger_multiplier = Decimal("1.2")  # More aggressive
-            position_size = 15000
-        elif 13 <= current_hour <= 22:  # New York session
-            session = "new_york"
-            trigger_multiplier = Decimal("1.0")  # Standard
-            position_size = 12000
-        elif 23 <= current_hour <= 8:  # Asia session
-            session = "asia"
-            trigger_multiplier = Decimal("0.8")  # More conservative
-            position_size = 8000
-        else:  # Overlap or quiet periods
-            session = "overlap"
-            trigger_multiplier = Decimal("1.5")  # Very aggressive
-            position_size = 18000
-
-        base_distance = Decimal("0.0025")  # 2.5 pips base
-        session_distance = base_distance * trigger_multiplier
-
-        pricing = await client.pricing.get_pricing(
-            account_id="your_account_id",
-            instruments=["EUR_USD"]
-        )
-
-        current_price = Decimal(pricing.prices[0].asks[0].price)
-
-        # Place session-specific orders
-        buy_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=position_size,
-            price=current_price + session_distance,
-            time_in_force="GTC"
-        )
-
-        print(f"{session.title()} session strategy:")
-        print(f"Trigger distance: {session_distance}")
-        print(f"Position size: {position_size}")
-        print(f"Buy stop: {current_price + session_distance}")
-
-        return buy_stop
-```
-
 ## Momentum Detection Systems
 
 ### Momentum Confirmation with Stop Orders
@@ -485,13 +373,14 @@ Wait for momentum confirmation before triggering breakouts:
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
+
 class MomentumBreakout:
-    def __init__(self, client: AsyncClient, account_id: str):
+    def __init__(self, client: AsyncClient, account_id: str) -> None:
         self.client = client
         self.account_id = account_id
         self.momentum_threshold = Decimal("0.0015")  # 1.5 pip momentum
 
-    async def place_momentum_confirmed_stops(self, instrument: str):
+    async def place_momentum_confirmed_stops(self, instrument: str) -> Any:
         """Place stop orders that require momentum confirmation."""
 
         # Get current price action
@@ -534,7 +423,7 @@ class MomentumBreakout:
 
         return buy_stop, sell_stop
 
-    async def monitor_momentum_quality(self, order_id: str):
+    async def monitor_momentum_quality(self, order_id: str) -> Any:
         """Monitor the quality of momentum after stop trigger."""
 
         # This would implement post-trigger momentum analysis
@@ -560,137 +449,6 @@ class MomentumBreakout:
         return False  # No fill yet or invalid momentum
 ```
 
-## Advanced Order Combinations
-
-### Stop-MIT Combination Strategy
-
-Combine stop and MIT orders for comprehensive market coverage:
-
-```python
-from decimal import Decimal
-from fivetwenty import AsyncClient
-
-async def stop_mit_combination_strategy():
-    """Use both stop and MIT orders for complete market approach."""
-    async with AsyncClient() as client:
-        # Current market analysis
-        current_price = Decimal("1.0850")
-        volatility = Decimal("0.0035")  # 3.5 pip volatility
-
-        # Define strategy levels
-        breakout_distance = volatility * Decimal("1.5")  # 1.5x volatility
-        reversion_distance = volatility * Decimal("0.8")  # 0.8x volatility
-
-        # Breakout levels (stop orders)
-        upper_breakout = current_price + breakout_distance
-        lower_breakout = current_price - breakout_distance
-
-        # Mean reversion levels (MIT orders)
-        upper_reversion = current_price + reversion_distance
-        lower_reversion = current_price - reversion_distance
-
-        # Place stop orders for breakouts
-        buy_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=10000,
-            price=upper_breakout,
-            time_in_force="GTC"
-        )
-
-        sell_stop = await client.orders.post_stop_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=-10000,
-            price=lower_breakout,
-            time_in_force="GTC"
-        )
-
-        # Place MIT orders for mean reversion
-        sell_mit = await client.orders.post_mit_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=-8000,  # Smaller size for reversion
-            price=upper_reversion,
-            time_in_force="GTC"
-        )
-
-        buy_mit = await client.orders.post_mit_order(
-            account_id="your_account_id",
-            instrument="EUR_USD",
-            units=8000,
-            price=lower_reversion,
-            time_in_force="GTC"
-        )
-
-        print(f"Dual strategy deployed:")
-        print(f"Breakout stops: {upper_breakout} / {lower_breakout}")
-        print(f"Reversion MITs: {upper_reversion} / {lower_reversion}")
-
-        return {
-            "breakout_orders": [buy_stop, sell_stop],
-            "reversion_orders": [sell_mit, buy_mit]
-        }
-```
-
-## Order Trigger Management
-
-### Intelligent Order Cancellation
-
-Cancel orders based on changing market conditions:
-
-```python
-from datetime import datetime
-from decimal import Decimal
-from fivetwenty import AsyncClient
-
-async def intelligent_order_management():
-    """Manage order lifecycle based on market conditions."""
-    async with AsyncClient() as client:
-        # Place initial orders
-        initial_orders = await stop_mit_combination_strategy()
-
-        # Monitor and manage orders
-        monitoring_duration = 3600  # 1 hour
-        check_interval = 60  # Check every minute
-
-        start_time = datetime.utcnow()
-
-        while (datetime.utcnow() - start_time).seconds < monitoring_duration:
-            # Get current market conditions
-            pricing = await client.pricing.get_pricing(
-                account_id="your_account_id",
-                instruments=["EUR_USD"]
-            )
-
-            current_price = Decimal(pricing.prices[0].asks[0].price)
-            current_spread = (
-                Decimal(pricing.prices[0].asks[0].price) -
-                Decimal(pricing.prices[0].bids[0].price)
-            )
-
-            # Cancel orders if market conditions change significantly
-            if current_spread > Decimal("0.0005"):  # Spread too wide
-                print("Cancelling orders due to wide spreads")
-
-                # Cancel all pending orders
-                for order_group in initial_orders.values():
-                    for order in order_group:
-                        try:
-                            await client.orders.cancel_order(
-                                account_id="your_account_id",
-                                order_id=order.order_create_transaction.id
-                            )
-                        except:
-                            pass  # Order might already be filled/cancelled
-
-                break
-
-            await asyncio.sleep(check_interval)
-
-        print("Order management cycle completed")
-```
-
 ## Performance Optimization
 
 ### Order Trigger Efficiency
@@ -701,7 +459,8 @@ Optimize order placement for fast trigger response:
 from decimal import Decimal
 from fivetwenty import AsyncClient
 
-async def efficient_trigger_placement():
+
+async def efficient_trigger_placement() -> Any:
     """Optimize order placement for fast market response."""
     async with AsyncClient() as client:
         # Pre-calculate all order parameters
@@ -749,43 +508,29 @@ async def efficient_trigger_placement():
 
 ### Stop Order Usage
 - Place stops beyond significant levels for momentum capture
-- Use volatility-adjusted trigger distances
 - Implement momentum confirmation for quality breakouts
-- Consider time-based adjustments for session characteristics
 
 ### MIT Order Usage
 - Target mean reversion at statistical extremes
 - Combine with technical indicators (RSI, Bollinger Bands)
 - Use smaller position sizes than breakout strategies
-- Monitor reversion quality after trigger
-
-### Trigger Management
-- Validate market conditions before placement
-- Implement intelligent cancellation rules
-- Monitor order quality after execution
-- Use appropriate position sizing for strategy type
 
 ### System Design
-- Batch related orders for efficiency
 - Implement comprehensive error handling
-- Monitor and adjust based on market regime
-- Combine complementary strategies for market coverage
+- Use appropriate position sizing for strategy type
 
 ## Next Steps
 
 Advance your order management capabilities:
 
 - **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
-- **[Automated Order Systems](automated-systems.md)** - Rule-based management and monitoring
 - **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
 
 ## Key Takeaways
 
 1. **Stop orders** capture momentum and breakouts effectively
 2. **MIT orders** excel at mean reversion and profit-taking
-3. **Adaptive triggers** improve strategy performance across market conditions
-4. **Momentum confirmation** reduces false breakout signals
-5. **Intelligent management** optimizes order lifecycle and performance
-6. **Combined strategies** provide comprehensive market coverage
+3. **Momentum confirmation** reduces false breakout signals
+4. **Performance optimization** ensures efficient order placement
 
 Master these trigger-based order strategies to build sophisticated trading systems that respond intelligently to market momentum and mean reversion opportunities.

@@ -112,30 +112,29 @@ class TestEnvironmentAndDeployment:
         test_env = {
             "FIVETWENTY_OANDA_TOKEN": "test-token-123",
             "FIVETWENTY_OANDA_ACCOUNT": "123-456-7890123-456",
-            "FIVETWENTY_OANDA_ACCOUNT_ALIAS": "test_account",
             "FIVETWENTY_OANDA_ENVIRONMENT": "practice",
         }
 
         with patch.dict(os.environ, test_env):
             config = AccountConfigLoader.load_default()
             assert config is not None, "Should load config when env vars are set"
-            assert config.alias == "test_account"
+            assert config.alias == "default"
             assert config.environment == Environment.PRACTICE
             assert config.token.get_secret_value() == "test-token-123"
             assert config.account_id.get_secret_value() == "123-456-7890123-456"
 
         # Test custom prefix
         custom_env = {
-            "CUSTOM_OANDA_TOKEN": "custom-token-456",
-            "CUSTOM_OANDA_ACCOUNT": "456-789-0123456-789",
-            "CUSTOM_OANDA_ENVIRONMENT": "live",
+            "CUSTOM_FIVETWENTY_OANDA_TOKEN": "custom-token-456",
+            "CUSTOM_FIVETWENTY_OANDA_ACCOUNT": "456-789-0123456-789",
+            "CUSTOM_FIVETWENTY_OANDA_ENVIRONMENT": "live",
         }
 
         with patch.dict(os.environ, custom_env):
             custom_config = AccountConfigLoader.from_env_prefix("CUSTOM_")
             assert custom_config is not None
             assert custom_config.environment == Environment.LIVE
-            assert custom_config.alias == "default"  # Default alias
+            assert custom_config.alias == "custom"  # Generated from CUSTOM_ prefix
 
         # Test missing required fields
         incomplete_env = {

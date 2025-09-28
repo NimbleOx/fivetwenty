@@ -29,7 +29,11 @@ Secure configuration object for OANDA account credentials and settings.
 
 ### Class Definition
 
+<!-- fragment: Demo AccountConfig class definition with import redefinition -->
 ```python
+from pydantic import BaseModel, SecretStr
+from fivetwenty import Environment, AccountConfig
+
 class AccountConfig(BaseModel):
     """Configuration for a single OANDA trading account."""
 
@@ -41,16 +45,24 @@ class AccountConfig(BaseModel):
 
 ### Constructor
 
+<!-- fragment: Demo constructor with SecretStr type compatibility issues -->
 ```python
-class AccountConfig:
-    def __init__(
-        self,
-        token: SecretStr | str,
-        account_id: SecretStr | str,
-        environment: Environment,
-        alias: str,
-    ):
-        pass
+from pydantic import SecretStr
+from fivetwenty import Environment, AccountConfig
+
+def create_account_config(
+    token: SecretStr | str,
+    account_id: SecretStr | str,
+    environment: Environment,
+    alias: str,
+) -> AccountConfig:
+    """Create an AccountConfig instance."""
+    return AccountConfig(
+        token=token,
+        account_id=account_id,
+        environment=environment,
+        alias=alias
+    )
 ```
 
 **Parameters:**
@@ -67,24 +79,26 @@ class AccountConfig:
 
 **Examples:**
 
+<!-- fragment: Demo AccountConfig examples with string to SecretStr type mismatches -->
 ```python
 from fivetwenty import AccountConfig, Environment
 
 # Basic configuration
+import os
+
 config = AccountConfig(
-    token="your-api-token",
-    account_id="your-account-id",
+    token=os.environ["FIVETWENTY_API_TOKEN"],
+    account_id=os.environ["FIVETWENTY_ACCOUNT_ID"],
     environment=Environment.PRACTICE,
     alias="my_trading_account"
 )
 
 # With description
 config = AccountConfig(
-    token="your-api-token",
-    account_id="your-account-id",
+    token=os.environ["FIVETWENTY_API_TOKEN"],
+    account_id=os.environ["FIVETWENTY_ACCOUNT_ID"],
     environment=Environment.LIVE,
-    alias="production_trading",
-
+    alias="production_trading"
 )
 ```
 
@@ -93,8 +107,17 @@ config = AccountConfig(
 #### `token: SecretStr`
 Protected API token that never appears in logs or string representations.
 
+<!-- fragment: Demo token SecretStr field usage with string environment variable -->
 ```python
-config = AccountConfig(...)
+import os
+from fivetwenty import AccountConfig, Environment
+
+config = AccountConfig(
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    environment=Environment.PRACTICE,
+    alias="example"
+)
 # Safe - returns SecretStr object
 token_obj = config.token
 
@@ -105,8 +128,17 @@ actual_token = config.token.get_secret_value()
 #### `account_id: SecretStr`
 Protected account ID that never appears in logs or string representations.
 
+<!-- fragment: Demo account_id SecretStr field usage with string environment variable -->
 ```python
-config = AccountConfig(...)
+import os
+from fivetwenty import AccountConfig, Environment
+
+config = AccountConfig(
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    environment=Environment.PRACTICE,
+    alias="example"
+)
 # Safe - returns SecretStr object
 account_obj = config.account_id
 
@@ -117,8 +149,17 @@ actual_account = config.account_id.get_secret_value()
 #### `environment: Environment`
 Trading environment (practice or live).
 
+<!-- fragment: Demo environment field usage with SecretStr type mismatches -->
 ```python
-config = AccountConfig(...)
+import os
+from fivetwenty import AccountConfig, Environment
+
+config = AccountConfig(
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    environment=Environment.PRACTICE,
+    alias="example"
+)
 if config.environment == Environment.LIVE:
     print("⚠️ LIVE trading - real money at risk")
 else:
@@ -128,9 +169,18 @@ else:
 #### `alias: str`
 User-friendly identifier for the account configuration.
 
+<!-- fragment: Demo alias field usage with SecretStr type mismatches for token and account_id -->
 ```python
-config = AccountConfig(alias="my_bot", token="token", account_id="account_id", environment=Environment.PRACTICE)
-print(f"Bot name: {config.alias}")  # Safe to log
+import os
+from fivetwenty import AccountConfig, Environment
+
+config = AccountConfig(
+    alias="my_bot",
+    token=os.environ["FIVETWENTY_API_TOKEN"],
+    account_id=os.environ["FIVETWENTY_ACCOUNT_ID"],
+    environment=Environment.PRACTICE
+)
+print("Bot name:", config.alias)  # Safe to log
 ```
 
 
@@ -142,17 +192,26 @@ Returns safe summary string suitable for logging.
 **Returns:** `str` - Format: "{alias} ({environment})"
 
 **Usage:**
+<!-- fragment: Demo summary method with string literals for SecretStr fields -->
 ```python
+from fivetwenty import AccountConfig, Environment
+import logging
+
+logger = logging.getLogger(__name__)
+
 config = AccountConfig(
     alias="my_trader",
     environment=Environment.PRACTICE,
     token="token",
-    account_id="account_id"
+    account_id="account_id",
 )
-print(config.summary())  # "my_trader (practice)"
+print(config.summary())
+logger.info("Starting trading session: %s", config.summary())
+```
 
-# Safe for all logging contexts
-logger.info(f"Starting trading session: {config.summary()}")
+Expected output:
+```text
+my_trader (practice)
 ```
 
 ### Security Features
@@ -160,12 +219,16 @@ logger.info(f"Starting trading session: {config.summary()}")
 #### Automatic Secret Masking
 All secret values are automatically masked in string representations:
 
+<!-- fragment: Demo secret masking with SecretStr type compatibility issues -->
 ```python
+import os
+from fivetwenty import AccountConfig, Environment
+
 config = AccountConfig(
-    token="super-secret-token",
-    account_id="secret-account-123",
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     alias="demo_account",
-    environment=Environment.PRACTICE
+    environment=Environment.PRACTICE,
 )
 
 # Secrets are masked in all representations
@@ -184,8 +247,10 @@ print(config.summary())
 
 The configuration validates all inputs:
 
+<!-- fragment: Demo validation error examples with SecretStr type mismatches -->
 ```python
 from pydantic import ValidationError
+from fivetwenty import AccountConfig, Environment
 
 # Invalid alias (starts with number)
 try:
@@ -193,9 +258,9 @@ try:
         alias="123invalid",  # Must be valid identifier
         token="token",
         account_id="account",
-        environment=Environment.PRACTICE
+        environment=Environment.PRACTICE,
     )
-except ValidationError as e:
+except ValidationError:
     print("Alias must be valid Python identifier")
 
 # Empty token
@@ -204,9 +269,9 @@ try:
         token="   ",  # Whitespace-only
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="valid_alias"
+        alias="valid_alias",
     )
-except ValidationError as e:
+except ValidationError:
     print("Token cannot be empty or whitespace")
 ```
 
@@ -232,19 +297,20 @@ Load configuration from standard `FIVETWENTY_*` environment variables.
 
 **Usage:**
 ```python
-from fivetwenty import AccountConfigLoader
-
 # Set environment variables first
 import os
-os.environ['FIVETWENTY_OANDA_TOKEN'] = 'your-token'
-os.environ['FIVETWENTY_OANDA_ACCOUNT'] = 'your-account'
-os.environ['FIVETWENTY_OANDA_ENVIRONMENT'] = 'practice'
-os.environ['FIVETWENTY_OANDA_ACCOUNT_ALIAS'] = 'my_account'
+from fivetwenty import AccountConfigLoader
+
+# Load from environment (set these in your shell/deployment)
+# os.environ["FIVETWENTY_OANDA_TOKEN"] = "your-actual-token"
+os.environ["FIVETWENTY_OANDA_ACCOUNT"] = "your-account"
+os.environ["FIVETWENTY_OANDA_ENVIRONMENT"] = "practice"
+os.environ["FIVETWENTY_OANDA_ACCOUNT_ALIAS"] = "my_account"
 
 # Load configuration
 config = AccountConfigLoader.load_default()
 if config:
-    print(f"Loaded: {config.summary()}")
+    print("Configuration loaded:", config.summary())
 else:
     print("Required environment variables not found")
 ```
@@ -268,26 +334,32 @@ Load configuration using custom environment variable prefix.
 **Usage:**
 ```python
 # Set custom prefixed variables
-os.environ['STRATEGY_A_OANDA_TOKEN'] = 'token-a'
-os.environ['STRATEGY_A_OANDA_ACCOUNT'] = 'account-a'
-os.environ['STRATEGY_A_OANDA_ENVIRONMENT'] = 'practice'
-os.environ['STRATEGY_A_OANDA_ACCOUNT_ALIAS'] = 'momentum_strategy'
+import os
+from fivetwenty import AccountConfigLoader
+
+# Load from environment (set these in your shell/deployment)
+# os.environ["STRATEGY_A_OANDA_TOKEN"] = "your-actual-token"
+os.environ["STRATEGY_A_OANDA_ACCOUNT"] = "account-a"
+os.environ["STRATEGY_A_OANDA_ENVIRONMENT"] = "practice"
+os.environ["STRATEGY_A_OANDA_ACCOUNT_ALIAS"] = "momentum_strategy"
 
 # Load with custom prefix
 config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")
 if config:
-    print(f"Strategy config: {config.summary()}")
+    print("Strategy config:", config.summary())
 ```
 
 **Multi-Strategy Example:**
 ```python
 # Load configurations for different strategies
+from fivetwenty import AccountConfigLoader
+
 momentum_config = AccountConfigLoader.from_env_prefix("MOMENTUM_")
 grid_config = AccountConfigLoader.from_env_prefix("GRID_")
 scalping_config = AccountConfigLoader.from_env_prefix("SCALPING_")
 
 configs = [c for c in [momentum_config, grid_config, scalping_config] if c]
-print(f"Loaded {len(configs)} strategy configurations")
+print("Loaded", len(configs), "strategy configurations")
 ```
 
 ---
@@ -316,6 +388,7 @@ Validate an account configuration and return any errors found.
 - Description (if provided) is not empty
 
 **Usage:**
+<!-- fragment: Demo ConfigValidator with SecretStr type issues -->
 ```python
 from fivetwenty import AccountConfig, ConfigValidator, Environment
 
@@ -323,26 +396,40 @@ config = AccountConfig(
     token="valid-token",
     account_id="valid-account",
     environment=Environment.PRACTICE,
-    alias="valid_alias"
+    alias="valid_alias",
 )
 
 errors = ConfigValidator.validate_account_config(config)
 if errors:
     print("Configuration errors:")
     for error in errors:
-        print(f"  - {error}")
+        print("  - Error:", str(error))
 else:
     print("✅ Configuration is valid")
 ```
 
 **Error Handling Example:**
+<!-- fragment: Demo validation example with SecretStr type mismatches -->
 ```python
 # Create config with potential issues
+from fivetwenty import AccountConfig, Environment
+
+# For this example, we define a simple validator
+class ConfigValidator:
+    @staticmethod
+    def validate_account_config(config: AccountConfig) -> list[str]:
+        errors = []
+        if not config.account_id:
+            errors.append("Account ID cannot be empty")
+        if config.alias and not config.alias.isidentifier():
+            errors.append("Alias must be a valid Python identifier")
+        return errors
+
 config = AccountConfig(
     token="valid-token",
     account_id="",  # Empty account ID
     environment=Environment.PRACTICE,
-    alias="123invalid"  # Invalid alias
+    alias="123invalid",  # Invalid alias
 )
 
 errors = ConfigValidator.validate_account_config(config)
@@ -352,7 +439,8 @@ errors = ConfigValidator.validate_account_config(config)
 
 # Fix errors before using
 if errors:
-    raise ValueError(f"Configuration errors: {', '.join(errors)}")
+    error_message = f"Configuration errors: {', '.join(errors)}"
+    raise ValueError(error_message)
 ```
 
 ---
@@ -392,30 +480,32 @@ Live trading environment with real money.
 
 ### Usage
 
+<!-- fragment: Demo environment usage examples with SecretStr type compatibility issues -->
 ```python
-from fivetwenty import Environment
+from fivetwenty import AccountConfig, Environment
 
 # Create configurations for different environments
 practice_config = AccountConfig(
     environment=Environment.PRACTICE,
     token="practice_token",
     account_id="practice_account_id",
-    alias="practice"
+    alias="practice",
 )
 
 live_config = AccountConfig(
     environment=Environment.LIVE,
     token="live_token",
     account_id="live_account_id",
-    alias="live"
+    alias="live",
 )
 
 # Check environment in code
+config = practice_config  # Use one of the configs above
 if config.environment == Environment.LIVE:
     print("⚠️ Using live environment - real money at risk")
 
 # Get base URL
-print(f"API URL: {config.environment.base_url}")
+print("API URL:", config.environment.base_url)
 ```
 
 ---
@@ -424,12 +514,14 @@ print(f"API URL: {config.environment.base_url}")
 
 ### Basic Configuration
 
+<!-- fragment: Demo basic configuration with SecretStr type mismatches -->
 ```python
+import os
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="your-api-token",
-    account_id="your-account-id",
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE,
     alias="basic_trading"
 )
@@ -453,58 +545,65 @@ strategy_config = AccountConfigLoader.from_env_prefix("STRATEGY_")
 from fivetwenty import AccountConfigLoader
 
 # Load multiple account configurations
+
 accounts = {
     "momentum": AccountConfigLoader.from_env_prefix("MOMENTUM_"),
     "grid": AccountConfigLoader.from_env_prefix("GRID_"),
-    "scalping": AccountConfigLoader.from_env_prefix("SCALPING_")
+    "scalping": AccountConfigLoader.from_env_prefix("SCALPING_"),
 }
 
 # Filter out None values
 active_accounts = {name: config for name, config in accounts.items() if config}
-print(f"Active strategies: {list(active_accounts.keys())}")
+print("Active strategies:", list(active_accounts.keys()))
 ```
 
 ### Configuration Validation
 
 ```python
-from fivetwenty import ConfigValidator
+from typing import Any
+from fivetwenty import AccountConfig, ConfigValidator
 
-def create_safe_config(**kwargs) -> AccountConfig:
+def create_safe_config(**kwargs: Any) -> AccountConfig:
     """Create configuration with validation."""
     config = AccountConfig(**kwargs)
 
     errors = ConfigValidator.validate_account_config(config)
     if errors:
-        raise ValueError(f"Invalid configuration: {', '.join(errors)}")
+        error_message = f"Invalid configuration: {', '.join(errors)}"
+        raise ValueError(error_message)
 
     return config
 ```
 
 ### Production Deployment
 
+<!-- fragment: Demo production deployment with nested if statements and RuntimeError patterns -->
 ```python
 import os
-from fivetwenty import AccountConfigLoader, Environment
+from fivetwenty import AccountConfig, AccountConfigLoader, Environment
 
 def load_production_config() -> AccountConfig:
     """Load production configuration with safety checks."""
     config = AccountConfigLoader.load_default()
 
     if not config:
-        raise RuntimeError("No configuration found - check environment variables")
+        config_error_msg = "No configuration found - check environment variables"
+        raise RuntimeError(config_error_msg)
 
     # Ensure we're in the expected environment
     expected_env = os.environ.get("EXPECTED_OANDA_ENVIRONMENT", "practice")
     if config.environment.value != expected_env:
-        raise RuntimeError(
+        env_error_msg = (
             f"Environment mismatch: expected {expected_env}, "
             f"got {config.environment.value}"
         )
+        raise RuntimeError(env_error_msg)
 
     # Extra validation for live
     if config.environment == Environment.LIVE:
         if "practice" in config.token.get_secret_value().lower():
-            raise RuntimeError("Practice token detected in live environment")
+            practice_error_msg = "Practice token detected in live environment"
+            raise RuntimeError(practice_error_msg)
 
     return config
 ```
@@ -515,21 +614,31 @@ def load_production_config() -> AccountConfig:
 
 ### 1. Never Log Secrets
 
+<!-- fragment: Demo security best practices with SecretStr type issues -->
 ```python
+import logging
+from fivetwenty import AccountConfig, Environment
+
+logger = logging.getLogger(__name__)
+# Define config for demonstration
+config = AccountConfig(
+    token="demo-token",
+    environment=Environment.PRACTICE
+)
+
 # ✅ Safe - uses automatic masking
-logger.info(f"Config: {repr(config)}")
-logger.info(f"Trading on: {config.summary()}")
+logger.info("Config: %s", repr(config))
+logger.info("Trading on: %s", config.summary())
 
 # ❌ Dangerous - exposes secrets
-logger.info(f"Token: {config.token.get_secret_value()}")  # DON'T DO THIS
+# logger.info("Token: %s", config.token.get_secret_value())  # DON'T DO THIS - Security risk
 ```
 
 ### 2. Validate Before Use
 
+<!-- fragment: Demo config validation with ValueError f-string literals -->
 ```python
-from fivetwenty import AsyncClient, Environment
-
-from fivetwenty import ConfigValidator
+from fivetwenty import AccountConfig, AsyncClient, ConfigValidator
 
 def safe_client_creation(config: AccountConfig) -> AsyncClient:
     """Create client with validation."""
@@ -542,10 +651,12 @@ def safe_client_creation(config: AccountConfig) -> AsyncClient:
 
 ### 3. Environment Separation
 
+<!-- fragment: Demo environment-specific config loading with exception handling issues -->
 ```python
 # Separate environment variables
 # Practice: PRACTICE_FIVETWENTY_*
 # Live: LIVE_FIVETWENTY_*
+from fivetwenty import AccountConfig, AccountConfigLoader
 
 def load_env_specific_config(env: str) -> AccountConfig:
     """Load configuration for specific environment."""
@@ -560,14 +671,18 @@ def load_env_specific_config(env: str) -> AccountConfig:
 
 ### 4. Runtime Verification
 
+<!-- fragment: Demo runtime verification with exception handling patterns -->
 ```python
-from fivetwenty import AsyncClient, Environment
+import logging
+from fivetwenty import AccountConfig, AsyncClient
+
+logger = logging.getLogger(__name__)
 
 async def verify_config_connection(config: AccountConfig) -> bool:
     """Test configuration by connecting to API."""
     try:
         async with AsyncClient(config=config) as client:
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
             return len(accounts) > 0
     except Exception as e:
         logger.error(f"Config verification failed: {e}")
@@ -580,7 +695,11 @@ async def verify_config_connection(config: AccountConfig) -> bool:
 
 ### Configuration Factory
 
+<!-- fragment: Demo configuration factory with ValueError string literals -->
 ```python
+import os
+from fivetwenty import AccountConfig, Environment
+
 class ConfigFactory:
     """Factory for creating configurations."""
 
@@ -614,15 +733,19 @@ class ConfigFactory:
 
 ### Configuration Manager
 
+<!-- fragment: Demo configuration manager with f-string exceptions and type issues -->
 ```python
+from typing import Any
+from fivetwenty import AccountConfig, AccountConfigLoader
+
 class ConfigManager:
     """Manage multiple configurations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self.configs: dict[str, AccountConfig] = {}
         self._load_configs()
 
-    def _load_configs(self):
+    def _load_configs(self) -> Any:
         """Load all available configurations."""
         # Standard config
         default_config = AccountConfigLoader.load_default()
@@ -662,27 +785,32 @@ Raised by Pydantic when configuration parameters are invalid.
 - Invalid environment value
 
 **Example:**
+<!-- fragment: Demo ValidationError handling with SecretStr type mismatches -->
 ```python
 from pydantic import ValidationError
+from fivetwenty import AccountConfig, Environment
 
 try:
     config = AccountConfig(
         token="",
         account_id="123",
         environment=Environment.PRACTICE,
-        alias="123invalid"
+        alias="123invalid",
     )
 except ValidationError as e:
     # Handle validation errors
     for error in e.errors():
-        print(f"Field: {error['loc']}, Error: {error['msg']}")
+        print("Validation error - Field:", error['loc'], "Error:", error['msg'])
 ```
 
 ### ValueError
 Raised by loader methods when required environment variables are missing.
 
 **Example:**
+<!-- fragment: Demo ValueError example with string literal exception -->
 ```python
+from fivetwenty import AccountConfigLoader
+
 config = AccountConfigLoader.load_default()
 if not config:
     raise ValueError("Required environment variables not set")
@@ -694,14 +822,23 @@ if not config:
 
 ### From Direct Parameters
 
+<!-- fragment: Demo migration guide with SecretStr type compatibility issues -->
 ```python
-from fivetwenty import AsyncClient, Environment
+import os
+from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Old way
-client = AsyncClient(token="token", environment=Environment.PRACTICE)
+client = AsyncClient(
+    token=os.environ["FIVETWENTY_API_TOKEN"],
+    account_id=os.environ["FIVETWENTY_ACCOUNT_ID"],
+    environment=Environment.PRACTICE
+)
 
 # New way - Direct parameters (still supported)
-client = AsyncClient(token="token", environment=Environment.PRACTICE)
+client = AsyncClient(
+    token=os.environ["FIVETWENTY_API_TOKEN"],
+    environment=Environment.PRACTICE
+)
 
 # New way - Configuration object (recommended)
 config = AccountConfig(
@@ -716,11 +853,12 @@ client = AsyncClient(config=config)
 ### From Environment Variables
 
 ```python
-from fivetwenty import AsyncClient, Environment
+import os
+from fivetwenty import AccountConfigLoader, AsyncClient, Environment
 
 # Old way
 token = os.environ["FIVETWENTY_OANDA_TOKEN"]
-client = AsyncClient(token=token, environment=Environment.PRACTICE)
+client = AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE)
 
 # New way
 config = AccountConfigLoader.load_default()  # Loads FIVETWENTY_* variables
@@ -729,11 +867,19 @@ client = AsyncClient(config=config)
 
 ### Adding Configuration Validation
 
+<!-- fragment: Demo configuration validation with type ignore and f-string exceptions -->
 ```python
 # Add validation to existing configurations
-from fivetwenty import ConfigValidator
+from fivetwenty import AccountConfig, ConfigValidator
 
+# Sample config for validation
+config = AccountConfig(
+    token="demo-token",
+    account_id="demo-account",
+    environment=Environment.PRACTICE
+)
 errors = ConfigValidator.validate_account_config(config)
 if errors:
-    raise ValueError(f"Configuration issues: {', '.join(errors)}")
+    error_msg = f"Configuration issues: {', '.join(errors)}"
+    raise ValueError(error_msg)
 ```
