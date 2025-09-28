@@ -476,6 +476,7 @@ async def bad_rate_limit_handling():
 
 ### Correct Alternatives
 
+<!-- fragment: Demo best practices with logging and exception handling patterns -->
 ```python
 import asyncio
 import logging
@@ -927,6 +928,7 @@ async def test_trading_logic():
 
 Test against practice environment:
 
+<!-- fragment: Demo integration testing with ValueError string literals -->
 ```python
 import os
 import pytest

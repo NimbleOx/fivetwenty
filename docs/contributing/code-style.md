@@ -10,6 +10,7 @@ FiveTwenty follows strict code quality standards to ensure maintainability, secu
 
 All code must pass mypy strict mode with no errors:
 
+<!-- fragment: Demo code style examples with non-existent model imports -->
 ```python
 from typing import Any
 
@@ -71,6 +72,7 @@ def parse_price(value: str | int | Decimal) -> Decimal:
 
 Use FiveTwenty's exception hierarchy:
 
+<!-- fragment: Demo error handling with FiveTwentyError status argument -->
 ```python
 import httpx
 from fivetwenty.exceptions import FiveTwentyError
@@ -128,7 +130,7 @@ class AccountsEndpoint:
         self,
         account_id: str,
         *,
-        timeout: float | None = None,
+        _timeout: float | None = None,
     ) -> AccountSummary:
         """Get account summary (async method)."""
         # Use public interface instead of private methods
@@ -156,7 +158,7 @@ class SyncAccountsEndpoint:
         """Get account summary (sync wrapper)."""
         # Use public interface instead of private methods
         return asyncio.run(
-            self._async_endpoint.get_summary(account_id, timeout=timeout)
+            self._async_endpoint.get_summary(account_id, _timeout=timeout)
         )
 ```
 
@@ -164,6 +166,7 @@ class SyncAccountsEndpoint:
 
 Group related methods into endpoint classes:
 
+<!-- fragment: Demo API endpoint organization with undefined Order types -->
 ```python
 from typing import Any
 from fivetwenty.models import Order, OrderRequest, OrderResponse
@@ -258,9 +261,10 @@ def parse_order_response(data: Any) -> Order:
 
 ### **Methods and Functions**
 
+<!-- fragment: Demo interface examples with undefined imports and missing implementations -->
 ```python
 from collections.abc import AsyncIterator
-from fivetwenty.models import AccountSummary, OrderResponse, Price
+from fivetwenty.models import AccountSummary, OrderResponse
 
 
 # ✅ Good - Clear, descriptive names
@@ -301,6 +305,7 @@ async def mk_ord(self, acct: str, instr: str, u: int) -> OrderResponse:
 
 ### **Variables and Parameters**
 
+<!-- fragment: Demo variable naming with undefined OrderRequest -->
 ```python
 from fivetwenty.models import OrderRequest
 
@@ -343,6 +348,9 @@ class PricingHeartbeat(BaseModel):
 
 
 # ❌ Bad - Generic or unclear names
+
+<!-- fragment: Demo bad naming examples with empty class implementations -->
+```python
 class Account(BaseModel):  # Too generic - summary? details?
     """Bad example - too generic."""
     pass
@@ -417,6 +425,7 @@ async def post_limit_order(
 
 ### **Model Documentation**
 
+<!-- fragment: Demo docstring formatting issues -->
 ```python
 from decimal import Decimal
 from pydantic import BaseModel, Field
@@ -520,7 +529,11 @@ async def stream_pricing(
     """Stream pricing with reconnection logic."""
     last_heartbeat = time.monotonic()
 
-    # Build streaming URL and headers\n    url = f\"/v3/accounts/{account_id}/pricing/stream\"\n    headers = {\"Authorization\": \"Bearer token\", \"Accept\": \"application/stream+json\"}\n    \n    async for line in self._stream_lines(url, headers):
+    # Build streaming URL and headers
+    url = f"/v3/accounts/{account_id}/pricing/stream"
+    headers = {"Authorization": "Bearer token", "Accept": "application/stream+json"}
+
+    async for line in self._stream_lines(url, headers):
         if not line.strip():
             continue
 
@@ -547,6 +560,7 @@ async def stream_pricing(
 
 ### **Validation Patterns**
 
+<!-- fragment: Demo input validation with undefined OrderRequest -->
 ```python
 import re
 from typing import Any
@@ -769,6 +783,7 @@ async def get_multiple_accounts(
 
 ### **Memory Management**
 
+<!-- fragment: Demo undefined Any type usage -->
 ```python
 # ✅ Good - Streaming with backpressure
 
@@ -783,6 +798,7 @@ async def process_price_stream(
     max_buffer_size: int = 1000,
 ) -> None:
     """Process price stream with memory management."""
+    # Memory-efficient processing
     buffer: list[Any] = []
 
     async for price in client.pricing.get_pricing_stream(account_id, instruments):
@@ -813,6 +829,7 @@ async def process_price_batch(prices: list[Any]) -> None:
 
 ### **Credential Handling**
 
+<!-- fragment: Demo batch processing with undefined Environment and Trade -->
 ```python
 import logging
 
@@ -862,6 +879,8 @@ def log_trade_result(trade: Trade, config: AccountConfig) -> None:
 
 
 # ❌ Bad - Exposes credentials
+<!-- fragment: Demo bad logging with undefined types and security issues -->
+```python
 def bad_logging(trade: Trade, config: AccountConfig) -> None:
     """Bad example that may expose secrets."""
     logger.info(f"Trade: {trade} Config: {config}")  # May expose secrets!

@@ -21,6 +21,7 @@ Learn how to monitor account health, manage multiple accounts, and track account
 
 The foundation of good account management is understanding your account's current financial health. This function retrieves comprehensive account information and calculates key health metrics.
 
+<!-- fragment: Demo account health monitoring with Decimal calculations and type annotations -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -94,6 +95,7 @@ asyncio.run(main())
 
 When trading with multiple OANDA accounts (such as separate accounts for different strategies or compliance with hedging rules), you need centralized account monitoring across all your accounts.
 
+<!-- fragment: Demo multi-account health monitoring with Decimal operations -->
 ```python
 from decimal import Decimal
 
@@ -175,6 +177,7 @@ asyncio.run(main())
 
 Track account performance over time to understand profitability and identify areas for improvement.
 
+<!-- fragment: Demo comprehensive account monitoring with environment variables and magic numbers -->
 ```python
 import os
 from datetime import datetime, timedelta

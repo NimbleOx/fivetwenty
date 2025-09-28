@@ -33,6 +33,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 
 ### Initialize Clients with Custom Prefixes
 
+<!-- fragment: Demo multi-account configuration with unused asyncio import -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -70,6 +71,7 @@ async def multi_account_example():
 
 ### Single Account with Custom Prefix
 
+<!-- fragment: Demo single account setup with unused asyncio import -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -94,6 +96,7 @@ async def single_custom_account():
 
 ### Synchronous Client Example
 
+<!-- fragment: Demo sync client configuration -->
 ```python
 from fivetwenty import Client
 from fivetwenty.configuration import AccountConfigLoader
@@ -115,6 +118,7 @@ def sync_example():
 
 Create configurations programmatically without environment variables:
 
+<!-- fragment: Demo direct configuration with unused asyncio import -->
 ```python
 import asyncio
 from pydantic import SecretStr
@@ -157,6 +161,7 @@ async def direct_config_example():
 
 Combine environment variables with direct configuration:
 
+<!-- fragment: Demo mixed approach configuration with unused asyncio import -->
 ```python
 import asyncio
 from pydantic import SecretStr
@@ -223,6 +228,7 @@ The pattern for custom prefixes follows: `{PREFIX}_FIVETWENTY_OANDA_{VARIABLE}`
 ### Error Handling
 
 Always validate that configurations were loaded successfully:
+<!-- fragment: Demo safe configuration loading with ValueError patterns -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -256,6 +262,7 @@ async def graceful_config_loading():
 ### Resource Management
 Always use context managers to ensure proper client cleanup:
 
+<!-- fragment: Demo resource management with asyncio -->
 ```python
 import asyncio
 
@@ -284,6 +291,7 @@ asyncio.run(main())
 
 Here's a complete example showing how to manage multiple accounts for different trading strategies:
 
+<!-- fragment: Demo complete trading system with nested async context managers -->
 ```python
 import asyncio
 

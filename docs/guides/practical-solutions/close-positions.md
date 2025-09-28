@@ -25,6 +25,7 @@
 
 Close all positions for one specific instrument:
 
+<!-- fragment: Demo position closing with exception handling patterns and attribute access -->
 ```python
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
@@ -95,6 +96,7 @@ close_result = await close_position(account_id, "EUR_USD")
 
 Close only part of a position:
 
+<!-- fragment: Demo partial position closing with ValueError f-string patterns and unit validation -->
 ```python
 from typing import Any
 from fivetwenty import AsyncClient, Environment
@@ -160,6 +162,7 @@ result = await close_partial_position(account_id, "EUR_USD", 500)
 
 Close positions across multiple instruments:
 
+<!-- fragment: Demo multiple position closing with undefined types and list annotations -->
 ```python
 from fivetwenty import AsyncClient, Environment
 
@@ -202,6 +205,7 @@ close_results = await close_multiple_positions(account_id, instruments_to_close)
 
 Close all open positions immediately:
 
+<!-- fragment: Demo emergency close with top-level await and exception code patterns -->
 ```python
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
@@ -279,6 +283,7 @@ async def emergency_close_all(account_id: str) -> Any:
 
 After closing positions, verify the operation:
 
+<!-- fragment: Demo position verification with return statement patterns -->
 ```python
 from fivetwenty import AsyncClient, Environment
 

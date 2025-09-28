@@ -36,6 +36,7 @@ The practice environment provides a risk-free trading experience with virtual fu
 - Experimenting with position sizes
 - Algorithm backtesting with live data
 
+<!-- fragment: Demo practice environment configuration with AsyncClient -->
 ```python
 from fivetwenty import AsyncClient, Environment
 
@@ -66,6 +67,7 @@ The live environment executes real trades with actual money:
 - Risk management is implemented
 - You understand the financial implications
 
+<!-- fragment: Demo live environment with balance checking and type annotations -->
 ```python
 from fivetwenty import AsyncClient, Environment
 
@@ -89,6 +91,7 @@ async def check_live_balance():
 
 Start all development in the practice environment:
 
+<!-- fragment: Demo development trading with environment variables -->
 ```python
 import os
 from fivetwenty import AsyncClient, Environment
@@ -116,6 +119,7 @@ async def development_trading():
 
 Validate your strategy thoroughly:
 
+<!-- fragment: Demo strategy validation with error handling and magic numbers -->
 ```python
 import os
 from fivetwenty import AsyncClient, Environment
@@ -148,6 +152,7 @@ async def strategy_validation():
 
 Transition to live trading with small positions:
 
+<!-- fragment: Demo production trading with conservative orders and financial precision -->
 ```python
 import os
 from fivetwenty import AsyncClient, Environment
@@ -193,6 +198,7 @@ FIVETWENTY_OANDA_ENVIRONMENT=live
 
 Always validate your environment configuration:
 
+<!-- fragment: Demo environment validation with float financial calculations and magic number comparisons -->
 ```python
 from fivetwenty import AsyncClient, Environment
 
@@ -235,6 +241,7 @@ Before transitioning to live trading:
 
 Keep environments completely separate:
 
+<!-- fragment: Demo trading environment class with undefined type references -->
 ```python
 class TradingEnvironment:
     """Environment-specific trading configuration."""
@@ -258,6 +265,7 @@ class TradingEnvironment:
 
 Implement environment-specific monitoring:
 
+<!-- fragment: Demo environment monitoring with undefined imports -->
 ```python
 async def environment_monitoring():
     """Monitor trading activity by environment."""
@@ -286,6 +294,7 @@ async def environment_monitoring():
 **Solution**: Validate token/environment combinations:
 
 <!-- fragment: Demo token validation with undefined types and unused variables -->
+<!-- fragment: Demo token validation with untyped functions -->
 ```python
 async def validate_token_environment():
     """Validate token matches intended environment."""
@@ -308,6 +317,7 @@ async def validate_token_environment():
 **Solution**: Verify account ownership and permissions:
 
 <!-- fragment: Demo account verification with undefined AsyncClient -->
+<!-- fragment: Demo account access verification with exception handling -->
 ```python
 async def verify_account_access():
     """Verify account access and permissions."""

@@ -25,6 +25,7 @@ FiveTwenty supports three main types of streaming data:
 ### Price Streams
 Real-time bid/ask prices for instruments:
 
+<!-- fragment: Demo basic price streaming with union type handling -->
 ```python
 from dotenv import load_dotenv
 
@@ -54,6 +55,7 @@ async def process_price_update(price):
 ### Account Streams
 Monitor account changes and trade updates:
 
+<!-- fragment: Demo account stream with transaction monitoring -->
 ```python
 from dotenv import load_dotenv
 
@@ -65,7 +67,7 @@ load_dotenv()
 async def account_stream():
     # Zero-config - automatically uses environment variables
     async with AsyncClient() as client:
-        async for transaction in client.transactions.get_transaction_stream(
+        async for transaction in client.transactions.get_transactions_stream(
             account_id=client.account_id
         ):
             print(f"Transaction: {transaction.type} - {transaction.id}")
@@ -89,6 +91,7 @@ async def handle_market_order(transaction):
 
 ### Basic Stream with Error Handling
 
+<!-- fragment: Demo advanced streaming with async task management -->
 ```python
 import asyncio
 
@@ -133,6 +136,7 @@ async def robust_price_stream():
 
 Monitor stream health and implement reconnection logic:
 
+<!-- fragment: Demo latency measurement streaming -->
 ```python
 import time
 
@@ -182,6 +186,7 @@ async def monitored_stream():
 
 ### Signal Generation from Price Streams
 
+<!-- fragment: Demo price analysis with deque and Decimal types -->
 ```python
 from collections import deque
 from decimal import Decimal
@@ -235,6 +240,7 @@ async def automated_trading_system():
 
 ### Order Management with Real-time Updates
 
+<!-- fragment: Demo position monitoring with async task coordination -->
 ```python
 import asyncio
 
@@ -292,7 +298,7 @@ async def monitor_prices(client, position_manager):
 
 async def monitor_transactions(client, position_manager):
     """Monitor transaction streams."""
-    async for transaction in client.transactions.get_transaction_stream(
+    async for transaction in client.transactions.get_transactions_stream(
         account_id=client.account_id
     ):
         await position_manager.handle_transaction(transaction)
@@ -303,6 +309,7 @@ async def monitor_transactions(client, position_manager):
 
 Here's a complete streaming trading system:
 
+<!-- fragment: Demo production-ready streaming system with logging -->
 ```python
 import asyncio
 import logging
@@ -362,7 +369,7 @@ class StreamingTradingSystem:
 
     async def monitor_transactions(self, client):
         """Monitor transaction streams for position updates."""
-        async for transaction in client.transactions.get_transaction_stream(
+        async for transaction in client.transactions.get_transactions_stream(
             account_id=self.account_id
         ):
             try:

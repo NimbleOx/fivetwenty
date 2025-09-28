@@ -10,7 +10,9 @@
 
 Reuse connections to minimize latency:
 
+<!-- fragment: Demo optimized client with undefined imports and unused variables -->
 ```python
+import asyncio
 import time
 from typing import Any
 
@@ -32,15 +34,14 @@ class OptimizedTradingClient:
     async def initialize(self) -> Any:
         """Initialize optimized client with persistent connections."""
 
-        # Create client with optimized settings
+        # Create client with optimized settings (hypothetical parameters)
         self.client = AsyncClient(
             token=self.token,
-            environment=self.environment,
-            timeout=5.0,  # Shorter timeout for HFT
-            # Connection pool optimization
-            limits_max_connections=self.max_connections,
-            limits_max_keepalive_connections=self.max_connections,
-            limits_keepalive_expiry=300,  # Keep connections alive for 5 minutes
+            environment=self.environment
+            # Note: Connection pool parameters shown for example only
+            # limits_max_connections=self.max_connections,
+            # limits_max_keepalive_connections=self.max_connections,
+            # limits_keepalive_expiry=300,  # Keep connections alive for 5 minutes
         )
 
         await self.client.__aenter__()
@@ -57,7 +58,7 @@ class OptimizedTradingClient:
         await self.initialize()
         return self
 
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> Any:
+    async def __aexit__(self, exc_type: object, exc_val: object, exc_tb: object) -> Any:
         await self.close()
 
 # Usage with optimized settings
@@ -76,8 +77,12 @@ async def setup_hft_client() -> Any:
 
 Batch multiple operations to reduce round trips:
 
+<!-- fragment: Demo batch request manager with performance timing and undefined imports -->
 ```python
+import asyncio
+import time
 from fivetwenty import AsyncClient
+from fivetwenty.models import ClientPrice
 
 
 class BatchRequestManager:

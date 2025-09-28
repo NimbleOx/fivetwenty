@@ -21,6 +21,7 @@
 
 Attach a stop-loss immediately when placing a trade:
 
+<!-- fragment: Demo stop-loss implementation with unused imports -->
 ```python
 import asyncio
 import os
@@ -85,6 +86,7 @@ if __name__ == "__main__":
 
 Set stop-loss at fixed pip distance from entry:
 
+<!-- fragment: Demo pip-based stop-loss with unused os import -->
 ```python
 import os
 from decimal import Decimal
@@ -164,6 +166,7 @@ async def example_usage():
 
 Limit risk to fixed percentage of account balance:
 
+<!-- fragment: Demo percentage-based stop-loss with unused imports -->
 ```python
 import os
 from decimal import Decimal
@@ -236,7 +239,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
                 actual_risk = abs(Decimal(str(fill.price)) - stop_loss_price) * abs(units)
                 print(f"✅ Order placed - Actual risk: ${actual_risk:.2f}")
 
-        return response.order_fill_transaction
+            return response.order_fill_transaction
 
         except Exception as e:
             print(f"❌ Error with percentage-based stop: {e}")
@@ -308,8 +311,8 @@ async def implement_trailing_stop_loss(account_id: str, instrument: str, units: 
 
                 return trade_id
 
-        print("❌ Order not filled")
-        return None
+            print("❌ Order not filled")
+            return None
 
         except Exception as e:
             print(f"❌ Error implementing trailing stop: {e}")
@@ -332,6 +335,7 @@ async def main() -> None:
 
 Stop-loss based on market volatility using Average True Range:
 
+<!-- fragment: Demo ATR-based stop-loss with unused imports and external libraries -->
 ```python
 import os
 from decimal import Decimal
@@ -433,6 +437,7 @@ async def main() -> None:
 
 Update stop-loss on existing positions:
 
+<!-- fragment: Demo trailing stop-loss update with unused imports -->
 ```python
 import os
 from decimal import Decimal
@@ -486,7 +491,7 @@ from decimal import Decimal
 
 from fivetwenty import AsyncClient
 
-
+<!-- fragment: Demo breakeven function with undefined Any type -->
 async def move_to_breakeven(account_id: str, trade_id: str, trigger_pips: int = 20) -> Any:
     """Move stop-loss to break-even after price moves favorably."""
 
@@ -650,6 +655,7 @@ async def main() -> None:
 
 Monitor positions and stop-loss orders:
 
+<!-- fragment: Demo stop-loss monitoring with unused asyncio import -->
 ```python
 import asyncio
 from decimal import Decimal

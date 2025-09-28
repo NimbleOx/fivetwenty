@@ -29,6 +29,7 @@ Secure configuration object for OANDA account credentials and settings.
 
 ### Class Definition
 
+<!-- fragment: Demo AccountConfig class definition with import redefinition -->
 ```python
 from pydantic import BaseModel, SecretStr
 from fivetwenty import Environment, AccountConfig
@@ -563,6 +564,7 @@ def create_safe_config(**kwargs: Any) -> AccountConfig:
 
 ### Production Deployment
 
+<!-- fragment: Demo production deployment with nested if statements and RuntimeError patterns -->
 ```python
 import os
 from fivetwenty import AccountConfig, AccountConfigLoader, Environment
@@ -620,6 +622,7 @@ logger.info("Trading on: %s", config.summary())
 
 ### 2. Validate Before Use
 
+<!-- fragment: Demo config validation with ValueError f-string literals -->
 ```python
 from fivetwenty import AccountConfig, AsyncClient, ConfigValidator
 
@@ -676,6 +679,7 @@ async def verify_config_connection(config: AccountConfig) -> bool:
 
 ### Configuration Factory
 
+<!-- fragment: Demo configuration factory with ValueError string literals -->
 ```python
 import os
 from fivetwenty import AccountConfig, Environment

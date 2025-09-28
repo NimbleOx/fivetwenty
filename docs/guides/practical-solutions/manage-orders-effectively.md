@@ -24,6 +24,7 @@ You need to create, monitor, and manage trading orders efficiently using FiveTwe
     OANDA supports different order workflows. Choose the pattern that matches your trading style:
 
     **OnFill Pattern (Recommended)**: Set TP/SL when creating orders
+    <!-- fragment: Demo OnFill pattern with multiple unused imports -->
     ```python
 import asyncio
 import os
@@ -74,6 +75,7 @@ if __name__ == "__main__":
     ```
 
     **Post-Trade Pattern**: Add TP/SL to existing trades
+    <!-- fragment: Demo post-trade pattern with unused imports -->
     ```python
 import asyncio
 import os
@@ -114,7 +116,8 @@ async def post_trade_example() -> None:
 **Use Case:** You've opened a position and want to add or modify stop loss and take profit levels based on subsequent market analysis, or you need more sophisticated risk management than the OnFill pattern provides.
 
 #### Step-by-Step Post-Trade Risk Management
-
+<!-- fragment: Demo post-trade risk management with unused imports -->
+<!-- fragment: Demo comprehensive order management with type compatibility issues -->
 ```python
 import asyncio
 import os
@@ -182,6 +185,7 @@ async def implement_post_trade_risk_management() -> None:
 
 #### Distance-Based Stop Loss
 
+<!-- fragment: Demo stop loss order creation with string-to-Decimal type mismatches -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.models import StopLossOrderRequest
@@ -204,6 +208,7 @@ async def add_distance_based_stop_loss(client: AsyncClient, account_id: str, tra
 
 #### Trailing Stop Loss
 
+<!-- fragment: Demo trailing stop loss with timeInForce type incompatibility -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.models import TrailingStopLossOrderRequest
@@ -225,6 +230,7 @@ async def add_trailing_stop_loss(client: AsyncClient, account_id: str, trade_id:
 
 #### Guaranteed Stop Loss
 
+<!-- fragment: Demo guaranteed stop loss with response indexing issues -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.models import GuaranteedStopLossOrderRequest, StopLossOrderRequest
@@ -272,6 +278,7 @@ async def add_regular_stop_loss(client: AsyncClient, account_id: str, trade_id: 
 
 #### Error Handling for Post-Trade Orders
 
+<!-- fragment: Demo robust trade setup with union attribute access -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError
@@ -844,6 +851,7 @@ async def example_order_handling():
 ```
 
 ### Verify Order Parameters
+<!-- fragment: Demo order validation with ValueError string literals -->
 ```python
 import os
 
@@ -1015,6 +1023,7 @@ async def rate_limited_order(client: AsyncClient, order_params: Any) -> Any:
 ```
 
 **Error Recovery:**
+<!-- fragment: Demo error recovery with retry logic and naming violations -->
 ```python
 import asyncio
 from typing import Any
@@ -1047,6 +1056,7 @@ async def robust_order_placement(client: AsyncClient, order_params: Any, max_ret
 ## Advanced Patterns
 
 ### Order State Machine
+<!-- fragment: Demo order state tracking with variable naming violations -->
 ```python
 import asyncio
 from datetime import datetime
@@ -1101,6 +1111,7 @@ class OrderManager:
 ```
 
 ### Risk Management Integration
+<!-- fragment: Demo risk management with FURB157 and unused argument violations -->
 ```python
 from decimal import Decimal
 from typing import Any
