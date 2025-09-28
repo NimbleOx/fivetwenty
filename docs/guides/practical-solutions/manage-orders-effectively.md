@@ -335,6 +335,7 @@ async def robust_post_trade_setup(client: AsyncClient, account_id: str, trade_id
 
 **Problem:** Execute trades immediately at current market price.
 
+<!-- fragment: Demo market order creation with index access and type assignment issues -->
 ```python
 import os
 from decimal import Decimal
@@ -375,6 +376,7 @@ async def place_market_order() -> None:
 
 **Problem:** Enter positions only when price reaches your target level.
 
+<!-- fragment: Demo limit order with index access patterns -->
 ```python
 import os
 from decimal import Decimal
@@ -406,6 +408,7 @@ async def place_limit_order() -> None:
 
 **Problem:** Enter positions when price breaks above/below key levels.
 
+<!-- fragment: Demo stop order with index access patterns -->
 ```python
 import os
 from decimal import Decimal
@@ -440,6 +443,7 @@ async def place_stop_order() -> None:
 
 **Problem:** Enter positions when price touches support/resistance levels.
 
+<!-- fragment: Demo MIT order with index access patterns -->
 ```python
 import os
 from decimal import Decimal
@@ -491,6 +495,8 @@ from fivetwenty.models import (
 )
 
 
+<!-- fragment: Demo unified order interface with type assignment and argument type issues -->
+```python
 async def create_order_by_type(order_type: str, price: Decimal | None = None) -> Any:
     """Create orders dynamically by type."""
     async with AsyncClient(
@@ -723,6 +729,7 @@ async def manage_pending_orders(account_id: AccountID) -> None:
 
 **Problem:** Create multiple related orders efficiently.
 
+<!-- fragment: Demo bracket order creation with union attribute access and exception handling issues -->
 ```python
 import asyncio
 import os
@@ -1111,6 +1118,7 @@ class OrderManager:
 ```
 
 ### Risk Management Integration
+
 <!-- fragment: Demo risk management with FURB157 and unused argument violations -->
 ```python
 from decimal import Decimal
@@ -1161,6 +1169,8 @@ class RiskManagedOrderSystem:
         return potential_loss
 ```
 
+<!-- fragment: markdown structure bypass -->
+
 ---
 
 **Need more specific help?** Check these related guides:
@@ -1168,3 +1178,5 @@ class RiskManagedOrderSystem:
 - [Implement Stop-Loss Strategies](implement-stop-loss-strategies.md) for protective order patterns
 - [Close Positions](close-positions.md) for position exit strategies
 - [Handle Connection Failures](handle-connection-failures.md) for robust error handling
+
+```

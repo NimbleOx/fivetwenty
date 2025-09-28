@@ -36,12 +36,14 @@ FiveTwenty implements a persistent HTTP/HTTPS connection model with the OANDA se
 
 The primary async interface uses Python's async iterator protocol:
 
+<!-- fragment: Demo async streaming with incomplete syntax patterns -->
 ```python
 from fivetwenty import AsyncClient, Environment
 
 # client would be initialized elsewhere
 async for price in client.pricing.get_pricing_stream(...):
     # Process price data
+    pass
 ```
 
 **Benefits**:
@@ -54,12 +56,14 @@ async for price in client.pricing.get_pricing_stream(...):
 
 The sync wrapper manages an async event loop in a background thread:
 
+<!-- fragment: Demo sync streaming with incomplete syntax patterns -->
 ```python
 from fivetwenty import Client, Environment
 
 # client would be initialized elsewhere
 for price in client.pricing.get_pricing_stream(...):
     # Process price data
+    pass
 ```
 
 **Benefits**:

@@ -198,8 +198,9 @@ FIVETWENTY_OANDA_ENVIRONMENT=live
 
 Always validate your environment configuration:
 
-<!-- fragment: Demo environment validation with float financial calculations and magic number comparisons -->
+<!-- fragment: Demo environment validation with Decimal financial calculations and magic number comparisons -->
 ```python
+from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
 
 async def validate_environment():
@@ -212,7 +213,7 @@ async def validate_environment():
 
             # Additional safety checks for live environment
             account = await client.accounts.get_account(client.account_id)
-            if float(account.balance) < 1000:
+            if Decimal(account.balance) < Decimal("1000"):
                 print("⚠️ Low account balance for live trading")
 
         else:
