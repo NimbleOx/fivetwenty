@@ -59,3 +59,5 @@ Based on spec, we could add:
 
 Need to add a disclaimer to main page
 Need to add outline of modern tools (uv, typing) to main page
+Remove all the emojiis from our code blocks
+Flesh out the examples

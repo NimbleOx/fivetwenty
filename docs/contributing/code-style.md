@@ -17,7 +17,7 @@ from typing import Any
 from fivetwenty.models import OrderRequest, OrderResponse
 
 
-# ✅ Good - Full type annotations
+# Success Good - Full type annotations
 async def create_order(
     self,
     account_id: str,
@@ -30,7 +30,7 @@ async def create_order(
     raise NotImplementedError
 
 
-# ❌ Bad - Missing type annotations
+# Error Bad - Missing type annotations
 async def create_order_bad(self, account_id: Any, order: Any, timeout: Any = None) -> None:
     """Bad example with missing annotations."""
     # Implementation would go here
@@ -45,7 +45,7 @@ async def create_order_bad(self, account_id: Any, order: Any, timeout: Any = Non
 from decimal import Decimal
 
 
-# ✅ Good - Decimal for financial values
+# Success Good - Decimal for financial values
 def calculate_position_value(
     units: int,
     price: Decimal,
@@ -54,13 +54,13 @@ def calculate_position_value(
     return Decimal(str(units)) * price
 
 
-# ❌ Bad - Float causes precision errors
+# Error Bad - Float causes precision errors
 def calculate_position_value_bad(units: int, price: Decimal) -> Decimal:
     """Bad example with precision loss."""
     return units * price  # Precision loss!
 
 
-# ✅ Good - Accept Decimal or convert from string/int
+# Success Good - Accept Decimal or convert from string/int
 def parse_price(value: str | int | Decimal) -> Decimal:
     """Parse price from various input types to Decimal."""
     if isinstance(value, Decimal):
@@ -79,7 +79,7 @@ from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import AccountSummary
 
 
-# ✅ Good - Specific exception types
+# Success Good - Specific exception types
 async def get_account(self, account_id: str) -> AccountSummary:
     """Get account with proper error handling."""
     try:
@@ -92,7 +92,7 @@ async def get_account(self, account_id: str) -> AccountSummary:
         ) from e
 
 
-# ❌ Bad - Generic exceptions
+# Error Bad - Generic exceptions
 async def get_account_bad(self, account_id: str) -> AccountSummary:
     """Bad example without proper error handling."""
     response = await self._request("GET", f"/accounts/{account_id}")
@@ -118,7 +118,7 @@ from typing import Any
 from fivetwenty.models import AccountSummary
 
 
-# ✅ Good - async client method
+# Success Good - async client method
 class AccountsEndpoint:
     """Accounts endpoint implementation."""
 
@@ -140,7 +140,7 @@ class AccountsEndpoint:
         return AccountSummary.model_validate(response.json())
 
 
-# ✅ Good - Sync wrapper delegates to async
+# Success Good - Sync wrapper delegates to async
 class SyncAccountsEndpoint:
     """Sync wrapper for accounts endpoint."""
 
@@ -172,7 +172,7 @@ from typing import Any
 from fivetwenty.models import Order, OrderRequest, OrderResponse
 
 
-# ✅ Good - Organized by OANDA API endpoints
+# Success Good - Organized by OANDA API endpoints
 class OrdersEndpoint:
     """Order management operations."""
 
@@ -231,7 +231,7 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 
-# ✅ Good - Complete Pydantic model
+# Success Good - Complete Pydantic model
 class Order(BaseModel):
     """Represents an OANDA order."""
 
@@ -249,7 +249,7 @@ class Order(BaseModel):
         use_enum_values = True
 
 
-# ✅ Good - Model usage with validation
+# Success Good - Model usage with validation
 def parse_order_response(data: Any) -> Order:
     """Parse order response data into model."""
     return Order.model_validate(data)
@@ -267,7 +267,7 @@ from collections.abc import AsyncIterator
 from fivetwenty.models import AccountSummary, OrderResponse
 
 
-# ✅ Good - Clear, descriptive names
+# Success Good - Clear, descriptive names
 async def get_accounts(self, account_id: str) -> AccountSummary:
     """Get account summary."""
     pass
@@ -292,7 +292,7 @@ async def stream_pricing(
     pass
 
 
-# ❌ Bad - Unclear abbreviations
+# Error Bad - Unclear abbreviations
 async def get_acct(self, account_id: str) -> AccountSummary:
     """Bad example with unclear abbreviations."""
     pass
@@ -310,14 +310,14 @@ async def mk_ord(self, acct: str, instr: str, u: int) -> OrderResponse:
 from fivetwenty.models import OrderRequest
 
 
-# ✅ Good - Full words, clear purpose
+# Success Good - Full words, clear purpose
 account_id: str
 instrument_name: str
 order_request: OrderRequest
 timeout_seconds: float
 client_request_id: str | None
 
-# ❌ Bad - Cryptic abbreviations
+# Error Bad - Cryptic abbreviations
 acct_id: str
 instr: str
 req: OrderRequest
@@ -331,7 +331,7 @@ req_id: str | None
 from pydantic import BaseModel
 
 
-# ✅ Good - Descriptive, matches OANDA terminology
+# Success Good - Descriptive, matches OANDA terminology
 class AccountSummary(BaseModel):
     """Account summary information."""
     pass
@@ -347,7 +347,7 @@ class PricingHeartbeat(BaseModel):
     pass
 
 
-# ❌ Bad - Generic or unclear names
+# Error Bad - Generic or unclear names
 
 <!-- fragment: Demo bad naming examples with empty class implementations -->
 ```python
@@ -475,7 +475,7 @@ from fivetwenty.exceptions import FiveTwentyError, StreamStall
 from fivetwenty.models import Price, PricingHeartbeat
 
 
-# ✅ Good - Appropriate exception types
+# Success Good - Appropriate exception types
 async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Price]:
     """Get current pricing with proper error handling."""
     try:
@@ -516,7 +516,7 @@ async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Pri
             error_code="REQUEST_TIMEOUT",
         ) from e
 
-# ✅ Good - Streaming-specific error handling
+# Success Good - Streaming-specific error handling
 HEARTBEAT_TIMEOUT = 30
 logger = logging.getLogger(__name__)
 
@@ -569,7 +569,7 @@ from pydantic import ValidationError
 from fivetwenty.models import OrderRequest
 
 
-# ✅ Good - Validate inputs early
+# Success Good - Validate inputs early
 def create_order_request(
     instrument: str,
     units: int,
@@ -747,7 +747,7 @@ from fivetwenty.models import AccountConfig, AccountSummary
 logger = logging.getLogger(__name__)
 
 
-# ✅ Good - Proper async context management
+# Success Good - Proper async context management
 @asynccontextmanager
 async def trading_session(config: AccountConfig) -> AsyncIterator[AsyncClient]:
     """Managed trading session with proper cleanup."""
@@ -759,7 +759,7 @@ async def trading_session(config: AccountConfig) -> AsyncIterator[AsyncClient]:
         await client.__aexit__(None, None, None)
 
 
-# ✅ Good - Concurrent operations
+# Success Good - Concurrent operations
 async def get_multiple_accounts(
     client: AsyncClient,
     account_ids: list[str],
@@ -785,7 +785,7 @@ async def get_multiple_accounts(
 
 <!-- fragment: Demo undefined Any type usage -->
 ```python
-# ✅ Good - Streaming with backpressure
+# Success Good - Streaming with backpressure
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import PricingHeartbeat
@@ -839,7 +839,7 @@ from fivetwenty.models import Environment, Trade
 logger = logging.getLogger(__name__)
 
 
-# ✅ Good - Secure credential handling
+# Success Good - Secure credential handling
 class AccountConfig(BaseModel):
     """Secure account configuration."""
 
@@ -868,7 +868,7 @@ class AccountConfig(BaseModel):
         )
 
 
-# ✅ Good - Safe logging practices
+# Success Good - Safe logging practices
 def log_trade_result(trade: Trade, config: AccountConfig) -> None:
     """Log trade result safely."""
     logger.info(
@@ -878,7 +878,7 @@ def log_trade_result(trade: Trade, config: AccountConfig) -> None:
     )
 
 
-# ❌ Bad - Exposes credentials
+# Error Bad - Exposes credentials
 <!-- fragment: Demo bad logging with undefined types and security issues -->
 ```python
 def bad_logging(trade: Trade, config: AccountConfig) -> None:

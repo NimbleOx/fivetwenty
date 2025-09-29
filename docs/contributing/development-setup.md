@@ -46,9 +46,9 @@ The `setup` command will:
 uv run poe dev
 
 # Expected output:
-# ✅ Code formatted
-# ✅ Type checking passed
-# ✅ Tests passed (158 tests)
+# Success Code formatted
+# Success Type checking passed
+# Success Tests passed (158 tests)
 ```
 
 ---
@@ -409,4 +409,4 @@ Once your environment is set up:
 4. **Pick an issue** - Look for "good first issue" labels on GitHub
 5. **Join discussions** - Participate in GitHub Discussions
 
-Happy contributing! 🚀
+Happy contributing! Starting

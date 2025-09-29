@@ -32,9 +32,9 @@ Please check the type of change your PR introduces:
 - [ ] 💥 **Breaking change** (fix or feature that would cause existing functionality to not work as expected)
 - [ ] 📚 **Documentation** (updates to documentation only)
 - [ ] 🧹 **Refactoring** (code changes that neither fix a bug nor add a feature)
-- [ ] ⚡ **Performance** (changes that improve performance)
-- [ ] 🧪 **Tests** (adding missing tests or correcting existing tests)
-- [ ] 🔧 **Chore** (changes to build process, dependencies, etc.)
+- [ ] Lightning **Performance** (changes that improve performance)
+- [ ] Test **Tests** (adding missing tests or correcting existing tests)
+- [ ] Config **Chore** (changes to build process, dependencies, etc.)
 
 ---
 
@@ -54,10 +54,10 @@ Please check the type of change your PR introduces:
 uv run poe test
 
 # Example:
-# ✅ 158 tests passed
-# ✅ Coverage: 95%
-# ✅ MyPy: No errors
-# ✅ Ruff: No issues
+# Success 158 tests passed
+# Success Coverage: 95%
+# Success MyPy: No errors
+# Success Ruff: No issues
 ```
 
 ### **Integration Testing**
@@ -217,6 +217,6 @@ For significant changes:
 
 ---
 
-**Thank you for contributing to FiveTwenty! 🚀**
+**Thank you for contributing to FiveTwenty! Starting**
 
 Please ensure all checkboxes are completed before requesting review. This helps maintainers provide faster, more focused feedback.

@@ -1,6 +1,6 @@
 # Position Management
 
-!!! tip "🎯 Learning Goal"
+!!! tip "Target Learning Goal"
     Master advanced position management techniques including stop losses, take profits, and risk-to-reward optimization.
 
 ---
@@ -23,7 +23,7 @@ async def demonstrate_position_management(trade_id: str) -> None:
     """Learn position management techniques."""
 
     if not trade_id:
-        print("❌ No trade for position management demo")
+        print("Error No trade for position management demo")
         return
 
     print("🎛️ POSITION MANAGEMENT TECHNIQUES")
@@ -34,7 +34,7 @@ async def demonstrate_position_management(trade_id: str) -> None:
         # Get current trade
         trade = await client.trades.get_trade(client.account_id, trade_id)
 
-        print("📊 Current Position:")
+        print("Data Current Position:")
         print(f"   Trade ID: {trade.id}")
         print(f"   Instrument: {trade.instrument}")
         print(f"   Units: {trade.current_units}")
@@ -42,7 +42,7 @@ async def demonstrate_position_management(trade_id: str) -> None:
         print(f"   Current P&L: ${Decimal(str(trade.unrealized_pl)):+.2f}")
 
         # Demonstrate different exit strategies
-        print("\n🎯 Exit Strategy Options:")
+        print("\nTarget Exit Strategy Options:")
 
         entry_price = Decimal(str(trade.price))
         is_long = int(trade.current_units) > 0
@@ -60,11 +60,18 @@ async def demonstrate_position_management(trade_id: str) -> None:
 
         print("   Risk/Reward Ratio: 1:1.5 (risking 20 pips to make 30 pips)")
 
-        # Don't actually set stop loss in tutorial - just demonstrate
-        print("\n💡 In real trading, you would set these levels using:")
-        print("   • Stop Loss orders for risk management")
-        print("   • Take Profit orders to secure gains")
-        print("   • Position monitoring for optimal exits")
+        # Step 7: Educational note about implementation
+        # In practice, these levels would be set using FiveTwenty's order management
+        print("\nNote In real trading, you would implement these levels using:")
+        print("   • Stop Loss orders for automatic risk management")
+        print("   • Take Profit orders to secure gains automatically")
+        print("   • Position monitoring for dynamic adjustments")
+        print("   • Trailing stops to lock in profits as price moves favorably")
+        print("\nConfig FiveTwenty Implementation:")
+        print("   • Use StopLossOrderRequest to set protective stops")
+        print("   • Use TakeProfitOrderRequest to secure profit targets")
+        print("   • Monitor positions via client.trades.get_trades()")
+        print("   • Close positions with client.positions.close_position()")
 
 # Demonstrate position management
 if __name__ == "__main__":
@@ -127,18 +134,27 @@ class StopLossStrategy:
 entry_price = Decimal("1.1000")
 is_long_position = True
 
-# Expected output: "🛡️ Stop Loss Strategy Examples:"
+print("\nSecurity Stop Loss Strategy Examples:")
 print(f"Entry Price: {entry_price:.5f}")
+print(f"Position Type: {'Long' if is_long_position else 'Short'}")
 
+# Strategy 1: Fixed pip distance (simple and predictable)
 fixed_stop = StopLossStrategy.fixed_pip_stop(entry_price, is_long_position, 20)
-print(f"Fixed 20-pip stop: {fixed_stop:.5f}")
+print(f"Fixed 20-pip stop: {fixed_stop:.5f} (Risk: 20 pips)")
 
-percent_stop = StopLossStrategy.percentage_stop(entry_price, is_long_position, 0.005)
-print(f"0.5% stop: {percent_stop:.5f}")
+# Strategy 2: Percentage-based (scales with price)
+percent_stop = StopLossStrategy.percentage_stop(entry_price, is_long_position, Decimal("0.005"))
+print(f"0.5% stop: {percent_stop:.5f} (Risk: {((entry_price - percent_stop) * 10000):.1f} pips)")
 
-# Simulated ATR value
-atr_stop = StopLossStrategy.atr_stop(entry_price, is_long_position, 0.0015, 2.0)
-print(f"2x ATR stop: {atr_stop:.5f}")
+# Strategy 3: Volatility-adjusted using simulated ATR value
+# ATR of 0.0015 means average daily range is 15 pips
+atr_stop = StopLossStrategy.atr_stop(entry_price, is_long_position, Decimal("0.0015"), Decimal("2.0"))
+print(f"2x ATR stop: {atr_stop:.5f} (Risk: {((entry_price - atr_stop) * 10000):.1f} pips)")
+
+# Strategy 4: Technical level-based (example with support at 1.0950)
+support_level = Decimal("1.0950")
+tech_stop = StopLossStrategy.support_resistance_stop(entry_price, is_long_position, support_level, 5)
+print(f"Support-based stop: {tech_stop:.5f} (5 pips below support level)")
 ```
 
 ---
@@ -195,7 +211,7 @@ entry_price = Decimal("1.1000")
 stop_loss = Decimal("1.0980")
 is_long_position = True
 
-print("\n🎯 Take Profit Strategy Examples:")
+print("\nTarget Take Profit Strategy Examples:")
 
 fixed_tp = TakeProfitStrategy.fixed_target(entry_price, is_long_position, 30)
 print(f"Fixed 30-pip target: {fixed_tp:.5f}")
@@ -218,7 +234,7 @@ Advanced position sizing based on volatility and risk:
 from decimal import Decimal
 
 class AdvancedPositionSizing:
-    """Advanced position sizing strategies."""
+    """Advanced position sizing strategies for optimal risk management."""
 
     @staticmethod
     def fixed_risk_sizing(account_balance: Decimal, risk_percent: Decimal,
@@ -259,7 +275,7 @@ position_size = AdvancedPositionSizing.fixed_risk_sizing(
     account_balance, risk_percent, entry_price, stop_loss
 )
 
-print(f"💰 Position Sizing Example:")
+print(f"Balance Position Sizing Example:")
 print(f"Account Balance: ${account_balance}")
 print(f"Risk Percentage: {risk_percent}%")
 print(f"Entry Price: {entry_price:.5f}")
@@ -275,7 +291,7 @@ adjusted_size = AdvancedPositionSizing.volatility_adjusted_sizing(
     base_position, current_vol, average_vol
 )
 
-print(f"\n📊 Volatility Adjustment:")
+print(f"\nData Volatility Adjustment:")
 print(f"Base Position: {base_position} units")
 print(f"Current Volatility: {current_vol:.4f}")
 print(f"Average Volatility: {average_vol:.4f}")
@@ -293,15 +309,15 @@ Use FiveTwenty's order management APIs to set stop losses and take profits when 
 
 ## What You've Learned
 
-✅ **Advanced Stop Loss Strategies**: Multiple approaches for different market conditions
+Success **Advanced Stop Loss Strategies**: Multiple approaches for different market conditions
 
-✅ **Take Profit Optimization**: Maximizing profits with intelligent exit strategies
+Success **Take Profit Optimization**: Maximizing profits with intelligent exit strategies
 
-✅ **Position Monitoring**: Tracking performance and adjusting positions dynamically
+Success **Position Monitoring**: Tracking performance and adjusting positions dynamically
 
-✅ **Position Sizing Mastery**: Risk-based and volatility-adjusted position sizing
+Success **Position Sizing Mastery**: Risk-based and volatility-adjusted position sizing
 
-!!! success "🎉 Position Management Mastery Complete!"
+!!! success "Complete Position Management Mastery Complete!"
     Excellent! You now have advanced skills for managing trading positions effectively. You understand how to balance risk and reward while maximizing profit potential. Next, you'll learn to build complete trading strategies.
 
 ---

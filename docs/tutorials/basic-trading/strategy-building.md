@@ -1,6 +1,6 @@
 # Strategy Building
 
-!!! tip "🎯 Learning Goal"
+!!! tip "Target Learning Goal"
     Develop your first complete trading strategy with systematic signal generation and risk management.
 
 ---
@@ -135,7 +135,7 @@ class StrategyBacktester:
     async def run_backtest(self, client: AsyncClient, start_date: str, end_date: str):
         """Run strategy backtest on historical data."""
 
-        print("🔄 RUNNING STRATEGY BACKTEST")
+        print("Processing RUNNING STRATEGY BACKTEST")
         print("=" * 35)
 
         try:
@@ -148,10 +148,10 @@ class StrategyBacktester:
             )
 
             if not candles.candles:
-                print("❌ No historical data available")
+                print("Error No historical data available")
                 return
 
-            print(f"📊 Testing on {len(candles.candles)} data points")
+            print(f"Data Testing on {len(candles.candles)} data points")
 
             # Process each candle
             for i, candle in enumerate(candles.candles):
@@ -175,18 +175,19 @@ class StrategyBacktester:
                 elif self.current_position:
                     await self._check_exit_conditions(price, timestamp)
 
-                # Record equity
+                # Step 7: Record account equity for performance analysis
+                # Track balance over time to calculate drawdowns and risk metrics
                 self.equity_curve.append({
-                    'timestamp': timestamp,
-                    'balance': self.current_balance,
-                    'price': price
+                    'timestamp': timestamp,           # Time point for this balance record
+                    'balance': self.current_balance,   # Account balance at this time
+                    'price': price                     # Market price at this time
                 })
 
-            # Generate backtest report
+            # Step 8: Generate comprehensive performance report
             self._generate_backtest_report()
 
         except Exception as e:
-            print(f"❌ Backtest error: {e}")
+            print(f"Error Backtest error: {e}")
 
     async def _execute_backtest_trade(self, direction: str, price: Decimal, timestamp):
         """Execute trade in backtest environment."""
@@ -210,7 +211,7 @@ class StrategyBacktester:
             'entry_time': timestamp
         }
 
-        print(f"📈 Backtest {direction}: {price:.5f} at {timestamp}")
+        print(f"Analysis Backtest {direction}: {price:.5f} at {timestamp}")
 
     async def _check_exit_conditions(self, current_price: Decimal, timestamp):
         """Check if position should be closed."""
@@ -284,7 +285,7 @@ class StrategyBacktester:
     def _generate_backtest_report(self):
         """Generate comprehensive backtest report."""
 
-        print(f"\n📊 BACKTEST RESULTS")
+        print(f"\nData BACKTEST RESULTS")
         print("=" * 25)
 
         if not self.trades:
@@ -323,9 +324,22 @@ class StrategyBacktester:
                 profit_factor = abs(avg_win / avg_loss)
                 print(f"Profit Factor: {profit_factor:.2f}")
 
-# Run backtest example
-# backtester = StrategyBacktester(strategy)
-# await backtester.run_backtest(client, "2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z")
+# Step 9: Example backtest execution
+# Demonstrates how to test strategy on historical data
+if __name__ == "__main__":
+    # Create strategy and backtester instances
+    strategy = SimpleMovingAverageCrossover("EUR_USD")
+    backtester = StrategyBacktester(strategy, initial_balance=Decimal("10000"))
+
+    print("Backtest Configuration:")
+    print(f"Strategy: {strategy.__class__.__name__}")
+    print(f"Instrument: {strategy.instrument}")
+    print(f"Initial Balance: ${backtester.initial_balance:,}")
+    print(f"Test Period: January 2024 (1 month)")
+
+    # Run backtest (uncomment for actual use)
+    # await backtester.run_backtest(client, "2024-01-01T00:00:00Z", "2024-02-01T00:00:00Z")
+    # print(f"\nBacktest completed. Final balance: ${backtester.current_balance:,.2f}")
 ```
 
 ---
@@ -353,7 +367,7 @@ class StrategyOptimizer:
     async def optimize_parameters(self, client: AsyncClient, parameter_ranges: dict):
         """Optimize strategy parameters across given ranges."""
 
-        print("🔧 STRATEGY OPTIMIZATION")
+        print("Config STRATEGY OPTIMIZATION")
         print("=" * 30)
 
         import itertools
@@ -400,7 +414,7 @@ class StrategyOptimizer:
 
             print(f"Combination {i+1}/{len(combinations)}: Return {total_return:.2f}%")
 
-        print(f"\n🏆 OPTIMIZATION COMPLETE")
+        print(f"\nAchievement OPTIMIZATION COMPLETE")
         print(f"Best Parameters: {best_params}")
         print(f"Best Return: {best_return:.2f}%")
 
@@ -423,15 +437,15 @@ class StrategyOptimizer:
 
 ## What You've Learned
 
-✅ **Strategy Design**: How to build systematic trading strategies with clear rules
+Success **Strategy Design**: How to build systematic trading strategies with clear rules
 
-✅ **Backtesting**: Testing strategies on historical data for validation
+Success **Backtesting**: Testing strategies on historical data for validation
 
-✅ **Parameter Optimization**: Systematically improving strategy performance
+Success **Parameter Optimization**: Systematically improving strategy performance
 
-✅ **Performance Analysis**: Evaluating strategy effectiveness and robustness
+Success **Performance Analysis**: Evaluating strategy effectiveness and robustness
 
-!!! success "🎉 Strategy Building Complete!"
+!!! success "Complete Strategy Building Complete!"
     Outstanding! You can now design, test, and optimize complete trading strategies. You understand the full development cycle from concept to implementation. Next, you'll learn to build production-ready automated systems.
 
 ---

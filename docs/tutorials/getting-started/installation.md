@@ -43,11 +43,26 @@ uv sync --dev
 
 Test your installation:
 
-<!-- fragment: Demo version check with attribute access patterns -->
+<!-- fragment: Demo version check with comprehensive installation validation -->
 ```python
+# Step 1: Import FiveTwenty SDK to verify successful installation
+# This confirms the package was installed correctly and is accessible
 import fivetwenty
 
-print(fivetwenty.__version())
+# Step 2: Display installed version for verification and troubleshooting
+# Version information helps confirm you have the expected release installed
+print(f"FiveTwenty SDK version: {fivetwenty.__version()}")
+
+# Step 3: Optional - Verify core dependencies are available
+# This additional check ensures all required components are properly installed
+try:
+    import httpx
+    import pydantic
+    print("Success Core dependencies verified: httpx and pydantic available")
+    print("Starting FiveTwenty SDK installation complete and ready for use")
+except ImportError as e:
+    print(f"⚠️ Dependency issue detected: {e}")
+    print("   Run 'uv add fivetwenty' to reinstall with dependencies")
 ```
 
 Expected output:

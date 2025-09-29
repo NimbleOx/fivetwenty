@@ -28,39 +28,53 @@ from fivetwenty import AsyncClient
 load_dotenv()
 
 async def scale_into_position():
-    # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
-        orders = []
+    """Demonstrate scaling into positions using multiple entry points for reduced average cost."""
 
-        # First entry - smaller size
+    # Step 1: Initialize client using environment-based authentication
+    # Zero-config approach reads OANDA credentials from environment variables
+    async with AsyncClient() as client:
+        orders = []  # Track all scaling orders for management
+
+        # Step 2: Place first entry order at conservative level
+        # First entry uses smaller size to test market direction
         order1 = await client.orders.post_limit_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=5000,  # Half position
-            price=Decimal("1.0850"),
-            time_in_force="GTC",
-            stop_loss_on_fill={
-                "price": "1.0800",
-                "time_in_force": "GTC"
+            account_id=client.account_id,     # Account for order execution
+            instrument="EUR_USD",             # Major currency pair with good liquidity
+            units=5000,                       # Conservative initial position size
+            price=Decimal("1.0850"),          # First entry level (higher price)
+            time_in_force="GTC",              # Good Till Cancelled - stays active
+            stop_loss_on_fill={               # Automatic risk protection on fill
+                "price": "1.0800",            # Stop loss 50 pips below entry
+                "time_in_force": "GTC"        # Stop remains active until triggered
             }
         )
         orders.append(order1)
+        print(f"   Analysis First entry: {order1.units} units at {order1.price}")
 
-        # Second entry - lower price, larger size
+        # Step 3: Place second entry order at more aggressive level
+        # Second entry uses larger size as confidence in direction increases
         order2 = await client.orders.post_limit_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=10000,  # Full position
-            price=Decimal("1.0825"),  # Better entry
-            time_in_force="GTC",
-            stop_loss_on_fill={
-                "price": "1.0800",
-                "time_in_force": "GTC"
+            account_id=client.account_id,     # Same account for position building
+            instrument="EUR_USD",             # Same instrument for cumulative position
+            units=10000,                      # Larger size for better average price
+            price=Decimal("1.0825"),          # Lower entry price (better value)
+            time_in_force="GTC",              # Long-term active order
+            stop_loss_on_fill={               # Consistent risk management
+                "price": "1.0800",            # Same stop level for both entries
+                "time_in_force": "GTC"        # Persistent protection
             }
         )
         orders.append(order2)
+        print(f"   Analysis Second entry: {order2.units} units at {order2.price}")
 
-        print("Scaling orders placed")
+        # Step 4: Provide scaling strategy summary
+        total_units = 5000 + 10000  # Combined position if both fill
+        average_price = ((5000 * Decimal("1.0850")) + (10000 * Decimal("1.0825"))) / total_units
+        print(f"\nTarget Scaling Strategy Summary:")
+        print(f"   Total Position (if both fill): {total_units} units")
+        print(f"   Average Entry Price: {average_price:.5f}")
+        print(f"   Risk Management: Stop loss at 1.0800 for all entries")
+
         return orders
 ```
 
@@ -78,27 +92,41 @@ from fivetwenty import AsyncClient
 load_dotenv()
 
 async def scale_out_of_position():
-    # Zero-config - automatically uses environment variables
+    """Demonstrate scaling out of positions using multiple profit-taking levels for optimized exits."""
+
+    # Step 1: Initialize client for profit-taking order management
+    # Scaling out allows capturing profits while maintaining market exposure
     async with AsyncClient() as client:
-        # First take partial profit at initial target
+        print(f"Target Implementing Scaling Exit Strategy:")
+
+        # Step 2: Place first profit-taking order at conservative target
+        # First exit secures partial profits at reasonable target level
         profit1 = await client.orders.post_limit_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=-5000,  # Sell half position
-            price=Decimal("1.0925"),  # First target
-            time_in_force="GTC"
+            account_id=client.account_id,     # Account for profit realization
+            instrument="EUR_USD",             # Same instrument as original position
+            units=-5000,                      # Negative units = sell (close partial position)
+            price=Decimal("1.0925"),          # First profit target (75 pips from 1.0850)
+            time_in_force="GTC"               # Persistent until market reaches target
         )
+        print(f"   Balance First profit target: Sell {abs(profit1.units)} units at {profit1.price}")
 
-        # Second take profit at extended target
+        # Step 3: Place second profit-taking order at extended target
+        # Second exit captures additional profits if trend continues
         profit2 = await client.orders.post_limit_order(
-            account_id=client.account_id,
-            instrument="EUR_USD",
-            units=-5000,  # Sell remaining
-            price=Decimal("1.0975"),  # Extended target
-            time_in_force="GTC"
+            account_id=client.account_id,     # Same account for consistent management
+            instrument="EUR_USD",             # Maintaining instrument consistency
+            units=-5000,                      # Close remaining position
+            price=Decimal("1.0975"),          # Extended target (125 pips from 1.0850)
+            time_in_force="GTC"               # Long-term profit capture
         )
+        print(f"   Balance Second profit target: Sell {abs(profit2.units)} units at {profit2.price}")
 
-        print("Profit-taking orders placed")
+        # Step 4: Display scaling exit strategy analysis
+        print(f"\nData Scaling Exit Analysis:")
+        print(f"   Conservative Target: {profit1.price} (early profit protection)")
+        print(f"   Extended Target: {profit2.price} (trend continuation capture)")
+        print(f"   Strategy Benefit: Balances profit security with upside potential")
+
         return [profit1, profit2]
 ```
 
@@ -119,19 +147,31 @@ from fivetwenty import AsyncClient
 load_dotenv()
 
 async def update_stop_loss(trade_id: str, new_stop_price: Decimal):
-    # Zero-config - automatically uses environment variables
+    """Update stop loss levels for active trades to lock in profits or adjust risk."""
+
+    # Step 1: Initialize client for trade management operations
+    # Stop loss updates enable dynamic risk management as trades develop
     async with AsyncClient() as client:
-        # Update the stop loss for an existing trade
+        print(f"Security Updating Stop Loss Protection:")
+        print(f"   Trade ID: {trade_id}")
+        print(f"   New Stop Level: {new_stop_price}")
+
+        # Step 2: Execute stop loss modification for specified trade
+        # Trade-specific updates allow individual position risk management
         response = await client.trades.put_trade_orders(
-            account_id=client.account_id,
-            trade_id=trade_id,
-            stop_loss={
-                "price": str(new_stop_price),
-                "time_in_force": "GTC"
+            account_id=client.account_id,     # Account containing the trade
+            trade_id=trade_id,                # Specific trade to modify
+            stop_loss={                       # New stop loss configuration
+                "price": str(new_stop_price), # Updated trigger price
+                "time_in_force": "GTC"        # Persistent until triggered
             }
         )
 
-        print(f"Stop loss updated to: {new_stop_price}")
+        # Step 3: Confirm successful stop loss update
+        print(f"Success Stop loss successfully updated to: {new_stop_price}")
+        print(f"Secure Trade {trade_id} now protected at new level")
+        print(f"Note Use this to trail stops or tighten risk management")
+
         return response
 ```
 
@@ -152,39 +192,51 @@ from fivetwenty import AsyncClient
 load_dotenv()
 
 async def conditional_order_logic():
-    # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
-        # Monitor a condition and place order when met
-        target_price = Decimal("1.0875")
+    """Implement conditional order logic using price monitoring for breakout strategies."""
 
+    # Step 1: Initialize client for conditional order monitoring
+    # Conditional logic enables automated responses to market conditions
+    async with AsyncClient() as client:
+        # Step 2: Define breakout condition parameters
+        target_price = Decimal("1.0875")  # Breakout level to monitor
+        print(f"Search Monitoring for breakout above {target_price}")
+        print(f"Data Starting conditional order monitoring...")
+
+        # Step 3: Continuous price monitoring loop
+        # Real-time monitoring enables immediate response to market conditions
         while True:
-            # Get current price
+            # Step 4: Retrieve current market pricing for condition evaluation
             pricing = await client.pricing.get_pricing(
-                account_id=client.account_id,
-                instruments=["EUR_USD"]
+                account_id=client.account_id,     # Account context for pricing
+                instruments=["EUR_USD"]           # Target instrument for monitoring
             )
 
-            current_price = Decimal(pricing.prices[0].mid.o)
-            print(f"Current price: {current_price}")
+            # Step 5: Extract current price for condition checking
+            current_price = Decimal(pricing.prices[0].mid.o)  # Mid price for fairness
+            print(f"Time Current price: {current_price} (target: {target_price})")
 
-            # Check condition
+            # Step 6: Evaluate breakout condition
+            # Price crossing above target indicates potential upward momentum
             if current_price >= target_price:
-                # Place order when condition is met
+                # Step 7: Execute breakout order when condition is satisfied
+                print(f"Starting BREAKOUT DETECTED! Price hit {current_price}")
                 order = await client.orders.post_market_order(
-                    account_id=client.account_id,
-                    instrument="EUR_USD",
-                    units=10000,
-                    stop_loss_on_fill={
-                        "price": "1.0825",
-                        "time_in_force": "GTC"
+                    account_id=client.account_id,     # Execute on monitored account
+                    instrument="EUR_USD",             # Same instrument as monitoring
+                    units=10000,                      # Full position size for breakout
+                    stop_loss_on_fill={               # Immediate risk protection
+                        "price": "1.0825",            # Stop below breakout level
+                        "time_in_force": "GTC"        # Persistent protection
                     }
                 )
 
-                print(f"Conditional order triggered at: {current_price}")
+                print(f"Success Breakout order executed: {order.units} units")
+                print(f"Security Stop loss protection active at 1.0825")
                 return order
 
-            # Wait before checking again
-            await asyncio.sleep(10)
+            # Step 8: Wait before next price check to avoid excessive API calls
+            print(f"   Wait Condition not met, checking again in 10 seconds...")
+            await asyncio.sleep(10)  # 10-second monitoring interval
 ```
 
 ### Position Reversal Strategy
@@ -200,29 +252,51 @@ from fivetwenty import AsyncClient
 load_dotenv()
 
 async def position_reversal():
-    # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
-        # Get current positions
-        positions = await client.positions.get_positions(account_id=account_id)
+    """Demonstrate position reversal strategy for trend change scenarios."""
 
+    # Step 1: Initialize client for position reversal operations
+    # Position reversal enables quick response to changing market conditions
+    async with AsyncClient() as client:
+        print(f"Processing Executing Position Reversal Strategy")
+
+        # Step 2: Retrieve current positions for reversal analysis
+        # Position data determines reversal size and direction
+        positions = await client.positions.get_positions(account_id=client.account_id)
+
+        # Step 3: Analyze positions for reversal opportunities
         for position in positions.positions:
             if position.instrument == "EUR_USD" and position.long.units != "0":
-                # Close long position and open short
-                close_size = int(position.long.units)
-                new_position_size = close_size * 2  # Double to reverse
+                # Step 4: Calculate reversal order size
+                # Reversal requires closing existing position and opening opposite position
+                close_size = int(position.long.units)    # Current long position size
+                new_position_size = close_size * 2       # Double size for full reversal
 
+                print(f"Data Reversal Analysis:")
+                print(f"   Current Position: {close_size} units LONG")
+                print(f"   Reversal Order: {new_position_size} units SHORT")
+                print(f"   Net Result: {new_position_size//2} units SHORT")
+
+                # Step 5: Execute reversal order with market order
+                # Negative units close long and open short in single transaction
                 order = await client.orders.post_market_order(
-                    account_id=client.account_id,
-                    instrument="EUR_USD",
-                    units=-new_position_size,  # Negative to go short
-                    stop_loss_on_fill={
-                        "price": "1.0925",  # Stop above current price
-                        "time_in_force": "GTC"
+                    account_id=client.account_id,     # Account for reversal
+                    instrument="EUR_USD",             # Same instrument as existing position
+                    units=-new_position_size,         # Negative for short position
+                    stop_loss_on_fill={               # Risk protection for new direction
+                        "price": "1.0925",            # Stop above current price (short protection)
+                        "time_in_force": "GTC"        # Persistent risk management
                     }
                 )
 
-                print(f"Position reversed: {close_size} long → {new_position_size//2} short")
+                print(f"\nSuccess Position Reversal Executed:")
+                print(f"   Closed: {close_size} units LONG")
+                print(f"   Opened: {new_position_size//2} units SHORT")
+                print(f"   Stop Loss: 1.0925 (protecting short position)")
                 return order
+
+        # Step 6: Handle case where no reversible positions exist
+        print(f"Info No EUR_USD long positions found for reversal")
+        return None
 ```
 
 ## Complete Strategy Example
@@ -240,49 +314,81 @@ from fivetwenty import AsyncClient
 load_dotenv()
 
 async def scaling_strategy_example():
-    """Complete scaling strategy using order combinations covered in this guide."""
-    # Zero-config - automatically uses environment variables
+    """Complete scaling strategy demonstrating systematic entry and exit using order combinations."""
+
+    # Step 1: Initialize client for comprehensive scaling strategy
+    # Scaling strategies balance risk and opportunity through systematic position building
     async with AsyncClient() as client:
-        # Demonstrate scaling into and out of positions
-        base_size = 5000
-        entry_prices = [Decimal("1.0850"), Decimal("1.0825"), Decimal("1.0800")]
-        exit_prices = [Decimal("1.0925"), Decimal("1.0950"), Decimal("1.0975")]
+        print(f"Target COMPREHENSIVE SCALING STRATEGY")
+        print(f"=" * 40)
 
-        scaling_orders = []
+        # Step 2: Define scaling parameters for systematic approach
+        base_size = 5000  # Base unit size for scaling calculations
+        entry_prices = [Decimal("1.0850"), Decimal("1.0825"), Decimal("1.0800")]  # Descending entry levels
+        exit_prices = [Decimal("1.0925"), Decimal("1.0950"), Decimal("1.0975")]   # Ascending exit levels
 
-        # Scale into position with multiple limit orders
+        scaling_orders = []  # Track all orders for strategy management
+
+        # Step 3: Implement scaling entry strategy
+        print(f"\nAnalysis SCALING INTO POSITION:")
         for i, price in enumerate(entry_prices):
+            # Step 4: Calculate progressive position sizing
+            # Larger sizes at better prices improve average entry cost
+            position_size = base_size * (i + 1)  # Increasing size: 5k, 10k, 15k
+            stop_price = price - Decimal("0.0050")  # 50 pip stop for each entry
+
+            # Step 5: Place scaling entry order with risk protection
             order = await client.orders.post_limit_order(
-                account_id=client.account_id,
-                instrument="EUR_USD",
-                units=base_size * (i + 1),  # Increasing size
-                price=price,
-                time_in_force="GTC",
-                stop_loss_on_fill={
-                    "price": str(price - Decimal("0.0050")),  # 50 pip stop
-                    "time_in_force": "GTC"
+                account_id=client.account_id,     # Account for strategy execution
+                instrument="EUR_USD",             # Major pair for reliable execution
+                units=position_size,              # Progressive sizing
+                price=price,                      # Entry level for this scale
+                time_in_force="GTC",              # Persistent until filled
+                stop_loss_on_fill={               # Automatic risk management
+                    "price": str(stop_price),     # Individual stop for this entry
+                    "time_in_force": "GTC"        # Persistent protection
                 }
             )
             scaling_orders.append(order)
-            print(f"Entry order {i+1}: {base_size * (i + 1)} units at {price}")
+            print(f"   Entry {i+1}: {position_size:,} units at {price} (stop: {stop_price})")
 
-        # Scale out of position with profit targets
+        # Step 6: Calculate total potential position and average price
+        total_units = sum(base_size * (i + 1) for i in range(len(entry_prices)))  # 30,000 units total
+        weighted_avg = sum(entry_prices[i] * base_size * (i + 1) for i in range(len(entry_prices))) / total_units
+        print(f"   Data Total Position (if all fill): {total_units:,} units")
+        print(f"   Data Weighted Average Price: {weighted_avg:.5f}")
+
+        # Step 7: Implement scaling exit strategy
+        print(f"\nBalance SCALING OUT OF POSITION:")
         for i, price in enumerate(exit_prices):
+            # Step 8: Place systematic profit-taking orders
+            # Equal exit sizes provide balanced profit realization
             order = await client.orders.post_limit_order(
-                account_id=client.account_id,
-                instrument="EUR_USD",
-                units=-base_size,  # Partial exit
-                price=price,
-                time_in_force="GTC"
+                account_id=client.account_id,     # Same account for consistency
+                instrument="EUR_USD",             # Same instrument
+                units=-base_size,                 # Consistent partial exit size
+                price=price,                      # Progressive profit targets
+                time_in_force="GTC"               # Persistent profit capture
             )
             scaling_orders.append(order)
-            print(f"Exit order {i+1}: {base_size} units at {price}")
+            pips_from_avg = (price - weighted_avg) * 10000
+            print(f"   Exit {i+1}: {base_size:,} units at {price} ({pips_from_avg:.0f} pips profit)")
+
+        # Step 9: Display strategy summary and risk analysis
+        print(f"\nList STRATEGY SUMMARY:")
+        print(f"   Entry Orders: {len(entry_prices)} levels ({entry_prices[0]} to {entry_prices[-1]})")
+        print(f"   Exit Orders: {len(exit_prices)} levels ({exit_prices[0]} to {exit_prices[-1]})")
+        print(f"   Risk Management: 50-pip stops on all entries")
+        print(f"   Total Orders: {len(scaling_orders)} orders placed")
+        print(f"   Strategy Type: Systematic scaling with progressive sizing")
 
         return scaling_orders
 
-# Run the strategy
+# Step 10: Execute the comprehensive scaling strategy demonstration
 if __name__ == "__main__":
+    print(f"Starting Starting comprehensive scaling strategy demonstration...")
     asyncio.run(scaling_strategy_example())
+    print(f"Success Scaling strategy demonstration completed")
 ```
 
 ## Key Takeaways
