@@ -6,7 +6,7 @@ A comprehensive, hands-on tutorial series that walks you through forex trading f
 
 ## Series Overview
 
-!!! success "🎓 Learning-oriented Tutorial Series"
+!!! success "Education Learning-oriented Tutorial Series"
     **Use this series when:** You want to learn forex trading fundamentals through hands-on practice
 
     **Learning outcome:** Confidence with basic trading operations and FiveTwenty usage
@@ -25,9 +25,9 @@ This progressive tutorial series builds on the getting-started tutorials to adva
 - OANDA practice account with API token configured
 - Familiarity with placing your first trade
 
-### 📈 Your Progressive Journey
+### Analysis Your Progressive Journey
 
-!!! info "🎯 Skill Progression Framework"
+!!! info "Target Skill Progression Framework"
     **Foundation** → Understand forex concepts and fundamentals
     **Market Analysis** → Analyze market data and conditions
     **Position Management** → Monitor and manage trading positions

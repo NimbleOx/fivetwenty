@@ -101,10 +101,16 @@ async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
                 await asyncio.sleep(60)  # Check every minute
 
             except Exception as e:
-                print(f"   ERROR: Strategy error: {e}")
-                await asyncio.sleep(60)
+                print(f"   Error ERROR: Strategy error: {e}")
+                print(f"   Processing Continuing strategy loop after error recovery")
+                # In production: implement proper error logging and alerting
+                await asyncio.sleep(60)  # Wait before retrying to avoid error loops
 
-        print(f"\nStrategy completed after {duration_minutes} minutes")
+        # Step 11: Strategy completion and final analysis
+        print(f"\nFlag Strategy completed after {duration_minutes} minutes")
+        print(f"Session ended at: {datetime.now().strftime('%H:%M:%S')}")
+
+        # Generate comprehensive final performance report
         print_strategy_performance(strategy)
 
 async def execute_strategy_trade(client: AsyncClient, strategy,
@@ -357,13 +363,13 @@ class StrategyMonitor:
 
 ## What You've Learned
 
-✅ **Complete System Development**: Building production-ready automated trading systems
+Success **Complete System Development**: Building production-ready automated trading systems
 
-✅ **Advanced Strategy Features**: Enhanced capabilities for real-world trading
+Success **Advanced Strategy Features**: Enhanced capabilities for real-world trading
 
-✅ **Production Deployment**: Checklist and best practices for live trading
+Success **Production Deployment**: Checklist and best practices for live trading
 
-✅ **Performance Monitoring**: Real-time tracking and analysis of strategy performance
+Success **Performance Monitoring**: Real-time tracking and analysis of strategy performance
 
 !!! success "Trading System Mastery Complete!"
     Incredible achievement! You've built a complete automated trading system from concept to production deployment. You understand the full development lifecycle, risk management, and operational requirements for successful algorithmic trading.
@@ -376,19 +382,19 @@ class StrategyMonitor:
 
 Congratulations! You've successfully completed the comprehensive FiveTwenty trading tutorial series. You now possess:
 
-✅ **Level 1 - Foundation Knowledge**
+Success **Level 1 - Foundation Knowledge**
 - Deep understanding of forex concepts, pips, spreads, and order types
 - Ability to analyze currency pair pricing and market dynamics
 
-✅ **Level 2 - Technical Proficiency**
+Success **Level 2 - Technical Proficiency**
 - Skill connecting to OANDA API safely and securely
 - Understanding of account management and margin concepts
 
-✅ **Level 3 - Trading Execution**
+Success **Level 3 - Trading Execution**
 - Practical experience placing, monitoring, and closing trades
 - Knowledge of position management and risk assessment
 
-✅ **Level 4 - System Development**
+Success **Level 4 - System Development**
 - Ability to build complete automated trading strategies
 - Understanding of strategy design, backtesting, and optimization
 

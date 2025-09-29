@@ -1,6 +1,6 @@
 # Market Data & Analysis
 
-!!! tip "🎯 Learning Goal"
+!!! tip "Target Learning Goal"
     Understand how to retrieve and analyze market data to make informed trading decisions.
 
 ---
@@ -25,31 +25,36 @@ load_dotenv()
 async def get_current_prices(instruments: list):
     """Fetch current market prices."""
 
-    # Zero-config - automatically uses environment variables
+    # Step 1: Create client using environment-based authentication
+    # AsyncClient automatically reads FIVETWENTY_OANDA_TOKEN and FIVETWENTY_OANDA_ACCOUNT
     async with AsyncClient() as client:
         try:
+            # Step 2: Request current pricing for specified instruments
+            # This gets real-time bid/ask prices and spreads
             prices = await client.pricing.get_pricing(
-                account_id=client.account_id,
-                instruments=instruments
+                account_id=client.account_id,  # Uses account from environment config
+                instruments=instruments         # List of currency pairs to get prices for
             )
 
-            print("📈 Current Market Prices:")
+            print("Analysis Current Market Prices:")
+            # Step 3: Process each price response with financial precision
             for price in prices:
                 if price.bids and price.asks:
-                    bid = Decimal(str(price.bids[0].price))
-                    ask = Decimal(str(price.asks[0].price))
-                    spread = ask - bid
+                    # Convert to Decimal for exact financial calculations
+                    bid = Decimal(str(price.bids[0].price))  # Highest price buyers willing to pay
+                    ask = Decimal(str(price.asks[0].price))  # Lowest price sellers willing to accept
+                    spread = ask - bid                       # Cost of trading (broker's margin)
 
                     print(f"   {price.instrument}:")
-                    print(f"     Bid: {bid:.5f}")
-                    print(f"     Ask: {ask:.5f}")
-                    print(f"     Spread: {spread:.5f} ({spread/ask*10000:.1f} pips)")
-                    print(f"     Time: {price.time}")
+                    print(f"     Bid: {bid:.5f}")                                        # Price you can sell at
+                    print(f"     Ask: {ask:.5f}")                                        # Price you must pay to buy
+                    print(f"     Spread: {spread:.5f} ({spread/ask*10000:.1f} pips)")   # Trading cost in pips
+                    print(f"     Time: {price.time}")                                   # When this price was quoted
 
             return prices
 
         except FiveTwentyError as e:
-            print(f"❌ Error getting prices: {e.message}")
+            print(f"Error Error getting prices: {e.message}")
             return None
 
 # Get prices for major pairs
@@ -80,29 +85,34 @@ load_dotenv()
 async def get_historical_data(instrument: str, count: int = 100) -> Any:
     """Get historical candlestick data."""
 
-    # Zero-config - automatically uses environment variables
+    # Step 1: Create authenticated client for historical data access
+    # Historical data doesn't require live pricing subscription
     async with AsyncClient() as client:
         try:
+            # Step 2: Request historical candlestick data
+            # Candlesticks show price movement over specific time periods
             candles = await client.instruments.get_instrument_candles(
-                instrument=instrument,
-                count=count,
-                granularity=CandlestickGranularity.H1  # 1-hour candles
+                instrument=instrument,                    # Currency pair to analyze
+                count=count,                             # Number of historical periods to retrieve
+                granularity=CandlestickGranularity.H1   # 1-hour time periods (other options: M1, M5, D, etc.)
             )
 
-            print(f"📊 Historical Data for {instrument}:")
+            print(f"Data Historical Data for {instrument}:")
             print(f"   Retrieved {len(candles.candles)} candles")
 
-            # Show last 5 candles
+            # Step 3: Display recent price action for market context
             print(f"   Recent 5 candles:")
             for candle in candles.candles[-5:]:
                 if candle.mid:
+                    # OHLC = Open, High, Low, Close prices for the time period
                     print(f"     {candle.time}: O={candle.mid.o} H={candle.mid.h} "
                           f"L={candle.mid.l} C={candle.mid.c} V={candle.volume}")
+                    # Volume shows trading activity during the period
 
             return candles
 
         except FiveTwentyError as e:
-            print(f"❌ Error getting historical data: {e.message}")
+            print(f"Error Error getting historical data: {e.message}")
             return None
 
 # Get historical data
@@ -131,62 +141,71 @@ load_dotenv()
 async def analyze_market_before_trading(instrument: str = "EUR_USD"):
     """Comprehensive market analysis before trading."""
 
-    # Zero-config - automatically uses environment variables
+    # Step 1: Initialize client for comprehensive market analysis
+    # This function demonstrates pre-trade analysis workflow
     async with AsyncClient() as client:
-        print("🔍 MARKET ANALYSIS")
+        print("Search MARKET ANALYSIS")
         print("=" * 30)
 
-        # 1. Get current pricing
+        # Step 2: Get current pricing to assess trading costs
+        # Always check spreads before trading to avoid high-cost periods
         pricing = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[instrument]
+            account_id=client.account_id,  # Account for pricing context
+            instruments=[instrument]        # Single instrument for focused analysis
         )
 
         if pricing.prices:
             price = pricing.prices[0]
-            bid = Decimal(str(price.bids[0].price))
-            ask = Decimal(str(price.asks[0].price))
-            spread = ask - bid
-            mid_price = (bid + ask) / 2
+            # Calculate precise pricing metrics using Decimal for accuracy
+            bid = Decimal(str(price.bids[0].price))  # Price you can sell at immediately
+            ask = Decimal(str(price.asks[0].price))  # Price you must pay to buy immediately
+            spread = ask - bid                       # Trading cost (broker's profit)
+            mid_price = (bid + ask) / 2             # Fair value estimate
 
-            print(f"📊 Current {instrument} Pricing:")
-            print(f"   Bid: {bid:.5f}")
-            print(f"   Ask: {ask:.5f}")
-            print(f"   Mid: {mid_price:.5f}")
-            print(f"   Spread: {spread:.5f} ({spread*10000:.1f} pips)")
+            print(f"Data Current {instrument} Pricing:")
+            print(f"   Bid: {bid:.5f}")                              # Immediate sell price
+            print(f"   Ask: {ask:.5f}")                              # Immediate buy price
+            print(f"   Mid: {mid_price:.5f}")                        # Market consensus price
+            print(f"   Spread: {spread:.5f} ({spread*10000:.1f} pips)")  # Cost to trade in pips
 
-            if spread > 0.0005:  # 5 pips
+            # Step 3: Assess trading conditions based on spread
+            # Wide spreads increase trading costs and reduce profitability
+            if spread > Decimal("0.0005"):  # 5 pips threshold for major pairs
                 print("   ⚠️ Wide spread detected - consider waiting for better conditions")
             else:
-                print("   ✅ Normal spread - good for trading")
+                print("   Success Normal spread - good for trading")
 
-        # 2. Get recent historical data for context
+        # Step 4: Get recent historical data for market context
+        # Historical analysis helps identify support/resistance and trend direction
         try:
             candles = await client.instruments.get_instrument_candles(
-                instrument=instrument,
-                count=24,  # Last 24 hours
-                granularity="H1"
+                instrument=instrument,    # Same instrument for consistency
+                count=24,                # Last 24 hours of data
+                granularity="H1"         # 1-hour periods for detailed analysis
             )
 
             if candles.candles:
+                # Extract closing prices for trend analysis
                 prices = [float(c.mid.c) for c in candles.candles if c.mid]
                 if len(prices) >= 2:
-                    recent_high = max(prices[-12:])  # 12-hour high
-                    recent_low = min(prices[-12:])   # 12-hour low
-                    current_price = prices[-1]
+                    # Calculate recent price levels for context
+                    recent_high = max(prices[-12:])  # Highest price in last 12 hours (resistance level)
+                    recent_low = min(prices[-12:])   # Lowest price in last 12 hours (support level)
+                    current_price = prices[-1]       # Most recent closing price
 
-                    print(f"\n📈 Recent Price Action (12H):")
-                    print(f"   High: {recent_high:.5f}")
-                    print(f"   Low:  {recent_low:.5f}")
-                    print(f"   Current: {current_price:.5f}")
+                    print(f"\nAnalysis Recent Price Action (12H):")
+                    print(f"   High: {recent_high:.5f}")    # Potential resistance level
+                    print(f"   Low:  {recent_low:.5f}")     # Potential support level
+                    print(f"   Current: {current_price:.5f}") # Current market position
 
-                    # Simple trend analysis
+                    # Step 5: Perform simple trend analysis
+                    # Compare current price to previous period for direction
                     if current_price > prices[-2]:
-                        print("   📈 Short-term trend: UP")
+                        print("   Analysis Short-term trend: UP")      # Price rising (bullish)
                     elif current_price < prices[-2]:
-                        print("   📉 Short-term trend: DOWN")
+                        print("   📉 Short-term trend: DOWN")    # Price falling (bearish)
                     else:
-                        print("   ➡️ Short-term trend: SIDEWAYS")
+                        print("   ➡️ Short-term trend: SIDEWAYS") # Price consolidating
 
         except Exception as e:
             print(f"   ⚠️ Could not get historical data: {e}")
@@ -234,37 +253,44 @@ load_dotenv()
 async def assess_market_conditions(instrument: str):
     """Assess current market conditions for trading suitability."""
 
-    # Zero-config - automatically uses environment variables
+    # Step 1: Create client for market condition assessment
+    # This function helps determine optimal trading times
     async with AsyncClient() as client:
+        # Step 2: Get current pricing for condition analysis
         pricing = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[instrument]
+            account_id=client.account_id,  # Account context for pricing
+            instruments=[instrument]        # Single instrument assessment
         )
 
+        # Step 3: Validate pricing data availability
         if not pricing.prices:
             return {"suitable": False, "reason": "No pricing data available"}
 
+        # Step 4: Extract pricing components for analysis
         price = pricing.prices[0]
-        bid = Decimal(str(price.bids[0].price))
-        ask = Decimal(str(price.asks[0].price))
-        spread = ask - bid
+        bid = Decimal(str(price.bids[0].price))  # Current sell price
+        ask = Decimal(str(price.asks[0].price))  # Current buy price
+        spread = ask - bid                       # Trading cost calculation
 
-        # Define conditions
+        # Step 5: Initialize market condition assessment
         conditions = {
-            "suitable": True,
-            "spread_pips": spread * 10000,
-            "reasons": []
+            "suitable": True,                    # Default to suitable unless issues found
+            "spread_pips": spread * 10000,     # Convert spread to pips for readability
+            "reasons": []                       # List of any issues detected
         }
 
-        # Check spread conditions
-        if spread > 0.0005:  # 5 pips
+        # Step 6: Evaluate spread conditions for trading viability
+        # Wide spreads increase trading costs and reduce profit potential
+        if spread > Decimal("0.0005"):  # 5 pips threshold for major pairs
             conditions["suitable"] = False
             conditions["reasons"].append("Wide spread detected")
 
-        # Add other condition checks here:
-        # - Time of day (avoid rollover times)
-        # - Economic news events
-        # - Market volatility
+        # Step 7: Framework for additional condition checks
+        # Future enhancements could include:
+        # - Time of day analysis (avoid market rollover times)
+        # - Economic calendar event checking
+        # - Market volatility assessment
+        # - Liquidity analysis
 
         return conditions
 
@@ -295,50 +321,58 @@ load_dotenv()
 async def analyze_price_movements(instrument: str, periods: int = 20):
     """Analyze recent price movements for trading insights."""
 
-    # Zero-config - automatically uses environment variables
+    # Step 1: Initialize client for detailed price movement analysis
+    # This provides volatility and range analysis for trading decisions
     async with AsyncClient() as client:
         try:
+            # Step 2: Request higher-frequency historical data
+            # 15-minute candles provide detailed recent price action
             candles = await client.instruments.get_instrument_candles(
-                instrument=instrument,
-                count=periods,
-                granularity="M15"  # 15-minute candles
+                instrument=instrument,    # Currency pair to analyze
+                count=periods,           # Number of time periods to examine
+                granularity="M15"        # 15-minute intervals for detailed analysis
             )
 
             if not candles.candles:
                 return None
 
-            # Extract price data
-            highs = [Decimal(str(c.mid.h)) for c in candles.candles if c.mid]
-            lows = [Decimal(str(c.mid.l)) for c in candles.candles if c.mid]
-            closes = [Decimal(str(c.mid.c)) for c in candles.candles if c.mid]
+            # Step 3: Extract OHLC price data with Decimal precision
+            # Using Decimal ensures accurate financial calculations
+            highs = [Decimal(str(c.mid.h)) for c in candles.candles if c.mid]   # High prices per period
+            lows = [Decimal(str(c.mid.l)) for c in candles.candles if c.mid]    # Low prices per period
+            closes = [Decimal(str(c.mid.c)) for c in candles.candles if c.mid]  # Closing prices per period
 
             if len(closes) < 2:
                 return None
 
-            # Calculate volatility
+            # Step 4: Calculate price volatility metrics
+            # Volatility indicates how much prices are moving (risk/opportunity)
             price_changes = [abs(closes[i] - closes[i-1]) for i in range(1, len(closes))]
             avg_volatility = sum(price_changes) / len(price_changes)
 
-            # Calculate range
-            recent_high = max(highs)
-            recent_low = min(lows)
-            price_range = recent_high - recent_low
+            # Step 5: Calculate trading range metrics
+            # Range analysis helps identify support and resistance levels
+            recent_high = max(highs)                              # Highest price in period (resistance)
+            recent_low = min(lows)                               # Lowest price in period (support)
+            price_range = recent_high - recent_low               # Total price movement range
 
-            current_price = closes[-1]
-            range_position = (current_price - recent_low) / price_range if price_range > 0 else 0.5
+            # Step 6: Determine current position within trading range
+            current_price = closes[-1]  # Most recent closing price
+            range_position = (current_price - recent_low) / price_range if price_range > 0 else Decimal("0.5")
 
-            print(f"📊 Price Movement Analysis for {instrument}:")
-            print(f"   Recent High: {recent_high:.5f}")
-            print(f"   Recent Low:  {recent_low:.5f}")
-            print(f"   Current:     {current_price:.5f}")
-            print(f"   Range:       {price_range:.5f} ({price_range*10000:.1f} pips)")
-            print(f"   Position in Range: {range_position:.1%}")
-            print(f"   Avg Volatility: {avg_volatility:.5f} ({avg_volatility*10000:.1f} pips)")
+            print(f"Data Price Movement Analysis for {instrument}:")
+            print(f"   Recent High: {recent_high:.5f}")                           # Potential resistance level
+            print(f"   Recent Low:  {recent_low:.5f}")                            # Potential support level
+            print(f"   Current:     {current_price:.5f}")                        # Current market price
+            print(f"   Range:       {price_range:.5f} ({price_range*10000:.1f} pips)")  # Total movement in pips
+            print(f"   Position in Range: {range_position:.1%}")                 # Where price sits in range
+            print(f"   Avg Volatility: {avg_volatility:.5f} ({avg_volatility*10000:.1f} pips)")  # Average price movement
 
-            # Provide interpretation
-            if range_position > 0.8:
-                print("   📈 Near recent highs - potential resistance")
-            elif range_position < 0.2:
+            # Step 7: Provide tactical trading interpretation
+            # Position in range suggests potential support/resistance reactions
+            if range_position > Decimal("0.8"):
+                print("   Analysis Near recent highs - potential resistance")
+            elif range_position < Decimal("0.2"):
                 print("   📉 Near recent lows - potential support")
             else:
                 print("   ➡️ Middle of range - less clear direction")
@@ -352,7 +386,7 @@ async def analyze_price_movements(instrument: str, periods: int = 20):
             }
 
         except Exception as e:
-            print(f"❌ Error analyzing price movements: {e}")
+            print(f"Error Error analyzing price movements: {e}")
             return None
 
 # Analyze price movements
@@ -370,15 +404,15 @@ Use FiveTwenty's pricing API to check current spreads and recent price action be
 
 ## What You've Learned
 
-✅ **Real-time Pricing**: How to retrieve and interpret current market prices
+Success **Real-time Pricing**: How to retrieve and interpret current market prices
 
-✅ **Historical Analysis**: Using past data to understand market context
+Success **Historical Analysis**: Using past data to understand market context
 
-✅ **Market Conditions**: Assessing when markets are suitable for trading
+Success **Market Conditions**: Assessing when markets are suitable for trading
 
-✅ **Price Movement Patterns**: Understanding volatility and range analysis
+Success **Price Movement Patterns**: Understanding volatility and range analysis
 
-!!! success "🎉 Market Analysis Mastery Complete!"
+!!! success "Complete Market Analysis Mastery Complete!"
     Excellent! You can now analyze market conditions effectively before trading. Next, you'll place your first actual trade with proper analysis and risk management.
 
 ---

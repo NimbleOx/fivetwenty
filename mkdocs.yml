@@ -85,9 +85,8 @@ nav:
           - Stop Orders & Market-If-Touched: tutorials/advanced-orders/stop-orders-mit.md
           - Dynamic Order Management: tutorials/advanced-orders/dynamic-management.md
           - Order Strategies & Combinations: tutorials/advanced-orders/order-strategies.md
-          - Validation & Best Practices: tutorials/advanced-orders/validation-best-practices.md
       - Risk Management: tutorials/risk-management.md
-      - Account Management: tutorials/portfolio-analysis.md
+      - Account Management: tutorials/account-management.md
       - Streaming Data: tutorials/streaming-data.md
 
   # GUIDES - Comprehensive practical guidance
@@ -111,11 +110,11 @@ nav:
           - Implement Stop-Loss Strategies: guides/practical-solutions/implement-stop-loss-strategies.md
           - Multi-Account Configuration: guides/practical-solutions/multi-account-configuration.md
       - Performance Optimization:
-          - Overview: guides/performance-optimization/hft-optimization/index.md
-          - Connection Optimization: guides/performance-optimization/hft-optimization/connection-optimization.md
-          - Streaming Optimization: guides/performance-optimization/hft-optimization/streaming-optimization.md
-          - Memory & CPU Optimization: guides/performance-optimization/hft-optimization/memory-cpu-optimization.md
-          - Latency Optimization: guides/performance-optimization/hft-optimization/latency-optimization.md
+          - Overview: guides/optimization/index.md
+          - Connection Optimization: guides/optimization/connection-optimization.md
+          - Streaming Optimization: guides/optimization/streaming-optimization.md
+          - Memory & CPU Optimization: guides/optimization/memory-cpu-optimization.md
+          - Latency Optimization: guides/optimization/latency-optimization.md
   # REFERENCE - Information-oriented quick lookup
   - "API Reference":
       - Overview: api-reference/index.md

@@ -2,7 +2,7 @@
 
 Learn how to monitor account health, manage multiple accounts, and track account-level metrics using FiveTwenty's account and position APIs.
 
-!!! success "🎯 Practical Guide - Problem-oriented solutions"
+!!! success "Target Practical Guide - Problem-oriented solutions"
     **Use this guide when:** You need to manage OANDA accounts and monitor account health
 
     **Learning outcome:** Effectively monitor and manage trading accounts using FiveTwenty
@@ -88,7 +88,9 @@ async def main():
         print(f"Health Status: {health['health_status']}")
         print(f"Active Positions: {health['active_positions']}")
 
-asyncio.run(main())
+# Step 5: Execute the account health assessment
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Multi-Account Management
@@ -170,7 +172,9 @@ async def main():
     for name, account in multi_account_summary['accounts'].items():
         print(f"{name}: {account['health_status']} - {account['active_positions']} positions")
 
-asyncio.run(main())
+# Step 5: Execute the multi-account monitoring
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ### Account Performance Tracking
@@ -249,7 +253,9 @@ async def main():
         print(f"Win Rate: {performance['win_rate']:.1f}%")
         print(f"Total Trades: {performance['total_trades']}")
 
-asyncio.run(main())
+# Step 5: Execute the performance analysis
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ## Next Steps

@@ -25,111 +25,713 @@ FiveTwenty supports three main types of streaming data:
 ### Price Streams
 Real-time bid/ask prices for instruments:
 
-<!-- fragment: Demo basic price streaming with union type handling -->
+<!-- fragment: Demo comprehensive basic price streaming with detailed educational explanations -->
 ```python
 from dotenv import load_dotenv
-
+from typing import Any
 from fivetwenty import AsyncClient
+from fivetwenty.models import ClientPrice
 
-# Load environment variables from .env file
-load_dotenv()
 
-async def basic_price_stream():
-    # Zero-config - automatically uses environment variables
+async def demonstrate_comprehensive_basic_price_streaming() -> None:
+    """Demonstrate comprehensive basic price streaming with detailed educational explanations."""
+    print(f"Data Comprehensive Basic Price Streaming Tutorial")
+
+    # Step 1: Environment configuration for streaming setup
+    # Environment variables provide secure credential management
+    print(f"\nConfig Environment Configuration:")
+    print(f"   Folder Loading from .env file for secure credential management")
+    print(f"   Lock Keeps sensitive tokens out of source code")
+    print(f"   World Supports multiple environments (practice/live)")
+
+    # Load environment variables from .env file
+    load_dotenv()
+    print(f"   Success Environment variables loaded successfully")
+
+    # Step 2: Initialize AsyncClient for streaming operations
+    # AsyncClient provides optimal performance for real-time data streaming
+    print(f"\nStarting AsyncClient Initialization:")
+    print(f"   Lightning Async architecture: Non-blocking I/O for optimal performance")
+    print(f"   Link Persistent connections: Efficient streaming connections")
+    print(f"   Processing Auto-reconnection: Built-in connection resilience")
+    print(f"   Satellite Real-time data: Live market price updates")
+
     async with AsyncClient() as client:
-        async for price in client.pricing.get_pricing_stream(
-            account_id=client.account_id,
-            instruments=["EUR_USD", "GBP_USD"]
-        ):
-            print(f"{price.instrument}: {price.bids[0].price} / {price.asks[0].price}")
+        # Zero-config client automatically uses environment variables
+        print(f"   Success Client initialized with zero-config setup")
+        print(f"   Bank Account ID: {client.account_id}")
+        print(f"   World Environment: {client.config.environment.value}")
 
-            # Process price data
-            await process_price_update(price)
+        # Step 3: Configure streaming parameters for educational demonstration
+        # Multiple instruments demonstrate real-world streaming scenarios
+        streaming_instruments = ["EUR_USD", "GBP_USD"]
+        print(f"\nAnalysis Streaming Configuration:")
+        print(f"   Target Instruments: {', '.join(streaming_instruments)}")
+        print(f"   Exchange EUR_USD: Most liquid major pair (tight spreads)")
+        print(f"   Pound GBP_USD: Volatile major pair (good for demonstration)")
+        print(f"   Data Data type: Real-time bid/ask prices with spreads")
+        print(f"   Time Frequency: Live updates as market moves")
 
-async def process_price_update(price):
-    """Process incoming price data."""
-    # Your price processing logic here
-    pass
+        # Step 4: Initialize streaming statistics for educational analysis
+        # Tracking helps understand streaming performance and behavior
+        streaming_stats = {
+            "total_updates": 0,
+            "eur_usd_updates": 0,
+            "gbp_usd_updates": 0,
+            "heartbeats_received": 0,
+            "avg_spread_eur_usd": [],
+            "avg_spread_gbp_usd": []
+        }
+
+        print(f"\nData Starting Real-Time Price Streaming...")
+        print(f"   Processing Streaming mode: Continuous real-time updates")
+        print(f"   Satellite Connection: Persistent HTTP streaming")
+        print(f"   Lightning Processing: Asynchronous price handling")
+
+        try:
+            # Step 5: Enter price streaming loop with comprehensive processing
+            # async for provides efficient iteration over streaming price data
+            async for price_data in client.pricing.get_pricing_stream(
+                account_id=client.account_id,
+                instruments=streaming_instruments
+            ):
+                # Step 6: Process different message types from the stream
+                # OANDA sends both price updates and heartbeat messages
+                if hasattr(price_data, 'type'):
+                    if price_data.type == "PRICE":
+                        # Real price update processing
+                        streaming_stats["total_updates"] += 1
+
+                        # Extract bid and ask prices for analysis
+                        bid_price = price_data.bids[0].price if price_data.bids else "N/A"
+                        ask_price = price_data.asks[0].price if price_data.asks else "N/A"
+
+                        # Calculate spread for market quality analysis
+                        if price_data.bids and price_data.asks:
+                            spread = float(ask_price) - float(bid_price)
+                            spread_pips = spread * (10000 if "JPY" not in price_data.instrument else 100)
+
+                            # Track spreads by instrument for educational analysis
+                            if price_data.instrument == "EUR_USD":
+                                streaming_stats["eur_usd_updates"] += 1
+                                streaming_stats["avg_spread_eur_usd"].append(spread_pips)
+                            elif price_data.instrument == "GBP_USD":
+                                streaming_stats["gbp_usd_updates"] += 1
+                                streaming_stats["avg_spread_gbp_usd"].append(spread_pips)
+
+                            print(f"   Analysis {price_data.instrument}: {bid_price} / {ask_price} (spread: {spread_pips:.1f} pips)")
+                        else:
+                            print(f"   Analysis {price_data.instrument}: {bid_price} / {ask_price}")
+
+                        # Process price data with educational context
+                        await process_comprehensive_price_update(price_data, streaming_stats)
+
+                    elif price_data.type == "HEARTBEAT":
+                        # Heartbeat message for connection health monitoring
+                        streaming_stats["heartbeats_received"] += 1
+                        if streaming_stats["heartbeats_received"] % 10 == 0:
+                            print(f"   Heart Connection healthy - heartbeat #{streaming_stats['heartbeats_received']}")
+
+                # Step 7: Educational demonstration limit (prevent infinite streaming)
+                if streaming_stats["total_updates"] >= 20:  # Stop after 20 updates for tutorial
+                    print(f"\nRed Tutorial limit reached - stopping demonstration")
+                    break
+
+        except KeyboardInterrupt:
+            print(f"\nStop Streaming stopped by user")
+        except Exception as streaming_error:
+            print(f"\nError Streaming error: {streaming_error}")
+            print(f"Note This is normal - streaming connections can have temporary issues")
+
+        # Step 8: Display comprehensive streaming statistics
+        print(f"\nData Streaming Session Statistics:")
+        print(f"   Analysis Total price updates: {streaming_stats['total_updates']}")
+        print(f"   Exchange EUR_USD updates: {streaming_stats['eur_usd_updates']}")
+        print(f"   Pound GBP_USD updates: {streaming_stats['gbp_usd_updates']}")
+        print(f"   Heart Heartbeats: {streaming_stats['heartbeats_received']}")
+
+        # Calculate average spreads for educational analysis
+        if streaming_stats["avg_spread_eur_usd"]:
+            avg_eur_spread = sum(streaming_stats["avg_spread_eur_usd"]) / len(streaming_stats["avg_spread_eur_usd"])
+            print(f"   Data EUR_USD avg spread: {avg_eur_spread:.1f} pips")
+
+        if streaming_stats["avg_spread_gbp_usd"]:
+            avg_gbp_spread = sum(streaming_stats["avg_spread_gbp_usd"]) / len(streaming_stats["avg_spread_gbp_usd"])
+            print(f"   Data GBP_USD avg spread: {avg_gbp_spread:.1f} pips")
+
+        print(f"\nEducation Key Learning Points:")
+        print(f"   Lightning Async streaming provides real-time market data")
+        print(f"   Data Price updates include bid/ask/spread information")
+        print(f"   Heart Heartbeats ensure connection health monitoring")
+        print(f"   Processing Streaming handles multiple instruments simultaneously")
+        print(f"   Analysis Market data quality varies by instrument and time")
+
+
+async def process_comprehensive_price_update(price: ClientPrice, stats: dict) -> None:
+    """Process incoming price data with comprehensive educational context."""
+    # Step 9: Educational price processing with market context
+    # This function demonstrates how to extract value from streaming price data
+
+    # Extract price components for analysis
+    instrument = price.instrument
+    timestamp = price.time
+    bid_price = float(price.bids[0].price) if price.bids else None
+    ask_price = float(price.asks[0].price) if price.asks else None
+
+    # Calculate mid price for strategy development
+    if bid_price and ask_price:
+        mid_price = (bid_price + ask_price) / 2
+        spread = ask_price - bid_price
+
+        # Educational market analysis
+        # In real applications, this would trigger:
+        # - Technical indicator calculations
+        # - Trading signal generation
+        # - Risk management checks
+        # - Position management updates
+        # - Market monitoring alerts
+
+        # For tutorial purposes, demonstrate basic analysis
+        update_number = stats["total_updates"]
+        if update_number % 5 == 0:  # Log every 5th update for education
+            print(f"      Search Analysis #{update_number}:")
+            print(f"         Balance Mid price: {mid_price:.5f}")
+            print(f"         Ruler Spread: {spread:.5f} ({spread*10000:.1f} pips)")
+            print(f"         Time Timestamp: {timestamp}")
+            print(f"         Target Use case: Signal generation, risk management, analysis")
+
+
+# Educational demonstration execution
+print(f"Data Starting Comprehensive Basic Price Streaming Tutorial")
+try:
+    import asyncio
+    asyncio.run(demonstrate_comprehensive_basic_price_streaming())
+except Exception as e:
+    print(f"Error Tutorial error: {e}")
+    print(f"Note Check environment configuration and network connectivity")
+print(f"Success Basic price streaming tutorial complete")
+print(f"Education Next: Explore connection management and error handling patterns")
 ```
 
 ### Account Streams
 Monitor account changes and trade updates:
 
-<!-- fragment: Demo account stream with transaction monitoring -->
+<!-- fragment: Demo comprehensive account transaction streaming with detailed monitoring -->
 ```python
 from dotenv import load_dotenv
-
+from typing import Dict, Any
+from decimal import Decimal
 from fivetwenty import AsyncClient
 
-# Load environment variables from .env file
-load_dotenv()
 
-async def account_stream():
-    # Zero-config - automatically uses environment variables
+async def demonstrate_comprehensive_account_transaction_streaming() -> None:
+    """Demonstrate comprehensive account transaction streaming with detailed monitoring."""
+    print(f"Bank Comprehensive Account Transaction Streaming Tutorial")
+
+    # Step 1: Environment setup for transaction streaming
+    # Transaction streams monitor account state changes in real-time
+    print(f"\nConfig Transaction Streaming Setup:")
+    print(f"   Folder Environment configuration: Secure credential loading")
+    print(f"   Bank Stream type: Account transaction monitoring")
+    print(f"   Data Data scope: Order fills, account changes, position updates")
+    print(f"   Lightning Processing: Real-time transaction event handling")
+
+    # Load environment variables from .env file
+    load_dotenv()
+    print(f"   Success Environment loaded - ready for transaction monitoring")
+
+    # Step 2: Initialize comprehensive transaction tracking
+    # Tracking helps understand account activity and trading patterns
+    transaction_tracker = {
+        "total_transactions": 0,
+        "order_fills": 0,
+        "market_orders": 0,
+        "limit_orders": 0,
+        "stop_orders": 0,
+        "account_changes": 0,
+        "position_updates": 0,
+        "transaction_types": {},
+        "instruments_traded": set(),
+        "total_volume": Decimal("0"),
+        "realized_pl": Decimal("0")
+    }
+
+    print(f"\nData Transaction Tracking Initialized:")
+    print(f"   Analysis Monitoring: All account transaction types")
+    print(f"   Target Focus: Order fills, account changes, position updates")
+    print(f"   List Metrics: Volume, P/L, instruments, transaction patterns")
+
+    # Step 3: Initialize AsyncClient for transaction streaming
     async with AsyncClient() as client:
-        async for transaction in client.transactions.get_transactions_stream(
-            account_id=client.account_id
-        ):
-            print(f"Transaction: {transaction.type} - {transaction.id}")
+        print(f"\nStarting Transaction Stream Client Ready:")
+        print(f"   Bank Account: {client.account_id}")
+        print(f"   World Environment: {client.config.environment.value}")
+        print(f"   Processing Stream type: Real-time transaction events")
+        print(f"   Lightning Architecture: Async transaction processing")
 
-            # Handle different transaction types
-            if transaction.type == "ORDER_FILL":
-                await handle_order_fill(transaction)
-            elif transaction.type == "MARKET_ORDER":
-                await handle_market_order(transaction)
+        print(f"\nSatellite Starting Real-Time Transaction Monitoring...")
+        print(f"   Processing Listening for: Order fills, account changes, position updates")
+        print(f"   Time Frequency: Immediate notification on account activity")
+        print(f"   Data Processing: Comprehensive transaction analysis")
 
-async def handle_order_fill(transaction):
-    """Handle order fill transactions."""
-    pass
+        try:
+            # Step 4: Enter transaction streaming loop
+            # Transaction streams notify of all account state changes
+            async for transaction in client.transactions.get_transactions_stream(
+                account_id=client.account_id
+            ):
+                # Step 5: Comprehensive transaction processing and analysis
+                transaction_tracker["total_transactions"] += 1
 
-async def handle_market_order(transaction):
-    """Handle market order transactions."""
-    pass
+                # Extract transaction details for educational analysis
+                transaction_type = transaction.type
+                transaction_id = transaction.id
+                transaction_time = getattr(transaction, 'time', 'N/A')
+
+                print(f"\n🔔 Transaction #{transaction_tracker['total_transactions']}:")
+                print(f"   Target Type: {transaction_type}")
+                print(f"   ID ID: {transaction_id}")
+                print(f"   Time Time: {transaction_time}")
+
+                # Track transaction type frequency for pattern analysis
+                if transaction_type not in transaction_tracker["transaction_types"]:
+                    transaction_tracker["transaction_types"][transaction_type] = 0
+                transaction_tracker["transaction_types"][transaction_type] += 1
+
+                # Step 6: Handle different transaction types with educational context
+                if transaction_type == "ORDER_FILL":
+                    # Order fill: Most important transaction for trading analysis
+                    transaction_tracker["order_fills"] += 1
+                    print(f"   Analysis Processing ORDER_FILL transaction...")
+                    await handle_comprehensive_order_fill(transaction, transaction_tracker)
+
+                elif transaction_type == "MARKET_ORDER":
+                    # Market order creation: Immediate execution order placed
+                    transaction_tracker["market_orders"] += 1
+                    print(f"   Starting Processing MARKET_ORDER transaction...")
+                    await handle_comprehensive_market_order(transaction, transaction_tracker)
+
+                elif transaction_type == "LIMIT_ORDER":
+                    # Limit order creation: Pending order at specific price
+                    transaction_tracker["limit_orders"] += 1
+                    print(f"   Target Processing LIMIT_ORDER transaction...")
+                    await handle_comprehensive_limit_order(transaction, transaction_tracker)
+
+                elif transaction_type == "STOP_ORDER":
+                    # Stop order: Risk management or breakout order
+                    transaction_tracker["stop_orders"] += 1
+                    print(f"   Stop Processing STOP_ORDER transaction...")
+                    await handle_comprehensive_stop_order(transaction, transaction_tracker)
+
+                elif transaction_type in ["DAILY_FINANCING", "MARGIN_CALL", "ACCOUNT_TRANSFER"]:
+                    # Account-level changes: Important for account health monitoring
+                    transaction_tracker["account_changes"] += 1
+                    print(f"   Bank Processing account change transaction...")
+                    await handle_comprehensive_account_change(transaction, transaction_tracker)
+
+                else:
+                    # Other transaction types: Educational logging for completeness
+                    print(f"   Info Other transaction type: {transaction_type}")
+                    print(f"      Notes Educational note: Monitor all types for complete picture")
+
+                # Step 7: Display running transaction analysis
+                if transaction_tracker["total_transactions"] % 5 == 0:
+                    print(f"\nData Running Transaction Analysis:")
+                    print(f"   Analysis Total transactions: {transaction_tracker['total_transactions']}")
+                    print(f"   Target Order fills: {transaction_tracker['order_fills']}")
+                    print(f"   Starting Market orders: {transaction_tracker['market_orders']}")
+                    print(f"   Balance Total volume: {transaction_tracker['total_volume']}")
+                    print(f"   Money Realized P/L: {transaction_tracker['realized_pl']}")
+
+                # Educational demonstration limit
+                if transaction_tracker["total_transactions"] >= 15:  # Limit for tutorial
+                    print(f"\nRed Tutorial limit reached - stopping transaction monitoring")
+                    break
+
+        except KeyboardInterrupt:
+            print(f"\nStop Transaction monitoring stopped by user")
+        except Exception as streaming_error:
+            print(f"\nError Transaction streaming error: {streaming_error}")
+            print(f"Note Transaction streams may pause during low activity periods")
+
+        # Step 8: Final transaction analysis summary
+        print(f"\nData Transaction Monitoring Session Summary:")
+        print(f"   Analysis Total transactions processed: {transaction_tracker['total_transactions']}")
+        print(f"   Target Order fills: {transaction_tracker['order_fills']}")
+        print(f"   Starting Market orders: {transaction_tracker['market_orders']}")
+        print(f"   Bank Account changes: {transaction_tracker['account_changes']}")
+        print(f"   Data Transaction types seen: {list(transaction_tracker['transaction_types'].keys())}")
+        print(f"   Exchange Instruments traded: {len(transaction_tracker['instruments_traded'])}")
+
+        print(f"\nEducation Transaction Streaming Key Learnings:")
+        print(f"   Satellite Real-time notification of all account activity")
+        print(f"   Target Order fills are most critical for trading systems")
+        print(f"   Bank Account changes affect available margin and balance")
+        print(f"   Data Transaction patterns reveal trading behavior")
+        print(f"   Lightning Immediate processing enables rapid position management")
+
+
+async def handle_comprehensive_order_fill(transaction: Any, tracker: Dict[str, Any]) -> None:
+    """Handle order fill transactions with comprehensive educational analysis."""
+    # Step 9: Order fill processing - most important transaction type
+    print(f"      Target ORDER_FILL Analysis:")
+
+    # Extract fill details for educational analysis
+    if hasattr(transaction, 'instrument'):
+        instrument = transaction.instrument
+        tracker["instruments_traded"].add(instrument)
+        print(f"         Exchange Instrument: {instrument}")
+
+    if hasattr(transaction, 'units'):
+        units = abs(int(transaction.units))
+        tracker["total_volume"] += Decimal(str(units))
+        print(f"         Data Units filled: {units:,}")
+
+    if hasattr(transaction, 'price'):
+        fill_price = transaction.price
+        print(f"         Balance Fill price: {fill_price}")
+
+    if hasattr(transaction, 'pl'):
+        realized_pl = Decimal(str(transaction.pl))
+        tracker["realized_pl"] += realized_pl
+        print(f"         Money Realized P/L: {realized_pl}")
+
+    print(f"         Education Educational note: Order fills update positions and realize P/L")
+
+
+async def handle_comprehensive_market_order(transaction: Any, tracker: Dict[str, Any]) -> None:
+    """Handle market order transactions with educational context."""
+    # Step 10: Market order processing for immediate execution orders
+    print(f"      Starting MARKET_ORDER Analysis:")
+
+    if hasattr(transaction, 'instrument'):
+        print(f"         Exchange Instrument: {transaction.instrument}")
+
+    if hasattr(transaction, 'units'):
+        units = transaction.units
+        direction = "BUY" if int(units) > 0 else "SELL"
+        print(f"         Analysis Direction: {direction} {abs(int(units)):,} units")
+
+    print(f"         Education Educational note: Market orders execute immediately at best available price")
+
+
+async def handle_comprehensive_limit_order(transaction: Any, tracker: Dict[str, Any]) -> None:
+    """Handle limit order transactions with educational context."""
+    # Step 11: Limit order processing for pending orders
+    print(f"      Target LIMIT_ORDER Analysis:")
+
+    if hasattr(transaction, 'instrument'):
+        print(f"         Exchange Instrument: {transaction.instrument}")
+
+    if hasattr(transaction, 'price'):
+        print(f"         Balance Limit price: {transaction.price}")
+
+    print(f"         Education Educational note: Limit orders wait for specific price levels")
+
+
+async def handle_comprehensive_stop_order(transaction: Any, tracker: Dict[str, Any]) -> None:
+    """Handle stop order transactions with educational context."""
+    # Step 12: Stop order processing for risk management
+    print(f"      Stop STOP_ORDER Analysis:")
+
+    if hasattr(transaction, 'instrument'):
+        print(f"         Exchange Instrument: {transaction.instrument}")
+
+    if hasattr(transaction, 'price'):
+        print(f"         Balance Stop price: {transaction.price}")
+
+    print(f"         Education Educational note: Stop orders provide risk management and breakout trading")
+
+
+async def handle_comprehensive_account_change(transaction: Any, tracker: Dict[str, Any]) -> None:
+    """Handle account-level change transactions with educational context."""
+    # Step 13: Account change processing for account health monitoring
+    print(f"      Bank ACCOUNT_CHANGE Analysis:")
+    print(f"         Data Type: {transaction.type}")
+    print(f"         Education Educational note: Account changes affect margin and balance")
+
+
+# Educational demonstration execution
+print(f"Bank Starting Comprehensive Account Transaction Streaming Tutorial")
+try:
+    import asyncio
+    asyncio.run(demonstrate_comprehensive_account_transaction_streaming())
+except Exception as e:
+    print(f"Error Tutorial error: {e}")
+    print(f"Note Transaction streams require active trading to generate events")
+print(f"Success Account transaction streaming tutorial complete")
+print(f"Education Next: Learn about automated trading with streaming data integration")
 ```
 
 ## Connection Management
 
 ### Basic Stream with Error Handling
 
-<!-- fragment: Demo advanced streaming with async task management -->
+<!-- fragment: Demo advanced streaming with comprehensive connection management and resilience -->
 ```python
 import asyncio
-
+import time
+from typing import Optional, Dict, Any
+from decimal import Decimal
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import StreamStall
+from fivetwenty.models import ClientPrice
 
-# Load environment variables from .env file
-load_dotenv()
 
-async def process_price_update(price):
-    """Process incoming price data."""
-    pass
+class AdvancedStreamingManager:
+    """Advanced streaming manager with comprehensive connection management and resilience."""
 
-async def robust_price_stream():
-    # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
-        max_retries = 5
-        retry_count = 0
+    def __init__(self, max_retries: int = 5, base_delay: float = 1.0) -> None:
+        """Initialize advanced streaming manager with resilience parameters."""
+        # Step 1: Initialize streaming resilience parameters
+        # These parameters control how the system handles connection issues
+        self.max_retries = max_retries
+        self.base_delay = base_delay
+        self.retry_count = 0
+        self.last_successful_data = time.time()
+        self.connection_start_time = None
+        self.total_reconnections = 0
 
-        while retry_count < max_retries:
-            try:
-                async for price in client.pricing.get_pricing_stream(
-                    account_id=client.account_id,
-                    instruments=["EUR_USD"]
-                ):
-                    # Reset retry count on successful data
-                    retry_count = 0
-                    await process_price_update(price)
+        print(f"Config Advanced Streaming Manager Initialized:")
+        print(f"   Processing Max retries: {max_retries}")
+        print(f"   Time Base delay: {base_delay} seconds")
+        print(f"   Security Resilience: Exponential backoff with connection monitoring")
 
-            except StreamStall:
-                retry_count += 1
-                if retry_count >= max_retries:
-                    raise
+        # Step 2: Initialize comprehensive streaming statistics
+        # Statistics help monitor streaming health and performance
+        self.streaming_stats = {
+            "total_messages": 0,
+            "price_updates": 0,
+            "heartbeats": 0,
+            "connection_uptime": 0,
+            "reconnection_count": 0,
+            "stall_events": 0,
+            "error_events": 0,
+            "data_gaps": 0,
+            "avg_message_interval": [],
+            "last_message_time": None
+        }
 
-                print(f"Stream stalled, retrying ({retry_count}/{max_retries})")
-                await asyncio.sleep(2 ** retry_count)  # Exponential backoff
+    async def demonstrate_robust_streaming_with_resilience(self) -> None:
+        """Demonstrate robust streaming with comprehensive resilience and error handling."""
+        print(f"\nSecurity Advanced Robust Streaming Demonstration")
+
+        # Step 3: Environment setup for resilient streaming
+        print(f"\nConfig Resilient Streaming Configuration:")
+        print(f"   Folder Environment: Secure credential management")
+        print(f"   Security Resilience: Advanced error handling and recovery")
+        print(f"   Data Monitoring: Comprehensive streaming health tracking")
+        print(f"   Processing Recovery: Automatic reconnection with intelligent backoff")
+
+        # Load environment variables from .env file
+        load_dotenv()
+        print(f"   Success Environment configured for resilient streaming")
+
+        # Step 4: Initialize streaming session
+        session_start_time = time.time()
+        self.connection_start_time = session_start_time
+
+        print(f"\nStarting Starting Resilient Streaming Session:")
+        print(f"   Time Session start: {time.strftime('%H:%M:%S', time.localtime(session_start_time))}")
+        print(f"   Target Target: EUR_USD price stream with resilience")
+        print(f"   Processing Max retries: {self.max_retries}")
+        print(f"   Lightning Architecture: Async with connection health monitoring")
+
+        # Step 5: Resilient streaming loop with comprehensive error handling
+        async with AsyncClient() as client:
+            print(f"   Bank Account: {client.account_id}")
+            print(f"   World Environment: {client.config.environment.value}")
+
+            while self.retry_count < self.max_retries:
+                try:
+                    print(f"\nSatellite Establishing Streaming Connection (Attempt {self.retry_count + 1}/{self.max_retries})...")
+                    connection_attempt_time = time.time()
+
+                    # Step 6: Enter price streaming with comprehensive monitoring
+                    async for price_data in client.pricing.get_pricing_stream(
+                        account_id=client.account_id,
+                        instruments=["EUR_USD"]
+                    ):
+                        # Step 7: Successful data reception - reset retry logic
+                        if self.retry_count > 0:
+                            print(f"   Success Connection restored after {self.retry_count} retries")
+                            self.total_reconnections += 1
+                            self.streaming_stats["reconnection_count"] += 1
+
+                        self.retry_count = 0  # Reset on successful data
+                        self.last_successful_data = time.time()
+
+                        # Update connection uptime
+                        self.streaming_stats["connection_uptime"] = time.time() - connection_attempt_time
+
+                        # Step 8: Process streaming data with comprehensive analysis
+                        await self.process_advanced_price_update(price_data)
+
+                        # Educational demonstration limit
+                        if self.streaming_stats["price_updates"] >= 15:
+                            print(f"\nRed Tutorial limit reached - ending resilient streaming demo")
+                            await self.display_streaming_health_report()
+                            return
+
+                except StreamStall as stall_error:
+                    # Step 9: Handle stream stall with intelligent recovery
+                    self.retry_count += 1
+                    self.streaming_stats["stall_events"] += 1
+
+                    print(f"\n⚠️ Stream Stall Detected:")
+                    print(f"   Processing Retry attempt: {self.retry_count}/{self.max_retries}")
+                    print(f"   Time Time since last data: {time.time() - self.last_successful_data:.1f} seconds")
+                    print(f"   Security Recovery strategy: Exponential backoff")
+
+                    if self.retry_count >= self.max_retries:
+                        print(f"\nError Maximum retries ({self.max_retries}) exceeded")
+                        print(f"Note Extended outage detected - may require manual intervention")
+                        raise stall_error
+
+                    # Step 10: Intelligent exponential backoff
+                    backoff_delay = self.base_delay * (2 ** (self.retry_count - 1))
+                    backoff_delay = min(backoff_delay, 60)  # Cap at 60 seconds
+
+                    print(f"   Wait Waiting {backoff_delay:.1f} seconds before retry...")
+                    print(f"   🔬 Backoff strategy: {self.base_delay} * 2^{self.retry_count-1} = {backoff_delay:.1f}s")
+                    await asyncio.sleep(backoff_delay)
+
+                    print(f"   Processing Attempting reconnection...")
+
+                except Exception as unexpected_error:
+                    # Step 11: Handle unexpected streaming errors
+                    self.retry_count += 1
+                    self.streaming_stats["error_events"] += 1
+
+                    print(f"\nError Unexpected Streaming Error:")
+                    print(f"   Search Error type: {type(unexpected_error).__name__}")
+                    print(f"   Notes Error details: {str(unexpected_error)}")
+                    print(f"   Processing Retry attempt: {self.retry_count}/{self.max_retries}")
+
+                    if self.retry_count >= self.max_retries:
+                        print(f"\nStop Maximum retries exceeded for unexpected error")
+                        print(f"Note Check network connectivity and API status")
+                        raise unexpected_error
+
+                    # Shorter delay for unexpected errors
+                    error_delay = min(5.0, self.base_delay * self.retry_count)
+                    print(f"   Wait Waiting {error_delay:.1f} seconds before retry...")
+                    await asyncio.sleep(error_delay)
+
+            # Step 12: Maximum retries exceeded
+            print(f"\nStop Resilient Streaming Failed:")
+            print(f"   Error All retry attempts ({self.max_retries}) exhausted")
+            print(f"   Time Total session time: {time.time() - session_start_time:.1f} seconds")
+            print(f"   Data Final statistics: {self.streaming_stats}")
+
+    async def process_advanced_price_update(self, price: ClientPrice) -> None:
+        """Process price updates with advanced monitoring and analysis."""
+        # Step 13: Advanced price processing with comprehensive monitoring
+        current_time = time.time()
+        self.streaming_stats["total_messages"] += 1
+
+        if hasattr(price, 'type'):
+            if price.type == "PRICE":
+                self.streaming_stats["price_updates"] += 1
+
+                # Calculate message intervals for performance monitoring
+                if self.streaming_stats["last_message_time"]:
+                    interval = current_time - self.streaming_stats["last_message_time"]
+                    self.streaming_stats["avg_message_interval"].append(interval)
+
+                self.streaming_stats["last_message_time"] = current_time
+
+                # Extract price data for educational analysis
+                bid_price = price.bids[0].price if price.bids else "N/A"
+                ask_price = price.asks[0].price if price.asks else "N/A"
+
+                update_number = self.streaming_stats["price_updates"]
+                print(f"   Analysis Price Update #{update_number}: {bid_price}/{ask_price}")
+
+                # Advanced monitoring every 5 updates
+                if update_number % 5 == 0:
+                    await self.display_advanced_streaming_metrics()
+
+            elif price.type == "HEARTBEAT":
+                self.streaming_stats["heartbeats"] += 1
+                heartbeat_count = self.streaming_stats["heartbeats"]
+
+                if heartbeat_count % 3 == 0:
+                    print(f"   Heart Heartbeat #{heartbeat_count} - Connection healthy")
+
+    async def display_advanced_streaming_metrics(self) -> None:
+        """Display advanced streaming performance metrics."""
+        # Step 14: Comprehensive streaming performance analysis
+        print(f"\nData Advanced Streaming Metrics:")
+
+        # Calculate average message interval
+        if self.streaming_stats["avg_message_interval"]:
+            avg_interval = sum(self.streaming_stats["avg_message_interval"]) / len(self.streaming_stats["avg_message_interval"])
+            print(f"   Lightning Avg message interval: {avg_interval:.2f} seconds")
+            print(f"   Analysis Message frequency: {1/avg_interval:.1f} messages/second")
+
+        # Connection health metrics
+        uptime = time.time() - self.connection_start_time if self.connection_start_time else 0
+        print(f"   Time Connection uptime: {uptime:.1f} seconds")
+        print(f"   Processing Reconnections: {self.streaming_stats['reconnection_count']}")
+        print(f"   ⚠️ Stall events: {self.streaming_stats['stall_events']}")
+        print(f"   Error Error events: {self.streaming_stats['error_events']}")
+
+        # Data quality metrics
+        total_messages = self.streaming_stats["total_messages"]
+        heartbeat_ratio = (self.streaming_stats["heartbeats"] / total_messages * 100) if total_messages > 0 else 0
+        print(f"   Heart Heartbeat ratio: {heartbeat_ratio:.1f}%")
+
+    async def display_streaming_health_report(self) -> None:
+        """Display comprehensive streaming health report."""
+        # Step 15: Final streaming health and performance report
+        print(f"\nList Streaming Health Report:")
+        print(f"   Data Total messages: {self.streaming_stats['total_messages']}")
+        print(f"   Analysis Price updates: {self.streaming_stats['price_updates']}")
+        print(f"   Heart Heartbeats: {self.streaming_stats['heartbeats']}")
+        print(f"   Processing Reconnections: {self.streaming_stats['reconnection_count']}")
+        print(f"   ⚠️ Stall events: {self.streaming_stats['stall_events']}")
+        print(f"   Error Error events: {self.streaming_stats['error_events']}")
+
+        # Health assessment
+        if self.streaming_stats["error_events"] == 0 and self.streaming_stats["stall_events"] == 0:
+            health_status = "EXCELLENT"
+        elif self.streaming_stats["error_events"] + self.streaming_stats["stall_events"] <= 2:
+            health_status = "GOOD"
+        else:
+            health_status = "NEEDS_ATTENTION"
+
+        print(f"   Target Overall health: {health_status}")
+
+
+# Advanced streaming demonstration
+async def demonstrate_advanced_streaming_resilience() -> None:
+    """Demonstrate advanced streaming with comprehensive resilience features."""
+    print(f"Security Advanced Streaming Resilience Tutorial")
+
+    # Initialize advanced streaming manager
+    streaming_manager = AdvancedStreamingManager(max_retries=3, base_delay=2.0)
+
+    try:
+        await streaming_manager.demonstrate_robust_streaming_with_resilience()
+    except Exception as demo_error:
+        print(f"\nError Advanced streaming demo error: {demo_error}")
+        print(f"Note This demonstrates how resilient systems handle various failure modes")
+        await streaming_manager.display_streaming_health_report()
+
+
+# Educational demonstration execution
+print(f"Security Starting Advanced Streaming Resilience Tutorial")
+try:
+    import asyncio
+    asyncio.run(demonstrate_advanced_streaming_resilience())
+except Exception as e:
+    print(f"Error Tutorial error: {e}")
+    print(f"Note Advanced streaming requires robust error handling for production use")
+print(f"Success Advanced streaming resilience tutorial complete")
+print(f"Education Next: Learn about stream monitoring and health detection")
 ```
 
 ### Stream Monitoring
