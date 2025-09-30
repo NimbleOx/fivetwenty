@@ -84,21 +84,26 @@ class PythonSyntaxValidator(BaseValidator):
         in_python_block = False
         current_block_lines: list[str] = []
         block_start_line = 0
+        skip_next_block = False
 
         for line_num, line in enumerate(lines, 1):
+            # Check for fragment marker (skip validation of next code block)
+            if re.search(r"<!--\s*fragment", line, re.IGNORECASE):
+                skip_next_block = True
             # Check for start of Python code block
-            if re.match(r"^\s*```\s*python\s*$", line, re.IGNORECASE):
+            elif re.match(r"^\s*```\s*python\s*$", line, re.IGNORECASE):
                 in_python_block = True
                 current_block_lines = []
                 block_start_line = line_num + 1  # Code starts on next line
             # Check for end of code block
             elif line.strip() == "```" and in_python_block:
                 in_python_block = False
-                if current_block_lines:
+                if current_block_lines and not skip_next_block:
                     code_block = "\n".join(current_block_lines)
                     # Only validate non-empty blocks
                     if code_block.strip():
                         code_blocks.append((block_start_line, code_block))
+                skip_next_block = False  # Reset for next block
             # Collect lines within Python block
             elif in_python_block:
                 current_block_lines.append(line)

@@ -94,6 +94,8 @@ validators:
         - "G004"    # Logging f-string usage in examples
         # Code comment examples
         - "ERA001"  # Found commented-out code (intentional examples)
+        # Financial precision best practices
+        - "FURB157" # Decimal string literals are best practice for financial code
 
   # Type checking with mypy (strict mode - all type issues)
   code_typing:

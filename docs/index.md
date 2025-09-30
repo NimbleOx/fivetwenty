@@ -34,89 +34,6 @@ FiveTwenty bridges the gap between OANDA's powerful v20 API and your Python appl
 - **Historical data** - Candlestick charts and order book snapshots
 - **Transaction streaming** - Real-time account activity
 
-## Quick Start
-
-Get trading in minutes with FiveTwenty's flexible configuration system.
-
-!!! info "Package Management with uv"
-    Throughout this documentation, we use **[uv](https://github.com/astral-sh/uv)** - the fast, modern Python package manager. All package installation commands use `uv add` instead of `pip install` for better performance and dependency management.
-
-    We also use **python-dotenv** throughout the documentation for secure credential management with `.env` files.
-
-    **New to uv?** [Learn more about uv](https://docs.astral.sh/uv/) and how it simplifies Python package management.
-
-By default, the client will look for three environment variables that must be set. The `FIVETWENTY_OANDA_TOKEN` and `FIVETWENTY_OANDA_ACCOUNT` environment variables represent your token and account number, needed to authenticate.  `FIVETWENTY_OANDA_ENVIRONMENT` is needed to know which OANDA url to connect to.
-
-The example below places environment variables in place using the package `python-dotenv`
-
-```bash
-# Install python-dotenv for .env file support (recommended)
-uv add python-dotenv
-```
-
-Once python-dotenv is installed, you can create a `.env` file in your project root, and the example below will work properly.
-
-```bash
-# File: .env
-FIVETWENTY_OANDA_TOKEN=your-practice-token
-FIVETWENTY_OANDA_ACCOUNT=your-account-id
-FIVETWENTY_OANDA_ENVIRONMENT=practice
-```
-
-Alternatively, you can set the environment variables manually by adding them to your `.bashrc` or `.zshrc`, or by otherwise setting them in your environment as needed.
-
-With `python-dotenv` installed, you can run this minimal example which will print out your account balance and open a trade for 1000 EUR_USD. You do not need to import `load_dotenv`, nor execute `load_dotenv()`
-
-Make sure this is your practice account, obviously.
-
-
-```python
-import asyncio
-
-from dotenv import load_dotenv
-
-from fivetwenty import AsyncClient
-from fivetwenty.models import InstrumentName
-
-load_dotenv()
-
-async def main() -> None:
-    async with AsyncClient() as client:
-        result = await client.accounts.get_account_summary(client.account_id)  # No type warnings!
-        account = result["account"]
-        print(f"Balance: {account.balance} {account.currency}")
-
-        # Place your first trade
-        order = await client.orders.post_market_order(
-            account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000,
-        )
-
-        if order.order_fill_transaction:
-            fill_price = order.order_fill_transaction.get("price", "N/A")
-            print(f"Trade executed at {fill_price}")
-
-asyncio.run(main())
-```
-
-## Next Steps
-
-Our documentation is organized to serve different user needs effectively:
-
-### Learn (Tutorials)
-**When you want to build skills through guided practice**
-
-Start with [Tutorials](tutorials/index.md) for hands-on learning that builds your confidence with the FiveTwenty step by step.
-
-### Understand & Solve (Guides)
-**When you need comprehensive guidance - both understanding and solutions**
-
-Use [Guides](guides/index.md) for both conceptual understanding and practical solutions to trading challenges.
-
-### Reference (API Docs)
-**When you need to look up specific details**
-
-Check [API Reference](api-reference/index.md) for comprehensive method signatures, parameters, and return values.
-
 ## Architecture Overview
 
 FiveTwenty provides a robust architecture for trading applications:
@@ -138,29 +55,104 @@ FiveTwenty provides a robust architecture for trading applications:
 - **Decimal precision** - Financial-grade decimal arithmetic throughout
 - **Type validation** - Catch errors at runtime with meaningful messages
 
-## Getting Started Paths
+## Quick Start
 
-Choose your learning journey based on your experience level:
+Get trading in minutes with a minimal example.
 
-### **New to OANDA Trading**
-1. [Install FiveTwenty](tutorials/getting-started/installation.md)
-2. [Set up authentication](tutorials/getting-started/authentication.md)
-3. [Understand environments](guides/understanding/environments.md)
-4. [Place your first trade](tutorials/getting-started/first-trade.md)
+### Installation
 
-### **Production Applications**
-Build production trading systems with confidence:
+```bash
+uv add fivetwenty python-dotenv
+```
 
-- [Configuration patterns](guides/understanding/configuration.md) - Multi-account, multi-environment setup
-- [Best practices](guides/understanding/best-practices.md) - Security, performance, and reliability
-- [Error handling](api-reference/error-handling.md) - Robust production error management
-- [Streaming guide](guides/trading-concepts/streaming.md) - Real-time data processing
+### Configuration
 
-## Support & Community
+Create a `.env` file in your project root:
 
-- **Documentation**: Complete guides and references here
-- **Issues**: [GitHub Issues](#) for bug reports
-- **Discussions**: [GitHub Discussions](#) for questions
+```bash
+FIVETWENTY_OANDA_TOKEN=your-practice-token
+FIVETWENTY_OANDA_ACCOUNT=your-account-id
+FIVETWENTY_OANDA_ENVIRONMENT=practice
+```
+
+### Your First Trade
+
+```python
+import asyncio
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
+from fivetwenty.models import InstrumentName
+
+# Load environment variables from .env file
+load_dotenv()
+
+async def main() -> None:
+    # Create async client - automatically reads FIVETWENTY_* environment variables
+    # Uses context manager for proper cleanup
+    async with AsyncClient() as client:
+        # Fetch current account information
+        # client.account_id is automatically set from FIVETWENTY_OANDA_ACCOUNT
+        result = await client.accounts.get_account_summary(client.account_id)
+        account = result["account"]
+        print(f"Balance: {account.balance} {account.currency}")
+
+        # Get current pricing for EUR/USD
+        pricing = await client.pricing.get_pricing(
+            account_id=client.account_id,
+            instruments=[InstrumentName.EUR_USD],
+        )
+        price = pricing["prices"][0]
+        print(f"Current EUR/USD - Bid: {price.bids[0].price}, Ask: {price.asks[0].price}")
+
+        # Place a market order for 1000 units of EUR/USD
+        # Positive units = buy, negative units = sell
+        order = await client.orders.post_market_order(
+            account_id=client.account_id,
+            instrument=InstrumentName.EUR_USD,
+            units=1000,  # Buy 1000 units
+        )
+
+        # Check if order was filled and print execution price
+        if order.order_fill_transaction:
+            fill_price = order.order_fill_transaction.get("price", "N/A")
+            print(f"Trade executed at {fill_price}")
+
+        # Close the position by selling the same amount
+        close_order = await client.orders.post_market_order(
+            account_id=client.account_id,
+            instrument=InstrumentName.EUR_USD,
+            units=-1000,  # Negative units = sell to close
+        )
+
+        # Check the closing trade execution
+        if close_order.order_fill_transaction:
+            close_price = close_order.order_fill_transaction.get("price", "N/A")
+            print(f"Position closed at {close_price}")
+
+# Run the async function
+asyncio.run(main())
+```
+
+## Next Steps
+
+Our documentation is organized to serve different user needs effectively:
+
+### Learn (Tutorials)
+**When you want to build skills through guided practice**
+
+Start with [Tutorials](tutorials/index.md) for hands-on learning that builds your confidence with the FiveTwenty step by step.
+
+### Understand & Solve (Guides)
+**When you need comprehensive guidance - both understanding and solutions**
+
+Use [Guides](guides/index.md) for both conceptual understanding and practical solutions to trading challenges.
+
+### Reference (API Docs)
+**When you need to look up specific details**
+
+Check [API Reference](api-reference/index.md) for comprehensive method signatures, parameters, and return values.
 
 ---
 

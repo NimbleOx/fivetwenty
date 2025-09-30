@@ -1222,7 +1222,6 @@ if __name__ == "__main__":
         print(f"⚠️ Emergency protocols activated")
         print(f"Call Contact system administrator immediately")
 ```
-```
 
 ## Environment Setup Examples
 
