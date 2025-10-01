@@ -116,7 +116,7 @@ async def main() -> None:
 
         # Check if order was filled and print execution price
         if order.order_fill_transaction:
-            fill_price = order.order_fill_transaction.get("price", "N/A")
+            fill_price = order.order_fill_transaction.price
             print(f"Trade executed at {fill_price}")
 
         # Close the position by selling the same amount
@@ -128,7 +128,7 @@ async def main() -> None:
 
         # Check the closing trade execution
         if close_order.order_fill_transaction:
-            close_price = close_order.order_fill_transaction.get("price", "N/A")
+            close_price = close_order.order_fill_transaction.price
             print(f"Position closed at {close_price}")
 
 # Run the async function
