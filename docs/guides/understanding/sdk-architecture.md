@@ -1056,10 +1056,8 @@ class ExtendedClient(AsyncClient):
 # async with ExtendedClient(token="your-token") as client:
 #     # Standard FiveTwenty functionality
 #     accounts = await client.accounts.get_accounts()
-#
 #     # Custom analytics functionality
 #     metrics = await client.analytics.get_performance_metrics(account_id)
-#
 #     # Combined capabilities for sophisticated trading applications
 
 # Extension benefits:
@@ -1312,7 +1310,6 @@ async def main():
     # FiveTwenty automatically converts Decimal objects to API-compatible strings
     # Note: client would be initialized from context in real usage
     # account_id = "your-account-id"  # Would come from configuration
-    #
     # order = await client.orders.post_market_order(
     #     account_id=account_id,
     #     instrument="EUR_USD",

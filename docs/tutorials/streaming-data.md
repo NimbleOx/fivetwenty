@@ -108,7 +108,7 @@ async def demonstrate_comprehensive_basic_price_streaming() -> None:
 
                         # Calculate spread for market quality analysis
                         if price_data.bids and price_data.asks:
-                            spread = float(ask_price) - float(bid_price)
+                            spread = ask_price - bid_price
                             spread_pips = spread * (10000 if "JPY" not in price_data.instrument else 100)
 
                             # Track spreads by instrument for educational analysis
@@ -175,8 +175,8 @@ async def process_comprehensive_price_update(price: ClientPrice, stats: dict) ->
     # Extract price components for analysis
     instrument = price.instrument
     timestamp = price.time
-    bid_price = float(price.bids[0].price) if price.bids else None
-    ask_price = float(price.asks[0].price) if price.asks else None
+    bid_price = price.bids[0].price if price.bids else None
+    ask_price = price.asks[0].price if price.asks else None
 
     # Calculate mid price for strategy development
     if bid_price and ask_price:

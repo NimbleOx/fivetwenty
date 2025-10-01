@@ -38,6 +38,7 @@ print(f"\nTrading Considerations:")
 print(f"   Majors: Tightest spreads, best execution, 24/5 liquidity")
 print(f"   Minors: Wider spreads, good liquidity during overlapping sessions")
 print(f"   ⚠️ Exotics: Widest spreads, lower liquidity, higher volatility")
+
 ```
 
 Key instrument categories:
@@ -74,25 +75,25 @@ async def main() -> Any:
 
     # First trade: Buy 10,000 EUR (long position establishment)
     trade1 = await client.orders.post_market_order(
-   account_id=account_id,
-   instrument="EUR_USD",
-   units=10000  # Positive units = buy EUR, sell USD
+            account_id=account_id,
+            instrument="EUR_USD",
+            units=10000,  # Positive units = buy EUR, sell USD
     )
     print(f"   Trade 1: Buy 10,000 EUR - Order ID: {trade1.order_create_transaction.id}")
 
     # Second trade: Buy additional 15,000 EUR (position size increase)
     trade2 = await client.orders.post_market_order(
-   account_id=account_id,
-   instrument="EUR_USD",
-   units=15000  # Additional long position
+            account_id=account_id,
+            instrument="EUR_USD",
+            units=15000,  # Additional long position
     )
     print(f"   Trade 2: Buy 15,000 EUR - Order ID: {trade2.order_create_transaction.id}")
 
     # Third trade: Sell 5,000 EUR (partial position reduction)
     trade3 = await client.orders.post_market_order(
-   account_id=account_id,
-   instrument="EUR_USD",
-   units=-5000  # Negative units = sell EUR, buy USD
+            account_id=account_id,
+            instrument="EUR_USD",
+            units=-5000,  # Negative units = sell EUR, buy USD
     )
     print(f"   Trade 3: Sell 5,000 EUR - Order ID: {trade3.order_create_transaction.id}")
 
@@ -104,12 +105,12 @@ async def main() -> Any:
 
     # Step 4: Display detailed information for each trade
     for i, trade in enumerate(trades, 1):
-   print(f"   Trade {i}:")
-   print(f"ID: {trade.id}")
-   print(f"Size: {trade.current_units} EUR")
-   print(f"Entry: {trade.price}")
-   print(f"Unrealized P/L: {trade.unrealized_pl}")
-   print(f"Open time: {trade.open_time}")
+            print(f"   Trade {i}:")
+            print(f"ID: {trade.id}")
+            print(f"Size: {trade.current_units} EUR")
+            print(f"Entry: {trade.price}")
+            print(f"Unrealized P/L: {trade.unrealized_pl}")
+            print(f"Open time: {trade.open_time}")
 
     # Step 5: Explain trade vs position concept
     print(f"\nKey Concept: Trade vs Position")
@@ -121,6 +122,7 @@ async def main() -> Any:
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 ```
 ```
 
@@ -190,6 +192,7 @@ async def check_position() -> None:
     print(f"   Risk management: Position shows total instrument exposure")
     print(f"   P/L tracking: Position provides consolidated profit/loss view")
     print(f"   Trading decisions: Use position for overall exposure management")
+
 ```
 
 **Position Properties**:
@@ -237,20 +240,20 @@ def calculate_risk_exposure(trades: list, position: Any, stop_loss_distance: flo
     # Step 1: Calculate individual trade risk exposure
     # Each trade has separate entry price and risk profile
     print(f"\nIndividual Trade Risk Analysis:")
-    total_trade_risk = Decimal('0')
+    total_trade_risk = Decimal("0")
 
     for i, trade in enumerate(trades, 1):
-   # Step 2: Calculate risk for each individual trade
-   # Risk = Position size × Stop loss distance × Pip value
-   trade_units = abs(int(trade.current_units))  # Use absolute value for risk calculation
-   individual_risk = trade_units * stop_loss_distance
-   total_trade_risk += Decimal(str(individual_risk))
+            # Step 2: Calculate risk for each individual trade
+            # Risk = Position size × Stop loss distance × Pip value
+            trade_units = abs(int(trade.current_units))  # Use absolute value for risk calculation
+            individual_risk = trade_units * stop_loss_distance
+            total_trade_risk += Decimal(str(individual_risk))
 
-   print(f"   Trade {trade.id}:")
-   print(f"Position size: {trade_units:,} units")
-   print(f"Entry price: {trade.price}")
-   print(f"⚠️ Risk exposure: {individual_risk:,.0f} USD (if stop triggered)")
-   print(f"Risk ratio: {(individual_risk / trade_units * 10000):.1f} pips per 10k units")
+            print(f"   Trade {trade.id}:")
+            print(f"Position size: {trade_units:,} units")
+            print(f"Entry price: {trade.price}")
+            print(f"⚠️ Risk exposure: {individual_risk:,.0f} USD (if stop triggered)")
+            print(f"Risk ratio: {(individual_risk / trade_units * 10000):.1f} pips per 10k units")
 
     # Step 3: Calculate position-level risk exposure
     # Position aggregates all trades for total instrument exposure
@@ -280,26 +283,27 @@ def calculate_risk_exposure(trades: list, position: Any, stop_loss_distance: flo
 
     # Risk interpretation based on exposure type
     if total_trade_risk > Decimal(str(net_risk)):
-   print(f"   Hedge effect: Long/short positions offset some risk")
-   hedging_benefit = float(total_trade_risk) - net_risk
-   print(f"   Risk reduction: {hedging_benefit:,.0f} USD from position offsetting")
+            print(f"   Hedge effect: Long/short positions offset some risk")
+            hedging_benefit = total_trade_risk - net_risk
+            print(f"   Risk reduction: {hedging_benefit:,.0f} USD from position offsetting")
     else:
-   print(f"   Directional exposure: All trades in same direction")
+            print(f"   Directional exposure: All trades in same direction")
 
     # Step 5: Risk management recommendations
     print(f"\nRisk Management Recommendations:")
     if net_risk > 1000:  # Example threshold
-   print(f"   ⚠️ HIGH RISK: Consider reducing position size or tightening stops")
+            print(f"   ⚠️ HIGH RISK: Consider reducing position size or tightening stops")
     elif net_risk > 500:
-   print(f"   MODERATE RISK: Monitor closely and consider profit taking")
+            print(f"   MODERATE RISK: Monitor closely and consider profit taking")
     else:
-   print(f"   ACCEPTABLE RISK: Within normal risk parameters")
+            print(f"   ACCEPTABLE RISK: Within normal risk parameters")
 
     # Risk per unit analysis for position sizing guidance
     if total_exposure > 0:
-   risk_per_unit = net_risk / total_exposure
-   print(f"   Risk per unit: {risk_per_unit:.4f} USD per unit")
-   print(f"   Use for position sizing: Risk budget ÷ {risk_per_unit:.4f} = max units")
+            risk_per_unit = net_risk / total_exposure
+            print(f"   Risk per unit: {risk_per_unit:.4f} USD per unit")
+            print(f"   Use for position sizing: Risk budget ÷ {risk_per_unit:.4f} = max units")
+
 ```
 
 **For P/L Tracking**:
@@ -318,37 +322,37 @@ def analyze_pnl(trades: list, position: Any) -> None:
     # Trade-level P/L helps identify which entries were profitable
     print(f"\nIndividual Trade Performance:")
     trade_performance = []
-    total_unrealized_pl = Decimal('0')
+    total_unrealized_pl = Decimal("0")
     winning_trades = 0
     losing_trades = 0
 
     for i, trade in enumerate(trades, 1):
-   # Step 2: Analyze each trade's performance metrics
-   trade_pl = Decimal(str(trade.unrealized_pl))
-   trade_performance.append((trade.id, float(trade_pl)))
-   total_unrealized_pl += trade_pl
+            # Step 2: Analyze each trade's performance metrics
+            trade_pl = Decimal(str(trade.unrealized_pl))
+            trade_performance.append((trade.id, trade_pl))
+            total_unrealized_pl += trade_pl
 
-   # Categorize trade performance
-   if trade_pl > 0:
-  winning_trades += 1
-  status = "WINNING"
-   elif trade_pl < 0:
-  losing_trades += 1
-  status = "LOSING"
-   else:
-  status = "BREAKEVEN"
+            # Categorize trade performance
+            if trade_pl > 0:
+                winning_trades += 1
+                status = "WINNING"
+            elif trade_pl < 0:
+                losing_trades += 1
+                status = "LOSING"
+            else:
+                status = "BREAKEVEN"
 
-   # Calculate trade-specific metrics
-   entry_price = Decimal(str(trade.price))
-   current_units = int(trade.current_units)
-   trade_size_usd = abs(current_units) * entry_price  # Approximate position value
+            # Calculate trade-specific metrics
+            entry_price = Decimal(str(trade.price))
+            current_units = int(trade.current_units)
+            trade_size_usd = abs(current_units) * entry_price  # Approximate position value
 
-   print(f"   Trade {trade.id} ({status}):")
-   print(f"Size: {current_units:,} units")
-   print(f"Entry: {entry_price}")
-   print(f"P/L: {trade_pl:+.2f} USD")
-   print(f"Return: {(trade_pl / trade_size_usd * 100):+.3f}%")
-   print(f"Open since: {trade.open_time}")
+            print(f"   Trade {trade.id} ({status}):")
+            print(f"Size: {current_units:,} units")
+            print(f"Entry: {entry_price}")
+            print(f"P/L: {trade_pl:+.2f} USD")
+            print(f"Return: {(trade_pl / trade_size_usd * 100):+.3f}%")
+            print(f"Open since: {trade.open_time}")
 
     # Step 3: Trade performance statistics
     total_trades = len(trades)
@@ -380,46 +384,47 @@ def analyze_pnl(trades: list, position: Any) -> None:
     print(f"\nP/L Reconciliation:")
     pl_difference = total_unrealized_pl - total_instrument_pl
 
-    if abs(pl_difference) < Decimal('0.01'):  # Accounting for rounding
-   print(f"   P/L matches: Trade sum = Position total")
+    if abs(pl_difference) < Decimal("0.01"):  # Accounting for rounding
+            print(f"   P/L matches: Trade sum = Position total")
     else:
-   print(f"   ⚠️ P/L difference: {pl_difference:+.2f} USD (rounding or timing)")
+            print(f"   ⚠️ P/L difference: {pl_difference:+.2f} USD (rounding or timing)")
 
     # Step 6: Performance insights and recommendations
     print(f"\nPerformance Insights:")
 
     if total_instrument_pl > 0:
-   print(f"   Position Status: PROFITABLE (+{total_instrument_pl:.2f} USD)")
-   if win_rate >= 60:
-  print(f"   Strong Strategy: High win rate ({win_rate:.1f}%) with profits")
-   else:
-  print(f"   Large Winners: Lower win rate but profitable overall")
+            print(f"   Position Status: PROFITABLE (+{total_instrument_pl:.2f} USD)")
+            if win_rate >= 60:
+                print(f"   Strong Strategy: High win rate ({win_rate:.1f}%) with profits")
+            else:
+                print(f"   Large Winners: Lower win rate but profitable overall")
     elif total_instrument_pl < 0:
-   print(f"   ⚠️ Position Status: LOSING ({total_instrument_pl:+.2f} USD)")
-   if win_rate < 40:
-  print(f"   Strategy Review: Low win rate ({win_rate:.1f}%) and losses")
-   else:
-  print(f"   Large Losers: Good win rate but big losing trades")
+            print(f"   ⚠️ Position Status: LOSING ({total_instrument_pl:+.2f} USD)")
+            if win_rate < 40:
+                print(f"   Strategy Review: Low win rate ({win_rate:.1f}%) and losses")
+            else:
+                print(f"   Large Losers: Good win rate but big losing trades")
     else:
-   print(f"   Position Status: BREAKEVEN")
+            print(f"   Position Status: BREAKEVEN")
 
     # Risk-adjusted performance metrics
     if abs(net_exposure) > 0:
-   pl_per_unit = float(total_instrument_pl) / abs(net_exposure)
-   print(f"   P/L per unit: {pl_per_unit:+.5f} USD/unit")
-   print(f"   Use for sizing: Scales with position size")
+            pl_per_unit = total_instrument_pl / abs(net_exposure)
+            print(f"   P/L per unit: {pl_per_unit:+.5f} USD/unit")
+            print(f"   Use for sizing: Scales with position size")
 
     # Step 7: Trading recommendations based on performance
     print(f"\nTrading Recommendations:")
     if total_instrument_pl > 100:  # Arbitrary threshold
-   print(f"   Consider profit taking: Strong unrealized gains")
+            print(f"   Consider profit taking: Strong unrealized gains")
     elif total_instrument_pl < -100:
-   print(f"   ⚠️ Review stop losses: Significant unrealized losses")
+            print(f"   ⚠️ Review stop losses: Significant unrealized losses")
 
     if win_rate < 50 and total_instrument_pl < 0:
-   print(f"   Strategy analysis needed: Both win rate and P/L are poor")
+            print(f"   Strategy analysis needed: Both win rate and P/L are poor")
     elif win_rate > 70:
-   print(f"   Strong entry timing: High win rate indicates good signals")
+            print(f"   Strong entry timing: High win rate indicates good signals")
+
 ```
 
 ---
@@ -452,59 +457,60 @@ async def place_market_order() -> None:
     print(f"Order type: MARKET (immediate execution priority)")
 
     try:
-   # Step 3: Execute market order through FiveTwenty SDK
-   # post_market_order() sends order to OANDA for immediate execution
-   print(f"\nExecuting market order...")
-   order = await client.orders.post_market_order(
-  account_id=account_id,
-  instrument=instrument,
-  units=order_size  # Positive = buy EUR, negative = sell EUR
-   )
-   print(f"Market order submitted successfully")
+            # Step 3: Execute market order through FiveTwenty SDK
+            # post_market_order() sends order to OANDA for immediate execution
+            print(f"\nExecuting market order...")
+            order = await client.orders.post_market_order(
+                account_id=account_id,
+                instrument=instrument,
+                units=order_size,  # Positive = buy EUR, negative = sell EUR
+            )
+            print(f"Market order submitted successfully")
 
-   # Step 4: Analyze order fill results
-   # Market orders typically fill immediately with fill transaction
-   if order.order_fill_transaction:
-  # Extract fill details for analysis
-  fill_price = order.order_fill_transaction.price
-  fill_time = order.order_fill_transaction.time
-  trade_id = order.order_fill_transaction.trade_opened.trade_id if order.order_fill_transaction.trade_opened else "N/A"
+            # Step 4: Analyze order fill results
+            # Market orders typically fill immediately with fill transaction
+            if order.order_fill_transaction:
+                # Extract fill details for analysis
+                fill_price = order.order_fill_transaction.price
+                fill_time = order.order_fill_transaction.time
+                trade_id = order.order_fill_transaction.trade_opened.trade_id if order.order_fill_transaction.trade_opened else "N/A"
 
-  print(f"\nOrder Fill Analysis:")
-  print(f"   Fill price: {fill_price}")
-  print(f"   Fill time: {fill_time}")
-  print(f"   Trade ID: {trade_id}")
-  print(f"   Position: {order_size:,} EUR at {fill_price}")
-  print(f"   Status: FILLED (immediate execution achieved)")
+                print(f"\nOrder Fill Analysis:")
+                print(f"   Fill price: {fill_price}")
+                print(f"   Fill time: {fill_time}")
+                print(f"   Trade ID: {trade_id}")
+                print(f"   Position: {order_size:,} EUR at {fill_price}")
+                print(f"   Status: FILLED (immediate execution achieved)")
 
-  # Step 5: Calculate immediate trading costs
-  # Market orders pay the spread immediately
-  print(f"\nTrading Cost Analysis:")
-  print(f"   ⚠️ Spread cost: Paid ask price for immediate execution")
-  print(f"   Immediate P/L: Negative due to bid-ask spread")
-  print(f"   Breakeven: Price must move above entry + spread")
+                # Step 5: Calculate immediate trading costs
+                # Market orders pay the spread immediately
+                print(f"\nTrading Cost Analysis:")
+                print(f"   ⚠️ Spread cost: Paid ask price for immediate execution")
+                print(f"   Immediate P/L: Negative due to bid-ask spread")
+                print(f"   Breakeven: Price must move above entry + spread")
 
-   else:
-  # Rare case: market order didn't fill immediately
-  print(f"\n⚠️ Unusual: Market order created but not filled immediately")
-  print(f"   Possible causes: Market halt, extreme volatility, or system issues")
-  print(f"   Order ID: {order.order_create_transaction.id}")
+            else:
+                # Rare case: market order didn't fill immediately
+                print(f"\n⚠️ Unusual: Market order created but not filled immediately")
+                print(f"   Possible causes: Market halt, extreme volatility, or system issues")
+                print(f"   Order ID: {order.order_create_transaction.id}")
 
-   # Step 6: Market order advantages and considerations
-   print(f"\nMarket Order Characteristics:")
-   print(f"   Advantages: Immediate execution, no 'missing the move' risk")
-   print(f"   ⚠️ Considerations: Price uncertainty, spread costs, slippage risk")
-   print(f"   Best for: High liquidity instruments, small sizes, urgent execution")
+            # Step 6: Market order advantages and considerations
+            print(f"\nMarket Order Characteristics:")
+            print(f"   Advantages: Immediate execution, no 'missing the move' risk")
+            print(f"   ⚠️ Considerations: Price uncertainty, spread costs, slippage risk")
+            print(f"   Best for: High liquidity instruments, small sizes, urgent execution")
 
     except Exception as e:
-   # Step 7: Handle market order execution errors
-   print(f"\nMarket order execution failed: {e}")
-   print(f"Common issues: Insufficient margin, market closed, invalid parameters")
-   print(f"Recovery: Check account balance, verify market hours, adjust position size")
+            # Step 7: Handle market order execution errors
+            print(f"\nMarket order execution failed: {e}")
+            print(f"Common issues: Insufficient margin, market closed, invalid parameters")
+            print(f"Recovery: Check account balance, verify market hours, adjust position size")
 
 
 if __name__ == "__main__":
     asyncio.run(place_market_order())
+
 ```
 ```
 
@@ -535,13 +541,13 @@ async def place_limit_order() -> None:
     # Step 2: Analyze current market conditions for limit order strategy
     # Limit orders require understanding of current price vs desired price
     current_market_price = Decimal("1.1050")  # Example current EUR_USD price
-    desired_entry_price = Decimal("1.1000")   # Target entry price (below market)
+    desired_entry_price = Decimal("1.1000")  # Target entry price (below market)
     price_difference = current_market_price - desired_entry_price
 
     print(f"\nGrowth Market Analysis for Limit Order:")
     print(f" Current market price: {current_market_price}")
     print(f" Desired entry price: {desired_entry_price}")
-    print(f" Price difference: {price_difference} ({float(price_difference * 10000):.0f} pips below market)")
+    print(f" Price difference: {price_difference} ({price_difference * 10000:.0f} pips below market)")
     print(f"   Note Strategy: Wait for price to drop to our favorable level")
 
     # Step 3: Set up limit order parameters
@@ -552,66 +558,67 @@ async def place_limit_order() -> None:
 
     print(f"\nGrowth Limit Order Configuration:")
     print(f"   Business Instrument: {instrument}")
-    print(f" Position size: {order_size:,} units (Buy {order_size/1000:.0f}k EUR)")
+    print(f" Position size: {order_size:,} units (Buy {order_size / 1000:.0f}k EUR)")
     print(f" Limit price: {limit_price} (execute only at this price or better)")
     print(f"   Type A Order type: BUY LIMIT (below market - value seeking)")
 
     try:
-   # Step 4: Place limit order through FiveTwenty SDK
-   # post_limit_order() creates pending order waiting for price condition
-   print(f"\nTime Placing limit order...")
-   limit_order = await client.orders.post_limit_order(
-  account_id=account_id,
-  instrument=instrument,
-  units=order_size,
-  price=limit_price  # Will only buy at 1.1000 or lower (better price)
-   )
-   print(f" Limit order placed successfully")
+            # Step 4: Place limit order through FiveTwenty SDK
+            # post_limit_order() creates pending order waiting for price condition
+            print(f"\nTime Placing limit order...")
+            limit_order = await client.orders.post_limit_order(
+                account_id=account_id,
+                instrument=instrument,
+                units=order_size,
+                price=limit_price,  # Will only buy at 1.1000 or lower (better price)
+            )
+            print(f" Limit order placed successfully")
 
-   # Step 5: Analyze limit order creation details
-   order_id = limit_order.order_create_transaction.id
-   order_time = limit_order.order_create_transaction.time
+            # Step 5: Analyze limit order creation details
+            order_id = limit_order.order_create_transaction.id
+            order_time = limit_order.order_create_transaction.time
 
-   print(f"\nList Order Details:")
-   print(f" Order ID: {order_id}")
-   print(f"   Time Created: {order_time}")
-   print(f"   Ruler Status: PENDING (waiting for price condition)")
-   print(f" Execution condition: Market price ≤ {limit_price}")
+            print(f"\nList Order Details:")
+            print(f" Order ID: {order_id}")
+            print(f"   Time Created: {order_time}")
+            print(f"   Ruler Status: PENDING (waiting for price condition)")
+            print(f" Execution condition: Market price ≤ {limit_price}")
 
-   # Step 6: Explain limit order execution scenarios
-   print(f"\nSearch Execution Scenarios:")
-   print(f" WILL EXECUTE if:")
-   print(f"• EUR_USD drops to {limit_price} or lower")
-   print(f"• Market becomes more favorable than our limit")
-   print(f"• Sufficient liquidity available at limit price")
-   print(f"   Error WILL NOT EXECUTE if:")
-   print(f"• Price stays above {limit_price}")
-   print(f"• Price gaps below our limit (may get better fill)")
-   print(f"• Order expires or is manually cancelled")
+            # Step 6: Explain limit order execution scenarios
+            print(f"\nSearch Execution Scenarios:")
+            print(f" WILL EXECUTE if:")
+            print(f"• EUR_USD drops to {limit_price} or lower")
+            print(f"• Market becomes more favorable than our limit")
+            print(f"• Sufficient liquidity available at limit price")
+            print(f"   Error WILL NOT EXECUTE if:")
+            print(f"• Price stays above {limit_price}")
+            print(f"• Price gaps below our limit (may get better fill)")
+            print(f"• Order expires or is manually cancelled")
 
-   # Step 7: Strategic implications of limit order
-   print(f"\nNote Limit Order Strategy Implications:")
-   print(f" Patience required: May wait indefinitely for price")
-   print(f" Price certainty: Know maximum price paid in advance")
-   print(f"   ⚠️ Opportunity risk: May miss move if price doesn't reach limit")
-   print(f" Value focus: Only execute at favorable pricing")
+            # Step 7: Strategic implications of limit order
+            print(f"\nNote Limit Order Strategy Implications:")
+            print(f" Patience required: May wait indefinitely for price")
+            print(f" Price certainty: Know maximum price paid in advance")
+            print(f"   ⚠️ Opportunity risk: May miss move if price doesn't reach limit")
+            print(f" Value focus: Only execute at favorable pricing")
 
-   # Step 8: Market condition analysis for limit success
-   print(f"\nGrowth Market Conditions Favoring Limit Fill:")
-   print(f"   Processing Ranging market: Price oscillates around current levels")
-   print(f" Bearish momentum: Downward price pressure toward limit")
-   print(f"   Calendar Economic events: News that might push price to limit")
-   print(f"   Clock Time decay: Longer time horizon increases fill probability")
+            # Step 8: Market condition analysis for limit success
+            print(f"\nGrowth Market Conditions Favoring Limit Fill:")
+            print(f"   Processing Ranging market: Price oscillates around current levels")
+            print(f" Bearish momentum: Downward pressure toward limit")
+            print(f"   Calendar Economic events: News that might push price to limit")
+            print(f"   Clock Time decay: Longer time horizon increases fill probability")
 
     except Exception as e:
-   # Step 9: Handle limit order placement errors
-   print(f"\nError Limit order placement failed: {e}")
-   print(f" Common issues: Invalid price, insufficient margin for pending order")
-   print(f"Recovery: Verify price format, check account limits, adjust parameters")
+            # Step 9: Handle limit order placement errors
+            print(f"\nError Limit order placement failed: {e}")
+            print(f" Common issues: Invalid price, insufficient margin for pending order")
+            print(f"Recovery: Verify price format, check account limits, adjust parameters")
 
 
 if __name__ == "__main__":
     asyncio.run(place_limit_order())
+
 ```
 ```
 
@@ -643,13 +650,13 @@ async def place_stop_order() -> None:
     # Step 2: Analyze market setup for stop order strategy
     # Stop orders capture momentum when price breaks through key levels
     current_market_price = Decimal("1.1050")  # Current EUR_USD price
-    stop_trigger_price = Decimal("1.1100")   # Breakout level above market
+    stop_trigger_price = Decimal("1.1100")  # Breakout level above market
     breakout_distance = stop_trigger_price - current_market_price
 
     print(f"\nGrowth Breakout Strategy Analysis:")
     print(f" Current market price: {current_market_price}")
     print(f" Stop trigger price: {stop_trigger_price}")
-    print(f"   Starting Breakout distance: {breakout_distance} ({float(breakout_distance * 10000):.0f} pips above market)")
+    print(f"   Starting Breakout distance: {breakout_distance} ({breakout_distance * 10000:.0f} pips above market)")
     print(f"   Note Strategy: Buy on upward momentum through resistance")
 
     # Step 3: Configure stop order parameters for breakout capture
@@ -666,69 +673,70 @@ async def place_stop_order() -> None:
     print(f" Execution: Becomes market order when price hits {stop_price}")
 
     try:
-   # Step 4: Place stop order through FiveTwenty SDK
-   # post_stop_order() creates conditional order waiting for momentum trigger
-   print(f"\nTime Placing stop order for breakout capture...")
-   stop_order = await client.orders.post_stop_order(
-  account_id=account_id,
-  instrument=instrument,
-  units=order_size,
-  price=stop_price  # Buy if price breaks above 1.1100
-   )
-   print(f" Stop order placed successfully")
+            # Step 4: Place stop order through FiveTwenty SDK
+            # post_stop_order() creates conditional order waiting for momentum trigger
+            print(f"\nTime Placing stop order for breakout capture...")
+            stop_order = await client.orders.post_stop_order(
+                account_id=account_id,
+                instrument=instrument,
+                units=order_size,
+                price=stop_price,  # Buy if price breaks above 1.1100
+            )
+            print(f" Stop order placed successfully")
 
-   # Step 5: Analyze stop order creation details
-   order_id = stop_order.order_create_transaction.id
-   order_time = stop_order.order_create_transaction.time
+            # Step 5: Analyze stop order creation details
+            order_id = stop_order.order_create_transaction.id
+            order_time = stop_order.order_create_transaction.time
 
-   print(f"\nList Order Details:")
-   print(f" Order ID: {order_id}")
-   print(f"   Time Created: {order_time}")
-   print(f"   Ruler Status: PENDING (waiting for breakout trigger)")
-   print(f"   Lightning Trigger condition: Market price ≥ {stop_price}")
-   print(f"   Starting Becomes: MARKET ORDER when triggered")
+            print(f"\nList Order Details:")
+            print(f" Order ID: {order_id}")
+            print(f"   Time Created: {order_time}")
+            print(f"   Ruler Status: PENDING (waiting for breakout trigger)")
+            print(f"   Lightning Trigger condition: Market price ≥ {stop_price}")
+            print(f"   Starting Becomes: MARKET ORDER when triggered")
 
-   # Step 6: Explain stop order activation scenarios
-   print(f"\nSearch Activation Scenarios:")
-   print(f" WILL TRIGGER if:")
-   print(f"• EUR_USD rises to {stop_price} or higher")
-   print(f"• Price gaps above trigger level (may cause slippage)")
-   print(f"• Strong upward momentum breaks resistance")
-   print(f"   Error WILL NOT TRIGGER if:")
-   print(f"• Price stays below {stop_price}")
-   print(f"• Resistance level holds and price reverses")
-   print(f"• Order is cancelled before breakout occurs")
+            # Step 6: Explain stop order activation scenarios
+            print(f"\nSearch Activation Scenarios:")
+            print(f" WILL TRIGGER if:")
+            print(f"• EUR_USD rises to {stop_price} or higher")
+            print(f"• Price gaps above trigger level (may cause slippage)")
+            print(f"• Strong upward momentum breaks resistance")
+            print(f"   Error WILL NOT TRIGGER if:")
+            print(f"• Price stays below {stop_price}")
+            print(f"• Resistance level holds and price reverses")
+            print(f"• Order is cancelled before breakout occurs")
 
-   # Step 7: Strategic implications of stop order breakout strategy
-   print(f"\nNote Breakout Strategy Implications:")
-   print(f"   Starting Momentum capture: Enter on confirmed upward movement")
-   print(f"   ⚠️ Slippage risk: May fill above stop price in fast markets")
-   print(f" Trend following: Assumes breakout continues in same direction")
-   print(f" False breakout risk: Price may reverse after trigger")
+            # Step 7: Strategic implications of stop order breakout strategy
+            print(f"\nNote Breakout Strategy Implications:")
+            print(f"   Starting Momentum capture: Enter on confirmed upward movement")
+            print(f"   ⚠️ Slippage risk: May fill above stop price in fast markets")
+            print(f" Trend following: Assumes breakout continues in same direction")
+            print(f" False breakout risk: Price may reverse after trigger")
 
-   # Step 8: Market conditions favoring stop order success
-   print(f"\nGrowth Optimal Market Conditions:")
-   print(f" Strong trend: Established upward momentum")
-   print(f" High volume: Institutional buying supporting breakout")
-   print(f"   Map Technical setup: Clear resistance level at {stop_price}")
-   print(f"   Calendar Fundamental catalyst: News supporting EUR strength")
+            # Step 8: Market conditions favoring stop order success
+            print(f"\nGrowth Optimal Market Conditions:")
+            print(f" Strong trend: Established upward momentum")
+            print(f" High volume: Institutional buying supporting breakout")
+            print(f"   Map Technical setup: Clear resistance level at {stop_price}")
+            print(f"   Calendar Fundamental catalyst: News supporting EUR strength")
 
-   # Step 9: Risk management considerations
-   print(f"\nShield Risk Management for Breakout Trade:")
-   print(f"   ⚠️ Consider stop loss: Place below breakout level if triggered")
-   print(f" Position sizing: Account for potential slippage")
-   print(f"   Time Time limits: Consider order expiration to avoid stale setups")
-   print(f"   Ruler Confirmation: Look for volume confirmation on breakout")
+            # Step 9: Risk management considerations
+            print(f"\nShield Risk Management for Breakout Trade:")
+            print(f"   ⚠️ Consider stop loss: Place below breakout level if triggered")
+            print(f" Position sizing: Account for potential slippage")
+            print(f"   Time Time limits: Consider order expiration to avoid stale setups")
+            print(f"   Ruler Confirmation: Look for volume confirmation on breakout")
 
     except Exception as e:
-   # Step 10: Handle stop order placement errors
-   print(f"\nError Stop order placement failed: {e}")
-   print(f" Common issues: Invalid trigger price, margin requirements")
-   print(f"Recovery: Verify price above market, check account capacity")
+            # Step 10: Handle stop order placement errors
+            print(f"\nError Stop order placement failed: {e}")
+            print(f" Common issues: Invalid trigger price, margin requirements")
+            print(f"Recovery: Verify price above market, check account capacity")
 
 
 if __name__ == "__main__":
     asyncio.run(place_stop_order())
+
 ```
 ```
 
@@ -776,6 +784,7 @@ import asyncio
 client = AsyncClient()
 account_id = "your-account-id"
 
+
 async def main() -> None:
     """Check your account margin situation with comprehensive leverage analysis."""
     print(f" Comprehensive Margin and Leverage Analysis")
@@ -798,66 +807,66 @@ async def main() -> None:
     # Step 3: Calculate margin utilization ratio
     # High utilization indicates elevated risk exposure
     if account_balance > 0:
-   margin_utilization = (margin_used / account_balance) * 100
-   print(f" Margin Utilization: {margin_utilization:.1f}%")
+            margin_utilization = (margin_used / account_balance) * 100
+            print(f" Margin Utilization: {margin_utilization:.1f}%")
 
-   # Risk assessment based on utilization
-   if margin_utilization > 80:
-  risk_level = "Red HIGH RISK"
-  recommendation = "Consider reducing positions"
-   elif margin_utilization > 50:
-  risk_level = "Yellow MODERATE RISK"
-  recommendation = "Monitor closely"
-   else:
-  risk_level = "Success LOW RISK"
-  recommendation = "Healthy margin levels"
+            # Risk assessment based on utilization
+            if margin_utilization > 80:
+                risk_level = "Red HIGH RISK"
+                recommendation = "Consider reducing positions"
+            elif margin_utilization > 50:
+                risk_level = "Yellow MODERATE RISK"
+                recommendation = "Monitor closely"
+            else:
+                risk_level = "Success LOW RISK"
+                recommendation = "Healthy margin levels"
 
-   print(f"   ⚠️ Risk Level: {risk_level}")
-   print(f"   Note Recommendation: {recommendation}")
+            print(f"   ⚠️ Risk Level: {risk_level}")
+            print(f"   Note Recommendation: {recommendation}")
 
     # Step 4: Demonstrate margin calculation with real example
     # OANDA typically uses 30:1 leverage (3.33% margin requirement)
     print(f"\nData Margin Calculation Example:")
 
     position_size = 100000  # 100,000 EUR_USD (1 standard lot)
-    leverage_ratio = 30# 30:1 leverage typical for major pairs
+    leverage_ratio = 30  # 30:1 leverage typical for major pairs
     margin_rate = Decimal("1") / Decimal(str(leverage_ratio))  # 1/30 = 3.33%
 
     required_margin = position_size * margin_rate
 
     print(f" Example Position: {position_size:,} EUR_USD")
-    print(f"   Lightning Leverage: {leverage_ratio}:1 (margin rate: {float(margin_rate*100):.2f}%)")
-    print(f" Required Margin: {position_size:,} × {float(margin_rate):.4f} = {required_margin:,.0f} USD")
+    print(f"   Lightning Leverage: {leverage_ratio}:1 (margin rate: {margin_rate * 100:.2f}%)")
+    print(f" Required Margin: {position_size:,} × {margin_rate:.4f} = {required_margin:,.0f} USD")
     print(f" Position Value: ~{position_size:,} USD (at 1.0000 EUR_USD)")
     print(f" Control Ratio: ${position_size:,} position with ${required_margin:,.0f} margin")
 
     # Step 5: Calculate maximum position size based on available margin
     if margin_available > 0:
-   max_position_size = int(margin_available / margin_rate)
-   max_lots = max_position_size / 100000
+            max_position_size = int(margin_available / margin_rate)
+            max_lots = max_position_size / 100000
 
-   print(f"\nTarget Maximum Position Capacity:")
-   print(f" Available margin: {margin_available} USD")
-   print(f" Max position size: {max_position_size:,} units")
-   print(f"   Ruler Max standard lots: {max_lots:.2f} lots")
-   print(f"   ⚠️ Conservative size: {max_position_size//2:,} units (50% margin usage)")
+            print(f"\nTarget Maximum Position Capacity:")
+            print(f" Available margin: {margin_available} USD")
+            print(f" Max position size: {max_position_size:,} units")
+            print(f"   Ruler Max standard lots: {max_lots:.2f} lots")
+            print(f"   ⚠️ Conservative size: {max_position_size // 2:,} units (50% margin usage)")
 
     # Step 6: Analyze leverage impact on risk
     print(f"\nLightning Leverage Risk Analysis:")
 
     # Calculate risk per pip for different position sizes
     pip_values = {
-   10000: 1.0,    # Mini lot: $1 per pip
-   100000: 10.0,  # Standard lot: $10 per pip
-   1000000: 100.0 # 10 standard lots: $100 per pip
+            10000: 1.0,  # Mini lot: $1 per pip
+            100000: 10.0,  # Standard lot: $10 per pip
+            1000000: 100.0,  # 10 standard lots: $100 per pip
     }
 
     print(f" Pip Value Analysis (EUR_USD):")
     for size, pip_value in pip_values.items():
-   margin_required = size * float(margin_rate)
-   risk_percent_per_pip = (pip_value / float(account_balance)) * 100 if account_balance > 0 else 0
+            margin_required = size * margin_rate
+            risk_percent_per_pip = (pip_value / account_balance) * 100 if account_balance > 0 else 0
 
-   print(f"{size:,} units: ${pip_value}/pip, ${margin_required:,.0f} margin, {risk_percent_per_pip:.3f}% risk/pip")
+            print(f"{size:,} units: ${pip_value}/pip, ${margin_required:,.0f} margin, {risk_percent_per_pip:.3f}% risk/pip")
 
     # Step 7: Margin call and stop-out warnings
     print(f"\nShield Margin Safety Thresholds:")
@@ -874,16 +883,16 @@ async def main() -> None:
 
     # Calculate distance to danger levels
     if margin_used > 0:
-   equity_to_margin_call = current_equity - margin_used
-   equity_to_stop_out = current_equity - stop_out_threshold
+            equity_to_margin_call = current_equity - margin_used
+            equity_to_stop_out = current_equity - stop_out_threshold
 
-   print(f" Distance to margin call: {equity_to_margin_call:+.2f} USD")
-   print(f" Distance to stop-out: {equity_to_stop_out:+.2f} USD")
+            print(f" Distance to margin call: {equity_to_margin_call:+.2f} USD")
+            print(f" Distance to stop-out: {equity_to_stop_out:+.2f} USD")
 
-   if equity_to_margin_call < 100:
-  print(f"   Alert WARNING: Approaching margin call territory!")
-   if equity_to_stop_out < 50:
-  print(f"   Red DANGER: Risk of automatic position closure!")
+            if equity_to_margin_call < 100:
+                print(f"   Alert WARNING: Approaching margin call territory!")
+            if equity_to_stop_out < 50:
+                print(f"   Red DANGER: Risk of automatic position closure!")
 
     # Step 8: Best practices for margin management
     print(f"\nNote Margin Management Best Practices:")
@@ -896,6 +905,7 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 ```
 
 ```
@@ -919,6 +929,7 @@ import asyncio
 client = AsyncClient()
 account_id = "your-account-id"
 
+
 async def main() -> None:
     """Check account margin levels across multiple analysis dimensions."""
     print(f" Multi-Level Margin Analysis Dashboard")
@@ -935,54 +946,54 @@ async def main() -> None:
 
     # Calculate and categorize overall margin utilization
     if account_balance > 0:
-   margin_utilization = (margin_used / account_balance) * 100
-   print(f" Overall Utilization: {margin_utilization:.1f}%")
+            margin_utilization = (margin_used / account_balance) * 100
+            print(f" Overall Utilization: {margin_utilization:.1f}%")
 
-   # Risk categorization with visual indicators
-   if margin_utilization > 75:
-  risk_status = "Red CRITICAL - Reduce exposure immediately"
-   elif margin_utilization > 50:
-  risk_status = "Yellow HIGH - Monitor closely"
-   elif margin_utilization > 25:
-  risk_status = "🟠 MODERATE - Normal operations"
-   else:
-  risk_status = "Success LOW - Conservative positioning"
+            # Risk categorization with visual indicators
+            if margin_utilization > 75:
+                risk_status = "Red CRITICAL - Reduce exposure immediately"
+            elif margin_utilization > 50:
+                risk_status = "Yellow HIGH - Monitor closely"
+            elif margin_utilization > 25:
+                risk_status = "🟠 MODERATE - Normal operations"
+            else:
+                risk_status = "Success LOW - Conservative positioning"
 
-   print(f"   ⚠️ Risk Status: {risk_status}")
+            print(f"   ⚠️ Risk Status: {risk_status}")
 
     # Step 2: Position-level margin breakdown
     # Shows margin allocation across different currency pairs
     print(f"\nGrowth Position-Level Margin Breakdown:")
     positions = await client.positions.get_open_positions(account_id)
 
-    total_position_margin = Decimal('0')
+    total_position_margin = Decimal("0")
     position_count = 0
 
     for position in positions:
-   # Analyze margin usage for each instrument position
-   position_margin = Decimal(str(position.margin_used)) if position.margin_used else Decimal('0')
-   total_position_margin += position_margin
-   position_count += 1
+            # Analyze margin usage for each instrument position
+            position_margin = Decimal(str(position.margin_used)) if position.margin_used else Decimal("0")
+            total_position_margin += position_margin
+            position_count += 1
 
-   # Calculate position's share of total margin
-   margin_percentage = (position_margin / margin_used * 100) if margin_used > 0 else 0
+            # Calculate position's share of total margin
+            margin_percentage = (position_margin / margin_used * 100) if margin_used > 0 else 0
 
-   # Determine position direction and size
-   long_units = int(position.long.units) if position.long.units else 0
-   short_units = int(position.short.units) if position.short.units else 0
-   net_units = long_units + short_units  # short_units is negative
+            # Determine position direction and size
+            long_units = int(position.long.units) if position.long.units else 0
+            short_units = int(position.short.units) if position.short.units else 0
+            net_units = long_units + short_units  # short_units is negative
 
-   direction = "LONG" if net_units > 0 else "SHORT" if net_units < 0 else "FLAT"
+            direction = "LONG" if net_units > 0 else "SHORT" if net_units < 0 else "FLAT"
 
-   print(f" {position.instrument}:")
-   print(f"Secure Margin used: {position_margin} USD ({margin_percentage:.1f}% of total)")
-   print(f"   Net position: {abs(net_units):,} units {direction}")
-   print(f"   Unrealized P/L: {position.unrealized_pl} USD")
+            print(f" {position.instrument}:")
+            print(f"Secure Margin used: {position_margin} USD ({margin_percentage:.1f}% of total)")
+            print(f"   Net position: {abs(net_units):,} units {direction}")
+            print(f"   Unrealized P/L: {position.unrealized_pl} USD")
 
-   # Position-specific margin efficiency
-   if abs(net_units) > 0:
-  margin_per_unit = float(position_margin) / abs(net_units)
-  print(f"   Margin efficiency: {margin_per_unit:.5f} USD per unit")
+            # Position-specific margin efficiency
+            if abs(net_units) > 0:
+                margin_per_unit = position_margin / abs(net_units)
+                print(f"   Margin efficiency: {margin_per_unit:.5f} USD per unit")
 
     print(f"   List Total positions: {position_count}")
     print(f" Sum of position margins: {total_position_margin} USD")
@@ -992,37 +1003,37 @@ async def main() -> None:
     print(f"\nNumbers Individual Trade Margin Analysis:")
     trades = await client.trades.get_open_trades(account_id)
 
-    total_trade_margin = Decimal('0')
+    total_trade_margin = Decimal("0")
     trade_margin_distribution = {}
 
     for trade in trades:
-   # Analyze margin usage for each individual trade
-   trade_margin = Decimal(str(trade.margin_used)) if trade.margin_used else Decimal('0')
-   total_trade_margin += trade_margin
+            # Analyze margin usage for each individual trade
+            trade_margin = Decimal(str(trade.margin_used)) if trade.margin_used else Decimal("0")
+            total_trade_margin += trade_margin
 
-   # Group trades by instrument for distribution analysis
-   instrument = trade.instrument
-   if instrument not in trade_margin_distribution:
-  trade_margin_distribution[instrument] = {'trades': 0, 'margin': Decimal('0')}
+            # Group trades by instrument for distribution analysis
+            instrument = trade.instrument
+            if instrument not in trade_margin_distribution:
+                trade_margin_distribution[instrument] = {"trades": 0, "margin": Decimal("0")}
 
-   trade_margin_distribution[instrument]['trades'] += 1
-   trade_margin_distribution[instrument]['margin'] += trade_margin
+            trade_margin_distribution[instrument]["trades"] += 1
+            trade_margin_distribution[instrument]["margin"] += trade_margin
 
-   # Calculate trade-specific metrics
-   trade_units = int(trade.current_units)
-   trade_direction = "BUY" if trade_units > 0 else "SELL"
+            # Calculate trade-specific metrics
+            trade_units = int(trade.current_units)
+            trade_direction = "BUY" if trade_units > 0 else "SELL"
 
-   print(f"   Trade {trade.id}:")
-   print(f"Business Instrument: {instrument}")
-   print(f"Secure Margin used: {trade_margin} USD")
-   print(f"   Size: {abs(trade_units):,} units ({trade_direction})")
-   print(f"   Entry price: {trade.price}")
-   print(f"   Unrealized P/L: {trade.unrealized_pl} USD")
+            print(f"   Trade {trade.id}:")
+            print(f"Business Instrument: {instrument}")
+            print(f"Secure Margin used: {trade_margin} USD")
+            print(f"   Size: {abs(trade_units):,} units ({trade_direction})")
+            print(f"   Entry price: {trade.price}")
+            print(f"   Unrealized P/L: {trade.unrealized_pl} USD")
 
-   # Trade efficiency metrics
-   if abs(trade_units) > 0:
-  pl_per_margin = float(trade.unrealized_pl) / float(trade_margin) if trade_margin > 0 else 0
-  print(f"   P/L per margin USD: {pl_per_margin:+.3f}")
+            # Trade efficiency metrics
+            if abs(trade_units) > 0:
+                pl_per_margin = trade.unrealized_pl / trade_margin if trade_margin > 0 else 0
+                print(f"   P/L per margin USD: {pl_per_margin:+.3f}")
 
     # Step 4: Margin distribution summary
     print(f"\nData Margin Distribution Summary:")
@@ -1030,41 +1041,41 @@ async def main() -> None:
     print(f"   List Number of open trades: {len(trades)}")
 
     if len(trades) > 0:
-   avg_margin_per_trade = total_trade_margin / len(trades)
-   print(f" Average margin per trade: {avg_margin_per_trade:.2f} USD")
+            avg_margin_per_trade = total_trade_margin / len(trades)
+            print(f" Average margin per trade: {avg_margin_per_trade:.2f} USD")
 
     # Step 5: Instrument-wise margin concentration
     print(f"\nMap Margin Concentration by Instrument:")
     for instrument, data in trade_margin_distribution.items():
-   concentration = (data['margin'] / total_trade_margin * 100) if total_trade_margin > 0 else 0
-   avg_margin_per_trade = data['margin'] / data['trades'] if data['trades'] > 0 else 0
+            concentration = (data["margin"] / total_trade_margin * 100) if total_trade_margin > 0 else 0
+            avg_margin_per_trade = data["margin"] / data["trades"] if data["trades"] > 0 else 0
 
-   print(f"   {instrument}:")
-   print(f"   Trades: {data['trades']}")
-   print(f"Secure Total margin: {data['margin']} USD")
-   print(f"   Concentration: {concentration:.1f}% of total margin")
-   print(f"   Avg per trade: {avg_margin_per_trade:.2f} USD")
+            print(f"   {instrument}:")
+            print(f"   Trades: {data['trades']}")
+            print(f"Secure Total margin: {data['margin']} USD")
+            print(f"   Concentration: {concentration:.1f}% of total margin")
+            print(f"   Avg per trade: {avg_margin_per_trade:.2f} USD")
 
     # Step 6: Margin efficiency and optimization insights
     print(f"\nNote Margin Optimization Insights:")
 
     # Check for margin discrepancies
     margin_difference = abs(total_trade_margin - total_position_margin)
-    if margin_difference > Decimal('0.01'):
-   print(f"   ⚠️ Margin calculation difference: {margin_difference} USD")
-   print(f"(Normal for complex positions with netting)")
+    if margin_difference > Decimal("0.01"):
+            print(f"   ⚠️ Margin calculation difference: {margin_difference} USD")
+            print(f"(Normal for complex positions with netting)")
 
     # Provide actionable recommendations
     print(f"   Shield Optimization Opportunities:")
     if position_count > 5:
-   print(f"• Consider consolidating {position_count} positions to reduce margin spread")
+            print(f"• Consider consolidating {position_count} positions to reduce margin spread")
 
     if margin_utilization > 50:
-   print(f"• High utilization ({margin_utilization:.1f}%) - consider position reduction")
+            print(f"• High utilization ({margin_utilization:.1f}%) - consider position reduction")
 
     diversification_score = len(trade_margin_distribution) / max(len(trades), 1)
     if diversification_score < 0.3:
-   print(f"• Low diversification - margin concentrated in few instruments")
+            print(f"• Low diversification - margin concentrated in few instruments")
 
     print(f"• Monitor unrealized P/L impact on margin availability")
     print(f"• Consider correlation between positions for risk assessment")
@@ -1072,6 +1083,7 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 ```
 ```
 
@@ -1099,7 +1111,7 @@ async def check_pnl() -> None:
     account = await client.accounts.get_account(account_id)
     current_unrealized = account.unrealized_pl  # All open positions combined
     account_balance = account.balance
-    total_equity = float(account_balance) + float(current_unrealized)
+    total_equity = account_balance + current_unrealized
 
     print(f"\nBusiness Account-Level P/L Overview:")
     print(f" Account balance: {account_balance} USD (cash)")
@@ -1107,55 +1119,55 @@ async def check_pnl() -> None:
     print(f" Total equity: {total_equity:+.2f} USD (balance + unrealized)")
 
     # Calculate portfolio performance metrics
-    if float(account_balance) > 0:
-   unrealized_return = (float(current_unrealized) / float(account_balance)) * 100
-   equity_return = ((total_equity - float(account_balance)) / float(account_balance)) * 100
+    if account_balance > 0:
+            unrealized_return = (current_unrealized / account_balance) * 100
+            equity_return = ((total_equity - account_balance) / account_balance) * 100
 
-   print(f" Unrealized return: {unrealized_return:+.2f}% of balance")
-   print(f" Total portfolio return: {equity_return:+.2f}%")
+            print(f" Unrealized return: {unrealized_return:+.2f}% of balance")
+            print(f" Total portfolio return: {equity_return:+.2f}%")
 
-   # Risk assessment based on P/L
-   if abs(unrealized_return) > 10:
-  risk_status = "Alert HIGH VOLATILITY - Monitor closely"
-   elif abs(unrealized_return) > 5:
-  risk_status = "Yellow MODERATE RISK - Normal trading range"
-   else:
-  risk_status = "Success STABLE - Low volatility"
+            # Risk assessment based on P/L
+            if abs(unrealized_return) > 10:
+                risk_status = "Alert HIGH VOLATILITY - Monitor closely"
+            elif abs(unrealized_return) > 5:
+                risk_status = "Yellow MODERATE RISK - Normal trading range"
+            else:
+                risk_status = "Success STABLE - Low volatility"
 
-   print(f"   ⚠️ Risk status: {risk_status}")
+            print(f"   ⚠️ Risk status: {risk_status}")
 
     # Step 3: Individual position unrealized P/L breakdown
     # Position-level P/L shows performance by currency pair
     print(f"\nMap Position-Level P/L Breakdown:")
 
     try:
-   position = await client.positions.get_position(account_id, "EUR_USD")
-   eur_usd_unrealized = position.unrealized_pl
+            position = await client.positions.get_position(account_id, "EUR_USD")
+            eur_usd_unrealized = position.unrealized_pl
 
-   # Analyze long and short side performance separately
-   long_pl = position.long.unrealized_pl if position.long.unrealized_pl else 0
-   short_pl = position.short.unrealized_pl if position.short.unrealized_pl else 0
-   long_units = int(position.long.units) if position.long.units else 0
-   short_units = int(position.short.units) if position.short.units else 0
+            # Analyze long and short side performance separately
+            long_pl = position.long.unrealized_pl if position.long.unrealized_pl else 0
+            short_pl = position.short.unrealized_pl if position.short.unrealized_pl else 0
+            long_units = int(position.long.units) if position.long.units else 0
+            short_units = int(position.short.units) if position.short.units else 0
 
-   print(f"   EUR_USD Position Analysis:")
-   print(f"   Long side P/L: {long_pl:+} USD ({long_units:,} units)")
-   print(f"   Short side P/L: {short_pl:+} USD ({abs(short_units):,} units)")
-   print(f"   Total position P/L: {eur_usd_unrealized:+} USD")
+            print(f"   EUR_USD Position Analysis:")
+            print(f"   Long side P/L: {long_pl:+} USD ({long_units:,} units)")
+            print(f"   Short side P/L: {short_pl:+} USD ({abs(short_units):,} units)")
+            print(f"   Total position P/L: {eur_usd_unrealized:+} USD")
 
-   # Calculate position efficiency metrics
-   total_units = abs(long_units) + abs(short_units)
-   if total_units > 0:
-  pl_per_unit = float(eur_usd_unrealized) / total_units
-  print(f"   P/L per unit: {pl_per_unit:+.5f} USD/unit")
+            # Calculate position efficiency metrics
+            total_units = abs(long_units) + abs(short_units)
+            if total_units > 0:
+                pl_per_unit = eur_usd_unrealized / total_units
+                print(f"   P/L per unit: {pl_per_unit:+.5f} USD/unit")
 
-   # Position P/L as percentage of account
-   if float(account_balance) > 0:
-  position_impact = (float(eur_usd_unrealized) / float(account_balance)) * 100
-  print(f"📌 Account impact: {position_impact:+.2f}% of balance")
+            # Position P/L as percentage of account
+            if account_balance > 0:
+                position_impact = (eur_usd_unrealized / account_balance) * 100
+                print(f"📌 Account impact: {position_impact:+.2f}% of balance")
 
     except Exception as e:
-   print(f"   ⚠️ No EUR_USD position found: {e}")
+            print(f"   ⚠️ No EUR_USD position found: {e}")
 
     # Step 4: Individual trade realized P/L analysis
     # Realized P/L shows actual profits/losses from closed portions
@@ -1168,88 +1180,89 @@ async def check_pnl() -> None:
     losing_trades = 0
 
     for trade in trades:
-   trade_unrealized = float(trade.unrealized_pl)
-   trade_realized = float(trade.realized_pl) if trade.realized_pl else 0
-   trade_units = int(trade.current_units)
-   trade_direction = "LONG" if trade_units > 0 else "SHORT"
+            trade_unrealized = trade.unrealized_pl
+            trade_realized = trade.realized_pl if trade.realized_pl else Decimal("0")
+            trade_units = int(trade.current_units)
+            trade_direction = "LONG" if trade_units > 0 else "SHORT"
 
-   total_trade_unrealized += trade_unrealized
-   total_trade_realized += trade_realized
+            total_trade_unrealized += trade_unrealized
+            total_trade_realized += trade_realized
 
-   # Categorize trade performance
-   if trade_unrealized > 0:
-  profitable_trades += 1
-  status = "Success PROFITABLE"
-   elif trade_unrealized < 0:
-  losing_trades += 1
-  status = "Error LOSING"
-   else:
-  status = "Scale BREAKEVEN"
+            # Categorize trade performance
+            if trade_unrealized > 0:
+                profitable_trades += 1
+                status = "Success PROFITABLE"
+            elif trade_unrealized < 0:
+                losing_trades += 1
+                status = "Error LOSING"
+            else:
+                status = "Scale BREAKEVEN"
 
-   print(f"   Trade {trade.id} ({status}):")
-   print(f"Business Instrument: {trade.instrument}")
-   print(f"   Direction: {trade_direction} ({abs(trade_units):,} units)")
-   print(f"   Entry price: {trade.price}")
-   print(f"   Unrealized P/L: {trade_unrealized:+.2f} USD")
-   print(f"   Realized P/L: {trade_realized:+.2f} USD")
+            print(f"   Trade {trade.id} ({status}):")
+            print(f"Business Instrument: {trade.instrument}")
+            print(f"   Direction: {trade_direction} ({abs(trade_units):,} units)")
+            print(f"   Entry price: {trade.price}")
+            print(f"   Unrealized P/L: {trade_unrealized:+.2f} USD")
+            print(f"   Realized P/L: {trade_realized:+.2f} USD")
 
-   # Calculate trade performance metrics
-   if abs(trade_units) > 0:
-  pl_per_unit = trade_unrealized / abs(trade_units)
-  print(f"   Performance: {pl_per_unit:+.5f} USD per unit")
+            # Calculate trade performance metrics
+            if abs(trade_units) > 0:
+                pl_per_unit = trade_unrealized / abs(trade_units)
+                print(f"   Performance: {pl_per_unit:+.5f} USD per unit")
 
     # Step 5: Trade performance statistics
     total_trades = len(trades)
     if total_trades > 0:
-   win_rate = (profitable_trades / total_trades) * 100
-   avg_unrealized_pl = total_trade_unrealized / total_trades
-   avg_realized_pl = total_trade_realized / total_trades
+    win_rate = (profitable_trades / total_trades) * 100
+    avg_unrealized_pl = total_trade_unrealized / total_trades
+    avg_realized_pl = total_trade_realized / total_trades
 
-   print(f"\nData Trade Performance Statistics:")
-   print(f" Total open trades: {total_trades}")
-   print(f" Profitable trades: {profitable_trades} ({win_rate:.1f}% win rate)")
-   print(f"   Error Losing trades: {losing_trades}")
-   print(f" Total unrealized: {total_trade_unrealized:+.2f} USD")
-   print(f" Total realized: {total_trade_realized:+.2f} USD")
-   print(f" Avg unrealized per trade: {avg_unrealized_pl:+.2f} USD")
-   print(f" Avg realized per trade: {avg_realized_pl:+.2f} USD")
+    print(f"\nData Trade Performance Statistics:")
+    print(f" Total open trades: {total_trades}")
+    print(f" Profitable trades: {profitable_trades} ({win_rate:.1f}% win rate)")
+    print(f"   Error Losing trades: {losing_trades}")
+    print(f" Total unrealized: {total_trade_unrealized:+.2f} USD")
+    print(f" Total realized: {total_trade_realized:+.2f} USD")
+    print(f" Avg unrealized per trade: {avg_unrealized_pl:+.2f} USD")
+    print(f" Avg realized per trade: {avg_realized_pl:+.2f} USD")
 
     # Step 6: P/L reconciliation and data integrity check
     print(f"\nSearch P/L Reconciliation Check:")
-    account_vs_trades_diff = float(current_unrealized) - total_trade_unrealized
+    account_vs_trades_diff = current_unrealized - total_trade_unrealized
 
-    if abs(account_vs_trades_diff) < 0.01:  # Allow for rounding
-   print(f" P/L reconciliation: Account and trade totals match")
+    if abs(account_vs_trades_diff) < Decimal("0.01"):  # Allow for rounding
+    print(f" P/L reconciliation: Account and trade totals match")
     else:
-   print(f"   ⚠️ P/L difference: {account_vs_trades_diff:+.2f} USD")
-   print(f"(May be due to rounding, timing, or multiple instruments)")
+    print(f"   ⚠️ P/L difference: {account_vs_trades_diff:+.2f} USD")
+    print(f"(May be due to rounding, timing, or multiple instruments)")
 
     # Step 7: Performance insights and recommendations
     print(f"\nNote Performance Insights & Recommendations:")
 
-    if float(current_unrealized) > 0:
-   print(f" Overall Position: PROFITABLE (+{current_unrealized} USD)")
-   if float(current_unrealized) > float(account_balance) * 0.05:  # 5% gain
-  print(f"   Strong performance - consider profit taking")
-    elif float(current_unrealized) < 0:
-   print(f" Overall Position: LOSING ({current_unrealized} USD)")
-   if abs(float(current_unrealized)) > float(account_balance) * 0.05:  # 5% loss
-  print(f"⚠️ Significant losses - review risk management")
+    if current_unrealized > 0:
+    print(f" Overall Position: PROFITABLE (+{current_unrealized} USD)")
+    if current_unrealized > account_balance * Decimal("0.05"):  # 5% gain
+    print(f"   Strong performance - consider profit taking")
+    elif current_unrealized < 0:
+    print(f" Overall Position: LOSING ({current_unrealized} USD)")
+    if abs(current_unrealized) > account_balance * Decimal("0.05"):  # 5% loss
+    print(f"⚠️ Significant losses - review risk management")
     else:
-   print(f" Overall Position: BREAKEVEN")
+    print(f" Overall Position: BREAKEVEN")
 
     # Win rate analysis
     if total_trades > 0:
-   if win_rate >= 60:
-  print(f" High win rate ({win_rate:.1f}%) - good entry timing")
-   elif win_rate <= 40:
-  print(f" Low win rate ({win_rate:.1f}%) - review strategy")
+    if win_rate >= 60:
+    print(f" High win rate ({win_rate:.1f}%) - good entry timing")
+    elif win_rate <= 40:
+    print(f" Low win rate ({win_rate:.1f}%) - review strategy")
 
     # Risk management recommendations
-    if abs(float(current_unrealized)) > float(account_balance) * 0.1:  # 10% of balance
-   print(f"   ⚠️ High P/L volatility - consider position sizing review")
+    if abs(current_unrealized) > account_balance * Decimal("0.1"):  # 10% of balance
+    print(f"   ⚠️ High P/L volatility - consider position sizing review")
 
     print(f"   Shield Next steps: Monitor closely, consider stop losses, review correlation")
+
 ```
 ```
 
@@ -1268,9 +1281,9 @@ async def main():
 
     # Step 1: Define trade scenario for P/L calculation demonstration
     # Manual calculation helps understand how FiveTwenty SDK computes P/L
-    entry_price = Decimal("1.1000") # Your entry price
-    current_price = Decimal("1.1050")    # Current market price
-    position_size = 10000 # Position size in base currency units
+    entry_price = Decimal("1.1000")  # Your entry price
+    current_price = Decimal("1.1050")  # Current market price
+    position_size = 10000  # Position size in base currency units
 
     print(f"\nBusiness Trade Scenario:")
     print(f" Entry price: {entry_price} EUR_USD")
@@ -1289,8 +1302,8 @@ async def main():
     print(f" Result: {manual_pnl:+} USD profit")
 
     # Step 3: Explain the calculation in trading terms
-    pips_moved = float(price_difference * 10000)  # Convert to pips (4 decimal places)
-    pip_value = 1.0  # For EUR_USD, 1 pip = $1 per 10k units
+    pips_moved = price_difference * 10000  # Convert to pips (4 decimal places)
+    pip_value = Decimal("1.0")  # For EUR_USD, 1 pip = $1 per 10k units
     pip_profit = pips_moved * pip_value
 
     print(f"\nGrowth Trading Terms Breakdown:")
@@ -1307,52 +1320,46 @@ async def main():
     trade_id = "123"  # Replace with actual trade ID
 
     try:
-   # Retrieve trade from FiveTwenty SDK for automatic P/L
-   trade = await client.trades.get_trade(account_id, trade_id)
-   sdk_pnl = trade.unrealized_pl
+            # Retrieve trade from FiveTwenty SDK for automatic P/L
+            trade = await client.trades.get_trade(account_id, trade_id)
+            sdk_pnl = trade.unrealized_pl
 
-   print(f" SDK calculated P/L: {sdk_pnl} USD")
-   print(f" Entry price: {trade.price}")
-   print(f" Current units: {trade.current_units}")
-   print(f"   Time Trade opened: {trade.open_time}")
+            print(f" SDK calculated P/L: {sdk_pnl} USD")
+            print(f" Entry price: {trade.price}")
+            print(f" Current units: {trade.current_units}")
+            print(f"   Time Trade opened: {trade.open_time}")
 
-   # Compare manual vs SDK calculation
-   if abs(float(sdk_pnl) - float(manual_pnl)) < 0.01:  # Allow rounding
-  print(f" Calculation match: Manual and SDK results align")
-   else:
-  difference = float(sdk_pnl) - float(manual_pnl)
-  print(f" Difference: {difference:+.2f} USD (real-time vs example prices)")
+            # Compare manual vs SDK calculation
+            if abs(sdk_pnl - manual_pnl) < Decimal("0.01"):  # Allow rounding
+                print(f" Calculation match: Manual and SDK results align")
+            else:
+                difference = sdk_pnl - manual_pnl
+                print(f" Difference: {difference:+.2f} USD (real-time vs example prices)")
 
-   # Step 5: Explain factors affecting P/L accuracy
-   print(f"\nNote P/L Calculation Factors:")
-   print(f"   🕐 Real-time prices: SDK uses live market data")
-   print(f" Price precision: Up to 5 decimal places for accuracy")
-   print(f"   Processing Currency conversion: Auto-converted to account currency")
-   print(f"   Time Timing: P/L updates with every price tick")
+            # Step 5: Explain factors affecting P/L accuracy
+            print(f"\nNote P/L Calculation Factors:")
+            print(f"   🕐 Real-time prices: SDK uses live market data")
+            print(f" Price precision: Up to 5 decimal places for accuracy")
+            print(f"   Processing Currency conversion: Auto-converted to account currency")
+            print(f"   Time Timing: P/L updates with every price tick")
 
     except Exception as e:
-   print(f"   ⚠️ SDK verification failed: {e}")
-   print(f"   Note Note: Trade ID '123' is example - use actual trade ID")
-   print(f" Manual calculation shows expected result: ${manual_pnl}")
+            print(f"   ⚠️ SDK verification failed: {e}")
+            print(f"   Note Note: Trade ID '123' is example - use actual trade ID")
+            print(f" Manual calculation shows expected result: ${manual_pnl}")
 
     # Step 6: Extended P/L scenarios for different market movements
     print(f"\nMap P/L Scenarios for Different Price Movements:")
 
-    scenarios = [
-   (Decimal("1.0950"), "50 pips loss"),
-   (Decimal("1.1000"), "Breakeven"),
-   (Decimal("1.1025"), "25 pips profit"),
-   (Decimal("1.1100"), "100 pips profit"),
-   (Decimal("1.0900"), "100 pips loss")
-    ]
+    scenarios = [(Decimal("1.0950"), "50 pips loss"), (Decimal("1.1000"), "Breakeven"), (Decimal("1.1025"), "25 pips profit"), (Decimal("1.1100"), "100 pips profit"), (Decimal("1.0900"), "100 pips loss")]
 
     for scenario_price, description in scenarios:
-   scenario_movement = scenario_price - entry_price
-   scenario_pnl = scenario_movement * position_size
-   scenario_pips = float(scenario_movement * 10000)
+            scenario_movement = scenario_price - entry_price
+            scenario_pnl = scenario_movement * position_size
+            scenario_pips = scenario_movement * 10000
 
-   status = "Success" if scenario_pnl > 0 else "Error" if scenario_pnl < 0 else "Scale"
-   print(f"   {status} Price {scenario_price}: {scenario_pnl:+.0f} USD ({description})")
+            status = "Success" if scenario_pnl > 0 else "Error" if scenario_pnl < 0 else "Scale"
+            print(f"   {status} Price {scenario_price}: {scenario_pnl:+.0f} USD ({description})")
 
     # Step 7: Key takeaways for P/L understanding
     print(f"\nTarget Key P/L Calculation Takeaways:")
@@ -1366,6 +1373,7 @@ async def main():
 
 if __name__ == "__main__":
     asyncio.run(main())
+
 ```
 ```
 
@@ -1392,64 +1400,64 @@ async def check_currency_conversion() -> None:
     print(f"   Note Challenge: Neither GBP nor JPY is your account currency")
 
     try:
-   # Step 3: Retrieve GBP_JPY position for currency conversion analysis
-   position = await client.positions.get_position(account_id, "GBP_JPY")
-   account_currency_pl = position.unrealized_pl  # Already converted to USD
+            # Step 3: Retrieve GBP_JPY position for currency conversion analysis
+            position = await client.positions.get_position(account_id, "GBP_JPY")
+            account_currency_pl = position.unrealized_pl  # Already converted to USD
 
-   print(f"\nGrowth Position Analysis:")
-   print(f"   Business Instrument: GBP_JPY")
-   print(f" Unrealized P/L: {account_currency_pl} USD (auto-converted)")
-   print(f" Conversion: FiveTwenty SDK handles JPY → USD automatically")
+            print(f"\nGrowth Position Analysis:")
+            print(f"   Business Instrument: GBP_JPY")
+            print(f" Unrealized P/L: {account_currency_pl} USD (auto-converted)")
+            print(f" Conversion: FiveTwenty SDK handles JPY → USD automatically")
 
-   # Step 4: Explain the conversion process step-by-step
-   print(f"\nProcessing Currency Conversion Process:")
-   print(f"   Step 1: Calculate P/L in quote currency (JPY)")
-   print(f"   Step 2: Get current USD_JPY exchange rate")
-   print(f"   Step 3: Convert JPY P/L to USD using current rate")
-   print(f"   Step 4: Display result in account currency (USD)")
+            # Step 4: Explain the conversion process step-by-step
+            print(f"\nProcessing Currency Conversion Process:")
+            print(f"   Step 1: Calculate P/L in quote currency (JPY)")
+            print(f"   Step 2: Get current USD_JPY exchange rate")
+            print(f"   Step 3: Convert JPY P/L to USD using current rate")
+            print(f"   Step 4: Display result in account currency (USD)")
 
-   # Step 5: Demonstrate conversion impact with hypothetical numbers
-   # Show how exchange rate fluctuations affect P/L
-   print(f"\n📉 Conversion Impact Example:")
+            # Step 5: Demonstrate conversion impact with hypothetical numbers
+            # Show how exchange rate fluctuations affect P/L
+            print(f"\n📉 Conversion Impact Example:")
 
-   # Hypothetical scenario to illustrate conversion effects
-   hypothetical_jpy_pl = 1000  # 1,000 JPY profit
-   usd_jpy_rate_1 = 110.00# 1 USD = 110 JPY
-   usd_jpy_rate_2 = 115.00# 1 USD = 115 JPY (JPY weakened)
+            # Hypothetical scenario to illustrate conversion effects
+            hypothetical_jpy_pl = 1000  # 1,000 JPY profit
+            usd_jpy_rate_1 = 110.00# 1 USD = 110 JPY
+            usd_jpy_rate_2 = 115.00# 1 USD = 115 JPY (JPY weakened)
 
-   usd_pl_rate_1 = hypothetical_jpy_pl / usd_jpy_rate_1
-   usd_pl_rate_2 = hypothetical_jpy_pl / usd_jpy_rate_2
+            usd_pl_rate_1 = hypothetical_jpy_pl / usd_jpy_rate_1
+            usd_pl_rate_2 = hypothetical_jpy_pl / usd_jpy_rate_2
 
-   print(f"   Scenario: +1,000 JPY profit from GBP_JPY trade")
-   print(f" USD_JPY at 110.00: 1,000 ÷ 110 = ${usd_pl_rate_1:.2f} USD")
-   print(f" USD_JPY at 115.00: 1,000 ÷ 115 = ${usd_pl_rate_2:.2f} USD")
-   print(f"   ⚠️ Currency impact: {(usd_pl_rate_2 - usd_pl_rate_1):+.2f} USD difference")
-   print(f"   Note Insight: JPY weakening reduces USD value of JPY profits")
+            print(f"   Scenario: +1,000 JPY profit from GBP_JPY trade")
+            print(f" USD_JPY at 110.00: 1,000 ÷ 110 = ${usd_pl_rate_1:.2f} USD")
+            print(f" USD_JPY at 115.00: 1,000 ÷ 115 = ${usd_pl_rate_2:.2f} USD")
+    print(f"   ⚠️ Currency impact: {(usd_pl_rate_2 - usd_pl_rate_1):+.2f} USD difference")
+    print(f"   Note Insight: JPY weakening reduces USD value of JPY profits")
 
-   # Step 6: Position composition analysis
-   if position.long.units or position.short.units:
-  long_units = int(position.long.units) if position.long.units else 0
-  short_units = int(position.short.units) if position.short.units else 0
-  net_units = long_units + short_units
+    # Step 6: Position composition analysis
+    if position.long.units or position.short.units:
+    long_units = int(position.long.units) if position.long.units else 0
+    short_units = int(position.short.units) if position.short.units else 0
+    net_units = long_units + short_units
 
-  print(f"\nGrowth Position Composition:")
-  print(f" Long GBP: {long_units:,} units")
-  print(f" Short GBP: {abs(short_units):,} units")
-  print(f" Net exposure: {net_units:,} GBP")
+    print(f"\nGrowth Position Composition:")
+    print(f" Long GBP: {long_units:,} units")
+    print(f" Short GBP: {abs(short_units):,} units")
+    print(f" Net exposure: {net_units:,} GBP")
 
-  # Currency exposure analysis
-  direction = "LONG GBP/SHORT JPY" if net_units > 0 else "SHORT GBP/LONG JPY" if net_units < 0 else "FLAT"
-  print(f"   Map Direction: {direction}")
+    # Currency exposure analysis
+    direction = "LONG GBP/SHORT JPY" if net_units > 0 else "SHORT GBP/LONG JPY" if net_units < 0 else "FLAT"
+    print(f"   Map Direction: {direction}")
 
-  # Triple currency exposure explanation
-  print(f"\nWorld Triple Currency Exposure:")
-  print(f"   1️⃣ GBP exposure: {abs(net_units):,} units ({'LONG' if net_units > 0 else 'SHORT' if net_units < 0 else 'NONE'})")
-  print(f"   2️⃣ JPY exposure: Opposite to GBP (quote currency)")
-  print(f"   3️⃣ USD exposure: Account currency conversion risk")
+    # Triple currency exposure explanation
+    print(f"\nWorld Triple Currency Exposure:")
+    print(f"   1️⃣ GBP exposure: {abs(net_units):,} units ({'LONG' if net_units > 0 else 'SHORT' if net_units < 0 else 'NONE'})")
+    print(f"   2️⃣ JPY exposure: Opposite to GBP (quote currency)")
+    print(f"   3️⃣ USD exposure: Account currency conversion risk")
 
     except Exception as e:
-   print(f"\n⚠️ No GBP_JPY position found: {e}")
-   print(f"   Note This demonstrates the concept with hypothetical position")
+    print(f"\n⚠️ No GBP_JPY position found: {e}")
+    print(f"   Note This demonstrates the concept with hypothetical position")
 
     # Step 7: Multi-currency trading considerations
     print(f"\nNote Multi-Currency Trading Considerations:")
@@ -1461,14 +1469,14 @@ async def check_currency_conversion() -> None:
     # Step 8: Currency conversion examples for different account types
     print(f"\nMap Currency Conversion Examples:")
     conversion_examples = [
-   ("USD account", "EUR_USD", "Direct - no conversion needed"),
-   ("USD account", "GBP_JPY", "JPY P/L → USD via USD_JPY rate"),
-   ("EUR account", "USD_JPY", "JPY P/L → EUR via EUR_JPY rate"),
-   ("GBP account", "AUD_CAD", "CAD P/L → GBP via GBP_CAD rate")
+    ("USD account", "EUR_USD", "Direct - no conversion needed"),
+    ("USD account", "GBP_JPY", "JPY P/L → USD via USD_JPY rate"),
+    ("EUR account", "USD_JPY", "JPY P/L → EUR via EUR_JPY rate"),
+    ("GBP account", "AUD_CAD", "CAD P/L → GBP via GBP_CAD rate")
     ]
 
     for account_curr, pair, conversion in conversion_examples:
-   print(f"   • {account_curr} trading {pair}: {conversion}")
+    print(f"   • {account_curr} trading {pair}: {conversion}")
 
     # Step 9: Best practices for multi-currency trading
     print(f"\nShield Multi-Currency Best Practices:")
@@ -1485,6 +1493,7 @@ async def check_currency_conversion() -> None:
     print(f"   Lightning Volatility: Some currencies more volatile than others")
     print(f"   Map Geographic: Consider time zones for currency pair liquidity")
     print(f" Hedging: Advanced traders may hedge currency exposure separately")
+
 ```
 ```
 
@@ -1524,104 +1533,105 @@ async def check_spread() -> None:
     print(f" Bid-Ask Spread Analysis for Trading Costs")
 
     try:
-   # Step 2: Retrieve real-time pricing data from FiveTwenty SDK
-   # Pricing data includes bid/ask prices and spread information
-   prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
-   eur_usd_price = prices.prices[0]
-   print(f"\nData EUR_USD Real-Time Pricing:")
+            # Step 2: Retrieve real-time pricing data from FiveTwenty SDK
+            # Pricing data includes bid/ask prices and spread information
+            prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
+            eur_usd_price = prices.prices[0]
+            print(f"\nData EUR_USD Real-Time Pricing:")
 
-   # Step 3: Extract and analyze bid/ask prices
-   # Bid = price you can sell at, Ask = price you can buy at
-   bid_price = eur_usd_price.bids[0].price # Price you can SELL at
-   ask_price = eur_usd_price.asks[0].price # Price you can BUY at
-   spread = float(ask_price) - float(bid_price)  # Market maker profit
+            # Step 3: Extract and analyze bid/ask prices
+            # Bid = price you can sell at, Ask = price you can buy at
+            bid_price = eur_usd_price.bids[0].price # Price you can SELL at
+            ask_price = eur_usd_price.asks[0].price # Price you can BUY at
+            spread = ask_price - bid_price  # Market maker profit
 
-   print(f" Bid price: {bid_price} (you can SELL EUR at this price)")
-   print(f" Ask price: {ask_price} (you can BUY EUR at this price)")
-   print(f" Spread: {spread:.5f} ({spread * 10000:.1f} pips)")
-   print(f"   Time Quote time: {eur_usd_price.time}")
+            print(f" Bid price: {bid_price} (you can SELL EUR at this price)")
+            print(f" Ask price: {ask_price} (you can BUY EUR at this price)")
+            print(f" Spread: {spread:.5f} ({spread * 10000:.1f} pips)")
+            print(f"   Time Quote time: {eur_usd_price.time}")
 
-   # Step 4: Calculate trading cost implications
-   # Spread represents immediate cost of opening any position
-   spread_pips = spread * 10000  # Convert to pips for easier understanding
-   spread_percentage = (spread / float(ask_price)) * 100
+            # Step 4: Calculate trading cost implications
+            # Spread represents immediate cost of opening any position
+            spread_pips = spread * 10000  # Convert to pips for easier understanding
+            spread_percentage = (spread / ask_price) * 100
 
-   print(f"\nBalance Trading Cost Analysis:")
-   print(f" Spread in pips: {spread_pips:.1f} pips")
-   print(f" Spread percentage: {spread_percentage:.4f}% of price")
-   print(f" Immediate cost: Must overcome spread to be profitable")
+            print(f"\nBalance Trading Cost Analysis:")
+            print(f" Spread in pips: {spread_pips:.1f} pips")
+            print(f" Spread percentage: {spread_percentage:.4f}% of price")
+            print(f" Immediate cost: Must overcome spread to be profitable")
 
-   # Step 5: Position size impact on spread costs
-   position_sizes = [10000, 100000, 1000000]  # Different position sizes
-   print(f"\nGrowth Spread Cost by Position Size:")
+            # Step 5: Position size impact on spread costs
+            position_sizes = [10000, 100000, 1000000]  # Different position sizes
+            print(f"\nGrowth Spread Cost by Position Size:")
 
-   for size in position_sizes:
-  # Calculate spread cost in USD for different position sizes
-  spread_cost_usd = spread * size
-  lot_description = f"{size//10000}0k" if size >= 10000 else f"{size}"
+            for size in position_sizes:
+                # Calculate spread cost in USD for different position sizes
+                spread_cost_usd = spread * size
+                lot_description = f"{size//10000}0k" if size >= 10000 else f"{size}"
 
-  print(f"   {lot_description} units: ${spread_cost_usd:.2f} immediate cost")
-  print(f"• Must move {spread_pips:.1f} pips in your favor to breakeven")
+                print(f"   {lot_description} units: ${spread_cost_usd:.2f} immediate cost")
+                print(f"• Must move {spread_pips:.1f} pips in your favor to breakeven")
 
-   # Step 6: Trading strategy implications
-   print(f"\nNote Trading Implications:")
-   print(f" Buying (going long):")
-   print(f"• You pay the ASK price: {ask_price}")
-   print(f"• Position immediately shows loss equal to spread")
-   print(f"• Need price to rise above {ask_price} + spread costs")
+            # Step 6: Trading strategy implications
+            print(f"\nNote Trading Implications:")
+            print(f" Buying (going long):")
+            print(f"• You pay the ASK price: {ask_price}")
+            print(f"• Position immediately shows loss equal to spread")
+            print(f"• Need price to rise above {ask_price} + spread costs")
 
-   print(f" Selling (going short):")
-   print(f"• You receive the BID price: {bid_price}")
-   print(f"• Position immediately shows loss equal to spread")
-   print(f"• Need price to fall below {bid_price} - spread costs")
+            print(f" Selling (going short):")
+            print(f"• You receive the BID price: {bid_price}")
+            print(f"• Position immediately shows loss equal to spread")
+            print(f"• Need price to fall below {bid_price} - spread costs")
 
-   print(f"   ⚠️ Initial P/L: Every position starts -{spread_cost_usd:.2f} USD (for 10k units)")
+            print(f"   ⚠️ Initial P/L: Every position starts -{spread_cost_usd:.2f} USD (for 10k units)")
 
-   # Step 7: Spread quality assessment
-   print(f"\nGrowth Spread Quality Assessment:")
+            # Step 7: Spread quality assessment
+            print(f"\nGrowth Spread Quality Assessment:")
 
-   # Typical spread ranges for EUR_USD (most liquid pair)
-   if spread_pips <= 0.5:
-  quality = "Success EXCELLENT - Institutional level"
-   elif spread_pips <= 1.0:
-  quality = "Green GOOD - Retail competitive"
-   elif spread_pips <= 2.0:
-  quality = "Yellow AVERAGE - Standard retail"
-   elif spread_pips <= 3.0:
-  quality = "🟠 FAIR - Higher cost broker"
-   else:
-  quality = "Red POOR - Avoid if possible"
+    # Typical spread ranges for EUR_USD (most liquid pair)
+    if spread_pips <= 0.5:
+    quality = "Success EXCELLENT - Institutional level"
+    elif spread_pips <= 1.0:
+    quality = "Green GOOD - Retail competitive"
+    elif spread_pips <= 2.0:
+    quality = "Yellow AVERAGE - Standard retail"
+    elif spread_pips <= 3.0:
+    quality = "🟠 FAIR - Higher cost broker"
+    else:
+    quality = "Red POOR - Avoid if possible"
 
-   print(f" Spread quality: {quality}")
-   print(f" EUR_USD typical range: 0.5-2.0 pips")
-   print(f"   Time Best spreads: London/NY overlap (12-17 UTC)")
+    print(f" Spread quality: {quality}")
+    print(f" EUR_USD typical range: 0.5-2.0 pips")
+    print(f"   Time Best spreads: London/NY overlap (12-17 UTC)")
 
-   # Step 8: Market conditions affecting spreads
-   print(f"\nWorld Market Conditions Affecting Spreads:")
-   print(f" Tighter spreads during: High liquidity, major sessions, normal volatility")
-   print(f" Wider spreads during: Low liquidity, news events, market open/close")
-   print(f"   ⚠️ Volatile times: Spreads can widen significantly (5-10+ pips)")
-   print(f"   Map Geographic: Better spreads during overlapping market sessions")
+    # Step 8: Market conditions affecting spreads
+    print(f"\nWorld Market Conditions Affecting Spreads:")
+    print(f" Tighter spreads during: High liquidity, major sessions, normal volatility")
+    print(f" Wider spreads during: Low liquidity, news events, market open/close")
+    print(f"   ⚠️ Volatile times: Spreads can widen significantly (5-10+ pips)")
+    print(f"   Map Geographic: Better spreads during overlapping market sessions")
 
-   # Step 9: Spread impact on different trading styles
-   print(f"\nTarget Trading Style Impact:")
-   print(f"   Starting Scalping: Spread is major cost - need tight spreads (<1 pip)")
-   print(f" Day trading: Moderate impact - consider spread in profit targets")
-   print(f" Swing trading: Minor impact - spread less relevant for larger moves")
-   print(f" Position trading: Minimal impact - focus on fundamentals")
+    # Step 9: Spread impact on different trading styles
+    print(f"\nTarget Trading Style Impact:")
+    print(f"   Starting Scalping: Spread is major cost - need tight spreads (<1 pip)")
+    print(f" Day trading: Moderate impact - consider spread in profit targets")
+    print(f" Swing trading: Minor impact - spread less relevant for larger moves")
+    print(f" Position trading: Minimal impact - focus on fundamentals")
 
-   # Step 10: Cost optimization strategies
-   print(f"\nShield Spread Cost Optimization:")
-   print(f"   Time Timing: Trade during high liquidity periods")
-   print(f" Pairs: Focus on major pairs for tightest spreads")
-   print(f" Size: Consider spread cost in position sizing")
-   print(f"   Ruler Broker: Compare spread offerings across brokers")
-   print(f"   Lightning Speed: Use limit orders to potentially get better prices")
+    # Step 10: Cost optimization strategies
+    print(f"\nShield Spread Cost Optimization:")
+    print(f"   Time Timing: Trade during high liquidity periods")
+    print(f" Pairs: Focus on major pairs for tightest spreads")
+    print(f" Size: Consider spread cost in position sizing")
+    print(f"   Ruler Broker: Compare spread offerings across brokers")
+    print(f"   Lightning Speed: Use limit orders to potentially get better prices")
 
     except Exception as e:
-   print(f"\nError Pricing data retrieval failed: {e}")
-   print(f" Common issues: Market closed, connectivity, invalid instrument")
-   print(f"️ Note: Spread analysis requires active market hours")
+    print(f"\nError Pricing data retrieval failed: {e}")
+    print(f" Common issues: Market closed, connectivity, invalid instrument")
+    print(f"️ Note: Spread analysis requires active market hours")
+
 ```
 ```
 
@@ -1641,131 +1651,131 @@ async def check_order_book() -> None:
     print(f" Note: Using market data proxies (OANDA doesn't provide order book)")
 
     try:
-   # Step 2: Retrieve current market data as liquidity proxy
-   # Candle data provides volume and price action insights
-   print(f"\nClock Retrieving market data for liquidity assessment...")
-   candles = await client.instruments.get_instrument_candles(
-  instrument="EUR_USD",
-  count=5,  # Get recent candles for trend analysis
-  granularity="M1"  # 1-minute candles for detailed view
-   )
+            # Step 2: Retrieve current market data as liquidity proxy
+            # Candle data provides volume and price action insights
+            print(f"\nClock Retrieving market data for liquidity assessment...")
+            candles = await client.instruments.get_instrument_candles(
+                instrument="EUR_USD",
+                count=5,  # Get recent candles for trend analysis
+                granularity="M1"  # 1-minute candles for detailed view
+            )
 
-   if candles.candles:
-  latest_candle = candles.candles[-1]  # Most recent candle
-  print(f"\nGrowth Latest Market Data (1-minute candle):")
-  print(f"   Time Time: {latest_candle.time}")
-  print(f" Open: {latest_candle.mid.o}")
-  print(f"   🔺 High: {latest_candle.mid.h}")
-  print(f"   🔻 Low: {latest_candle.mid.l}")
-  print(f"   🔲 Close: {latest_candle.mid.c}")
-  print(f" Volume: {latest_candle.volume} trades")
+            if candles.candles:
+                latest_candle = candles.candles[-1]  # Most recent candle
+                print(f"\nGrowth Latest Market Data (1-minute candle):")
+                print(f"   Time Time: {latest_candle.time}")
+                print(f" Open: {latest_candle.mid.o}")
+                print(f"   🔺 High: {latest_candle.mid.h}")
+                print(f"   🔻 Low: {latest_candle.mid.l}")
+                print(f"   🔲 Close: {latest_candle.mid.c}")
+                print(f" Volume: {latest_candle.volume} trades")
 
-  # Step 3: Analyze price action for liquidity indicators
-  high_low_range = float(latest_candle.mid.h) - float(latest_candle.mid.l)
-  range_pips = high_low_range * 10000
+                # Step 3: Analyze price action for liquidity indicators
+                high_low_range = latest_candle.mid.h - latest_candle.mid.l
+                range_pips = high_low_range * 10000
 
-  print(f"\n📉 Liquidity Indicators:")
-  print(f" Price range: {range_pips:.1f} pips (High-Low)")
-  print(f" Volume: {latest_candle.volume} trades in 1 minute")
+                print(f"\n📉 Liquidity Indicators:")
+                print(f" Price range: {range_pips:.1f} pips (High-Low)")
+                print(f" Volume: {latest_candle.volume} trades in 1 minute")
 
-  # Volume-based liquidity assessment
-  if latest_candle.volume > 100:
- liquidity_status = "Success HIGH - Strong trading activity"
-  elif latest_candle.volume > 50:
- liquidity_status = "Green MODERATE - Normal activity"
-  elif latest_candle.volume > 20:
- liquidity_status = "Yellow LOW - Light trading"
-  else:
- liquidity_status = "Red VERY LOW - Minimal activity"
+                # Volume-based liquidity assessment
+                if latest_candle.volume > 100:
+                    liquidity_status = "Success HIGH - Strong trading activity"
+                elif latest_candle.volume > 50:
+                    liquidity_status = "Green MODERATE - Normal activity"
+                elif latest_candle.volume > 20:
+                    liquidity_status = "Yellow LOW - Light trading"
+                else:
+                    liquidity_status = "Red VERY LOW - Minimal activity"
 
-  print(f" Liquidity status: {liquidity_status}")
+                print(f" Liquidity status: {liquidity_status}")
 
-  # Step 4: Analyze recent price action for depth insights
-  print(f"\nMap Recent Price Action Analysis:")
-  for i, candle in enumerate(candles.candles[-3:], 1):
- candle_range = float(candle.mid.h) - float(candle.mid.l)
- candle_pips = candle_range * 10000
- body = abs(float(candle.mid.c) - float(candle.mid.o))
- body_pips = body * 10000
+                # Step 4: Analyze recent price action for depth insights
+                print(f"\nMap Recent Price Action Analysis:")
+                for i, candle in enumerate(candles.candles[-3:], 1):
+                    candle_range = candle.mid.h - candle.mid.l
+                    candle_pips = candle_range * 10000
+                    body = abs(candle.mid.c - candle.mid.o)
+                    body_pips = body * 10000
 
- # Determine candle color
- if float(candle.mid.c) > float(candle.mid.o):
-candle_color = "Green GREEN (bullish)"
- elif float(candle.mid.c) < float(candle.mid.o):
-candle_color = "Red RED (bearish)"
- else:
-candle_color = "⬜ DOJI (neutral)"
+                    # Determine candle color
+                    if candle.mid.c > candle.mid.o:
+                            candle_color = "Green GREEN (bullish)"
+                    elif candle.mid.c < candle.mid.o:
+                            candle_color = "Red RED (bearish)"
+                    else:
+                            candle_color = "⬜ DOJI (neutral)"
 
- print(f"   Candle {i}: {candle_color}")
- print(f"Range: {candle_pips:.1f} pips, Body: {body_pips:.1f} pips")
- print(f"Volume: {candle.volume} trades")
+                    print(f"   Candle {i}: {candle_color}")
+                    print(f"Range: {candle_pips:.1f} pips, Body: {body_pips:.1f} pips")
+                    print(f"Volume: {candle.volume} trades")
 
-   # Step 5: Pricing data for bid-ask depth analysis
-   print(f"\nGrowth Current Bid-Ask Depth Analysis:")
-   pricing = await client.pricing.get_pricing(account_id, ["EUR_USD"])
-   price_data = pricing.prices[0]
+                # Step 5: Pricing data for bid-ask depth analysis
+                print(f"\nGrowth Current Bid-Ask Depth Analysis:")
+                pricing = await client.pricing.get_pricing(account_id, ["EUR_USD"])
+                price_data = pricing.prices[0]
 
-   # Analyze bid and ask depth (limited in retail forex)
-   print(f" Available bid levels: {len(price_data.bids)}")
-   print(f" Available ask levels: {len(price_data.asks)}")
+                # Analyze bid and ask depth (limited in retail forex)
+                print(f" Available bid levels: {len(price_data.bids)}")
+                print(f" Available ask levels: {len(price_data.asks)}")
 
-   # Display available price levels
-   for i, bid in enumerate(price_data.bids[:3]):
-  print(f"Bid {i+1}: {bid.price} (liquidity indicator)")
+                # Display available price levels
+                for i, bid in enumerate(price_data.bids[:3]):
+                    print(f"Bid {i+1}: {bid.price} (liquidity indicator)")
 
-   for i, ask in enumerate(price_data.asks[:3]):
-  print(f"Ask {i+1}: {ask.price} (liquidity indicator)")
+                for i, ask in enumerate(price_data.asks[:3]):
+                    print(f"Ask {i+1}: {ask.price} (liquidity indicator)")
 
-   # Step 6: Market depth implications for trading
-   print(f"\nNote Market Depth Trading Implications:")
+                # Step 6: Market depth implications for trading
+                print(f"\nNote Market Depth Trading Implications:")
 
-   current_spread = float(price_data.asks[0].price) - float(price_data.bids[0].price)
-   spread_pips = current_spread * 10000
+                current_spread = price_data.asks[0].price - price_data.bids[0].price
+                spread_pips = current_spread * 10000
 
-   print(f" Current spread: {spread_pips:.1f} pips")
-   print(f"   Map Depth factors affecting your trades:")
-   print(f"• Tight spread ({spread_pips:.1f} pips) suggests good liquidity")
-   print(f"• Recent volume ({latest_candle.volume} trades) shows activity")
-   print(f"• Price stability indicates sufficient market depth")
+                print(f" Current spread: {spread_pips:.1f} pips")
+                print(f"   Map Depth factors affecting your trades:")
+                print(f"• Tight spread ({spread_pips:.1f} pips) suggests good liquidity")
+                print(f"• Recent volume ({latest_candle.volume} trades) shows activity")
+                print(f"• Price stability indicates sufficient market depth")
 
-   # Step 7: Slippage risk assessment
-   print(f"\n⚠️ Slippage Risk Assessment:")
-   if spread_pips <= 1.0 and latest_candle.volume > 50:
-  slippage_risk = "Success LOW - Good execution expected"
-   elif spread_pips <= 2.0 and latest_candle.volume > 30:
-  slippage_risk = "Yellow MODERATE - Normal conditions"
-   else:
-  slippage_risk = "Red HIGH - Consider smaller positions"
+                # Step 7: Slippage risk assessment
+                print(f"\n⚠️ Slippage Risk Assessment:")
+                if spread_pips <= 1.0 and latest_candle.volume > 50:
+                    slippage_risk = "Success LOW - Good execution expected"
+                elif spread_pips <= 2.0 and latest_candle.volume > 30:
+                    slippage_risk = "Yellow MODERATE - Normal conditions"
+                else:
+                    slippage_risk = "Red HIGH - Consider smaller positions"
 
-   print(f" Slippage risk: {slippage_risk}")
-   print(f" Factors: Spread tightness + trading volume")
+                print(f" Slippage risk: {slippage_risk}")
+                print(f" Factors: Spread tightness + trading volume")
 
-   # Step 8: Order size recommendations based on depth
-   print(f"\nGrowth Position Sizing Based on Market Depth:")
-   if latest_candle.volume > 100:
-  max_recommended = "Large positions (100k+ units) acceptable"
-   elif latest_candle.volume > 50:
-  max_recommended = "Medium positions (50k units) recommended"
-   elif latest_candle.volume > 20:
-  max_recommended = "Small positions (10k units) safer"
-   else:
-  max_recommended = "Mini positions (1k units) only"
+                # Step 8: Order size recommendations based on depth
+                print(f"\nGrowth Position Sizing Based on Market Depth:")
+    if latest_candle.volume > 100:
+    max_recommended = "Large positions (100k+ units) acceptable"
+    elif latest_candle.volume > 50:
+    max_recommended = "Medium positions (50k units) recommended"
+    elif latest_candle.volume > 20:
+    max_recommended = "Small positions (10k units) safer"
+    else:
+    max_recommended = "Mini positions (1k units) only"
 
-   print(f" Recommended sizing: {max_recommended}")
-   print(f"   Note Logic: Higher volume = better ability to absorb orders")
+    print(f" Recommended sizing: {max_recommended}")
+    print(f"   Note Logic: Higher volume = better ability to absorb orders")
 
-   # Step 9: Best practices for depth-aware trading
-   print(f"\nShield Market Depth Best Practices:")
-   print(f"   Time Timing: Trade during high-volume periods")
-   print(f" Sizing: Adjust position size to market depth")
-   print(f"   Ruler Orders: Use limit orders in thin markets")
-   print(f" Monitoring: Watch spread and volume for liquidity changes")
-   print(f"   Lightning Speed: Fast execution in good liquidity, patience in thin markets")
+    # Step 9: Best practices for depth-aware trading
+    print(f"\nShield Market Depth Best Practices:")
+    print(f"   Time Timing: Trade during high-volume periods")
+    print(f" Sizing: Adjust position size to market depth")
+    print(f"   Ruler Orders: Use limit orders in thin markets")
+    print(f" Monitoring: Watch spread and volume for liquidity changes")
+    print(f"   Lightning Speed: Fast execution in good liquidity, patience in thin markets")
 
     except Exception as e:
-   print(f"\nError Market data retrieval failed: {e}")
-   print(f" Common issues: Market closed, connectivity problems")
-   print(f"️ Note: Market depth analysis requires active trading hours")
+    print(f"\nError Market data retrieval failed: {e}")
+    print(f" Common issues: Market closed, connectivity problems")
+    print(f"️ Note: Market depth analysis requires active trading hours")
 
     # Step 10: Alternative depth analysis methods
     print(f"\n📚 Alternative Market Depth Analysis:")
@@ -1774,6 +1784,7 @@ candle_color = "⬜ DOJI (neutral)"
     print(f"   Time Time analysis: Depth varies by session (London/NY best)")
     print(f"   Map Economic calendar: Major news affects market depth")
     print(f" Historical patterns: Learn typical depth for your trading times")
+
 ```
 ```
 
@@ -1822,7 +1833,7 @@ async def calculate_position_size() -> None:
     conservative_risk = account_balance * Decimal("0.01")  # 1% for conservative approach
 
     print(f"\n📉 Risk Budget Calculation:")
-    print(f" Risk percentage: {float(risk_percentage * 100):.1f}% per trade")
+    print(f" Risk percentage: {risk_percentage * 100:.1f}% per trade")
     print(f"   Red Maximum risk: {max_risk_per_trade} USD (2% rule)")
     print(f" Conservative risk: {conservative_risk} USD (1% rule)")
     print(f"   Note Rule: This protects you from catastrophic losses")
@@ -1877,7 +1888,7 @@ async def calculate_position_size() -> None:
     print(f"\nShield Risk Validation:")
 
     # Check if position size is reasonable for account
-    margin_required = optimal_units * float(entry_price) * Decimal("0.0333")  # 30:1 leverage
+    margin_required = optimal_units * entry_price * Decimal("0.0333")  # 30:1 leverage
     margin_percentage = (margin_required / account_balance) * 100
 
     print(f" Required margin: {margin_required:.2f} USD")
@@ -1885,11 +1896,11 @@ async def calculate_position_size() -> None:
 
     # Safety assessments
     if margin_percentage > 50:
-   safety_status = "Red HIGH RISK - Reduce position size"
+    safety_status = "Red HIGH RISK - Reduce position size"
     elif margin_percentage > 30:
-   safety_status = "Yellow MODERATE - Monitor closely"
+    safety_status = "Yellow MODERATE - Monitor closely"
     else:
-   safety_status = "Success SAFE - Good margin buffer"
+    safety_status = "Success SAFE - Good margin buffer"
 
     print(f"   ⚠️ Safety status: {safety_status}")
 
@@ -1904,42 +1915,42 @@ async def calculate_position_size() -> None:
     print(f"   Shield Stop loss: {stop_loss_price}")
 
     try:
-   # Place order with calculated position size and risk management
-   order = await client.orders.post_market_order(
-  account_id=account_id,
-  instrument=instrument,
-  units=final_position_size,
-  stop_loss_on_fill={
- "price": str(stop_loss_price),
- "time_in_force": "GTC"  # Good Till Cancelled
-  }
-   )
+    # Place order with calculated position size and risk management
+    order = await client.orders.post_market_order(
+    account_id=account_id,
+    instrument=instrument,
+    units=final_position_size,
+    stop_loss_on_fill={
+"price": str(stop_loss_price),
+"time_in_force": "GTC"  # Good Till Cancelled
+    }
+    )
 
-   print(f" Order executed successfully")
-   print(f" Order ID: {order.order_create_transaction.id}")
-   if order.order_fill_transaction:
-  print(f" Fill price: {order.order_fill_transaction.price}")
-  print(f"   Shield Stop loss attached: {stop_loss_price}")
+    print(f" Order executed successfully")
+    print(f" Order ID: {order.order_create_transaction.id}")
+    if order.order_fill_transaction:
+    print(f" Fill price: {order.order_fill_transaction.price}")
+    print(f"   Shield Stop loss attached: {stop_loss_price}")
 
     except Exception as e:
-   print(f"   Error Order execution failed: {e}")
-   print(f"   Note Check margin availability and market conditions")
+    print(f"   Error Order execution failed: {e}")
+    print(f"   Note Check margin availability and market conditions")
 
     # Step 9: Position sizing variations for different scenarios
     print(f"\nMap Position Sizing Scenarios:")
 
     scenarios = [
-   (25, "Tight stop - larger position"),
-   (50, "Standard stop - medium position"),
-   (100, "Wide stop - smaller position")
+    (25, "Tight stop - larger position"),
+    (50, "Standard stop - medium position"),
+    (100, "Wide stop - smaller position")
     ]
 
     for stop_pips, description in scenarios:
-   scenario_risk_per_pip = stop_pips * pip_value_per_1k
-   scenario_position = int(conservative_risk / scenario_risk_per_pip) * 1000
-   scenario_lots = scenario_position / 100000
+    scenario_risk_per_pip = stop_pips * pip_value_per_1k
+    scenario_position = int(conservative_risk / scenario_risk_per_pip) * 1000
+    scenario_lots = scenario_position / 100000
 
-   print(f"   {stop_pips} pip stop: {scenario_position:,} units ({scenario_lots:.2f} lots) - {description}")
+    print(f"   {stop_pips} pip stop: {scenario_position:,} units ({scenario_lots:.2f} lots) - {description}")
 
     # Step 10: Advanced position sizing considerations
     print(f"\nEducation Advanced Position Sizing Concepts:")
@@ -1949,6 +1960,7 @@ async def calculate_position_size() -> None:
     print(f" Portfolio: Total risk across all positions <10% of account")
     print(f" Scaling: Increase position size as account grows")
     print(f"   Shield Psychology: Size positions to sleep well at night")
+
 ```
 ```
 
@@ -1967,148 +1979,149 @@ async def check_correlation_risk() -> None:
     print(f"Map Portfolio Correlation Risk Analysis")
 
     try:
-   # Step 2: Retrieve positions for major correlated pairs
-   # EUR_USD and GBP_USD often show high correlation (0.7-0.9)
-   print(f"\nGrowth Retrieving positions for correlation analysis...")
-   eur_position = await client.positions.get_position(account_id, "EUR_USD")
-   gbp_position = await client.positions.get_position(account_id, "GBP_USD")
+    # Step 2: Retrieve positions for major correlated pairs
+    # EUR_USD and GBP_USD often show high correlation (0.7-0.9)
+    print(f"\nGrowth Retrieving positions for correlation analysis...")
+    eur_position = await client.positions.get_position(account_id, "EUR_USD")
+    gbp_position = await client.positions.get_position(account_id, "GBP_USD")
 
-   # Step 3: Calculate net exposure for each position
-   # Net exposure shows true directional risk per currency pair
-   eur_long = int(eur_position.long.units) if eur_position.long.units else 0
-   eur_short = int(eur_position.short.units) if eur_position.short.units else 0
-   eur_net = eur_long + eur_short  # short.units is negative
+    # Step 3: Calculate net exposure for each position
+    # Net exposure shows true directional risk per currency pair
+    eur_long = int(eur_position.long.units) if eur_position.long.units else 0
+    eur_short = int(eur_position.short.units) if eur_position.short.units else 0
+    eur_net = eur_long + eur_short  # short.units is negative
 
-   gbp_long = int(gbp_position.long.units) if gbp_position.long.units else 0
-   gbp_short = int(gbp_position.short.units) if gbp_position.short.units else 0
-   gbp_net = gbp_long + gbp_short  # short.units is negative
+    gbp_long = int(gbp_position.long.units) if gbp_position.long.units else 0
+    gbp_short = int(gbp_position.short.units) if gbp_position.short.units else 0
+    gbp_net = gbp_long + gbp_short  # short.units is negative
 
-   print(f"\nGrowth Individual Position Analysis:")
-   print(f"   EUR_USD Position:")
-   print(f"   Long: {eur_long:,} units")
-   print(f"   Short: {abs(eur_short):,} units")
-   print(f"   Net: {eur_net:,} units ({'LONG' if eur_net > 0 else 'SHORT' if eur_net < 0 else 'FLAT'})")
-   print(f"   P/L: {eur_position.unrealized_pl} USD")
+    print(f"\nGrowth Individual Position Analysis:")
+    print(f"   EUR_USD Position:")
+    print(f"   Long: {eur_long:,} units")
+    print(f"   Short: {abs(eur_short):,} units")
+    print(f"   Net: {eur_net:,} units ({'LONG' if eur_net > 0 else 'SHORT' if eur_net < 0 else 'FLAT'})")
+    print(f"   P/L: {eur_position.unrealized_pl} USD")
 
-   print(f"   GBP_USD Position:")
-   print(f"   Long: {gbp_long:,} units")
-   print(f"   Short: {abs(gbp_short):,} units")
-   print(f"   Net: {gbp_net:,} units ({'LONG' if gbp_net > 0 else 'SHORT' if gbp_net < 0 else 'FLAT'})")
-   print(f"   P/L: {gbp_position.unrealized_pl} USD")
+    print(f"   GBP_USD Position:")
+    print(f"   Long: {gbp_long:,} units")
+    print(f"   Short: {abs(gbp_short):,} units")
+    print(f"   Net: {gbp_net:,} units ({'LONG' if gbp_net > 0 else 'SHORT' if gbp_net < 0 else 'FLAT'})")
+    print(f"   P/L: {gbp_position.unrealized_pl} USD")
 
-   # Step 4: Analyze USD exposure and correlation risk
-   # Both EUR_USD and GBP_USD involve USD, creating correlation
-   print(f"\nMap USD Exposure Analysis:")
+    # Step 4: Analyze USD exposure and correlation risk
+    # Both EUR_USD and GBP_USD involve USD, creating correlation
+    print(f"\nMap USD Exposure Analysis:")
 
-   # Determine USD exposure direction for each pair
-   eur_usd_direction = "LONG USD" if eur_net < 0 else "SHORT USD" if eur_net > 0 else "NEUTRAL"
-   gbp_usd_direction = "LONG USD" if gbp_net < 0 else "SHORT USD" if gbp_net > 0 else "NEUTRAL"
+    # Determine USD exposure direction for each pair
+    eur_usd_direction = "LONG USD" if eur_net < 0 else "SHORT USD" if eur_net > 0 else "NEUTRAL"
+    gbp_usd_direction = "LONG USD" if gbp_net < 0 else "SHORT USD" if gbp_net > 0 else "NEUTRAL"
 
-   print(f"   EUR_USD: {eur_usd_direction} ({abs(eur_net):,} units exposure)")
-   print(f"   GBP_USD: {gbp_usd_direction} ({abs(gbp_net):,} units exposure)")
+    print(f"   EUR_USD: {eur_usd_direction} ({abs(eur_net):,} units exposure)")
+    print(f"   GBP_USD: {gbp_usd_direction} ({abs(gbp_net):,} units exposure)")
 
-   # Step 5: Calculate total USD exposure and correlation impact
-   # Same-direction positions amplify risk, opposite directions hedge
-   total_usd_exposure = abs(eur_net) + abs(gbp_net)  # Total USD exposure
-   net_usd_exposure = -eur_net - gbp_net  # Net USD position (negative of others)
+    # Step 5: Calculate total USD exposure and correlation impact
+    # Same-direction positions amplify risk, opposite directions hedge
+    total_usd_exposure = abs(eur_net) + abs(gbp_net)  # Total USD exposure
+    net_usd_exposure = -eur_net - gbp_net  # Net USD position (negative of others)
 
-   print(f" Total USD exposure: {total_usd_exposure:,} units")
-   print(f" Net USD exposure: {net_usd_exposure:,} units")
+    print(f" Total USD exposure: {total_usd_exposure:,} units")
+    print(f" Net USD exposure: {net_usd_exposure:,} units")
 
-   # Step 6: Assess correlation risk level
-   print(f"\n⚠️ Correlation Risk Assessment:")
+    # Step 6: Assess correlation risk level
+    print(f"\n⚠️ Correlation Risk Assessment:")
 
-   # Analyze directional alignment
-   if (eur_net > 0 and gbp_net > 0) or (eur_net < 0 and gbp_net < 0):
-  # Same direction = high correlation risk
-  correlation_risk = "Red HIGH CORRELATION RISK"
-  risk_explanation = "Both positions move together - amplified risk"
-  hedge_status = "CONCENTRATED - Consider diversification"
-   elif (eur_net > 0 and gbp_net < 0) or (eur_net < 0 and gbp_net > 0):
-  # Opposite directions = natural hedge
-  correlation_risk = "Success NATURAL HEDGE"
-  risk_explanation = "Positions offset each other - reduced risk"
-  hedge_status = "HEDGED - Good risk management"
-   else:
-  # One or both positions are flat
-  correlation_risk = "Yellow MINIMAL RISK"
-  risk_explanation = "Limited exposure - low correlation impact"
-  hedge_status = "NEUTRAL - No significant correlation exposure"
+    # Analyze directional alignment
+    if (eur_net > 0 and gbp_net > 0) or (eur_net < 0 and gbp_net < 0):
+    # Same direction = high correlation risk
+    correlation_risk = "Red HIGH CORRELATION RISK"
+    risk_explanation = "Both positions move together - amplified risk"
+    hedge_status = "CONCENTRATED - Consider diversification"
+    elif (eur_net > 0 and gbp_net < 0) or (eur_net < 0 and gbp_net > 0):
+    # Opposite directions = natural hedge
+    correlation_risk = "Success NATURAL HEDGE"
+    risk_explanation = "Positions offset each other - reduced risk"
+    hedge_status = "HEDGED - Good risk management"
+    else:
+    # One or both positions are flat
+    correlation_risk = "Yellow MINIMAL RISK"
+    risk_explanation = "Limited exposure - low correlation impact"
+    hedge_status = "NEUTRAL - No significant correlation exposure"
 
-   print(f" Risk level: {correlation_risk}")
-   print(f"   Note Explanation: {risk_explanation}")
-   print(f"   Shield Portfolio status: {hedge_status}")
+    print(f" Risk level: {correlation_risk}")
+    print(f"   Note Explanation: {risk_explanation}")
+    print(f"   Shield Portfolio status: {hedge_status}")
 
-   # Step 7: Calculate correlation impact on portfolio P/L
-   total_correlation_pl = float(eur_position.unrealized_pl) + float(gbp_position.unrealized_pl)
-   print(f"\nGrowth Portfolio P/L Impact:")
-   print(f" Combined P/L: {total_correlation_pl:+.2f} USD")
+    # Step 7: Calculate correlation impact on portfolio P/L
+    total_correlation_pl = eur_position.unrealized_pl + gbp_position.unrealized_pl
+    print(f"\nGrowth Portfolio P/L Impact:")
+    print(f" Combined P/L: {total_correlation_pl:+.2f} USD")
 
-   if total_correlation_pl > 0:
-  print(f" Correlation benefit: Positions are profitable together")
-   elif total_correlation_pl < 0:
-  print(f"   ⚠️ Correlation risk: Both positions losing simultaneously")
-   else:
-  print(f" Correlation neutral: Minimal combined impact")
+    if total_correlation_pl > 0:
+    print(f" Correlation benefit: Positions are profitable together")
+    elif total_correlation_pl < 0:
+    print(f"   ⚠️ Correlation risk: Both positions losing simultaneously")
+    else:
+    print(f" Correlation neutral: Minimal combined impact")
 
-   # Step 8: Position sizing recommendations
-   print(f"\nGrowth Position Sizing Recommendations:")
+    # Step 8: Position sizing recommendations
+    print(f"\nGrowth Position Sizing Recommendations:")
 
-   # Calculate position concentration
-   if total_usd_exposure > 0:
-  eur_concentration = (abs(eur_net) / total_usd_exposure) * 100
-  gbp_concentration = (abs(gbp_net) / total_usd_exposure) * 100
+    # Calculate position concentration
+    if total_usd_exposure > 0:
+    eur_concentration = (abs(eur_net) / total_usd_exposure) * 100
+    gbp_concentration = (abs(gbp_net) / total_usd_exposure) * 100
 
-  print(f" EUR_USD concentration: {eur_concentration:.1f}% of USD exposure")
-  print(f" GBP_USD concentration: {gbp_concentration:.1f}% of USD exposure")
+    print(f" EUR_USD concentration: {eur_concentration:.1f}% of USD exposure")
+    print(f" GBP_USD concentration: {gbp_concentration:.1f}% of USD exposure")
 
-  if max(eur_concentration, gbp_concentration) > 70:
- sizing_advice = "Reduce dominant position for better balance"
-  elif abs(eur_concentration - gbp_concentration) < 20:
- sizing_advice = "Well-balanced USD exposure"
-  else:
- sizing_advice = "Consider rebalancing positions"
+    if max(eur_concentration, gbp_concentration) > 70:
+sizing_advice = "Reduce dominant position for better balance"
+    elif abs(eur_concentration - gbp_concentration) < 20:
+sizing_advice = "Well-balanced USD exposure"
+    else:
+sizing_advice = "Consider rebalancing positions"
 
-  print(f" Sizing advice: {sizing_advice}")
+    print(f" Sizing advice: {sizing_advice}")
 
-   # Step 9: Additional correlation pairs to monitor
-   print(f"\nMap Other High-Correlation Pairs to Monitor:")
-   correlation_groups = [
-  (["EUR_USD", "GBP_USD"], "High positive correlation (0.7-0.9)"),
-  (["AUD_USD", "NZD_USD"], "Commodity currencies - strong correlation"),
-  (["USD_CHF", "EUR_USD"], "High negative correlation (-0.8)"),
-  (["EUR_GBP", "GBP_USD"], "GBP exposure correlation"),
-  (["USD_JPY", "USD_CHF"], "USD strength pairs")
-   ]
+    # Step 9: Additional correlation pairs to monitor
+    print(f"\nMap Other High-Correlation Pairs to Monitor:")
+    correlation_groups = [
+    (["EUR_USD", "GBP_USD"], "High positive correlation (0.7-0.9)"),
+    (["AUD_USD", "NZD_USD"], "Commodity currencies - strong correlation"),
+    (["USD_CHF", "EUR_USD"], "High negative correlation (-0.8)"),
+    (["EUR_GBP", "GBP_USD"], "GBP exposure correlation"),
+    (["USD_JPY", "USD_CHF"], "USD strength pairs")
+    ]
 
-   for pairs, description in correlation_groups:
-  print(f"   • {' vs '.join(pairs)}: {description}")
+    for pairs, description in correlation_groups:
+    print(f"   • {' vs '.join(pairs)}: {description}")
 
-   # Step 10: Risk management strategies for correlated positions
-   print(f"\nShield Correlation Risk Management Strategies:")
-   print(f" Diversification: Spread risk across uncorrelated pairs")
-   print(f" Position sizing: Reduce size when holding correlated positions")
-   print(f" Hedging: Use opposite positions to reduce correlation risk")
-   print(f"   Clock Timing: Avoid simultaneous entry in correlated pairs")
-   print(f" Monitoring: Track correlation changes during market stress")
-   print(f" Limits: Set maximum exposure per currency or correlation group")
+    # Step 10: Risk management strategies for correlated positions
+    print(f"\nShield Correlation Risk Management Strategies:")
+    print(f" Diversification: Spread risk across uncorrelated pairs")
+    print(f" Position sizing: Reduce size when holding correlated positions")
+    print(f" Hedging: Use opposite positions to reduce correlation risk")
+    print(f"   Clock Timing: Avoid simultaneous entry in correlated pairs")
+    print(f" Monitoring: Track correlation changes during market stress")
+    print(f" Limits: Set maximum exposure per currency or correlation group")
 
-   # Final recommendations based on current analysis
-   print(f"\nTarget Current Portfolio Recommendations:")
-   if abs(eur_net) > 0 and abs(gbp_net) > 0:
-  if (eur_net > 0) == (gbp_net > 0):  # Same direction
- print(f"   ⚠️ High correlation exposure detected")
- print(f" Consider reducing one position or adding hedge")
-  else:
- print(f" Natural hedge in place - good risk management")
- print(f" Monitor for changing correlations")
-   else:
-  print(f"   Yellow Limited correlation exposure - acceptable risk")
+    # Final recommendations based on current analysis
+    print(f"\nTarget Current Portfolio Recommendations:")
+    if abs(eur_net) > 0 and abs(gbp_net) > 0:
+    if (eur_net > 0) == (gbp_net > 0):  # Same direction
+print(f"   ⚠️ High correlation exposure detected")
+print(f" Consider reducing one position or adding hedge")
+    else:
+print(f" Natural hedge in place - good risk management")
+print(f" Monitor for changing correlations")
+    else:
+    print(f"   Yellow Limited correlation exposure - acceptable risk")
 
     except Exception as e:
-   print(f"\nError Correlation analysis failed: {e}")
-   print(f" Note: Ensure you have positions in EUR_USD and GBP_USD")
-   print(f"️ General rule: Monitor correlation between all USD pairs")
+    print(f"\nError Correlation analysis failed: {e}")
+    print(f" Note: Ensure you have positions in EUR_USD and GBP_USD")
+    print(f"️ General rule: Monitor correlation between all USD pairs")
+
 ```
 ```
 
@@ -2156,47 +2169,47 @@ async def monitor_drawdown() -> None:
     # Step 4: Calculate drawdown metrics
     # Drawdown = (Peak Equity - Current Equity) / Peak Equity
     if peak_equity > 0:
-   drawdown_amount = peak_equity - current_equity
-   drawdown_percentage = (drawdown_amount / peak_equity) * 100
-   equity_recovery_needed = drawdown_amount
-   recovery_percentage_needed = (current_equity / peak_equity - 1) * 100 if current_equity < peak_equity else 0
+    drawdown_amount = peak_equity - current_equity
+    drawdown_percentage = (drawdown_amount / peak_equity) * 100
+    equity_recovery_needed = drawdown_amount
+    recovery_percentage_needed = (current_equity / peak_equity - 1) * 100 if current_equity < peak_equity else 0
 
-   print(f"\n📉 Drawdown Analysis:")
-   print(f" Drawdown amount: {drawdown_amount:+.2f} USD")
-   print(f" Drawdown percentage: {drawdown_percentage:+.2f}%")
-   print(f" Recovery needed: {equity_recovery_needed:.2f} USD")
+    print(f"\n📉 Drawdown Analysis:")
+    print(f" Drawdown amount: {drawdown_amount:+.2f} USD")
+    print(f" Drawdown percentage: {drawdown_percentage:+.2f}%")
+    print(f" Recovery needed: {equity_recovery_needed:.2f} USD")
 
-   # Update peak if current equity is higher
-   if current_equity > peak_equity:
-  print(f" NEW HIGH: Current equity exceeds previous peak!")
-  print(f"   Achievement New peak equity: {current_equity} USD")
-  # In practice, update your peak_equity tracking here
-  peak_equity = current_equity
-  drawdown_percentage = 0
+    # Update peak if current equity is higher
+    if current_equity > peak_equity:
+    print(f" NEW HIGH: Current equity exceeds previous peak!")
+    print(f"   Achievement New peak equity: {current_equity} USD")
+    # In practice, update your peak_equity tracking here
+    peak_equity = current_equity
+    drawdown_percentage = 0
 
     # Step 5: Categorize drawdown severity
     print(f"\n⚠️ Drawdown Severity Assessment:")
 
     if drawdown_percentage <= 2:
-   severity = "Success MINIMAL - Normal trading fluctuations"
-   action = "Continue normal operations"
-   alert_level = "GREEN"
+    severity = "Success MINIMAL - Normal trading fluctuations"
+    action = "Continue normal operations"
+    alert_level = "GREEN"
     elif drawdown_percentage <= 5:
-   severity = "Yellow MINOR - Monitor closely"
-   action = "Review recent trades for improvements"
-   alert_level = "YELLOW"
+    severity = "Yellow MINOR - Monitor closely"
+    action = "Review recent trades for improvements"
+    alert_level = "YELLOW"
     elif drawdown_percentage <= 10:
-   severity = "🟠 MODERATE - Caution advised"
-   action = "Consider reducing position sizes"
-   alert_level = "ORANGE"
+    severity = "🟠 MODERATE - Caution advised"
+    action = "Consider reducing position sizes"
+    alert_level = "ORANGE"
     elif drawdown_percentage <= 20:
-   severity = "Red SIGNIFICANT - Take action"
-   action = "Reduce position sizes, review strategy"
-   alert_level = "RED"
+    severity = "Red SIGNIFICANT - Take action"
+    action = "Reduce position sizes, review strategy"
+    alert_level = "RED"
     else:
-   severity = "Alert SEVERE - Emergency measures"
-   action = "Stop trading, reassess completely"
-   alert_level = "CRITICAL"
+    severity = "Alert SEVERE - Emergency measures"
+    action = "Stop trading, reassess completely"
+    alert_level = "CRITICAL"
 
     print(f" Severity: {severity}")
     print(f"   Shield Recommended action: {action}")
@@ -2207,34 +2220,34 @@ async def monitor_drawdown() -> None:
 
     # Define multiple drawdown thresholds
     thresholds = [
-   (5, "Review trading plan"),
-   (10, "Reduce position sizes by 50%"),
-   (15, "Reduce position sizes by 75%"),
-   (20, "Stop new positions"),
-   (25, "Close all positions, take break")
+    (5, "Review trading plan"),
+    (10, "Reduce position sizes by 50%"),
+    (15, "Reduce position sizes by 75%"),
+    (20, "Stop new positions"),
+    (25, "Close all positions, take break")
     ]
 
     for threshold, action in thresholds:
-   status = "Success SAFE" if drawdown_percentage < threshold else "Error TRIGGERED"
-   print(f"   {threshold}% threshold: {status} - {action}")
+    status = "Success SAFE" if drawdown_percentage < threshold else "Error TRIGGERED"
+    print(f"   {threshold}% threshold: {status} - {action}")
 
     # Step 7: Position size adjustment recommendations
     if drawdown_percentage > 5:
-   print(f"\n📉 Position Size Adjustments:")
+    print(f"\n📉 Position Size Adjustments:")
 
-   # Calculate recommended position size reduction
-   if drawdown_percentage <= 10:
-  size_reduction = 0.25  # 25% reduction
-   elif drawdown_percentage <= 15:
-  size_reduction = 0.50  # 50% reduction
-   elif drawdown_percentage <= 20:
-  size_reduction = 0.75  # 75% reduction
-   else:
-  size_reduction = 1.0   # 100% reduction (stop trading)
+    # Calculate recommended position size reduction
+    if drawdown_percentage <= 10:
+    size_reduction = 0.25  # 25% reduction
+    elif drawdown_percentage <= 15:
+    size_reduction = 0.50  # 50% reduction
+    elif drawdown_percentage <= 20:
+    size_reduction = 0.75  # 75% reduction
+    else:
+    size_reduction = 1.0   # 100% reduction (stop trading)
 
-   print(f" Recommended size reduction: {size_reduction * 100:.0f}%")
-   print(f" New position multiplier: {1 - size_reduction:.2f}x")
-   print(f" Example: If normal size is 10k, trade {int(10000 * (1 - size_reduction)):,} units")
+    print(f" Recommended size reduction: {size_reduction * 100:.0f}%")
+    print(f" New position multiplier: {1 - size_reduction:.2f}x")
+    print(f" Example: If normal size is 10k, trade {int(10000 * (1 - size_reduction)):,} units")
 
     # Step 8: Equity curve momentum analysis
     print(f"\nGrowth Equity Curve Analysis:")
@@ -2244,25 +2257,25 @@ async def monitor_drawdown() -> None:
     print(f"   Clock Days since peak: {days_in_drawdown} days")
 
     if days_in_drawdown > 30:
-   momentum_status = "Red CONCERNING - Extended drawdown period"
+    momentum_status = "Red CONCERNING - Extended drawdown period"
     elif days_in_drawdown > 14:
-   momentum_status = "Yellow MONITORING - Moderate drawdown duration"
+    momentum_status = "Yellow MONITORING - Moderate drawdown duration"
     else:
-   momentum_status = "Success NORMAL - Recent drawdown"
+    momentum_status = "Success NORMAL - Recent drawdown"
 
     print(f" Momentum status: {momentum_status}")
 
     # Step 9: Recovery scenarios and projections
     if drawdown_percentage > 0:
-   print(f"\nTarget Recovery Scenarios:")
+    print(f"\nTarget Recovery Scenarios:")
 
-   recovery_targets = [50, 75, 100]  # Percentage recovery levels
-   for recovery_pct in recovery_targets:
-  target_equity = peak_equity - (drawdown_amount * (1 - recovery_pct / 100))
-  recovery_amount = target_equity - current_equity
-  recovery_return_needed = (recovery_amount / current_equity) * 100 if current_equity > 0 else 0
+    recovery_targets = [50, 75, 100]  # Percentage recovery levels
+    for recovery_pct in recovery_targets:
+    target_equity = peak_equity - (drawdown_amount * (1 - recovery_pct / 100))
+    recovery_amount = target_equity - current_equity
+    recovery_return_needed = (recovery_amount / current_equity) * 100 if current_equity > 0 else 0
 
-  print(f"   {recovery_pct}% recovery: {target_equity:.2f} USD (+{recovery_return_needed:.1f}% needed)")
+    print(f"   {recovery_pct}% recovery: {target_equity:.2f} USD (+{recovery_return_needed:.1f}% needed)")
 
     # Step 10: Automated monitoring recommendations
     print(f"\n💻 Automated Monitoring Setup:")
@@ -2284,14 +2297,15 @@ async def monitor_drawdown() -> None:
     # Final assessment and recommendations
     print(f"\nTarget Final Assessment:")
     if drawdown_percentage > 15:
-   print(f"   Alert PRIORITY: Immediate risk reduction required")
-   print(f"   Shield Action: Implement emergency risk management measures")
+    print(f"   Alert PRIORITY: Immediate risk reduction required")
+    print(f"   Shield Action: Implement emergency risk management measures")
     elif drawdown_percentage > 5:
-   print(f"   ⚠️ CAUTION: Enhanced monitoring and risk reduction")
-   print(f" Action: Reduce position sizes and review strategy")
+    print(f"   ⚠️ CAUTION: Enhanced monitoring and risk reduction")
+    print(f" Action: Reduce position sizes and review strategy")
     else:
-   print(f" HEALTHY: Normal account fluctuations")
-   print(f" Action: Continue with standard risk management")
+    print(f" HEALTHY: Normal account fluctuations")
+    print(f" Action: Continue with standard risk management")
+
 ```
 ```
 
@@ -2321,25 +2335,25 @@ def get_market_session(dt: datetime) -> str:
     # Step 2: Determine primary trading session based on UTC hours
     # Each session has distinct characteristics and currency preferences
     if 0 <= utc_hour < 7:
-   session = "Sydney/Tokyo"    # Asian session
-   session_emoji = "🌏"
-   characteristics = "Lower volatility, JPY/AUD focus, thin liquidity"
-   best_pairs = ["USD_JPY", "AUD_USD", "NZD_USD"]
+    session = "Sydney/Tokyo"    # Asian session
+    session_emoji = "🌏"
+    characteristics = "Lower volatility, JPY/AUD focus, thin liquidity"
+    best_pairs = ["USD_JPY", "AUD_USD", "NZD_USD"]
     elif 7 <= utc_hour < 15:
-   session = "London"# European session
-   session_emoji = "🇬🇧"
-   characteristics = "High volatility, EUR/GBP focus, excellent liquidity"
-   best_pairs = ["EUR_USD", "GBP_USD", "EUR_GBP", "USD_CHF"]
+    session = "London"# European session
+    session_emoji = "🇬🇧"
+    characteristics = "High volatility, EUR/GBP focus, excellent liquidity"
+    best_pairs = ["EUR_USD", "GBP_USD", "EUR_GBP", "USD_CHF"]
     elif 15 <= utc_hour < 22:
-   session = "New York"   # US session
-   session_emoji = "🇺🇸"
-   characteristics = "High volatility, USD focus, strong trends"
-   best_pairs = ["EUR_USD", "GBP_USD", "USD_JPY", "USD_CAD"]
+    session = "New York"   # US session
+    session_emoji = "🇺🇸"
+    characteristics = "High volatility, USD focus, strong trends"
+    best_pairs = ["EUR_USD", "GBP_USD", "USD_JPY", "USD_CAD"]
     else:
-   session = "Sydney"# Asian session starts
-   session_emoji = "🇦🇺"
-   characteristics = "Market opening, moderate volatility, AUD focus"
-   best_pairs = ["AUD_USD", "NZD_USD", "AUD_JPY"]
+    session = "Sydney"# Asian session starts
+    session_emoji = "🇦🇺"
+    characteristics = "Market opening, moderate volatility, AUD focus"
+    best_pairs = ["AUD_USD", "NZD_USD", "AUD_JPY"]
 
     print(f"\n{session_emoji} Current Session: {session} ({utc_hour:02d}:00 UTC)")
     print(f" Characteristics: {characteristics}")
@@ -2359,21 +2373,21 @@ def analyze_session_overlaps(dt: datetime) -> None:
 
     # Check for session overlaps
     if 7 <= utc_hour < 8:
-   overlap = "🌏🇬🇧 Tokyo/London Opening"
-   liquidity = "Moderate - European markets opening"
-   strategy = "Watch for breakouts as European traders enter"
+    overlap = "🌏🇬🇧 Tokyo/London Opening"
+    liquidity = "Moderate - European markets opening"
+    strategy = "Watch for breakouts as European traders enter"
     elif 12 <= utc_hour < 17:
-   overlap = "🇬🇧🇺🇸 London/New York PRIME TIME"
-   liquidity = "MAXIMUM - Highest volume period"
-   strategy = "Best time for scalping and day trading"
+    overlap = "🇬🇧🇺🇸 London/New York PRIME TIME"
+    liquidity = "MAXIMUM - Highest volume period"
+    strategy = "Best time for scalping and day trading"
     elif 21 <= utc_hour < 22:
-   overlap = "🇺🇸🌏 New York/Sydney Transition"
-   liquidity = "Low - End of NY session"
-   strategy = "Avoid major trades, prepare for Asian session"
+    overlap = "🇺🇸🌏 New York/Sydney Transition"
+    liquidity = "Low - End of NY session"
+    strategy = "Avoid major trades, prepare for Asian session"
     else:
-   overlap = "No Major Overlap"
-   liquidity = "Single session - standard liquidity"
-   strategy = "Trade session-specific currency pairs"
+    overlap = "No Major Overlap"
+    liquidity = "Single session - standard liquidity"
+    strategy = "Trade session-specific currency pairs"
 
     print(f" Current overlap: {overlap}")
     print(f" Liquidity level: {liquidity}")
@@ -2386,14 +2400,14 @@ def get_session_trading_hours() -> None:
     print(f"\nMap Complete Session Schedule (UTC):")
 
     sessions = [
-   ("Sydney", "22:00-07:00", "🇦🇺", "AUD/NZD focus, weekend gaps"),
-   ("Tokyo", "00:00-09:00", "🇯🇵", "JPY pairs, moderate volatility"),
-   ("London", "07:00-16:00", "🇬🇧", "EUR/GBP focus, high volatility"),
-   ("New York", "12:00-21:00", "🇺🇸", "USD focus, trend continuation")
+    ("Sydney", "22:00-07:00", "🇦🇺", "AUD/NZD focus, weekend gaps"),
+    ("Tokyo", "00:00-09:00", "🇯🇵", "JPY pairs, moderate volatility"),
+    ("London", "07:00-16:00", "🇬🇧", "EUR/GBP focus, high volatility"),
+    ("New York", "12:00-21:00", "🇺🇸", "USD focus, trend continuation")
     ]
 
     for session, hours, flag, description in sessions:
-   print(f"   {flag} {session}: {hours} UTC - {description}")
+    print(f"   {flag} {session}: {hours} UTC - {description}")
 
     # Step 5: Highlight optimal trading windows
     print(f"\n🎆 OPTIMAL Trading Windows:")
@@ -2439,6 +2453,7 @@ print(f"\n📍 Market Closure Schedule:")
 print(f"   🚫 Weekend closure: Friday 22:00 UTC - Sunday 22:00 UTC")
 print(f"   🎄 Holiday closures: Reduced activity during major holidays")
 print(f"   ⚠️ Thin liquidity: Avoid major trades during closures")
+
 ```
 ```
 
@@ -2464,38 +2479,38 @@ def adjust_for_news() -> None:
     # Step 2: Define upcoming news events with impact levels
     # High-impact events require significant trading adjustments
     upcoming_news = [
-   {
-  "time": current_time + timedelta(hours=2),
-  "event": "US Non-Farm Payrolls",
-  "currency": "USD",
-  "impact": "HIGH",
-  "expected_volatility": "50-100 pips"
-   },
-   {
-  "time": current_time + timedelta(hours=6),
-  "event": "ECB Interest Rate Decision",
-  "currency": "EUR",
-  "impact": "HIGH",
-  "expected_volatility": "75-150 pips"
-   },
-   {
-  "time": current_time + timedelta(hours=24),
-  "event": "UK GDP Quarterly",
-  "currency": "GBP",
-  "impact": "MEDIUM",
-  "expected_volatility": "30-60 pips"
-   }
+    {
+    "time": current_time + timedelta(hours=2),
+    "event": "US Non-Farm Payrolls",
+    "currency": "USD",
+    "impact": "HIGH",
+    "expected_volatility": "50-100 pips"
+    },
+    {
+    "time": current_time + timedelta(hours=6),
+    "event": "ECB Interest Rate Decision",
+    "currency": "EUR",
+    "impact": "HIGH",
+    "expected_volatility": "75-150 pips"
+    },
+    {
+    "time": current_time + timedelta(hours=24),
+    "event": "UK GDP Quarterly",
+    "currency": "GBP",
+    "impact": "MEDIUM",
+    "expected_volatility": "30-60 pips"
+    }
     ]
 
     print(f"\nMap Upcoming High-Impact Events:")
     for news in upcoming_news:
-   time_until = news["time"] - current_time
-   hours_until = time_until.total_seconds() / 3600
+    time_until = news["time"] - current_time
+    hours_until = time_until.total_seconds() / 3600
 
-   print(f"   {news['impact']} IMPACT: {news['event']}")
-   print(f"Clock Time: {news['time'].strftime('%Y-%m-%d %H:%M')} ({hours_until:.1f}h away)")
-   print(f"   Currency: {news['currency']}")
-   print(f"   Expected volatility: {news['expected_volatility']}")
+    print(f"   {news['impact']} IMPACT: {news['event']}")
+    print(f"Clock Time: {news['time'].strftime('%Y-%m-%d %H:%M')} ({hours_until:.1f}h away)")
+    print(f"   Currency: {news['currency']}")
+    print(f"   Expected volatility: {news['expected_volatility']}")
 
     # Step 3: Assess news impact on current trading setup
     # Major news can dramatically affect market conditions
@@ -2503,14 +2518,14 @@ def adjust_for_news() -> None:
 
     # Example trading parameters before news adjustment
     original_params = {
-   "stop_loss_distance": 50,    # pips
-   "position_size": 10000, # units
-   "take_profit": 100,# pips
-   "risk_per_trade": 200   # USD
+    "stop_loss_distance": 50,    # pips
+    "position_size": 10000, # units
+    "take_profit": 100,# pips
+    "risk_per_trade": 200   # USD
     }
 
     for param, value in original_params.items():
-   print(f" {param.replace('_', ' ').title()}: {value}")
+    print(f" {param.replace('_', ' ').title()}: {value}")
 
     # Step 4: Determine adjustment factors based on news proximity
     print(f"\n⚠️ News Impact Assessment:")
@@ -2522,21 +2537,21 @@ def adjust_for_news() -> None:
 
     # Determine risk level
     if news_within_1h:
-   risk_level = "EXTREME"
-   risk_emoji = "Alert"
-   adjustment_factor = 0.25  # 75% reduction
+    risk_level = "EXTREME"
+    risk_emoji = "Alert"
+    adjustment_factor = 0.25  # 75% reduction
     elif high_impact_news and news_within_4h:
-   risk_level = "HIGH"
-   risk_emoji = "Red"
-   adjustment_factor = 0.5   # 50% reduction
+    risk_level = "HIGH"
+    risk_emoji = "Red"
+    adjustment_factor = 0.5   # 50% reduction
     elif news_within_4h:
-   risk_level = "MODERATE"
-   risk_emoji = "Yellow"
-   adjustment_factor = 0.75  # 25% reduction
+    risk_level = "MODERATE"
+    risk_emoji = "Yellow"
+    adjustment_factor = 0.75  # 25% reduction
     else:
-   risk_level = "LOW"
-   risk_emoji = "Success"
-   adjustment_factor = 1.0   # No reduction
+    risk_level = "LOW"
+    risk_emoji = "Success"
+    adjustment_factor = 1.0   # No reduction
 
     print(f"   {risk_emoji} Risk level: {risk_level}")
     print(f" Position size adjustment: {adjustment_factor}x normal size")
@@ -2546,18 +2561,18 @@ def adjust_for_news() -> None:
     print(f"\nShield Adjusted Trading Parameters:")
 
     adjusted_params = {
-   "position_size": int(original_params["position_size"] * adjustment_factor),
-   "stop_loss_distance": int(original_params["stop_loss_distance"] * (1.5 if risk_level in ['HIGH', 'EXTREME'] else 1.0)),
-   "take_profit": int(original_params["take_profit"] * (1.5 if risk_level in ['HIGH', 'EXTREME'] else 1.0)),
-   "risk_per_trade": int(original_params["risk_per_trade"] * adjustment_factor)
+    "position_size": int(original_params["position_size"] * adjustment_factor),
+    "stop_loss_distance": int(original_params["stop_loss_distance"] * (1.5 if risk_level in ['HIGH', 'EXTREME'] else 1.0)),
+    "take_profit": int(original_params["take_profit"] * (1.5 if risk_level in ['HIGH', 'EXTREME'] else 1.0)),
+    "risk_per_trade": int(original_params["risk_per_trade"] * adjustment_factor)
     }
 
     for param, value in adjusted_params.items():
-   original_value = original_params[param]
-   change = ((value - original_value) / original_value) * 100
-   status = "Growth" if change > 0 else "📉" if change < 0 else "➖"
+    original_value = original_params[param]
+    change = ((value - original_value) / original_value) * 100
+    status = "Growth" if change > 0 else "📉" if change < 0 else "➖"
 
-   print(f"   {status} {param.replace('_', ' ').title()}: {value} ({change:+.0f}% vs normal)")
+    print(f"   {status} {param.replace('_', ' ').title()}: {value} ({change:+.0f}% vs normal)")
 
     # Step 6: Currency-specific adjustments
     print(f"\nMap Currency-Specific Considerations:")
@@ -2565,63 +2580,63 @@ def adjust_for_news() -> None:
     affected_currencies = set(news["currency"] for news in upcoming_news)
 
     currency_pairs_affected = {
-   "USD": ["EUR_USD", "GBP_USD", "USD_JPY", "USD_CHF", "AUD_USD", "USD_CAD"],
-   "EUR": ["EUR_USD", "EUR_GBP", "EUR_JPY", "EUR_CHF", "EUR_AUD"],
-   "GBP": ["GBP_USD", "EUR_GBP", "GBP_JPY", "GBP_CHF", "GBP_AUD"]
+    "USD": ["EUR_USD", "GBP_USD", "USD_JPY", "USD_CHF", "AUD_USD", "USD_CAD"],
+    "EUR": ["EUR_USD", "EUR_GBP", "EUR_JPY", "EUR_CHF", "EUR_AUD"],
+    "GBP": ["GBP_USD", "EUR_GBP", "GBP_JPY", "GBP_CHF", "GBP_AUD"]
     }
 
     for currency in affected_currencies:
-   pairs = currency_pairs_affected.get(currency, [])
-   print(f" {currency} news affects: {', '.join(pairs[:4])}{'...' if len(pairs) > 4 else ''}")
+    pairs = currency_pairs_affected.get(currency, [])
+    print(f" {currency} news affects: {', '.join(pairs[:4])}{'...' if len(pairs) > 4 else ''}")
 
-   # Specific recommendations per currency
-   if currency == "USD":
-  print(f"⚠️ USD events affect ALL major pairs - widespread impact")
-   elif currency == "EUR":
-  print(f"🇪🇺 EUR events primarily affect European session pairs")
-   elif currency == "GBP":
-  print(f"🇬🇧 GBP events cause high volatility - notorious for spikes")
+    # Specific recommendations per currency
+    if currency == "USD":
+    print(f"⚠️ USD events affect ALL major pairs - widespread impact")
+    elif currency == "EUR":
+    print(f"🇪🇺 EUR events primarily affect European session pairs")
+    elif currency == "GBP":
+    print(f"🇬🇧 GBP events cause high volatility - notorious for spikes")
 
     # Step 7: Pre-news trading strategies
     print(f"\nTarget Pre-News Trading Strategies:")
 
     if risk_level == "EXTREME":
-   strategy = "AVOID TRADING - Close positions or wait until after news"
-   actions = [
-  "Close all open positions",
-  "Cancel pending orders",
-  "Wait 30-60 minutes after news release",
-  "Watch for market stabilization"
-   ]
+    strategy = "AVOID TRADING - Close positions or wait until after news"
+    actions = [
+    "Close all open positions",
+    "Cancel pending orders",
+    "Wait 30-60 minutes after news release",
+    "Watch for market stabilization"
+    ]
     elif risk_level == "HIGH":
-   strategy = "DEFENSIVE TRADING - Minimal exposure only"
-   actions = [
-  "Reduce position sizes by 50%",
-  "Widen stop losses by 50%",
-  "Avoid new positions 2h before news",
-  "Consider hedging existing positions"
-   ]
+    strategy = "DEFENSIVE TRADING - Minimal exposure only"
+    actions = [
+    "Reduce position sizes by 50%",
+    "Widen stop losses by 50%",
+    "Avoid new positions 2h before news",
+    "Consider hedging existing positions"
+    ]
     elif risk_level == "MODERATE":
-   strategy = "CAUTIOUS TRADING - Adjusted parameters"
-   actions = [
-  "Reduce position sizes by 25%",
-  "Monitor news closely",
-  "Be ready to exit quickly",
-  "Avoid counter-trend trades"
-   ]
+    strategy = "CAUTIOUS TRADING - Adjusted parameters"
+    actions = [
+    "Reduce position sizes by 25%",
+    "Monitor news closely",
+    "Be ready to exit quickly",
+    "Avoid counter-trend trades"
+    ]
     else:
-   strategy = "NORMAL TRADING - Standard risk management"
-   actions = [
-  "Continue normal operations",
-  "Monitor economic calendar",
-  "Stay alert for unexpected news",
-  "Maintain disciplined approach"
-   ]
+    strategy = "NORMAL TRADING - Standard risk management"
+    actions = [
+    "Continue normal operations",
+    "Monitor economic calendar",
+    "Stay alert for unexpected news",
+    "Maintain disciplined approach"
+    ]
 
     print(f" Strategy: {strategy}")
     print(f"   Notes Action items:")
     for action in actions:
-   print(f"• {action}")
+    print(f"• {action}")
 
     # Step 8: Post-news trading considerations
     print(f"\nClock Post-News Trading Guidelines:")
@@ -2655,6 +2670,7 @@ def adjust_for_news() -> None:
 print(f"Map Executing Economic News Risk Assessment...")
 adjusted_parameters = adjust_for_news()
 print(f"\nSuccess News risk assessment complete - parameters adjusted for current conditions")
+
 ```
 ```
 
@@ -2733,128 +2749,129 @@ async def check_carry_trade() -> None:
     print(f"\nGrowth FiveTwenty SDK Carry Trade Analysis")
 
     try:
-   # Step 5: Analyze AUD_JPY as classic carry trade example
-   instrument = "AUD_JPY"
-   print(f"\nGrowth Analyzing {instrument} Carry Trade Setup:")
+    # Step 5: Analyze AUD_JPY as classic carry trade example
+    instrument = "AUD_JPY"
+    print(f"\nGrowth Analyzing {instrument} Carry Trade Setup:")
 
-   # Get current market data
-   candles = await client.instruments.get_instrument_candles(
-  instrument=instrument,
-  count=5,
-  granularity="D"  # Daily candles for trend analysis
-   )
+    # Get current market data
+    candles = await client.instruments.get_instrument_candles(
+    instrument=instrument,
+    count=5,
+    granularity="D"  # Daily candles for trend analysis
+    )
 
-   if candles.candles:
-  latest_candle = candles.candles[-1]
-  current_price = latest_candle.mid.c
+    if candles.candles:
+    latest_candle = candles.candles[-1]
+    current_price = latest_candle.mid.c
 
-  print(f" Current price: {current_price}")
-  print(f"   Map Instrument: {instrument} (AUD = base, JPY = quote)")
+    print(f" Current price: {current_price}")
+    print(f"   Map Instrument: {instrument} (AUD = base, JPY = quote)")
 
-  # Calculate recent price movement
-  if len(candles.candles) >= 2:
- prev_price = candles.candles[-2].mid.c
- price_change = (float(current_price) - float(prev_price)) / float(prev_price) * 100
- trend_status = "Growth RISING" if price_change > 0 else "📉 FALLING" if price_change < 0 else "➖ FLAT"
+    # Calculate recent price movement
+    if len(candles.candles) >= 2:
+prev_price = candles.candles[-2].mid.c
+price_change = (current_price - prev_price) / prev_price * 100
+trend_status = "Growth RISING" if price_change > 0 else "📉 FALLING" if price_change < 0 else "➖ FLAT"
 
- print(f" Daily change: {price_change:+.2f}% ({trend_status})")
+print(f" Daily change: {price_change:+.2f}% ({trend_status})")
 
-  # Step 6: Analyze carry trade viability
-  print(f"\nData Carry Trade Viability Analysis:")
+    # Step 6: Analyze carry trade viability
+    print(f"\nData Carry Trade Viability Analysis:")
 
-  # Theoretical interest differential (AUD 4.25% - JPY 0.10% = 4.15%)
-  theoretical_carry = 4.15  # Annual percentage
-  daily_carry_rate = theoretical_carry / 365
-  position_size = 100000  # 1 standard lot
+    # Theoretical interest differential (AUD 4.25% - JPY 0.10% = 4.15%)
+    theoretical_carry = 4.15  # Annual percentage
+    daily_carry_rate = theoretical_carry / 365
+    position_size = 100000  # 1 standard lot
 
-  # Calculate potential daily earnings
-  position_value_aud = position_size  # 100,000 AUD
-  daily_carry_aud = position_value_aud * (daily_carry_rate / 100)
-  daily_carry_jpy = daily_carry_aud * float(current_price)  # Convert to JPY
+    # Calculate potential daily earnings
+    position_value_aud = position_size  # 100,000 AUD
+    daily_carry_aud = position_value_aud * (daily_carry_rate / 100)
+    daily_carry_jpy = daily_carry_aud * current_price  # Convert to JPY
 
-  print(f" Position size: {position_size:,} AUD (1 standard lot)")
-  print(f"   Bank Interest differential: +{theoretical_carry:.2f}% annually")
-  print(f" Daily carry estimate: {daily_carry_aud:.2f} AUD (~{daily_carry_jpy:.0f} JPY)")
-  print(f" Monthly estimate: ~{daily_carry_aud * 30:.2f} AUD")
-  print(f" Annual estimate: ~{daily_carry_aud * 365:.2f} AUD")
+    print(f" Position size: {position_size:,} AUD (1 standard lot)")
+    print(f"   Bank Interest differential: +{theoretical_carry:.2f}% annually")
+    print(f" Daily carry estimate: {daily_carry_aud:.2f} AUD (~{daily_carry_jpy:.0f} JPY)")
+    print(f" Monthly estimate: ~{daily_carry_aud * 30:.2f} AUD")
+    print(f" Annual estimate: ~{daily_carry_aud * 365:.2f} AUD")
 
-  # Step 7: Risk assessment for carry trades
-  print(f"\n⚠️ Carry Trade Risk Assessment:")
+    # Step 7: Risk assessment for carry trades
+    print(f"\n⚠️ Carry Trade Risk Assessment:")
 
-  # Calculate risk scenarios
-  daily_volatility = 0.5  # Typical daily volatility in %
-  position_value_usd = position_size * float(current_price) / 110  # Rough USD conversion
-  daily_risk_usd = position_value_usd * (daily_volatility / 100)
+    # Calculate risk scenarios
+    daily_volatility = 0.5  # Typical daily volatility in %
+    position_value_usd = position_size * current_price / 110  # Rough USD conversion
+    daily_risk_usd = position_value_usd * (daily_volatility / 100)
 
-  print(f" Daily carry income: ~${daily_carry_aud:.2f}")
-  print(f"   ⚠️ Daily volatility risk: ~${daily_risk_usd:.2f} (1 standard deviation)")
+    print(f" Daily carry income: ~${daily_carry_aud:.2f}")
+    print(f"   ⚠️ Daily volatility risk: ~${daily_risk_usd:.2f} (1 standard deviation)")
 
-  risk_reward_ratio = daily_risk_usd / daily_carry_aud if daily_carry_aud > 0 else float('inf')
-  print(f" Risk/Carry ratio: {risk_reward_ratio:.1f}:1")
+    risk_reward_ratio = daily_risk_usd / daily_carry_aud if daily_carry_aud > 0 else Decimal('Infinity')
+    print(f" Risk/Carry ratio: {risk_reward_ratio:.1f}:1")
 
-  if risk_reward_ratio > 10:
- risk_assessment = "Red HIGH RISK - Volatility overwhelms carry"
-  elif risk_reward_ratio > 5:
- risk_assessment = "Yellow MODERATE RISK - Manage position size"
-  else:
- risk_assessment = "Success REASONABLE - Good carry opportunity"
+    if risk_reward_ratio > 10:
+risk_assessment = "Red HIGH RISK - Volatility overwhelms carry"
+    elif risk_reward_ratio > 5:
+risk_assessment = "Yellow MODERATE RISK - Manage position size"
+    else:
+risk_assessment = "Success REASONABLE - Good carry opportunity"
 
-  print(f" Assessment: {risk_assessment}")
+    print(f" Assessment: {risk_assessment}")
 
-   # Step 8: Get account information for position sizing
-   print(f"\nBusiness Account Suitability for Carry Trading:")
-   account = await client.accounts.get_account(account_id)
-   account_balance = float(account.balance)
+    # Step 8: Get account information for position sizing
+    print(f"\nBusiness Account Suitability for Carry Trading:")
+    account = await client.accounts.get_account(account_id)
+    account_balance = account.balance
 
-   # Calculate appropriate position size for carry trading
-   # Carry trades typically use lower leverage due to longer holding periods
-   conservative_leverage = 5  # 5:1 leverage for carry trades
-   max_position_value = account_balance * conservative_leverage
-   max_aud_units = max_position_value / float(current_price) * 110  # Rough calculation
+    # Calculate appropriate position size for carry trading
+    # Carry trades typically use lower leverage due to longer holding periods
+    conservative_leverage = 5  # 5:1 leverage for carry trades
+    max_position_value = account_balance * conservative_leverage
+    max_aud_units = max_position_value / current_price * 110  # Rough calculation
 
-   print(f" Account balance: ${account_balance:,.2f}")
-   print(f" Conservative leverage: {conservative_leverage}:1 (lower for carry trades)")
-   print(f" Max recommended position: {max_aud_units:,.0f} AUD units")
-   print(f" Conservative position: {max_aud_units/2:,.0f} AUD units (50% of max)")
+    print(f" Account balance: ${account_balance:,.2f}")
+    print(f" Conservative leverage: {conservative_leverage}:1 (lower for carry trades)")
+    print(f" Max recommended position: {max_aud_units:,.0f} AUD units")
+    print(f" Conservative position: {max_aud_units/2:,.0f} AUD units (50% of max)")
 
-   # Step 9: Carry trade best practices
-   print(f"\nTarget Carry Trade Best Practices:")
-   print(f"   Clock Time horizon: Medium to long-term (weeks to months)")
-   print(f" Leverage: Use conservative leverage (5:1 or less)")
-   print(f"   Map Diversification: Don't put all capital in carry trades")
-   print(f" Trend alignment: Best when currency trend supports carry")
-   print(f"   ⚠️ Risk management: Set wide stops, expect volatility")
-   print(f" Monitoring: Watch central bank policy changes")
+    # Step 9: Carry trade best practices
+    print(f"\nTarget Carry Trade Best Practices:")
+    print(f"   Clock Time horizon: Medium to long-term (weeks to months)")
+    print(f" Leverage: Use conservative leverage (5:1 or less)")
+    print(f"   Map Diversification: Don't put all capital in carry trades")
+    print(f" Trend alignment: Best when currency trend supports carry")
+    print(f"   ⚠️ Risk management: Set wide stops, expect volatility")
+    print(f" Monitoring: Watch central bank policy changes")
 
-   # Step 10: Market conditions affecting carry trades
-   print(f"\nWorld Market Conditions for Carry Trades:")
-   print(f" FAVORABLE:")
-   print(f"• Stable/rising risk sentiment")
-   print(f"• Widening interest rate differentials")
-   print(f"• Low market volatility")
-   print(f"• Supportive economic fundamentals")
+    # Step 10: Market conditions affecting carry trades
+    print(f"\nWorld Market Conditions for Carry Trades:")
+    print(f" FAVORABLE:")
+    print(f"• Stable/rising risk sentiment")
+    print(f"• Widening interest rate differentials")
+    print(f"• Low market volatility")
+    print(f"• Supportive economic fundamentals")
 
-   print(f"   Error UNFAVORABLE:")
-   print(f"• Risk-off sentiment / market stress")
-   print(f"• Narrowing rate differentials")
-   print(f"• High volatility periods")
-   print(f"• Central bank policy uncertainty")
+    print(f"   Error UNFAVORABLE:")
+    print(f"• Risk-off sentiment / market stress")
+    print(f"• Narrowing rate differentials")
+    print(f"• High volatility periods")
+    print(f"• Central bank policy uncertainty")
 
     except Exception as e:
-   print(f"\nError Carry trade analysis failed: {e}")
-   print(f" Note: This demonstrates carry trade concepts with simulated data")
-   print(f"️ Real implementation needs actual swap/rollover rates from broker")
+    print(f"\nError Carry trade analysis failed: {e}")
+    print(f" Note: This demonstrates carry trade concepts with simulated data")
+    print(f"️ Real implementation needs actual swap/rollover rates from broker")
 
-   # Step 11: Provide educational information even if API fails
-   print(f"\n📚 Carry Trade Educational Summary:")
-   print(f"   Bank Interest differential drives carry trade profitability")
-   print(f" Popular pairs: AUD_JPY, NZD_JPY, GBP_JPY (high vs low yield)")
-   print(f"   ⚠️ Major risk: Currency depreciation can overwhelm interest income")
-   print(f"   Clock Timeline: Longer holding periods to benefit from rollover")
-   print(f" Strategy: Combine with technical/fundamental analysis")
+    # Step 11: Provide educational information even if API fails
+    print(f"\n📚 Carry Trade Educational Summary:")
+    print(f"   Bank Interest differential drives carry trade profitability")
+    print(f" Popular pairs: AUD_JPY, NZD_JPY, GBP_JPY (high vs low yield)")
+    print(f"   ⚠️ Major risk: Currency depreciation can overwhelm interest income")
+    print(f"   Clock Timeline: Longer holding periods to benefit from rollover")
+    print(f" Strategy: Combine with technical/fundamental analysis")
 
 # Execute carry trade analysis
 await check_carry_trade()
+
 ```
 ```
 
@@ -2889,160 +2906,161 @@ async def hedge_currency_exposure() -> None:
 
     # Step 3: Analyze current exchange rate and potential risk
     try:
-   # Get current EUR_USD pricing
-   pricing = await client.pricing.get_pricing(account_id, ["EUR_USD"])
-   current_rate = pricing.prices[0].bids[0].price  # Use bid for selling EUR
+    # Get current EUR_USD pricing
+    pricing = await client.pricing.get_pricing(account_id, ["EUR_USD"])
+    current_rate = pricing.prices[0].bids[0].price  # Use bid for selling EUR
 
-   print(f"\nGrowth Current Market Analysis:")
-   print(f" Current EUR_USD rate: {current_rate}")
-   print(f" Current USD value: ${float(current_rate) * business_eur_exposure:,.2f}")
+    print(f"\nGrowth Current Market Analysis:")
+    print(f" Current EUR_USD rate: {current_rate}")
+    print(f" Current USD value: ${current_rate * business_eur_exposure:,.2f}")
 
-   # Calculate potential currency risk scenarios
-   risk_scenarios = [
-  (0.95, "5% EUR decline"),
-  (0.90, "10% EUR decline"),
-  (0.85, "15% EUR decline")
-   ]
+    # Calculate potential currency risk scenarios
+    risk_scenarios = [
+    (0.95, "5% EUR decline"),
+    (0.90, "10% EUR decline"),
+    (0.85, "15% EUR decline")
+    ]
 
-   print(f"\n⚠️ Currency Risk Scenarios:")
-   for multiplier, scenario in risk_scenarios:
-  scenario_rate = float(current_rate) * multiplier
-  scenario_value = scenario_rate * business_eur_exposure
-  value_loss = (float(current_rate) * business_eur_exposure) - scenario_value
+    print(f"\n⚠️ Currency Risk Scenarios:")
+    for multiplier, scenario in risk_scenarios:
+    scenario_rate = current_rate * multiplier
+    scenario_value = scenario_rate * business_eur_exposure
+    value_loss = (current_rate * business_eur_exposure) - scenario_value
 
-  print(f"   {scenario}: Rate {scenario_rate:.4f}")
-  print(f"   USD value: ${scenario_value:,.2f}")
-  print(f"   Loss: ${value_loss:,.2f}")
+    print(f"   {scenario}: Rate {scenario_rate:.4f}")
+    print(f"   USD value: ${scenario_value:,.2f}")
+    print(f"   Loss: ${value_loss:,.2f}")
 
-   # Step 4: Calculate optimal hedge position
-   # Natural hedge: Go short EUR_USD to offset EUR exposure
-   print(f"\nShield Hedging Strategy Analysis:")
+    # Step 4: Calculate optimal hedge position
+    # Natural hedge: Go short EUR_USD to offset EUR exposure
+    print(f"\nShield Hedging Strategy Analysis:")
 
-   hedge_position = -business_eur_exposure  # Opposite position (short EUR)
-   hedge_percentage = 100  # 100% hedge for this example
+    hedge_position = -business_eur_exposure  # Opposite position (short EUR)
+    hedge_percentage = 100  # 100% hedge for this example
 
-   print(f" Strategy: SHORT EUR_USD to hedge EUR exposure")
-   print(f" Hedge size: {abs(hedge_position):,} EUR units")
-   print(f" Direction: SHORT (sell EUR, buy USD)")
-   print(f" Hedge ratio: {hedge_percentage}% of exposure")
+    print(f" Strategy: SHORT EUR_USD to hedge EUR exposure")
+    print(f" Hedge size: {abs(hedge_position):,} EUR units")
+    print(f" Direction: SHORT (sell EUR, buy USD)")
+    print(f" Hedge ratio: {hedge_percentage}% of exposure")
 
-   # Step 5: Explain hedging mechanics
-   print(f"\nProcessing Hedging Mechanics:")
-   print(f" Business exposure: +€{business_eur_exposure:,} (receive EUR)")
-   print(f" Hedge position: {hedge_position:,} EUR units (short EUR_USD)")
-   print(f" Net EUR exposure: €0 (fully hedged)")
-   print(f" Result: Protected against EUR/USD rate changes")
+    # Step 5: Explain hedging mechanics
+    print(f"\nProcessing Hedging Mechanics:")
+    print(f" Business exposure: +€{business_eur_exposure:,} (receive EUR)")
+    print(f" Hedge position: {hedge_position:,} EUR units (short EUR_USD)")
+    print(f" Net EUR exposure: €0 (fully hedged)")
+    print(f" Result: Protected against EUR/USD rate changes")
 
-   # Step 6: Calculate hedge effectiveness
-   print(f"\nGrowth Hedge Effectiveness Analysis:")
+    # Step 6: Calculate hedge effectiveness
+    print(f"\nGrowth Hedge Effectiveness Analysis:")
 
-   # Simulate EUR decline scenario with hedge
-   eur_decline_scenario = 0.90  # 10% decline
-   new_rate = float(current_rate) * eur_decline_scenario
+    # Simulate EUR decline scenario with hedge
+    eur_decline_scenario = 0.90  # 10% decline
+    new_rate = current_rate * eur_decline_scenario
 
-   # Business exposure impact
-   original_value = float(current_rate) * business_eur_exposure
-   new_business_value = new_rate * business_eur_exposure
-   business_loss = original_value - new_business_value
+    # Business exposure impact
+    original_value = current_rate * business_eur_exposure
+    new_business_value = new_rate * business_eur_exposure
+    business_loss = original_value - new_business_value
 
-   # Hedge position impact (profit on short position)
-   hedge_entry_price = float(current_rate)
-   hedge_exit_price = new_rate
-   hedge_profit = (hedge_entry_price - hedge_exit_price) * abs(hedge_position)
+    # Hedge position impact (profit on short position)
+    hedge_entry_price = current_rate
+    hedge_exit_price = new_rate
+    hedge_profit = (hedge_entry_price - hedge_exit_price) * abs(hedge_position)
 
-   net_result = hedge_profit - business_loss
+    net_result = hedge_profit - business_loss
 
-   print(f" EUR declines 10% scenario:")
-   print(f"   Business loss: ${business_loss:,.2f}")
-   print(f"   Hedge profit: ${hedge_profit:,.2f}")
-   print(f"   Net result: ${net_result:+.2f} (near zero = effective hedge)")
+    print(f" EUR declines 10% scenario:")
+    print(f"   Business loss: ${business_loss:,.2f}")
+    print(f"   Hedge profit: ${hedge_profit:,.2f}")
+    print(f"   Net result: ${net_result:+.2f} (near zero = effective hedge)")
 
-   # Step 7: Execute hedge position
-   print(f"\nStarting Executing Hedge Position:")
+    # Step 7: Execute hedge position
+    print(f"\nStarting Executing Hedge Position:")
 
-   try:
-  hedge_order = await client.orders.post_market_order(
- account_id=account_id,
- instrument="EUR_USD",
- units=hedge_position  # Negative = short EUR
-  )
+    try:
+    hedge_order = await client.orders.post_market_order(
+account_id=account_id,
+instrument="EUR_USD",
+units=hedge_position  # Negative = short EUR
+    )
 
-  print(f" Hedge order executed successfully")
-  print(f" Order ID: {hedge_order.order_create_transaction.id}")
+    print(f" Hedge order executed successfully")
+    print(f" Order ID: {hedge_order.order_create_transaction.id}")
 
-  if hedge_order.order_fill_transaction:
- fill_price = hedge_order.order_fill_transaction.price
- print(f" Fill price: {fill_price}")
- print(f"   Shield Hedge active: EUR exposure now neutralized")
+    if hedge_order.order_fill_transaction:
+fill_price = hedge_order.order_fill_transaction.price
+print(f" Fill price: {fill_price}")
+print(f"   Shield Hedge active: EUR exposure now neutralized")
 
- # Calculate hedge cost (spread)
- spread_cost = (float(pricing.prices[0].asks[0].price) - float(fill_price)) * abs(hedge_position)
- print(f" Hedge cost (spread): ${spread_cost:.2f}")
-
-   except Exception as e:
-  print(f"   Error Hedge execution failed: {e}")
-  print(f"   Note Check margin requirements and market conditions")
-
-   # Step 8: Alternative hedging strategies
-   print(f"\nMap Alternative Hedging Approaches:")
-
-   hedging_alternatives = [
-  ("100% Hedge", "Full protection, no upside", hedge_position),
-  ("75% Hedge", "Partial protection, some upside", int(hedge_position * 0.75)),
-  ("50% Hedge", "Balanced approach", int(hedge_position * 0.50)),
-  ("No Hedge", "Full exposure, maximum risk/reward", 0)
-   ]
-
-   for strategy, description, position_size in hedging_alternatives:
-  hedge_ratio = abs(position_size) / business_eur_exposure * 100 if position_size != 0 else 0
-  print(f"   • {strategy}: {description}")
-  print(f"Position: {position_size:,} EUR units ({hedge_ratio:.0f}% hedge)")
-
-   # Step 9: Hedging timeline considerations
-   print(f"\nClock Hedging Timeline Management:")
-   print(f" Immediate hedge: Protect against adverse moves")
-   print(f"   Time Rolling hedge: Adjust as payment date approaches")
-   print(f"   Map Partial unwind: Reduce hedge if EUR strengthens")
-   print(f" Full unwind: Close hedge when payment received")
-
-   # Step 10: Cost-benefit analysis
-   print(f"\nData Hedging Cost-Benefit Analysis:")
-
-   # Estimate hedging costs
-   estimated_spread = 0.0002  # 0.2 pips
-   hedging_cost = estimated_spread * abs(hedge_position)
-   protection_value = business_eur_exposure * 0.05 * float(current_rate)  # 5% protection
-
-   print(f" Estimated hedging cost: ${hedging_cost:.2f}")
-   print(f"   Shield Protection value (5% move): ${protection_value:.2f}")
-   print(f" Cost/benefit ratio: {hedging_cost/protection_value:.3f}")
-
-   if hedging_cost / protection_value < 0.1:  # Less than 10% of protection value
-  recommendation = "Success RECOMMENDED - Low cost for good protection"
-   elif hedging_cost / protection_value < 0.2:
-  recommendation = "Yellow CONSIDER - Moderate cost for protection"
-   else:
-  recommendation = "⚠️ EXPENSIVE - High cost relative to protection"
-
-   print(f" Recommendation: {recommendation}")
+# Calculate hedge cost (spread)
+spread_cost = (pricing.prices[0].asks[0].price - fill_price) * abs(hedge_position)
+print(f" Hedge cost (spread): ${spread_cost:.2f}")
 
     except Exception as e:
-   print(f"\nError Currency hedging analysis failed: {e}")
-   print(f" Note: This demonstrates hedging concepts")
+    print(f"   Error Hedge execution failed: {e}")
+    print(f"   Note Check margin requirements and market conditions")
 
-   # Step 11: Educational summary even if API fails
-   print(f"\n📚 Currency Hedging Summary:")
-   print(f" Purpose: Reduce currency risk from business operations")
-   print(f"   Shield Method: Opposite forex position to offset exposure")
-   print(f"   ⚠️ Trade-off: Protection vs potential upside")
-   print(f" Timing: Balance cost vs risk tolerance")
-   print(f"   Map Strategy: Can be partial or full hedge")
+    # Step 8: Alternative hedging strategies
+    print(f"\nMap Alternative Hedging Approaches:")
+
+    hedging_alternatives = [
+    ("100% Hedge", "Full protection, no upside", hedge_position),
+    ("75% Hedge", "Partial protection, some upside", int(hedge_position * 0.75)),
+    ("50% Hedge", "Balanced approach", int(hedge_position * 0.50)),
+    ("No Hedge", "Full exposure, maximum risk/reward", 0)
+    ]
+
+    for strategy, description, position_size in hedging_alternatives:
+    hedge_ratio = abs(position_size) / business_eur_exposure * 100 if position_size != 0 else 0
+    print(f"   • {strategy}: {description}")
+    print(f"Position: {position_size:,} EUR units ({hedge_ratio:.0f}% hedge)")
+
+    # Step 9: Hedging timeline considerations
+    print(f"\nClock Hedging Timeline Management:")
+    print(f" Immediate hedge: Protect against adverse moves")
+    print(f"   Time Rolling hedge: Adjust as payment date approaches")
+    print(f"   Map Partial unwind: Reduce hedge if EUR strengthens")
+    print(f" Full unwind: Close hedge when payment received")
+
+    # Step 10: Cost-benefit analysis
+    print(f"\nData Hedging Cost-Benefit Analysis:")
+
+    # Estimate hedging costs
+    estimated_spread = 0.0002  # 0.2 pips
+    hedging_cost = estimated_spread * abs(hedge_position)
+    protection_value = business_eur_exposure * 0.05 * current_rate  # 5% protection
+
+    print(f" Estimated hedging cost: ${hedging_cost:.2f}")
+    print(f"   Shield Protection value (5% move): ${protection_value:.2f}")
+    print(f" Cost/benefit ratio: {hedging_cost/protection_value:.3f}")
+
+    if hedging_cost / protection_value < 0.1:  # Less than 10% of protection value
+    recommendation = "Success RECOMMENDED - Low cost for good protection"
+    elif hedging_cost / protection_value < 0.2:
+    recommendation = "Yellow CONSIDER - Moderate cost for protection"
+    else:
+    recommendation = "⚠️ EXPENSIVE - High cost relative to protection"
+
+    print(f" Recommendation: {recommendation}")
+
+    except Exception as e:
+    print(f"\nError Currency hedging analysis failed: {e}")
+    print(f" Note: This demonstrates hedging concepts")
+
+    # Step 11: Educational summary even if API fails
+    print(f"\n📚 Currency Hedging Summary:")
+    print(f" Purpose: Reduce currency risk from business operations")
+    print(f"   Shield Method: Opposite forex position to offset exposure")
+    print(f"   ⚠️ Trade-off: Protection vs potential upside")
+    print(f" Timing: Balance cost vs risk tolerance")
+    print(f"   Map Strategy: Can be partial or full hedge")
 
 # Execute currency hedging analysis
 print(f"World Executing Currency Hedging Analysis...")
 await hedge_currency_exposure()
 print(f"
 Success Currency hedging analysis complete")
+
 ```
 ```
 
@@ -3090,15 +3108,16 @@ print(f"\n⚠️ Why Precision Matters:")
 position_size = 100000  # 1 standard lot
 price_difference = Decimal("0.0001")  # 1 pip movement
 
-# Incorrect calculation with float
-float_calculation = float(price_difference) * position_size
-
 # Correct calculation with Decimal
 decimal_calculation = price_difference * position_size
 
+# Demonstrate precision by showing exact vs approximated calculations
+approximate_result = 0.0001 * 100000  # Using regular numbers (imprecise)
+exact_result = decimal_calculation  # Using Decimal (exact)
+
 print(f" 1 pip movement on 100k units:")
-print(f"Red Float calculation: ${float_calculation}")
-print(f"   Decimal calculation: ${decimal_calculation}")
+print(f"   Decimal calculation: ${exact_result} (exact)")
+print(f"Red Approximate calculation: ${approximate_result} (may have rounding errors)")
 print(f"   Note Always use Decimal for financial calculations!")
 
 # Step 5: Practical precision examples for different scenarios
@@ -3122,7 +3141,7 @@ print(f"\nData Position Sizing with Decimal Precision:")
 # Example position sizing calculation
 account_balance = Decimal("10000.00")  # $10,000 account
 risk_percentage = Decimal("0.02")  # 2% risk
-stop_loss_pips = Decimal("50")# 50 pip stop loss
+stop_loss_pips = Decimal("50")  # 50 pip stop loss
 pip_value = Decimal("1.00")  # $1 per pip for 10k units
 
 # Calculate position size using Decimal arithmetic
@@ -3171,6 +3190,7 @@ print(f" Decimal vs float: Slightly slower but necessary for accuracy")
 print(f"   Map Memory usage: Decimal uses more memory than float")
 print(f" Trade-off: Accuracy is essential for financial calculations")
 print(f" Conclusion: Always use Decimal for money and prices")
+
 ```
 ```
 
@@ -3199,22 +3219,22 @@ async def main() -> None:
 
     # Step 2: Initialize streaming statistics
     stream_stats = {
-   "price_updates": 0,
-   "heartbeats": 0,
-   "start_time": datetime.now(),
-   "last_prices": {}
+    "price_updates": 0,
+    "heartbeats": 0,
+    "start_time": datetime.now(),
+    "last_prices": {}
     }
 
     async def price_monitor() -> None:
-   """Monitor real-time prices for trading signals with comprehensive analysis."""
-   print(f"\nGrowth Live Price Stream Active:")
+    """Monitor real-time prices for trading signals with comprehensive analysis."""
+    print(f"\nGrowth Live Price Stream Active:")
 
-   try:
-  # Step 3: Enter streaming loop for continuous price updates
-  async for price_data in client.pricing.get_pricing_stream(account_id, instruments):
+    try:
+    # Step 3: Enter streaming loop for continuous price updates
+    async for price_data in client.pricing.get_pricing_stream(account_id, instruments):
 
- # Step 4: Handle price updates with detailed analysis
- if hasattr(price_data, 'type') and price_data.type == "PRICE":
+# Step 4: Handle price updates with detailed analysis
+if hasattr(price_data, 'type') and price_data.type == "PRICE":
 # Extract price components for analysis
 instrument = price_data.instrument
 current_bid = price_data.bids[0].price
@@ -3230,7 +3250,7 @@ stream_stats["last_prices"][instrument] = {
 }
 
 # Calculate spread for market quality assessment
-spread = float(current_ask) - float(current_bid)
+spread = current_ask - current_bid
 spread_pips = spread * 10000
 
 # Display price update with market analysis
@@ -3246,8 +3266,8 @@ await analyze_price_movement(instrument, current_bid, current_ask, stream_stats)
 if stream_stats["price_updates"] % 10 == 0:  # Every 10 updates
     await display_streaming_stats(stream_stats)
 
- # Step 7: Handle heartbeat messages for connection health
- elif hasattr(price_data, 'type') and price_data.type == "HEARTBEAT":
+# Step 7: Handle heartbeat messages for connection health
+elif hasattr(price_data, 'type') and price_data.type == "HEARTBEAT":
 # Keep-alive signal - connection is healthy
 stream_stats["heartbeats"] += 1
 
@@ -3255,69 +3275,69 @@ stream_stats["heartbeats"] += 1
 if stream_stats["heartbeats"] % 5 == 0:
     print(f"   Heart Heartbeat #{stream_stats['heartbeats']} - Connection healthy")
 
- # Step 8: Handle other message types
- else:
+# Step 8: Handle other message types
+else:
 message_type = getattr(price_data, 'type', 'UNKNOWN')
 print(f"   Notes Other message: {message_type}")
 
-   except Exception as e:
-  print(f"\nError Streaming error: {e}")
-  print(f" Check connection, credentials, and market hours")
+    except Exception as e:
+    print(f"\nError Streaming error: {e}")
+    print(f" Check connection, credentials, and market hours")
 
     async def analyze_price_movement(instrument: str, bid: str, ask: str, stats: dict) -> None:
-   """Analyze price movement for trading signals."""
-   # Step 9: Implement simple trading signal logic
-   # This is where your trading algorithms would analyze price data
+    """Analyze price movement for trading signals."""
+    # Step 9: Implement simple trading signal logic
+    # This is where your trading algorithms would analyze price data
 
-   if instrument in stats["last_prices"]:
-  previous_data = stats["last_prices"][instrument]
+    if instrument in stats["last_prices"]:
+    previous_data = stats["last_prices"][instrument]
 
-  # Calculate price change since last update
-  mid_price = (float(bid) + float(ask)) / 2
-  prev_bid = float(previous_data["bid"])
-  prev_ask = float(previous_data["ask"])
-  prev_mid = (prev_bid + prev_ask) / 2
+    # Calculate price change since last update
+    mid_price = (bid + ask) / 2
+    prev_bid = previous_data["bid"]
+    prev_ask = previous_data["ask"]
+    prev_mid = (prev_bid + prev_ask) / 2
 
-  price_change = mid_price - prev_mid
-  price_change_pips = price_change * 10000
+    price_change = mid_price - prev_mid
+    price_change_pips = price_change * 10000
 
-  # Signal detection (basic example)
-  if abs(price_change_pips) > 0.5:  # Significant move (>0.5 pips)
- direction = "Growth UP" if price_change > 0 else "📉 DOWN"
- print(f"Lightning MOVE: {direction} {abs(price_change_pips):.1f} pips")
+    # Signal detection (basic example)
+    if abs(price_change_pips) > 0.5:  # Significant move (>0.5 pips)
+direction = "Growth UP" if price_change > 0 else "📉 DOWN"
+print(f"Lightning MOVE: {direction} {abs(price_change_pips):.1f} pips")
 
- # Here you would implement your trading logic:
- # - Technical analysis
- # - Risk management
- # - Order placement
- # await execute_trading_logic(instrument, direction, price_change_pips)
+# Here you would implement your trading logic:
+# - Technical analysis
+# - Risk management
+# - Order placement
+# await execute_trading_logic(instrument, direction, price_change_pips)
 
     async def display_streaming_stats(stats: dict) -> None:
-   """Display comprehensive streaming performance statistics."""
-   # Step 10: Calculate streaming performance metrics
-   runtime = (datetime.now() - stats["start_time"]).total_seconds()
-   updates_per_second = stats["price_updates"] / runtime if runtime > 0 else 0
+    """Display comprehensive streaming performance statistics."""
+    # Step 10: Calculate streaming performance metrics
+    runtime = (datetime.now() - stats["start_time"]).total_seconds()
+    updates_per_second = stats["price_updates"] / runtime if runtime > 0 else 0
 
-   print(f"\nGrowth Streaming Performance:")
-   print(f"   Time Runtime: {runtime:.1f} seconds")
-   print(f" Price updates: {stats['price_updates']}")
-   print(f"   Heart Heartbeats: {stats['heartbeats']}")
-   print(f"   Lightning Update rate: {updates_per_second:.1f} updates/sec")
+    print(f"\nGrowth Streaming Performance:")
+    print(f"   Time Runtime: {runtime:.1f} seconds")
+    print(f" Price updates: {stats['price_updates']}")
+    print(f"   Heart Heartbeats: {stats['heartbeats']}")
+    print(f"   Lightning Update rate: {updates_per_second:.1f} updates/sec")
 
-   # Display last known prices
-   print(f" Last prices:")
-   for instrument, data in stats["last_prices"].items():
-  print(f"{instrument}: {data['bid']}/{data['ask']}")
+    # Display last known prices
+    print(f" Last prices:")
+    for instrument, data in stats["last_prices"].items():
+    print(f"{instrument}: {data['bid']}/{data['ask']}")
 
     # Step 11: Start price monitoring with error handling
     try:
-   await price_monitor()
+    await price_monitor()
     except KeyboardInterrupt:
-   print(f"\nRed Streaming stopped by user")
-   await display_streaming_stats(stream_stats)
+    print(f"\nRed Streaming stopped by user")
+    await display_streaming_stats(stream_stats)
     except Exception as e:
-   print(f"\nError Streaming failed: {e}")
-   print(f"️ Ensure valid credentials and market hours")
+    print(f"\nError Streaming failed: {e}")
+    print(f"️ Ensure valid credentials and market hours")
 
 
 if __name__ == "__main__":
@@ -3326,12 +3346,13 @@ if __name__ == "__main__":
     print(f" Press Ctrl+C to stop streaming gracefully")
 
     try:
-   asyncio.run(main())
+    asyncio.run(main())
     except KeyboardInterrupt:
-   print(f"\nSuccess Streaming session ended")
+    print(f"\nSuccess Streaming session ended")
     except Exception as e:
-   print(f"\nError Streaming setup failed: {e}")
-   print(f"️ Check your FiveTwenty configuration and try again")
+    print(f"\nError Streaming setup failed: {e}")
+    print(f"️ Check your FiveTwenty configuration and try again")
+
 ```
 ```
 
@@ -3356,8 +3377,8 @@ async def handle_trading_errors() -> None:
 
     # Setup logging for error tracking
     logging.basicConfig(
-   level=logging.INFO,
-   format='%(asctime)s - %(levelname)s - %(message)s'
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
     )
     logger = logging.getLogger(__name__)
 
@@ -3366,73 +3387,73 @@ async def handle_trading_errors() -> None:
 
     # Step 2: Initialize error tracking statistics
     error_stats = {
-   "total_attempts": 0,
-   "successful_orders": 0,
-   "errors_by_type": {},
-   "recovery_attempts": 0,
-   "session_start": datetime.now()
+    "total_attempts": 0,
+    "successful_orders": 0,
+    "errors_by_type": {},
+    "recovery_attempts": 0,
+    "session_start": datetime.now()
     }
 
     def calculate_affordable_size(balance: str) -> int:
-   """Calculate affordable position size based on account balance."""
-   # Conservative sizing: 1% of balance converted to position units
-   balance_decimal = Decimal(balance)
-   conservative_percentage = Decimal('0.01')  # 1% of balance
-   affordable_value = balance_decimal * conservative_percentage
+    """Calculate affordable position size based on account balance."""
+    # Conservative sizing: 1% of balance converted to position units
+    balance_decimal = Decimal(balance)
+    conservative_percentage = Decimal('0.01')  # 1% of balance
+    affordable_value = balance_decimal * conservative_percentage
 
-   # Convert to position units (rough calculation)
-   # For EUR_USD at ~1.10, this gives reasonable position size
-   position_units = int(affordable_value * 10)  # Rough conversion
+    # Convert to position units (rough calculation)
+    # For EUR_USD at ~1.10, this gives reasonable position size
+    position_units = int(affordable_value * 10)  # Rough conversion
 
-   print(f" Balance: ${balance}")
-   print(f" Affordable size: {position_units:,} units (1% risk)")
-   return position_units
+    print(f" Balance: ${balance}")
+    print(f" Affordable size: {position_units:,} units (1% risk)")
+    return position_units
 
     async def attempt_order_with_recovery(instrument: str, units: int, max_retries: int = 3) -> Optional[dict]:
-   """Attempt order placement with intelligent recovery strategies."""
-   # Step 3: Implement robust order placement with retry logic
+    """Attempt order placement with intelligent recovery strategies."""
+    # Step 3: Implement robust order placement with retry logic
 
-   for attempt in range(max_retries):
-  error_stats["total_attempts"] += 1
-  attempt_number = attempt + 1
+    for attempt in range(max_retries):
+    error_stats["total_attempts"] += 1
+    attempt_number = attempt + 1
 
-  print(f"\nStarting Order Attempt #{attempt_number}:")
-  print(f"   Business Instrument: {instrument}")
-  print(f" Size: {units:,} units")
+    print(f"\nStarting Order Attempt #{attempt_number}:")
+    print(f"   Business Instrument: {instrument}")
+    print(f" Size: {units:,} units")
 
-  try:
- # Step 4: Attempt order placement
- order = await client.orders.post_market_order(
+    try:
+# Step 4: Attempt order placement
+order = await client.orders.post_market_order(
 account_id=account_id,
 instrument=instrument,
 units=units
- )
+)
 
- # Success path
- error_stats["successful_orders"] += 1
- print(f" Order successful on attempt #{attempt_number}")
- print(f" Order ID: {order.order_create_transaction.id}")
+# Success path
+error_stats["successful_orders"] += 1
+print(f" Order successful on attempt #{attempt_number}")
+print(f" Order ID: {order.order_create_transaction.id}")
 
- if order.order_fill_transaction:
+if order.order_fill_transaction:
 print(f" Fill price: {order.order_fill_transaction.price}")
 
- return order
+return order
 
-  except VeeTwentyError as e:
- # Step 5: Analyze error type and implement specific recovery
- error_type = str(e)
- error_stats["errors_by_type"][error_type] = error_stats["errors_by_type"].get(error_type, 0) + 1
+    except VeeTwentyError as e:
+# Step 5: Analyze error type and implement specific recovery
+error_type = str(e)
+error_stats["errors_by_type"][error_type] = error_stats["errors_by_type"].get(error_type, 0) + 1
 
- print(f"   Error Attempt #{attempt_number} failed: {e}")
- logger.error(f"Trading error on attempt {attempt_number}: {e}")
+print(f"   Error Attempt #{attempt_number} failed: {e}")
+logger.error(f"Trading error on attempt {attempt_number}: {e}")
 
- # Step 6: Implement error-specific recovery strategies
- if "INSUFFICIENT_MARGIN" in error_type:
+# Step 6: Implement error-specific recovery strategies
+if "INSUFFICIENT_MARGIN" in error_type:
 print(f"   ⚠️ INSUFFICIENT_MARGIN detected - reducing position size")
 
 # Get current account status
 account = await client.accounts.get_account(account_id)
-available_margin = float(account.margin_available)
+available_margin = account.margin_available
 
 print(f"   Available margin: ${available_margin}")
 
@@ -3441,19 +3462,19 @@ if available_margin > 100:  # Minimum margin threshold
     smaller_size = calculate_affordable_size(account.balance)
 
     if smaller_size < units:
-   units = smaller_size
-   error_stats["recovery_attempts"] += 1
-   print(f"   Reduced size to: {units:,} units")
-   print(f"Processing Retrying with smaller position...")
-   continue  # Retry with smaller size
+    units = smaller_size
+    error_stats["recovery_attempts"] += 1
+    print(f"   Reduced size to: {units:,} units")
+    print(f"Processing Retrying with smaller position...")
+    continue  # Retry with smaller size
     else:
-   print(f"Error: Cannot reduce size further - insufficient funds")
-   break
+    print(f"Error: Cannot reduce size further - insufficient funds")
+    break
 else:
     print(f"Error: Insufficient margin ({available_margin}) - cannot trade")
     break
 
- elif "MARKET_HALTED" in error_type:
+elif "MARKET_HALTED" in error_type:
 print(f"   ⏸️ MARKET_HALTED detected - implementing wait strategy")
 
 if attempt < max_retries - 1:  # Don't wait on final attempt
@@ -3467,22 +3488,22 @@ else:
     print(f"Error: Market halt persists - abandoning order")
     break
 
- elif "INVALID_INSTRUMENT" in error_type:
+elif "INVALID_INSTRUMENT" in error_type:
 print(f"   Error INVALID_INSTRUMENT - cannot recover")
 print(f"Note: Check instrument name and market hours")
 break
 
- elif "ACCOUNT_NOT_ACTIVE" in error_type:
+elif "ACCOUNT_NOT_ACTIVE" in error_type:
 print(f"   Error ACCOUNT_NOT_ACTIVE - cannot recover")
 print(f"Note: Check account status with broker")
 break
 
- elif "INSUFFICIENT_AUTHORIZATION" in error_type:
+elif "INSUFFICIENT_AUTHORIZATION" in error_type:
 print(f"   Error INSUFFICIENT_AUTHORIZATION - cannot recover")
 print(f"Note: Check API token permissions")
 break
 
- elif "PRICE_INVALID" in error_type:
+elif "PRICE_INVALID" in error_type:
 print(f"   ⚠️ PRICE_INVALID - market conditions issue")
 
 if attempt < max_retries - 1:
@@ -3495,7 +3516,7 @@ else:
     print(f"Error: Persistent pricing issues - abandoning order")
     break
 
- else:
+else:
 # Step 7: Handle unexpected errors with logging
 print(f"   ⚠️ Unexpected error type: {error_type}")
 logger.error(f"Unexpected trading error: {e}")
@@ -3511,28 +3532,28 @@ else:
     print(f"Error: Max retries exceeded for unknown error")
     break
 
-   # Step 8: All retry attempts exhausted
-   print(f"\nError Order placement failed after {max_retries} attempts")
-   return None
+    # Step 8: All retry attempts exhausted
+    print(f"\nError Order placement failed after {max_retries} attempts")
+    return None
 
     # Step 9: Execute comprehensive error handling demonstration
     print(f"\nMap Testing Error Handling Scenarios:")
 
     # Test scenarios with different error conditions
     test_scenarios = [
-   ("EUR_USD", 10000, "Normal order attempt"),
-   ("EUR_USD", 1000000, "Large order (may trigger margin error)"),
-   ("INVALID_PAIR", 10000, "Invalid instrument test"),
+    ("EUR_USD", 10000, "Normal order attempt"),
+    ("EUR_USD", 1000000, "Large order (may trigger margin error)"),
+    ("INVALID_PAIR", 10000, "Invalid instrument test"),
     ]
 
     for instrument, units, description in test_scenarios:
-   print(f"\nTarget Scenario: {description}")
-   result = await attempt_order_with_recovery(instrument, units)
+    print(f"\nTarget Scenario: {description}")
+    result = await attempt_order_with_recovery(instrument, units)
 
-   if result:
-  print(f" Scenario completed successfully")
-   else:
-  print(f"   Error Scenario failed - all recovery attempts exhausted")
+    if result:
+    print(f" Scenario completed successfully")
+    else:
+    print(f"   Error Scenario failed - all recovery attempts exhausted")
 
     # Step 10: Display comprehensive error handling statistics
     print(f"\nGrowth Error Handling Session Statistics:")
@@ -3547,7 +3568,7 @@ else:
 
     print(f"\n📉 Error Breakdown:")
     for error_type, count in error_stats["errors_by_type"].items():
-   print(f"   • {error_type}: {count} occurrences")
+    print(f"   • {error_type}: {count} occurrences")
 
     # Step 11: Provide error handling best practices summary
     print(f"\nNote Error Handling Best Practices:")
@@ -3571,7 +3592,7 @@ except Exception as e:
     print(f"️ Note: Some errors are expected for demonstration purposes")
 
 print(f"\nSuccess Error handling demonstration complete")
-```
+
 ```
 
 ---

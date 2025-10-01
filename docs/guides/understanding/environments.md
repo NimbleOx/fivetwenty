@@ -1276,12 +1276,12 @@ class ComprehensiveTradingEnvironment:
             "environment_type": self.env_type,
             "max_position_size": self.max_position_size,
             "risk_checks_enabled": self.risk_checks_enabled,
-            "position_size_limit_percentage": float(self.position_size_limit_percentage),
+            "position_size_limit_percentage": self.position_size_limit_percentage,
             "mandatory_stop_loss": self.mandatory_stop_loss,
             "max_daily_trades": self.max_daily_trades,
-            "risk_per_trade_limit": float(self.risk_per_trade_limit),
+            "risk_per_trade_limit": self.risk_per_trade_limit,
             "daily_trade_count": self.daily_trade_count,
-            "total_risk_exposure": float(self.total_risk_exposure),
+            "total_risk_exposure": self.total_risk_exposure,
             "safety_violations": self.safety_violations,
             "financial_risk_level": "ZERO" if self.env_type == "practice" else "MAXIMUM"
         }
@@ -1396,9 +1396,9 @@ class ComprehensiveEnvironmentMonitor:
             monitoring_results = {
                 "environment": environment_name,
                 "timestamp": current_time,
-                "account_balance": float(account_balance),
-                "unrealized_pl": float(unrealized_pl),
-                "margin_utilization": float(margin_utilization),
+                "account_balance": account_balance,
+                "unrealized_pl": unrealized_pl,
+                "margin_utilization": margin_utilization,
                 "alerts": [],
                 "status": "normal"
             }
@@ -1527,7 +1527,7 @@ class ComprehensiveEnvironmentMonitor:
             "total_alerts": self.alert_count,
             "monitoring_active": self.monitoring_active,
             "last_check": self.last_check_time,
-            "alert_thresholds": {k: float(v) if isinstance(v, Decimal) else v for k, v in self.alert_thresholds.items()}
+            "alert_thresholds": self.alert_thresholds
         }
 
 

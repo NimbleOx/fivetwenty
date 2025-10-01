@@ -32,6 +32,28 @@
   border-left: 4px solid var(--md-accent-fg-color);
 }
 
+/* Enhanced comment styling for better visibility */
+.highlight .c,   /* Comment */
+.highlight .c1,  /* Single-line comment */
+.highlight .cm,  /* Multi-line comment */
+.highlight .cp,  /* Preprocessor comment */
+.highlight .cs { /* Special comment */
+  color: #7cb342 !important;  /* Brighter green for light mode */
+  font-style: italic;
+  font-weight: 500;
+}
+
+/* Dark mode comment styling */
+[data-md-color-scheme="slate"] .highlight .c,
+[data-md-color-scheme="slate"] .highlight .c1,
+[data-md-color-scheme="slate"] .highlight .cm,
+[data-md-color-scheme="slate"] .highlight .cp,
+[data-md-color-scheme="slate"] .highlight .cs {
+  color: #9ccc65 !important;  /* Even brighter green for dark mode */
+  font-style: italic;
+  font-weight: 500;
+}
+
 /* Admonition styling */
 .md-typeset .admonition.tip {
   border-color: var(--md-accent-fg-color);

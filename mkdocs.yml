@@ -212,7 +212,7 @@ plugins:
   #     allow_errors: true
 
 extra_css:
-  - assets/footer.css
+  - assets/custom.css
 
 extra:
   # analytics:

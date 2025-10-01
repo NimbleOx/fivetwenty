@@ -206,8 +206,8 @@ class LiveTradingValidator:
 
         # Step 3: Check daily loss limit to prevent runaway losses
         # Daily P&L includes both realized and unrealized gains/losses
-        daily_pl = float(account.unrealized_pl) + float(getattr(account, 'pl', 0))
-        if daily_pl < -float(self.daily_loss_limit):
+        daily_pl = Decimal(str(account.unrealized_pl)) + Decimal(str(getattr(account, 'pl', 0)))
+        if daily_pl < -self.daily_loss_limit:
             msg = f"⚠️ Daily loss limit exceeded: ${daily_pl:.2f} < -${self.daily_loss_limit}"
             print(f"Error {msg}")
             raise ValueError(msg)
@@ -215,8 +215,8 @@ class LiveTradingValidator:
 
         # Step 4: Verify adequate margin availability for safe trading
         # Margin buffer prevents margin calls and forced position closures
-        margin_available = float(account.margin_available)
-        min_margin_buffer = 100  # Minimum $100 margin buffer
+        margin_available = Decimal(str(account.margin_available))
+        min_margin_buffer = Decimal("100")  # Minimum $100 margin buffer
         if margin_available < min_margin_buffer:
             msg = f"⚠️ Insufficient margin: ${margin_available:.2f} < ${min_margin_buffer}"
             print(f"Error {msg}")
@@ -368,10 +368,10 @@ async def monitor_live_account(account_id: str, check_interval: int = 30) -> Non
                 monitoring_count += 1
 
                 # Step 3: Extract critical account metrics for analysis
-                balance = float(account.balance)              # Current account equity
-                unrealized_pl = float(account.unrealized_pl)  # Floating P&L from open positions
-                margin_used = float(account.margin_used)      # Capital committed to positions
-                margin_available = float(account.margin_available) # Available trading capacity
+                balance = Decimal(str(account.balance))              # Current account equity
+                unrealized_pl = Decimal(str(account.unrealized_pl))  # Floating P&L from open positions
+                margin_used = Decimal(str(account.margin_used))      # Capital committed to positions
+                margin_available = Decimal(str(account.margin_available)) # Available trading capacity
 
                 # Step 4: Display comprehensive account status
                 print(f"\nBalance Live Account Status (Update #{monitoring_count}):")

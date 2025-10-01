@@ -521,7 +521,6 @@ print(f"   Error Negative units: SELL order (go short or close long)")
 print(f"   Position Magnitude: Position size in base currency units")
 print(f"   Note Example: +10000 = buy 10k EUR, -10000 = sell 10k EUR")
 ```
-```
 
 ### Time-In-Force Options
 
@@ -701,8 +700,8 @@ async def monitor_order_status(order_id: str) -> Any:
 
                     # Calculate execution quality
                     if hasattr(order, 'price') and order.price:
-                        requested_price = float(order.price)
-                        actual_price = float(fill_price)
+                        requested_price = Decimal(str(order.price))
+                        actual_price = Decimal(str(fill_price))
                         slippage = actual_price - requested_price
 
                         if abs(slippage) < 0.0001:  # Less than 1 pip
@@ -819,7 +818,7 @@ async def modify_pending_order(order_id: str, new_price: Decimal) -> Any:
             # Step 4: Calculate modification impact
             current_price = Decimal(str(current_order.price))
             price_change = new_price - current_price
-            price_change_pips = float(price_change * 10000)
+            price_change_pips = price_change * 10000
 
             print(f"\nProcessing Modification Impact Analysis:")
             print(f"   Down Price change: {price_change:+.5f}")
@@ -1310,10 +1309,10 @@ async def calculate_position_size(risk_amount: Decimal, stop_distance: Decimal, 
     return {
         "recommended_size": constrained_size,
         "conservative_size": conservative_size,
-        "actual_risk": float(actual_risk),
-        "risk_utilization": float(risk_utilization),
-        "stop_distance_pips": float(stop_distance_pips),
-        "pip_value": float(pip_value_per_10k),
+        "actual_risk": actual_risk,
+        "risk_utilization": risk_utilization,
+        "stop_distance_pips": stop_distance_pips,
+        "pip_value": pip_value_per_10k,
         "sizing_options": sizing_options
     }
 ```

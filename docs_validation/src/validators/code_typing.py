@@ -267,23 +267,11 @@ class CodeTypingValidator(BaseValidator):
                 # Check for validation skip patterns in HTML comments
                 if "<!--" in line:
                     # Skip all validation
-                    if any(pattern in line for pattern in [
-                        "validation: skip",
-                        "validation: skip-all",
-                        "fragment:",
-                        "partial:",
-                        "example:",
-                        "skip-type",
-                        "no-type"
-                    ]):
+                    if any(pattern in line for pattern in ["validation: skip", "validation: skip-all", "fragment:", "partial:", "example:", "skip-type", "no-type"]):
                         return True
 
                     # Skip only typing (but allow linting)
-                    if any(pattern in line for pattern in [
-                        "validation: skip-typing",
-                        "skip-typing",
-                        "no-typing"
-                    ]):
+                    if any(pattern in line for pattern in ["validation: skip-typing", "skip-typing", "no-typing"]):
                         return True
 
         return False

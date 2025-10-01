@@ -40,6 +40,35 @@ class Transaction(ApiModel):
     type: TransactionType
 
 
+class TradeOpen(ApiModel):
+    """Represents a Trade that was opened as part of an OrderFill."""
+
+    trade_id: str = Field(alias="tradeID")
+    units: Decimal
+    price: PriceValue
+    guaranteed_execution_fee: AccountUnits | None = Field(None, alias="guaranteedExecutionFee")
+    quote_guaranteed_execution_fee: Decimal | None = Field(None, alias="quoteGuaranteedExecutionFee")
+    client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
+    half_spread_cost: AccountUnits | None = Field(None, alias="halfSpreadCost")
+    initial_margin_required: AccountUnits | None = Field(None, alias="initialMarginRequired")
+
+
+class TradeReduce(ApiModel):
+    """Represents a Trade that was reduced or closed as part of an OrderFill."""
+
+    trade_id: str = Field(alias="tradeID")
+    units: Decimal
+    price: PriceValue
+    realized_pl: AccountUnits | None = Field(None, alias="realizedPL")
+    financing: AccountUnits | None = None
+    base_financing: Decimal | None = Field(None, alias="baseFinancing")
+    quote_financing: Decimal | None = Field(None, alias="quoteFinancing")
+    financing_rate: Decimal | None = Field(None, alias="financingRate")
+    guaranteed_execution_fee: AccountUnits | None = Field(None, alias="guaranteedExecutionFee")
+    quote_guaranteed_execution_fee: Decimal | None = Field(None, alias="quoteGuaranteedExecutionFee")
+    half_spread_cost: AccountUnits | None = Field(None, alias="halfSpreadCost")
+
+
 class OrderFillTransaction(Transaction):
     """Transaction representing the filling of an Order."""
 
@@ -58,9 +87,9 @@ class OrderFillTransaction(Transaction):
     commission: Decimal | None = None
     guarantee_execution_fee: Decimal | None = Field(None, alias="guaranteeExecutionFee")
     account_balance: Decimal | None = Field(None, alias="accountBalance")
-    trade_opened: dict[str, Any] | None = Field(None, alias="tradeOpened")
-    trades_closed: list[dict[str, Any]] | None = Field(None, alias="tradesClosed")
-    trade_reduced: dict[str, Any] | None = Field(None, alias="tradeReduced")
+    trade_opened: TradeOpen | None = Field(None, alias="tradeOpened")
+    trades_closed: list[TradeReduce] | None = Field(None, alias="tradesClosed")
+    trade_reduced: TradeReduce | None = Field(None, alias="tradeReduced")
     half_spread_cost: Decimal | None = Field(None, alias="halfSpreadCost")
 
 
@@ -530,6 +559,8 @@ __all__ = [
     "TakeProfitOrderRejectTransaction",
     "TakeProfitOrderTransaction",
     "TradeClientExtensionsModifyTransaction",
+    "TradeOpen",
+    "TradeReduce",
     "TrailingStopLossOrderRejectTransaction",
     "TrailingStopLossOrderTransaction",
     "Transaction",
