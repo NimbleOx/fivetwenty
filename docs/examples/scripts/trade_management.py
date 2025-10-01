@@ -11,7 +11,6 @@ Demonstrates trade operations including:
 """
 
 import asyncio
-
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
