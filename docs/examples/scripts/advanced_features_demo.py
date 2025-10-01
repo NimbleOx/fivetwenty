@@ -18,6 +18,7 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import (
     ClientExtensions,
     InstrumentName,
+    MarketOrderRequest,
     StopLossDetails,
     TakeProfitDetails,
 )
@@ -93,7 +94,8 @@ async def main() -> None:
         print(f"  Comment: {extensions.comment}")
 
         # Place order with extensions
-        order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, client_extensions=extensions, client_request_id=client_request_id)
+        order_request = MarketOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("1000"), clientExtensions=extensions)
+        order = await client.orders.post_order(account_id=client.account_id, order_request=order_request, client_request_id=client_request_id)
 
         if order.order_fill_transaction:
             print("\n✅ Order placed with extensions")
@@ -152,9 +154,14 @@ async for event in client.pricing.stream_pricing_with_retries(
         print(f"  Take Profit: {take_profit_price} (+50 pips)")
         print(f"  Stop Loss: {stop_loss_price} (-25 pips)")
 
-        bracket_order = await client.orders.post_market_order(
-            account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, take_profit_on_fill=TakeProfitDetails(price=str(take_profit_price)), stop_loss_on_fill=StopLossDetails(price=str(stop_loss_price)), client_extensions=ClientExtensions(comment="Bracket order demo")
+        bracket_order_request = MarketOrderRequest(
+            instrument=InstrumentName.EUR_USD,
+            units=Decimal("1000"),
+            takeProfitOnFill=TakeProfitDetails(price=take_profit_price),
+            stopLossOnFill=StopLossDetails(price=stop_loss_price),
+            clientExtensions=ClientExtensions(comment="Bracket order demo"),
         )
+        bracket_order = await client.orders.post_order(account_id=client.account_id, order_request=bracket_order_request)
 
         if bracket_order.order_fill_transaction:
             print("\n✅ Bracket order filled")

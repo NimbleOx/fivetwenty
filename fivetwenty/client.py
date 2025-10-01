@@ -487,6 +487,11 @@ class Client:
         """Get the account configuration."""
         return self._async.config
 
+    @property
+    def _environment(self) -> Environment:
+        """Get the configured environment."""
+        return self._async._environment
+
     def __enter__(self) -> "Client":
         return self
 

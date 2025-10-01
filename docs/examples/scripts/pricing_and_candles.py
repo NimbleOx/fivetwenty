@@ -24,7 +24,7 @@ async def main() -> None:
         # Section 1: Get current pricing
         print("\n=== 1. Current Pricing ===")
 
-        instruments = [InstrumentName.EUR_USD, InstrumentName.GBP_USD, InstrumentName.USD_JPY]
+        instruments = [InstrumentName.EUR_USD.value, InstrumentName.GBP_USD.value, InstrumentName.USD_JPY.value]
 
         print(f"\nFetching current prices for {len(instruments)} instruments...")
 
@@ -142,7 +142,7 @@ async for event in client.pricing.stream_pricing_with_retries(
 
         latest_response = await client.pricing.get_latest_candles(
             account_id=client.account_id,
-            candleSpecifications=[
+            candle_specifications=[
                 f"{InstrumentName.EUR_USD}:{CandlestickGranularity.H1}",
                 f"{InstrumentName.GBP_USD}:{CandlestickGranularity.H1}",
             ],
@@ -276,8 +276,8 @@ async for event in client.pricing.stream_pricing_with_retries(
 
             # Simple Bollinger Bands
             if len(closes) >= 20:
-                sma = sum(closes[-20:]) / 20
-                variance = sum((c - sma) ** 2 for c in closes[-20:]) / 20
+                sma = sum(closes[-20:]) / Decimal("20")
+                variance = sum((c - sma) ** 2 for c in closes[-20:]) / Decimal("20")
                 std_dev = variance ** Decimal("0.5")
                 upper_band = sma + (std_dev * 2)
                 lower_band = sma - (std_dev * 2)

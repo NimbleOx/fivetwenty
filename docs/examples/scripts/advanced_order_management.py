@@ -17,7 +17,11 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import (
     ClientExtensions,
     InstrumentName,
+    LimitOrderRequest,
+    MarketIfTouchedOrderRequest,
+    MarketOrderRequest,
     StopLossDetails,
+    StopOrderRequest,
     TakeProfitDetails,
     TimeInForce,
 )
@@ -42,21 +46,22 @@ async def main() -> None:
         extensions = ClientExtensions(id="strategy-A-001", tag="momentum-strategy", comment="Opening position with auto TP/SL")
 
         # Define take profit and stop loss on fill
-        take_profit = TakeProfitDetails(price=str(current_ask + Decimal("0.0050")))  # 50 pips profit
-        stop_loss = StopLossDetails(price=str(current_ask - Decimal("0.0025")))  # 25 pips loss
+        take_profit = TakeProfitDetails(price=current_ask + Decimal("0.0050"))  # 50 pips profit
+        stop_loss = StopLossDetails(price=current_ask - Decimal("0.0025"))  # 25 pips loss
 
         print(f"Placing market order with TP={take_profit.price}, SL={stop_loss.price}")
 
-        order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, client_extensions=extensions, take_profit_on_fill=take_profit, stop_loss_on_fill=stop_loss)
+        order_request = MarketOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("1000"), clientExtensions=extensions, takeProfitOnFill=take_profit, stopLossOnFill=stop_loss)
+        order_response = await client.orders.post_order(account_id=client.account_id, order_request=order_request)
 
         if order_response.order_fill_transaction:
             fill = order_response.order_fill_transaction
             print(f"✅ Order filled at {fill.price}")
             print(f"Client ID: {extensions.id}")
 
-            if order_response.order_create_transaction.take_profit_on_fill:
+            if order_response.order_create_transaction and hasattr(order_response.order_create_transaction, "take_profit_on_fill"):
                 print(f"Take Profit: {order_response.order_create_transaction.take_profit_on_fill.price}")
-            if order_response.order_create_transaction.stop_loss_on_fill:
+            if order_response.order_create_transaction and hasattr(order_response.order_create_transaction, "stop_loss_on_fill"):
                 print(f"Stop Loss: {order_response.order_create_transaction.stop_loss_on_fill.price}")
 
         # Section 2: Limit orders
@@ -67,14 +72,8 @@ async def main() -> None:
 
         print(f"Placing GTC limit order at {limit_price}")
 
-        limit_order = await client.orders.post_limit_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000,
-            price=limit_price,
-            time_in_force=TimeInForce.GTC,  # Good-Till-Cancelled
-            client_extensions=ClientExtensions(comment="Buy limit - support level"),
-        )
+        limit_request = LimitOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("1000"), price=limit_price, timeInForce=TimeInForce.GTC, clientExtensions=ClientExtensions(comment="Buy limit - support level"))
+        limit_order = await client.orders.post_order(account_id=client.account_id, order_request=limit_request)
 
         limit_order_id = None
         if limit_order.order_create_transaction:
@@ -84,11 +83,12 @@ async def main() -> None:
             print(f"Time in Force: {limit_order.order_create_transaction.time_in_force}")
 
         # GTD limit order (expires in 1 hour)
-        gtd_time = (datetime.now(timezone.utc) + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
+        gtd_time = datetime.now(timezone.utc) + timedelta(hours=1)
 
         print(f"\nPlacing GTD limit order (expires at {gtd_time})")
 
-        gtd_order = await client.orders.post_limit_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=500, price=current_bid - Decimal("0.0030"), time_in_force=TimeInForce.GTD, gtd_time=gtd_time, client_extensions=ClientExtensions(comment="1-hour limit order"))
+        gtd_request = LimitOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("500"), price=current_bid - Decimal("0.0030"), timeInForce=TimeInForce.GTD, gtdTime=gtd_time, clientExtensions=ClientExtensions(comment="1-hour limit order"))
+        gtd_order = await client.orders.post_order(account_id=client.account_id, order_request=gtd_request)
 
         gtd_order_id = None
         if gtd_order.order_create_transaction:
@@ -104,7 +104,8 @@ async def main() -> None:
 
         print(f"Placing stop-entry order at {stop_entry_price}")
 
-        stop_order = await client.orders.post_stop_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, price=stop_entry_price, time_in_force=TimeInForce.GTC, client_extensions=ClientExtensions(comment="Breakout entry"))
+        stop_request = StopOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("1000"), price=stop_entry_price, timeInForce=TimeInForce.GTC, clientExtensions=ClientExtensions(comment="Breakout entry"))
+        stop_order = await client.orders.post_order(account_id=client.account_id, order_request=stop_request)
 
         stop_order_id = None
         if stop_order.order_create_transaction:
@@ -120,9 +121,15 @@ async def main() -> None:
 
         print(f"Placing MIT order at {mit_price}")
 
-        mit_order = await client.orders.post_market_if_touched_order(
-            account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, price=mit_price, time_in_force=TimeInForce.GTC, take_profit_on_fill=TakeProfitDetails(price=str(mit_price + Decimal("0.0040"))), client_extensions=ClientExtensions(comment="MIT with TP")
+        mit_request = MarketIfTouchedOrderRequest(
+            instrument=InstrumentName.EUR_USD,
+            units=Decimal("1000"),
+            price=mit_price,
+            timeInForce=TimeInForce.GTC,
+            takeProfitOnFill=TakeProfitDetails(price=mit_price + Decimal("0.0040")),
+            clientExtensions=ClientExtensions(comment="MIT with TP"),
         )
+        mit_order = await client.orders.post_order(account_id=client.account_id, order_request=mit_request)
 
         mit_order_id = None
         if mit_order.order_create_transaction:
@@ -135,15 +142,15 @@ async def main() -> None:
 
         # Get all orders
         all_orders = await client.orders.get_orders(account_id=client.account_id)
-        print(f"\nTotal orders: {len(all_orders.get('orders', []))}")
+        print(f"\nTotal orders: {len(all_orders.get('orders', []))}")  # type: ignore[attr-defined]
 
         # Filter by instrument
         eur_orders = await client.orders.get_orders(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
-        print(f"EUR/USD orders: {len(eur_orders.get('orders', []))}")
+        print(f"EUR/USD orders: {len(eur_orders.get('orders', []))}")  # type: ignore[attr-defined]
 
         # Filter by state
         pending_orders = await client.orders.get_orders(account_id=client.account_id, state="PENDING")
-        print(f"Pending orders: {len(pending_orders.get('orders', []))}")
+        print(f"Pending orders: {len(pending_orders.get('orders', []))}")  # type: ignore[attr-defined]
 
         # Section 6: Get pending orders
         print("\n=== 6. Pending Orders ===")
@@ -196,7 +203,8 @@ async def main() -> None:
         if gtd_order_id:
             print(f"\nUpdating client extensions for order {gtd_order_id}")
 
-            extension_response = await client.orders.put_order_client_extensions(account_id=client.account_id, order_specifier=gtd_order_id, client_extensions=ClientExtensions(comment="Updated: High priority order", tag="priority-high"))
+            extensions_update = ClientExtensions(comment="Updated: High priority order", tag="priority-high")
+            extension_response = await client.orders.put_order_client_extensions(account_id=client.account_id, order_specifier=gtd_order_id, client_extensions=extensions_update.model_dump(by_alias=True, exclude_none=True))
 
             if extension_response.get("orderClientExtensionsModifyTransaction"):
                 print("✅ Client extensions updated")

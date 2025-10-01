@@ -13,6 +13,8 @@ Demonstrates different ways to configure the client:
 import asyncio
 import os
 
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
@@ -51,12 +53,12 @@ async def main() -> None:
 
     print("\nAccountConfig provides structured configuration:")
 
-    config = AccountConfig(token=token, account_id=account_id, environment=Environment.PRACTICE)
+    config = AccountConfig(alias="example", token=SecretStr(token) if token else SecretStr(""), account_id=SecretStr(account_id) if account_id else SecretStr(""), environment=Environment.PRACTICE)
 
     print("\nAccountConfig created:")
-    print(f"  Account ID: {config.account_id}")
+    print(f"  Account ID: {config.account_id.get_secret_value()}")
     print(f"  Environment: {config.environment}")
-    print(f"  Token: {config.token[:10]}... (masked)")
+    print(f"  Token: {config.token.get_secret_value()[:10]}... (masked)")
 
     async with AsyncClient(config=config) as client:
         print("\n✅ Connected with AccountConfig")
@@ -208,7 +210,7 @@ async with AsyncClient(
     print("  *credentials*")
 
     print("\nAccountConfig automatically masks sensitive data:")
-    masked_config = AccountConfig(token="super-secret-token-12345", account_id="123-456-7890123-001", environment=Environment.PRACTICE)
+    masked_config = AccountConfig(alias="demo", token=SecretStr("super-secret-token-12345"), account_id=SecretStr("123-456-7890123-001"), environment=Environment.PRACTICE)
     print(f"  Token in repr: {masked_config!r}")
     print("  (Token is masked, not exposed in logs)")
 
