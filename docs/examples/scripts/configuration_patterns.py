@@ -13,8 +13,7 @@ Demonstrates different ways to configure the client:
 import asyncio
 import os
 
-from fivetwenty import AsyncClient, Environment
-from fivetwenty._internal.environment import AccountConfig
+from fivetwenty import AccountConfig, AsyncClient, Environment
 
 
 async def main() -> None:
@@ -31,7 +30,7 @@ async def main() -> None:
     async with AsyncClient() as client:
         print("\n✅ Connected using environment variables")
         print(f"Account: {client.account_id}")
-        print(f"Environment: {client.environment.value}")
+        print(f"Environment: {client._environment.value}")
 
     # Section 2: Direct parameter configuration
     print("\n=== 2. Direct Parameter Configuration ===")
@@ -45,7 +44,7 @@ async def main() -> None:
     async with AsyncClient(token=token, account_id=account_id, environment=Environment.PRACTICE) as client:
         print("✅ Connected with direct parameters")
         print(f"Account: {client.account_id}")
-        print(f"Environment: {client.environment}")
+        print(f"Environment: {client._environment}")
 
     # Section 3: Using AccountConfig
     print("\n=== 3. AccountConfig Usage ===")

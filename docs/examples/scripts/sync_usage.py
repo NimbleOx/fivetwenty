@@ -41,7 +41,7 @@ def main() -> None:
     with Client() as client:
         print("✅ Connected (sync)")
         print(f"Account: {client.account_id}")
-        print(f"Environment: {client.environment.value}")
+        print(f"Environment: {client._environment.value}")
 
     # Section 3: Basic sync operations
     print("\n=== 3. Basic Sync Operations ===")
@@ -238,7 +238,7 @@ async def my_async_function():
     print("\nFull working example:")
 
     with Client() as client:
-        print(f"\n1. Connected to {client.environment.value}")
+        print(f"\n1. Connected to {client._environment.value}")
 
         # Check balance
         summary = client.accounts.get_account_summary(client.account_id)
