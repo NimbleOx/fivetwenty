@@ -11,7 +11,7 @@ Demonstrates transaction operations including:
 
 import asyncio
 from collections import Counter
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
@@ -48,8 +48,8 @@ async def main() -> None:
         print("\n=== 2. Transactions by Time Range ===")
 
         # Get transactions from last 7 days
-        from_time = (datetime.now(UTC) - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
-        to_time = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
+        from_time = datetime.now(timezone.utc) - timedelta(days=7)
+        to_time = datetime.now(timezone.utc)
 
         print("\nFetching transactions from last 7 days...")
         print(f"From: {from_time}")
@@ -104,7 +104,7 @@ async def main() -> None:
 
         print(f"\nFetching transactions since ID {since_id}...")
 
-        since_response = await client.transactions.get_transactions_since_id(account_id=client.account_id, id=str(since_id))
+        since_response = await client.transactions.get_transactions_since_id(account_id=client.account_id, transaction_id=str(since_id))
 
         since_transactions = since_response.get("transactions", [])
         print(f"Found {len(since_transactions)} transaction(s) since ID {since_id}")
@@ -122,7 +122,7 @@ async def main() -> None:
 
         print(f"\nFetching transactions from ID {from_id} to {to_id}...")
 
-        range_response = await client.transactions.get_transactions_range(account_id=client.account_id, from_id=str(from_id), to_id=str(to_id))
+        range_response = await client.transactions.get_transactions_range(account_id=client.account_id, from_transaction_id=str(from_id), to_transaction_id=str(to_id))
 
         range_transactions = range_response.get("transactions", [])
         print(f"Found {len(range_transactions)} transaction(s) in range")
@@ -162,7 +162,7 @@ async def main() -> None:
         print("\n=== 8. Transaction Type Analysis ===")
 
         # Get a good sample of transactions
-        analysis_response = await client.transactions.get_transactions_since_id(account_id=client.account_id, id=str(max(1, int(last_transaction_id) - 200)))
+        analysis_response = await client.transactions.get_transactions_since_id(account_id=client.account_id, transaction_id=str(max(1, int(last_transaction_id) - 200)))
 
         analysis_transactions = analysis_response.get("transactions", [])
 

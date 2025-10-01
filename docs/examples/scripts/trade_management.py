@@ -12,8 +12,10 @@ Demonstrates trade operations including:
 
 import asyncio
 
+from decimal import Decimal
+
 from fivetwenty import AsyncClient
-from fivetwenty.models import ClientExtensions, InstrumentName, StopLossDetails, TakeProfitDetails
+from fivetwenty.models import ClientExtensions, InstrumentName, MarketOrderRequest, StopLossDetails, TakeProfitDetails, TradeStateFilter
 
 
 async def main() -> None:
@@ -45,7 +47,7 @@ async def main() -> None:
         print(f"EUR/USD trades: {len(eur_trades.get('trades', []))}")
 
         # Filter by state
-        open_trades = await client.trades.get_trades(account_id=client.account_id, state="OPEN")
+        open_trades = await client.trades.get_trades(account_id=client.account_id, state=TradeStateFilter.OPEN)
         print(f"Open trades: {len(open_trades.get('trades', []))}")
 
         # Show first few trades
@@ -80,8 +82,8 @@ async def main() -> None:
         order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
         trade_id = None
-        if order_response.order_fill_transaction and order_response.order_fill_transaction.trade_opened:
-            trade_id = order_response.order_fill_transaction.trade_opened.trade_id
+        if order_response.order_fill_transaction and order_response.order_fill_transaction.get("tradeOpened"):
+            trade_id = order_response.order_fill_transaction["tradeOpened"]["tradeID"]
             print(f"\nOpened trade: {trade_id}")
 
             # Get full trade details
@@ -109,11 +111,12 @@ async def main() -> None:
         trade_ids = []
 
         for i in range(3):
-            order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=500, client_extensions=ClientExtensions(id=f"trade-batch-{i + 1}", comment=f"Trade {i + 1} of 3"))
-            if order.order_fill_transaction and order.order_fill_transaction.trade_opened:
-                tid = order.order_fill_transaction.trade_opened.trade_id
+            order_request = MarketOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("500"), clientExtensions=ClientExtensions(id=f"trade-batch-{i + 1}", comment=f"Trade {i + 1} of 3"))
+            order = await client.orders.post_order(account_id=client.account_id, order_request=order_request)
+            if order.order_fill_transaction and order.order_fill_transaction.get("tradeOpened"):
+                tid = order.order_fill_transaction["tradeOpened"]["tradeID"]
                 trade_ids.append(tid)
-                print(f"  ✅ Trade {tid} opened at {order.order_fill_transaction.price}")
+                print(f"  ✅ Trade {tid} opened at {order.order_fill_transaction.get('price', 'N/A')}")
 
         print(f"\nCreated {len(trade_ids)} separate trades")
         print("Note: These form a single EUR/USD position but are tracked individually")
@@ -160,7 +163,7 @@ async def main() -> None:
             if update_trade_id:
                 print(f"\nUpdating client extensions for trade {update_trade_id}...")
 
-                extension_response = await client.trades.put_trade_client_extensions(account_id=client.account_id, trade_specifier=update_trade_id, client_extensions=ClientExtensions(comment="Updated: Important trade", tag="high-priority"))
+                extension_response = await client.trades.put_trade_client_extensions(account_id=client.account_id, trade_specifier=update_trade_id, client_extensions={"comment": "Updated: Important trade", "tag": "high-priority"})
 
                 if extension_response.get("tradeClientExtensionsModifyTransaction"):
                     print("✅ Client extensions updated")
@@ -171,9 +174,9 @@ async def main() -> None:
         # Open a fresh trade for this example
         new_order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
-        if new_order.order_fill_transaction and new_order.order_fill_transaction.trade_opened:
-            new_trade_id = new_order.order_fill_transaction.trade_opened.trade_id
-            entry_price = float(new_order.order_fill_transaction.price)
+        if new_order.order_fill_transaction and new_order.order_fill_transaction.get("tradeOpened"):
+            new_trade_id = new_order.order_fill_transaction["tradeOpened"]["tradeID"]
+            entry_price = Decimal(str(new_order.order_fill_transaction.get("price", "1.0")))
 
             print(f"\nAdding TP/SL to trade {new_trade_id}...")
 
@@ -181,8 +184,8 @@ async def main() -> None:
             dependent_orders = await client.trades.put_trade_orders(
                 account_id=client.account_id,
                 trade_specifier=new_trade_id,
-                take_profit=TakeProfitDetails(price=str(entry_price + 0.0050)),  # 50 pips profit
-                stop_loss=StopLossDetails(price=str(entry_price - 0.0025)),  # 25 pips loss
+                take_profit=TakeProfitDetails(price=entry_price + Decimal("0.0050")),  # 50 pips profit
+                stop_loss=StopLossDetails(price=entry_price - Decimal("0.0025")),  # 25 pips loss
             )
 
             if dependent_orders.get("takeProfitOrderTransaction"):
@@ -203,8 +206,8 @@ async def main() -> None:
             modify_response = await client.trades.put_trade_orders(
                 account_id=client.account_id,
                 trade_specifier=new_trade_id,
-                take_profit=TakeProfitDetails(price=str(entry_price + 0.0100)),  # 100 pips profit
-                stop_loss=StopLossDetails(price=str(entry_price - 0.0050)),  # 50 pips loss
+                take_profit=TakeProfitDetails(price=entry_price + Decimal("0.0100")),  # 100 pips profit
+                stop_loss=StopLossDetails(price=entry_price - Decimal("0.0050")),  # 50 pips loss
             )
 
             if modify_response.get("takeProfitOrderTransaction"):

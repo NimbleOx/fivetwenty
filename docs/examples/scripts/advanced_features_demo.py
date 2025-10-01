@@ -73,9 +73,9 @@ async def main() -> None:
         print("  ❌ Does NOT prevent duplicate orders")
         print("  ❌ Does NOT appear in transaction responses")
 
-        from datetime import UTC, datetime
+        from datetime import datetime, timezone
 
-        client_request_id = f"trading-bot-v1-{datetime.now(UTC).isoformat()}"
+        client_request_id = f"trading-bot-v1-{datetime.now(timezone.utc).isoformat()}"
 
         print(f"\nExample: {client_request_id}")
 

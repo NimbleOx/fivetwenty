@@ -3,7 +3,7 @@
 Enhanced Error Handling Example
 
 Demonstrates robust error handling patterns:
-- VeeTwentyError exception handling
+- FiveTwentyError exception handling
 - Retry strategies
 - Rate limit handling
 - Network error recovery
@@ -14,7 +14,7 @@ Demonstrates robust error handling patterns:
 import asyncio
 
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import InstrumentName
 
 
@@ -25,14 +25,14 @@ async def main() -> None:
         # Section 1: Basic error handling
         print("\n=== 1. Basic Error Handling ===")
 
-        print("\nAll API errors are wrapped in VeeTwentyError:")
+        print("\nAll API errors are wrapped in FiveTwentyError:")
 
         try:
             # This will fail - invalid instrument
-            await client.orders.post_market_order(account_id=client.account_id, instrument="INVALID_INSTRUMENT", units=1000)
-        except VeeTwentyError as e:
-            print("✅ Caught VeeTwentyError:")
-            print(f"  Status Code: {e.status_code}")
+            await client.orders.post_market_order(account_id=client.account_id, instrument="INVALID_INSTRUMENT", units=1000)  # type: ignore[arg-type]
+        except FiveTwentyError as e:
+            print("✅ Caught FiveTwentyError:")
+            print(f"  Status Code: {e.status}")
             print(f"  Message: {e.message}")
             print(f"  Error Code: {e.code if e.code else 'N/A'}")
 
@@ -49,8 +49,8 @@ async def main() -> None:
                 instrument=InstrumentName.EUR_USD,
                 units=0,  # Invalid - units cannot be zero
             )
-        except VeeTwentyError as e:
-            if e.status_code == 400:
+        except FiveTwentyError as e:
+            if e.status == 400:
                 print(f"  ✅ Validation error caught: {e.message}")
 
         # 404 Not Found
@@ -60,8 +60,8 @@ async def main() -> None:
                 account_id=client.account_id,
                 order_specifier="99999999",  # Non-existent order
             )
-        except VeeTwentyError as e:
-            if e.status_code == 404:
+        except FiveTwentyError as e:
+            if e.status == 404:
                 print(f"  ✅ Resource not found: {e.message}")
 
         # Section 3: Validation errors
@@ -77,7 +77,7 @@ async def main() -> None:
         for test_name, instrument, units in validation_tests:
             try:
                 await client.orders.post_market_order(account_id=client.account_id, instrument=instrument, units=units)
-            except VeeTwentyError as e:
+            except FiveTwentyError as e:
                 print(f"{test_name}:")
                 print(f"  Error: {e.message}")
 
@@ -97,8 +97,8 @@ async def retry_with_backoff(func, max_attempts=3):
     for attempt in range(max_attempts):
         try:
             return await func()
-        except VeeTwentyError as e:
-            if e.status_code == 429:
+        except FiveTwentyError as e:
+            if e.status == 429:
                 # Rate limited
                 wait_time = 2 ** attempt  # Exponential backoff
                 print(f"Rate limited, waiting {wait_time}s...")
@@ -172,7 +172,7 @@ except StreamStall:
                 instrument=InstrumentName.EUR_USD,
                 units=10000000,  # Very large order
             )
-        except VeeTwentyError as e:
+        except FiveTwentyError as e:
             print("Order rejected:")
             print(f"  Reason: {e.message}")
             print("\nCommon rejection reasons:")
@@ -191,7 +191,7 @@ except StreamStall:
 
         if order.order_fill_transaction:
             requested = 1000
-            filled = int(order.order_fill_transaction.units)
+            filled = int(order.order_fill_transaction.get("units", 0))
 
             if filled < requested:
                 print("⚠️  Partial fill detected!")
@@ -217,12 +217,12 @@ def async_retry(max_attempts=3, base_delay=1.0, backoff=2.0, jitter=True):
             for attempt in range(max_attempts):
                 try:
                     return await func(*args, **kwargs)
-                except VeeTwentyError as e:
+                except FiveTwentyError as e:
                     if attempt == max_attempts - 1:
                         raise  # Last attempt, re-raise
 
                     # Retry on specific errors
-                    if e.status_code in [429, 500, 502, 503, 504]:
+                    if e.status in [429, 500, 502, 503, 504]:
                         delay = base_delay * (backoff ** attempt)
                         if jitter:
                             delay *= (0.5 + random.random())
@@ -271,13 +271,13 @@ class TradingBot:
             logger.info(f"Order placed: {order.order_fill_transaction.id}")
             return order
 
-        except VeeTwentyError as e:
+        except FiveTwentyError as e:
             self.error_count += 1
 
             logger.error(
                 f"Order failed: {e.message}",
                 extra={
-                    "status_code": e.status_code,
+                    "status_code": e.status,
                     "error_code": e.code,
                     "instrument": instrument,
                     "units": units
@@ -290,7 +290,7 @@ class TradingBot:
                 raise Exception("Circuit breaker tripped")
 
             # Graceful degradation
-            if e.status_code == 429:
+            if e.status == 429:
                 # Rate limited - back off
                 await asyncio.sleep(60)
 
@@ -333,7 +333,7 @@ async def place_order_with_recovery(client, instrument, units):
             units=units
         )
     except VeeTwentyError as e:
-        if e.status_code == 400 and "INSUFFICIENT_MARGIN" in str(e.message):
+        if e.status == 400 and "INSUFFICIENT_MARGIN" in str(e.message):
             # Fallback: try with 50% size
             print(f"Insufficient margin, trying 50% size...")
             return await client.orders.post_market_order(

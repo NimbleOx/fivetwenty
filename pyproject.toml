@@ -241,7 +241,7 @@ test-integration = "python -m pytest tests/integration/"
 lint = "ruff check ."
 lint-fix = "ruff check --fix ."
 format = "ruff format ."
-typecheck = "uv run mypy fivetwenty/"
+typecheck = "uv run mypy fivetwenty/ docs/examples/"
 
 # Development tasks
 dev-install = "uv sync --group dev"

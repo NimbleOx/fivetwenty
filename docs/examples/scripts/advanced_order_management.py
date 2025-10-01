@@ -10,7 +10,7 @@ Demonstrates all order types and order management operations:
 """
 
 import asyncio
-from datetime import UTC, datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
@@ -84,7 +84,7 @@ async def main() -> None:
             print(f"Time in Force: {limit_order.order_create_transaction.time_in_force}")
 
         # GTD limit order (expires in 1 hour)
-        gtd_time = (datetime.now(UTC) + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
+        gtd_time = (datetime.now(timezone.utc) + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
 
         print(f"\nPlacing GTD limit order (expires at {gtd_time})")
 
