@@ -70,15 +70,15 @@ async def main() -> None:
         if order_response.order_fill_transaction:
             fill = order_response.order_fill_transaction
             print("✅ Order filled!")
-            print(f"Transaction ID: {fill.get('id')}")
-            print(f"Instrument: {fill.get('instrument')}")
-            print(f"Units: {fill.get('units')}")
-            print(f"Price: {fill.get('price')}")
-            print(f"Time: {fill.get('time')}")
+            print(f"Transaction ID: {fill.id}")
+            print(f"Instrument: {fill.instrument}")
+            print(f"Units: {fill.units}")
+            print(f"Price: {fill.price}")
+            print(f"Time: {fill.time}")
 
             trade_id = None
-            if fill.get("tradeOpened"):
-                trade_id = fill["tradeOpened"]["tradeID"]
+            if fill.trade_opened:
+                trade_id = fill.trade_opened.trade_id
                 print(f"Trade Opened: {trade_id}")
         else:
             print("❌ Order was not filled")
@@ -124,13 +124,13 @@ async def main() -> None:
         if close_response.order_fill_transaction:
             close_fill = close_response.order_fill_transaction
             print("✅ Position closed!")
-            print(f"Transaction ID: {close_fill.get('id')}")
-            print(f"Close Price: {close_fill.get('price')}")
-            print(f"Realized P/L: {close_fill.get('pl')} {account.currency}")
-            print(f"Time: {close_fill.get('time')}")
+            print(f"Transaction ID: {close_fill.id}")
+            print(f"Close Price: {close_fill.price}")
+            print(f"Realized P/L: {close_fill.pl} {account.currency}")
+            print(f"Time: {close_fill.time}")
 
-            if close_fill.get("tradeClosed"):
-                print(f"Trade Closed: {close_fill['tradeClosed']['tradeID']}")
+            if close_fill.trades_closed:
+                print(f"Trade Closed: {close_fill.trades_closed[0].trade_id}")
         else:
             print("❌ Position was not closed")
 
