@@ -29,7 +29,7 @@ async def main() -> None:
     print("  FIVETWENTY_OANDA_ENVIRONMENT")
 
     async with AsyncClient() as client:
-        print(f"\n✅ Connected using environment variables")
+        print("\n✅ Connected using environment variables")
         print(f"Account: {client.account_id}")
         print(f"Environment: {client.environment.value}")
 
@@ -42,12 +42,8 @@ async def main() -> None:
     token = os.getenv("FIVETWENTY_OANDA_TOKEN")
     account_id = os.getenv("FIVETWENTY_OANDA_ACCOUNT")
 
-    async with AsyncClient(
-        token=token,
-        account_id=account_id,
-        environment=Environment.PRACTICE
-    ) as client:
-        print(f"✅ Connected with direct parameters")
+    async with AsyncClient(token=token, account_id=account_id, environment=Environment.PRACTICE) as client:
+        print("✅ Connected with direct parameters")
         print(f"Account: {client.account_id}")
         print(f"Environment: {client.environment}")
 
@@ -56,19 +52,15 @@ async def main() -> None:
 
     print("\nAccountConfig provides structured configuration:")
 
-    config = AccountConfig(
-        token=token,
-        account_id=account_id,
-        environment=Environment.PRACTICE
-    )
+    config = AccountConfig(token=token, account_id=account_id, environment=Environment.PRACTICE)
 
-    print(f"\nAccountConfig created:")
+    print("\nAccountConfig created:")
     print(f"  Account ID: {config.account_id}")
     print(f"  Environment: {config.environment}")
     print(f"  Token: {config.token[:10]}... (masked)")
 
     async with AsyncClient(config=config) as client:
-        print(f"\n✅ Connected with AccountConfig")
+        print("\n✅ Connected with AccountConfig")
         summary = await client.accounts.get_account_summary(client.account_id)
         print(f"Balance: {summary['account'].balance}")
 
@@ -217,12 +209,8 @@ async with AsyncClient(
     print("  *credentials*")
 
     print("\nAccountConfig automatically masks sensitive data:")
-    masked_config = AccountConfig(
-        token="super-secret-token-12345",
-        account_id="123-456-7890123-001",
-        environment=Environment.PRACTICE
-    )
-    print(f"  Token in repr: {repr(masked_config)}")
+    masked_config = AccountConfig(token="super-secret-token-12345", account_id="123-456-7890123-001", environment=Environment.PRACTICE)
+    print(f"  Token in repr: {masked_config!r}")
     print("  (Token is masked, not exposed in logs)")
 
     # Section 10: Runtime configuration updates

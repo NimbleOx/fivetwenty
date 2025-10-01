@@ -11,7 +11,7 @@ Demonstrates transaction operations including:
 
 import asyncio
 from collections import Counter
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
@@ -21,7 +21,6 @@ async def main() -> None:
     """Transaction analysis operations example."""
 
     async with AsyncClient() as client:
-
         # Section 1: Understanding transactions
         print("\n=== 1. Understanding Transactions ===")
 
@@ -49,19 +48,14 @@ async def main() -> None:
         print("\n=== 2. Transactions by Time Range ===")
 
         # Get transactions from last 7 days
-        from_time = (datetime.utcnow() - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
-        to_time = datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
+        from_time = (datetime.now(UTC) - timedelta(days=7)).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
+        to_time = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
 
-        print(f"\nFetching transactions from last 7 days...")
+        print("\nFetching transactions from last 7 days...")
         print(f"From: {from_time}")
         print(f"To: {to_time}")
 
-        transactions_response = await client.transactions.get_transactions(
-            account_id=client.account_id,
-            from_time=from_time,
-            to_time=to_time,
-            page_size=100
-        )
+        transactions_response = await client.transactions.get_transactions(account_id=client.account_id, from_time=from_time, to_time=to_time, page_size=100)
 
         transactions = transactions_response.get("transactions", [])
         print(f"\nFound {len(transactions)} transaction(s)")
@@ -72,7 +66,7 @@ async def main() -> None:
                 print(f"\n  ID {txn.id}:")
                 print(f"    Type: {txn.type}")
                 print(f"    Time: {txn.time}")
-                if hasattr(txn, 'account_balance'):
+                if hasattr(txn, "account_balance"):
                     print(f"    Account Balance: {txn.account_balance}")
 
         # Section 3: Get specific transaction
@@ -84,10 +78,7 @@ async def main() -> None:
 
             print(f"\nFetching details for transaction {first_txn_id}...")
 
-            txn_details = await client.transactions.get_transaction(
-                account_id=client.account_id,
-                transaction_id=first_txn_id
-            )
+            txn_details = await client.transactions.get_transaction(account_id=client.account_id, transaction_id=first_txn_id)
             txn = txn_details["transaction"]
 
             print(f"\nTransaction {txn.id}:")
@@ -113,10 +104,7 @@ async def main() -> None:
 
         print(f"\nFetching transactions since ID {since_id}...")
 
-        since_response = await client.transactions.get_transactions_since_id(
-            account_id=client.account_id,
-            id=str(since_id)
-        )
+        since_response = await client.transactions.get_transactions_since_id(account_id=client.account_id, id=str(since_id))
 
         since_transactions = since_response.get("transactions", [])
         print(f"Found {len(since_transactions)} transaction(s) since ID {since_id}")
@@ -134,11 +122,7 @@ async def main() -> None:
 
         print(f"\nFetching transactions from ID {from_id} to {to_id}...")
 
-        range_response = await client.transactions.get_transactions_range(
-            account_id=client.account_id,
-            from_id=str(from_id),
-            to_id=str(to_id)
-        )
+        range_response = await client.transactions.get_transactions_range(account_id=client.account_id, from_id=str(from_id), to_id=str(to_id))
 
         range_transactions = range_response.get("transactions", [])
         print(f"Found {len(range_transactions)} transaction(s) in range")
@@ -148,9 +132,7 @@ async def main() -> None:
 
         print("\nFetching most recent transactions...")
 
-        recent_response = await client.transactions.get_recent_transactions(
-            account_id=client.account_id
-        )
+        recent_response = await client.transactions.get_recent_transactions(account_id=client.account_id)
 
         recent_transactions = recent_response.get("transactions", [])
         print(f"Found {len(recent_transactions)} recent transaction(s)")
@@ -180,10 +162,7 @@ async def main() -> None:
         print("\n=== 8. Transaction Type Analysis ===")
 
         # Get a good sample of transactions
-        analysis_response = await client.transactions.get_transactions_since_id(
-            account_id=client.account_id,
-            id=str(max(1, int(last_transaction_id) - 200))
-        )
+        analysis_response = await client.transactions.get_transactions_since_id(account_id=client.account_id, id=str(max(1, int(last_transaction_id) - 200)))
 
         analysis_transactions = analysis_response.get("transactions", [])
 
@@ -205,8 +184,8 @@ async def main() -> None:
             print(f"\nAnalyzing {len(fills)} order fills...")
 
             # Count wins vs losses
-            wins = sum(1 for txn in fills if hasattr(txn, 'pl') and float(txn.pl) > 0)
-            losses = sum(1 for txn in fills if hasattr(txn, 'pl') and float(txn.pl) < 0)
+            wins = sum(1 for txn in fills if hasattr(txn, "pl") and float(txn.pl) > 0)
+            losses = sum(1 for txn in fills if hasattr(txn, "pl") and float(txn.pl) < 0)
 
             print(f"  Wins: {wins}")
             print(f"  Losses: {losses}")
@@ -216,21 +195,13 @@ async def main() -> None:
                 print(f"  Win Rate: {win_rate:.1f}%")
 
             # Calculate total P/L from fills
-            total_pl = sum(
-                Decimal(txn.pl)
-                for txn in fills
-                if hasattr(txn, 'pl') and txn.pl
-            )
+            total_pl = sum(Decimal(txn.pl) for txn in fills if hasattr(txn, "pl") and txn.pl)
             print(f"  Total P/L from fills: {total_pl}")
 
             # Calculate total financing
             financing_txns = [txn for txn in analysis_transactions if txn.type == "DAILY_FINANCING"]
             if financing_txns:
-                total_financing = sum(
-                    Decimal(txn.financing)
-                    for txn in financing_txns
-                    if hasattr(txn, 'financing') and txn.financing
-                )
+                total_financing = sum(Decimal(txn.financing) for txn in financing_txns if hasattr(txn, "financing") and txn.financing)
                 print(f"  Total Financing: {total_financing}")
 
         # Section 10: Transaction-based reconciliation
@@ -246,7 +217,7 @@ async def main() -> None:
         current_account = await client.accounts.get_account_summary(client.account_id)
         account_summary = current_account["account"]
 
-        print(f"\nCurrent Account State:")
+        print("\nCurrent Account State:")
         print(f"  Balance: {account_summary.balance}")
         print(f"  Realized P/L: {account_summary.pl}")
         print(f"  Unrealized P/L: {account_summary.unrealized_pl}")

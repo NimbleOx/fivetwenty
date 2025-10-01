@@ -44,10 +44,7 @@ async def main() -> None:
         # Section 3: Get current market prices
         print("\n=== 3. Current Market Prices ===")
 
-        pricing = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[InstrumentName.EUR_USD]
-        )
+        pricing = await client.pricing.get_pricing(account_id=client.account_id, instruments=[InstrumentName.EUR_USD])
 
         price = pricing["prices"][0]
         bid = price.bids[0].price if price.bids else "N/A"
@@ -68,15 +65,11 @@ async def main() -> None:
         print("\n=== 4. Place Market Order ===")
         print("⚠️  Placing a BUY order for 1000 units of EUR/USD...")
 
-        order_response = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000
-        )
+        order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
         if order_response.order_fill_transaction:
             fill = order_response.order_fill_transaction
-            print(f"✅ Order filled!")
+            print("✅ Order filled!")
             print(f"Transaction ID: {fill.id}")
             print(f"Instrument: {fill.instrument}")
             print(f"Units: {fill.units}")
@@ -103,15 +96,15 @@ async def main() -> None:
                 print(f"\n  Instrument: {position.instrument}")
 
                 # Check long side
-                if hasattr(position, 'long') and position.long.units != "0":
-                    print(f"  Long:")
+                if hasattr(position, "long") and position.long.units != "0":
+                    print("  Long:")
                     print(f"    Units: {position.long.units}")
                     print(f"    Average Price: {position.long.average_price}")
                     print(f"    Unrealized P/L: {position.long.unrealized_pl}")
 
                 # Check short side
-                if hasattr(position, 'short') and position.short.units != "0":
-                    print(f"  Short:")
+                if hasattr(position, "short") and position.short.units != "0":
+                    print("  Short:")
                     print(f"    Units: {position.short.units}")
                     print(f"    Average Price: {position.short.average_price}")
                     print(f"    Unrealized P/L: {position.short.unrealized_pl}")
@@ -125,12 +118,12 @@ async def main() -> None:
         close_response = await client.orders.post_market_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
-            units=-1000  # Negative to close long position
+            units=-1000,  # Negative to close long position
         )
 
         if close_response.order_fill_transaction:
             close_fill = close_response.order_fill_transaction
-            print(f"✅ Position closed!")
+            print("✅ Position closed!")
             print(f"Transaction ID: {close_fill.id}")
             print(f"Close Price: {close_fill.price}")
             print(f"Realized P/L: {close_fill.pl} {account.currency}")

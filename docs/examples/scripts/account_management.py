@@ -18,7 +18,6 @@ async def main() -> None:
     """Account management operations example."""
 
     async with AsyncClient() as client:
-
         # Section 1: List all accounts
         print("\n=== 1. List All Accounts ===")
 
@@ -27,9 +26,8 @@ async def main() -> None:
 
         for acc in accounts:
             print(f"\n  ID: {acc.id}")
-            print(f"  Alias: {acc.alias if acc.alias else 'N/A'}")
             print(f"  Tags: {', '.join(acc.tags) if acc.tags else 'None'}")
-            print(f"  MT4 Account ID: {acc.mt4_account_id if hasattr(acc, 'mt4_account_id') and acc.mt4_account_id else 'N/A'}")
+            print(f"  MT4 Account ID: {acc.mt4_account_id if acc.mt4_account_id else 'N/A'}")
 
         # Section 2: Get detailed account information
         print("\n=== 2. Account Details ===")
@@ -41,18 +39,18 @@ async def main() -> None:
         print(f"Alias: {account.alias if account.alias else 'N/A'}")
         print(f"Currency: {account.currency}")
         print(f"Created Time: {account.created_time}")
-        print(f"\nBalance Information:")
+        print("\nBalance Information:")
         print(f"  Balance: {account.balance}")
         print(f"  NAV: {account.nav}")
         print(f"  Unrealized P/L: {account.unrealized_pl}")
         print(f"  Realized P/L: {account.pl}")
         print(f"  Financing: {account.financing}")
-        print(f"\nMargin Information:")
+        print("\nMargin Information:")
         print(f"  Margin Used: {account.margin_used}")
         print(f"  Margin Available: {account.margin_available}")
         print(f"  Margin Closeout Percent: {account.margin_closeout_percent}")
         print(f"  Margin Call Percent: {account.margin_call_percent}")
-        print(f"\nPosition Information:")
+        print("\nPosition Information:")
         print(f"  Open Trade Count: {account.open_trade_count}")
         print(f"  Open Position Count: {account.open_position_count}")
         print(f"  Pending Order Count: {account.pending_order_count}")
@@ -70,15 +68,13 @@ async def main() -> None:
         print(f"Open Trades: {summary.open_trade_count}")
         print(f"Open Positions: {summary.open_position_count}")
         print(f"Pending Orders: {summary.pending_order_count}")
-        print(f"\nℹ️  Summary is lighter-weight than full account details")
+        print("\nℹ️  Summary is lighter-weight than full account details")
 
         # Section 4: Get available instruments
         print("\n=== 4. Available Instruments ===")
 
         # Get first 10 instruments
-        instruments_response = await client.accounts.get_account_instruments(
-            account_id=client.account_id
-        )
+        instruments_response = await client.accounts.get_account_instruments(account_id=client.account_id)
         instruments = instruments_response.get("instruments", [])
 
         print(f"\nShowing first 10 of {len(instruments)} available instruments:")
@@ -94,10 +90,7 @@ async def main() -> None:
 
         # Get specific instruments
         print("\n  Querying specific instruments (EUR/USD, GBP/USD):")
-        specific_instruments = await client.accounts.get_account_instruments(
-            account_id=client.account_id,
-            instruments=["EUR_USD", "GBP_USD"]
-        )
+        specific_instruments = await client.accounts.get_account_instruments(account_id=client.account_id, instruments=["EUR_USD", "GBP_USD"])
 
         for instrument in specific_instruments.get("instruments", []):
             print(f"\n  {instrument.name}:")
@@ -135,7 +128,7 @@ async def main() -> None:
         print("  - State updates since the specified transaction")
 
         # Show how to use it (without actually calling unless there are recent changes)
-        print(f"\nℹ️  Use this for efficient polling: only fetch what changed")
+        print("\nℹ️  Use this for efficient polling: only fetch what changed")
         print(f"  Example: get_account_changes('{client.account_id}', '{last_transaction_id}')")
 
     print("\n✅ Account management example completed!")

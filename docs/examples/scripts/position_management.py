@@ -20,7 +20,6 @@ async def main() -> None:
     """Position management operations example."""
 
     async with AsyncClient() as client:
-
         # Section 1: Get all positions
         print("\n=== 1. All Positions ===")
 
@@ -56,23 +55,20 @@ async def main() -> None:
         # Section 3: Get position for specific instrument
         print("\n=== 3. Position by Instrument ===")
 
-        position_response = await client.positions.get_position(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD
-        )
+        position_response = await client.positions.get_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
         eur_position = position_response["position"]
 
-        print(f"\nEUR/USD Position:")
+        print("\nEUR/USD Position:")
         print(f"  Instrument: {eur_position.instrument}")
 
-        print(f"\n  Long Side:")
+        print("\n  Long Side:")
         print(f"    Units: {eur_position.long.units}")
         if eur_position.long.units != "0":
             print(f"    Average Price: {eur_position.long.average_price}")
             print(f"    Unrealized P/L: {eur_position.long.unrealized_pl}")
             print(f"    Trade IDs: {', '.join(eur_position.long.trade_i_ds) if eur_position.long.trade_i_ds else 'None'}")
 
-        print(f"\n  Short Side:")
+        print("\n  Short Side:")
         print(f"    Units: {eur_position.short.units}")
         if eur_position.short.units != "0":
             print(f"    Average Price: {eur_position.short.average_price}")
@@ -83,11 +79,7 @@ async def main() -> None:
         print("\n=== 4. Open New Position ===")
         print("Opening position: BUY 2000 units EUR/USD")
 
-        order_response = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=2000
-        )
+        order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=2000)
 
         if order_response.order_fill_transaction:
             fill = order_response.order_fill_transaction
@@ -95,10 +87,7 @@ async def main() -> None:
             print(f"Units: {fill.units}")
 
         # Verify position
-        position_response = await client.positions.get_position(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD
-        )
+        position_response = await client.positions.get_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
         updated_position = position_response["position"]
         print(f"Current long units: {updated_position.long.units}")
 
@@ -110,11 +99,7 @@ async def main() -> None:
 
         print(f"Closing 50% of position ({-close_50_percent} units)")
 
-        partial_close = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=close_50_percent
-        )
+        partial_close = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=close_50_percent)
 
         if partial_close.order_fill_transaction:
             fill = partial_close.order_fill_transaction
@@ -122,10 +107,7 @@ async def main() -> None:
             print(f"Realized P/L: {fill.pl}")
 
             # Check remaining position
-            remaining_response = await client.positions.get_position(
-                account_id=client.account_id,
-                instrument=InstrumentName.EUR_USD
-            )
+            remaining_response = await client.positions.get_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
             remaining_position = remaining_response["position"]
             print(f"Remaining long units: {remaining_position.long.units}")
 
@@ -133,20 +115,13 @@ async def main() -> None:
         print("\n=== 6. Close Long Position ===")
 
         # Get current position
-        current_response = await client.positions.get_position(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD
-        )
+        current_response = await client.positions.get_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
         current_position = current_response["position"]
 
         if current_position.long.units != "0":
             print(f"Closing all long units: {current_position.long.units}")
 
-            close_response = await client.positions.close_position(
-                account_id=client.account_id,
-                instrument=InstrumentName.EUR_USD,
-                long_units="ALL"
-            )
+            close_response = await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD, long_units="ALL")
 
             if close_response.get("longOrderFillTransaction"):
                 long_fill = close_response["longOrderFillTransaction"]
@@ -163,7 +138,7 @@ async def main() -> None:
         short_order = await client.orders.post_market_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
-            units=-1000  # Negative for short
+            units=-1000,  # Negative for short
         )
 
         if short_order.order_fill_transaction:
@@ -171,11 +146,7 @@ async def main() -> None:
 
             # Now close it
             print("\nClosing short position...")
-            close_short = await client.positions.close_position(
-                account_id=client.account_id,
-                instrument=InstrumentName.EUR_USD,
-                short_units="ALL"
-            )
+            close_short = await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD, short_units="ALL")
 
             if close_short.get("shortOrderFillTransaction"):
                 short_fill = close_short["shortOrderFillTransaction"]
@@ -190,20 +161,17 @@ async def main() -> None:
         await client.orders.post_market_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
-            units=1000  # Long
+            units=1000,  # Long
         )
         await client.orders.post_market_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
-            units=-500  # Short
+            units=-500,  # Short
         )
 
         print("Closing entire EUR/USD position (both sides)...")
 
-        close_all = await client.positions.close_position(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD
-        )
+        close_all = await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
 
         total_pl = Decimal("0")
         if close_all.get("longOrderFillTransaction"):
@@ -230,7 +198,7 @@ async def main() -> None:
         account_response = await client.accounts.get_account_summary(client.account_id)
         account = account_response["account"]
 
-        print(f"\nAccount-Level P/L:")
+        print("\nAccount-Level P/L:")
         print(f"  Total Unrealized P/L: {account.unrealized_pl}")
         print(f"  Total Realized P/L: {account.pl}")
 
@@ -239,7 +207,7 @@ async def main() -> None:
         positions = positions_response.get("positions", [])
 
         if positions:
-            print(f"\nPosition-Level P/L:")
+            print("\nPosition-Level P/L:")
             for position in positions:
                 long_pl = Decimal(position.long.unrealized_pl) if position.long.units != "0" else Decimal("0")
                 short_pl = Decimal(position.short.unrealized_pl) if position.short.units != "0" else Decimal("0")

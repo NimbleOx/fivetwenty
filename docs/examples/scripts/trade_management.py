@@ -20,7 +20,6 @@ async def main() -> None:
     """Trade management operations example."""
 
     async with AsyncClient() as client:
-
         # Section 1: Understanding trades vs positions
         print("\n=== 1. Trades vs Positions ===")
 
@@ -42,17 +41,11 @@ async def main() -> None:
         print(f"\nTotal trades: {len(all_trades)}")
 
         # Filter by instrument
-        eur_trades = await client.trades.get_trades(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD
-        )
+        eur_trades = await client.trades.get_trades(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
         print(f"EUR/USD trades: {len(eur_trades.get('trades', []))}")
 
         # Filter by state
-        open_trades = await client.trades.get_trades(
-            account_id=client.account_id,
-            state="OPEN"
-        )
+        open_trades = await client.trades.get_trades(account_id=client.account_id, state="OPEN")
         print(f"Open trades: {len(open_trades.get('trades', []))}")
 
         # Show first few trades
@@ -84,11 +77,7 @@ async def main() -> None:
         print("\n=== 4. Trade Details ===")
 
         # Open a trade first
-        order_response = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000
-        )
+        order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
         trade_id = None
         if order_response.order_fill_transaction and order_response.order_fill_transaction.trade_opened:
@@ -96,13 +85,10 @@ async def main() -> None:
             print(f"\nOpened trade: {trade_id}")
 
             # Get full trade details
-            trade_details = await client.trades.get_trade(
-                account_id=client.account_id,
-                trade_specifier=trade_id
-            )
+            trade_details = await client.trades.get_trade(account_id=client.account_id, trade_specifier=trade_id)
             trade = trade_details["trade"]
 
-            print(f"\nTrade Details:")
+            print("\nTrade Details:")
             print(f"  ID: {trade.id}")
             print(f"  Instrument: {trade.instrument}")
             print(f"  State: {trade.state}")
@@ -113,7 +99,7 @@ async def main() -> None:
             print(f"  Unrealized P/L: {trade.unrealized_pl}")
             print(f"  Margin Used: {trade.margin_used}")
             print(f"  Financing: {trade.financing}")
-            if hasattr(trade, 'client_extensions') and trade.client_extensions:
+            if hasattr(trade, "client_extensions") and trade.client_extensions:
                 print(f"  Client Extensions: {trade.client_extensions}")
 
         # Section 5: Open new trades
@@ -123,15 +109,7 @@ async def main() -> None:
         trade_ids = []
 
         for i in range(3):
-            order = await client.orders.post_market_order(
-                account_id=client.account_id,
-                instrument=InstrumentName.EUR_USD,
-                units=500,
-                client_extensions=ClientExtensions(
-                    id=f"trade-batch-{i+1}",
-                    comment=f"Trade {i+1} of 3"
-                )
-            )
+            order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=500, client_extensions=ClientExtensions(id=f"trade-batch-{i + 1}", comment=f"Trade {i + 1} of 3"))
             if order.order_fill_transaction and order.order_fill_transaction.trade_opened:
                 tid = order.order_fill_transaction.trade_opened.trade_id
                 trade_ids.append(tid)
@@ -147,10 +125,7 @@ async def main() -> None:
             close_trade_id = trade_ids[0]
             print(f"\nClosing trade {close_trade_id}...")
 
-            close_response = await client.trades.close_trade(
-                account_id=client.account_id,
-                trade_specifier=close_trade_id
-            )
+            close_response = await client.trades.close_trade(account_id=client.account_id, trade_specifier=close_trade_id)
 
             if close_response.get("orderFillTransaction"):
                 fill = close_response["orderFillTransaction"]
@@ -165,11 +140,7 @@ async def main() -> None:
             partial_trade_id = trade_ids[0]
             print(f"\nPartially closing trade {partial_trade_id} (250 of 500 units)...")
 
-            partial_close = await client.trades.close_trade(
-                account_id=client.account_id,
-                trade_specifier=partial_trade_id,
-                units="250"
-            )
+            partial_close = await client.trades.close_trade(account_id=client.account_id, trade_specifier=partial_trade_id, units="250")
 
             if partial_close.get("orderFillTransaction"):
                 fill = partial_close["orderFillTransaction"]
@@ -177,10 +148,7 @@ async def main() -> None:
                 print(f"Realized P/L: {fill.pl}")
 
                 # Check remaining units
-                trade_check = await client.trades.get_trade(
-                    account_id=client.account_id,
-                    trade_specifier=partial_trade_id
-                )
+                trade_check = await client.trades.get_trade(account_id=client.account_id, trade_specifier=partial_trade_id)
                 remaining_units = trade_check["trade"].current_units
                 print(f"Remaining units in trade: {remaining_units}")
 
@@ -192,27 +160,16 @@ async def main() -> None:
             if update_trade_id:
                 print(f"\nUpdating client extensions for trade {update_trade_id}...")
 
-                extension_response = await client.trades.put_trade_client_extensions(
-                    account_id=client.account_id,
-                    trade_specifier=update_trade_id,
-                    client_extensions=ClientExtensions(
-                        comment="Updated: Important trade",
-                        tag="high-priority"
-                    )
-                )
+                extension_response = await client.trades.put_trade_client_extensions(account_id=client.account_id, trade_specifier=update_trade_id, client_extensions=ClientExtensions(comment="Updated: Important trade", tag="high-priority"))
 
                 if extension_response.get("tradeClientExtensionsModifyTransaction"):
-                    print(f"✅ Client extensions updated")
+                    print("✅ Client extensions updated")
 
         # Section 9: Add dependent orders to trade
         print("\n=== 9. Add Dependent Orders ===")
 
         # Open a fresh trade for this example
-        new_order = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000
-        )
+        new_order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
         if new_order.order_fill_transaction and new_order.order_fill_transaction.trade_opened:
             new_trade_id = new_order.order_fill_transaction.trade_opened.trade_id
@@ -225,7 +182,7 @@ async def main() -> None:
                 account_id=client.account_id,
                 trade_specifier=new_trade_id,
                 take_profit=TakeProfitDetails(price=str(entry_price + 0.0050)),  # 50 pips profit
-                stop_loss=StopLossDetails(price=str(entry_price - 0.0025))       # 25 pips loss
+                stop_loss=StopLossDetails(price=str(entry_price - 0.0025)),  # 25 pips loss
             )
 
             if dependent_orders.get("takeProfitOrderTransaction"):
@@ -247,7 +204,7 @@ async def main() -> None:
                 account_id=client.account_id,
                 trade_specifier=new_trade_id,
                 take_profit=TakeProfitDetails(price=str(entry_price + 0.0100)),  # 100 pips profit
-                stop_loss=StopLossDetails(price=str(entry_price - 0.0050))       # 50 pips loss
+                stop_loss=StopLossDetails(price=str(entry_price - 0.0050)),  # 50 pips loss
             )
 
             if modify_response.get("takeProfitOrderTransaction"):
@@ -276,19 +233,16 @@ async def main() -> None:
         open_list = current_trades.get("trades", [])
 
         if open_list:
-            print(f"\nCurrent Open Trades Summary:")
+            print("\nCurrent Open Trades Summary:")
             for trade in open_list[:5]:
                 print(f"  Trade {trade.id}: {trade.current_units} units, P/L: {trade.unrealized_pl}")
 
         # Clean up - close all our test trades
         print("\n\nCleaning up: Closing all EUR/USD trades...")
-        close_position_response = await client.positions.close_position(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD
-        )
+        close_position_response = await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
 
         if close_position_response.get("longOrderFillTransaction"):
-            print(f"✅ All trades closed")
+            print("✅ All trades closed")
 
     print("\n✅ Trade management example completed!")
 

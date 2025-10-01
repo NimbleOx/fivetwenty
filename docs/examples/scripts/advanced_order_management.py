@@ -10,14 +10,13 @@ Demonstrates all order types and order management operations:
 """
 
 import asyncio
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
 from fivetwenty.models import (
     ClientExtensions,
     InstrumentName,
-    OrderPositionFill,
     StopLossDetails,
     TakeProfitDetails,
     TimeInForce,
@@ -28,12 +27,8 @@ async def main() -> None:
     """Advanced order management operations example."""
 
     async with AsyncClient() as client:
-
         # Get current pricing for reference
-        pricing_response = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[InstrumentName.EUR_USD]
-        )
+        pricing_response = await client.pricing.get_pricing(account_id=client.account_id, instruments=[InstrumentName.EUR_USD])
         current_price = pricing_response["prices"][0]
         current_ask = Decimal(current_price.asks[0].price)
         current_bid = Decimal(current_price.bids[0].price)
@@ -44,26 +39,15 @@ async def main() -> None:
         print("\n=== 1. Market Order with Extensions ===")
 
         # Create client extensions for tracking
-        extensions = ClientExtensions(
-            id="strategy-A-001",
-            tag="momentum-strategy",
-            comment="Opening position with auto TP/SL"
-        )
+        extensions = ClientExtensions(id="strategy-A-001", tag="momentum-strategy", comment="Opening position with auto TP/SL")
 
         # Define take profit and stop loss on fill
         take_profit = TakeProfitDetails(price=str(current_ask + Decimal("0.0050")))  # 50 pips profit
-        stop_loss = StopLossDetails(price=str(current_ask - Decimal("0.0025")))      # 25 pips loss
+        stop_loss = StopLossDetails(price=str(current_ask - Decimal("0.0025")))  # 25 pips loss
 
         print(f"Placing market order with TP={take_profit.price}, SL={stop_loss.price}")
 
-        order_response = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000,
-            client_extensions=extensions,
-            take_profit_on_fill=take_profit,
-            stop_loss_on_fill=stop_loss
-        )
+        order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, client_extensions=extensions, take_profit_on_fill=take_profit, stop_loss_on_fill=stop_loss)
 
         if order_response.order_fill_transaction:
             fill = order_response.order_fill_transaction
@@ -89,7 +73,7 @@ async def main() -> None:
             units=1000,
             price=limit_price,
             time_in_force=TimeInForce.GTC,  # Good-Till-Cancelled
-            client_extensions=ClientExtensions(comment="Buy limit - support level")
+            client_extensions=ClientExtensions(comment="Buy limit - support level"),
         )
 
         limit_order_id = None
@@ -100,19 +84,11 @@ async def main() -> None:
             print(f"Time in Force: {limit_order.order_create_transaction.time_in_force}")
 
         # GTD limit order (expires in 1 hour)
-        gtd_time = (datetime.utcnow() + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
+        gtd_time = (datetime.now(UTC) + timedelta(hours=1)).strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
 
         print(f"\nPlacing GTD limit order (expires at {gtd_time})")
 
-        gtd_order = await client.orders.post_limit_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=500,
-            price=current_bid - Decimal("0.0030"),
-            time_in_force=TimeInForce.GTD,
-            gtd_time=gtd_time,
-            client_extensions=ClientExtensions(comment="1-hour limit order")
-        )
+        gtd_order = await client.orders.post_limit_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=500, price=current_bid - Decimal("0.0030"), time_in_force=TimeInForce.GTD, gtd_time=gtd_time, client_extensions=ClientExtensions(comment="1-hour limit order"))
 
         gtd_order_id = None
         if gtd_order.order_create_transaction:
@@ -128,14 +104,7 @@ async def main() -> None:
 
         print(f"Placing stop-entry order at {stop_entry_price}")
 
-        stop_order = await client.orders.post_stop_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000,
-            price=stop_entry_price,
-            time_in_force=TimeInForce.GTC,
-            client_extensions=ClientExtensions(comment="Breakout entry")
-        )
+        stop_order = await client.orders.post_stop_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, price=stop_entry_price, time_in_force=TimeInForce.GTC, client_extensions=ClientExtensions(comment="Breakout entry"))
 
         stop_order_id = None
         if stop_order.order_create_transaction:
@@ -152,13 +121,7 @@ async def main() -> None:
         print(f"Placing MIT order at {mit_price}")
 
         mit_order = await client.orders.post_market_if_touched_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000,
-            price=mit_price,
-            time_in_force=TimeInForce.GTC,
-            take_profit_on_fill=TakeProfitDetails(price=str(mit_price + Decimal("0.0040"))),
-            client_extensions=ClientExtensions(comment="MIT with TP")
+            account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, price=mit_price, time_in_force=TimeInForce.GTC, take_profit_on_fill=TakeProfitDetails(price=str(mit_price + Decimal("0.0040"))), client_extensions=ClientExtensions(comment="MIT with TP")
         )
 
         mit_order_id = None
@@ -175,17 +138,11 @@ async def main() -> None:
         print(f"\nTotal orders: {len(all_orders.get('orders', []))}")
 
         # Filter by instrument
-        eur_orders = await client.orders.get_orders(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD
-        )
+        eur_orders = await client.orders.get_orders(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
         print(f"EUR/USD orders: {len(eur_orders.get('orders', []))}")
 
         # Filter by state
-        pending_orders = await client.orders.get_orders(
-            account_id=client.account_id,
-            state="PENDING"
-        )
+        pending_orders = await client.orders.get_orders(account_id=client.account_id, state="PENDING")
         print(f"Pending orders: {len(pending_orders.get('orders', []))}")
 
         # Section 6: Get pending orders
@@ -200,7 +157,7 @@ async def main() -> None:
             print(f"    Type: {order.type}")
             print(f"    Instrument: {order.instrument}")
             print(f"    Units: {order.units}")
-            if hasattr(order, 'price'):
+            if hasattr(order, "price"):
                 print(f"    Price: {order.price}")
             print(f"    Time in Force: {order.time_in_force}")
 
@@ -208,10 +165,7 @@ async def main() -> None:
         print("\n=== 7. Order Details ===")
 
         if limit_order_id:
-            order_details = await client.orders.get_order(
-                account_id=client.account_id,
-                order_specifier=limit_order_id
-            )
+            order_details = await client.orders.get_order(account_id=client.account_id, order_specifier=limit_order_id)
             order = order_details["order"]
             print(f"\nDetails for order {order.id}:")
             print(f"  Type: {order.type}")
@@ -230,22 +184,10 @@ async def main() -> None:
             print(f"\nModifying limit order {limit_order_id}")
             print(f"New price: {new_price}")
 
-            modify_response = await client.orders.put_order(
-                account_id=client.account_id,
-                order_specifier=limit_order_id,
-                order_request={
-                    "order": {
-                        "type": "LIMIT",
-                        "instrument": "EUR_USD",
-                        "units": "1000",
-                        "price": str(new_price),
-                        "timeInForce": "GTC"
-                    }
-                }
-            )
+            modify_response = await client.orders.put_order(account_id=client.account_id, order_specifier=limit_order_id, order_request={"order": {"type": "LIMIT", "instrument": "EUR_USD", "units": "1000", "price": str(new_price), "timeInForce": "GTC"}})
 
             if modify_response.get("orderCreateTransaction"):
-                print(f"✅ Order modified successfully")
+                print("✅ Order modified successfully")
                 print(f"New Order ID: {modify_response['orderCreateTransaction'].id}")
 
         # Section 9: Update order client extensions
@@ -254,30 +196,20 @@ async def main() -> None:
         if gtd_order_id:
             print(f"\nUpdating client extensions for order {gtd_order_id}")
 
-            extension_response = await client.orders.put_order_client_extensions(
-                account_id=client.account_id,
-                order_specifier=gtd_order_id,
-                client_extensions=ClientExtensions(
-                    comment="Updated: High priority order",
-                    tag="priority-high"
-                )
-            )
+            extension_response = await client.orders.put_order_client_extensions(account_id=client.account_id, order_specifier=gtd_order_id, client_extensions=ClientExtensions(comment="Updated: High priority order", tag="priority-high"))
 
             if extension_response.get("orderClientExtensionsModifyTransaction"):
-                print(f"✅ Client extensions updated")
+                print("✅ Client extensions updated")
 
         # Section 10: Cancel orders
         print("\n=== 10. Cancel Orders ===")
 
         # Cancel all our test orders
-        orders_to_cancel = [id for id in [limit_order_id, gtd_order_id, stop_order_id, mit_order_id] if id]
+        orders_to_cancel = [order_id for order_id in [limit_order_id, gtd_order_id, stop_order_id, mit_order_id] if order_id]
 
         for order_id in orders_to_cancel:
             print(f"\nCancelling order {order_id}")
-            cancel_response = await client.orders.cancel_order(
-                account_id=client.account_id,
-                order_specifier=order_id
-            )
+            cancel_response = await client.orders.cancel_order(account_id=client.account_id, order_specifier=order_id)
 
             if cancel_response.get("orderCancelTransaction"):
                 print(f"✅ Order {order_id} cancelled")
@@ -304,14 +236,10 @@ async def main() -> None:
 
         # Close our test position
         print("\n\nCleaning up: Closing EUR/USD position...")
-        close_response = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=-1000
-        )
+        close_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=-1000)
 
         if close_response.order_fill_transaction:
-            print(f"✅ Position closed")
+            print("✅ Position closed")
 
     print("\n✅ Advanced order management example completed!")
 

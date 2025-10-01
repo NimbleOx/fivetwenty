@@ -11,7 +11,6 @@ Demonstrates market data operations including:
 """
 
 import asyncio
-from datetime import datetime, timedelta
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
@@ -22,7 +21,6 @@ async def main() -> None:
     """Pricing and candlestick data operations example."""
 
     async with AsyncClient() as client:
-
         # Section 1: Get current pricing
         print("\n=== 1. Current Pricing ===")
 
@@ -30,10 +28,7 @@ async def main() -> None:
 
         print(f"\nFetching current prices for {len(instruments)} instruments...")
 
-        pricing_response = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=instruments
-        )
+        pricing_response = await client.pricing.get_pricing(account_id=client.account_id, instruments=instruments)
 
         prices = pricing_response["prices"]
 
@@ -123,13 +118,13 @@ async for event in client.pricing.stream_pricing_with_retries(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
             granularity=CandlestickGranularity.M5,
-            count=20  # Last 20 candles
+            count=20,  # Last 20 candles
         )
 
         candles = candles_response.get("candles", [])
 
         print(f"Retrieved {len(candles)} candles:")
-        for i, candle in enumerate(candles[-5:], start=len(candles)-4):  # Show last 5
+        for i, candle in enumerate(candles[-5:], start=len(candles) - 4):  # Show last 5
             if candle.mid:
                 print(f"\n  Candle {i}:")
                 print(f"    Time: {candle.time}")
@@ -150,7 +145,7 @@ async for event in client.pricing.stream_pricing_with_retries(
             candleSpecifications=[
                 f"{InstrumentName.EUR_USD}:{CandlestickGranularity.H1}",
                 f"{InstrumentName.GBP_USD}:{CandlestickGranularity.H1}",
-            ]
+            ],
         )
 
         latest_candles = latest_response.get("latestCandles", [])
@@ -175,12 +170,12 @@ async for event in client.pricing.stream_pricing_with_retries(
         generic_candles = await client.instruments.get_instrument_candles(
             instrument=InstrumentName.EUR_USD,
             granularity=CandlestickGranularity.D,  # Daily candles
-            count=10
+            count=10,
         )
 
         daily_candles = generic_candles.get("candles", [])
 
-        print(f"\nLast 5 daily candles for EUR/USD:")
+        print("\nLast 5 daily candles for EUR/USD:")
         for candle in daily_candles[-5:]:
             if candle.mid:
                 body_size = abs(Decimal(candle.mid.c) - Decimal(candle.mid.o))
@@ -199,12 +194,7 @@ async for event in client.pricing.stream_pricing_with_retries(
         ]
 
         for granularity, count in timeframes:
-            tf_response = await client.pricing.get_account_instrument_candles(
-                account_id=client.account_id,
-                instrument=InstrumentName.EUR_USD,
-                granularity=granularity,
-                count=count
-            )
+            tf_response = await client.pricing.get_account_instrument_candles(account_id=client.account_id, instrument=InstrumentName.EUR_USD, granularity=granularity, count=count)
 
             tf_candles = tf_response.get("candles", [])
             if tf_candles and tf_candles[-1].mid:
@@ -216,12 +206,7 @@ async for event in client.pricing.stream_pricing_with_retries(
 
         print("\nAnalyzing recent M5 candles for patterns...")
 
-        analysis_response = await client.pricing.get_account_instrument_candles(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            granularity=CandlestickGranularity.M5,
-            count=50
-        )
+        analysis_response = await client.pricing.get_account_instrument_candles(account_id=client.account_id, instrument=InstrumentName.EUR_USD, granularity=CandlestickGranularity.M5, count=50)
 
         analysis_candles = analysis_response.get("candles", [])
 
@@ -247,7 +232,6 @@ async for event in client.pricing.stream_pricing_with_retries(
 
                 # Hammer: small body at top, long lower wick
                 lower_wick = min(open_price, close) - low
-                upper_wick = high - max(open_price, close)
                 if total_range > 0:
                     if lower_wick / total_range > Decimal("0.6") and body / total_range < Decimal("0.3"):
                         hammer_count += 1
@@ -265,12 +249,7 @@ async for event in client.pricing.stream_pricing_with_retries(
         print("\nCalculating simple indicators from candle data...")
 
         # Get enough data for calculations
-        indicator_response = await client.pricing.get_account_instrument_candles(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            granularity=CandlestickGranularity.H1,
-            count=50
-        )
+        indicator_response = await client.pricing.get_account_instrument_candles(account_id=client.account_id, instrument=InstrumentName.EUR_USD, granularity=CandlestickGranularity.H1, count=50)
 
         indicator_candles = indicator_response.get("candles", [])
         closes = [Decimal(c.mid.c) for c in indicator_candles if c.mid and c.complete]
@@ -283,16 +262,12 @@ async for event in client.pricing.stream_pricing_with_retries(
             # Calculate ATR (Average True Range) - simplified
             true_ranges = []
             for i in range(1, len(indicator_candles)):
-                if indicator_candles[i].mid and indicator_candles[i-1].mid:
+                if indicator_candles[i].mid and indicator_candles[i - 1].mid:
                     high = Decimal(indicator_candles[i].mid.h)
                     low = Decimal(indicator_candles[i].mid.l)
-                    prev_close = Decimal(indicator_candles[i-1].mid.c)
+                    prev_close = Decimal(indicator_candles[i - 1].mid.c)
 
-                    tr = max(
-                        high - low,
-                        abs(high - prev_close),
-                        abs(low - prev_close)
-                    )
+                    tr = max(high - low, abs(high - prev_close), abs(low - prev_close))
                     true_ranges.append(tr)
 
             if len(true_ranges) >= 14:
@@ -307,7 +282,7 @@ async for event in client.pricing.stream_pricing_with_retries(
                 upper_band = sma + (std_dev * 2)
                 lower_band = sma - (std_dev * 2)
 
-                print(f"\nBollinger Bands (20, 2):")
+                print("\nBollinger Bands (20, 2):")
                 print(f"  Upper: {upper_band:.5f}")
                 print(f"  Middle: {sma:.5f}")
                 print(f"  Lower: {lower_band:.5f}")
@@ -316,32 +291,24 @@ async for event in client.pricing.stream_pricing_with_retries(
         print("\n=== 10. Price vs Candle Data ===")
 
         # Get current price
-        current_pricing = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[InstrumentName.EUR_USD]
-        )
+        current_pricing = await client.pricing.get_pricing(account_id=client.account_id, instruments=[InstrumentName.EUR_USD])
         current_price = current_pricing["prices"][0]
         current_mid = (Decimal(current_price.bids[0].price) + Decimal(current_price.asks[0].price)) / 2
 
         # Get latest M1 candle
-        m1_response = await client.pricing.get_account_instrument_candles(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            granularity=CandlestickGranularity.M1,
-            count=2
-        )
+        m1_response = await client.pricing.get_account_instrument_candles(account_id=client.account_id, instrument=InstrumentName.EUR_USD, granularity=CandlestickGranularity.M1, count=2)
 
         m1_candles = m1_response.get("candles", [])
 
         if m1_candles:
             latest_m1 = m1_candles[-1]
 
-            print(f"\nEUR/USD Current State:")
+            print("\nEUR/USD Current State:")
             print(f"  Live Price (mid): {current_mid:.5f}")
             print(f"  Live Time: {current_price.time}")
 
             if latest_m1.mid:
-                print(f"\n  Latest M1 Candle:")
+                print("\n  Latest M1 Candle:")
                 print(f"    Open: {latest_m1.mid.o}")
                 print(f"    High: {latest_m1.mid.h}")
                 print(f"    Low: {latest_m1.mid.l}")
@@ -350,7 +317,7 @@ async for event in client.pricing.stream_pricing_with_retries(
                 print(f"    Time: {latest_m1.time}")
 
                 if not latest_m1.complete:
-                    print(f"\n  ⚠️  Candle in formation - close price is current market price")
+                    print("\n  ⚠️  Candle in formation - close price is current market price")
                     candle_open = Decimal(latest_m1.mid.o)
                     movement = current_mid - candle_open
                     print(f"  Movement this candle: {movement:.5f} pips")

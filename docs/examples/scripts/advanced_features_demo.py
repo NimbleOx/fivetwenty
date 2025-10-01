@@ -18,10 +18,8 @@ from fivetwenty import AsyncClient
 from fivetwenty.models import (
     ClientExtensions,
     InstrumentName,
-    OrderPositionFill,
     StopLossDetails,
     TakeProfitDetails,
-    TimeInForce,
 )
 
 
@@ -29,7 +27,6 @@ async def main() -> None:
     """Advanced features demonstration."""
 
     async with AsyncClient() as client:
-
         # Section 1: Decimal precision
         print("\n=== 1. Decimal Precision ===")
 
@@ -37,13 +34,13 @@ async def main() -> None:
         print("  Float precision problems:")
         float_sum = 0.1 + 0.2
         print(f"    0.1 + 0.2 = {float_sum} (float)")
-        print(f"    Expected: 0.3")
-        print(f"    ❌ Float arithmetic is imprecise!")
+        print("    Expected: 0.3")
+        print("    ❌ Float arithmetic is imprecise!")
 
         print("\n  Decimal precision:")
         decimal_sum = Decimal("0.1") + Decimal("0.2")
         print(f"    0.1 + 0.2 = {decimal_sum} (Decimal)")
-        print(f"    ✅ Decimal arithmetic is exact!")
+        print("    ✅ Decimal arithmetic is exact!")
 
         print("\nFiveTwenty uses Decimal everywhere:")
         print("  - Order prices")
@@ -59,7 +56,7 @@ async def main() -> None:
         pips = (exit_price - entry_price) * Decimal("10000")  # For EUR/USD
         profit = (exit_price - entry_price) * units
 
-        print(f"\nExample calculation:")
+        print("\nExample calculation:")
         print(f"  Entry: {entry_price}")
         print(f"  Exit: {exit_price}")
         print(f"  Units: {units}")
@@ -76,8 +73,9 @@ async def main() -> None:
         print("  ❌ Does NOT prevent duplicate orders")
         print("  ❌ Does NOT appear in transaction responses")
 
-        from datetime import datetime
-        client_request_id = f"trading-bot-v1-{datetime.utcnow().isoformat()}"
+        from datetime import UTC, datetime
+
+        client_request_id = f"trading-bot-v1-{datetime.now(UTC).isoformat()}"
 
         print(f"\nExample: {client_request_id}")
 
@@ -87,28 +85,18 @@ async def main() -> None:
         print("\nClient extensions add metadata to orders/trades:")
 
         # Create extensions
-        extensions = ClientExtensions(
-            id="momentum-strategy-001",
-            tag="breakout",
-            comment="Strong momentum signal detected"
-        )
+        extensions = ClientExtensions(id="momentum-strategy-001", tag="breakout", comment="Strong momentum signal detected")
 
-        print(f"\nExtensions:")
+        print("\nExtensions:")
         print(f"  ID: {extensions.id}")
         print(f"  Tag: {extensions.tag}")
         print(f"  Comment: {extensions.comment}")
 
         # Place order with extensions
-        order = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000,
-            client_extensions=extensions,
-            client_request_id=client_request_id
-        )
+        order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, client_extensions=extensions, client_request_id=client_request_id)
 
         if order.order_fill_transaction:
-            print(f"\n✅ Order placed with extensions")
+            print("\n✅ Order placed with extensions")
             print(f"Fill price: {order.order_fill_transaction.price}")
 
         # Section 4: Advanced streaming
@@ -152,52 +140,44 @@ async for event in client.pricing.stream_pricing_with_retries(
         print("\nBracket order strategy (Entry + TP + SL):")
 
         # Get current price
-        pricing = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[InstrumentName.EUR_USD]
-        )
+        pricing = await client.pricing.get_pricing(account_id=client.account_id, instruments=[InstrumentName.EUR_USD])
         current_ask = Decimal(pricing["prices"][0].asks[0].price)
 
         # Define bracket
         entry_price = current_ask
         take_profit_price = entry_price + Decimal("0.0050")  # 50 pips
-        stop_loss_price = entry_price - Decimal("0.0025")    # 25 pips
+        stop_loss_price = entry_price - Decimal("0.0025")  # 25 pips
 
         print(f"\n  Entry: {entry_price}")
         print(f"  Take Profit: {take_profit_price} (+50 pips)")
         print(f"  Stop Loss: {stop_loss_price} (-25 pips)")
 
         bracket_order = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000,
-            take_profit_on_fill=TakeProfitDetails(price=str(take_profit_price)),
-            stop_loss_on_fill=StopLossDetails(price=str(stop_loss_price)),
-            client_extensions=ClientExtensions(comment="Bracket order demo")
+            account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000, take_profit_on_fill=TakeProfitDetails(price=str(take_profit_price)), stop_loss_on_fill=StopLossDetails(price=str(stop_loss_price)), client_extensions=ClientExtensions(comment="Bracket order demo")
         )
 
         if bracket_order.order_fill_transaction:
-            print(f"\n✅ Bracket order filled")
+            print("\n✅ Bracket order filled")
             print(f"Entry: {bracket_order.order_fill_transaction.price}")
 
         # Section 6: Position fill strategies
         print("\n=== 6. Position Fill Strategies ===")
 
         print("\nOrderPositionFill determines how orders affect positions:")
-        print(f"\n  DEFAULT:")
-        print(f"    OANDA decides based on position state")
+        print("\n  DEFAULT:")
+        print("    OANDA decides based on position state")
 
-        print(f"\n  OPEN_ONLY:")
-        print(f"    Only opens new positions")
-        print(f"    Rejects if would close existing position")
+        print("\n  OPEN_ONLY:")
+        print("    Only opens new positions")
+        print("    Rejects if would close existing position")
 
-        print(f"\n  REDUCE_FIRST:")
-        print(f"    First reduces opposite position")
-        print(f"    Then opens new position if units remain")
+        print("\n  REDUCE_FIRST:")
+        print("    First reduces opposite position")
+        print("    Then opens new position if units remain")
 
-        print(f"\n  REDUCE_ONLY:")
-        print(f"    Only reduces existing positions")
-        print(f"    Rejects if would open new position")
+        print("\n  REDUCE_ONLY:")
+        print("    Only reduces existing positions")
+        print("    Rejects if would open new position")
 
         print("\n💡 Example - REDUCE_ONLY:")
         print("""
@@ -214,19 +194,19 @@ await client.orders.post_market_order(
         print("\n=== 7. Time In Force Options ===")
 
         print("\nOrder timing strategies:")
-        print(f"\n  GTC (Good-Till-Cancelled):")
-        print(f"    Remains active until filled or cancelled")
+        print("\n  GTC (Good-Till-Cancelled):")
+        print("    Remains active until filled or cancelled")
 
-        print(f"\n  GTD (Good-Till-Date):")
-        print(f"    Expires at specified time")
+        print("\n  GTD (Good-Till-Date):")
+        print("    Expires at specified time")
 
-        print(f"\n  FOK (Fill-Or-Kill):")
-        print(f"    Must fill immediately and completely")
-        print(f"    Or cancelled if not possible")
+        print("\n  FOK (Fill-Or-Kill):")
+        print("    Must fill immediately and completely")
+        print("    Or cancelled if not possible")
 
-        print(f"\n  IOC (Immediate-Or-Cancel):")
-        print(f"    Fill immediately (partial fills OK)")
-        print(f"    Cancel unfilled portion")
+        print("\n  IOC (Immediate-Or-Cancel):")
+        print("    Fill immediately (partial fills OK)")
+        print("    Cancel unfilled portion")
 
         print("\n💡 Example - GTD:")
         print("""
@@ -256,7 +236,7 @@ await client.orders.post_limit_order(
         print("\nExample - InstrumentName enum:")
         print(f"  InstrumentName.EUR_USD = '{InstrumentName.EUR_USD}'")
         print(f"  InstrumentName.GBP_USD = '{InstrumentName.GBP_USD}'")
-        print(f"  # IDE autocomplete available!")
+        print("  # IDE autocomplete available!")
 
         print("\nPydantic validation:")
         print("""
@@ -378,10 +358,7 @@ async with AsyncClient() as client:
         print("\nPutting it all together:")
 
         # Clean up our demo position
-        await client.positions.close_position(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD
-        )
+        await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
 
         # Complete example
         print("\n💡 Production-ready trading example:")

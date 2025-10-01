@@ -12,13 +12,9 @@ Demonstrates robust error handling patterns:
 """
 
 import asyncio
-import random
-import time
-from decimal import Decimal
-from functools import wraps
 
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import StreamStall, VeeTwentyError
+from fivetwenty.exceptions import VeeTwentyError
 from fivetwenty.models import InstrumentName
 
 
@@ -26,7 +22,6 @@ async def main() -> None:
     """Enhanced error handling patterns example."""
 
     async with AsyncClient() as client:
-
         # Section 1: Basic error handling
         print("\n=== 1. Basic Error Handling ===")
 
@@ -34,13 +29,9 @@ async def main() -> None:
 
         try:
             # This will fail - invalid instrument
-            await client.orders.post_market_order(
-                account_id=client.account_id,
-                instrument="INVALID_INSTRUMENT",
-                units=1000
-            )
+            await client.orders.post_market_order(account_id=client.account_id, instrument="INVALID_INSTRUMENT", units=1000)
         except VeeTwentyError as e:
-            print(f"✅ Caught VeeTwentyError:")
+            print("✅ Caught VeeTwentyError:")
             print(f"  Status Code: {e.status_code}")
             print(f"  Message: {e.message}")
             print(f"  Error Code: {e.code if e.code else 'N/A'}")
@@ -56,7 +47,7 @@ async def main() -> None:
             await client.orders.post_market_order(
                 account_id=client.account_id,
                 instrument=InstrumentName.EUR_USD,
-                units=0  # Invalid - units cannot be zero
+                units=0,  # Invalid - units cannot be zero
             )
         except VeeTwentyError as e:
             if e.status_code == 400:
@@ -67,7 +58,7 @@ async def main() -> None:
         try:
             await client.orders.get_order(
                 account_id=client.account_id,
-                order_specifier="99999999"  # Non-existent order
+                order_specifier="99999999",  # Non-existent order
             )
         except VeeTwentyError as e:
             if e.status_code == 404:
@@ -85,11 +76,7 @@ async def main() -> None:
 
         for test_name, instrument, units in validation_tests:
             try:
-                await client.orders.post_market_order(
-                    account_id=client.account_id,
-                    instrument=instrument,
-                    units=units
-                )
+                await client.orders.post_market_order(account_id=client.account_id, instrument=instrument, units=units)
             except VeeTwentyError as e:
                 print(f"{test_name}:")
                 print(f"  Error: {e.message}")
@@ -183,35 +170,31 @@ except StreamStall:
             await client.orders.post_market_order(
                 account_id=client.account_id,
                 instrument=InstrumentName.EUR_USD,
-                units=10000000  # Very large order
+                units=10000000,  # Very large order
             )
         except VeeTwentyError as e:
-            print(f"Order rejected:")
+            print("Order rejected:")
             print(f"  Reason: {e.message}")
-            print(f"\nCommon rejection reasons:")
-            print(f"  - Insufficient margin")
-            print(f"  - Market closed")
-            print(f"  - Invalid price")
-            print(f"  - Instrument not tradeable")
-            print(f"  - Account restrictions")
+            print("\nCommon rejection reasons:")
+            print("  - Insufficient margin")
+            print("  - Market closed")
+            print("  - Invalid price")
+            print("  - Instrument not tradeable")
+            print("  - Account restrictions")
 
         # Section 8: Partial fills and slippage
         print("\n=== 8. Partial Fills ===")
 
         print("\nDetecting partial fills:")
 
-        order = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000
-        )
+        order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
         if order.order_fill_transaction:
             requested = 1000
             filled = int(order.order_fill_transaction.units)
 
             if filled < requested:
-                print(f"⚠️  Partial fill detected!")
+                print("⚠️  Partial fill detected!")
                 print(f"  Requested: {requested}")
                 print(f"  Filled: {filled}")
                 print(f"  Unfilled: {requested - filled}")
@@ -219,11 +202,7 @@ except StreamStall:
                 print(f"✅ Full fill: {filled} units")
 
         # Close the position
-        await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=-1000
-        )
+        await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=-1000)
 
         # Section 9: Comprehensive retry decorator
         print("\n=== 9. Retry Decorator ===")

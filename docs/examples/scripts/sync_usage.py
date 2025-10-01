@@ -39,7 +39,7 @@ def main() -> None:
     print("\nSync client has same configuration options as AsyncClient:")
 
     with Client() as client:
-        print(f"✅ Connected (sync)")
+        print("✅ Connected (sync)")
         print(f"Account: {client.account_id}")
         print(f"Environment: {client.environment.value}")
 
@@ -53,44 +53,33 @@ def main() -> None:
         summary = client.accounts.get_account_summary(client.account_id)
         account = summary["account"]
 
-        print(f"\nAccount Balance:")
+        print("\nAccount Balance:")
         print(f"  Balance: {account.balance} {account.currency}")
         print(f"  NAV: {account.nav}")
         print(f"  Unrealized P/L: {account.unrealized_pl}")
 
         # Get current pricing
-        pricing = client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[InstrumentName.EUR_USD]
-        )
+        pricing = client.pricing.get_pricing(account_id=client.account_id, instruments=[InstrumentName.EUR_USD])
 
         price = pricing["prices"][0]
         if price.bids and price.asks:
-            print(f"\nEUR/USD:")
+            print("\nEUR/USD:")
             print(f"  Bid: {price.bids[0].price}")
             print(f"  Ask: {price.asks[0].price}")
 
         # Place an order
         print("\n⚠️  Placing order...")
-        order = client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000
-        )
+        order = client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
         if order.order_fill_transaction:
             print(f"✅ Order filled at {order.order_fill_transaction.price}")
 
         # Close position
         print("\n⚠️  Closing position...")
-        close_order = client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=-1000
-        )
+        close_order = client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=-1000)
 
         if close_order.order_fill_transaction:
-            print(f"✅ Position closed")
+            print("✅ Position closed")
             print(f"Realized P/L: {close_order.order_fill_transaction.pl}")
 
     # Section 4: Sync streaming
@@ -256,10 +245,7 @@ async def my_async_function():
         print(f"2. Balance: {summary['account'].balance}")
 
         # Get price
-        pricing = client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[InstrumentName.GBP_USD]
-        )
+        pricing = client.pricing.get_pricing(account_id=client.account_id, instruments=[InstrumentName.GBP_USD])
         price = pricing["prices"][0]
 
         if price.bids and price.asks:
