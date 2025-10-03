@@ -1,6 +1,6 @@
 # Positions Endpoint
 
-📖 **OANDA Reference**: [Position Endpoints](https://developer.oanda.com/rest-live-v20/position-ep/)
+**OANDA Reference**: [Position Endpoints](https://developer.oanda.com/rest-live-v20/position-ep/)
 
 Position monitoring and management.
 
@@ -9,21 +9,30 @@ Position monitoring and management.
 ## get_positions
 ```python
 import asyncio
+from typing import TYPE_CHECKING
+
 from fivetwenty import AsyncClient
+
+if TYPE_CHECKING:
+    from fivetwenty.endpoints.positions import PositionsResponse
 
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # positions.get_positions(account_id: AccountID) -> dict[str, Any]
+        # positions.get_positions(account_id: AccountID) -> PositionsResponse
+        # Returns: {"positions": list[Position], "lastTransactionID": str}
 
         # Example usage:
-        _positions = await client.positions.get_positions(account_id="123-456-789")
+        result: PositionsResponse = await client.positions.get_positions(account_id="123-456-789")
+        positions = result["positions"]
+        print(f"Found {len(positions)} position(s)")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/positions`
 
-📖 **OANDA Documentation**: [Get Positions](https://developer.oanda.com/rest-live-v20/position-ep/#get-positions)
+**OANDA Documentation**: [Get Positions](https://developer.oanda.com/rest-live-v20/position-ep/#get-positions)
 
 Get a list of all positions for an account.
 
@@ -33,7 +42,7 @@ Get a list of all positions for an account.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
 
-**Returns:** Dictionary containing list of positions and last transaction ID
+**Returns:** Dictionary containing list of positions (`list[Position]`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -44,20 +53,29 @@ Get a list of all positions for an account.
 ## get_open_positions
 ```python
 import asyncio
+from typing import TYPE_CHECKING
+
 from fivetwenty import AsyncClient
+
+if TYPE_CHECKING:
+    from fivetwenty.endpoints.positions import PositionsResponse
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # positions.get_open_positions(account_id: AccountID) -> dict[str, Any]
+        # positions.get_open_positions(account_id: AccountID) -> PositionsResponse
+        # Returns: {"positions": list[Position], "lastTransactionID": str}
 
         # Example usage:
-        _open_positions = await client.positions.get_open_positions(account_id="123-456-789")
+        result: PositionsResponse = await client.positions.get_open_positions(account_id="123-456-789")
+        open_positions = result["positions"]
+        print(f"Found {len(open_positions)} open position(s)")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openPositions`
 
-📖 **OANDA Documentation**: [Get Open Positions](https://developer.oanda.com/rest-live-v20/position-ep/#get-open-positions)
+**OANDA Documentation**: [Get Open Positions](https://developer.oanda.com/rest-live-v20/position-ep/#get-open-positions)
 
 Get a list of all open positions for an account.
 
@@ -67,7 +85,7 @@ Get a list of all open positions for an account.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
 
-**Returns:** Dictionary containing list of open positions and last transaction ID
+**Returns:** Dictionary containing list of open positions (`list[Position]`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -80,22 +98,26 @@ Get a list of all open positions for an account.
 ```python
 import asyncio
 from fivetwenty import AsyncClient
+from fivetwenty.endpoints.positions import PositionResponse
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # positions.get_position(account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]
+        # positions.get_position(account_id: AccountID, instrument: InstrumentName) -> PositionResponse
+        # Returns: {"position": Position, "lastTransactionID": str}
 
         # Example usage:
-        _position = await client.positions.get_position(
+        result: PositionResponse = await client.positions.get_position(
             account_id="123-456-789",
             instrument="EUR_USD"
         )
+        position = result["position"]
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/positions/{instrument}`
 
-📖 **OANDA Documentation**: [Get Position](https://developer.oanda.com/rest-live-v20/position-ep/#get-position)
+**OANDA Documentation**: [Get Position](https://developer.oanda.com/rest-live-v20/position-ep/#get-position)
 
 Get the position for a specific instrument in an account.
 
@@ -106,7 +128,7 @@ Get the position for a specific instrument in an account.
 | `account_id` | AccountID | ✅ | Account identifier |
 | `instrument` | InstrumentName | ✅ | Name of the instrument |
 
-**Returns:** Dictionary containing position details and last transaction ID
+**Returns:** Dictionary containing position details (`Position`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -119,6 +141,7 @@ Get the position for a specific instrument in an account.
 ```python
 import asyncio
 from fivetwenty import AsyncClient
+from fivetwenty.endpoints.positions import ClosePositionResponse
 
 
 async def main() -> None:
@@ -127,20 +150,21 @@ async def main() -> None:
         #                long_units: str | Decimal | None = None,
         #                short_units: str | Decimal | None = None,
         #                long_client_extensions: ClientExtensions | dict[str, str] | None = None,
-        #                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> dict[str, Any]
+        #                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> ClosePositionResponse
 
         # Example usage:
-        _result = await client.positions.close_position(
+        result: ClosePositionResponse = await client.positions.close_position(
             account_id="123-456-789",
             instrument="EUR_USD",
             long_units="ALL",
         )
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/positions/{instrument}/close`
 
-📖 **OANDA Documentation**: [Close Position](https://developer.oanda.com/rest-live-v20/position-ep/#close-position)
+**OANDA Documentation**: [Close Position](https://developer.oanda.com/rest-live-v20/position-ep/#close-position)
 
 Close the open position for a specific instrument.
 
@@ -155,7 +179,7 @@ Close the open position for a specific instrument.
 | `long_client_extensions` | ClientExtensions &#124; dict[str, str] | ➖ | Client extensions for long position closure order |
 | `short_client_extensions` | ClientExtensions &#124; dict[str, str] | ➖ | Client extensions for short position closure order |
 
-**Returns:** Dictionary containing closure transaction details
+**Returns:** Dictionary containing closure transaction details and last transaction ID (`str`)
 
 **Raises:**
 

@@ -114,10 +114,10 @@ class TestPackageExports:
     def test_client_classes_instantiable(self):
         """Test client classes can be instantiated with basic parameters."""
         # Test that classes can be instantiated (with fake token)
-        client = fivetwenty.AsyncClient(token="test-token")
+        client = fivetwenty.AsyncClient(token="test-token", account_id="123-456-789")
         assert client is not None
 
-        sync_client = fivetwenty.Client(token="test-token")
+        sync_client = fivetwenty.Client(token="test-token", account_id="123-456-789")
         assert sync_client is not None
 
     def test_environment_enum_accessible(self):
@@ -290,7 +290,7 @@ class TestNamespaceCleanness:
             unexpected_public = set(public_attrs) - set(fivetwenty.__all__)
 
             # Allow some standard attributes
-            allowed_extras = {"models", "client", "exceptions", "endpoints", "configuration"}
+            allowed_extras = {"models", "client", "exceptions", "endpoints", "configuration", "version"}
             unexpected_public = unexpected_public - allowed_extras
 
             assert not unexpected_public, f"Unexpected public attributes: {unexpected_public}"

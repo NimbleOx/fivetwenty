@@ -1,16 +1,68 @@
 """Trade management endpoints."""
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from ..models import (
     AccountID,
     InstrumentName,
+    Trade,
     TradeID,
     TradeStateFilter,
 )
 
 if TYPE_CHECKING:
     from ..client import AsyncClient
+
+
+class TradesResponse(TypedDict):
+    """Response from get_trades and get_open_trades endpoints."""
+
+    trades: list[Trade]
+    lastTransactionID: str
+
+
+class TradeResponse(TypedDict):
+    """Response from get_trade endpoint."""
+
+    trade: Trade
+    lastTransactionID: str
+
+
+class CloseTradeResponse(TypedDict, total=False):
+    """Response from close_trade endpoint."""
+
+    orderCreateTransaction: Any
+    orderFillTransaction: Any
+    orderCancelTransaction: Any
+    relatedTransactionIDs: list[str]
+    lastTransactionID: str
+
+
+class TradeClientExtensionsResponse(TypedDict, total=False):
+    """Response from put_trade_client_extensions endpoint."""
+
+    tradeClientExtensionsModifyTransaction: Any
+    relatedTransactionIDs: list[str]
+    lastTransactionID: str
+
+
+class TradeOrdersResponse(TypedDict, total=False):
+    """Response from put_trade_orders endpoint."""
+
+    takeProfitOrderCancelTransaction: Any
+    takeProfitOrderTransaction: Any
+    takeProfitOrderFillTransaction: Any
+    takeProfitOrderCreatedCancelTransaction: Any
+    stopLossOrderCancelTransaction: Any
+    stopLossOrderTransaction: Any
+    stopLossOrderFillTransaction: Any
+    stopLossOrderCreatedCancelTransaction: Any
+    trailingStopLossOrderTransaction: Any
+    trailingStopLossOrderCancelTransaction: Any
+    guaranteedStopLossOrderTransaction: Any
+    guaranteedStopLossOrderCancelTransaction: Any
+    relatedTransactionIDs: list[str]
+    lastTransactionID: str
 
 
 class TradeEndpoints:
@@ -28,7 +80,7 @@ class TradeEndpoints:
         instrument: InstrumentName | None = None,
         count: int = 50,
         before_id: TradeID | None = None,
-    ) -> dict[str, Any]:
+    ) -> TradesResponse:
         """
         Get a list of trades for an account.
 
@@ -64,12 +116,16 @@ class TradeEndpoints:
             params=params,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "trades": [Trade.model_validate(t) for t in data["trades"]],
+            "lastTransactionID": data["lastTransactionID"],
+        }
 
     async def get_open_trades(
         self,
         account_id: AccountID,
-    ) -> dict[str, Any]:
+    ) -> TradesResponse:
         """
         Get the list of open trades for an account.
 
@@ -87,13 +143,17 @@ class TradeEndpoints:
             f"/accounts/{account_id}/openTrades",
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "trades": [Trade.model_validate(t) for t in data["trades"]],
+            "lastTransactionID": data["lastTransactionID"],
+        }
 
     async def get_trade(
         self,
         account_id: AccountID,
         trade_specifier: str,
-    ) -> dict[str, Any]:
+    ) -> TradeResponse:
         """
         Get details of a specific trade.
 
@@ -112,7 +172,11 @@ class TradeEndpoints:
             f"/accounts/{account_id}/trades/{trade_specifier}",
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "trade": Trade.model_validate(data["trade"]),
+            "lastTransactionID": data["lastTransactionID"],
+        }
 
     async def close_trade(
         self,
@@ -121,7 +185,7 @@ class TradeEndpoints:
         *,
         units: str | None = None,
         idempotency_key: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> CloseTradeResponse:
         """
         Close a trade (fully or partially).
 
@@ -141,7 +205,7 @@ class TradeEndpoints:
         if units is not None:
             data["units"] = units
 
-        headers = {}
+        headers: dict[str, str] = {}
         if idempotency_key:
             headers["ClientRequestID"] = idempotency_key
 
@@ -149,7 +213,7 @@ class TradeEndpoints:
             "PUT",
             f"/accounts/{account_id}/trades/{trade_specifier}/close",
             json_data=data if data else None,
-            headers=headers if headers else None,
+            headers=headers,
         )
 
         return response.json()  # type: ignore[no-any-return]
@@ -161,7 +225,7 @@ class TradeEndpoints:
         *,
         client_extensions: dict[str, Any] | None = None,
         idempotency_key: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> TradeClientExtensionsResponse:
         """
         Update client extensions for a trade.
 
@@ -181,7 +245,7 @@ class TradeEndpoints:
         if client_extensions:
             data["clientExtensions"] = client_extensions
 
-        headers = {}
+        headers: dict[str, str] = {}
         if idempotency_key:
             headers["ClientRequestID"] = idempotency_key
 
@@ -189,7 +253,7 @@ class TradeEndpoints:
             "PUT",
             f"/accounts/{account_id}/trades/{trade_specifier}/clientExtensions",
             json_data=data,
-            headers=headers if headers else None,
+            headers=headers,
         )
 
         return response.json()  # type: ignore[no-any-return]
@@ -199,7 +263,7 @@ class TradeEndpoints:
         account_id: AccountID,
         trade_specifier: str,
         **kwargs: Any,
-    ) -> dict[str, Any]:
+    ) -> TradeOrdersResponse:
         """
         Create, replace, or cancel dependent orders (TP/SL) for a trade.
 
@@ -234,7 +298,7 @@ class TradeEndpoints:
         if "guaranteed_stop_loss" in kwargs:
             data["guaranteedStopLoss"] = kwargs["guaranteed_stop_loss"]
 
-        headers = {}
+        headers: dict[str, str] = {}
         if idempotency_key:
             headers["ClientRequestID"] = idempotency_key
 
@@ -242,7 +306,7 @@ class TradeEndpoints:
             "PUT",
             f"/accounts/{account_id}/trades/{trade_specifier}/orders",
             json_data=data,
-            headers=headers if headers else None,
+            headers=headers,
         )
 
         return response.json()  # type: ignore[no-any-return]

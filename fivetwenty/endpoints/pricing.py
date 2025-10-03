@@ -3,13 +3,35 @@
 import json
 from collections.abc import AsyncIterator
 from datetime import datetime
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
-from ..models import AccountID, ClientPrice, PricingHeartbeat
+from ..models import AccountID, ClientPrice, HomeConversions, PricingHeartbeat
 from ..models.streaming import StreamingConfiguration, StreamState
 
 if TYPE_CHECKING:
     from ..client import AsyncClient
+
+
+class GetPricingResponse(TypedDict, total=False):
+    """Response from get_pricing endpoint."""
+
+    prices: list[ClientPrice]  # Required
+    homeConversions: list[HomeConversions]  # Optional
+    time: str  # Required
+
+
+class CandlesResponse(TypedDict):
+    """Response from get_account_instrument_candles endpoint."""
+
+    instrument: str
+    granularity: str
+    candles: list[Any]
+
+
+class LatestCandlesResponse(TypedDict):
+    """Response from get_latest_candles endpoint."""
+
+    latestCandles: list[Any]
 
 
 class PricingEndpoints:
@@ -26,7 +48,7 @@ class PricingEndpoints:
         since: str | None = None,
         include_units_available: bool = True,
         include_home_conversions: bool = False,
-    ) -> dict[str, Any]:
+    ) -> GetPricingResponse:
         """
         Get current prices for instruments.
 
@@ -38,7 +60,7 @@ class PricingEndpoints:
             include_home_conversions: Include home currency conversions
 
         Returns:
-            Pricing information
+            Dictionary containing prices, optional homeConversions, and time
 
         Raises:
             FiveTwentyError: On API errors
@@ -58,7 +80,19 @@ class PricingEndpoints:
             params=params,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+
+        # Parse prices into ClientPrice models
+        result: GetPricingResponse = {
+            "prices": [ClientPrice.model_validate(p) for p in data.get("prices", [])],
+            "time": data["time"],
+        }
+
+        # Parse homeConversions if present
+        if "homeConversions" in data:
+            result["homeConversions"] = [HomeConversions.model_validate(hc) for hc in data["homeConversions"]]
+
+        return result
 
     async def get_pricing_stream(
         self,
@@ -134,7 +168,7 @@ class PricingEndpoints:
         daily_alignment: int = 17,
         alignment_timezone: str = "America/New_York",
         weekly_alignment: str = "Friday",
-    ) -> dict[str, Any]:
+    ) -> CandlesResponse:
         """
         Get account-specific candlestick data for a specified instrument.
 
@@ -223,7 +257,7 @@ class PricingEndpoints:
         daily_alignment: int = 17,
         alignment_timezone: str = "America/New_York",
         weekly_alignment: str = "Friday",
-    ) -> dict[str, Any]:
+    ) -> LatestCandlesResponse:
         """
         Get the latest candle for multiple instrument/granularity combinations.
 

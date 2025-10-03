@@ -107,6 +107,15 @@ class TestEnhancedPricingEndpoints:
         """Test pricing retrieval with datetime since parameter."""
         since_time = datetime(2024, 1, 15, 14, 30, 0, tzinfo=timezone.utc)
 
+        # Mock response with required fields
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "prices": [],
+            "time": "2024-01-15T14:30:00.000000000Z",
+            "homeConversions": [],
+        }
+        mock_client._request = AsyncMock(return_value=mock_response)
+
         await pricing.get_pricing("101-001-123456-001", ["EUR_USD", "GBP_USD"], since=since_time.isoformat(), include_home_conversions=True)
 
         mock_client._request.assert_called_once_with(

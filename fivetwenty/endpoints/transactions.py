@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import builtins  # noqa: TC003
 import json
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -16,6 +16,39 @@ else:
     from datetime import datetime  # noqa: TC003
 
     from ..models import AccountID  # noqa: TC001
+
+
+class TransactionsResponse(TypedDict, total=False):
+    """Response from get_transactions endpoint."""
+
+    from_: str  # Note: 'from' is a reserved keyword
+    to: str
+    pageSize: int
+    type: str
+    count: int
+    pages: list[str]
+    lastTransactionID: str
+
+
+class TransactionResponse(TypedDict):
+    """Response from get_transaction endpoint."""
+
+    transaction: Any
+    lastTransactionID: str
+
+
+class TransactionsSinceIdResponse(TypedDict):
+    """Response from get_transactions_since_id endpoint."""
+
+    transactions: list[Any]
+    lastTransactionID: str
+
+
+class TransactionsRangeResponse(TypedDict):
+    """Response from get_transactions_range and get_recent_transactions endpoints."""
+
+    transactions: list[Any]
+    lastTransactionID: str
 
 
 class TransactionEndpoints:
@@ -32,7 +65,7 @@ class TransactionEndpoints:
         to_time: datetime | None = None,
         page_size: int = 100,
         transaction_type: builtins.list[str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> TransactionsResponse:
         """
         List transactions for an account within a time range.
 
@@ -74,7 +107,7 @@ class TransactionEndpoints:
         self,
         account_id: AccountID,
         transaction_id: str,
-    ) -> dict[str, Any]:
+    ) -> TransactionResponse:
         """
         Get details for a specific transaction.
 
@@ -101,7 +134,7 @@ class TransactionEndpoints:
         transaction_id: str,
         *,
         transaction_type: builtins.list[str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> TransactionsSinceIdResponse:
         """
         Get transactions that occurred after a specific transaction ID.
 
@@ -182,7 +215,7 @@ class TransactionEndpoints:
         to_transaction_id: str,
         *,
         transaction_type: builtins.list[str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> TransactionsRangeResponse:
         """
         Get transactions within a specific ID range.
 
@@ -235,7 +268,7 @@ class TransactionEndpoints:
         *,
         count: int = 50,
         transaction_type: builtins.list[str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> TransactionsRangeResponse:
         """
         Get the most recent transactions for an account.
 

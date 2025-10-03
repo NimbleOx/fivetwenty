@@ -467,16 +467,16 @@ Practice trading environment with virtual money.
 
 **Properties:**
 
-- `value`: `"practice"`
-- `base_url`: `"https://api-fxpractice.oanda.com/v3"`
+- `value: "practice"`
+- `base_url` (`https\://api-fxpractice.oanda.com/v3`)
 
 #### `Environment.LIVE`
 Live trading environment with real money.
 
 **Properties:**
 
-- `value`: `"live"`
-- `base_url`: `"https://api-fxtrade.oanda.com/v3"`
+- `value: "live"`
+- `base_url` (`https\://api-fxtrade.oanda.com/v3`)
 
 ### Usage
 

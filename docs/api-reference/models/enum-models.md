@@ -420,32 +420,4 @@ Filter for trade queries by state.
 | `CLOSE_WHEN_TRADEABLE` | Trades set to close when tradeable |
 | `ALL` | All trades regardless of state |
 
-## Usage Examples
-
-```python
-from fivetwenty.models.enums import (
-
-    CandlestickGranularity,
-    Direction,
-    InstrumentName,
-    OrderType,
-)
-
-# Using instrument names
-instrument = InstrumentName.EUR_USD
-print(f"Trading {instrument}")  # Trading EUR_USD
-
-# Using order types
-order_type = OrderType.LIMIT
-print(f"Placing {order_type} order")  # Placing LIMIT order
-
-# Using candlestick granularity
-granularity = CandlestickGranularity.H1
-print(f"Fetching {granularity} candles")  # Fetching H1 candles
-
-# Using direction
-direction = Direction.LONG
-print(f"Going {direction}")  # Going LONG
-```
-
 All enums are string-based and can be used directly with OANDA API endpoints or for type validation in your trading applications.

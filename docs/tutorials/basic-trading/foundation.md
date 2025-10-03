@@ -5,7 +5,9 @@
 
 ## FiveTwenty Instrument Names
 
-FiveTwenty uses standardized instrument names for currency pairs. Here's how to work with the most common trading instruments:
+Currency trading requires precise instrument identification. FiveTwenty provides the `InstrumentName` enum to eliminate typos and ensure type safety when specifying currency pairs. Instead of using error-prone strings like `"EUR_USD"` or `"EURUSD"`, you use strongly-typed enum values that your IDE can autocomplete and your type checker can verify. This prevents common mistakes that could cause API errors or unexpected trading behavior.
+
+The example below demonstrates how to use `InstrumentName` for major currency pairs, which typically offer the highest liquidity and tightest spreads:
 
 ```python
 # Step 1: Import standardized instrument enumeration for type safety
@@ -32,25 +34,13 @@ for pair in major_pairs:
     print(f"   Success {pair.value} - Ready for trading")
 ```
 
-## Essential Trading Concepts for FiveTwenty
-
-**Units**: Position size in FiveTwenty
-- Positive units = Buy (long) position
-- Negative units = Sell (short) position
-- Example: `units=1000` buys 1000 units of base currency
-
-**Decimal Precision**: FiveTwenty uses `Decimal` for exact calculations
-- Always use `Decimal("1000")` instead of `1000.0` for financial values
-- Prevents floating-point precision errors in trading calculations
-- Critical for accurate profit/loss calculations and position sizing
-
-**Environment Types**: Practice vs Live trading
-- `Environment.PRACTICE` - Safe testing with virtual money
-- `Environment.LIVE` - Real trading with actual funds
-
 ## Understanding Decimal Precision in Trading
 
-Financial calculations require exact precision to avoid costly errors. FiveTwenty enforces `Decimal` usage for all monetary values to ensure accuracy:
+Floating-point arithmetic is fundamentally unsuitable for financial calculations. The classic example `0.1 + 0.2 = 0.30000000000000004` demonstrates how binary floating-point representation introduces rounding errors that can compound across thousands of trades, leading to incorrect account balances, position sizing errors, and regulatory compliance issues.
+
+FiveTwenty enforces the use of Python's `Decimal` type for all monetary values. `Decimal` uses base-10 arithmetic with exact precision, ensuring that calculations involving money, prices, and quantities remain accurate. This is not just a best practice - it's essential for production trading systems.
+
+The example below demonstrates the difference between float and Decimal arithmetic, then shows practical applications in position sizing, currency conversion, and profit/loss calculations:
 
 ```python
 # Step 1: Import Decimal for exact financial precision
@@ -72,7 +62,7 @@ print("   Exact calculations protect your trading capital")
 # Step 4: Real trading example - Risk-based position sizing
 # Position sizing determines how much capital to risk per trade
 account_balance = Decimal("10000.00")  # $10,000 account balance
-risk_percentage = Decimal("0.02")      # 2% maximum risk per trade
+risk_percentage = Decimal("0.02")  # 2% maximum risk per trade
 position_value = account_balance * risk_percentage
 print("\nBalance Position Sizing Example:")
 print(f"   Account Balance: ${account_balance}")
@@ -81,17 +71,17 @@ print(f"   Position Size: ${position_value}")  # Exactly $200.00
 
 # Step 5: Currency conversion with exact precision
 # Exchange rates require precise calculation to avoid rounding errors
-eur_usd_rate = Decimal("1.0875")       # Current EUR/USD exchange rate
-eur_amount = Decimal("1000.00")        # 1,000 EUR to convert
+eur_usd_rate = Decimal("1.0875")  # Current EUR/USD exchange rate
+eur_amount = Decimal("1000.00")  # 1,000 EUR to convert
 usd_equivalent = eur_amount * eur_usd_rate
 print("\nExchange Currency Conversion:")
 print(f"   €{eur_amount} x {eur_usd_rate} = ${usd_equivalent}")  # Exactly $1087.50
 
 # Step 6: Profit/Loss calculations for trade analysis
 # P&L calculations must be exact for accurate performance tracking
-entry_price = Decimal("1.0850")         # Price when entering trade
-exit_price = Decimal("1.0920")          # Price when exiting trade
-position_size = Decimal("10000")        # 10,000 EUR position size
+entry_price = Decimal("1.0850")  # Price when entering trade
+exit_price = Decimal("1.0920")  # Price when exiting trade
+position_size = Decimal("10000")  # 10,000 EUR position size
 
 # Step 7: Calculate exact profit for long position
 # Price difference multiplied by position size gives precise profit
@@ -108,15 +98,20 @@ print(f"   Profit: ${profit_usd}")  # Exactly $70.00
 ### Common Decimal Use Cases in Trading
 
 **Position Sizing**: Calculate exact position sizes based on risk management
+
+Risk management is the foundation of successful trading. Position sizing determines how much capital you allocate to each trade based on your account size, risk tolerance, and stop loss distance. The calculation must be exact - a rounding error could expose you to more risk than intended or prevent you from taking valid trades.
+
+This example demonstrates the standard position sizing formula: calculate your maximum risk amount (account equity × risk percentage), then divide by your stop loss distance to determine the maximum position size that keeps your risk within limits:
+
 ```python
 from decimal import Decimal
 
 # Step 1: Define account and risk parameters for position sizing
 # Risk-based position sizing protects account from catastrophic losses
-account_equity = Decimal("25000.00")   # Total account value
-max_risk_percent = Decimal("0.01")     # 1% maximum risk per trade (conservative)
-stop_loss_pips = Decimal("20")         # 20 pip stop loss distance
-pip_value = Decimal("1.00")            # $1 per pip for standard lot (EUR/USD)
+account_equity = Decimal("25000.00")  # Total account value
+max_risk_percent = Decimal("0.01")  # 1% maximum risk per trade (conservative)
+stop_loss_pips = Decimal("20")  # 20 pip stop loss distance
+pip_value = Decimal("1.00")  # $1 per pip for standard lot (EUR/USD)
 
 # Step 2: Calculate maximum risk amount based on account percentage
 # This ensures we never risk more than our predetermined limit
@@ -136,14 +131,19 @@ print(f"   Success This position size limits loss to exactly ${max_risk_amount}"
 ```
 
 **Profit Target Calculations**: Set precise take profit levels
+
+Professional traders use risk-reward ratios to ensure their strategy remains profitable over time. A 2:1 risk-reward ratio means you target twice as much profit as the amount you're risking. If you risk 50 pips with a stop loss, you aim for 100 pips of profit with your take profit level. Even with a 50% win rate, this ratio produces net positive returns.
+
+The calculation requires exact precision to properly set take profit orders. This example shows how to calculate take profit levels based on your entry price, stop loss distance, and desired risk-reward ratio:
+
 ```python
 from decimal import Decimal
 
 # Step 1: Define trade parameters for take profit calculation
 # Risk-reward ratios help ensure profitable trading over time
-entry_price = Decimal("1.1250")        # Planned entry price for trade
-stop_loss_price = Decimal("1.1200")    # Stop loss level (50 pips below entry)
-risk_reward_ratio = Decimal("2.0")     # 2:1 risk-reward ratio (conservative target)
+entry_price = Decimal("1.1250")  # Planned entry price for trade
+stop_loss_price = Decimal("1.1200")  # Stop loss level (50 pips below entry)
+risk_reward_ratio = Decimal("2.0")  # 2:1 risk-reward ratio (conservative target)
 
 # Step 2: Calculate risk amount (distance from entry to stop loss)
 # Risk amount determines how much we could lose on this trade
@@ -163,75 +163,117 @@ print(f"   Stop Loss: {stop_loss_price} ({risk_amount * 10000:.0f} pips risk)")
 print(f"   Risk-Reward Ratio: {risk_reward_ratio}:1")
 print(f"   Reward Target: {reward_amount * 10000:.0f} pips")
 print(f"   Take Profit: {take_profit_price}")  # Exactly 1.1350
-print(f"   Success This setup risks {risk_amount * 10000:.0f} pips to make {reward_amount * 10000:.0f} pips")
+print(
+    f"   Success This setup risks {risk_amount * 10000:.0f} pips to make {reward_amount * 10000:.0f} pips"
+)
 ```
 
 ## Order Types in FiveTwenty
 
-FiveTwenty provides models for all major order types:
+Different trading situations require different order types. Market orders execute immediately at the current price, useful when you need to enter or exit quickly. Limit orders only execute at your specified price or better, giving you price control at the cost of execution certainty. Stop loss and take profit orders automatically close positions when price targets are reached, essential for risk management and capital preservation.
 
-<!-- fragment: Demo order models with unused imports and type argument patterns -->
+FiveTwenty provides strongly-typed request models for each order type. These Pydantic models ensure you provide all required fields, validate your parameters, and serialize correctly for the OANDA API. The example below demonstrates how to construct different order types and understand their trade-offs:
+
 ```python
-# Step 1: Import essential order model classes for comprehensive trading
-# These models provide type safety and validation for all order types
+import asyncio
+from decimal import Decimal
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
 from fivetwenty.models import (
-    MarketOrderRequest,     # Immediate execution at current market price
-    LimitOrderRequest,      # Entry orders at specific price levels
-    StopLossOrderRequest,   # Risk management and loss protection orders
-    TakeProfitOrderRequest, # Profit-taking and target price orders
-    InstrumentName,         # Type-safe currency pair enumeration
-    TimeInForce            # Order duration and execution control
+    InstrumentName,
+    LimitOrderRequest,
+    MarketOrderRequest,
+    StopLossOrderRequest,
+    TimeInForce,
 )
 
-# Step 2: Create market order for immediate position entry
-# Market orders guarantee execution but not price - use for urgent entries
-market_order = MarketOrderRequest(
-    instrument=InstrumentName.EUR_USD,        # Major currency pair with high liquidity
-    units=1000,                               # 1,000 units long position (positive = buy)
-    time_in_force=TimeInForce.FOK,           # Fill or Kill: execute completely or cancel
-)
-print(f"Analysis Market Order: Buy {market_order.units} units of {market_order.instrument}")
-print("   Execution: Immediate at best available price")
-print("   Risk: Price may move against you during execution")
+# Load environment variables from .env file
+load_dotenv()
 
-# Step 3: Create limit order for precise entry price control
-# Limit orders control price but don't guarantee execution - use for planned entries
-limit_order = LimitOrderRequest(
-    instrument=InstrumentName.EUR_USD,        # Same currency pair for consistency
-    units=1000,                               # Same position size for comparison
-    price="1.0950",                          # Will only buy if price reaches 1.0950 or better
-    time_in_force=TimeInForce.GTC,           # Good Till Cancelled: stays active until filled
-)
-print(f"\nWait Limit Order: Buy {limit_order.units} units at {limit_order.price}")
-print("   Execution: Only if market reaches your target price")
-print("   Benefit: Price protection and potential better fills")
 
-# Step 4: Create stop loss order for risk management and capital protection
-# Stop loss orders are essential for limiting losses on open positions
-stop_loss = StopLossOrderRequest(
-    tradeID="12345",                         # Links to specific open trade for protection
-    price="1.0900",                          # Triggers closure if price hits this level
-    timeInForce="GTC",                       # Remains active until trade is closed
-)
-print(f"\nSecurity Stop Loss Order: Protect trade 12345 at {stop_loss.price}")
-print("   Purpose: Automatic loss limitation and capital preservation")
-print("   Trigger: Activates if market moves against your position")
+async def main() -> None:
+    """
+    Tutorial: Working with Order Types in FiveTwenty.
 
-# Step 5: Demonstrate order type selection strategy
-print("\nTarget Order Type Selection Guide:")
-print("   Analysis Market Orders: When speed matters more than price")
-print("   Wait Limit Orders: When price matters more than speed")
-print("   Security Stop Loss: Always use for risk management")
-print("   Balance Take Profit: Lock in gains at target levels")
+    This example shows how to construct different order request models.
+    Each order type serves a different trading purpose and has distinct
+    execution characteristics.
+    """
+
+    print("=" * 60)
+    print("FiveTwenty Order Types Tutorial")
+    print("=" * 60)
+
+    # Initialize AsyncClient with automatic environment-based configuration
+    async with AsyncClient() as client:
+        print(f"\nConnected to: {client.config.environment.name}")
+        print(f"Account: {client.account_id}")
+
+        # Step 1: Create market order for immediate position entry
+        # Market orders guarantee execution but not price - use for urgent entries
+        market_order = MarketOrderRequest(
+            instrument=InstrumentName.EUR_USD,
+            units=Decimal("1000"),  # Positive = buy, negative = sell
+            timeInForce=TimeInForce.FOK,  # Fill or Kill
+        )
+        print(
+            f"\n📊 Market Order: Buy {market_order.units} units of {market_order.instrument}"
+        )
+        print("   Execution: Immediate at best available price")
+        print("   Use case: When speed matters more than price")
+
+        # Step 2: Create limit order for precise entry price control
+        # Limit orders control price but don't guarantee execution
+        limit_order = LimitOrderRequest(
+            instrument=InstrumentName.EUR_USD,
+            units=Decimal("1000"),
+            price=Decimal("1.0950"),  # Only execute at this price or better
+            timeInForce=TimeInForce.GTC,  # Good Till Cancelled
+        )
+        print(f"\n⏳ Limit Order: Buy {limit_order.units} units at {limit_order.price}")
+        print("   Execution: Only if market reaches your target price")
+        print("   Use case: When price matters more than speed")
+
+        # Step 3: Create stop loss order for risk management
+        # Stop loss orders are essential for limiting losses on open positions
+        stop_loss = StopLossOrderRequest(
+            tradeID="12345",  # Links to specific open trade
+            price=Decimal("1.0900"),  # Triggers closure at this level
+            timeInForce=TimeInForce.GTC,
+        )
+        print(f"\n🛡️  Stop Loss Order: Protect trade 12345 at {stop_loss.price}")
+        print("   Purpose: Automatic loss limitation")
+        print("   Use case: Always - essential risk management")
+
+        # Step 4: Order type selection guide
+        print("\n" + "=" * 60)
+        print("Order Type Selection Guide")
+        print("=" * 60)
+        print("📊 Market Orders: Immediate execution, price not guaranteed")
+        print("⏳ Limit Orders: Price guaranteed, execution not guaranteed")
+        print("🛡️  Stop Loss: Essential for every trade - limits downside risk")
+        print("🎯 Take Profit: Lock in gains at predetermined levels")
+
+        print("\n✓ Tutorial complete - order models created successfully")
+
+
+# Run the tutorial when this script is executed
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
 ## Quick Setup Test
 
-Test your FiveTwenty setup with this simple example:
+Before building trading strategies, verify your FiveTwenty installation and API credentials are configured correctly. This test performs three critical checks: authenticating with OANDA's API using your credentials, retrieving your account information to confirm access permissions, and fetching real-time market data to verify data feed connectivity.
 
-<!-- fragment: Demo setup test with return type annotations and attribute access patterns -->
+Run this example after completing your initial setup (creating a `.env` file with your OANDA token and account ID). If successful, you'll see your account balance, open positions, and current EUR/USD pricing, confirming you're ready to proceed with trading operations:
+
+
 ```python
 import asyncio
+
 from dotenv import load_dotenv
 from fivetwenty import AsyncClient
 from fivetwenty.models import InstrumentName
@@ -239,6 +281,7 @@ from fivetwenty.models import InstrumentName
 # Step 1: Load configuration from environment variables
 # This reads your API token, account ID, and environment from .env file
 load_dotenv()
+
 
 async def test_fivetwenty_setup():
     """Comprehensive verification of FiveTwenty setup and API connectivity."""
@@ -251,8 +294,9 @@ async def test_fivetwenty_setup():
 
         # Step 3: Test API authentication by retrieving account information
         # Account access confirms successful authentication and authorization
-        account = await client.accounts.get_account(client.account_id)
-        print(f"\nBalance Account Verification:")
+        account_response = await client.accounts.get_account(client.account_id)
+        account = account_response["account"]
+        print("\nBalance Account Verification:")
         print(f"   Balance: {account.balance} {account.currency}")
         print(f"   Open Trades: {account.open_trade_count}")
         print(f"   Margin Available: {account.margin_available} {account.currency}")
@@ -260,22 +304,23 @@ async def test_fivetwenty_setup():
         # Step 4: Test market data access by retrieving real-time pricing
         # Pricing access confirms data feed connectivity and permissions
         pricing = await client.pricing.get_pricing(
-            account_id=client.account_id,        # Account context for pricing data
-            instruments=[InstrumentName.EUR_USD] # Major pair for reliable data
+            account_id=client.account_id,  # Account context for pricing data
+            instruments=[InstrumentName.EUR_USD.value],  # Major pair for reliable data
         )
 
         # Step 5: Display current market data to confirm successful data access
         # Real-time pricing validates complete API functionality
-        price = pricing.prices[0]
-        print(f"\nData Market Data Verification:")
+        price = pricing["prices"][0]
+        print("\nData Market Data Verification:")
         print(f"   Instrument: {price.instrument}")
-        print(f"   Bid: {price.bids[0].price} (sell price)")
-        print(f"   Ask: {price.asks[0].price} (buy price)")
-        print(f"   Spread: {price.spread} (trading cost)")
+        print(f"   Bid: {price.closeout_bid} (sell price)")
+        print(f"   Ask: {price.closeout_ask} (buy price)")
+        print(f"   Tradeable: {price.tradeable}")
         print(f"   Time: {price.time}")
 
         print("\nSuccess FiveTwenty setup verification complete!")
         print("Starting Ready for live trading operations")
+
 
 # Step 6: Execute comprehensive setup verification
 # This test validates authentication, account access, and market data connectivity

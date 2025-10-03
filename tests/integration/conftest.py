@@ -32,8 +32,10 @@ async def sandbox_client_no_cleanup(integration_config):
     """Async client configured for sandbox testing WITHOUT automatic cleanup."""
     if not integration_config["token"]:
         pytest.skip("FIVETWENTY_OANDA_TOKEN environment variable not set")
+    if not integration_config["account_id"]:
+        pytest.skip("FIVETWENTY_OANDA_ACCOUNT environment variable not set")
 
-    async with AsyncClient(token=integration_config["token"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
+    async with AsyncClient(token=integration_config["token"], account_id=integration_config["account_id"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
         yield client
 
 
@@ -42,8 +44,10 @@ async def sandbox_client(integration_config, test_account_id):
     """Async client with automatic order and trade cleanup enabled by default."""
     if not integration_config["token"]:
         pytest.skip("FIVETWENTY_OANDA_TOKEN environment variable not set")
+    if not integration_config["account_id"]:
+        pytest.skip("FIVETWENTY_OANDA_ACCOUNT environment variable not set")
 
-    async with AsyncClient(token=integration_config["token"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
+    async with AsyncClient(token=integration_config["token"], account_id=integration_config["account_id"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
         created_order_ids = []
         created_trade_ids = []
 
@@ -123,8 +127,10 @@ def sync_sandbox_client(integration_config):
     """Sync client configured for sandbox testing."""
     if not integration_config["token"]:
         pytest.skip("FIVETWENTY_OANDA_TOKEN environment variable not set")
+    if not integration_config["account_id"]:
+        pytest.skip("FIVETWENTY_OANDA_ACCOUNT environment variable not set")
 
-    with Client(token=integration_config["token"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
+    with Client(token=integration_config["token"], account_id=integration_config["account_id"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
         yield client
 
 

@@ -5,7 +5,6 @@ into efficient tests that validate multiple aspects with fewer API calls.
 """
 
 import asyncio
-from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 from typing import ClassVar
 
@@ -169,9 +168,6 @@ class TestConsolidatedPricingOperations:
             CandlestickGranularity.D,
         ]
 
-        end_time = datetime.now(timezone.utc)
-        start_time = end_time - timedelta(days=7)
-
         for granularity in granularities_to_test:
             print(f"\n✓ Testing {granularity.value} candlesticks:")
 
@@ -179,8 +175,6 @@ class TestConsolidatedPricingOperations:
                 candles_response = await sandbox_client.instruments.get_instrument_candles(
                     instrument=test_instrument,
                     granularity=granularity,
-                    from_time=start_time,
-                    to_time=end_time,
                     count=10,  # Limit to reduce test time
                 )
 

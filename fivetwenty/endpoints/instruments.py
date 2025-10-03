@@ -2,12 +2,21 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, TypedDict
 
 if TYPE_CHECKING:
     from datetime import datetime
 
     from ..client import AsyncClient
+    from ..models import Candlestick, CandlestickGranularity, InstrumentName
+
+
+class CandlesResponse(TypedDict):
+    """Response from get_instrument_candles endpoint."""
+
+    instrument: InstrumentName
+    granularity: CandlestickGranularity
+    candles: list[Candlestick]
 
 
 class InstrumentEndpoints:
@@ -18,10 +27,10 @@ class InstrumentEndpoints:
 
     async def get_instrument_candles(
         self,
-        instrument: str,
+        instrument: InstrumentName | str,
         *,
         price: str = "M",
-        granularity: str = "S5",
+        granularity: CandlestickGranularity,
         count: int | None = None,
         from_time: datetime | None = None,
         to_time: datetime | None = None,
@@ -30,7 +39,7 @@ class InstrumentEndpoints:
         daily_alignment: int = 17,
         alignment_timezone: str = "America/New_York",
         weekly_alignment: str = "Friday",
-    ) -> dict[str, Any]:
+    ) -> CandlesResponse:
         """
         Get candlestick data for a specified instrument.
 
@@ -38,9 +47,9 @@ class InstrumentEndpoints:
         with configurable granularities, price components, and alignment options.
 
         Args:
-            instrument: The instrument to get candlestick data for
+            instrument: Instrument enum or string (e.g., InstrumentName.EUR_USD or "EUR_USD")
             price: Price component(s) - M, B, A, BA, BM, AM, or BAM (default: M)
-            granularity: Candlestick granularity (default: S5)
+            granularity: Candlestick granularity enum (e.g., CandlestickGranularity.H1)
             count: Number of candlesticks to return (max 5000, conflicts with time range)
             from_time: Start of time range for candlesticks
             to_time: End of time range for candlesticks
@@ -58,18 +67,18 @@ class InstrumentEndpoints:
             ValueError: If both count and time range are specified
 
         Examples:
-            Get 500 M1 midpoint candles:
+            Get 500 M1 midpoint candles using enums:
                 candles = await client.instruments.get_candles(
-                    "EUR_USD",
-                    granularity="M1",
+                    InstrumentName.EUR_USD,
+                    granularity=CandlestickGranularity.M1,
                     count=500
                 )
 
             Get H1 bid/ask candles for specific time range:
                 candles = await client.instruments.get_candles(
-                    "GBP_JPY",
+                    InstrumentName.GBP_JPY,
                     price="BA",
-                    granularity="H1",
+                    granularity=CandlestickGranularity.H1,
                     from_time=datetime(2024, 1, 1),
                     to_time=datetime(2024, 1, 2)
                 )
@@ -77,9 +86,13 @@ class InstrumentEndpoints:
         if count is not None and (from_time is not None or to_time is not None):
             raise ValueError("Cannot specify both count and time range parameters")
 
+        # Convert enums to strings if needed
+        instrument_str = instrument.value if hasattr(instrument, "value") else instrument
+        granularity_str = granularity.value if hasattr(granularity, "value") else granularity
+
         params: dict[str, str] = {
             "price": price,
-            "granularity": granularity,
+            "granularity": granularity_str,
             "smooth": str(smooth).lower(),
             "dailyAlignment": str(daily_alignment),
             "alignmentTimezone": alignment_timezone,
@@ -99,8 +112,19 @@ class InstrumentEndpoints:
 
         response = await self._client._request(
             "GET",
-            f"/instruments/{instrument}/candles",
+            f"/instruments/{instrument_str}/candles",
             params=params,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+
+        # Parse response into proper types
+        from ..models import Candlestick, CandlestickGranularity, InstrumentName
+
+        parsed_candles = [Candlestick.model_validate(candle) for candle in data.get("candles", [])]
+
+        return {
+            "instrument": InstrumentName(data["instrument"]),
+            "granularity": CandlestickGranularity(data["granularity"]),
+            "candles": parsed_candles,
+        }

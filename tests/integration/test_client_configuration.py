@@ -480,7 +480,7 @@ class TestConfigurationManagement:
         print("✓ Testing environment switching...")
 
         # Test 1: Practice environment
-        practice_client = AsyncClient(token=sandbox_client._token, environment=Environment.PRACTICE)
+        practice_client = AsyncClient(token=sandbox_client._token, account_id=sandbox_client.account_id, environment=Environment.PRACTICE)
 
         try:
             assert practice_client._environment == Environment.PRACTICE
@@ -493,7 +493,7 @@ class TestConfigurationManagement:
             pytest.fail(f"Practice environment failed: {e}")
 
         # Test 2: Live environment (URL construction only, no real connection)
-        live_client = AsyncClient(token="dummy-live-token", environment=Environment.LIVE)
+        live_client = AsyncClient(token="dummy-live-token", account_id="dummy-account", environment=Environment.LIVE)
 
         try:
             assert live_client._environment == Environment.LIVE
@@ -514,6 +514,7 @@ class TestConfigurationManagement:
         # Test 4: Environment from string
         practice_from_str = AsyncClient(
             token=sandbox_client._token,
+            account_id=sandbox_client.account_id,
             environment="practice",  # String instead of enum
         )
 
@@ -553,7 +554,7 @@ class TestConfigurationManagement:
         # Test 2: Credentials not in error messages
         try:
             # This will fail but shouldn't expose token
-            client = AsyncClient(token=sensitive_token, environment=Environment.PRACTICE)
+            client = AsyncClient(token=sensitive_token, account_id=sensitive_account, environment=Environment.PRACTICE)
             await client.accounts.get_accounts()
             await client.close()
 
@@ -579,7 +580,7 @@ class TestConfigurationManagement:
         print("  - SecretStr protection verified")
 
         # Test 4: Client doesn't expose credentials
-        client = AsyncClient(token=sensitive_token, environment=Environment.PRACTICE)
+        client = AsyncClient(token=sensitive_token, account_id=sensitive_account, environment=Environment.PRACTICE)
 
         try:
             # Check client string representation
@@ -596,7 +597,7 @@ class TestConfigurationManagement:
 
         # Test 5: Credentials in headers are protected
         # The token is used in Authorization header but should be protected
-        client = AsyncClient(token=sandbox_client._token, environment=Environment.PRACTICE)
+        client = AsyncClient(token=sandbox_client._token, account_id=sandbox_client.account_id, environment=Environment.PRACTICE)
 
         try:
             # Make a request and ensure headers aren't exposed

@@ -1,6 +1,6 @@
 """Validator package initialization and registration."""
 
-from .code_executability import CodeExecutabilityValidator
+from .code_execution import CodeExecutionValidator
 from .code_linting import CodeLintingValidator
 from .code_typing import CodeTypingValidator
 from .cross_references import CrossReferenceValidator
@@ -12,7 +12,7 @@ from .sdk_methods import SDKMethodsValidator
 from .security import SecurityValidator
 
 __all__ = [
-    "CodeExecutabilityValidator",
+    "CodeExecutionValidator",
     "CodeLintingValidator",
     "CodeTypingValidator",
     "CrossReferenceValidator",

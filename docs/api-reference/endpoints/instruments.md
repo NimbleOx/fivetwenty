@@ -1,6 +1,6 @@
 # Instruments Endpoint
 
-📖 **OANDA Reference**: [Instrument Endpoints](https://developer.oanda.com/rest-live-v20/instrument-ep/)
+**OANDA Reference**: [Instrument Endpoints](https://developer.oanda.com/rest-live-v20/instrument-ep/)
 
 Instrument information and historical data.
 
@@ -9,9 +9,8 @@ Instrument information and historical data.
 ## candles
 ```python
 import asyncio
-from typing import Any, Dict
-
 from fivetwenty import AsyncClient
+from fivetwenty.endpoints.instruments import CandlesResponse
 
 
 async def main() -> None:
@@ -20,16 +19,18 @@ async def main() -> None:
     #                    to_time: str | None = None, smooth: bool = False,
     #                    include_first: bool = True, daily_alignment: int = 17,
     #                    alignment_timezone: str = "America/New_York",
-    #                    weekly_alignment: str = "Friday") -> dict[str, Any]
+    #                    weekly_alignment: str = "Friday") -> CandlesResponse
+    # Returns: {"instrument": str, "granularity": str, "candles": list[...]}
 
     async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
         # Example usage:
-        candles = await client.instruments.get_instrument_candles(
+        result: CandlesResponse = await client.instruments.get_instrument_candles(
             instrument="EUR_USD",
             granularity="H1",
             count=100,
         )
-        print(f"Retrieved {len(candles.get('candles', []))} candles")
+        candles = result["candles"]
+        print(f"Retrieved {len(candles)} candles for {result['instrument']}")
 
 
 if __name__ == "__main__":
@@ -37,7 +38,7 @@ if __name__ == "__main__":
 ```
 🔗 **OANDA Endpoint**: `GET /v3/instruments/{instrument}/candles`
 
-📖 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
+**OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
 
 Get historical candle data for an instrument.
 
@@ -57,7 +58,7 @@ Get historical candle data for an instrument.
 | `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") |
 | `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") |
 
-**Returns:** Dictionary containing candle data
+**Returns:** Dictionary containing instrument name, granularity, and candle data
 
 **Raises:**
 

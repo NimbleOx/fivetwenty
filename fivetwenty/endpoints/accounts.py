@@ -1,12 +1,33 @@
 """Account management endpoints."""
 
 import builtins
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from ..models import Account, AccountID, AccountProperties, AccountSummary, Instrument
 
 if TYPE_CHECKING:
     from ..client import AsyncClient
+
+
+class AccountResponse(TypedDict):
+    """Response from get_account endpoint."""
+
+    account: Account
+    lastTransactionID: str
+
+
+class AccountSummaryResponse(TypedDict):
+    """Response from get_account_summary endpoint."""
+
+    account: AccountSummary
+    lastTransactionID: str
+
+
+class AccountInstrumentsResponse(TypedDict):
+    """Response from get_account_instruments endpoint."""
+
+    instruments: list[Instrument]
+    lastTransactionID: str
 
 
 class AccountEndpoints:
@@ -30,7 +51,7 @@ class AccountEndpoints:
 
         return [AccountProperties.model_validate(account_data) for account_data in data["accounts"]]
 
-    async def get_account(self, account_id: AccountID) -> dict[str, Any]:
+    async def get_account(self, account_id: AccountID) -> AccountResponse:
         """
         Get detailed account information.
 
@@ -51,7 +72,7 @@ class AccountEndpoints:
             "lastTransactionID": data["lastTransactionID"],
         }
 
-    async def get_account_summary(self, account_id: AccountID) -> dict[str, Any]:
+    async def get_account_summary(self, account_id: AccountID) -> AccountSummaryResponse:
         """
         Get account summary (same as get but more efficient).
 
@@ -77,7 +98,7 @@ class AccountEndpoints:
         account_id: AccountID,
         *,
         instruments: builtins.list[str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> AccountInstrumentsResponse:
         """
         Get tradeable instruments for an account.
 

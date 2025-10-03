@@ -51,7 +51,7 @@ import fivetwenty
 
 # Step 2: Display installed version for verification and troubleshooting
 # Version information helps confirm you have the expected release installed
-print(f"FiveTwenty SDK version: {fivetwenty.__version()}")
+print(f"FiveTwenty SDK version: {fivetwenty.__version__}")
 
 # Step 3: Optional - Verify core dependencies are available
 # This additional check ensures all required components are properly installed
@@ -67,7 +67,7 @@ except ImportError as e:
 
 Expected output:
 ```text
-0.1.1
+0.1.1 # or current version number
 ```
 
 ## Dependencies

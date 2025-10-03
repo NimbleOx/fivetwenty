@@ -21,11 +21,62 @@ from fivetwenty.models import InstrumentName
 async def main() -> None:
     """Enhanced error handling patterns example."""
 
+    # ERROR HANDLING is CRITICAL for production trading systems
+    # Poor error handling = lost money, missed opportunities, system crashes
+    #
+    # Why comprehensive error handling matters:
+    # - Network issues: Internet drops, timeouts, DNS failures
+    # - API errors: Rate limits, validation failures, rejected orders
+    # - Market conditions: Insufficient margin, market closed, low liquidity
+    # - System failures: Server errors, maintenance windows, bugs
+    #
+    # Without proper error handling:
+    # - System crashes on minor issues
+    # - Silent failures (orders not placed)
+    # - Cascade failures (one error causes many)
+    # - No visibility into problems
+    # - Manual intervention required constantly
+    #
+    # With proper error handling:
+    # - Graceful degradation
+    # - Automatic recovery
+    # - Clear error messages
+    # - Monitoring and alerting
+    # - High availability
+    #
+    # This example demonstrates:
+    # 1. Exception types and handling
+    # 2. Retry strategies with backoff
+    # 3. Rate limit handling
+    # 4. Network error recovery
+    # 5. Production-ready patterns
+
     async with AsyncClient() as client:
         # Section 1: Basic error handling
+        # ===============================
+        # ALL API errors are wrapped in FiveTwentyError
+        # This provides consistent error handling across all endpoints
+        #
+        # FiveTwentyError attributes:
+        # - status: HTTP status code (400, 404, 429, 500, etc.)
+        # - message: Human-readable error description
+        # - code: OANDA error code (if provided)
+        # - details: Additional error details
+        #
+        # Common error categories:
+        # - 400 Bad Request: Validation errors (invalid parameters)
+        # - 401 Unauthorized: Authentication failed (bad token)
+        # - 403 Forbidden: Not allowed (permissions)
+        # - 404 Not Found: Resource doesn't exist
+        # - 429 Too Many Requests: Rate limited
+        # - 500 Internal Server Error: Server-side issue
+        # - 503 Service Unavailable: Maintenance or overload
         print("\n=== 1. Basic Error Handling ===")
 
         print("\nAll API errors are wrapped in FiveTwentyError:")
+        print("  - Consistent exception type across all operations")
+        print("  - Structured error information (status, message, code)")
+        print("  - Easy to catch and handle systematically")
 
         try:
             # This will fail - invalid instrument
@@ -90,24 +141,30 @@ async def main() -> None:
         print("  - Respect Retry-After header when present")
 
         print("\n💡 Retry strategy example:")
-        print("""
-import asyncio
 
-async def retry_with_backoff(func, max_attempts=3):
-    for attempt in range(max_attempts):
-        try:
-            return await func()
-        except FiveTwentyError as e:
-            if e.status == 429:
-                # Rate limited
-                wait_time = 2 ** attempt  # Exponential backoff
-                print(f"Rate limited, waiting {wait_time}s...")
-                await asyncio.sleep(wait_time)
-            else:
-                raise
+        # Simple retry function with exponential backoff
+        from collections.abc import Callable
+        from typing import Any
 
-    raise Exception("Max retry attempts reached")
-        """)
+        async def retry_with_backoff(func: Callable[[], Any], max_attempts: int = 3) -> Any:
+            """Retry function with exponential backoff for rate limits."""
+            for attempt in range(max_attempts):
+                try:
+                    return await func()
+                except FiveTwentyError as e:
+                    if e.status == 429 and attempt < max_attempts - 1:
+                        # Rate limited
+                        wait_time = 2**attempt  # Exponential backoff
+                        print(f"  Rate limited, would wait {wait_time}s...")
+                        # await asyncio.sleep(wait_time)  # Commented out for demo
+                    else:
+                        raise
+            raise RuntimeError("Max retry attempts reached")
+
+        print("✅ Retry function defined (see code for implementation)")
+        print("   - Catches 429 errors")
+        print("   - Exponential backoff: 1s, 2s, 4s...")
+        print("   - Configurable max attempts")
 
         # Section 5: Network errors
         print("\n=== 5. Network Errors ===")
@@ -119,17 +176,10 @@ async def retry_with_backoff(func, max_attempts=3):
         print("  - Temporary network outages")
 
         print("\n💡 Retry logic with timeouts:")
-        print("""
-import httpx
-
-try:
-    async with AsyncClient(timeout=10.0) as client:
-        result = await client.accounts.get_account_summary(client.account_id)
-except httpx.TimeoutException:
-    print("Request timed out - network issue")
-except httpx.ConnectError:
-    print("Connection failed - check network")
-        """)
+        print("  - Set timeout parameter on AsyncClient(timeout=10.0)")
+        print("  - Catch httpx.TimeoutException for timeout errors")
+        print("  - Catch httpx.ConnectError for connection failures")
+        print("  - Implement retry logic for transient network issues")
 
         # Section 6: Streaming errors
         print("\n=== 6. Streaming Errors ===")
@@ -140,24 +190,10 @@ except httpx.ConnectError:
         print("  - Network interruptions")
 
         print("\n💡 Robust streaming:")
-        print("""
-from fivetwenty.models import ReconnectionPolicy, StreamingConfiguration
-
-config = StreamingConfiguration(stall_timeout=30.0)
-policy = ReconnectionPolicy(max_attempts=5)
-
-try:
-    async for event in client.pricing.stream_pricing_with_retries(
-        account_id=client.account_id,
-        instruments=[InstrumentName.EUR_USD],
-        config=config,
-        policy=policy
-    ):
-        # Handle events with automatic reconnection
-        print(f"Price: {event.bids[0].price}")
-except StreamStall:
-    print("Stream stalled - exceeded timeout")
-        """)
+        print("  - Use stream_pricing_with_retries() instead of get_pricing_stream()")
+        print("  - Configure StreamingConfiguration with stall_timeout")
+        print("  - Configure ReconnectionPolicy with max_attempts and backoff")
+        print("  - Catch StreamStall exception after all retries exhausted")
 
         # Section 7: Order rejection handling
         print("\n=== 7. Order Rejection Handling ===")
@@ -191,7 +227,7 @@ except StreamStall:
 
         if order.order_fill_transaction:
             requested = 1000
-            filled = int(order.order_fill_transaction.get("units", 0))
+            filled = abs(int(order.order_fill_transaction.units))
 
             if filled < requested:
                 print("⚠️  Partial fill detected!")
@@ -207,95 +243,25 @@ except StreamStall:
         # Section 9: Comprehensive retry decorator
         print("\n=== 9. Retry Decorator ===")
 
-        print("\nReusable retry logic with exponential backoff:\n")
-
-        print("""
-def async_retry(max_attempts=3, base_delay=1.0, backoff=2.0, jitter=True):
-    def decorator(func):
-        @wraps(func)
-        async def wrapper(*args, **kwargs):
-            for attempt in range(max_attempts):
-                try:
-                    return await func(*args, **kwargs)
-                except FiveTwentyError as e:
-                    if attempt == max_attempts - 1:
-                        raise  # Last attempt, re-raise
-
-                    # Retry on specific errors
-                    if e.status in [429, 500, 502, 503, 504]:
-                        delay = base_delay * (backoff ** attempt)
-                        if jitter:
-                            delay *= (0.5 + random.random())
-
-                        print(f"Retry {attempt + 1}/{max_attempts} after {delay:.1f}s")
-                        await asyncio.sleep(delay)
-                    else:
-                        raise  # Don't retry client errors
-
-            raise Exception("Should never reach here")
-        return wrapper
-    return decorator
-
-@async_retry(max_attempts=3)
-async def fetch_account_summary(client):
-    return await client.accounts.get_account_summary(client.account_id)
-        """)
+        print("\nReusable retry logic with exponential backoff:")
+        print("  - Create decorator with max_attempts, base_delay, backoff, jitter")
+        print("  - Only retry on specific errors: 429, 500, 502, 503, 504")
+        print("  - Don't retry client errors (4xx except 429)")
+        print("  - Use jitter to prevent thundering herd")
+        print("  - Calculate delay: base_delay * (backoff ** attempt)")
+        print("  - Apply decorator to async functions needing retry logic")
 
         # Section 10: Production error patterns
         print("\n=== 10. Production Error Patterns ===")
 
-        print("\nProduction-ready error handling:\n")
-
-        print("""
-import logging
-
-logger = logging.getLogger(__name__)
-
-class TradingBot:
-    def __init__(self, client):
-        self.client = client
-        self.error_count = 0
-        self.max_errors = 10
-
-    async def place_order_safe(self, instrument, units):
-        try:
-            order = await self.client.orders.post_market_order(
-                account_id=self.client.account_id,
-                instrument=instrument,
-                units=units
-            )
-
-            # Reset error count on success
-            self.error_count = 0
-
-            logger.info(f"Order placed: {order.order_fill_transaction.id}")
-            return order
-
-        except FiveTwentyError as e:
-            self.error_count += 1
-
-            logger.error(
-                f"Order failed: {e.message}",
-                extra={
-                    "status_code": e.status,
-                    "error_code": e.code,
-                    "instrument": instrument,
-                    "units": units
-                }
-            )
-
-            # Circuit breaker pattern
-            if self.error_count >= self.max_errors:
-                logger.critical("Too many errors - stopping bot")
-                raise Exception("Circuit breaker tripped")
-
-            # Graceful degradation
-            if e.status == 429:
-                # Rate limited - back off
-                await asyncio.sleep(60)
-
-            return None
-        """)
+        print("\nProduction-ready error handling patterns:")
+        print("  - Track error_count to detect cascading failures")
+        print("  - Reset counter on successful operations")
+        print("  - Implement circuit breaker: stop after max_errors threshold")
+        print("  - Log errors with structured context (status, code, params)")
+        print("  - Graceful degradation: back off on rate limits")
+        print("  - Return None or default on recoverable errors")
+        print("  - Raise critical exceptions on circuit breaker trip")
 
         # Section 11: Error recovery strategies
         print("\n=== 11. Error Recovery Strategies ===")
@@ -322,29 +288,35 @@ class TradingBot:
         print("   - Switch to read-only mode")
         print("   - Use cached data when available")
 
-        print("\n💡 Example recovery:")
-        print("""
-async def place_order_with_recovery(client, instrument, units):
-    try:
-        # Try primary order
-        return await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=instrument,
-            units=units
-        )
-    except VeeTwentyError as e:
-        if e.status == 400 and "INSUFFICIENT_MARGIN" in str(e.message):
-            # Fallback: try with 50% size
-            print(f"Insufficient margin, trying 50% size...")
-            return await client.orders.post_market_order(
-                account_id=client.account_id,
-                instrument=instrument,
-                units=units // 2
-            )
-        raise
-        """)
+        print("\n💡 Example recovery pattern:")
+        print("  - Catch specific errors (e.g., INSUFFICIENT_MARGIN)")
+        print("  - Implement fallback: reduce order size by 50%")
+        print("  - Retry operation with adjusted parameters")
+        print("  - Re-raise if fallback also fails")
 
     print("\n✅ Enhanced error handling example completed!")
+    print("\n📚 Summary:")
+    print("   Error Categories:")
+    print("   - 4xx: Client errors (your fault - fix your code)")
+    print("   - 5xx: Server errors (OANDA's fault - retry)")
+    print("   - Network: Connection issues (transient - retry)")
+    print("\n   Best Practices:")
+    print("   - Catch FiveTwentyError for all API operations")
+    print("   - Implement exponential backoff for retries")
+    print("   - Respect rate limits (429 errors)")
+    print("   - Use circuit breakers for cascading failures")
+    print("   - Log errors with context for debugging")
+    print("   - Monitor error rates and alert on spikes")
+    print("   - Graceful degradation over crashes")
+    print("\n   Production Checklist:")
+    print("   ✓ Comprehensive try/except blocks")
+    print("   ✓ Retry logic with backoff")
+    print("   ✓ Rate limit handling")
+    print("   ✓ Structured logging")
+    print("   ✓ Error metrics/monitoring")
+    print("   ✓ Circuit breakers")
+    print("   ✓ Fallback strategies")
+    print("   ✓ Alerting on critical errors")
 
 
 if __name__ == "__main__":

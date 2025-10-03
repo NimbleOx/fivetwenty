@@ -88,7 +88,6 @@ class ValidationConfig(BaseModel):
                 "python_syntax": ValidatorConfig(enabled=True),
                 "cross_references": ValidatorConfig(enabled=True),
                 "sdk_methods": ValidatorConfig(enabled=False),  # Disabled due to many missing docs (334 issues)
-                "code_executability": ValidatorConfig(enabled=False),  # Disabled due to high warning volume
             },
         )
 

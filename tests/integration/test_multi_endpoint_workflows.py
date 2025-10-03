@@ -299,16 +299,18 @@ class TestCrossEndpointIntegration:
         latest_candle = candles["candles"][-1]
         current_price = pricing["prices"][0]
 
-        print(f"Latest candle: {latest_candle.get('mid', {}).get('c', 'N/A') if latest_candle.get('mid') else 'N/A'}")
-        current_bid = current_price.get("bids", [{}])[0].get("price", "N/A")
-        current_ask = current_price.get("asks", [{}])[0].get("price", "N/A")
+        # Candles are now Pydantic models, use attribute access
+        print(f"Latest candle: {latest_candle.mid.c if latest_candle.mid else 'N/A'}")
+        # Pricing responses return Pydantic models, use attribute access
+        current_bid = current_price.bids[0].price if current_price.bids else "N/A"
+        current_ask = current_price.asks[0].price if current_price.asks else "N/A"
         print(f"Current price: {current_bid}/{current_ask}")
 
         # Validate price relationships
-        if latest_candle.get("mid") and current_price.get("bids") and current_price.get("asks"):
-            candle_close = Decimal(str(latest_candle["mid"]["c"]))
-            current_bid = Decimal(str(current_price["bids"][0]["price"]))
-            current_ask = Decimal(str(current_price["asks"][0]["price"]))
+        if latest_candle.mid and current_price.bids and current_price.asks:
+            candle_close = Decimal(latest_candle.mid.c)
+            current_bid = Decimal(current_price.bids[0].price)
+            current_ask = Decimal(current_price.asks[0].price)
 
             # Current price should be reasonably close to latest candle close
             # Allow for reasonable market movement
@@ -321,11 +323,11 @@ class TestCrossEndpointIntegration:
 
         # Validate candle OHLC relationships
         for candle in candles["candles"][-10:]:  # Check last 10 candles
-            if candle.get("mid"):
-                high = Decimal(str(candle["mid"]["h"]))
-                low = Decimal(str(candle["mid"]["l"]))
-                open_price = Decimal(str(candle["mid"]["o"]))
-                close = Decimal(str(candle["mid"]["c"]))
+            if candle.mid:
+                high = Decimal(candle.mid.h)
+                low = Decimal(candle.mid.l)
+                open_price = Decimal(candle.mid.o)
+                close = Decimal(candle.mid.c)
 
                 assert high >= open_price, "High should be >= Open"
                 assert high >= close, "High should be >= Close"

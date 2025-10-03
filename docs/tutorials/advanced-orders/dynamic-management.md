@@ -14,166 +14,206 @@ By the end of this guide, you will:
 
 ## Trailing Stop Implementation
 
-Trailing stops protect profits while allowing positions to run in favorable directions.
+Trailing stops dynamically adjust stop-loss levels as price moves in your favor, protecting accumulated profits while giving positions room to grow. Unlike fixed stop losses that remain static, trailing stops "follow" price at a specified distance, automatically tightening protection as profits increase. This creates an asymmetric risk profile where losses are limited but profits can run indefinitely - the holy grail of position management.
+
+OANDA provides native trailing stop functionality that automatically adjusts stop levels server-side as price moves favorably. The FiveTwenty SDK exposes this through `TrailingStopLossOrderRequest`, which attaches trailing stops to existing trades at a specified distance. OANDA's platform handles all trailing logic automatically - no client-side monitoring required. The examples demonstrate both native trailing stops and advanced custom implementations for volatility-adjusted strategies.
 
 ### Basic Trailing Stop System
 
-<!-- fragment: Demo advanced order management with undefined types -->
 ```python
 import asyncio
-from datetime import datetime, timedelta
 from decimal import Decimal
 
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
+from fivetwenty.models import InstrumentName, TrailingStopLossOrderRequest
+
+# ==============================================================================
+# ENVIRONMENT SETUP
+# ==============================================================================
+
+# Load API credentials from .env file
+# The AsyncClient automatically reads these environment variables:
+#   - FIVETWENTY_OANDA_TOKEN: Your OANDA API token
+#   - FIVETWENTY_OANDA_ACCOUNT: Your OANDA account ID
+#   - FIVETWENTY_OANDA_ENVIRONMENT: "practice" or "live" (defaults to practice)
+load_dotenv()
+
+# ==============================================================================
+# NATIVE TRAILING STOP IMPLEMENTATION
+# ==============================================================================
+
+# This example demonstrates OANDA's native trailing stop functionality:
+#
+# KEY CONCEPTS:
+# 1. Native Trailing Stops - OANDA automatically trails stops as price moves favorably
+# 2. Distance-Based Trailing - Stop trails at fixed distance (in price units) from current price
+# 3. Trade-Linked Orders - Trailing stops attach to existing trades, not positions
+# 4. Automatic Management - OANDA handles all trailing logic server-side
+#
+# HOW IT WORKS:
+# OANDA's trailing stops automatically adjust stop-loss levels as price moves in your
+# favor. You specify a trailing distance (in price units), and OANDA's server continuously
+# monitors price and updates the stop level to maintain that distance. Unlike manual
+# trailing systems, this requires no client-side monitoring or order replacements - the
+# trailing happens entirely on OANDA's platform.
+#
+# This code is fully executable and demonstrates native trailing stop usage with SDK.
 
 
+async def main() -> None:
+    """Demonstrate OANDA's native trailing stop functionality with real trade example."""
 
-class TrailingStopManager:
-    """Advanced trailing stop management for dynamic profit protection and risk control."""
+    print("=" * 60)
+    print("NATIVE TRAILING STOP IMPLEMENTATION")
+    print("=" * 60)
 
-    def __init__(self, client: AsyncClient, account_id: str) -> None:
-        """Initialize trailing stop manager with FiveTwenty client and account context."""
-        self.client = client               # Authenticated FiveTwenty client for order operations
-        self.account_id = account_id       # Target account for trailing stop management
-        self.active_trails = {}            # Dictionary tracking all active trailing stops
+    # ==============================================================================
+    # CONNECT TO OANDA
+    # ==============================================================================
 
-    async def create_trailing_stop(self, position_id: str, initial_stop: Decimal, trail_distance: Decimal, instrument: str) -> Any:
-        """Create and configure a trailing stop system for position profit protection."""
+    # AsyncClient automatically reads FIVETWENTY_OANDA_* environment variables
+    # Context manager ensures proper cleanup of HTTP connections
+    async with AsyncClient() as client:
+        # ==============================================================================
+        # STEP 1: OPEN A POSITION WITH MARKET ORDER
+        # ==============================================================================
 
-        # Step 1: Place initial stop-loss order for immediate risk protection
-        # This provides baseline protection while trailing mechanism is established
-        initial_stop_response = await self.client.orders.post_stop_order(
-            account_id=self.account_id,       # Account for order execution
-            instrument=instrument,            # Currency pair for stop order
-            units=-10000,                     # Close position size (negative for long closure)
-            price=initial_stop,               # Initial stop level for protection
-            time_in_force="GTC",              # Good Till Cancelled - persistent protection
+        # ==============================================================================
+        # SDK METHOD: client.orders.post_market_order()
+        # ==============================================================================
+        #
+        # Place a market order to enter a position
+        #
+        # Parameters:
+        #   - account_id: Your OANDA account ID
+        #   - instrument: Currency pair (InstrumentName enum)
+        #   - units: Position size (positive=buy, negative=sell)
+        #
+        # Returns: OrderResponse with trade creation details
+
+        print("\nOpening EUR/USD position...")
+
+        market_order = await client.orders.post_market_order(
+            account_id=client.account_id,
+            instrument=InstrumentName("EUR_USD"),
+            units=10000,  # Long position
         )
 
-        # Step 2: Configure trailing stop parameters for dynamic management
-        # Configuration stores all information needed for automated trailing
-        trail_config = {
-            "position_id": position_id,                                            # Unique position identifier
-            "instrument": instrument,                                              # Currency pair being protected
-            "current_stop": initial_stop,                                          # Current stop loss level
-            "trail_distance": trail_distance,                                      # Distance to trail behind price
-            "stop_order_id": initial_stop_response.order_create_transaction.id,   # Current stop order ID
-            "highest_price": initial_stop + trail_distance,                       # Highest price seen (starting reference)
-            "direction": "long",                                                  # Position direction for trailing logic
-        }
+        # Extract trade ID from market order fill transaction
+        assert market_order.order_fill_transaction is not None
+        assert market_order.order_fill_transaction.trade_opened is not None
+        trade_id = market_order.order_fill_transaction.trade_opened.trade_id
+        fill_price = Decimal(str(market_order.order_fill_transaction.price))
 
-        # Step 3: Register trailing stop for automated monitoring
-        self.active_trails[position_id] = trail_config
-        print(f"Security Trailing stop created: {initial_stop} (trail distance: {trail_distance})")
-        print(f"   Position: {position_id} | Instrument: {instrument}")
-        print(f"   Initial highest price: {trail_config['highest_price']}")
+        print("✓ Position opened:")
+        print(f"  Trade ID: {trade_id}")
+        print(f"  Fill Price: {fill_price:.5f}")
+        print("  Size: 10,000 units long")
 
-        return trail_config
+        # ==============================================================================
+        # STEP 2: ATTACH NATIVE TRAILING STOP TO THE TRADE
+        # ==============================================================================
 
-    async def update_trailing_stops(self) -> Any:
-        """Update all active trailing stops based on current market prices."""
+        # ==============================================================================
+        # SDK METHOD: client.orders.post_order(TrailingStopLossOrderRequest(...))
+        # ==============================================================================
+        #
+        # Create a trailing stop loss order for an existing trade
+        #
+        # Parameters:
+        #   - trade_id: The trade ID to protect (from step 1)
+        #   - distance: Trailing distance in price units (Decimal)
+        #   - time_in_force: Order lifetime (default "GTC")
+        #
+        # Returns: OrderResponse with trailing stop order details
+        #
+        # NOTE: OANDA automatically trails the stop as price moves favorably
+        #       The stop maintains the specified distance from the current price
 
-        # Step 1: Iterate through all active trailing stops for batch updates
-        # Regular updates ensure stops trail price movements automatically
-        for position_id, config in self.active_trails.items():
-            # Step 2: Retrieve current market pricing for trailing calculation
-            # Real-time prices ensure accurate trailing stop adjustments
-            pricing = await self.client.pricing.get_pricing(
-                account_id=self.account_id,           # Account context for pricing
-                instruments=[config["instrument"]],   # Single instrument for focused update
+        trailing_distance = Decimal("0.0030")  # 30 pips trailing distance
+
+        print(
+            f"\nAttaching native trailing stop (distance: {trailing_distance * 10000:.0f} pips)..."
+        )
+
+        trailing_stop_request = TrailingStopLossOrderRequest(
+            tradeID=trade_id,  # Use camelCase alias for Pydantic
+            distance=trailing_distance,
+        )
+
+        trailing_stop_response = await client.orders.post_order(
+            account_id=client.account_id, order_request=trailing_stop_request
+        )
+
+        # Extract trailing stop order details
+        assert trailing_stop_response.order_create_transaction is not None
+        trailing_stop_id = trailing_stop_response.order_create_transaction["id"]
+
+        print("✓ Trailing stop attached:")
+        print(f"  Order ID: {trailing_stop_id}")
+        print(f"  Trailing Distance: {trailing_distance * 10000:.0f} pips")
+        print(f"  Initial Stop Level: {fill_price - trailing_distance:.5f}")
+
+        # ==============================================================================
+        # STEP 3: DEMONSTRATE HOW TRAILING WORKS
+        # ==============================================================================
+
+        print("\nTrailing Stop Behavior:")
+        print(f"  Current Price: {fill_price:.5f}")
+        print(f"  Stop Level: {fill_price - trailing_distance:.5f}")
+        print(f"\n  If price rises to {fill_price + Decimal('0.0020'):.5f} (+20 pips):")
+        print(
+            f"  → Stop automatically trails to {fill_price + Decimal('0.0020') - trailing_distance:.5f}"
+        )
+        print(f"\n  If price rises to {fill_price + Decimal('0.0050'):.5f} (+50 pips):")
+        print(
+            f"  → Stop automatically trails to {fill_price + Decimal('0.0050') - trailing_distance:.5f}"
+        )
+        print("\n  Stop never moves down - only trails upward!")
+
+        # ==============================================================================
+        # STEP 4: VERIFY TRADE HAS TRAILING STOP ATTACHED
+        # ==============================================================================
+
+        # Fetch trade details to confirm trailing stop
+        trade_details = await client.trades.get_trade(
+            account_id=client.account_id, trade_specifier=trade_id
+        )
+
+        if trade_details["trade"].trailing_stop_loss_order:
+            print(f"\n✓ Trade {trade_id} confirmed with trailing stop:")
+            print(
+                f"  Trailing Stop Order ID: {trade_details['trade'].trailing_stop_loss_order.id}"
             )
+            print("  Protection: OANDA manages trailing automatically")
 
-            # Step 3: Extract current bid price for long position trailing
-            # Bid price represents the price you can sell at (exit price for long)
-            current_price = Decimal(pricing.prices[0].bids[0].price)
+        # ==============================================================================
+        # PRODUCTION ENHANCEMENTS
+        # ==============================================================================
 
-            # Step 4: Apply trailing logic based on position direction
-            # Long positions trail upward as price increases
-            if config["direction"] == "long":
-                # Step 5: Check if price has reached new favorable level
-                # Only update when price moves in profitable direction
-                if current_price > config["highest_price"]:
-                    # Step 6: Record new highest price for future reference
-                    config["highest_price"] = current_price
-                    print(f"Analysis New high for {position_id}: {current_price}")
+        print("\n" + "=" * 60)
+        print("PRODUCTION ENHANCEMENTS TO CONSIDER")
+        print("=" * 60)
+        print("\nTo make this strategy production-ready, add:")
+        print("  • Calculate trailing distance based on ATR (volatility-adjusted)")
+        print(
+            "  • Use trailing_stop_loss_on_fill parameter for one-step order+protection"
+        )
+        print("  • Monitor trade unrealized P/L to assess trailing effectiveness")
+        print(
+            "  • Implement different trailing distances for different market conditions"
+        )
+        print("  • Add position size calculation based on trailing distance")
+        print("  • Track trailing stop trigger rates and average profit capture")
+        print("  • Consider using minimum_distance from instrument details")
+        print("  • Implement multi-level trailing (tighten distance as profits grow)")
 
-                    # Step 7: Calculate new trailing stop level
-                    # New stop = Current Price - Trail Distance
-                    new_stop = current_price - config["trail_distance"]
 
-                    # Step 8: Only move stop in favorable direction (up for long)
-                    # Never lower stops - only raise them to lock in profits
-                    if new_stop > config["current_stop"]:
-                        print(f"Processing Updating trailing stop from {config['current_stop']} to {new_stop}")
-                        await self._update_stop_order(config, new_stop)
-
-    async def _update_stop_order(self, config: dict, new_stop: Decimal) -> Any:
-        """Update the actual stop order price with atomic cancel-and-replace operation."""
-        try:
-            # Step 1: Cancel existing stop order to prepare for replacement
-            # Atomic replacement ensures no gap in protection coverage
-            await self.client.orders.cancel_order(
-                account_id=self.account_id,           # Target account for cancellation
-                order_id=config["stop_order_id"],    # Current stop order to cancel
-            )
-            print(f"   Error Cancelled old stop order: {config['stop_order_id']}")
-
-            # Step 2: Place new stop order at updated trailing level
-            # New order continues protection at improved level
-            new_stop_response = await self.client.orders.post_stop_order(
-                account_id=self.account_id,           # Same account for consistency
-                instrument=config["instrument"],      # Same instrument being protected
-                units=-10000,                         # Same position size to close
-                price=new_stop,                       # Updated stop level
-                time_in_force="GTC",                  # Persistent protection
-            )
-
-            # Step 3: Update configuration with new stop order details
-            # Configuration tracks current state for future updates
-            config["current_stop"] = new_stop
-            config["stop_order_id"] = new_stop_response.order_create_transaction.id
-
-            print(f"   Success New trailing stop active: {new_stop}")
-            print(f"   ID New stop order ID: {config['stop_order_id']}")
-
-        except Exception as e:
-            # Step 4: Handle update failures with detailed error reporting
-            # Failed updates require manual intervention to maintain protection
-            print(f"Error Failed to update trailing stop for {config['position_id']}: {e}")
-            print(f"   ⚠️ Manual intervention may be required")
-            print(f"   List Last known stop: {config['current_stop']}")
-
-    async def monitor_trailing_stops(self, monitoring_duration: int = 3600) -> Any:
-        """Continuously monitor and update trailing stops with configurable duration."""
-
-        # Step 1: Calculate monitoring end time for session management
-        # Time-bounded monitoring prevents indefinite resource usage
-        end_time = datetime.utcnow() + timedelta(seconds=monitoring_duration)
-        print(f"Processing Starting trailing stop monitoring for {monitoring_duration} seconds")
-        print(f"   Monitoring {len(self.active_trails)} active trailing stops")
-        print(f"   Session ends at: {end_time.strftime('%H:%M:%S UTC')}")
-
-        # Step 2: Continuous monitoring loop with time and trail count checks
-        # Loop continues while time remains and trails exist
-        update_count = 0
-        while datetime.utcnow() < end_time and self.active_trails:
-            # Step 3: Update all trailing stops based on current market conditions
-            await self.update_trailing_stops()
-            update_count += 1
-
-            # Step 4: Display monitoring progress every 10 updates
-            if update_count % 10 == 0:
-                remaining_time = (end_time - datetime.utcnow()).total_seconds()
-                print(f"   Data Update #{update_count} | {remaining_time:.0f}s remaining | {len(self.active_trails)} trails active")
-
-            # Step 5: Wait before next update to balance responsiveness and API usage
-            # 30-second intervals provide timely updates without excessive API calls
-            await asyncio.sleep(30)
-
-        # Step 6: Display monitoring session completion summary
-        print(f"Success Trailing stop monitoring completed")
-        print(f"   Total updates performed: {update_count}")
-        print(f"   Remaining active trails: {len(self.active_trails)}")
+if __name__ == "__main__":
+    # Run the native trailing stop demonstration
+    asyncio.run(main())
 ```
 
 ### Advanced Trailing Stop Strategies
@@ -312,7 +352,9 @@ class AcceleratedTrailing:
 
 ## Position Scaling Strategies
 
-Build and reduce positions systematically based on market conditions.
+Position scaling strategies systematically build or reduce exposure based on price action and market confirmation. Scale-in approaches add to winning positions as they prove themselves, averaging up into strength rather than weakness. Scale-out strategies take partial profits at different levels, reducing risk while maintaining exposure to continued favorable moves. Both approaches improve average entry prices and optimize risk-adjusted returns compared to all-or-nothing position sizing.
+
+The SDK's order placement methods (`client.orders.post_limit_order()`, `client.orders.post_market_order()`) enable precise scaling implementations by placing orders at calculated intervals. You'll learn to build scale-in pyramids that add positions as price confirms your thesis, and scale-out systems that systematically reduce exposure while locking in profits at predetermined levels.
 
 ### Scale-In Strategy Implementation
 
@@ -543,7 +585,9 @@ class ScaleOutStrategy:
 
 ## Adaptive Position Management
 
-Create systems that respond intelligently to changing market conditions.
+Adaptive position management systems monitor market conditions in real-time and adjust order parameters dynamically to match current volatility, trend strength, and risk levels. Rather than using static rules, these systems calculate optimal position sizes, stop distances, and profit targets based on live market data like ATR (Average True Range), price momentum, and volatility metrics. This responsiveness ensures your trading system remains properly calibrated regardless of changing market regimes.
+
+Using the SDK's pricing and order management endpoints together, you can build systems that fetch current market conditions with `client.pricing.get_pricing()`, calculate adaptive parameters, and update orders accordingly. The examples show complete implementations that adjust position sizing based on volatility, modify stop distances when market conditions change, and dynamically manage risk exposure as trends develop or deteriorate.
 
 ### Market Condition Adaptive System
 
@@ -757,6 +801,10 @@ class DynamicRiskManager:
 ```
 
 ## Performance Monitoring and Optimization
+
+Effective order management requires continuous performance monitoring to identify what's working and what needs adjustment. By tracking metrics like fill rates, slippage, order execution times, and profit/loss per order type, you gain insights into system efficiency and can optimize order placement strategies. Performance analytics reveal patterns like which order types perform best in different market conditions, optimal trigger distances, and timing factors that impact execution quality.
+
+The SDK provides transaction history and order details through `client.transactions.get_transactions()` and `client.orders.get_order()`, enabling comprehensive performance analysis. The examples demonstrate building analytics systems that track order performance metrics, calculate execution statistics, and identify optimization opportunities in your order management workflows.
 
 ### Order Performance Analytics
 

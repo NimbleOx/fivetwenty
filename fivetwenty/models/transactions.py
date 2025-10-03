@@ -69,6 +69,14 @@ class TradeReduce(ApiModel):
     half_spread_cost: AccountUnits | None = Field(None, alias="halfSpreadCost")
 
 
+class FullPrice(ApiModel):
+    """Complete pricing information for an order fill."""
+
+    closeout_bid: PriceValue = Field(alias="closeoutBid")
+    closeout_ask: PriceValue = Field(alias="closeoutAsk")
+    liquidity: int | None = None
+
+
 class OrderFillTransaction(Transaction):
     """Transaction representing the filling of an Order."""
 
@@ -80,7 +88,7 @@ class OrderFillTransaction(Transaction):
     loss_quote_home_conversion_factor: Decimal | None = Field(None, alias="lossQuoteHomeConversionFactor")
     price: PriceValue | None = None
     full_vwap: PriceValue | None = Field(None, alias="fullVWAP")
-    full_price: PriceValue | None = Field(None, alias="fullPrice")
+    full_price: FullPrice | None = Field(None, alias="fullPrice")
     reason: str | None = None
     pl: Decimal | None = Field(None, alias="pl")
     financing: Decimal | None = None

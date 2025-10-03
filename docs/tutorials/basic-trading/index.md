@@ -155,7 +155,7 @@ Upon completing this tutorial series, you'll be ready for:
 
 ## Support & Community
 
-- 📖 **API Reference**: [Complete Documentation](../../api-reference/index.md)
+- **API Reference**: [Complete Documentation](../../api-reference/index.md)
 - 🐛 **Issues**: [GitHub Issues](https://github.com/NimbleOx/fivetwenty/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/NimbleOx/fivetwenty/discussions)
 - 📚 **Examples**: [Jupyter Notebooks](https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/notebooks)

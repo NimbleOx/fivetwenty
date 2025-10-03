@@ -27,7 +27,24 @@ class TestTradeEndpoints:
     async def test_list_trades_basic(self, trades, mock_client):
         """Test basic trade listing."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"trades": [{"id": "12345", "instrument": "EUR_USD", "price": "1.1000", "openTime": "2024-01-01T00:00:00.000000000Z", "state": "OPEN", "initialUnits": "1000", "currentUnits": "1000", "realizedPL": "0.00000", "unrealizedPL": "5.00000"}], "lastTransactionID": "12346"}
+        mock_response.json.return_value = {
+            "trades": [
+                {
+                    "id": "12345",
+                    "instrument": "EUR_USD",
+                    "price": "1.1000",
+                    "openTime": "2024-01-01T00:00:00.000000000Z",
+                    "state": "OPEN",
+                    "initialUnits": "1000",
+                    "initialMarginRequired": "33.00",
+                    "currentUnits": "1000",
+                    "realizedPL": "0.00000",
+                    "unrealizedPL": "5.00000",
+                    "marginUsed": "33.00",
+                }
+            ],
+            "lastTransactionID": "12346",
+        }
         mock_client._request.return_value = mock_response
 
         result = await trades.get_trades("101-001-123456-001")
@@ -40,7 +57,7 @@ class TestTradeEndpoints:
                 "count": 50,
             },
         )
-        assert result["trades"][0]["id"] == "12345"
+        assert result["trades"][0].id == "12345"
         assert result["lastTransactionID"] == "12346"
 
     @pytest.mark.asyncio
@@ -97,8 +114,16 @@ class TestTradeEndpoints:
             "trades": [
                 {
                     "id": "12345",
-                    "state": "OPEN",
                     "instrument": "EUR_USD",
+                    "price": "1.1000",
+                    "openTime": "2024-01-01T00:00:00.000000000Z",
+                    "state": "OPEN",
+                    "initialUnits": "1000",
+                    "initialMarginRequired": "33.00",
+                    "currentUnits": "1000",
+                    "realizedPL": "0.00000",
+                    "unrealizedPL": "5.00000",
+                    "marginUsed": "33.00",
                 }
             ],
             "lastTransactionID": "12346",
@@ -111,7 +136,7 @@ class TestTradeEndpoints:
             "GET",
             "/accounts/101-001-123456-001/openTrades",
         )
-        assert result["trades"][0]["id"] == "12345"
+        assert result["trades"][0].id == "12345"
 
     @pytest.mark.asyncio
     async def test_get_trade_by_id(self, trades, mock_client):
@@ -121,7 +146,15 @@ class TestTradeEndpoints:
             "trade": {
                 "id": "12345",
                 "instrument": "EUR_USD",
+                "price": "1.1000",
+                "openTime": "2024-01-01T00:00:00.000000000Z",
                 "state": "OPEN",
+                "initialUnits": "1000",
+                "initialMarginRequired": "33.00",
+                "currentUnits": "1000",
+                "realizedPL": "0.00000",
+                "unrealizedPL": "5.00000",
+                "marginUsed": "33.00",
             },
             "lastTransactionID": "12346",
         }
@@ -133,7 +166,7 @@ class TestTradeEndpoints:
             "GET",
             "/accounts/101-001-123456-001/trades/12345",
         )
-        assert result["trade"]["id"] == "12345"
+        assert result["trade"].id == "12345"
 
     @pytest.mark.asyncio
     async def test_get_trade_by_client_id(self, trades, mock_client):
@@ -143,7 +176,15 @@ class TestTradeEndpoints:
             "trade": {
                 "id": "12345",
                 "instrument": "EUR_USD",
+                "price": "1.1000",
+                "openTime": "2024-01-01T00:00:00.000000000Z",
                 "state": "OPEN",
+                "initialUnits": "1000",
+                "initialMarginRequired": "33.00",
+                "currentUnits": "1000",
+                "realizedPL": "0.00000",
+                "unrealizedPL": "5.00000",
+                "marginUsed": "33.00",
             },
             "lastTransactionID": "12346",
         }
@@ -169,7 +210,7 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/close",
             json_data=None,
-            headers=None,
+            headers={},
         )
         assert result["orderFillTransaction"]["id"] == "12347"
 
@@ -220,7 +261,7 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/clientExtensions",
             json_data={},
-            headers=None,
+            headers={},
         )
 
     @pytest.mark.asyncio
@@ -256,7 +297,7 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
             json_data={"stopLoss": stop_loss},
-            headers=None,
+            headers={},
         )
 
     @pytest.mark.asyncio
@@ -274,7 +315,7 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
             json_data={"trailingStopLoss": trailing_stop_loss},
-            headers=None,
+            headers={},
         )
 
     @pytest.mark.asyncio
@@ -293,7 +334,7 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
             json_data={"takeProfit": take_profit, "stopLoss": stop_loss},
-            headers=None,
+            headers={},
         )
 
     @pytest.mark.asyncio
@@ -314,7 +355,7 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
             json_data={"takeProfit": None},
-            headers=None,
+            headers={},
         )
 
     @pytest.mark.asyncio
@@ -332,5 +373,5 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
             json_data={"guaranteedStopLoss": guaranteed_stop_loss},
-            headers=None,
+            headers={},
         )

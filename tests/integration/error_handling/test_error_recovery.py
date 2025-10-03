@@ -114,7 +114,7 @@ class TestComprehensiveEdgeCases:
     async def test_authentication_edge_cases(self, sandbox_client: AsyncClient, test_account_id: str):
         """Test authentication-related edge cases."""
         # Test with malformed token
-        malformed_client = AsyncClient(token="malformed-token-format", environment="practice")
+        malformed_client = AsyncClient(token="malformed-token-format", account_id="test-account", environment="practice")
 
         try:
             with pytest.raises(FiveTwentyError) as exc_info:
@@ -127,7 +127,7 @@ class TestComprehensiveEdgeCases:
 
         # Test with empty token - should fail at client creation
         with pytest.raises(ValueError):
-            AsyncClient(token="", environment="practice")
+            AsyncClient(token="", account_id="test-account", environment="practice")
 
         # Test that authentication errors are properly handled and categorized
         # We've already tested malformed tokens above, so the test is complete

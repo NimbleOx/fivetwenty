@@ -1,6 +1,6 @@
 # Orders Endpoint
 
-📖 **OANDA Reference**: [Order Endpoints](https://developer.oanda.com/rest-live-v20/order-ep/)
+**OANDA Reference**: [Order Endpoints](https://developer.oanda.com/rest-live-v20/order-ep/)
 
 Order creation, modification, and management.
 
@@ -33,7 +33,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-📖 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
 Create a new order using any order request type.
 
@@ -82,7 +82,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-📖 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
 Create a market order (convenience method).
 
@@ -133,7 +133,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-📖 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
 Create a limit order (convenience method).
 
@@ -186,7 +186,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-📖 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
 Create a stop order (convenience method).
 
@@ -240,7 +240,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-📖 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
 Create a market-if-touched order (convenience method).
 
@@ -272,26 +272,31 @@ Create a market-if-touched order (convenience method).
 ```python
 import asyncio
 from fivetwenty import AsyncClient
-
-# orders.get_orders(account_id: AccountID, ids: list[str] | None = None,
-#            state: str = "PENDING", instrument: str | None = None,
-#            count: int | None = None, before_id: str | None = None) -> dict[str, Any]
+from fivetwenty.endpoints.orders import PendingOrdersResponse
 
 
-async def main():
+async def main() -> None:
+    # orders.get_orders(account_id: AccountID, ids: list[str] | None = None,
+    #            state: str = "PENDING", instrument: str | None = None,
+    #            count: int | None = None, before_id: str | None = None) -> PendingOrdersResponse
+    # Returns: {"orders": list[Any], "lastTransactionID": str}
+
     # Example usage:
     async with AsyncClient() as client:
-        orders = await client.orders.get_orders(
+        result: PendingOrdersResponse = await client.orders.get_orders(
             account_id="123-456-789",
             state="PENDING",
             count=50
         )
+        orders = result["orders"]
+        print(f"Found {len(orders)} orders")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders`
 
-📖 **OANDA Documentation**: [Get Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-orders)
+**OANDA Documentation**: [Get Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-orders)
 
 Get list of orders for account.
 
@@ -306,7 +311,7 @@ Get list of orders for account.
 | `count` | int | ➖ | Maximum number of orders to return |
 | `before_id` | str | ➖ | Maximum order ID to return |
 
-**Returns:** Dictionary containing orders list and lastTransactionID
+**Returns:** Dictionary containing orders list (`list[Any]`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -319,23 +324,27 @@ Get list of orders for account.
 ```python
 import asyncio
 from fivetwenty import AsyncClient
+from fivetwenty.endpoints.orders import GetOrderResponse
 
-# orders.get_order(account_id: AccountID, order_specifier: str) -> dict[str, Any]
 
+async def main() -> None:
+    # orders.get_order(account_id: AccountID, order_specifier: str) -> GetOrderResponse
+    # Returns: {"order": Any, "lastTransactionID": str}
 
-async def main():
     # Example usage:
     async with AsyncClient() as client:
-        order = await client.orders.get_order(
+        result: GetOrderResponse = await client.orders.get_order(
             account_id="123-456-789",
             order_specifier="12345"
         )
+        order = result["order"]
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders/{orderSpecifier}`
 
-📖 **OANDA Documentation**: [Get Order](https://developer.oanda.com/rest-live-v20/order-ep/#get-order)
+**OANDA Documentation**: [Get Order](https://developer.oanda.com/rest-live-v20/order-ep/#get-order)
 
 Get order details.
 
@@ -346,7 +355,7 @@ Get order details.
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `order_specifier` | str | ✅ | Order identifier or specifier |
 
-**Returns:** Dictionary containing order details and lastTransactionID
+**Returns:** Dictionary containing order details and last transaction ID (`str`)
 
 **Raises:**
 
@@ -359,24 +368,28 @@ Get order details.
 ```python
 import asyncio
 from fivetwenty import AsyncClient
-
-# orders.cancel_order(account_id: AccountID, order_specifier: str,
-#             timeout: float | None = None, client_request_id: str | None = None) -> dict[str, Any]
+from fivetwenty.endpoints.orders import CancelOrderResponse
 
 
-async def main():
+async def main() -> None:
+    # orders.cancel_order(account_id: AccountID, order_specifier: str,
+    #             timeout: float | None = None, client_request_id: str | None = None) -> CancelOrderResponse
+    # Returns: {"orderCancelTransaction": Any, "relatedTransactionIDs": list[str],
+    #           "lastTransactionID": str} (some fields may be optional)
+
     # Example usage:
     async with AsyncClient() as client:
-        result = await client.orders.cancel_order(
+        result: CancelOrderResponse = await client.orders.cancel_order(
             account_id="123-456-789",
             order_specifier="12345"
         )
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}/cancel`
 
-📖 **OANDA Documentation**: [Cancel Order](https://developer.oanda.com/rest-live-v20/order-ep/#cancel-order)
+**OANDA Documentation**: [Cancel Order](https://developer.oanda.com/rest-live-v20/order-ep/#cancel-order)
 
 Cancel pending order.
 
@@ -389,7 +402,7 @@ Cancel pending order.
 | `timeout` | float | ➖ | Request timeout override |
 | `client_request_id` | str | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** Dictionary containing cancellation transaction details
+**Returns:** Dictionary containing cancellation transaction details and last transaction ID (`str`)
 
 **Raises:**
 
@@ -402,20 +415,25 @@ Cancel pending order.
 ```python
 import asyncio
 from fivetwenty import AsyncClient
+from fivetwenty.endpoints.orders import PendingOrdersResponse
 
-# orders.get_pending_orders(account_id: AccountID) -> dict[str, Any]
 
+async def main() -> None:
+    # orders.get_pending_orders(account_id: AccountID) -> PendingOrdersResponse
+    # Returns: {"orders": list[Any], "lastTransactionID": str}
 
-async def main():
     # Example usage:
     async with AsyncClient() as client:
-        open_orders = await client.orders.get_pending_orders(account_id="123-456-789")
+        result: PendingOrdersResponse = await client.orders.get_pending_orders(account_id="123-456-789")
+        pending_orders = result["orders"]
+        print(f"Found {len(pending_orders)} pending orders")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pendingOrders`
 
-📖 **OANDA Documentation**: [Get Pending Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-pending-orders)
+**OANDA Documentation**: [Get Pending Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-pending-orders)
 
 List all pending orders for an account.
 
@@ -425,7 +443,7 @@ List all pending orders for an account.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 
-**Returns:** Dictionary containing pending orders list and lastTransactionID
+**Returns:** Dictionary containing pending orders list (`list[Any]`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -438,25 +456,30 @@ List all pending orders for an account.
 ```python
 import asyncio
 from fivetwenty import AsyncClient
-
-# orders.put_order(account_id: AccountID, order_specifier: str,
-#              order_request: dict[str, Any], client_request_id: str | None = None) -> dict[str, Any]
+from fivetwenty.endpoints.orders import ReplaceOrderResponse
 
 
-async def main():
+async def main() -> None:
+    # orders.put_order(account_id: AccountID, order_specifier: str,
+    #              order_request: dict[str, Any], client_request_id: str | None = None) -> ReplaceOrderResponse
+    # Returns: {"orderCancelTransaction": Any, "orderCreateTransaction": Any,
+    #           "orderFillTransaction": Any, "relatedTransactionIDs": list[str],
+    #           "lastTransactionID": str} (some fields may be optional)
+
     # Example usage:
     async with AsyncClient() as client:
-        result = await client.orders.put_order(
+        result: ReplaceOrderResponse = await client.orders.put_order(
             account_id="123-456-789",
             order_specifier="12345",
             order_request={"price": "1.1400"}
         )
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}`
 
-📖 **OANDA Documentation**: [Replace Order](https://developer.oanda.com/rest-live-v20/order-ep/#replace-order)
+**OANDA Documentation**: [Replace Order](https://developer.oanda.com/rest-live-v20/order-ep/#replace-order)
 
 Replace existing order by cancelling and creating new order.
 
@@ -469,7 +492,7 @@ Replace existing order by cancelling and creating new order.
 | `order_request` | dict[str, Any] | ✅ | New order specification |
 | `client_request_id` | str | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** Dictionary containing replacement transaction details
+**Returns:** Dictionary containing replacement transaction details and last transaction ID (`str`)
 
 **Raises:**
 
@@ -482,26 +505,30 @@ Replace existing order by cancelling and creating new order.
 ```python
 import asyncio
 from fivetwenty import AsyncClient
-
-# orders.put_order_client_extensions(account_id: AccountID, order_specifier: str,
-#                                client_extensions: dict[str, Any] | None = None,
-#                                trade_client_extensions: dict[str, Any] | None = None) -> dict[str, Any]
+from fivetwenty.endpoints.orders import OrderClientExtensionsResponse
 
 
-async def main():
+async def main() -> None:
+    # orders.put_order_client_extensions(account_id: AccountID, order_specifier: str,
+    #                                client_extensions: dict[str, Any] | None = None,
+    #                                trade_client_extensions: dict[str, Any] | None = None) -> OrderClientExtensionsResponse
+    # Returns: {"orderClientExtensionsModifyTransaction": Any, "relatedTransactionIDs": list[str],
+    #           "lastTransactionID": str} (some fields may be optional)
+
     # Example usage:
     async with AsyncClient() as client:
-        result = await client.orders.put_order_client_extensions(
+        result: OrderClientExtensionsResponse = await client.orders.put_order_client_extensions(
             account_id="123-456-789",
             order_specifier="12345",
             client_extensions={"comment": "Updated order"}
         )
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}/clientExtensions`
 
-📖 **OANDA Documentation**: [Update Order Client Extensions](https://developer.oanda.com/rest-live-v20/order-ep/#update-order-client-extensions)
+**OANDA Documentation**: [Update Order Client Extensions](https://developer.oanda.com/rest-live-v20/order-ep/#update-order-client-extensions)
 
 Modify client extensions for existing order.
 
@@ -514,7 +541,7 @@ Modify client extensions for existing order.
 | `client_extensions` | dict[str, Any] | ➖ | New order client extensions |
 | `trade_client_extensions` | dict[str, Any] | ➖ | New trade client extensions |
 
-**Returns:** Dictionary containing modification transaction details
+**Returns:** Dictionary containing modification transaction details and last transaction ID (`str`)
 
 **Raises:**
 
