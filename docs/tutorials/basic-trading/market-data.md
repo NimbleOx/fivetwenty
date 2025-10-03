@@ -234,7 +234,7 @@ async def analyze_market_before_trading(instrument: str = "EUR_USD") -> None:
                             "   Analysis Short-term trend: UP"
                         )  # Price rising (bullish)
                     elif current_price < prices[-2]:
-                        print("   📉 Short-term trend: DOWN")  # Price falling (bearish)
+                        print("    Short-term trend: DOWN")  # Price falling (bearish)
                     else:
                         print("   ➡️ Short-term trend: SIDEWAYS")  # Price consolidating
 
@@ -425,7 +425,7 @@ async def analyze_price_movements(instrument: str, periods: int = 20):
             if range_position > Decimal("0.8"):
                 print("   Analysis Near recent highs - potential resistance")
             elif range_position < Decimal("0.2"):
-                print("   📉 Near recent lows - potential support")
+                print("    Near recent lows - potential support")
             else:
                 print("   ➡️ Middle of range - less clear direction")
 

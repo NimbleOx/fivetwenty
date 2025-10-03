@@ -158,7 +158,7 @@ async def main() -> None:
         buy_stop_id = buy_stop_response.order_create_transaction["id"]
         sell_stop_id = sell_stop_response.order_create_transaction["id"]
 
-        print("\n✓ Breakout stops successfully placed:")
+        print("\n Breakout stops successfully placed:")
         print(f"  Buy Stop Order ID: {buy_stop_id}")
         print(f"    Trigger: {bullish_trigger:.5f} (bullish breakout)")
         print("    Size: 10,000 units")
@@ -367,7 +367,7 @@ async def main() -> None:
         buy_id = buy_stop.order_create_transaction["id"]
         sell_id = sell_stop.order_create_transaction["id"]
 
-        print("\n✓ Dynamic breakout orders placed:")
+        print("\n Dynamic breakout orders placed:")
         print(f"  Buy Stop ID: {buy_id}")
         print(f"    Trigger: {upper_breakout:.5f}")
         print(f"    Size: {position_size:,} units")
@@ -624,7 +624,7 @@ class MultiTimeframeBreakout:
 
             self.active_stops.extend([buy_id, sell_id])
 
-            print(f"  ✓ Stops placed: {scaled_units:,} units each direction")
+            print(f"   Stops placed: {scaled_units:,} units each direction")
             print(f"    Buy trigger: {buy_trigger:.5f} (Order ID: {buy_id})")
             print(f"    Sell trigger: {sell_trigger:.5f} (Order ID: {sell_id})")
 
@@ -848,7 +848,7 @@ async def main() -> None:
         sell_mit_id = sell_mit_response.order_create_transaction["id"]
         buy_mit_id = buy_mit_response.order_create_transaction["id"]
 
-        print("\n✓ Mean reversion MIT orders placed:")
+        print("\n Mean reversion MIT orders placed:")
         print(f"  Sell MIT Order ID: {sell_mit_id}")
         print(f"    Trigger: {upper_reversion:.5f} (fade overbought)")
         print("    Size: 10,000 units short")
@@ -1087,7 +1087,7 @@ class MomentumBreakout:
         buy_stop_id = buy_stop_response.order_create_transaction["id"]
         sell_stop_id = sell_stop_response.order_create_transaction["id"]
 
-        print("\n✓ Momentum-confirmed breakout orders placed:")
+        print("\n Momentum-confirmed breakout orders placed:")
         print(f"  Buy Stop Order ID: {buy_stop_id}")
         print(f"    Trigger: {bullish_trigger:.5f} (resistance + {self.momentum_threshold * 10000:.1f} pips)")
         print(f"    Size: {position_size:,} units long")
@@ -1350,7 +1350,7 @@ async def main() -> None:
         # STEP 4: CONFIRM BATCH PLACEMENT
         # ==============================================================================
 
-        print(f"\n✓ Successfully placed {len(placed_order_ids)} trigger orders:")
+        print(f"\n Successfully placed {len(placed_order_ids)} trigger orders:")
         for i, order_id in enumerate(placed_order_ids, 1):
             order_spec = orders_to_place[i - 1]
             price = order_spec["price"]

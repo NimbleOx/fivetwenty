@@ -288,7 +288,7 @@ async def demonstrate_comprehensive_account_transaction_streaming() -> None:
                 transaction_id = transaction.id
                 transaction_time = getattr(transaction, 'time', 'N/A')
 
-                print(f"\n🔔 Transaction #{transaction_tracker['total_transactions']}:")
+                print(f"\n Transaction #{transaction_tracker['total_transactions']}:")
                 print(f"   Target Type: {transaction_type}")
                 print(f"   ID ID: {transaction_id}")
                 print(f"   Time Time: {transaction_time}")

@@ -28,10 +28,10 @@ This progressive tutorial series builds on the getting-started tutorials to adva
 ### Analysis Your Progressive Journey
 
 !!! info "Target Skill Progression Framework"
-    **Foundation** → Understand forex concepts and fundamentals
-    **Market Analysis** → Analyze market data and conditions
-    **Position Management** → Monitor and manage trading positions
-    **Strategy Development** → Build systematic trading systems
+    **Foundation**  Understand forex concepts and fundamentals
+    **Market Analysis**  Analyze market data and conditions
+    **Position Management**  Monitor and manage trading positions
+    **Strategy Development**  Build systematic trading systems
 
 ---
 
@@ -109,10 +109,10 @@ Build a production-ready automated trading system:
 
 ## Learning Support Features
 
-### 📚 Concept Explanations
+###  Concept Explanations
 Each lesson includes detailed explanations of theory before practice
 
-### 💻 Hands-on Exercises
+###  Hands-on Exercises
 Interactive code examples you can run and modify
 
 ### Progress Celebrations
@@ -156,6 +156,6 @@ Upon completing this tutorial series, you'll be ready for:
 ## Support & Community
 
 - **API Reference**: [Complete Documentation](../../api-reference/index.md)
-- 🐛 **Issues**: [GitHub Issues](https://github.com/NimbleOx/fivetwenty/issues)
+-  **Issues**: [GitHub Issues](https://github.com/NimbleOx/fivetwenty/issues)
 - 💬 **Discussions**: [GitHub Discussions](https://github.com/NimbleOx/fivetwenty/discussions)
-- 📚 **Examples**: [Jupyter Notebooks](https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/notebooks)
+-  **Examples**: [Jupyter Notebooks](https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/notebooks)

@@ -169,7 +169,7 @@ async def main() -> None:
 
         # Explain the ratio
         if risk_reward_ratio >= 1.5:
-            print("\n✓ Good risk-reward ratio!")
+            print("\n Good risk-reward ratio!")
             print(f"  With 1:{risk_reward_ratio:.1f} R/R, you can be profitable even with <50% win rate.")
         else:
             print("\n⚠ Risk-reward ratio below 1.5:1 is suboptimal")
@@ -386,9 +386,9 @@ async def main() -> None:
             #       * exclude_none=True: Omits None values from the request
             #   - take_profit: Optional take profit configuration (not used here)
             #
-            # The model_dump() method is crucial for Pydantic → API conversion:
+            # The model_dump() method is crucial for Pydantic  API conversion:
             # - Converts Decimal to string (required by OANDA API)
-            # - Maps field aliases (price → price for stop loss)
+            # - Maps field aliases (price  price for stop loss)
             # - Removes None values to avoid API errors
 
             await client.trades.put_trade_orders(
@@ -397,7 +397,7 @@ async def main() -> None:
                 stop_loss=stop_loss_details.model_dump(by_alias=True, exclude_none=True),
             )
 
-            print(f"✓ Stop loss set at {fixed_stop:.5f} (20 pips from entry)")
+            print(f" Stop loss set at {fixed_stop:.5f} (20 pips from entry)")
             print("  Your risk is now limited to approximately 20 pips on this trade.")
 
         except FiveTwentyError as e:
@@ -677,7 +677,7 @@ async def main() -> None:
                     by_alias=True, exclude_none=True
                 ),
             )
-            print(f"\n✓ Take profit successfully set at {calculated_tp:.5f}")
+            print(f"\n Take profit successfully set at {calculated_tp:.5f}")
             print(
                 "  Your trade will automatically close when price reaches this level"
             )
@@ -1001,14 +1001,14 @@ async def main() -> None:
         #         ),
         #     )
         #
-        #     print("\n✓ Order placed successfully")
+        #     print("\n Order placed successfully")
         #     print(f"  Order ID: {order_response['orderFillTransaction']['id']}")
         #
         # except FiveTwentyError as e:
         #     print(f"\nCould not place order: {e.message}")
 
         print(
-            "\n💡 Key Insight: By calculating position size this way, you ensure that"
+            "\n Key Insight: By calculating position size this way, you ensure that"
         )
         print(
             "   if your stop loss is hit, you lose exactly $"

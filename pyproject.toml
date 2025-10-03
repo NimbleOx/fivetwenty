@@ -302,5 +302,5 @@ sequence = [
     "clean-dist",
     "build",
     "publish-pypi",
-    # "release-github"
+    "release-github"
 ]

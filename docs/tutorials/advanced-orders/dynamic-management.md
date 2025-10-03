@@ -107,7 +107,7 @@ async def main() -> None:
         trade_id = market_order.order_fill_transaction.trade_opened.trade_id
         fill_price = Decimal(str(market_order.order_fill_transaction.price))
 
-        print("✓ Position opened:")
+        print(" Position opened:")
         print(f"  Trade ID: {trade_id}")
         print(f"  Fill Price: {fill_price:.5f}")
         print("  Size: 10,000 units long")
@@ -151,7 +151,7 @@ async def main() -> None:
         assert trailing_stop_response.order_create_transaction is not None
         trailing_stop_id = trailing_stop_response.order_create_transaction["id"]
 
-        print("✓ Trailing stop attached:")
+        print(" Trailing stop attached:")
         print(f"  Order ID: {trailing_stop_id}")
         print(f"  Trailing Distance: {trailing_distance * 10000:.0f} pips")
         print(f"  Initial Stop Level: {fill_price - trailing_distance:.5f}")
@@ -165,11 +165,11 @@ async def main() -> None:
         print(f"  Stop Level: {fill_price - trailing_distance:.5f}")
         print(f"\n  If price rises to {fill_price + Decimal('0.0020'):.5f} (+20 pips):")
         print(
-            f"  → Stop automatically trails to {fill_price + Decimal('0.0020') - trailing_distance:.5f}"
+            f"   Stop automatically trails to {fill_price + Decimal('0.0020') - trailing_distance:.5f}"
         )
         print(f"\n  If price rises to {fill_price + Decimal('0.0050'):.5f} (+50 pips):")
         print(
-            f"  → Stop automatically trails to {fill_price + Decimal('0.0050') - trailing_distance:.5f}"
+            f"   Stop automatically trails to {fill_price + Decimal('0.0050') - trailing_distance:.5f}"
         )
         print("\n  Stop never moves down - only trails upward!")
 
@@ -183,7 +183,7 @@ async def main() -> None:
         )
 
         if trade_details["trade"].trailing_stop_loss_order:
-            print(f"\n✓ Trade {trade_id} confirmed with trailing stop:")
+            print(f"\n Trade {trade_id} confirmed with trailing stop:")
             print(
                 f"  Trailing Stop Order ID: {trade_details['trade'].trailing_stop_loss_order.id}"
             )

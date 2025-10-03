@@ -219,7 +219,7 @@ async def main() -> None:
             timeInForce=TimeInForce.FOK,  # Fill or Kill
         )
         print(
-            f"\n📊 Market Order: Buy {market_order.units} units of {market_order.instrument}"
+            f"\n Market Order: Buy {market_order.units} units of {market_order.instrument}"
         )
         print("   Execution: Immediate at best available price")
         print("   Use case: When speed matters more than price")
@@ -251,12 +251,12 @@ async def main() -> None:
         print("\n" + "=" * 60)
         print("Order Type Selection Guide")
         print("=" * 60)
-        print("📊 Market Orders: Immediate execution, price not guaranteed")
+        print(" Market Orders: Immediate execution, price not guaranteed")
         print("⏳ Limit Orders: Price guaranteed, execution not guaranteed")
         print("🛡️  Stop Loss: Essential for every trade - limits downside risk")
-        print("🎯 Take Profit: Lock in gains at predetermined levels")
+        print(" Take Profit: Lock in gains at predetermined levels")
 
-        print("\n✓ Tutorial complete - order models created successfully")
+        print("\n Tutorial complete - order models created successfully")
 
 
 # Run the tutorial when this script is executed
