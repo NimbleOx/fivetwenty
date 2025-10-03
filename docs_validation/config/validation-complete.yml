@@ -1,7 +1,7 @@
 # FiveTwenty Documentation Validation Configuration - Complete Mode
 #
 # Complete validation including all validators for comprehensive quality assessment.
-# Includes slower validators like code_executability and external_links.
+# Includes slower validators like code_execution and external_links.
 
 # File discovery - docs directory only
 file_patterns:
@@ -125,9 +125,28 @@ validators:
   security:
     enabled: true
 
-  # Code example executability (slower)
-  code_executability:
+  # Code execution - runtime validation (slower, catches runtime errors)
+  # Note: Runs sequentially even in parallel mode due to signal handlers and I/O redirection
+  code_execution:
     enabled: true
+    options:
+      # Include list: Only these files will be executed
+      # Empty list = execute all files (use with caution!)
+      include_files:
+        - "docs/index.md"
+        - "docs/tutorials/getting-started/installation.md"
+        - "docs/tutorials/getting-started/authentication.md"
+        - "docs/tutorials/getting-started/first-trade.md"
+        - "docs/tutorials/basic-trading/index.md"
+        - "docs/tutorials/basic-trading/foundation.md"
+        - "docs/tutorials/basic-trading/market-data.md"
+        - "docs/tutorials/basic-trading/position-management.md"
+        - "docs/tutorials/basic-trading/strategy-building.md"
+        - "docs/tutorials/basic-trading/complete-system.md"
+        # Add more files as they become fully standalone/executable
+
+      # Mock API calls when executing code (prevents real API calls)
+      mock_api_calls: true
 
   # External link validation (slower)
   external_links:

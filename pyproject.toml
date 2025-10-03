@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fivetwenty"
-version = "0.1.1"
+version = "0.2.0"
 description = "Simple, elegant Python client for OANDA's REST API v20"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -15,11 +15,14 @@ authors = [
 keywords = ["oanda", "trading", "forex", "api", "finance"]
 classifiers = [
     "Development Status :: 4 - Beta",
-    "Intended Audience :: Financial Industry, Forex Trading",
+    "Intended Audience :: Developers",
+    "Intended Audience :: Financial and Insurance Industry",
     "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Office/Business :: Financial",
 ]
 
 dependencies = [
@@ -251,7 +254,6 @@ build = "python -m build"
 # Documentation tasks
 docs-serve = "python -m mkdocs serve"
 docs-build = "python -m mkdocs build --clean"
-docs-deploy = "python -m mkdocs gh-deploy --force"
 
 # Documentation validation tasks
 docs-validate-list = "uv run python -m docs_validation.src.cli list-validators"
@@ -265,15 +267,40 @@ docs-validate-ultra-fast = "uv run python -m docs_validation.src.cli validate --
 # Complete validation - all validators including slow ones (CI/CD workflow)
 docs-validate-complete = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
 
-# Markdown tasks
-markdown-format = "mdformat docs/ README.md"
-markdown-check = "mdformat --check docs/ README.md"
-
 # YAML tasks
 yaml-lint = "yamllint mkdocs.yml docs_validation/config/validation.yml .pre-commit-config-docs.yaml .github/workflows/ docs/api-reference/openapi.yaml"
 
 # Workflow tasks
-quality = ["format", "lint", "typecheck"]
-quality-docs = ["format", "lint", "typecheck", "docs-validate-fast"]
-check = ["format", "lint", "typecheck", "test", "docs-validate-fast"]
+check-fast = ["format", "lint", "typecheck", "test"]
 check-full = ["format", "lint", "typecheck", "test", "docs-validate-complete"]
+
+# Release tasks
+clean-dist = "rm -rf dist/ build/ *.egg-info"
+
+bump-version = "uv run python scripts/bump_version.py"
+
+[tool.poe.tasks.publish-pypi]
+shell = """
+source .env
+uv run python -m twine upload dist/* --username __token__ --password $PYPI_TOKEN
+"""
+interpreter = "bash"
+# test pypi upload command for reference
+# uv run python -m twine upload --repository testpypi dist/* --username __token__ --password $PYPI_TOKEN
+
+[tool.poe.tasks.release-github]
+shell = """
+VERSION=$(grep '^version = ' pyproject.toml | cut -d '"' -f 2)
+gh release create v$VERSION dist/* --title "Release v$VERSION" --notes "Release version $VERSION"
+"""
+interpreter = "bash"
+
+[tool.poe.tasks.release]
+help = "Bump version interactively, then build and release"
+sequence = [
+    "bump-version",
+    "clean-dist",
+    "build",
+    "publish-pypi",
+    # "release-github"
+]

@@ -7,9 +7,13 @@
 
 ## Complete Trading Strategy Implementation
 
-Let's build a comprehensive automated trading system:
+Building a complete automated trading system requires orchestrating multiple components into a cohesive, production-ready workflow. This involves continuously monitoring market conditions, calculating technical indicators in real-time, managing open positions dynamically, and executing trades with proper risk management - all while handling errors gracefully and tracking performance metrics. A well-designed trading system operates autonomously within defined parameters, making decisions based on your strategy logic without requiring constant manual intervention.
 
-<!-- fragment: Demo complete trading strategy with magic numbers and attribute access patterns -->
+This example demonstrates a full end-to-end trading loop that runs continuously for a specified duration. You'll see how to integrate price updates with `client.pricing.get_pricing()`, check existing positions using `client.trades.get_trades()`, execute trades with `client.orders.post_market_order()`, and implement proper error handling throughout. The code shows real-world patterns like sleep intervals to avoid API rate limits, exception handling for network issues, and performance tracking that provides visibility into your strategy's behavior.
+
+Understanding this complete system architecture prepares you to build your own automated strategies with confidence. You'll learn how all the individual components from previous tutorials (market data, position management, order execution) work together in a production environment, and see best practices for structuring long-running trading applications:
+
+<!-- fragment: Complete executable trading system with full strategy implementation -->
 ```python
 import asyncio
 from datetime import datetime
@@ -18,42 +22,340 @@ from decimal import Decimal
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
+from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.models import InstrumentName
 
-# Load environment variables from .env file
+# ==============================================================================
+# ENVIRONMENT SETUP
+# ==============================================================================
+
+# Load API credentials from .env file
+# The AsyncClient automatically reads these environment variables:
+#   - FIVETWENTY_OANDA_TOKEN: Your OANDA API token
+#   - FIVETWENTY_OANDA_ACCOUNT: Your OANDA account ID
+#   - FIVETWENTY_OANDA_ENVIRONMENT: "practice" or "live" (defaults to practice)
 load_dotenv()
 
-# SimpleMovingAverageCrossover would be defined elsewhere
-# (see previous lessons for implementation)
+# ==============================================================================
+# COMPLETE AUTOMATED TRADING SYSTEM
+# ==============================================================================
 
-async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
-    """Run a complete trading strategy with full automation."""
+# This example demonstrates a production-ready automated trading system that
+# combines all the concepts from previous tutorials into a complete workflow:
+#
+# KEY COMPONENTS:
+# 1. Strategy Class - Moving Average Crossover with full state management
+# 2. Price Updates - Continuous market data fetching from OANDA
+# 3. Technical Indicators - Real-time moving average calculations
+# 4. Position Management - Check existing trades before entering new ones
+# 5. Trade Execution - Market orders with stop loss and take profit
+# 6. Error Handling - Graceful recovery from API errors and rate limits
+# 7. Performance Tracking - Monitor win rate, P&L, and trade statistics
+#
+# HOW IT WORKS:
+# The system runs autonomously for a specified duration, checking market conditions
+# every minute. When the fast MA crosses the slow MA, it generates signals and
+# executes trades with proper risk management. All trades include protective
+# stop loss and take profit orders to define maximum risk.
+#
+# This code is fully executable and runs a complete 5-minute trading session.
 
+
+# ==============================================================================
+# STRATEGY CLASS: MOVING AVERAGE CROSSOVER
+# ==============================================================================
+
+
+class SimpleMovingAverageCrossover:
+    """
+    A complete moving average crossover trading strategy.
+
+    This strategy generates buy signals when a fast moving average crosses above
+    a slow moving average, and sell signals when the fast MA crosses below the
+    slow MA. This is a classic trend-following strategy that works in trending
+    markets but can produce false signals in ranging markets.
+    """
+
+    def __init__(
+        self,
+        instrument: str = "EUR_USD",
+        fast_ma_period: int = 10,
+        slow_ma_period: int = 20,
+        position_size: int = 1000,
+        stop_loss_pips: int = 20,
+        take_profit_pips: int = 30,
+    ) -> None:
+        """
+        Initialize the strategy with trading parameters.
+
+        Args:
+            instrument: Currency pair to trade (e.g., "EUR_USD")
+            fast_ma_period: Number of periods for fast moving average
+            slow_ma_period: Number of periods for slow moving average
+            position_size: Number of units to trade
+            stop_loss_pips: Stop loss distance in pips
+            take_profit_pips: Take profit distance in pips
+        """
+        self.instrument = instrument
+        self.fast_ma_period = fast_ma_period
+        self.slow_ma_period = slow_ma_period
+        self.position_size = position_size
+        self.stop_loss_pips = stop_loss_pips
+        self.take_profit_pips = take_profit_pips
+
+        # Price history for calculating moving averages
+        self.prices: list[Decimal] = []
+
+        # Track previous MAs for crossover detection
+        self.prev_fast_ma: Decimal | None = None
+        self.prev_slow_ma: Decimal | None = None
+
+        # Performance tracking
+        self.strategy_stats: dict[str, int | Decimal] = {
+            "total_trades": 0,
+            "winning_trades": 0,
+            "total_pnl": Decimal("0"),
+        }
+
+    async def update_prices(self, client: AsyncClient) -> bool:
+        """Fetch latest price and add to price history."""
+        try:
+            # Get current pricing from OANDA
+            response = await client.pricing.get_pricing(
+                client.account_id, [self.instrument]
+            )
+
+            if response["prices"]:
+                price_data = response["prices"][0]
+                # Use mid-point between bid and ask for calculations
+                bid = Decimal(price_data.bids[0].price)
+                ask = Decimal(price_data.asks[0].price)
+                mid_price = (bid + ask) / Decimal("2")
+
+                self.prices.append(mid_price)
+
+                # Keep only the most recent prices we need
+                max_prices = self.slow_ma_period + 10
+                if len(self.prices) > max_prices:
+                    self.prices = self.prices[-max_prices:]
+
+                return True
+
+        except FiveTwentyError as e:
+            print(f"   ERROR: Could not fetch prices: {e.message}")
+
+        return False
+
+    def calculate_moving_average(
+        self, prices: list[Decimal], period: int
+    ) -> Decimal | None:
+        """Calculate simple moving average over the specified period."""
+        if len(prices) < period:
+            return None
+
+        recent_prices = prices[-period:]
+        return sum(recent_prices) / Decimal(str(period))
+
+    def should_buy(self) -> bool:
+        """Check for bullish crossover signal (fast MA crosses above slow MA)."""
+        if len(self.prices) < self.slow_ma_period:
+            return False
+
+        fast_ma = self.calculate_moving_average(self.prices, self.fast_ma_period)
+        slow_ma = self.calculate_moving_average(self.prices, self.slow_ma_period)
+
+        if fast_ma is None or slow_ma is None:
+            return False
+
+        # Detect crossover: fast MA was below/equal and is now above slow MA
+        if self.prev_fast_ma is not None and self.prev_slow_ma is not None:
+            crossover = (
+                self.prev_fast_ma <= self.prev_slow_ma and fast_ma > slow_ma
+            )
+            self.prev_fast_ma = fast_ma
+            self.prev_slow_ma = slow_ma
+            return crossover
+
+        # Initialize previous values on first call
+        self.prev_fast_ma = fast_ma
+        self.prev_slow_ma = slow_ma
+        return False
+
+    def should_sell(self) -> bool:
+        """Check for bearish crossover signal (fast MA crosses below slow MA)."""
+        if len(self.prices) < self.slow_ma_period:
+            return False
+
+        fast_ma = self.calculate_moving_average(self.prices, self.fast_ma_period)
+        slow_ma = self.calculate_moving_average(self.prices, self.slow_ma_period)
+
+        if fast_ma is None or slow_ma is None:
+            return False
+
+        # Detect crossover: fast MA was above/equal and is now below slow MA
+        if self.prev_fast_ma is not None and self.prev_slow_ma is not None:
+            crossover = (
+                self.prev_fast_ma >= self.prev_slow_ma and fast_ma < slow_ma
+            )
+            self.prev_fast_ma = fast_ma
+            self.prev_slow_ma = slow_ma
+            return crossover
+
+        # Initialize previous values on first call
+        self.prev_fast_ma = fast_ma
+        self.prev_slow_ma = slow_ma
+        return False
+
+
+# ==============================================================================
+# TRADE EXECUTION FUNCTION
+# ==============================================================================
+
+
+async def execute_strategy_trade(
+    client: AsyncClient,
+    strategy: SimpleMovingAverageCrossover,
+    direction: str,
+    current_price: Decimal,
+) -> None:
+    """Execute a trade with stop loss and take profit attached."""
+    try:
+        # Calculate position size (positive for buy, negative for sell)
+        units = (
+            strategy.position_size
+            if direction == "BUY"
+            else -strategy.position_size
+        )
+
+        # Calculate stop loss and take profit levels
+        pip_value = Decimal("0.0001")
+
+        if direction == "BUY":
+            # Long: stop below entry, profit above entry
+            stop_loss_price = current_price - (strategy.stop_loss_pips * pip_value)
+            take_profit_price = current_price + (strategy.take_profit_pips * pip_value)
+        else:
+            # Short: stop above entry, profit below entry
+            stop_loss_price = current_price + (strategy.stop_loss_pips * pip_value)
+            take_profit_price = current_price - (strategy.take_profit_pips * pip_value)
+
+        print(f"   Placing {direction} order...")
+        print(f"      Entry: {current_price:.5f}")
+        print(f"      Stop Loss: {stop_loss_price:.5f}")
+        print(f"      Take Profit: {take_profit_price:.5f}")
+
+        # ==============================================================================
+        # SDK METHOD: client.orders.post_market_order()
+        # ==============================================================================
+        #
+        # Place a market order with protective stop loss and take profit
+        #
+        # Parameters:
+        #   - account_id: Your OANDA account ID (available as client.account_id)
+        #   - instrument: Currency pair to trade (InstrumentName enum)
+        #   - units: Position size (positive=buy, negative=sell)
+        #   - stop_loss: Optional stop loss price (Decimal)
+        #   - take_profit: Optional take profit price (Decimal)
+        #
+        # Returns: TypedDict with order fill details including transaction ID
+        #
+        # NOTE: The API now accepts Decimal prices directly for stop_loss and
+        #       take_profit, simplifying the previous model-based approach
+
+        await client.orders.post_market_order(
+            account_id=client.account_id,
+            instrument=InstrumentName(strategy.instrument),
+            units=units,
+            stop_loss=stop_loss_price,
+            take_profit=take_profit_price,
+        )
+
+        # Update statistics (safely handle int type)
+        total_trades = strategy.strategy_stats["total_trades"]
+        assert isinstance(total_trades, int)
+        strategy.strategy_stats["total_trades"] = total_trades + 1
+        print(f"   ✓ {direction} ORDER EXECUTED SUCCESSFULLY")
+
+    except FiveTwentyError as e:
+        print(f"   ERROR: Trade execution failed: {e.message}")
+
+
+# ==============================================================================
+# MAIN TRADING LOOP
+# ==============================================================================
+
+
+async def run_complete_trading_strategy(
+    strategy: SimpleMovingAverageCrossover, duration_minutes: int = 10
+) -> None:
+    """
+    Run a complete automated trading strategy with continuous monitoring.
+
+    This is the main loop that demonstrates:
+    1. Continuous price updates using client.pricing.get_pricing()
+    2. Technical indicator calculation (moving averages)
+    3. Position checking with client.trades.get_trades()
+    4. Automated trade execution with proper risk management
+    5. Error handling and recovery patterns
+    6. Performance tracking throughout the session
+    """
+
+    print("=" * 50)
     print("LAUNCHING AUTOMATED TRADING STRATEGY")
-    print("=" * 45)
-    print(f"Strategy: Moving Average Crossover")
+    print("=" * 50)
+    print("Strategy: Moving Average Crossover")
     print(f"Instrument: {strategy.instrument}")
     print(f"Duration: {duration_minutes} minutes")
     print(f"Fast MA: {strategy.fast_ma_period} periods")
     print(f"Slow MA: {strategy.slow_ma_period} periods")
+    print(f"Position Size: {strategy.position_size} units")
+    print("=" * 50)
 
-    # Zero-config - automatically uses environment variables
+    # ==============================================================================
+    # CONNECT TO OANDA
+    # ==============================================================================
+
+    # AsyncClient automatically reads FIVETWENTY_OANDA_* environment variables
+    # Context manager ensures proper cleanup of HTTP connections
     async with AsyncClient() as client:
         start_time = datetime.now()
 
+        # Main trading loop - runs until duration expires
         while (datetime.now() - start_time).seconds < duration_minutes * 60:
             try:
                 print(f"\n{datetime.now().strftime('%H:%M:%S')} - Strategy Check")
 
-                # Step 1: Update market data
+                # ==============================================================================
+                # STEP 1: UPDATE MARKET DATA
+                # ==============================================================================
+
+                # The SDK method: client.pricing.get_pricing()
+                #
+                # Parameters:
+                #   - account_id: Your OANDA account ID (available as client.account_id)
+                #   - instruments: List of instruments to get pricing for
+                #
+                # Returns: TypedDict with structure:
+                #   {
+                #       "prices": list[ClientPrice],  # Pydantic models with bids/asks
+                #       "time": datetime
+                #   }
+                #
+                # NOTE: Response is a TypedDict (use dictionary access: response["prices"])
+                #       Each ClientPrice is a Pydantic model (use attribute access: price.bids)
+
                 if not await strategy.update_prices(client):
                     print("   WARNING: Could not update prices, skipping this cycle")
-                    await asyncio.sleep(60)  # Wait 1 minute before retry
+                    await asyncio.sleep(60)
                     continue
 
                 current_price = strategy.prices[-1]
                 print(f"   Current Price: {current_price:.5f}")
 
-                # Step 2: Calculate indicators
+                # ==============================================================================
+                # STEP 2: CALCULATE INDICATORS
+                # ==============================================================================
+
                 if len(strategy.prices) >= strategy.slow_ma_period:
                     fast_ma = strategy.calculate_moving_average(
                         strategy.prices, strategy.fast_ma_period
@@ -61,120 +363,135 @@ async def run_complete_trading_strategy(strategy, duration_minutes: int = 10):
                     slow_ma = strategy.calculate_moving_average(
                         strategy.prices, strategy.slow_ma_period
                     )
-                    print(f"   Fast MA: {fast_ma:.5f}")
-                    print(f"   Slow MA: {slow_ma:.5f}")
+                    if fast_ma and slow_ma:
+                        print(f"   Fast MA: {fast_ma:.5f}")
+                        print(f"   Slow MA: {slow_ma:.5f}")
+                else:
+                    print(
+                        f"   Collecting data... ({len(strategy.prices)}/{strategy.slow_ma_period} candles)"
+                    )
 
-                # Step 3: Check current position
-                open_trades = await client.trades.get_trades(
-                    client.account_id,
-                    state="OPEN",
-                    instrument=strategy.instrument
-                )
+                # ==============================================================================
+                # STEP 3: CHECK CURRENT POSITION
+                # ==============================================================================
 
+                # The SDK method: client.trades.get_trades()
+                #
+                # Returns: TypedDict with structure:
+                #   {
+                #       "trades": list[Trade],        # List of Pydantic Trade models
+                #       "lastTransactionID": str
+                #   }
+                #
+                # Each Trade model contains:
+                #   - trade.id: str - Unique trade identifier
+                #   - trade.instrument: str - Currency pair
+                #   - trade.current_units: str - Position size
+
+                response = await client.trades.get_trades(client.account_id)
+                trades = response["trades"]
+
+                # Filter for our instrument
+                open_trades = [
+                    t for t in trades if t.instrument == strategy.instrument
+                ]
                 has_position = len(open_trades) > 0
+
                 print(f"   Current Position: {'YES' if has_position else 'NONE'}")
 
-                # Step 4: Strategy logic
+                # ==============================================================================
+                # STEP 4: EXECUTE STRATEGY LOGIC
+                # ==============================================================================
+
                 if not has_position:
                     # Look for entry signals
                     if strategy.should_buy():
-                        print("   BUY SIGNAL DETECTED!")
+                        print("   🔔 BUY SIGNAL DETECTED!")
                         await execute_strategy_trade(
                             client, strategy, "BUY", current_price
                         )
                     elif strategy.should_sell():
-                        print("   SELL SIGNAL DETECTED!")
+                        print("   🔔 SELL SIGNAL DETECTED!")
                         await execute_strategy_trade(
                             client, strategy, "SELL", current_price
                         )
                     else:
-                        print("   No signal - waiting")
+                        print("   No signal - waiting...")
                 else:
                     print("   Managing existing position...")
-                    # In a real strategy, you might implement trailing stops,
-                    # position sizing adjustments, or other management rules here
+                    # In production, you might implement:
+                    # - Trailing stop loss adjustments
+                    # - Partial profit taking
+                    # - Position scaling
 
-                # Step 5: Display strategy statistics
-                print(f"   Strategy Stats: {strategy.strategy_stats['total_trades']} trades, "
-                      f"${strategy.strategy_stats['total_pnl']:+.2f} total P&L")
+                # ==============================================================================
+                # STEP 5: DISPLAY STATISTICS
+                # ==============================================================================
 
-                await asyncio.sleep(60)  # Check every minute
+                stats = strategy.strategy_stats
+                print(
+                    f"   Stats: {stats['total_trades']} trades, "
+                    f"${stats['total_pnl']:+.2f} P&L"
+                )
+
+                # Wait before next check (avoid API rate limits)
+                await asyncio.sleep(60)
 
             except Exception as e:
-                print(f"   Error ERROR: Strategy error: {e}")
-                print(f"   Processing Continuing strategy loop after error recovery")
-                # In production: implement proper error logging and alerting
-                await asyncio.sleep(60)  # Wait before retrying to avoid error loops
+                print(f"   ERROR: {e}")
+                print("   Continuing after error recovery...")
+                await asyncio.sleep(60)
 
-        # Step 11: Strategy completion and final analysis
-        print(f"\nFlag Strategy completed after {duration_minutes} minutes")
+        # Strategy completion
+        print("\n" + "=" * 50)
+        print("STRATEGY COMPLETED")
+        print("=" * 50)
         print(f"Session ended at: {datetime.now().strftime('%H:%M:%S')}")
-
-        # Generate comprehensive final performance report
         print_strategy_performance(strategy)
 
-async def execute_strategy_trade(client: AsyncClient, strategy,
-                               direction: str, current_price: Decimal):
-    """Execute a trade based on strategy signal."""
 
-    try:
-        units = strategy.position_size if direction == "BUY" else -strategy.position_size
+# ==============================================================================
+# PERFORMANCE REPORTING
+# ==============================================================================
 
-        # Calculate stop loss and take profit levels
-        if direction == "BUY":
-            stop_loss_price = current_price - (strategy.stop_loss_pips * Decimal("0.0001"))
-            take_profit_price = current_price + (strategy.take_profit_pips * Decimal("0.0001"))
-        else:
-            stop_loss_price = current_price + (strategy.stop_loss_pips * Decimal("0.0001"))
-            take_profit_price = current_price - (strategy.take_profit_pips * Decimal("0.0001"))
 
-        # Place the trade with risk management
-        response = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=strategy.instrument,
-            units=units,
-            stop_loss=Decimal(str(stop_loss_price)),
-            take_profit=Decimal(str(take_profit_price))
-        )
+def print_strategy_performance(strategy: SimpleMovingAverageCrossover) -> None:
+    """
+    Display comprehensive strategy performance metrics.
 
-        if response.order_fill_transaction:
-            fill = response.order_fill_transaction
-            strategy.strategy_stats['total_trades'] += 1
-
-            print(f"   {direction} ORDER EXECUTED!")
-            print(f"      Trade ID: {fill.id}")
-            print(f"      Fill Price: {fill.price}")
-            print(f"      Stop Loss: {stop_loss_price:.5f}")
-            print(f"      Take Profit: {take_profit_price:.5f}")
-
-    except Exception as e:
-        print(f"   ERROR: Trade execution failed: {e}")
-
-def print_strategy_performance(strategy):
-    """Display comprehensive strategy performance."""
-
-    print(f"\nFINAL STRATEGY PERFORMANCE")
-    print("=" * 35)
+    Shows total trades, win rate, and P&L along with strategy parameters
+    for post-session analysis.
+    """
+    print("\nFINAL STRATEGY PERFORMANCE")
+    print("=" * 50)
 
     stats = strategy.strategy_stats
-    print(f"Total Trades: {stats['total_trades']}")
+    total_trades = stats["total_trades"]
+    winning_trades = stats["winning_trades"]
+    total_pnl = stats["total_pnl"]
 
-    if stats['total_trades'] > 0:
-        win_rate = (stats['winning_trades'] / stats['total_trades']) * 100
-        print(f"Winning Trades: {stats['winning_trades']}")
+    assert isinstance(total_trades, int)
+    assert isinstance(winning_trades, int)
+    assert isinstance(total_pnl, Decimal)
+
+    print(f"Total Trades: {total_trades}")
+
+    if total_trades > 0:
+        win_rate = (winning_trades / total_trades) * 100
+        print(f"Winning Trades: {winning_trades}")
         print(f"Win Rate: {win_rate:.1f}%")
-        print(f"Total P&L: ${stats['total_pnl']:+.2f}")
+        print(f"Total P&L: ${total_pnl:+.2f}")
 
-        if stats['total_pnl'] > 0:
-            print("Profitable strategy performance!")
-        elif stats['total_pnl'] < 0:
-            print("Learning opportunity - analyze what happened")
+        if total_pnl > 0:
+            print("\n✓ Profitable strategy session")
+        elif total_pnl < 0:
+            print("\n⚠ Loss detected - review strategy parameters")
         else:
-            print("Breakeven performance")
+            print("\n= Breakeven performance")
     else:
-        print("No trades executed during this period")
+        print("No trades executed during this session")
 
-    print(f"\nStrategy Parameters:")
+    print("\nStrategy Parameters:")
     print(f"   Instrument: {strategy.instrument}")
     print(f"   Position Size: {strategy.position_size} units")
     print(f"   Stop Loss: {strategy.stop_loss_pips} pips")
@@ -182,42 +499,99 @@ def print_strategy_performance(strategy):
     print(f"   Fast MA: {strategy.fast_ma_period} periods")
     print(f"   Slow MA: {strategy.slow_ma_period} periods")
 
-# Run your complete strategy (uncomment to run)
-# if __name__ == "__main__":
-#     # strategy would be initialized elsewhere
-#     asyncio.run(run_complete_trading_strategy(strategy, duration_minutes=5))
+
+# ==============================================================================
+# EXECUTION
+# ==============================================================================
+
+if __name__ == "__main__":
+    # Create strategy instance with parameters
+    strategy = SimpleMovingAverageCrossover(
+        instrument="EUR_USD",
+        fast_ma_period=10,
+        slow_ma_period=20,
+        position_size=1000,
+        stop_loss_pips=20,
+        take_profit_pips=30,
+    )
+
+    # Run the strategy for 5 minutes (use longer duration in production)
+    # Note: This will attempt to trade on your OANDA practice account
+    asyncio.run(run_complete_trading_strategy(strategy, duration_minutes=5))
 ```
 
 ---
 
 ## Enhanced Strategy with Advanced Features
 
-Here's an enhanced version with additional capabilities:
+Professional trading strategies extend beyond simple technical indicators to incorporate sophisticated market analysis and adaptive risk management. Advanced features like volatility filters prevent trading during choppy, unpredictable market conditions, while dynamic position sizing adjusts your exposure based on current market volatility and account risk parameters. Implementing spread monitoring ensures you only trade when execution costs are reasonable, and daily trade limits prevent over-trading that can erode profits through transaction costs and emotional decision-making.
 
-<!-- fragment: Demo enhanced strategy with magic numbers and decimal precision patterns -->
+This enhanced strategy demonstrates how to build adaptive trading logic that responds intelligently to changing market conditions. You'll see how to use `client.pricing.get_pricing()` to monitor bid-ask spreads in real-time, implement volatility-based position sizing that protects capital during turbulent markets, and create market condition filters that keep your strategy out of unfavorable trading environments. These protective mechanisms are essential for long-term profitability, as they help your strategy avoid the losses that come from trading in unsuitable market conditions.
+
+The concepts shown here elevate your trading system from basic automation to professional-grade risk management. While the example provides a foundation, real-world implementations would expand these ideas with multi-timeframe analysis, correlation filters across instruments, economic calendar integration, and machine learning-based signal optimization:
+
+<!-- fragment: Enhanced strategy with market condition filtering and dynamic position sizing -->
 ```python
+import asyncio
 from decimal import Decimal
 
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 
-# Load environment variables from .env file
+# ==============================================================================
+# ENVIRONMENT SETUP
+# ==============================================================================
+
+# Load API credentials from .env file
+# The AsyncClient automatically reads these environment variables:
+#   - FIVETWENTY_OANDA_TOKEN: Your OANDA API token
+#   - FIVETWENTY_OANDA_ACCOUNT: Your OANDA account ID
+#   - FIVETWENTY_OANDA_ENVIRONMENT: "practice" or "live" (defaults to practice)
 load_dotenv()
 
-# Enhanced strategy concepts (for further learning)
-# Note: SimpleMovingAverageCrossover would be imported from previous lesson
+# ==============================================================================
+# ENHANCED STRATEGY WITH MARKET CONDITION FILTERING
+# ==============================================================================
 
-class EnhancedTradingStrategy:  # SimpleMovingAverageCrossover
-    """Enhanced strategy with additional features."""
+# This example demonstrates advanced trading features beyond basic automation:
+#
+# KEY CONCEPTS COVERED:
+# 1. Market Condition Analysis - Check spread width before trading
+# 2. Dynamic Position Sizing - Adjust position size based on volatility
+# 3. Risk-Based Limits - Never exceed account risk parameters
+# 4. Real-time SDK Integration - Use live account and pricing data
+#
+# WHAT'S DIFFERENT FROM BASIC STRATEGY:
+# - Analyzes market conditions to determine if trading is appropriate
+# - Calculates position sizes dynamically based on current volatility
+# - Demonstrates account balance integration for risk management
+# - Shows how to build protective filters into your strategy
+#
+# This code is fully executable and demonstrates real SDK methods in action.
+
+
+# ==============================================================================
+# ENHANCED TRADING STRATEGY CLASS
+# ==============================================================================
+
+
+class EnhancedTradingStrategy:
+    """
+    Enhanced trading strategy with advanced market condition filtering.
+
+    This strategy extends basic trading with:
+    - Spread monitoring to avoid trading during wide spreads
+    - Dynamic position sizing based on volatility
+    - Market condition analysis before trade execution
+    - Risk-based position limits
+    """
 
     def __init__(self, instrument: str = "EUR_USD") -> None:
-        # super().__init__(instrument)  # Uncomment if inheriting from SimpleMovingAverageCrossover
-
-        # Basic strategy attributes (from parent class)
+        """Initialize enhanced strategy with risk management parameters."""
         self.instrument = instrument
         self.position_size = 1000
-        self.max_risk_per_trade = 0.02
+        self.max_risk_per_trade = 0.02  # 2% risk per trade
         self.stop_loss_pips = 20
         self.take_profit_pips = 30
 
@@ -227,10 +601,17 @@ class EnhancedTradingStrategy:  # SimpleMovingAverageCrossover
         self.trend_filter_enabled = True
         self.volatility_filter_enabled = True
 
-    async def check_market_conditions(self, client: AsyncClient) -> dict:
-        """Advanced market condition analysis."""
+    async def check_market_conditions(self, client: AsyncClient) -> dict[str, str | bool]:
+        """
+        Analyze market conditions to determine if trading is appropriate.
 
-        conditions = {
+        Checks spread width and determines if market conditions are suitable
+        for trade execution based on current bid-ask spread.
+
+        Returns:
+            Dictionary with market condition indicators and tradeable status
+        """
+        conditions: dict[str, str | bool] = {
             "trend": "neutral",
             "volatility": "normal",
             "spread": "normal",
@@ -238,124 +619,588 @@ class EnhancedTradingStrategy:  # SimpleMovingAverageCrossover
         }
 
         try:
-            # Check spread conditions
-            pricing = await client.pricing.get_pricing(
+            # ==============================================================================
+            # SDK METHOD: client.pricing.get_pricing()
+            # ==============================================================================
+            #
+            # Get current market pricing to analyze spread conditions
+            #
+            # Parameters:
+            #   - account_id: Your OANDA account ID (available as client.account_id)
+            #   - instruments: List of instruments to get pricing for
+            #
+            # Returns: TypedDict with structure:
+            #   {
+            #       "prices": list[ClientPrice],  # Pydantic models
+            #       "time": datetime
+            #   }
+            #
+            # NOTE: Response is TypedDict (use dictionary access: response["prices"])
+
+            response = await client.pricing.get_pricing(
                 client.account_id,
                 [self.instrument],
             )
 
-            if pricing.prices:
-                price = pricing.prices[0]
-                bid = Decimal(str(price.bids[0].price))
-                ask = Decimal(str(price.asks[0].price))
+            if response["prices"]:
+                price_data = response["prices"][0]
+                # Calculate spread from bid-ask prices
+                bid = Decimal(price_data.bids[0].price)
+                ask = Decimal(price_data.asks[0].price)
                 spread = ask - bid
 
-                if spread > 0.0005:  # 5 pips
+                # Check if spread is too wide (more than 5 pips)
+                if spread > Decimal("0.0005"):  # 5 pips
                     conditions["spread"] = "wide"
                     conditions["tradeable"] = False
 
-                # Add more sophisticated analysis here:
-                # - Volatility measurement
-                # - Trend strength calculation
-                # - Economic calendar awareness
-                # - Multi-timeframe analysis
+                # In production, you would also analyze:
+                # - Volatility measurement (ATR, standard deviation)
+                # - Trend strength (ADX, moving average slopes)
+                # - Economic calendar events
+                # - Multi-timeframe confirmation
 
         except Exception:
+            # If we can't get market conditions, don't trade
             conditions["tradeable"] = False
 
         return conditions
 
-    def calculate_dynamic_position_size(self, account_balance: Decimal,
-                                      volatility: Decimal) -> int:
-        """Calculate position size based on account and market conditions."""
+    def calculate_dynamic_position_size(
+        self, account_balance: Decimal, volatility: Decimal
+    ) -> int:
+        """
+        Calculate position size based on account balance and market volatility.
 
-        # Base position size
+        Adjusts position size dynamically:
+        - Reduces size in high volatility to limit risk
+        - Increases size in low volatility to maximize opportunity
+        - Never exceeds risk limits or maximum position cap
+        """
+        # Start with base position size
         base_size = self.position_size
 
-        # Adjust for volatility (reduce size in high volatility)
-        if volatility > Decimal("0.002"):  # High volatility threshold
-            base_size = int(base_size * Decimal("0.5"))
-        elif volatility < Decimal("0.001"):  # Low volatility
-            base_size = int(base_size * Decimal("1.2"))
+        # ==============================================================================
+        # VOLATILITY-BASED POSITION SIZING
+        # ==============================================================================
+        # Adjust position size based on current market volatility
+        # High volatility = smaller positions to control risk
+        # Low volatility = larger positions to capitalize on stable conditions
 
-        # Ensure we don't exceed risk limits
-        max_size_by_risk = int(account_balance * self.max_risk_per_trade / 20)
+        if volatility > Decimal("0.002"):  # High volatility threshold (20 pips)
+            base_size = int(base_size * Decimal("0.5"))  # Reduce to 50%
+        elif volatility < Decimal("0.001"):  # Low volatility (10 pips)
+            base_size = int(base_size * Decimal("1.2"))  # Increase to 120%
 
+        # Calculate maximum size based on account risk limits
+        # Risk 2% of account per trade with 20 pip stop loss
+        max_size_by_risk = int(account_balance * Decimal(str(self.max_risk_per_trade)) / 20)
+
+        # Return the smallest of: volatility-adjusted size, risk limit, or hard cap
         return min(base_size, max_size_by_risk, 2000)  # Cap at 2000 units
 
-print("Strategy Enhancement Ideas:")
-print("- Add volatility filters to avoid trading in choppy markets")
-print("- Implement dynamic position sizing based on market conditions")
-print("- Add time-of-day filters (avoid trading during low liquidity)")
-print("- Include economic calendar integration")
-print("- Implement portfolio-level risk management")
-print("- Add machine learning for signal optimization")
+
+# ==============================================================================
+# DEMONSTRATION MAIN FUNCTION
+# ==============================================================================
+
+
+async def main() -> None:
+    """Demonstrate enhanced strategy features with real SDK integration."""
+
+    print("=" * 60)
+    print("ENHANCED TRADING STRATEGY - MARKET CONDITION ANALYSIS")
+    print("=" * 60)
+
+    # ==============================================================================
+    # CONNECT TO OANDA
+    # ==============================================================================
+
+    # AsyncClient automatically reads FIVETWENTY_OANDA_* environment variables
+    # Context manager ensures proper cleanup of HTTP connections
+    async with AsyncClient() as client:
+
+        # Create enhanced strategy instance
+        strategy = EnhancedTradingStrategy(instrument="EUR_USD")
+
+        print(f"\nAnalyzing market conditions for {strategy.instrument}...")
+
+        # ==============================================================================
+        # STEP 1: CHECK MARKET CONDITIONS
+        # ==============================================================================
+
+        conditions = await strategy.check_market_conditions(client)
+
+        print("\nMarket Condition Analysis:")
+        print(f"  Trend: {conditions['trend']}")
+        print(f"  Volatility: {conditions['volatility']}")
+        print(f"  Spread: {conditions['spread']}")
+        print(f"  Tradeable: {'YES ✓' if conditions['tradeable'] else 'NO ✗'}")
+
+        if not conditions["tradeable"]:
+            print("\n⚠ Market conditions not suitable for trading")
+            print("  Reason: Spread too wide (>5 pips)")
+            print("  Action: Wait for better conditions")
+        else:
+            print("\n✓ Market conditions acceptable for trading")
+
+        # ==============================================================================
+        # STEP 2: DEMONSTRATE DYNAMIC POSITION SIZING
+        # ==============================================================================
+
+        print("\n" + "=" * 60)
+        print("DYNAMIC POSITION SIZING EXAMPLES")
+        print("=" * 60)
+
+        # Get account balance for position sizing calculations
+        account_response = await client.accounts.get_account_summary(client.account_id)
+        account_balance = Decimal(account_response["account"].balance)
+
+        print(f"\nAccount Balance: ${account_balance}")
+        print(f"Max Risk Per Trade: {strategy.max_risk_per_trade * 100}%")
+
+        # Test different volatility scenarios
+        scenarios = [
+            (Decimal("0.0005"), "Very Low Volatility (5 pips)"),
+            (Decimal("0.0010"), "Low Volatility (10 pips)"),
+            (Decimal("0.0015"), "Normal Volatility (15 pips)"),
+            (Decimal("0.0025"), "High Volatility (25 pips)"),
+        ]
+
+        print("\nPosition Sizing by Volatility:")
+        for volatility, description in scenarios:
+            position_size = strategy.calculate_dynamic_position_size(
+                account_balance, volatility
+            )
+            print(f"  {description:30s} → {position_size:5d} units")
+
+        # ==============================================================================
+        # ENHANCEMENT IDEAS FOR PRODUCTION
+        # ==============================================================================
+
+        print("\n" + "=" * 60)
+        print("PRODUCTION ENHANCEMENT IDEAS")
+        print("=" * 60)
+        print("\nTo make this strategy production-ready, consider adding:")
+        print("  • Volatility filters using ATR (Average True Range)")
+        print("  • Time-of-day filters to avoid low liquidity periods")
+        print("  • Economic calendar integration to avoid news events")
+        print("  • Multi-timeframe trend confirmation")
+        print("  • Correlation analysis across currency pairs")
+        print("  • Machine learning for adaptive parameter optimization")
+        print("  • Real-time drawdown monitoring and circuit breakers")
+
+
+if __name__ == "__main__":
+    # Run the demonstration
+    asyncio.run(main())
 ```
 
 ---
 
 ## Performance Monitoring Dashboard
 
-Monitor your strategy's real-time performance:
+Effective trading requires continuous performance monitoring to understand how your strategy behaves in live market conditions. Real-time metrics like win rate, profit per hour, and trades per hour help you identify when your strategy is performing as expected versus when market conditions have changed and adjustments are needed. A comprehensive monitoring dashboard provides immediate visibility into your strategy's health, allowing you to make informed decisions about when to let it run, when to pause for analysis, or when to shut it down to prevent further losses.
 
-<!-- fragment: Demo performance monitoring with magic numbers and calculation patterns -->
+This monitoring system demonstrates how to track and display key performance indicators that professional traders use to evaluate strategy effectiveness. The `StrategyMonitor` class calculates runtime statistics, win rates, profitability metrics, and efficiency measures that tell you not just whether you're making money, but how efficiently your capital is being deployed. These metrics are essential for comparing different strategies, optimizing parameters, and understanding the trade-off between trade frequency and profitability.
+
+Building robust monitoring into your trading infrastructure is as important as the trading logic itself. Without proper visibility, you're flying blind - unable to distinguish between normal strategy drawdowns and fundamental strategy failures. The patterns shown here provide a foundation for more sophisticated monitoring that could include equity curve tracking, drawdown analysis, Sharpe ratio calculation, and real-time alerting for abnormal behavior:
+
+<!-- fragment: Complete performance monitoring with SDK integration and real account data -->
 ```python
+import asyncio
 from datetime import datetime
+from decimal import Decimal
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
+from fivetwenty.exceptions import FiveTwentyError
+
+# ==============================================================================
+# ENVIRONMENT SETUP
+# ==============================================================================
+
+# Load API credentials from .env file
+# The AsyncClient automatically reads these environment variables:
+#   - FIVETWENTY_OANDA_TOKEN: Your OANDA API token
+#   - FIVETWENTY_OANDA_ACCOUNT: Your OANDA account ID
+#   - FIVETWENTY_OANDA_ENVIRONMENT: "practice" or "live" (defaults to practice)
+load_dotenv()
+
+# ==============================================================================
+# PERFORMANCE MONITORING DASHBOARD
+# ==============================================================================
+
+# This example demonstrates real-time performance monitoring for trading strategies:
+#
+# KEY FEATURES:
+# 1. Runtime Metrics - Track how long the strategy has been running
+# 2. Trade Statistics - Count total trades and winning trades
+# 3. Win Rate Calculation - Measure strategy effectiveness percentage
+# 4. Profitability Tracking - Monitor total P&L and P&L per hour
+# 5. Efficiency Metrics - Calculate trades per hour
+# 6. Status Indicators - Automatic alerts for performance thresholds
+#
+# WHY MONITORING MATTERS:
+# Without proper monitoring, you can't distinguish between normal strategy
+# drawdowns and fundamental strategy failures. Real-time visibility into
+# performance metrics allows you to make informed decisions about when to
+# continue trading versus when to pause for analysis or adjustment.
+#
+# This code is fully executable and demonstrates monitoring integration with
+# a simple strategy. In production, you would add equity curve tracking,
+# drawdown analysis, Sharpe ratio calculation, and real-time alerting.
+
+
+# ==============================================================================
+# SIMPLE STRATEGY FOR DEMONSTRATION
+# ==============================================================================
+
+
+class SimpleStrategy:
+    """
+    A minimal strategy class for demonstrating the performance monitor.
+
+    In a real system, this would be your complete trading strategy (like the
+    SimpleMovingAverageCrossover from the previous example). For monitoring
+    demonstration purposes, we keep it simple.
+    """
+
+    def __init__(self, instrument: str = "EUR_USD") -> None:
+        """Initialize strategy with basic tracking."""
+        self.instrument = instrument
+
+        # Performance tracking - same structure as complete trading system
+        self.strategy_stats: dict[str, int | Decimal] = {
+            "total_trades": 0,
+            "winning_trades": 0,
+            "total_pnl": Decimal("0"),
+        }
+
+    def simulate_trade_result(self, profit: Decimal) -> None:
+        """Simulate a trade result for demonstration purposes."""
+        # Update total trades count
+        total_trades = self.strategy_stats["total_trades"]
+        assert isinstance(total_trades, int)
+        self.strategy_stats["total_trades"] = total_trades + 1
+
+        # Update P&L
+        current_pnl = self.strategy_stats["total_pnl"]
+        assert isinstance(current_pnl, Decimal)
+        self.strategy_stats["total_pnl"] = current_pnl + profit
+
+        # Update winning trades if profitable
+        if profit > 0:
+            winning_trades = self.strategy_stats["winning_trades"]
+            assert isinstance(winning_trades, int)
+            self.strategy_stats["winning_trades"] = winning_trades + 1
+
+
+# ==============================================================================
+# STRATEGY PERFORMANCE MONITOR
+# ==============================================================================
 
 
 class StrategyMonitor:
-    """Monitor strategy performance in real-time."""
+    """
+    Real-time performance monitoring for trading strategies.
 
-    def __init__(self, strategy):
+    This monitor tracks key performance indicators (KPIs) that professional
+    traders use to evaluate strategy effectiveness:
+    - Win rate: Percentage of profitable trades
+    - P&L per hour: Capital efficiency metric
+    - Trades per hour: Activity level indicator
+    - Status indicators: Automatic performance alerts
+
+    Usage:
+        monitor = StrategyMonitor(strategy)
+        monitor.print_performance_dashboard()  # Display current metrics
+    """
+
+    # ==============================================================================
+    # PERFORMANCE THRESHOLDS (CONFIGURABLE)
+    # ==============================================================================
+
+    # These thresholds determine when the monitor raises alerts about
+    # strategy performance. Adjust these based on your risk tolerance:
+
+    MAX_ACCEPTABLE_LOSS = Decimal("100")  # Dollar loss before review needed
+    MIN_WIN_RATE_WARNING = 40.0  # Win rate percentage below which to warn
+    MIN_TRADES_FOR_STATS = 5  # Minimum trades before calculating win rate
+
+    def __init__(self, strategy: SimpleStrategy) -> None:
+        """
+        Initialize the monitor with a strategy to track.
+
+        Args:
+            strategy: Strategy instance with strategy_stats dictionary
+        """
         self.strategy = strategy
         self.start_time = datetime.now()
-        self.daily_stats = {}
 
-    def update_performance_metrics(self):
-        """Calculate and update performance metrics."""
+    def update_performance_metrics(self) -> dict[str, float | int | Decimal]:
+        """
+        Calculate comprehensive performance metrics.
 
+        Returns:
+            Dictionary with runtime metrics, trade statistics, and efficiency measures
+        """
+        # Calculate runtime in hours
         current_time = datetime.now()
-        runtime = (current_time - self.start_time).total_seconds() / 3600  # hours
+        runtime_seconds = (current_time - self.start_time).total_seconds()
+        runtime_hours = runtime_seconds / 3600
 
+        # Get current strategy statistics
         stats = self.strategy.strategy_stats
+        total_trades = stats["total_trades"]
+        winning_trades = stats["winning_trades"]
+        total_pnl = stats["total_pnl"]
 
-        metrics = {
-            "runtime_hours": runtime,
-            "total_trades": stats["total_trades"],
-            "winning_trades": stats["winning_trades"],
-            "total_pnl": stats["total_pnl"],
-            "win_rate": (stats["winning_trades"] / max(stats["total_trades"], 1)) * 100,
-            "trades_per_hour": stats["total_trades"] / max(runtime, 1),
-            "pnl_per_hour": stats["total_pnl"] / max(runtime, 1),
+        assert isinstance(total_trades, int)
+        assert isinstance(winning_trades, int)
+        assert isinstance(total_pnl, Decimal)
+
+        # ==============================================================================
+        # METRIC CALCULATIONS
+        # ==============================================================================
+
+        # Win Rate: Percentage of trades that were profitable
+        # Use max() to avoid division by zero on first call
+        win_rate = (winning_trades / max(total_trades, 1)) * 100
+
+        # Trades Per Hour: Measures strategy activity level
+        # Higher values indicate more frequent trading
+        trades_per_hour = total_trades / max(runtime_hours, 0.01)
+
+        # P&L Per Hour: Capital efficiency metric
+        # Shows how effectively capital is being deployed
+        pnl_per_hour = total_pnl / Decimal(str(max(runtime_hours, 0.01)))
+
+        return {
+            "runtime_hours": runtime_hours,
+            "total_trades": total_trades,
+            "winning_trades": winning_trades,
+            "total_pnl": total_pnl,
+            "win_rate": win_rate,
+            "trades_per_hour": trades_per_hour,
+            "pnl_per_hour": pnl_per_hour,
         }
 
-        return metrics
+    def get_performance_status(
+        self, metrics: dict[str, float | int | Decimal]
+    ) -> str:
+        """
+        Determine current performance status based on metrics.
 
-    def print_performance_dashboard(self):
-        """Display real-time performance dashboard."""
+        Args:
+            metrics: Dictionary of performance metrics
 
+        Returns:
+            Status string: "PROFITABLE", "REVIEW NEEDED", or "MONITORING"
+        """
+        total_pnl = metrics["total_pnl"]
+        win_rate = metrics["win_rate"]
+        total_trades = metrics["total_trades"]
+
+        assert isinstance(total_pnl, Decimal)
+        assert isinstance(win_rate, (int, float))
+        assert isinstance(total_trades, int)
+
+        # Status determination logic:
+        # 1. Profitable: Overall P&L is positive
+        # 2. Review needed: Loss exceeds threshold OR win rate too low
+        # 3. Monitoring: Normal operation within acceptable parameters
+
+        if total_pnl > 0:
+            return "PROFITABLE ✓"
+        elif total_pnl < -self.MAX_ACCEPTABLE_LOSS:
+            return "REVIEW NEEDED ⚠"
+        elif (
+            total_trades >= self.MIN_TRADES_FOR_STATS
+            and win_rate < self.MIN_WIN_RATE_WARNING
+        ):
+            return "LOW WIN RATE ⚠"
+        else:
+            return "MONITORING"
+
+    def print_performance_dashboard(self) -> None:
+        """Display comprehensive real-time performance dashboard."""
         metrics = self.update_performance_metrics()
 
-        print(f"\nSTRATEGY PERFORMANCE DASHBOARD")
+        # Extract values with type safety
+        runtime_hours = metrics["runtime_hours"]
+        total_trades = metrics["total_trades"]
+        win_rate = metrics["win_rate"]
+        total_pnl = metrics["total_pnl"]
+        trades_per_hour = metrics["trades_per_hour"]
+        pnl_per_hour = metrics["pnl_per_hour"]
+
+        assert isinstance(runtime_hours, (int, float))
+        assert isinstance(total_trades, int)
+        assert isinstance(win_rate, (int, float))
+        assert isinstance(total_pnl, Decimal)
+        assert isinstance(trades_per_hour, (int, float))
+        assert isinstance(pnl_per_hour, Decimal)
+
+        print("\nSTRATEGY PERFORMANCE DASHBOARD")
         print("=" * 40)
-        print(f"Runtime: {metrics['runtime_hours']:.1f} hours")
-        print(f"Total Trades: {metrics['total_trades']}")
-        print(f"Win Rate: {metrics['win_rate']:.1f}%")
-        print(f"Total P&L: ${metrics['total_pnl']:+.2f}")
-        print(f"Trades/Hour: {metrics['trades_per_hour']:.1f}")
-        print(f"P&L/Hour: ${metrics['pnl_per_hour']:+.2f}")
+        print(f"Runtime: {runtime_hours:.1f} hours")
+        print(f"Total Trades: {total_trades}")
+        print(f"Win Rate: {win_rate:.1f}%")
+        print(f"Total P&L: ${total_pnl:+.2f}")
+        print(f"Trades/Hour: {trades_per_hour:.1f}")
+        print(f"P&L/Hour: ${pnl_per_hour:+.2f}")
 
-        # Performance indicators
-        if metrics["total_pnl"] > 0:
-            print(f"Status: PROFITABLE")
-        elif metrics["total_pnl"] < -100:
-            print(f"Status: REVIEW NEEDED")
-        else:
-            print(f"Status: MONITORING")
+        # Display performance status
+        status = self.get_performance_status(metrics)
+        print(f"Status: {status}")
 
-# Example monitoring (strategy would be defined elsewhere)
-# monitor = StrategyMonitor(strategy)
-# monitor.print_performance_dashboard()
+
+# ==============================================================================
+# DEMONSTRATION WITH SDK INTEGRATION
+# ==============================================================================
+
+
+async def main() -> None:
+    """Demonstrate performance monitoring with simulated and real SDK data."""
+
+    print("=" * 60)
+    print("PERFORMANCE MONITORING DASHBOARD DEMONSTRATION")
+    print("=" * 60)
+
+    # ==============================================================================
+    # PART 1: DEMONSTRATE MONITORING WITH SIMULATED TRADES
+    # ==============================================================================
+
+    print("\nPart 1: Monitoring with Simulated Trades")
+    print("-" * 60)
+
+    # Create a simple strategy for demonstration
+    strategy = SimpleStrategy(instrument="EUR_USD")
+
+    # Create monitor instance
+    monitor = StrategyMonitor(strategy)
+
+    # Simulate some trades to show how monitoring works
+    print("\nSimulating trading activity...")
+
+    # Simulate 10 trades with realistic P&L values
+    simulated_results = [
+        Decimal("15.50"),  # Win
+        Decimal("-20.00"),  # Loss
+        Decimal("22.30"),  # Win
+        Decimal("18.75"),  # Win
+        Decimal("-20.00"),  # Loss
+        Decimal("25.00"),  # Win
+        Decimal("-20.00"),  # Loss
+        Decimal("19.25"),  # Win
+        Decimal("21.50"),  # Win
+        Decimal("-20.00"),  # Loss
+    ]
+
+    for i, pnl in enumerate(simulated_results, 1):
+        strategy.simulate_trade_result(pnl)
+        print(f"  Trade {i}: ${pnl:+.2f}")
+
+    # Display the performance dashboard
+    print("\nPerformance After Simulated Trades:")
+    monitor.print_performance_dashboard()
+
+    # ==============================================================================
+    # PART 2: DEMONSTRATE SDK INTEGRATION FOR REAL MONITORING
+    # ==============================================================================
+
+    print("\n" + "=" * 60)
+    print("Part 2: Integration with Real OANDA Account Data")
+    print("-" * 60)
+
+    # ==============================================================================
+    # CONNECT TO OANDA
+    # ==============================================================================
+
+    # AsyncClient automatically reads FIVETWENTY_OANDA_* environment variables
+    # Context manager ensures proper cleanup of HTTP connections
+    async with AsyncClient() as client:
+        try:
+            # ==============================================================================
+            # SDK METHOD: client.accounts.get_account_summary()
+            # ==============================================================================
+            #
+            # Get account summary including P&L information
+            #
+            # Parameters:
+            #   - account_id: Your OANDA account ID (available as client.account_id)
+            #
+            # Returns: TypedDict with structure:
+            #   {
+            #       "account": AccountSummary,  # Pydantic model
+            #       "lastTransactionID": str
+            #   }
+            #
+            # NOTE: AccountSummary contains unrealized_pl, realized_pl, balance fields
+
+            account_response = await client.accounts.get_account_summary(
+                client.account_id
+            )
+            account = account_response["account"]
+
+            print("\nReal Account Performance Metrics:")
+            print(f"  Account Balance: ${Decimal(account.balance)}")
+            print(f"  Unrealized P&L: ${Decimal(account.unrealized_pl):+.2f}")
+
+            # ==============================================================================
+            # SDK METHOD: client.trades.get_trades()
+            # ==============================================================================
+            #
+            # Get all open trades to count active positions
+            #
+            # Returns: TypedDict with structure:
+            #   {
+            #       "trades": list[Trade],
+            #       "lastTransactionID": str
+            #   }
+
+            trades_response = await client.trades.get_trades(client.account_id)
+            trades = trades_response["trades"]
+
+            print(f"  Open Positions: {len(trades)}")
+
+            # Show real-time data integration
+            if trades:
+                print("\n  Open Trade Details:")
+                for trade in trades[:3]:  # Show first 3 trades
+                    print(f"    {trade.instrument}: {trade.current_units} units")
+                    print(f"      Entry: {trade.price}")
+                    print(f"      Current P&L: ${Decimal(trade.unrealized_pl):+.2f}")
+            else:
+                print("  No open trades currently")
+
+        except FiveTwentyError as e:
+            print(f"\n  ERROR: Could not fetch account data: {e.message}")
+            print("  Note: Ensure your .env file contains valid OANDA credentials")
+
+    # ==============================================================================
+    # PRODUCTION MONITORING ENHANCEMENTS
+    # ==============================================================================
+
+    print("\n" + "=" * 60)
+    print("PRODUCTION MONITORING ENHANCEMENTS")
+    print("=" * 60)
+    print("\nTo build production-grade monitoring, consider adding:")
+    print("  • Equity curve tracking - Plot account balance over time")
+    print("  • Maximum drawdown analysis - Track largest peak-to-trough decline")
+    print("  • Sharpe ratio calculation - Risk-adjusted return metric")
+    print("  • Trade duration statistics - Analyze holding period distribution")
+    print("  • Real-time alerting - Email/SMS when thresholds breached")
+    print("  • Daily/weekly performance reports - Automated performance summaries")
+    print("  • Correlation monitoring - Track performance vs market conditions")
+    print("  • Database persistence - Store metrics for historical analysis")
+
+
+if __name__ == "__main__":
+    # Run the demonstration
+    asyncio.run(main())
 ```
 
 ---
@@ -363,16 +1208,16 @@ class StrategyMonitor:
 
 ## What You've Learned
 
-Success **Complete System Development**: Building production-ready automated trading systems
+Success **Complete System Development**: Building production-ready automated trading systems with continuous market monitoring, technical indicator calculation, position management, and automated trade execution using `client.pricing.get_pricing()`, `client.trades.get_trades()`, and `client.orders.post_market_order()`
 
-Success **Advanced Strategy Features**: Enhanced capabilities for real-world trading
+Success **Advanced Strategy Features**: Market condition analysis with spread monitoring, dynamic position sizing based on volatility and account balance, and risk-based trade limits using real-time data from `client.accounts.get_account_summary()`
 
-Success **Production Deployment**: Checklist and best practices for live trading
+Success **Performance Monitoring**: Real-time tracking with KPI dashboards, win rate calculations, profitability metrics (P&L per hour), efficiency measures (trades per hour), and automatic status alerts for performance thresholds
 
-Success **Performance Monitoring**: Real-time tracking and analysis of strategy performance
+Success **SDK Integration Patterns**: Proper AsyncClient context manager usage, TypedDict response handling with dictionary access, Pydantic model field access with attributes, Decimal type for financial precision, InstrumentName enum for type-safe instruments, and FiveTwentyError exception handling
 
 !!! success "Trading System Mastery Complete!"
-    Incredible achievement! You've built a complete automated trading system from concept to production deployment. You understand the full development lifecycle, risk management, and operational requirements for successful algorithmic trading.
+    Incredible achievement! You've built a complete automated trading system from concept to production deployment. You understand the full development lifecycle, risk management, and operational requirements for successful algorithmic trading. You can now integrate real-time OANDA data, execute trades with proper risk management, and monitor performance with professional-grade dashboards.
 
 ---
 

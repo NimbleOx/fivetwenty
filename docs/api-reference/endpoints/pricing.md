@@ -1,6 +1,6 @@
 # Pricing Endpoint
 
-📖 **OANDA Reference**: [Pricing Endpoints](https://developer.oanda.com/rest-live-v20/pricing-ep/)
+**OANDA Reference**: [Pricing Endpoints](https://developer.oanda.com/rest-live-v20/pricing-ep/)
 
 Real-time pricing data and streaming.
 
@@ -11,27 +11,33 @@ Real-time pricing data and streaming.
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
-from typing import Any
+from fivetwenty.endpoints.pricing import GetPricingResponse
 
 
 async def main() -> None:
     # pricing.get_pricing(account_id: AccountID, instruments: list[str], since: str | None = None,
-    #             include_units_available: bool = True, include_home_conversions: bool = False) -> dict[str, Any]
+    #             include_units_available: bool = True, include_home_conversions: bool = False) -> GetPricingResponse
+    # Returns: {"prices": list[ClientPrice], "time": str, "homeConversions": list[HomeConversions] (optional)}
 
     config = Configuration(token="your-token", environment="practice")
     async with AsyncClient(config=config) as client:
         # Example usage:
-        prices = await client.pricing.get_pricing(
+        result: GetPricingResponse = await client.pricing.get_pricing(
             account_id="123-456-789",
             instruments=["EUR_USD", "GBP_USD"],
             include_units_available=True,
         )
+        prices = result["prices"]
+        time = result["time"]
+        # homeConversions is optional, only present if include_home_conversions=True
+        if "homeConversions" in result:
+            home_conversions = result["homeConversions"]
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing`
 
-📖 **OANDA Documentation**: [Get Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#get-pricing)
+**OANDA Documentation**: [Get Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#get-pricing)
 
 Get current prices for instruments.
 
@@ -45,7 +51,7 @@ Get current prices for instruments.
 | `include_units_available` | bool | ➖ | Include units available info (default: True) |
 | `include_home_conversions` | bool | ➖ | Include home currency conversions (default: False) |
 
-**Returns:** Pricing information
+**Returns:** Dictionary containing prices (`list[ClientPrice]`), time (`str`), and optionally homeConversions (`list[HomeConversions]`)
 
 **Raises:**
 
@@ -79,7 +85,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing/stream`
 
-📖 **OANDA Documentation**: [Stream Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#stream-pricing)
+**OANDA Documentation**: [Stream Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#stream-pricing)
 
 Stream real-time pricing data.
 
@@ -132,7 +138,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/instruments/{instrument}/candles`
 
-📖 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
+**OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
 
 Get historical candle data for an instrument.
 
@@ -166,29 +172,31 @@ Get historical candle data for an instrument.
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
-from typing import Any
+from fivetwenty.endpoints.pricing import LatestCandlesResponse
 
 
 async def main() -> None:
     # pricing.get_latest_candles(account_id: AccountID, candle_specifications: list[str],
     #                       units: int = 1, smooth: bool = False,
     #                       daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
-    #                       weekly_alignment: str = "Friday") -> dict[str, Any]
+    #                       weekly_alignment: str = "Friday") -> LatestCandlesResponse
+    # Returns: {"latestCandles": list[...]}
 
     config = Configuration(token="your-token", environment="practice")
     async with AsyncClient(config=config) as client:
         # Example usage:
-        candles = await client.pricing.get_latest_candles(
+        result: LatestCandlesResponse = await client.pricing.get_latest_candles(
             account_id="123-456-789",
             candle_specifications=["EUR_USD:S5:BM", "GBP_USD:M1:BM"],
             units=50
         )
+        candles = result["latestCandles"]
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/candles/latest`
 
-📖 **OANDA Documentation**: [Get Latest Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-latest-candles)
+**OANDA Documentation**: [Get Latest Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-latest-candles)
 
 Get latest candles for multiple instruments.
 
@@ -237,7 +245,7 @@ main()
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing/stream`
 
-📖 **OANDA Documentation**: [Stream Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#stream-pricing)
+**OANDA Documentation**: [Stream Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#stream-pricing)
 
 Stream pricing with automatic reconnection and configuration.
 

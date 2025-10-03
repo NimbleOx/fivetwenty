@@ -1,6 +1,6 @@
 # Accounts Endpoint
 
-📖 **OANDA Reference**: [Account Endpoints](https://developer.oanda.com/rest-live-v20/account-ep/)
+**OANDA Reference**: [Account Endpoints](https://developer.oanda.com/rest-live-v20/account-ep/)
 
 Account management and information retrieval.
 
@@ -26,7 +26,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts`
 
-📖 **OANDA Documentation**: [Get Accounts](https://developer.oanda.com/rest-live-v20/account-ep/#get-accounts)
+**OANDA Documentation**: [Get Accounts](https://developer.oanda.com/rest-live-v20/account-ep/#get-accounts)
 
 Get list of all accounts for the authenticated user.
 
@@ -46,20 +46,24 @@ Get list of all accounts for the authenticated user.
 <!-- fragment: Demo get_account with module attribute access and dict attribute patterns -->
 ```python
 from fivetwenty import AsyncClient, Configuration
+from fivetwenty.endpoints.accounts import AccountResponse
 
 
 async def get_account_example() -> None:
     config = Configuration(token="demo-token", environment="practice")
     async with AsyncClient(config=config) as client:
-        # accounts.get_account(account_id: AccountID) -> Account
+        # accounts.get_account(account_id: AccountID) -> AccountResponse
+        # Returns: {"account": Account, "lastTransactionID": str}
 
         # Example usage:
-        account = await client.accounts.get_account(account_id="123-456-789")
+        result: AccountResponse = await client.accounts.get_account(account_id="123-456-789")
+        account = result["account"]
         print(f"Account balance: {account.balance}")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}`
 
-📖 **OANDA Documentation**: [Get Account Details](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-details)
+**OANDA Documentation**: [Get Account Details](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-details)
 
 Get detailed information for specific account.
 
@@ -69,7 +73,7 @@ Get detailed information for specific account.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 
-**Returns:** Complete account details with balances, margin, and statistics
+**Returns:** Dictionary containing complete account details (`Account`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -80,17 +84,23 @@ Get detailed information for specific account.
 ## get_account_summary
 <!-- fragment: Demo get_account_summary with undefined names and dict attribute access patterns -->
 ```python
+from fivetwenty.endpoints.accounts import AccountSummaryResponse
+
+
 async def get_account_summary_example() -> None:
     async with AsyncClient(token="demo-token") as client:
-        # accounts.get_account_summary(account_id: AccountID) -> AccountSummary
+        # accounts.get_account_summary(account_id: AccountID) -> AccountSummaryResponse
+        # Returns: {"account": AccountSummary, "lastTransactionID": str}
 
         # Example usage:
-        summary = await client.accounts.get_account_summary(account_id="123-456-789")
+        result: AccountSummaryResponse = await client.accounts.get_account_summary(account_id="123-456-789")
+        summary = result["account"]
         print(f"Account NAV: {summary.nav}")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/summary`
 
-📖 **OANDA Documentation**: [Get Account Summary](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-summary)
+**OANDA Documentation**: [Get Account Summary](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-summary)
 
 Get condensed account information.
 
@@ -100,7 +110,7 @@ Get condensed account information.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 
-**Returns:** Account summary with key metrics
+**Returns:** Dictionary containing account summary (`AccountSummary`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -113,24 +123,28 @@ Get condensed account information.
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Configuration
+from fivetwenty.endpoints.accounts import AccountInstrumentsResponse
 
 
 async def main() -> None:
-    # accounts.get_account_instruments(account_id: AccountID, instruments: list[str] | None = None) -> list[Instrument]
+    # accounts.get_account_instruments(account_id: AccountID, instruments: list[str] | None = None) -> AccountInstrumentsResponse
+    # Returns: {"instruments": list[Instrument], "lastTransactionID": str}
 
     config = Configuration(token="demo-token", environment="practice")
     async with AsyncClient(config=config) as client:
         # Example usage:
-        instruments = await client.accounts.get_account_instruments(
+        result: AccountInstrumentsResponse = await client.accounts.get_account_instruments(
             account_id="123-456-789",
             instruments=["EUR_USD", "GBP_USD"]
         )
+        instruments = result["instruments"]
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/instruments`
 
-📖 **OANDA Documentation**: [Get Account Instruments](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-instruments)
+**OANDA Documentation**: [Get Account Instruments](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-instruments)
 
 Get all tradeable instruments for account.
 
@@ -141,7 +155,7 @@ Get all tradeable instruments for account.
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `instruments` | list[str] | ➖ | Filter to specific instruments (optional) |
 
-**Returns:** List of instrument specifications
+**Returns:** Dictionary containing list of instrument specifications (`list[Instrument]`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -173,7 +187,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PATCH /v3/accounts/{accountID}/configuration`
 
-📖 **OANDA Documentation**: [Configure Account](https://developer.oanda.com/rest-live-v20/account-ep/#configure-account)
+**OANDA Documentation**: [Configure Account](https://developer.oanda.com/rest-live-v20/account-ep/#configure-account)
 
 Update account configuration settings.
 
@@ -216,7 +230,7 @@ asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/changes`
 
-📖 **OANDA Documentation**: [Get Account Changes](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-changes)
+**OANDA Documentation**: [Get Account Changes](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-changes)
 
 Get account state changes since specified transaction ID.
 

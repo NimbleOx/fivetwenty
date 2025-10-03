@@ -1,16 +1,44 @@
 """Position management endpoints."""
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from ..models import (
     AccountID,
     ClientExtensions,
     InstrumentName,
+    Position,
 )
 
 if TYPE_CHECKING:
     from ..client import AsyncClient
+
+
+class PositionsResponse(TypedDict):
+    """Response from get_positions and get_open_positions endpoints."""
+
+    positions: list[Position]
+    lastTransactionID: str
+
+
+class PositionResponse(TypedDict):
+    """Response from get_position endpoint."""
+
+    position: Position
+    lastTransactionID: str
+
+
+class ClosePositionResponse(TypedDict, total=False):
+    """Response from close_position endpoint."""
+
+    longOrderCreateTransaction: Any
+    longOrderFillTransaction: Any
+    longOrderCancelTransaction: Any
+    shortOrderCreateTransaction: Any
+    shortOrderFillTransaction: Any
+    shortOrderCancelTransaction: Any
+    relatedTransactionIDs: list[str]
+    lastTransactionID: str
 
 
 class PositionEndpoints:
@@ -19,7 +47,7 @@ class PositionEndpoints:
     def __init__(self, client: "AsyncClient"):
         self._client = client
 
-    async def get_positions(self, account_id: AccountID) -> dict[str, Any]:
+    async def get_positions(self, account_id: AccountID) -> PositionsResponse:
         """
         Get a list of all positions for an account.
 
@@ -38,7 +66,7 @@ class PositionEndpoints:
         response = await self._client._request("GET", f"/accounts/{account_id}/positions")
         return response.json()  # type: ignore[no-any-return]
 
-    async def get_open_positions(self, account_id: AccountID) -> dict[str, Any]:
+    async def get_open_positions(self, account_id: AccountID) -> PositionsResponse:
         """
         Get a list of all open positions for an account.
 
@@ -56,7 +84,7 @@ class PositionEndpoints:
         response = await self._client._request("GET", f"/accounts/{account_id}/openPositions")
         return response.json()  # type: ignore[no-any-return]
 
-    async def get_position(self, account_id: AccountID, instrument: InstrumentName) -> dict[str, Any]:
+    async def get_position(self, account_id: AccountID, instrument: InstrumentName) -> PositionResponse:
         """
         Get the position for a specific instrument in an account.
 
@@ -83,7 +111,7 @@ class PositionEndpoints:
         short_units: str | Decimal | None = None,
         long_client_extensions: ClientExtensions | dict[str, str] | None = None,
         short_client_extensions: ClientExtensions | dict[str, str] | None = None,
-    ) -> dict[str, Any]:
+    ) -> ClosePositionResponse:
         """
         Close the open position for a specific instrument.
 

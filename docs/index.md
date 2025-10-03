@@ -81,55 +81,64 @@ FIVETWENTY_OANDA_ENVIRONMENT=practice
 import asyncio
 
 from dotenv import load_dotenv
-
 from fivetwenty import AsyncClient
-from fivetwenty.models import InstrumentName
+from fivetwenty.models import AccountSummary, ClientPrice, InstrumentName, OrderResponse
 
 # Load environment variables from .env file
 load_dotenv()
 
+
 async def main() -> None:
-    # Create async client - automatically reads FIVETWENTY_* environment variables
-    # Uses context manager for proper cleanup
+    # Step 1: Initialize the client
+    # The AsyncClient automatically reads FIVETWENTY_* environment variables
+    # Using 'async with' ensures proper cleanup of connections
     async with AsyncClient() as client:
-        # Fetch current account information
-        # client.account_id is automatically set from FIVETWENTY_OANDA_ACCOUNT
+        # Step 2: Check account balance before trading
+        # Always verify you have sufficient funds before placing orders
         result = await client.accounts.get_account_summary(client.account_id)
-        account = result["account"]
+        account: AccountSummary = result["account"]
         print(f"Balance: {account.balance} {account.currency}")
 
-        # Get current pricing for EUR/USD
+        # Step 3: Get current market prices
+        # This shows the bid (sell) and ask (buy) prices
+        # The difference between them is the spread (your transaction cost)
         pricing = await client.pricing.get_pricing(
             account_id=client.account_id,
             instruments=[InstrumentName.EUR_USD],
         )
-        price = pricing["prices"][0]
-        print(f"Current EUR/USD - Bid: {price.bids[0].price}, Ask: {price.asks[0].price}")
+        price: ClientPrice = pricing["prices"][0]
+        print(
+            f"Current EUR/USD - Bid: {price.bids[0].price}, Ask: {price.asks[0].price}"
+        )
 
-        # Place a market order for 1000 units of EUR/USD
-        # Positive units = buy, negative units = sell
-        order = await client.orders.post_market_order(
+        # Step 4: Place a market order to open a position
+        # Market orders execute immediately at the current market price
+        # Positive units = BUY (go long), Negative units = SELL (go short)
+        order: OrderResponse = await client.orders.post_market_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
             units=1000,  # Buy 1000 units
         )
 
-        # Check if order was filled and print execution price
+        # Step 5: Verify the order was filled
+        # The order_fill_transaction contains execution details
         if order.order_fill_transaction:
-            fill_price = order.order_fill_transaction.price
-            print(f"Trade executed at {fill_price}")
+            print(f"Trade executed at {order.order_fill_transaction.price}")
 
-        # Close the position by selling the same amount
-        close_order = await client.orders.post_market_order(
+        # Step 6: Close the position
+        # To close, place an order with the opposite sign (-1000 sells what we bought)
+        # This demonstrates a complete trade cycle: open → close
+        close_order: OrderResponse = await client.orders.post_market_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
             units=-1000,  # Negative units = sell to close
         )
 
-        # Check the closing trade execution
+        # Step 7: Confirm the position was closed
+        # Check the closing price to calculate profit/loss manually if needed
         if close_order.order_fill_transaction:
-            close_price = close_order.order_fill_transaction.price
-            print(f"Position closed at {close_price}")
+            print(f"Position closed at {close_order.order_fill_transaction.price}")
+
 
 # Run the async function
 asyncio.run(main())

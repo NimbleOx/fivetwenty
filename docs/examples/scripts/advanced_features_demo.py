@@ -27,8 +27,54 @@ from fivetwenty.models import (
 async def main() -> None:
     """Advanced features demonstration."""
 
+    # ADVANCED FEATURES distinguish professional trading systems from hobby projects
+    # These features ensure:
+    # - Financial precision (no float errors)
+    # - System reliability (robust error handling, reconnection)
+    # - Performance (concurrent operations, efficient APIs)
+    # - Maintainability (type safety, clear code)
+    # - Traceability (client extensions, request IDs)
+    #
+    # This demo covers:
+    # 1. Decimal precision (avoid float errors in money calculations)
+    # 2. Client request IDs (debugging and correlation)
+    # 3. Client extensions (metadata and tracking)
+    # 4. Advanced streaming (automatic reconnection)
+    # 5. Order dependencies (bracket orders)
+    # 6. Position fill strategies (control position behavior)
+    # 7. Time in force (order expiry control)
+    # 8. Type safety (prevent errors at compile time)
+    # 9. Concurrent operations (parallel API calls)
+    # 10. Resource management (proper cleanup)
+    # 11. Custom timeouts (latency control)
+    # 12. Complete production example (all together)
+    #
+    # Why these matter:
+    # - Production systems handle real money
+    # - Downtime = lost opportunities
+    # - Bugs = lost money
+    # - Poor performance = missed trades
+    # - Lack of tracing = debugging nightmares
+
     async with AsyncClient() as client:
         # Section 1: Decimal precision
+        # ============================
+        # CRITICAL: Never use float for financial calculations
+        # Float arithmetic has rounding errors that compound over time
+        #
+        # Example of float problem:
+        # 0.1 + 0.2 = 0.30000000000000004 (not 0.3!)
+        #
+        # In trading:
+        # - 0.01% error on $1M position = $100 mistake
+        # - Compounding errors over 1000 trades = significant losses
+        # - Regulatory compliance requires exact calculations
+        #
+        # Python's Decimal type:
+        # - Exact decimal arithmetic
+        # - No rounding errors
+        # - Required for financial applications
+        # - FiveTwenty uses Decimal everywhere automatically
         print("\n=== 1. Decimal Precision ===")
 
         print("\nWhy Decimal matters for trading:")
@@ -105,36 +151,11 @@ async def main() -> None:
         print("\n=== 4. Advanced Streaming ===")
 
         print("\nRobust streaming configuration:")
-        print("""
-from fivetwenty.models import ReconnectionPolicy, StreamingConfiguration
-
-# Configure stall detection
-config = StreamingConfiguration(
-    stall_timeout=30.0,  # Detect stalls after 30s
-    heartbeat_interval=5.0  # Expect heartbeats every 5s
-)
-
-# Configure reconnection policy
-policy = ReconnectionPolicy(
-    max_attempts=10,  # Try up to 10 times
-    initial_delay=1.0,  # Start with 1s delay
-    max_delay=60.0,  # Cap at 60s delay
-    backoff_multiplier=2.0  # Double delay each time
-)
-
-# Stream with automatic reconnection
-async for event in client.pricing.stream_pricing_with_retries(
-    account_id=client.account_id,
-    instruments=[InstrumentName.EUR_USD],
-    config=config,
-    policy=policy
-):
-    if event.type == "PRICE":
-        print(f"Price: {event.bids[0].price}")
-    elif event.type == "HEARTBEAT":
-        # Connection is alive
-        pass
-        """)
+        print("  - Use StreamingConfiguration for stall detection")
+        print("  - Use ReconnectionPolicy for automatic reconnection")
+        print("  - stream_pricing_with_retries() handles reconnection transparently")
+        print("  - Configure max_attempts, delays, backoff multiplier")
+        print("  - Handle PRICE events for data, HEARTBEAT for connection health")
 
         # Section 5: Order dependencies and linking
         print("\n=== 5. Order Dependencies ===")
@@ -186,16 +207,10 @@ async for event in client.pricing.stream_pricing_with_retries(
         print("    Only reduces existing positions")
         print("    Rejects if would open new position")
 
-        print("\n💡 Example - REDUCE_ONLY:")
-        print("""
-# Only close existing position, don't open new one
-await client.orders.post_market_order(
-    account_id=client.account_id,
-    instrument=InstrumentName.EUR_USD,
-    units=-1000,
-    position_fill=OrderPositionFill.REDUCE_ONLY
-)
-        """)
+        print("\n💡 Usage:")
+        print("  - Set position_fill parameter in order requests")
+        print("  - OrderPositionFill.REDUCE_ONLY ensures only closing trades")
+        print("  - Prevents accidentally opening new positions")
 
         # Section 7: Time in force options
         print("\n=== 7. Time In Force Options ===")
@@ -215,21 +230,11 @@ await client.orders.post_market_order(
         print("    Fill immediately (partial fills OK)")
         print("    Cancel unfilled portion")
 
-        print("\n💡 Example - GTD:")
-        print("""
-from datetime import datetime, timedelta
-
-expiry = datetime.utcnow() + timedelta(hours=24)
-
-await client.orders.post_limit_order(
-    account_id=client.account_id,
-    instrument=InstrumentName.EUR_USD,
-    units=1000,
-    price="1.08500",
-    time_in_force=TimeInForce.GTD,
-    gtd_time=expiry.strftime("%Y-%m-%dT%H:%M:%S.000000000Z")
-)
-        """)
+        print("\n💡 GTD Usage:")
+        print("  - Set time_in_force=TimeInForce.GTD")
+        print("  - Provide gtd_time in RFC3339 format")
+        print("  - Use datetime + timedelta to calculate expiry")
+        print("  - Order automatically cancelled if not filled by expiry time")
 
         # Section 8: Type safety and validation
         print("\n=== 8. Type Safety ===")
@@ -245,49 +250,20 @@ await client.orders.post_limit_order(
         print(f"  InstrumentName.GBP_USD = '{InstrumentName.GBP_USD}'")
         print("  # IDE autocomplete available!")
 
-        print("\nPydantic validation:")
-        print("""
-from fivetwenty.models import ClientExtensions
-
-# Valid
-ext = ClientExtensions(id="test-123", tag="my-tag")
-
-# Invalid - will raise validation error
-try:
-    ext = ClientExtensions(id="", tag="")  # Empty strings
-except ValidationError as e:
-    print(f"Validation error: {e}")
-        """)
+        print("\nPydantic validation benefits:")
+        print("  - Models validate input at runtime")
+        print("  - Invalid data raises ValidationError immediately")
+        print("  - Catch errors early before sending to API")
+        print("  - Type coercion when safe (strings to Decimal, etc.)")
 
         # Section 9: Concurrent operations
         print("\n=== 9. Concurrent Operations ===")
 
         print("\nUse asyncio.gather() for parallel requests:")
-
-        print("\n💡 Example:")
-        print("""
-# Fetch multiple instruments simultaneously
-instruments = [
-    InstrumentName.EUR_USD,
-    InstrumentName.GBP_USD,
-    InstrumentName.USD_JPY,
-    InstrumentName.AUD_USD
-]
-
-# Concurrent requests
-prices = await asyncio.gather(*[
-    client.pricing.get_pricing(
-        account_id=client.account_id,
-        instruments=[instrument]
-    )
-    for instrument in instruments
-])
-
-# All prices fetched in parallel!
-for price_data in prices:
-    price = price_data["prices"][0]
-    print(f"{price.instrument}: {price.bids[0].price}")
-        """)
+        print("  - Fetch multiple instruments simultaneously")
+        print("  - Significantly faster than sequential requests")
+        print("  - Use list comprehension to create tasks")
+        print("  - await asyncio.gather(*tasks) to run in parallel")
 
         # Demonstration
         print("\nDemo - Fetching 3 instruments concurrently:")
@@ -311,105 +287,108 @@ for price_data in prices:
         print("\n=== 10. Resource Management ===")
 
         print("\nAlways use context managers:")
-
-        print("\n✅ Correct:")
-        print("""
-async with AsyncClient() as client:
-    # Client automatically closed when done
-    result = await client.accounts.get_account_summary(client.account_id)
-        """)
-
-        print("\n❌ Incorrect:")
-        print("""
-client = AsyncClient()
-# Resources may not be cleaned up properly!
-result = await client.accounts.get_account_summary(client.account_id)
-        """)
-
-        print("\nContext managers ensure:")
+        print("  ✅ Use 'async with AsyncClient() as client:'")
+        print("  ✅ Client automatically closed when done")
         print("  ✅ Connections properly closed")
         print("  ✅ Resources released")
         print("  ✅ No connection leaks")
         print("  ✅ Clean shutdown even on errors")
+        print("\n  ❌ Don't create client without context manager")
+        print("  ❌ Resources may not be cleaned up properly")
 
         # Section 11: Custom timeouts
         print("\n=== 11. Custom Timeouts ===")
 
         print("\nConfigure timeouts for different scenarios:")
-
-        print("\n💡 Examples:")
-        print("""
-# Fast timeout for low-latency trading
-async with AsyncClient(timeout=5.0) as client:
-    price = await client.pricing.get_pricing(...)
-
-# Longer timeout for historical data
-async with AsyncClient(timeout=30.0) as client:
-    candles = await client.pricing.get_account_instrument_candles(
-        count=5000  # Large dataset
-    )
-
-# Per-request timeout using httpx
-import httpx
-
-async with AsyncClient() as client:
-    try:
-        result = await client.accounts.get_account_summary(...)
-    except httpx.TimeoutException:
-        print("Request timed out")
-        """)
+        print("  - Low-latency trading: AsyncClient(timeout=5.0)")
+        print("  - Historical data: AsyncClient(timeout=30.0) for large datasets")
+        print("  - Default timeout: 60 seconds")
+        print("  - Catch httpx.TimeoutException for timeout errors")
+        print("  - Balance between responsiveness and reliability")
 
         # Section 12: Comprehensive trading example
         print("\n=== 12. Complete Advanced Example ===")
 
-        print("\nPutting it all together:")
+        print("\n💡 Demo: Production-ready order with risk management...")
+
+        # 1. Get current price with Decimal precision
+        pricing_response = await client.pricing.get_pricing(account_id=client.account_id, instruments=[InstrumentName.EUR_USD])
+        current_price = Decimal(pricing_response["prices"][0].asks[0].price)
+
+        # 2. Calculate risk management levels (2% risk)
+        account_summary = await client.accounts.get_account_summary(client.account_id)
+        balance = Decimal(account_summary["account"].balance)
+        risk_percent = Decimal("0.02")  # 2% risk
+        risk_amount = balance * risk_percent
+
+        # 3. Calculate position size based on risk and stop distance
+        stop_distance = Decimal("0.0025")  # 25 pips
+        units = Decimal(int(risk_amount / stop_distance))
+
+        print(f"  Balance: {balance}")
+        print(f"  Risk: {risk_percent * 100}% = {risk_amount}")
+        print(f"  Stop Distance: {stop_distance}")
+        print(f"  Position Size: {units} units")
+
+        # 4. Place order with take profit and stop loss
+        tp_price = current_price + Decimal("0.0050")  # 50 pips TP
+        sl_price = current_price - stop_distance  # 25 pips SL
+
+        # Use MarketOrderRequest to include all risk management parameters
+        risk_managed_request = MarketOrderRequest(
+            instrument=InstrumentName.EUR_USD,
+            units=units,
+            takeProfitOnFill=TakeProfitDetails(price=tp_price),
+            stopLossOnFill=StopLossDetails(price=sl_price),
+            clientExtensions=ClientExtensions(id=f"risk-managed-{datetime.now(timezone.utc).isoformat()}", tag="risk-managed", comment="2% risk with 2:1 RR"),
+        )
+        risk_managed_order = await client.orders.post_order(account_id=client.account_id, order_request=risk_managed_request)
+
+        if risk_managed_order.order_fill_transaction:
+            print(f"\n✅ Risk-managed order filled at {risk_managed_order.order_fill_transaction.price}")
+            print(f"   TP: {tp_price} (+50 pips, 2% profit)")
+            print(f"   SL: {sl_price} (-25 pips, 1% loss)")
+            print("   Risk/Reward: 2:1")
 
         # Clean up our demo position
         await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
 
-        # Complete example
-        print("\n💡 Production-ready trading example:")
-        print("""
-async def execute_trade_with_risk_management(client):
-    # 1. Get current price with Decimal precision
-    pricing = await client.pricing.get_pricing(
-        account_id=client.account_id,
-        instruments=[InstrumentName.EUR_USD]
-    )
-    entry_price = Decimal(pricing["prices"][0].asks[0].price)
-
-    # 2. Calculate risk management levels
-    risk_percent = Decimal("0.02")  # 2% risk
-    account = await client.accounts.get_account_summary(client.account_id)
-    balance = Decimal(account["account"].balance)
-
-    risk_amount = balance * risk_percent
-    stop_distance = Decimal("0.0025")  # 25 pips
-    units = int(risk_amount / stop_distance)
-
-    # 3. Place order with full risk management
-    order = await client.orders.post_market_order(
-        account_id=client.account_id,
-        instrument=InstrumentName.EUR_USD,
-        units=units,
-        take_profit_on_fill=TakeProfitDetails(
-            price=str(entry_price + Decimal("0.0050"))  # 50 pips TP
-        ),
-        stop_loss_on_fill=StopLossDetails(
-            price=str(entry_price - stop_distance)  # 25 pips SL
-        ),
-        client_extensions=ClientExtensions(
-            id=f"trade-{datetime.utcnow().isoformat()}",
-            tag="risk-managed",
-            comment="Systematic entry with 2% risk"
-        ),
-        position_fill=OrderPositionFill.DEFAULT
-    )
-
-    return order
-        """)
-
     print("\n✅ Advanced features demo completed!")
+    print("\n📚 Summary of Advanced Features:")
+    print("\n   Financial Precision:")
+    print("   ✓ Always use Decimal for money calculations")
+    print("   ✓ FiveTwenty handles Decimal↔string conversion automatically")
+    print("   ✓ Prevents float rounding errors")
+    print("\n   Traceability:")
+    print("   ✓ Client Request IDs for debugging (OANDA logs)")
+    print("   ✓ Client Extensions for metadata (persists in trades)")
+    print("   ✓ Track strategies, tag orders, add comments")
+    print("\n   Reliability:")
+    print("   ✓ Streaming with automatic reconnection")
+    print("   ✓ Configurable stall detection and backoff")
+    print("   ✓ Production-grade error handling")
+    print("\n   Trading Features:")
+    print("   ✓ Bracket orders (Entry + TP + SL together)")
+    print("   ✓ Position fill strategies (control how orders affect positions)")
+    print("   ✓ Time in force options (GTC, GTD, FOK, IOC)")
+    print("\n   Performance:")
+    print("   ✓ Concurrent operations with asyncio.gather()")
+    print("   ✓ Custom timeouts per use case")
+    print("   ✓ Efficient async/await patterns")
+    print("\n   Code Quality:")
+    print("   ✓ Full mypy strict mode compliance")
+    print("   ✓ Type-safe with InstrumentName enum")
+    print("   ✓ Runtime validation with Pydantic")
+    print("   ✓ Context managers for proper cleanup")
+    print("\n   Production Readiness:")
+    print("   - Decimal precision everywhere")
+    print("   - Comprehensive error handling")
+    print("   - Automatic retry with backoff")
+    print("   - Structured logging and tracing")
+    print("   - Type safety catches bugs early")
+    print("   - Resource cleanup guaranteed")
+    print("\n   These features combined create a robust,")
+    print("   production-ready trading system foundation.")
 
 
 if __name__ == "__main__":

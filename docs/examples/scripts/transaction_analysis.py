@@ -11,7 +11,6 @@ Demonstrates transaction operations including:
 
 import asyncio
 from collections import Counter
-from datetime import datetime, timedelta, timezone
 from decimal import Decimal
 
 from fivetwenty import AsyncClient
@@ -22,42 +21,80 @@ async def main() -> None:
 
     async with AsyncClient() as client:
         # Section 1: Understanding transactions
+        # ======================================
+        # TRANSACTIONS are the immutable record of all account activity
+        # Think of them as your trading "ledger" or "blockchain"
+        #
+        # Why transactions matter:
+        # - Audit trail: Complete history of every account change
+        # - Debugging: Understand why balance changed
+        # - Analytics: Calculate performance metrics
+        # - Reconciliation: Verify account state is correct
+        # - Compliance: Meet regulatory requirements
+        # - Tax reporting: Track all P/L for taxes
+        #
+        # Key properties:
+        # 1. IMMUTABLE: Once created, transactions never change
+        # 2. SEQUENTIAL: Transaction IDs always increase (1, 2, 3, ...)
+        # 3. COMPLETE: Every balance change has a transaction
+        # 4. TIMESTAMPED: Precise time of each action
+        # 5. TYPED: Different transaction types for different actions
+        #
+        # Transaction vs Trade vs Order vs Position:
+        # - TRANSACTION: Record of an action (immutable log entry)
+        # - ORDER: Request to buy/sell (can be cancelled)
+        # - TRADE: Open position from filled order (can be closed)
+        # - POSITION: Aggregate of trades for instrument
+        #
+        # Example flow:
+        # 1. Place order → ORDER transaction created
+        # 2. Order fills → ORDER_FILL transaction created
+        # 3. Trade opened → TRADE_CLIENT_EXTENSIONS transaction (if extensions used)
+        # 4. Close trade → Another ORDER_FILL transaction
         print("\n=== 1. Understanding Transactions ===")
 
         print("\nWhat are Transactions?")
         print("  Every action on your account creates a transaction")
         print("  Transaction IDs are sequential and always increasing")
+        print("  Transactions are IMMUTABLE - never change after creation")
+        print("  Provide complete audit trail of all account activity")
         print("\nCommon Transaction Types:")
-        print("  - ORDER: Order creation")
-        print("  - ORDER_FILL: Order execution")
+        # ORDER-RELATED:
+        print("  - ORDER: Order creation (placed but not filled)")
+        print("  - ORDER_FILL: Order execution (actually filled)")
         print("  - ORDER_CANCEL: Order cancellation")
-        print("  - STOP_LOSS_ORDER: Stop loss creation")
-        print("  - TAKE_PROFIT_ORDER: Take profit creation")
-        print("  - MARKET_ORDER_REJECT: Rejected order")
-        print("  - DAILY_FINANCING: Rollover charges")
-        print("  - TRANSFER_FUNDS: Account transfers")
+        print("  - MARKET_ORDER_REJECT: Rejected order (insufficient margin, etc.)")
+        # RISK MANAGEMENT:
+        print("  - STOP_LOSS_ORDER: Stop loss creation/modification")
+        print("  - TAKE_PROFIT_ORDER: Take profit creation/modification")
+        print("  - TRAILING_STOP_LOSS_ORDER: Trailing stop creation/modification")
+        # ACCOUNT OPERATIONS:
+        print("  - DAILY_FINANCING: Rollover charges (overnight position costs)")
+        print("  - TRANSFER_FUNDS: Account deposits/withdrawals")
+        print("  - RESET_RESETTABLE_PL: Reset P/L counter (practice accounts)")
 
         # Get account to find transaction range
+        # Last transaction ID tells us the most recent transaction
         account_response = await client.accounts.get_account(client.account_id)
         account = account_response["account"]
+
+        # Last Transaction ID: Monotonically increasing identifier
+        # Use this for efficient change tracking (see Section 4)
         last_transaction_id = account.last_transaction_id
 
         print(f"\nYour account's last transaction ID: {last_transaction_id}")
+        print("  (This is the highest transaction ID currently in your account)")
+        print(f"  (New transactions will have IDs: {int(last_transaction_id) + 1}, {int(last_transaction_id) + 2}, etc.)")
 
         # Section 2: Get transactions by time range
         print("\n=== 2. Transactions by Time Range ===")
 
         # Get transactions from last 7 days
-        from_time = datetime.now(timezone.utc) - timedelta(days=7)
-        to_time = datetime.now(timezone.utc)
+        print("\nFetching recent transactions...")
 
-        print("\nFetching transactions from last 7 days...")
-        print(f"From: {from_time}")
-        print(f"To: {to_time}")
+        transactions_response = await client.transactions.get_recent_transactions(account_id=client.account_id, count=100)
 
-        transactions_response = await client.transactions.get_transactions(account_id=client.account_id, from_time=from_time, to_time=to_time, page_size=100)
-
-        transactions = transactions_response.get("transactions", [])
+        transactions = transactions_response["transactions"]
         print(f"\nFound {len(transactions)} transaction(s)")
 
         if transactions:
@@ -146,17 +183,11 @@ async def main() -> None:
         print("\n=== 7. Real-Time Transaction Stream ===")
 
         print("\n💡 Transaction streaming allows you to monitor account activity in real-time")
-        print("   Example code (not running live in this demo):\n")
-
-        print("""
-    async for event in client.transactions.get_transactions_stream(account_id):
-        if event.type == "HEARTBEAT":
-            print(f"Heartbeat at {event.time}")
-        else:
-            print(f"Transaction {event.id}: {event.type}")
-        """)
-
-        print("\nThis would stream all new transactions as they occur")
+        print("   Use get_transactions_stream() with async for:")
+        print("   - Streams all new transactions as they occur")
+        print("   - Returns HEARTBEAT events and transaction events")
+        print("   - Useful for real-time monitoring and alerting")
+        print("   (Not executed in this demo)")
 
         # Section 8: Analyze transaction types
         print("\n=== 8. Transaction Type Analysis ===")
@@ -228,6 +259,19 @@ async def main() -> None:
         print("   Transaction IDs are sequential - gaps indicate missing data")
 
     print("\n✅ Transaction analysis example completed!")
+    print("\n📚 Summary:")
+    print("   Retrieval Methods:")
+    print("   - get_transactions(): By time range (from_time, to_time)")
+    print("   - get_transactions_since_id(): All transactions after ID")
+    print("   - get_transactions_range(): Specific ID range")
+    print("   - get_recent_transactions(): Most recent transactions")
+    print("   - get_transaction(): Single transaction by ID")
+    print("\n   Key concepts:")
+    print("   - Transactions are immutable audit trail")
+    print("   - IDs are sequential (gaps indicate missing data)")
+    print("   - Each transaction type has specific fields")
+    print("   - Use for analytics, reconciliation, compliance")
+    print("   - Streaming provides real-time monitoring")
 
 
 if __name__ == "__main__":

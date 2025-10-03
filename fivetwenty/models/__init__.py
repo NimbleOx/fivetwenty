@@ -47,6 +47,7 @@ AccountChanges.model_rebuild()
 Account.model_rebuild()
 AccountSummary.model_rebuild()
 Trade.model_rebuild()
+OrderResponse.model_rebuild()
 
 __all__ = [
     "Account",

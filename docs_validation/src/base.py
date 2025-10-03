@@ -94,10 +94,21 @@ class ValidatorRegistry:
         start_time = time.perf_counter()
         all_results: list[ValidationResult] = []
 
-        if parallel and len(files) > 1:
-            all_results = self._validate_parallel(files, enabled_validators, validator_options, max_workers)
-        else:
-            all_results = self._validate_sequential(files, enabled_validators, validator_options)
+        # Split validators into parallel-safe and sequential-only
+        # code_execution uses signal handlers and I/O redirection which don't work well in threads
+        sequential_validators = {"code_execution"}
+        parallel_validators = [v for v in enabled_validators if v not in sequential_validators]
+        sequential_only = [v for v in enabled_validators if v in sequential_validators]
+
+        # Run parallel-safe validators in parallel if requested
+        if parallel and len(files) > 1 and parallel_validators:
+            all_results.extend(self._validate_parallel(files, parallel_validators, validator_options, max_workers))
+        elif parallel_validators:
+            all_results.extend(self._validate_sequential(files, parallel_validators, validator_options))
+
+        # Always run sequential-only validators sequentially
+        if sequential_only:
+            all_results.extend(self._validate_sequential(files, sequential_only, validator_options))
 
         duration_ms = (time.perf_counter() - start_time) * 1000
 
@@ -189,6 +200,10 @@ class ValidatorRegistry:
         # Process each result
         for result in results:
             if result.validator_name not in validator_stats:
+                continue
+
+            # Skip results that were marked as skipped (e.g., files excluded by include_files option)
+            if result.metadata.get("skipped", False):
                 continue
 
             stats = validator_stats[result.validator_name]

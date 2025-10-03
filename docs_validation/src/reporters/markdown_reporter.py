@@ -278,11 +278,14 @@ class MarkdownReporter:
         for issues in issues_by_file.values():
             for issue in issues:
                 # Extract validator name from rule_id (e.g., "markdown_syntax_list_spacing" -> "markdown_syntax")
-                validator_name = issue.rule_id.split("_")[0:2]  # Take first two parts for compound names
-                if len(validator_name) >= 2:
-                    validator_key = "_".join(validator_name)
+                if issue.rule_id:
+                    validator_name = issue.rule_id.split("_")[0:2]  # Take first two parts for compound names
+                    if len(validator_name) >= 2:
+                        validator_key = "_".join(validator_name)
+                    else:
+                        validator_key = validator_name[0] if validator_name else "unknown"
                 else:
-                    validator_key = validator_name[0] if validator_name else "unknown"
+                    validator_key = "unknown"
 
                 issues_by_validator[validator_key].append(issue)
 
@@ -296,7 +299,7 @@ class MarkdownReporter:
             "sdk_methods": ("📚 SDK Methods", 6),
             "security": ("🔒 Security", 7),
             "financial_precision": ("💰 Financial Precision", 8),
-            "code_executability": ("⚡ Code Executability", 9),
+            "code_execution": ("⚡ Code Execution", 9),
             "external_links": ("🌐 External Links", 10),
         }
 
@@ -390,7 +393,7 @@ class MarkdownReporter:
             "",
             "| Validator | Purpose | Technology |",
             "|-----------|---------|------------|",
-            "| `code_executability` | Ensures code blocks can be executed | AST parsing, import checking |",
+            "| `code_execution` | Executes code examples to verify runtime behavior | exec() with mocking |",
             "| `code_linting` | Validates code style and best practices | Ruff linter |",
             "| `code_typing` | Checks type safety and annotations | MyPy type checker |",
             "| `cross_references` | Validates internal links and references | Link resolution |",
@@ -485,7 +488,7 @@ class MarkdownReporter:
         insights = {
             "code_linting": f"Found {len(issues)} style/best practice violations. Focus on import organization and code formatting.",
             "code_typing": f"Identified {len(issues)} type-related issues. Consider adding type annotations to improve code clarity.",
-            "code_executability": f"Detected {len(issues)} execution issues. Ensure all code examples can run without modifications.",
+            "code_execution": f"Detected {len(issues)} runtime errors. Fix code examples that fail when executed.",
             "cross_references": f"Found {len(issues)} broken internal links. Verify all documentation cross-references are valid.",
             "financial_precision": f"Located {len(issues)} financial precision issues. Use Decimal type for all monetary calculations.",
             "markdown_syntax": f"Discovered {len(issues)} markdown formatting issues. Review documentation structure.",
@@ -562,7 +565,7 @@ class MarkdownReporter:
         if rule_id.startswith("code_typing"):
             return "code_typing"
         if rule_id.startswith("code_"):
-            return "code_executability"
+            return "code_execution"
         return rule_id.split("_")[0] if "_" in rule_id else "unknown"
 
     def _format_issue_details(self, issue: ValidationIssue, include_code_snippets: bool) -> list[str]:

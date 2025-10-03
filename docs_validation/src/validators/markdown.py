@@ -32,8 +32,9 @@ class MarkdownSyntaxValidator(BaseValidator):
             code_block_issues, in_code_block = self._check_code_blocks(line, line_num, file_info.path, lines, line_num - 1, in_code_block)
             issues.extend(code_block_issues)
 
-            # Check for malformed headers
-            issues.extend(self._check_headers(line, line_num, file_info.path))
+            # Check for malformed headers (skip if in code block)
+            if not in_code_block:
+                issues.extend(self._check_headers(line, line_num, file_info.path))
 
             # Check for malformed links (skip if in code block)
             if not in_code_block:

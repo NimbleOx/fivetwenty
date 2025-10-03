@@ -31,28 +31,50 @@ The most straightforward approach is to pass credentials directly to the client 
 import asyncio
 import os
 
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient, Environment
 
-async def main() -> None:
-    """Demonstrate explicit parameter authentication with environment variable security."""
+# Load environment variables from .env file
+load_dotenv()
 
-    # Step 1: Create AsyncClient with explicit parameter configuration
-    # This approach provides maximum control over authentication credentials
+
+async def main() -> None:
+    """
+    Tutorial: Basic OANDA API Authentication.
+
+    This example demonstrates how to connect to the OANDA API using the fivetwenty library.
+    You'll learn how to:
+    - Create an authenticated API client
+    - Retrieve account information
+    - Verify your connection is working
+    """
+
+    # Step 1: Create the API client
+    # The AsyncClient manages your connection to OANDA's servers
+    # Using 'async with' ensures proper cleanup when done
     async with AsyncClient(
-        token=os.environ["FIVETWENTY_OANDA_TOKEN"],         # API token from secure environment storage
-        account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],  # Target account identifier
-        environment=Environment.PRACTICE                    # Safe practice environment for testing
+        # Your API token authenticates your requests (stored in .env file)
+        token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+
+        # The account ID specifies which OANDA account to interact with
+        account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+
+        # Use PRACTICE for learning/testing (never risk real money while learning!)
+        environment=Environment.PRACTICE,
     ) as client:
-        # Step 2: Validate authentication by requesting account information
-        # Account listing confirms successful API authentication and authorization
+        # Step 2: Test the connection by fetching your accounts
+        # This API call returns a list of all accounts you have access to
         accounts = await client.accounts.get_accounts()
         account_count = len(accounts)
 
-        # Step 3: Display authentication success confirmation
-        print(f"Success Authentication successful - found {account_count} account(s)")
-        print(f"Config Configuration: {client.config.summary()}")
+        # Step 3: Display the results
+        # If you see this message, your API credentials are working correctly!
+        print(f"✓ Authentication successful - found {account_count} account(s)")
+        print(f"📋 Configuration: {client.config.summary()}")
 
-# Step 4: Execute the authentication validation test
+
+# Step 4: Run the tutorial when this script is executed
+# asyncio.run() is needed because we're using async/await for API calls
 if __name__ == "__main__":
     asyncio.run(main())
 ```
@@ -106,31 +128,47 @@ Then create clients without explicitly passing credentials - the library automat
 
 <!-- fragment: zero-config client example -->
 ```python
-import asyncio
+import asyncio  # Needed for async/await operations (API calls run asynchronously)
+
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 async def main() -> None:
-    """Demonstrate zero-configuration authentication using environment variables."""
+    """
+    Tutorial: Zero-Configuration Authentication
+
+    This example shows the simplest way to connect to OANDA - just set your
+    environment variables and the fivetwenty library handles the rest!
+    """
+    # Import AsyncClient inside the function (can also import at top of file)
     from fivetwenty import AsyncClient
 
-    # Step 1: Create AsyncClient with automatic environment-based configuration
-    # Zero-config approach reads all settings from environment variables:
-    # - FIVETWENTY_OANDA_TOKEN: Your OANDA API authentication token
-    # - FIVETWENTY_OANDA_ACCOUNT: Target account ID for trading operations
-    # - FIVETWENTY_OANDA_ENVIRONMENT: Environment setting (practice/live)
+    # Step 1: Create the API client with zero configuration
+    # The AsyncClient automatically reads these environment variables:
+    # - FIVETWENTY_OANDA_TOKEN: Your API token for authentication
+    # - FIVETWENTY_OANDA_ACCOUNT: Your account ID
+    # - FIVETWENTY_OANDA_ENVIRONMENT: "practice" or "live"
+    # Using 'async with' ensures the connection is properly closed when done
     async with AsyncClient() as client:
-        # Step 2: Validate automatic configuration by requesting account data
-        # This confirms environment variables were loaded correctly
+        # Step 2: Test the connection by fetching your accounts
+        # This API call retrieves a list of all accounts you can access
+        # If this succeeds, your credentials are configured correctly!
         accounts = await client.accounts.get_accounts()
         account_count = len(accounts)
 
-        # Step 3: Display configuration summary with security protection
-        # Summary method shows configuration status without exposing credentials
-        print(f"Config Auto-loaded configuration: {client.config.summary()}")
-        print(f"Success Authentication successful: {account_count} account(s) found")
-        print(f"Starting Zero-config setup complete - ready for trading operations")
+        # Step 3: Display the results
+        # The config.summary() method shows your settings without exposing secrets
+        print(f"✓ Auto-loaded configuration: {client.config.summary()}")
+        print(f"✓ Authentication successful: {account_count} account(s) found")
+        print("✓ Ready for trading operations!")
 
-# Step 4: Execute the zero-configuration authentication validation
+
+# Step 4: Run the tutorial
+# This is the standard Python idiom for executable scripts
+# asyncio.run() is required because our main() function uses async/await
 if __name__ == "__main__":
     asyncio.run(main())
 ```
@@ -150,6 +188,11 @@ token = "abc123def456"  # NEVER hardcode tokens!
 **Success Good - Use environment variables:**
 ```python
 import os
+
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Step 1: Safely retrieve API token from environment variables
 # Environment variables keep secrets out of source code and version control
@@ -225,80 +268,10 @@ For production deployments, you can use AWS Secrets Manager, HashiCorp Vault, Ku
 
 ## Multiple Account Configuration
 
-You can create as many clients as you need to access different accounts with OANDA. Common scenarios include separating long and short positions to comply with US broker hedging rules, isolating different trading strategies to manage risk, or maintaining separate accounts for testing versus live trading.
+FiveTwenty supports managing multiple OANDA accounts simultaneously - essential for hedging strategies, US broker compliance, or isolating different trading approaches.
 
-For traders subject to US broker hedging rules, using separate long and short accounts provides a compliant way to maintain opposing positions in the same currency pair. This approach allows you to hedge positions without violating FIFO (First In, First Out) rules that prevent holding both long and short positions simultaneously in a single account. The next example shows how you might approach this.
-
-<!-- fragment: multi-account configuration with placeholder tokens -->
-```python
-import asyncio
-import os
-from fivetwenty import AccountConfig, AsyncClient, Environment
-
-
-async def main() -> None:
-    """Demonstrate multi-account hedging strategy for US broker compliance."""
-
-    # Step 1: Configure dedicated account for long positions
-    # Separate long account enables compliance with US FIFO regulations
-    long_config = AccountConfig(
-        token=os.environ["LONG_ACCOUNT_TOKEN"],    # Dedicated token for long account
-        account_id=os.environ["LONG_ACCOUNT_ID"],  # Long position account identifier
-        environment=Environment.LIVE,              # Live trading environment
-        alias="long_positions",                   # Descriptive alias for identification
-    )
-
-    # Step 2: Configure dedicated account for short positions
-    # Separate short account allows hedging without violating broker rules
-    short_config = AccountConfig(
-        token=os.environ["SHORT_ACCOUNT_TOKEN"],   # Dedicated token for short account
-        account_id=os.environ["SHORT_ACCOUNT_ID"], # Short position account identifier
-        environment=Environment.LIVE,              # Live trading environment
-        alias="short_positions",                  # Descriptive alias for identification
-    )
-
-    # Step 3: Execute hedged trading strategy across both accounts
-    # Multiple clients enable simultaneous management of long and short positions
-    async with AsyncClient(config=long_config) as long_client:
-        async with AsyncClient(config=short_config) as short_client:
-            print("Starting Executing multi-account hedging strategy")
-            print("Analysis Long positions will be managed on dedicated account")
-            print("📉 Short positions will be managed on separate account")
-
-            # Step 4: Execute bullish strategy on long account
-            # Long account handles all buy positions for the strategy
-            await execute_long_strategy(long_client)
-
-            # Step 5: Execute bearish strategy on short account for hedging
-            # Short account provides hedge against long positions
-            await execute_short_strategy(short_client)
-
-async def execute_long_strategy(client: AsyncClient) -> None:
-    """Execute bullish trading strategy with comprehensive account validation."""
-
-    # Step 1: Validate long account accessibility and configuration
-    # Account verification ensures the long strategy can execute properly
-    accounts = await client.accounts.get_accounts()
-
-    # Step 2: Confirm successful long account strategy execution
-    print(f"Analysis Long strategy executed on account: {client.config.alias}")
-    print(f"Success Account validation: {len(accounts)} account(s) accessible")
-    print(f"Target Ready for bullish position management")
-
-async def execute_short_strategy(client: AsyncClient) -> None:
-    """Execute bearish trading strategy with comprehensive account validation."""
-
-    # Step 1: Validate short account accessibility and configuration
-    # Account verification ensures the short strategy can execute properly
-    accounts = await client.accounts.get_accounts()
-
-    # Step 2: Confirm successful short account strategy execution
-    print(f"📉 Short strategy executed on account: {client.config.alias}")
-    print(f"Success Account validation: {len(accounts)} account(s) accessible")
-    print(f"Target Ready for bearish position management and hedging")
-
-asyncio.run(main())
-```
+!!! tip "Multi-Account Management"
+    For detailed examples of multi-account setups including US broker hedging compliance, separate strategy accounts, and aggregate account monitoring, see [Account Management Tutorial](../account-management.md#multi-account-management).
 
 ## Security Features
 
@@ -309,15 +282,25 @@ The library automatically protects sensitive information:
 <!-- fragment: security masking example with placeholder tokens -->
 ```python
 import os
+
+from dotenv import load_dotenv
 from fivetwenty import AccountConfig, Environment
+from pydantic import SecretStr
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Step 1: Create configuration with automatic security masking
 # AccountConfig automatically protects sensitive information from exposure
 config = AccountConfig(
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],     # API token (automatically masked)
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"], # Account ID (automatically masked)
-    environment=Environment.PRACTICE,                # Environment setting (visible)
-    alias="my_account",                             # Friendly alias (visible)
+    token=SecretStr(
+        os.environ["FIVETWENTY_OANDA_TOKEN"]
+    ),  # API token (automatically masked)
+    account_id=SecretStr(
+        os.environ["FIVETWENTY_OANDA_ACCOUNT"]
+    ),  # Account ID (automatically masked)
+    environment=Environment.PRACTICE,  # Environment setting (visible)
+    alias="my_account",  # Friendly alias (visible)
 )
 
 # Step 2: Demonstrate automatic secret masking in string representation
@@ -341,38 +324,37 @@ The library validates all configuration values:
 
 <!-- fragment: validation example - designed to fail -->
 ```python
-from pydantic import ValidationError
-
 from fivetwenty import AccountConfig, Environment
+from pydantic import SecretStr, ValidationError
 
 # Step 1: Demonstrate token validation (empty/whitespace tokens rejected)
 # Configuration validation prevents common credential errors before runtime
 try:
     config = AccountConfig(
-        token="   ",                          # Empty/whitespace token - validation fails
-        account_id="123-456-789",            # Valid account ID format
-        environment=Environment.PRACTICE,     # Valid environment
-        alias="my_account",                  # Valid alias
+        token=SecretStr("   "),  # Empty/whitespace token - validation fails
+        account_id=SecretStr("123-456-789"),  # Valid account ID format
+        environment=Environment.PRACTICE,  # Valid environment
+        alias="my_account",  # Valid alias
     )
     print(f"Error Unexpected success: {config}")
 except ValidationError as e:
-    print(f"Success Empty token rejected (expected): Configuration validation working")
+    print("Success Empty token rejected (expected): Configuration validation working")
     print(f"   Error details: {e}")
 
 # Step 2: Demonstrate alias validation (must follow naming rules)
 # Alias validation ensures configuration identifiers follow proper conventions
 try:
     config = AccountConfig(
-        token="valid-token",                  # Valid token format
-        account_id="valid-account",           # Valid account ID
-        environment=Environment.PRACTICE,     # Valid environment
-        alias="123invalid",                  # Invalid alias - starts with number
+        token=SecretStr("valid-token"),  # Valid token format
+        account_id=SecretStr("valid-account"),  # Valid account ID
+        environment=Environment.PRACTICE,  # Valid environment
+        alias="123invalid",  # Invalid alias - starts with number
     )
     print(f"Error Unexpected success: {config}")
 except ValidationError as e:
-    print(f"Success Invalid alias rejected (expected): Alias validation working")
+    print("Success Invalid alias rejected (expected): Alias validation working")
     print(f"   Error details: {e}")
-    print(f"   Note: Aliases must start with a letter, not a number")
+    print("   Note: Aliases must start with a letter, not a number")
 ```
 
 ## Testing Authentication
@@ -381,12 +363,18 @@ Before deploying your application, it's important to verify that your authentica
 
 ### Test Your Authentication Setup
 
+This example demonstrates a complete authentication test that connects to OANDA's servers and retrieves your account information. The test verifies both your API credentials and network connectivity, displaying detailed account metrics including balance, open trades, and margin usage. Use this script to confirm your authentication setup before building trading applications.
+
 <!-- fragment: authentication test example with placeholder tokens -->
 ```python
 import asyncio
 import os
 
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient, Environment
+
+# Load environment variables from .env file
+load_dotenv()
 
 
 async def test_authentication() -> None:
@@ -466,9 +454,15 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 
 **Invalid Token Format**
 ```python
+import os
+
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
+
 # Step 1: Validate token format and availability
 # Token validation prevents authentication failures before API calls
-import os
 
 # Step 2: Safely retrieve and clean token from environment
 # Strip whitespace to handle common configuration errors
@@ -482,35 +476,69 @@ if not token:
 else:
     # Step 4: Display token confirmation with security masking
     # Show partial token for verification while protecting sensitive data
-    masked_token = token[:8] + '...' if len(token) > 8 else '*' * len(token)
+    masked_token = token[:8] + "..." if len(token) > 8 else "*" * len(token)
     print(f"Success Token loaded: {masked_token}")
     print(f"Ruler Token length: {len(token)} characters")
-    print(f"Lock Token format appears valid")
+    print("Lock Token format appears valid")
 ```
 
 **Environment Mismatch**
 ```python
-# Step 1: Ensure token-environment compatibility for successful authentication
-# Token type must match environment: practice tokens for practice, live tokens for live
 import os
+
+from dotenv import load_dotenv
 from fivetwenty import AsyncClient, Environment
 
-# Step 2: Configure practice environment with practice token
-# Practice tokens only work with practice environment for safety
-practice_client = AsyncClient(
-    token=os.environ["FIVETWENTY_PRACTICE_TOKEN"],  # Practice-specific API token
-    environment=Environment.PRACTICE                # Practice environment setting
-)
-print("Test Practice environment configured with practice token")
+# Load environment variables from .env file
+load_dotenv()
 
-# Step 3: Configure live environment with live token
-# Live tokens only work with live environment for real trading
-live_client = AsyncClient(
-    token=os.environ["FIVETWENTY_LIVE_TOKEN"],      # Live trading API token
-    environment=Environment.LIVE                    # Live environment setting
+# PROBLEM: Environment Mismatch Troubleshooting
+# This example shows how to avoid a common mistake - using the wrong token
+# with the wrong environment, which causes authentication failures.
+
+# Step 1: Identify which token type you have
+# OANDA tokens are environment-specific: practice tokens only work with practice,
+# and live tokens only work with live environments
+token = os.environ["FIVETWENTY_OANDA_TOKEN"]
+account_id = os.environ.get("FIVETWENTY_OANDA_ACCOUNT")
+
+# Step 2: Match your token to the correct environment
+# ✓ CORRECT: Using practice token with practice environment
+correct_client = AsyncClient(
+    token=token,
+    account_id=account_id,
+    environment=Environment.PRACTICE,  # Matches practice token
 )
-print("Starting Live environment configured with live token")
-print("⚠️  Note: Live tokens access real money - use with caution")
+print("✓ CORRECT: Practice token paired with PRACTICE environment")
+print(f"  Configuration: {correct_client.config.summary()}")
+
+# ❌ WRONG: Don't mix token types with environments
+# This would fail authentication:
+# wrong_client = AsyncClient(
+#     token=token,  # Practice token
+#     environment=Environment.LIVE,  # Wrong! This expects a live token
+# )
+# Result: Authentication error - token doesn't match environment
+
+# Step 3: Solution for multiple environments
+# Keep separate environment variables for practice vs live tokens:
+# .env file should have:
+#   FIVETWENTY_PRACTICE_TOKEN=your-practice-token
+#   FIVETWENTY_LIVE_TOKEN=your-live-token
+# Then use them explicitly:
+#   practice_client = AsyncClient(
+#       token=os.environ["FIVETWENTY_PRACTICE_TOKEN"],
+#       environment=Environment.PRACTICE
+#   )
+#   live_client = AsyncClient(
+#       token=os.environ["FIVETWENTY_LIVE_TOKEN"],
+#       environment=Environment.LIVE
+#   )
+
+print("\n💡 Always match token type to environment:")
+print("   • Practice tokens → Environment.PRACTICE")
+print("   • Live tokens → Environment.LIVE")
+
 ```
 
 !!! info "Comprehensive Troubleshooting"

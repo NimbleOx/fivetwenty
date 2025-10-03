@@ -12,7 +12,7 @@ OANDA Order Management Patterns:
 """
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypedDict
 
 from .._internal.utils import quantize_price
 from ..models import (
@@ -34,6 +34,46 @@ from ..models import (
 
 if TYPE_CHECKING:
     from ..client import AsyncClient
+
+
+class GetOrderResponse(TypedDict):
+    """Response from get_order endpoint."""
+
+    order: Any
+    lastTransactionID: str
+
+
+class CancelOrderResponse(TypedDict, total=False):
+    """Response from cancel_order endpoint."""
+
+    orderCancelTransaction: Any
+    relatedTransactionIDs: list[str]
+    lastTransactionID: str
+
+
+class PendingOrdersResponse(TypedDict):
+    """Response from get_pending_orders endpoint."""
+
+    orders: list[Any]
+    lastTransactionID: str
+
+
+class ReplaceOrderResponse(TypedDict, total=False):
+    """Response from put_order endpoint."""
+
+    orderCancelTransaction: Any
+    orderCreateTransaction: Any
+    orderFillTransaction: Any
+    relatedTransactionIDs: list[str]
+    lastTransactionID: str
+
+
+class OrderClientExtensionsResponse(TypedDict, total=False):
+    """Response from put_order_client_extensions endpoint."""
+
+    orderClientExtensionsModifyTransaction: Any
+    relatedTransactionIDs: list[str]
+    lastTransactionID: str
 
 
 class OrderEndpoints:
@@ -422,7 +462,7 @@ class OrderEndpoints:
 
         return data.get("orders", [])  # type: ignore[no-any-return]
 
-    async def get_order(self, account_id: AccountID, order_specifier: str) -> dict[str, Any]:
+    async def get_order(self, account_id: AccountID, order_specifier: str) -> GetOrderResponse:
         """
         Get order details.
 
@@ -454,7 +494,7 @@ class OrderEndpoints:
         *,
         timeout: float | None = None,
         client_request_id: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> CancelOrderResponse:
         """
         Cancel an order.
 
@@ -486,7 +526,7 @@ class OrderEndpoints:
     async def get_pending_orders(
         self,
         account_id: AccountID,
-    ) -> dict[str, Any]:
+    ) -> PendingOrdersResponse:
         """
         List all pending orders for an account.
 
@@ -516,7 +556,7 @@ class OrderEndpoints:
         order_request: dict[str, Any],
         *,
         client_request_id: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> ReplaceOrderResponse:
         """
         Replace an existing order with a new order.
 
@@ -557,7 +597,7 @@ class OrderEndpoints:
         *,
         client_extensions: dict[str, Any] | None = None,
         trade_client_extensions: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
+    ) -> OrderClientExtensionsResponse:
         """
         Update the client extensions for an order.
 

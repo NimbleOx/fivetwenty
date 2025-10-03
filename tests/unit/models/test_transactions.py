@@ -136,7 +136,11 @@ class TestPhase4TransactionModels:
             "instrument": "EUR_USD",
             "units": "10000",
             "fullVWAP": "1.0950",
-            "fullPrice": "1.0950",
+            "fullPrice": {
+                "closeoutBid": "1.0945",
+                "closeoutAsk": "1.0955",
+                "liquidity": 10000000,
+            },
             "gainQuoteHomeConversionFactor": "1.0",
             "lossQuoteHomeConversionFactor": "1.0",
             "accountBalance": "10000.00",
@@ -148,7 +152,8 @@ class TestPhase4TransactionModels:
         assert fill_back_to_api["orderID"] == "order-123"
         assert fill_back_to_api["clientOrderID"] == "client-order-123"
         assert fill_back_to_api["fullVWAP"] == "1.0950"
-        assert fill_back_to_api["fullPrice"] == "1.0950"
+        assert fill_back_to_api["fullPrice"]["closeoutBid"] == "1.0945"
+        assert fill_back_to_api["fullPrice"]["closeoutAsk"] == "1.0955"
         assert fill_back_to_api["accountBalance"] == "10000.00"
 
     def test_order_cancel_transaction(self) -> None:
@@ -314,7 +319,11 @@ class TestPhase4AliasTests:
             "gainQuoteHomeConversionFactor": "1.0",
             "lossQuoteHomeConversionFactor": "1.0",
             "fullVWAP": "1.0950",
-            "fullPrice": "1.0950",
+            "fullPrice": {
+                "closeoutBid": "1.0945",
+                "closeoutAsk": "1.0955",
+                "liquidity": 10000000,
+            },
             "accountBalance": "10000.00",
             "halfSpreadCost": "0.25",
             "guaranteeExecutionFee": "0.10",

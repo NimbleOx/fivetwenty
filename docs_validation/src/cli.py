@@ -17,7 +17,7 @@ from .reporters import MarkdownReporter
 
 # Import and register validators
 from .validators import (
-    CodeExecutabilityValidator,
+    CodeExecutionValidator,
     CodeLintingValidator,
     CodeTypingValidator,
     CrossReferenceValidator,
@@ -36,7 +36,7 @@ registry.register(MarkdownSyntaxValidator())
 registry.register(PythonSyntaxValidator())
 registry.register(CrossReferenceValidator())
 registry.register(SDKMethodsValidator())
-registry.register(CodeExecutabilityValidator())
+registry.register(CodeExecutionValidator())
 registry.register(CodeLintingValidator())
 registry.register(CodeTypingValidator())
 registry.register(ExternalLinkValidator())
@@ -214,6 +214,10 @@ def _display_results(
 
     # Show per-validator summary (contains all necessary information)
     _display_validator_summaries(summary)
+
+    # Show total runtime
+    runtime_seconds = summary.duration_ms / 1000.0
+    console.print(f"\n⏱️  Total validation runtime: {runtime_seconds:.2f}s", style="cyan")
 
     # Show brief issues summary if any (detailed issues are in the report)
     if summary.total_issues > 0:

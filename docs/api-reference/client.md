@@ -358,14 +358,14 @@ OANDA API enforces rate limits:
 ## Environment Considerations
 
 ### Practice Environment
-- URL: `Environment.PRACTICE.base_url` (https://api-fxpractice.oanda.com/v3)
+- URL: `Environment.PRACTICE.base_url` (`https\://api-fxpractice.oanda.com/v3`)
 - Virtual money only
 - Same API functionality as live
 - Reset account balances available
 - No trading restrictions
 
 ### Live Environment
-- URL: `Environment.LIVE.base_url` (https://api-fxtrade.oanda.com/v3)
+- URL: `Environment.LIVE.base_url` (`https\://api-fxtrade.oanda.com/v3`)
 - Real money trading
 - Risk management essential
 - Requires live trading account

@@ -1,7 +1,7 @@
 # FiveTwenty Documentation Validation Configuration - Fast Mode
 #
 # Fast validation for development workflow focusing on core quality checks.
-# Excludes slower validators like code_executability and external_links.
+# Excludes slower validators like external_links.
 
 # File discovery - docs directory only
 file_patterns:
@@ -126,8 +126,5 @@ validators:
     enabled: true
 
   # Slower validators - disabled for fast mode
-  code_executability:
-    enabled: false
-
   external_links:
     enabled: false

@@ -79,7 +79,7 @@ class ClientPrice(ApiModel):
     closeout_bid: PriceValue = Field(alias="closeoutBid")
     closeout_ask: PriceValue = Field(alias="closeoutAsk")
     quote_home_conversion_factors: QuoteHomeConversionFactors | None = Field(None, alias="quoteHomeConversionFactors")  # Deprecated
-    units_available: UnitsAvailableDetails | None = Field(None, alias="unitsAvailable")  # Deprecated
+    units_available: UnitsAvailable | None = Field(None, alias="unitsAvailable")  # Deprecated
 
 
 class CandlestickData(ApiModel):

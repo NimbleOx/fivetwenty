@@ -95,84 +95,87 @@ if __name__ == "__main__":
 
 ### Multi-Account Management
 
-When trading with multiple OANDA accounts (such as separate accounts for different strategies or compliance with hedging rules), you need centralized account monitoring across all your accounts.
+You can create as many clients as you need to access different accounts with OANDA. Common scenarios include separating long and short positions to comply with US broker hedging rules, isolating different trading strategies to manage risk, or maintaining separate accounts for testing versus live trading.
 
-<!-- fragment: Demo multi-account health monitoring with Decimal operations -->
+For traders subject to US broker hedging rules, using separate long and short accounts provides a compliant way to maintain opposing positions in the same currency pair. This approach allows you to hedge positions without violating FIFO (First In, First Out) rules that prevent holding both long and short positions simultaneously in a single account.
+
+<!-- fragment: multi-account hedging with AccountConfig -->
 ```python
-from decimal import Decimal
+import asyncio
+import os
 
 from dotenv import load_dotenv
-
-from fivetwenty import AsyncClient
+from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Load environment variables from .env file
 load_dotenv()
 
-async def monitor_multiple_accounts(account_configs: list[dict]) -> dict:
-    """Monitor health across multiple trading accounts."""
 
-    account_summaries = {}
-    total_nav = Decimal("0")
-    total_margin_used = Decimal("0")
+async def main() -> None:
+    """Demonstrate multi-account hedging strategy for US broker compliance."""
 
-    for config in account_configs:
-        # Note: For multi-account setups, you would need separate client instances
-        # with different tokens/account configurations
-        async with AsyncClient() as client:
-            # Get account health for each account
-            health = await get_account_health(client)
+    # Step 1: Configure dedicated account for long positions
+    # Separate long account enables compliance with US FIFO regulations
+    long_config = AccountConfig(
+        token=os.environ["LONG_ACCOUNT_TOKEN"],    # Dedicated token for long account
+        account_id=os.environ["LONG_ACCOUNT_ID"],  # Long position account identifier
+        environment=Environment.LIVE,              # Live trading environment
+        alias="long_positions",                   # Descriptive alias for identification
+    )
 
-            account_summaries[config["name"]] = {
-                "account_id": config["account_id"],
-                "balance": health["account_balance"],
-                "nav": health["nav"],
-                "margin_used": health["margin_used"],
-                "margin_ratio": health["margin_ratio"],
-                "health_status": health["health_status"],
-                "active_positions": health["active_positions"]
-            }
+    # Step 2: Configure dedicated account for short positions
+    # Separate short account allows hedging without violating broker rules
+    short_config = AccountConfig(
+        token=os.environ["SHORT_ACCOUNT_TOKEN"],   # Dedicated token for short account
+        account_id=os.environ["SHORT_ACCOUNT_ID"], # Short position account identifier
+        environment=Environment.LIVE,              # Live trading environment
+        alias="short_positions",                  # Descriptive alias for identification
+    )
 
-            total_nav += health["nav"]
-            total_margin_used += health["margin_used"]
+    # Step 3: Execute hedged trading strategy across both accounts
+    # Multiple clients enable simultaneous management of long and short positions
+    async with AsyncClient(config=long_config) as long_client:
+        async with AsyncClient(config=short_config) as short_client:
+            print("📈 Executing multi-account hedging strategy")
+            print("📈 Long positions will be managed on dedicated account")
+            print("📉 Short positions will be managed on separate account")
 
-    # Calculate aggregate metrics
-    aggregate_margin_ratio = (total_margin_used / total_nav * 100) if total_nav > 0 else Decimal("0")
+            # Step 4: Execute bullish strategy on long account
+            # Long account handles all buy positions for the strategy
+            await execute_long_strategy(long_client)
 
-    return {
-        "accounts": account_summaries,
-        "aggregate": {
-            "total_nav": total_nav,
-            "total_margin_used": total_margin_used,
-            "aggregate_margin_ratio": aggregate_margin_ratio,
-            "account_count": len(account_configs)
-        }
-    }
+            # Step 5: Execute bearish strategy on short account for hedging
+            # Short account provides hedge against long positions
+            await execute_short_strategy(short_client)
 
-# Example usage for multiple accounts
-async def main():
-    # Configure your accounts
-    accounts = [
-        {
-            "name": "Long Strategy Account",
-            "token": "your-long-token",
-            "account_id": "long-account-id"
-        },
-        {
-            "name": "Short Strategy Account",
-            "token": "your-short-token",
-            "account_id": "short-account-id"
-        }
-    ]
 
-    multi_account_summary = await monitor_multiple_accounts(accounts)
+async def execute_long_strategy(client: AsyncClient) -> None:
+    """Execute bullish trading strategy with comprehensive account validation."""
 
-    print(f"Total NAV across accounts: ${multi_account_summary['aggregate']['total_nav']}")
-    print(f"Aggregate margin usage: {multi_account_summary['aggregate']['aggregate_margin_ratio']:.1f}%")
+    # Step 1: Validate long account accessibility and configuration
+    # Account verification ensures the long strategy can execute properly
+    accounts = await client.accounts.get_accounts()
 
-    for name, account in multi_account_summary['accounts'].items():
-        print(f"{name}: {account['health_status']} - {account['active_positions']} positions")
+    # Step 2: Confirm successful long account strategy execution
+    print(f"📈 Long strategy executed on account: {client.config.alias}")
+    print(f"✓ Account validation: {len(accounts)} account(s) accessible")
+    print(f"✓ Ready for bullish position management")
 
-# Step 5: Execute the multi-account monitoring
+
+async def execute_short_strategy(client: AsyncClient) -> None:
+    """Execute bearish trading strategy with comprehensive account validation."""
+
+    # Step 1: Validate short account accessibility and configuration
+    # Account verification ensures the short strategy can execute properly
+    accounts = await client.accounts.get_accounts()
+
+    # Step 2: Confirm successful short account strategy execution
+    print(f"📉 Short strategy executed on account: {client.config.alias}")
+    print(f"✓ Account validation: {len(accounts)} account(s) accessible")
+    print(f"✓ Ready for bearish position management and hedging")
+
+
+# Execute the multi-account hedging strategy
 if __name__ == "__main__":
     asyncio.run(main())
 ```

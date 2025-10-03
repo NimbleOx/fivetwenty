@@ -16,7 +16,19 @@ class TestInstrumentEndpoints:
         """Create a mock async client."""
         client = MagicMock()
         mock_response = MagicMock()
-        mock_response.json.return_value = {"mock": "data"}
+        # Mock response matching OANDA API structure
+        mock_response.json.return_value = {
+            "instrument": "EUR_USD",
+            "granularity": "S5",
+            "candles": [
+                {
+                    "time": "2024-01-01T12:00:00.000000000Z",
+                    "volume": 100,
+                    "complete": True,
+                    "mid": {"o": "1.10000", "h": "1.10010", "l": "1.09990", "c": "1.10005"},
+                }
+            ],
+        }
         client._request = AsyncMock(return_value=mock_response)
         return client
 
@@ -28,7 +40,9 @@ class TestInstrumentEndpoints:
     @pytest.mark.asyncio
     async def test_get_candles_basic(self, instruments, mock_client):
         """Test basic candle data retrieval."""
-        await instruments.get_instrument_candles("EUR_USD")
+        from fivetwenty.models import CandlestickGranularity
+
+        await instruments.get_instrument_candles("EUR_USD", granularity=CandlestickGranularity.S5)
 
         mock_client._request.assert_called_once_with(
             "GET",
@@ -107,25 +121,31 @@ class TestInstrumentEndpoints:
     @pytest.mark.asyncio
     async def test_get_candles_count_too_high_raises_error(self, instruments, mock_client):
         """Test that count > 5000 raises ValueError."""
+        from fivetwenty.models import CandlestickGranularity
+
         with pytest.raises(ValueError, match="Count cannot exceed 5000"):
-            await instruments.get_instrument_candles("EUR_USD", count=5001)
+            await instruments.get_instrument_candles("EUR_USD", granularity=CandlestickGranularity.H1, count=5001)
 
     @pytest.mark.asyncio
     async def test_get_candles_count_and_time_raises_error(self, instruments, mock_client):
         """Test that specifying both count and time range raises ValueError."""
+        from fivetwenty.models import CandlestickGranularity
+
         from_time = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         with pytest.raises(ValueError, match="Cannot specify both count and time range"):
-            await instruments.get_instrument_candles("EUR_USD", count=100, from_time=from_time)
+            await instruments.get_instrument_candles("EUR_USD", granularity=CandlestickGranularity.H1, count=100, from_time=from_time)
 
     @pytest.mark.asyncio
     async def test_get_candles_all_price_types(self, instruments, mock_client):
         """Test candle retrieval with all price types."""
+        from fivetwenty.models import CandlestickGranularity
+
         price_types = ["M", "B", "A", "BA", "BM", "AM", "BAM"]
 
         for price_type in price_types:
             mock_client._request.reset_mock()
 
-            await instruments.get_instrument_candles("EUR_USD", price=price_type)
+            await instruments.get_instrument_candles("EUR_USD", granularity=CandlestickGranularity.S5, price=price_type)
 
             mock_client._request.assert_called_once_with(
                 "GET",
@@ -190,16 +210,18 @@ class TestInstrumentEndpoints:
     @pytest.mark.asyncio
     async def test_get_candles_edge_case_values(self, instruments, mock_client):
         """Test candle retrieval with edge case parameter values."""
+        from fivetwenty.models import CandlestickGranularity
+
         # Test with maximum count
-        await instruments.get_instrument_candles("USD_CHF", count=5000)
+        await instruments.get_instrument_candles("USD_CHF", granularity=CandlestickGranularity.H1, count=5000)
 
         # Test with minimum daily alignment
         mock_client._request.reset_mock()
-        await instruments.get_instrument_candles("NZD_USD", daily_alignment=0)
+        await instruments.get_instrument_candles("NZD_USD", granularity=CandlestickGranularity.S5, daily_alignment=0)
 
         # Test with maximum daily alignment
         mock_client._request.reset_mock()
-        await instruments.get_instrument_candles("CAD_JPY", daily_alignment=23)
+        await instruments.get_instrument_candles("CAD_JPY", granularity=CandlestickGranularity.S5, daily_alignment=23)
 
         mock_client._request.assert_called_with(
             "GET",

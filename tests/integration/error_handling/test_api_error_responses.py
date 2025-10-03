@@ -43,7 +43,7 @@ class TestAPIErrorResponses:
         # Test 401 Unauthorized - Invalid token (simulate by using wrong token)
         from fivetwenty import AsyncClient
 
-        invalid_client = AsyncClient(token="invalid-token-12345", environment="practice")
+        invalid_client = AsyncClient(token="invalid-token-12345", account_id="000-000-0000000-000", environment="practice")
 
         with pytest.raises(FiveTwentyError) as exc_info:
             await invalid_client.accounts.get_accounts()

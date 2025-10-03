@@ -123,8 +123,5 @@ validators:
   code_typing:
     enabled: false    # Skip type checking for maximum speed
 
-  code_executability:
-    enabled: false
-
   external_links:
     enabled: false

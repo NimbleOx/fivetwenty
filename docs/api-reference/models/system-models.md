@@ -1,6 +1,6 @@
 # System Models
 
-📖 **OANDA Reference**: [Primitives Data Definitions](https://developer.oanda.com/rest-live-v20/primitives-df/)
+**OANDA Reference**: [Primitives Data Definitions](https://developer.oanda.com/rest-live-v20/primitives-df/)
 
 Models for streaming configuration, error handling, and system enums used throughout the OANDA API.
 
@@ -15,7 +15,7 @@ Configuration for streaming connections.
 |-------|------|----------|-------------|
 | `include_heartbeats` | bool | ➖ | Include heartbeat messages (default: True) |
 | `stall_timeout` | float | ➖ | Seconds before considering stream stalled (default: 30.0) |
-| `reconnection_policy` | ReconnectionPolicy | ✅ | Reconnection settings (default: ReconnectionPolicy()) |
+| `reconnection_policy` | [ReconnectionPolicy](#reconnectionpolicy) | ✅ | Reconnection settings (default: ReconnectionPolicy()) |
 
 ### ReconnectionPolicy
 Policy for automatic reconnection.
@@ -34,10 +34,10 @@ Structured error information from API responses.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `error_code` | FiveTwentyErrorCode | ✅ | Standardized error code |
+| `error_code` | [FiveTwentyErrorCode](enum-models.md#fivetwentyerrorcode) | ✅ | Standardized error code |
 | `error_message` | str | ✅ | Human-readable error description |
 | `details` | dict | ✅ | Additional error context |
-| `violations` | list[ValidationViolation] | ✅ | Field validation errors |
+| `violations` | list[[ValidationViolation](#validationviolation)] | ✅ | Field validation errors |
 
 ### ValidationViolation
 Specific field validation error.
@@ -172,17 +172,29 @@ Time intervals for candlestick data.
 
 🔗 **OANDA Definition**: [CandlestickGranularity](https://developer.oanda.com/rest-live-v20/instrument-df/#CandlestickGranularity)
 
-**Second-based Intervals:**
-`S5`, `S10`, `S15`, `S30`
-
-**Minute-based Intervals:**
-`M1`, `M2`, `M4`, `M5`, `M10`, `M15`, `M30`
-
-**Hour-based Intervals:**
-`H1`, `H2`, `H3`, `H4`, `H6`, `H8`, `H12`
-
-**Higher Timeframes:**
-`D` (daily), `W` (weekly), `M` (monthly)
+| Value | Description | Alignment |
+|-------|-------------|-----------|
+| `S5` | 5 seconds | Minute aligned |
+| `S10` | 10 seconds | Minute aligned |
+| `S15` | 15 seconds | Minute aligned |
+| `S30` | 30 seconds | Minute aligned |
+| `M1` | 1 minute | Hour aligned |
+| `M2` | 2 minutes | Hour aligned |
+| `M4` | 4 minutes | Hour aligned |
+| `M5` | 5 minutes | Hour aligned |
+| `M10` | 10 minutes | Hour aligned |
+| `M15` | 15 minutes | Hour aligned |
+| `M30` | 30 minutes | Hour aligned |
+| `H1` | 1 hour | Day aligned |
+| `H2` | 2 hours | Day aligned |
+| `H3` | 3 hours | Day aligned |
+| `H4` | 4 hours | Day aligned |
+| `H6` | 6 hours | Day aligned |
+| `H8` | 8 hours | Day aligned |
+| `H12` | 12 hours | Day aligned |
+| `D` | 1 day | Week aligned |
+| `W` | 1 week | Month aligned |
+| `M` | 1 month | Year aligned |
 
 #### DayOfWeek
 Standard day-of-week enumeration for scheduling and alignment.
@@ -230,35 +242,53 @@ Complete enumeration of all transaction types in the OANDA system.
 
 🔗 **OANDA Definition**: [TransactionType](https://developer.oanda.com/rest-live-v20/transaction-df/#TransactionType)
 
-**Account Management:**
-`CREATE`, `CLOSE`, `REOPEN`, `CLIENT_CONFIGURE`, `CLIENT_CONFIGURE_REJECT`
-
-**Fund Management:**
-`TRANSFER_FUNDS`, `TRANSFER_FUNDS_REJECT`
-
-**Order Creation:**
-`MARKET_ORDER`, `MARKET_ORDER_REJECT`, `FIXED_PRICE_ORDER`, `LIMIT_ORDER`, `LIMIT_ORDER_REJECT`, `STOP_ORDER`, `STOP_ORDER_REJECT`, `MARKET_IF_TOUCHED_ORDER`, `MARKET_IF_TOUCHED_ORDER_REJECT`
-
-**Specialized Orders:**
-`TAKE_PROFIT_ORDER`, `TAKE_PROFIT_ORDER_REJECT`, `STOP_LOSS_ORDER`, `STOP_LOSS_ORDER_REJECT`, `GUARANTEED_STOP_LOSS_ORDER`, `GUARANTEED_STOP_LOSS_ORDER_REJECT`, `TRAILING_STOP_LOSS_ORDER`, `TRAILING_STOP_LOSS_ORDER_REJECT`
-
-**Order Management:**
-`ORDER_FILL`, `ORDER_CANCEL`, `ORDER_CANCEL_REJECT`, `ORDER_CLIENT_EXTENSIONS_MODIFY`, `ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT`
-
-**Trade Management:**
-`TRADE_CLIENT_EXTENSIONS_MODIFY`, `TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT`
-
-**Risk Management:**
-`MARGIN_CALL_ENTER`, `MARGIN_CALL_EXTEND`, `MARGIN_CALL_EXIT`, `DELAYED_TRADE_CLOSURE`
-
-**Financial Operations:**
-`DAILY_FINANCING`, `DIVIDEND_ADJUSTMENT`, `RESET_RESETTABLE_PL`
+| Value | Description |
+|-------|-------------|
+| `CREATE` | Account creation transaction |
+| `CLOSE` | Account closure transaction |
+| `REOPEN` | Account reopening transaction |
+| `CLIENT_CONFIGURE` | Client configuration change transaction |
+| `CLIENT_CONFIGURE_REJECT` | Rejected client configuration change |
+| `TRANSFER_FUNDS` | Funds transfer transaction |
+| `TRANSFER_FUNDS_REJECT` | Rejected funds transfer |
+| `MARKET_ORDER` | Market order submission |
+| `MARKET_ORDER_REJECT` | Rejected market order |
+| `FIXED_PRICE_ORDER` | Fixed price order submission |
+| `LIMIT_ORDER` | Limit order submission |
+| `LIMIT_ORDER_REJECT` | Rejected limit order |
+| `STOP_ORDER` | Stop order submission |
+| `STOP_ORDER_REJECT` | Rejected stop order |
+| `MARKET_IF_TOUCHED_ORDER` | Market-if-touched order submission |
+| `MARKET_IF_TOUCHED_ORDER_REJECT` | Rejected market-if-touched order |
+| `TAKE_PROFIT_ORDER` | Take profit order submission |
+| `TAKE_PROFIT_ORDER_REJECT` | Rejected take profit order |
+| `STOP_LOSS_ORDER` | Stop loss order submission |
+| `STOP_LOSS_ORDER_REJECT` | Rejected stop loss order |
+| `GUARANTEED_STOP_LOSS_ORDER` | Guaranteed stop loss order submission |
+| `GUARANTEED_STOP_LOSS_ORDER_REJECT` | Rejected guaranteed stop loss order |
+| `TRAILING_STOP_LOSS_ORDER` | Trailing stop loss order submission |
+| `TRAILING_STOP_LOSS_ORDER_REJECT` | Rejected trailing stop loss order |
+| `ORDER_FILL` | Order execution/fill transaction |
+| `ORDER_CANCEL` | Order cancellation transaction |
+| `ORDER_CANCEL_REJECT` | Rejected order cancellation |
+| `ORDER_CLIENT_EXTENSIONS_MODIFY` | Order client extensions modification |
+| `ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT` | Rejected order client extensions modification |
+| `TRADE_CLIENT_EXTENSIONS_MODIFY` | Trade client extensions modification |
+| `TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT` | Rejected trade client extensions modification |
+| `MARGIN_CALL_ENTER` | Margin call initiated |
+| `MARGIN_CALL_EXTEND` | Margin call extended |
+| `MARGIN_CALL_EXIT` | Margin call resolved/exited |
+| `DELAYED_TRADE_CLOSURE` | Delayed trade closure due to liquidity |
+| `DAILY_FINANCING` | Daily financing charge/credit applied to positions |
+| `DIVIDEND_ADJUSTMENT` | Dividend adjustment for positions |
+| `RESET_RESETTABLE_PL` | Reset of resettable profit/loss counter |
 
 ### Type Aliases
 - `AccountID` - str: Account identifier using format "{siteID}-{divisionID}-{userID}-{accountNumber}"
 - `TradeID` - str: Trade identifier (OANDA-assigned positive integer as string)
 - `OrderID` - str: Order identifier (unique within account)
 - `TransactionID` - str: Transaction identifier (positive integer assigned sequentially by OANDA)
+- `RequestID` - str: Client-provided request identifier for correlating API requests with transactions
 - `PriceValue` - str: Price value encoded as string for precision
 - `AccountUnits` - str: Account currency amounts encoded as strings
 - `DateTime` - str: RFC3339 format ("YYYY-MM-DDTHH:MM:SS.nnnnnnnnnZ") or UNIX timestamp with nanosecond precision
