@@ -469,6 +469,7 @@ class MultiTimeframeBreakout:
         Args:
             client: Authenticated AsyncClient for order execution
             account_id: Account ID for trading operations
+
         """
         self.client = client
         self.account_id = account_id
@@ -491,6 +492,7 @@ class MultiTimeframeBreakout:
 
         Returns:
             Dictionary mapping timeframes to their breakout levels and metadata
+
         """
         print(f"\nAnalyzing {instrument} breakout levels across timeframes:")
 
@@ -523,8 +525,9 @@ class MultiTimeframeBreakout:
         for timeframe, levels in breakout_levels.items():
             resistance = levels["resistance"]
             support = levels["support"]
-            assert isinstance(resistance, Decimal)
-            assert isinstance(support, Decimal)
+            if not isinstance(resistance, Decimal) or not isinstance(support, Decimal):
+                msg = f"Expected Decimal types for resistance and support in {timeframe}"
+                raise TypeError(msg)
 
             range_pips = (resistance - support) * 10000
             print(f"  {timeframe}: {support:.5f} - {resistance:.5f} ({range_pips:.0f} pips)")
@@ -546,6 +549,7 @@ class MultiTimeframeBreakout:
 
         Returns:
             List of order IDs for all placed stop orders
+
         """
         # ==============================================================================
         # STEP 1: GET MULTI-TIMEFRAME BREAKOUT ANALYSIS
@@ -584,8 +588,9 @@ class MultiTimeframeBreakout:
 
             resistance = level_data["resistance"]
             support = level_data["support"]
-            assert isinstance(resistance, Decimal)
-            assert isinstance(support, Decimal)
+            if not isinstance(resistance, Decimal) or not isinstance(support, Decimal):
+                msg = f"Expected Decimal types for resistance and support in {timeframe}"
+                raise TypeError(msg)
 
             buy_trigger = resistance + breakout_buffer   # Bullish breakout
             sell_trigger = support - breakout_buffer     # Bearish breakout
@@ -617,8 +622,9 @@ class MultiTimeframeBreakout:
             # ==============================================================================
 
             # Extract order IDs from responses
-            assert buy_stop.order_create_transaction is not None
-            assert sell_stop.order_create_transaction is not None
+            if buy_stop.order_create_transaction is None or sell_stop.order_create_transaction is None:
+                msg = "Order creation transaction missing from response"
+                raise ValueError(msg)
             buy_id = buy_stop.order_create_transaction["id"]
             sell_id = sell_stop.order_create_transaction["id"]
 
@@ -964,6 +970,7 @@ class MomentumBreakout:
         Args:
             client: Authenticated AsyncClient for order execution
             account_id: Account ID for trading operations
+
         """
         self.client = client
         self.account_id = account_id
@@ -984,6 +991,7 @@ class MomentumBreakout:
 
         Returns:
             Tuple of (buy_stop_id, sell_stop_id)
+
         """
         # ==============================================================================
         # STEP 1: GET CURRENT MARKET PRICE FOR CONTEXT
@@ -1082,8 +1090,9 @@ class MomentumBreakout:
         # STEP 5: EXTRACT ORDER IDS AND CONFIRM PLACEMENT
         # ==============================================================================
 
-        assert buy_stop_response.order_create_transaction is not None
-        assert sell_stop_response.order_create_transaction is not None
+        if buy_stop_response.order_create_transaction is None or sell_stop_response.order_create_transaction is None:
+            msg = "Order creation transaction missing from response"
+            raise ValueError(msg)
         buy_stop_id = buy_stop_response.order_create_transaction["id"]
         sell_stop_id = sell_stop_response.order_create_transaction["id"]
 
