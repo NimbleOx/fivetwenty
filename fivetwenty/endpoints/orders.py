@@ -19,29 +19,44 @@ from ..models import (
     AccountID,
     FixedPriceOrder,
     GuaranteedStopLossOrder,
+    GuaranteedStopLossOrderRejectTransaction,
     GuaranteedStopLossOrderRequest,
+    GuaranteedStopLossOrderTransaction,
     InstrumentName,
     LimitOrder,
+    LimitOrderRejectTransaction,
     LimitOrderRequest,
+    LimitOrderTransaction,
     MarketIfTouchedOrder,
+    MarketIfTouchedOrderRejectTransaction,
     MarketIfTouchedOrderRequest,
+    MarketIfTouchedOrderTransaction,
     MarketOrder,
+    MarketOrderRejectTransaction,
     MarketOrderRequest,
+    MarketOrderTransaction,
     OrderCancelTransaction,
     OrderClientExtensionsModifyTransaction,
     OrderFillTransaction,
-    OrderResponse,
     StopLossDetails,
     StopLossOrder,
+    StopLossOrderRejectTransaction,
     StopLossOrderRequest,
+    StopLossOrderTransaction,
     StopOrder,
+    StopOrderRejectTransaction,
     StopOrderRequest,
+    StopOrderTransaction,
     TakeProfitDetails,
     TakeProfitOrder,
+    TakeProfitOrderRejectTransaction,
     TakeProfitOrderRequest,
+    TakeProfitOrderTransaction,
     TimeInForce,
     TrailingStopLossOrder,
+    TrailingStopLossOrderRejectTransaction,
     TrailingStopLossOrderRequest,
+    TrailingStopLossOrderTransaction,
 )
 
 if TYPE_CHECKING:
@@ -59,6 +74,42 @@ Order = (
     | TrailingStopLossOrder
     | FixedPriceOrder
 )
+
+# Union type for order creation transactions
+OrderCreateTransaction = (
+    MarketOrderTransaction
+    | LimitOrderTransaction
+    | StopOrderTransaction
+    | MarketIfTouchedOrderTransaction
+    | TakeProfitOrderTransaction
+    | StopLossOrderTransaction
+    | TrailingStopLossOrderTransaction
+    | GuaranteedStopLossOrderTransaction
+)
+
+# Union type for order rejection transactions
+OrderRejectTransaction = (
+    MarketOrderRejectTransaction
+    | LimitOrderRejectTransaction
+    | StopOrderRejectTransaction
+    | MarketIfTouchedOrderRejectTransaction
+    | TakeProfitOrderRejectTransaction
+    | StopLossOrderRejectTransaction
+    | TrailingStopLossOrderRejectTransaction
+    | GuaranteedStopLossOrderRejectTransaction
+)
+
+
+class OrderResponse(TypedDict, total=False):
+    """Response from order creation endpoints."""
+
+    orderCreateTransaction: OrderCreateTransaction
+    orderFillTransaction: OrderFillTransaction
+    orderCancelTransaction: OrderCancelTransaction
+    orderReissueTransaction: OrderCreateTransaction  # Re-issued order creation
+    orderReissueRejectTransaction: OrderRejectTransaction  # Rejection of re-issue
+    relatedTransactionIDs: list[str]
+    lastTransactionID: str  # Required field
 
 
 class GetOrderResponse(TypedDict):
@@ -167,7 +218,25 @@ class OrderEndpoints:
             headers=headers,
         )
 
-        return OrderResponse.model_validate(response.json())
+        data = response.json()
+        result: OrderResponse = {
+            "lastTransactionID": data["lastTransactionID"],
+        }
+
+        if "orderCreateTransaction" in data:
+            result["orderCreateTransaction"] = self._parse_order_transaction(data["orderCreateTransaction"])
+        if "orderFillTransaction" in data:
+            result["orderFillTransaction"] = OrderFillTransaction.model_validate(data["orderFillTransaction"])
+        if "orderCancelTransaction" in data:
+            result["orderCancelTransaction"] = OrderCancelTransaction.model_validate(data["orderCancelTransaction"])
+        if "orderReissueTransaction" in data:
+            result["orderReissueTransaction"] = self._parse_order_transaction(data["orderReissueTransaction"])
+        if "orderReissueRejectTransaction" in data:
+            result["orderReissueRejectTransaction"] = self._parse_order_reject_transaction(data["orderReissueRejectTransaction"])
+        if "relatedTransactionIDs" in data:
+            result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
+
+        return result
 
     async def post_market_order(
         self,
@@ -757,6 +826,74 @@ class OrderEndpoints:
             return FixedPriceOrder.model_validate(order_data)
 
         raise ValueError(f"Unknown order type: {order_type}")
+
+    def _parse_order_transaction(self, transaction_data: dict[str, Any]) -> OrderCreateTransaction:  # noqa: PLR0911
+        """
+        Parse transaction data into the appropriate order creation transaction model.
+
+        Args:
+            transaction_data: Raw transaction data from API response
+
+        Returns:
+            Parsed OrderCreateTransaction model
+
+        Raises:
+            ValueError: If transaction type is unknown
+        """
+        transaction_type = transaction_data.get("type")
+
+        if transaction_type == "MARKET_ORDER":
+            return MarketOrderTransaction.model_validate(transaction_data)
+        if transaction_type == "LIMIT_ORDER":
+            return LimitOrderTransaction.model_validate(transaction_data)
+        if transaction_type == "STOP_ORDER":
+            return StopOrderTransaction.model_validate(transaction_data)
+        if transaction_type == "MARKET_IF_TOUCHED_ORDER":
+            return MarketIfTouchedOrderTransaction.model_validate(transaction_data)
+        if transaction_type == "TAKE_PROFIT_ORDER":
+            return TakeProfitOrderTransaction.model_validate(transaction_data)
+        if transaction_type == "STOP_LOSS_ORDER":
+            return StopLossOrderTransaction.model_validate(transaction_data)
+        if transaction_type == "GUARANTEED_STOP_LOSS_ORDER":
+            return GuaranteedStopLossOrderTransaction.model_validate(transaction_data)
+        if transaction_type == "TRAILING_STOP_LOSS_ORDER":
+            return TrailingStopLossOrderTransaction.model_validate(transaction_data)
+
+        raise ValueError(f"Unknown order transaction type: {transaction_type}")
+
+    def _parse_order_reject_transaction(self, transaction_data: dict[str, Any]) -> OrderRejectTransaction:  # noqa: PLR0911
+        """
+        Parse transaction data into the appropriate order reject transaction model.
+
+        Args:
+            transaction_data: Raw transaction data from API response
+
+        Returns:
+            Parsed OrderRejectTransaction model
+
+        Raises:
+            ValueError: If transaction type is unknown
+        """
+        transaction_type = transaction_data.get("type")
+
+        if transaction_type == "MARKET_ORDER_REJECT":
+            return MarketOrderRejectTransaction.model_validate(transaction_data)
+        if transaction_type == "LIMIT_ORDER_REJECT":
+            return LimitOrderRejectTransaction.model_validate(transaction_data)
+        if transaction_type == "STOP_ORDER_REJECT":
+            return StopOrderRejectTransaction.model_validate(transaction_data)
+        if transaction_type == "MARKET_IF_TOUCHED_ORDER_REJECT":
+            return MarketIfTouchedOrderRejectTransaction.model_validate(transaction_data)
+        if transaction_type == "TAKE_PROFIT_ORDER_REJECT":
+            return TakeProfitOrderRejectTransaction.model_validate(transaction_data)
+        if transaction_type == "STOP_LOSS_ORDER_REJECT":
+            return StopLossOrderRejectTransaction.model_validate(transaction_data)
+        if transaction_type == "GUARANTEED_STOP_LOSS_ORDER_REJECT":
+            return GuaranteedStopLossOrderRejectTransaction.model_validate(transaction_data)
+        if transaction_type == "TRAILING_STOP_LOSS_ORDER_REJECT":
+            return TrailingStopLossOrderRejectTransaction.model_validate(transaction_data)
+
+        raise ValueError(f"Unknown order reject transaction type: {transaction_type}")
 
     # =========================================================================
     # INTENTIONALLY OMITTED CONVENIENCE METHODS

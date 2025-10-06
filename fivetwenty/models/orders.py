@@ -298,18 +298,6 @@ class DynamicOrderState(ApiModel):
     is_trigger_distance_exact: bool | None = Field(None, alias="isTriggerDistanceExact")
 
 
-class OrderResponse(ApiModel):
-    """Response from order creation."""
-
-    order_create_transaction: Any | None = Field(None, alias="orderCreateTransaction")
-    order_fill_transaction: "OrderFillTransaction | None" = Field(None, alias="orderFillTransaction")
-    order_cancel_transaction: "OrderCancelTransaction | None" = Field(None, alias="orderCancelTransaction")
-    order_reissue_transaction: Any | None = Field(None, alias="orderReissueTransaction")
-    order_reissue_reject_transaction: Any | None = Field(None, alias="orderReissueRejectTransaction")
-    related_transaction_ids: list[str] = Field(alias="relatedTransactionIDs", default_factory=list)
-    last_transaction_id: str = Field(alias="lastTransactionID")
-
-
 # === COMPLETE ORDER STATE MODELS ===
 # These represent actual orders in the system (not just requests)
 
@@ -607,8 +595,6 @@ __all__ = [
     # Order request models (for creating orders)
     "MarketOrderRequest",
     "MarketOrderTradeClose",
-    # Response models
-    "OrderResponse",
     "StopLossDetails",
     "StopLossOrder",
     "StopLossOrderRequest",
