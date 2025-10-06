@@ -320,6 +320,8 @@ class CodeExecutionValidator(BaseValidator):
             return builtins.__import__(name, *args, **kwargs)
 
         # Create restricted builtins
+        import builtins
+
         safe_builtins = {
             # Keep safe builtins
             "abs": abs,
@@ -361,6 +363,9 @@ class CodeExecutionValidator(BaseValidator):
             "Decimal": Decimal,
             # Safe controlled import
             "__import__": safe_import,
+            # Special builtins needed for class definitions
+            "__build_class__": builtins.__build_class__,
+            "__name__": builtins.__name__,
         }
 
         # Block dangerous operations

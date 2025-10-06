@@ -52,6 +52,8 @@ validators:
         - "INP001"  # Missing __init__.py
         # Allow educational print statements in tutorials
         - "T201"    # Print statements
+        # Allow direct imports in documentation examples
+        - "TC001"   # Move imports into TYPE_CHECKING block (not needed in docs)
         # Relax some documentation-specific rules
         - "D100"    # Missing module docstrings (for small examples)
         - "ANN401"  # Allow Any in examples for simplicity
