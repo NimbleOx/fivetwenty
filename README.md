@@ -104,3 +104,17 @@ if __name__ == "__main__":
 ## License
 
 MIT License - see LICENSE file for details.
+
+## ⚠️ Disclaimer
+
+**This library is provided for educational and demonstration purposes only.**
+
+Trading financial instruments involves substantial risk of loss. The examples and code provided in this library are for demonstration purposes only and should not be used for actual trading without thorough testing and understanding of the risks involved.
+
+- Past performance is not indicative of future results
+- You are solely responsible for any trading decisions and their consequences
+- The authors and contributors accept no liability for any financial losses incurred through use of this software
+- Always test thoroughly with paper trading accounts before risking real capital
+- Consult with qualified financial advisors before making investment decisions
+
+**USE AT YOUR OWN RISK.**
