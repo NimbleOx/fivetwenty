@@ -143,6 +143,10 @@ validators:
         - "docs/tutorials/basic-trading/position-management.md"
         - "docs/tutorials/basic-trading/strategy-building.md"
         - "docs/tutorials/basic-trading/complete-system.md"
+        - "docs/tutorials/advanced-orders/index.md"
+        - "docs/tutorials/advanced-orders/dynamic-management.md"
+        - "docs/tutorials/advanced-orders/order-strategies.md"
+        - "docs/tutorials/advanced-orders/stop-orders-mit.md"
         # Add more files as they become fully standalone/executable
 
       # Mock API calls when executing code (prevents real API calls)
