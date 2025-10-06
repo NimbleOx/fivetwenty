@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 """Interactive version bumping script."""
+
 import re
 import sys
 from pathlib import Path
@@ -18,7 +19,7 @@ def main() -> None:
         sys.exit(1)
 
     current = match.group(1)
-    major, minor, patch = map(int, current.split('.'))
+    major, minor, patch = map(int, current.split("."))
 
     print(f"Current version: {current}")
     print("\nBump type:")
@@ -29,13 +30,13 @@ def main() -> None:
 
     choice = input("\nSelect (1-4): ").strip()
 
-    if choice == '1':
+    if choice == "1":
         new_version = f"{major + 1}.0.0"
-    elif choice == '2':
+    elif choice == "2":
         new_version = f"{major}.{minor + 1}.0"
-    elif choice == '3':
+    elif choice == "3":
         new_version = f"{major}.{minor}.{patch + 1}"
-    elif choice == '4':
+    elif choice == "4":
         new_version = input("Enter version (e.g., 1.2.3): ").strip()
     else:
         print("Invalid choice")
@@ -43,17 +44,12 @@ def main() -> None:
 
     # Confirm
     confirm = input(f"\nBump {current} → {new_version}? (y/N): ").strip().lower()
-    if confirm != 'y':
+    if confirm != "y":
         print("Cancelled")
         sys.exit(1)
 
     # Update pyproject.toml
-    new_content = re.sub(
-        r'^version = "[^"]+"',
-        f'version = "{new_version}"',
-        content,
-        flags=re.MULTILINE
-    )
+    new_content = re.sub(r'^version = "[^"]+"', f'version = "{new_version}"', content, flags=re.MULTILINE)
 
     pyproject.write_text(new_content)
     print(f"✓ Version bumped to {new_version}")
