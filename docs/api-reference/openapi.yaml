@@ -81,7 +81,9 @@ paths:
       tags:
         - Accounts
       summary: Get Account Details
-      description: Get the full details for a single Account that a client has access to. Full pending Order, open Trade and open Position representations are provided.
+      description: >
+        Get the full details for a single Account that a client has access to.
+        Full pending Order, open Trade and open Position representations are provided.
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/AcceptDatetimeFormat'
@@ -155,7 +157,11 @@ paths:
       tags:
         - Accounts
       summary: Get Tradeable Instruments
-      description: Get the list of tradeable instruments for the given Account. The list of tradeable instruments is dependent on the regulatory division that the Account is located in, thus should be the same for all Accounts owned by a single user.
+      description: >
+        Get the list of tradeable instruments for the given Account.
+        The list of tradeable instruments is dependent on the regulatory
+        division that the Account is located in, thus should be the same for
+        all Accounts owned by a single user.
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/AccountID'
@@ -615,7 +621,10 @@ paths:
       tags:
         - Orders
       summary: Update Order Client Extensions
-      description: Update the Client Extensions for an Order in an Account. Do not set, modify, or delete clientExtensions if your account is associated with MT4.
+      description: >
+        Update the Client Extensions for an Order in an Account.
+        Do not set, modify, or delete clientExtensions if your account
+        is associated with MT4.
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/AcceptDatetimeFormat'
@@ -988,7 +997,9 @@ paths:
       tags:
         - Pricing
       summary: Get Latest Candles
-      description: Get the most recently completed candles within an Account for specified combinations of instrument, granularity, and price component.
+      description: >
+        Get the most recently completed candles within an Account for
+        specified combinations of instrument, granularity, and price component.
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/AcceptDatetimeFormat'
@@ -1223,7 +1234,9 @@ paths:
       tags:
         - Trades
       summary: Update Trade Client Extensions
-      description: Update the Client Extensions for a Trade. Do not add, update, or delete the Client Extensions if your account is associated with MT4.
+      description: >
+        Update the Client Extensions for a Trade. Do not add, update, or delete
+        the Client Extensions if your account is associated with MT4.
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/AcceptDatetimeFormat'
@@ -1277,7 +1290,9 @@ paths:
       tags:
         - Trades
       summary: Manage Trade Dependent Orders
-      description: Create, replace and cancel a Trade's dependent Orders (Take Profit, Stop Loss and Trailing Stop Loss) through the Trade itself
+      description: >
+        Create, replace and cancel a Trade's dependent Orders
+        (Take Profit, Stop Loss and Trailing Stop Loss) through the Trade itself
       parameters:
         - $ref: '#/components/parameters/Authorization'
         - $ref: '#/components/parameters/AcceptDatetimeFormat'
