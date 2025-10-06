@@ -449,7 +449,7 @@ class OrderEndpoints:
         if ids:
             params["ids"] = ",".join(ids)
         if instrument:
-            params["instrument"] = instrument
+            params["instrument"] = instrument.value if hasattr(instrument, "value") else str(instrument)
         if before_id:
             params["beforeID"] = before_id
 
