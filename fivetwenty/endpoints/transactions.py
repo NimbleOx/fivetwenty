@@ -41,6 +41,7 @@ from ..models import (
     TradeClientExtensionsModifyTransaction,
     TrailingStopLossOrderRejectTransaction,
     TrailingStopLossOrderTransaction,
+    TransactionHeartbeat,
     TransferFundsRejectTransaction,
     TransferFundsTransaction,
 )
@@ -103,7 +104,7 @@ class TransactionsResponse(TypedDict, total=False):
     from_: str  # Note: 'from' is a reserved keyword
     to: str
     pageSize: int
-    type: str
+    type: list[str]  # Array of transaction type filters
     count: int
     pages: list[str]
     lastTransactionID: str
@@ -257,19 +258,20 @@ class TransactionEndpoints:
         account_id: AccountID,
         *,
         stall_timeout: float = 30.0,
-    ) -> AsyncIterator[TransactionUnion]:
+    ) -> AsyncIterator[TransactionUnion | TransactionHeartbeat]:
         """
         Stream live transaction events for an account.
 
         This provides real-time updates about transactions as they occur,
         including order fills, account changes, and other transaction events.
+        Heartbeat messages are sent every 5 seconds to keep the connection alive.
 
         Args:
             account_id: Account identifier
             stall_timeout: Timeout for detecting stream stalls
 
         Yields:
-            Transaction objects as they occur
+            Transaction objects or TransactionHeartbeat messages as they occur
 
         Raises:
             FiveTwentyError: On API errors
@@ -282,7 +284,12 @@ class TransactionEndpoints:
         ):
             try:
                 transaction_data = json.loads(line)
-                yield self._parse_transaction(transaction_data)
+
+                # Check if this is a heartbeat message
+                if transaction_data.get("type") == "HEARTBEAT":
+                    yield TransactionHeartbeat.model_validate(transaction_data)
+                else:
+                    yield self._parse_transaction(transaction_data)
             except (json.JSONDecodeError, ValueError) as e:
                 # Log malformed data but continue streaming
                 self._client._log(

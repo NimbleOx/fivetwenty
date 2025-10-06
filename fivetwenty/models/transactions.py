@@ -28,6 +28,17 @@ from .orders import ClientExtensions
 # Forward references for type checking
 
 
+class TransactionHeartbeat(ApiModel):
+    """Transaction stream heartbeat message.
+
+    Sent every 5 seconds on the transaction stream to maintain connection
+    and verify stream is alive.
+    """
+
+    type: str = Field(default="HEARTBEAT")
+    time: datetime
+
+
 class Transaction(ApiModel):
     """Base transaction model with common fields for all transaction types."""
 
@@ -529,8 +540,9 @@ class TransactionIDRange(ApiModel):
 
 
 # Removed extra transaction models that are not part of official OANDA v20 API:
-# - TransactionHeartbeat, TransactionRejectDetails, TransactionSummary, TransactionBatch
+# - TransactionRejectDetails, TransactionSummary, TransactionBatch
 # - AccountChangesState, AccountChanges (these are now properly in accounts.py)
+# Note: TransactionHeartbeat IS part of the OANDA API (used in transaction streaming)
 
 
 # Export all transaction-related models
@@ -573,6 +585,7 @@ __all__ = [
     "TrailingStopLossOrderTransaction",
     "Transaction",
     "TransactionFilter",
+    "TransactionHeartbeat",
     "TransactionIDRange",
     "TransferFundsRejectTransaction",
     "TransferFundsTransaction",

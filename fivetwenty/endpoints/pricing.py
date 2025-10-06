@@ -5,6 +5,8 @@ from collections.abc import AsyncIterator
 from datetime import datetime
 from typing import TYPE_CHECKING, TypedDict
 
+from typing_extensions import Required
+
 from ..models import AccountID, Candlestick, CandlestickGranularity, ClientPrice, HomeConversions, InstrumentName, PricingHeartbeat
 from ..models.streaming import StreamingConfiguration, StreamState
 
@@ -15,9 +17,9 @@ if TYPE_CHECKING:
 class GetPricingResponse(TypedDict, total=False):
     """Response from get_pricing endpoint."""
 
-    prices: list[ClientPrice]  # Required
+    prices: Required[list[ClientPrice]]  # Always present
     homeConversions: list[HomeConversions]  # Optional
-    time: str  # Required
+    time: Required[str]  # Always present
 
 
 class CandlesResponse(TypedDict):
