@@ -7,6 +7,7 @@ from ..models import (
     AccountID,
     ClientExtensions,
     InstrumentName,
+    MarketOrderTransaction,
     OrderCancelTransaction,
     OrderFillTransaction,
     Position,
@@ -33,10 +34,10 @@ class PositionResponse(TypedDict):
 class ClosePositionResponse(TypedDict, total=False):
     """Response from close_position endpoint."""
 
-    longOrderCreateTransaction: Any  # Market order creation transaction
+    longOrderCreateTransaction: MarketOrderTransaction
     longOrderFillTransaction: OrderFillTransaction
     longOrderCancelTransaction: OrderCancelTransaction
-    shortOrderCreateTransaction: Any  # Market order creation transaction
+    shortOrderCreateTransaction: MarketOrderTransaction
     shortOrderFillTransaction: OrderFillTransaction
     shortOrderCancelTransaction: OrderCancelTransaction
     relatedTransactionIDs: list[str]
@@ -215,7 +216,7 @@ class PositionEndpoints:
 
         # Parse long position transactions
         if "longOrderCreateTransaction" in data:
-            result["longOrderCreateTransaction"] = data["longOrderCreateTransaction"]
+            result["longOrderCreateTransaction"] = MarketOrderTransaction.model_validate(data["longOrderCreateTransaction"])
         if "longOrderFillTransaction" in data:
             result["longOrderFillTransaction"] = OrderFillTransaction.model_validate(data["longOrderFillTransaction"])
         if "longOrderCancelTransaction" in data:
@@ -223,7 +224,7 @@ class PositionEndpoints:
 
         # Parse short position transactions
         if "shortOrderCreateTransaction" in data:
-            result["shortOrderCreateTransaction"] = data["shortOrderCreateTransaction"]
+            result["shortOrderCreateTransaction"] = MarketOrderTransaction.model_validate(data["shortOrderCreateTransaction"])
         if "shortOrderFillTransaction" in data:
             result["shortOrderFillTransaction"] = OrderFillTransaction.model_validate(data["shortOrderFillTransaction"])
         if "shortOrderCancelTransaction" in data:
