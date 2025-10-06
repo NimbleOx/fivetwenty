@@ -201,7 +201,28 @@ class TestTradeEndpoints:
     async def test_close_trade_full(self, trades, mock_client):
         """Test closing trade completely."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"orderFillTransaction": {"id": "12347", "type": "ORDER_FILL", "tradesClosed": [{"tradeID": "12345", "units": "1000"}]}, "lastTransactionID": "12347"}
+        mock_response.json.return_value = {
+            "orderFillTransaction": {
+                "id": "12347",
+                "type": "ORDER_FILL",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "orderID": "12347",
+                "instrument": "EUR_USD",
+                "units": "1000",
+                "price": "1.1000",
+                "pl": "0.0000",
+                "financing": "0.0000",
+                "commission": "0.0000",
+                "accountBalance": "10000.0000",
+                "tradesClosed": [{"tradeID": "12345", "units": "1000", "price": "1.1000", "realizedPL": "5.0000"}],
+                "reason": "MARKET_ORDER",
+            },
+            "lastTransactionID": "12347",
+        }
         mock_client._request.return_value = mock_response
 
         result = await trades.close_trade("101-001-123456-001", "12345")
@@ -212,13 +233,34 @@ class TestTradeEndpoints:
             json_data=None,
             headers={},
         )
-        assert result["orderFillTransaction"]["id"] == "12347"
+        assert result["orderFillTransaction"].id == "12347"
 
     @pytest.mark.asyncio
     async def test_close_trade_partial(self, trades, mock_client):
         """Test partially closing trade."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"orderFillTransaction": {"id": "12347", "type": "ORDER_FILL", "tradeReduced": {"tradeID": "12345", "units": "500"}}, "lastTransactionID": "12347"}
+        mock_response.json.return_value = {
+            "orderFillTransaction": {
+                "id": "12347",
+                "type": "ORDER_FILL",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "orderID": "12347",
+                "instrument": "EUR_USD",
+                "units": "500",
+                "price": "1.1000",
+                "pl": "0.0000",
+                "financing": "0.0000",
+                "commission": "0.0000",
+                "accountBalance": "10000.0000",
+                "tradeReduced": {"tradeID": "12345", "units": "500", "price": "1.1000", "realizedPL": "2.5000"},
+                "reason": "MARKET_ORDER",
+            },
+            "lastTransactionID": "12347",
+        }
         mock_client._request.return_value = mock_response
 
         await trades.close_trade("101-001-123456-001", "12345", units="500", idempotency_key="close-trade-12345")
@@ -234,7 +276,21 @@ class TestTradeEndpoints:
     async def test_update_client_extensions(self, trades, mock_client):
         """Test updating trade client extensions."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"tradeClientExtensionsModifyTransaction": {"id": "12347", "type": "TRADE_CLIENT_EXTENSIONS_MODIFY", "tradeID": "12345"}, "lastTransactionID": "12347"}
+        mock_response.json.return_value = {
+            "tradeClientExtensionsModifyTransaction": {
+                "id": "12347",
+                "type": "TRADE_CLIENT_EXTENSIONS_MODIFY",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "tradeID": "12345",
+                "clientTradeID": "my_trade",
+                "tradeClientExtensionsModify": {"id": "my_trade", "tag": "long_eur_usd", "comment": "Monthly EUR/USD position"},
+            },
+            "lastTransactionID": "12347",
+        }
         mock_client._request.return_value = mock_response
 
         extensions = {"id": "my_trade", "tag": "long_eur_usd", "comment": "Monthly EUR/USD position"}
@@ -268,7 +324,23 @@ class TestTradeEndpoints:
     async def test_update_orders_take_profit(self, trades, mock_client):
         """Test updating take profit order for trade."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"takeProfitOrderTransaction": {"id": "12347", "type": "TAKE_PROFIT_ORDER", "tradeID": "12345"}, "lastTransactionID": "12347"}
+        mock_response.json.return_value = {
+            "takeProfitOrderTransaction": {
+                "id": "12347",
+                "type": "TAKE_PROFIT_ORDER",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "tradeID": "12345",
+                "price": "1.1100",
+                "timeInForce": "GTC",
+                "triggerCondition": "DEFAULT",
+                "reason": "CLIENT_ORDER",
+            },
+            "lastTransactionID": "12347",
+        }
         mock_client._request.return_value = mock_response
 
         take_profit = {"price": "1.1100", "timeInForce": "GTC"}
@@ -286,7 +358,23 @@ class TestTradeEndpoints:
     async def test_update_orders_stop_loss(self, trades, mock_client):
         """Test updating stop loss order for trade."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"stopLossOrderTransaction": {"id": "12347", "type": "STOP_LOSS_ORDER", "tradeID": "12345"}, "lastTransactionID": "12347"}
+        mock_response.json.return_value = {
+            "stopLossOrderTransaction": {
+                "id": "12347",
+                "type": "STOP_LOSS_ORDER",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "tradeID": "12345",
+                "price": "1.0900",
+                "timeInForce": "GTC",
+                "triggerCondition": "DEFAULT",
+                "reason": "CLIENT_ORDER",
+            },
+            "lastTransactionID": "12347",
+        }
         mock_client._request.return_value = mock_response
 
         stop_loss = {"price": "1.0900", "timeInForce": "GTC"}
@@ -304,7 +392,23 @@ class TestTradeEndpoints:
     async def test_update_orders_trailing_stop_loss(self, trades, mock_client):
         """Test updating trailing stop loss order for trade."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"trailingStopLossOrderTransaction": {"id": "12347", "type": "TRAILING_STOP_LOSS_ORDER", "tradeID": "12345"}, "lastTransactionID": "12347"}
+        mock_response.json.return_value = {
+            "trailingStopLossOrderTransaction": {
+                "id": "12347",
+                "type": "TRAILING_STOP_LOSS_ORDER",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "tradeID": "12345",
+                "distance": "0.0100",
+                "timeInForce": "GTC",
+                "triggerCondition": "DEFAULT",
+                "reason": "CLIENT_ORDER",
+            },
+            "lastTransactionID": "12347",
+        }
         mock_client._request.return_value = mock_response
 
         trailing_stop_loss = {"distance": "0.0100", "timeInForce": "GTC"}
@@ -322,7 +426,37 @@ class TestTradeEndpoints:
     async def test_update_orders_multiple(self, trades, mock_client):
         """Test updating multiple orders for trade."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"takeProfitOrderTransaction": {"id": "12347"}, "stopLossOrderTransaction": {"id": "12348"}, "lastTransactionID": "12348"}
+        mock_response.json.return_value = {
+            "takeProfitOrderTransaction": {
+                "id": "12347",
+                "type": "TAKE_PROFIT_ORDER",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "tradeID": "12345",
+                "price": "1.1100",
+                "timeInForce": "GTC",
+                "triggerCondition": "DEFAULT",
+                "reason": "CLIENT_ORDER",
+            },
+            "stopLossOrderTransaction": {
+                "id": "12348",
+                "type": "STOP_LOSS_ORDER",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12348",
+                "requestID": "12348",
+                "tradeID": "12345",
+                "price": "1.0900",
+                "timeInForce": "GTC",
+                "triggerCondition": "DEFAULT",
+                "reason": "CLIENT_ORDER",
+            },
+            "lastTransactionID": "12348",
+        }
         mock_client._request.return_value = mock_response
 
         take_profit = {"price": "1.1100", "timeInForce": "GTC"}
@@ -341,7 +475,20 @@ class TestTradeEndpoints:
     async def test_update_orders_cancel_orders(self, trades, mock_client):
         """Test canceling orders by passing None."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"takeProfitOrderCancelTransaction": {"id": "12347"}, "lastTransactionID": "12347"}
+        mock_response.json.return_value = {
+            "takeProfitOrderCancelTransaction": {
+                "id": "12347",
+                "type": "ORDER_CANCEL",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "orderID": "12346",
+                "reason": "CLIENT_REQUEST",
+            },
+            "lastTransactionID": "12347",
+        }
         mock_client._request.return_value = mock_response
 
         # Pass None to cancel take profit order
@@ -362,7 +509,25 @@ class TestTradeEndpoints:
     async def test_update_orders_guaranteed_stop_loss(self, trades, mock_client):
         """Test updating guaranteed stop loss order for trade."""
         mock_response = MagicMock()
-        mock_response.json.return_value = {"guaranteedStopLossOrderTransaction": {"id": "12347", "type": "GUARANTEED_STOP_LOSS_ORDER", "tradeID": "12345"}, "lastTransactionID": "12347"}
+        mock_response.json.return_value = {
+            "guaranteedStopLossOrderTransaction": {
+                "id": "12347",
+                "type": "GUARANTEED_STOP_LOSS_ORDER",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12347",
+                "requestID": "12347",
+                "tradeID": "12345",
+                "price": "1.0850",
+                "timeInForce": "GTC",
+                "gtdTime": "2024-12-31T23:59:59.000000000Z",
+                "triggerCondition": "DEFAULT",
+                "guaranteedExecutionPremium": "5.0000",
+                "reason": "CLIENT_ORDER",
+            },
+            "lastTransactionID": "12347",
+        }
         mock_client._request.return_value = mock_response
 
         guaranteed_stop_loss = {"price": "1.0850", "timeInForce": "GTC", "gtdTime": "2024-12-31T23:59:59.000000000Z"}

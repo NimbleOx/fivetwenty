@@ -110,7 +110,7 @@ class ReplaceOrderResponse(TypedDict, total=False):
     """Response from put_order endpoint."""
 
     orderCancelTransaction: OrderCancelTransaction
-    orderCreateTransaction: Order
+    orderCreateTransaction: OrderCreateTransaction
     orderFillTransaction: OrderFillTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
@@ -678,7 +678,7 @@ class OrderEndpoints:
         if "orderCancelTransaction" in data:
             result["orderCancelTransaction"] = OrderCancelTransaction.model_validate(data["orderCancelTransaction"])
         if "orderCreateTransaction" in data:
-            result["orderCreateTransaction"] = self._parse_order(data["orderCreateTransaction"])
+            result["orderCreateTransaction"] = self._parse_order_transaction(data["orderCreateTransaction"])
         if "orderFillTransaction" in data:
             result["orderFillTransaction"] = OrderFillTransaction.model_validate(data["orderFillTransaction"])
         if "relatedTransactionIDs" in data:

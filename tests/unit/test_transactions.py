@@ -15,9 +15,112 @@ class TestTransactionEndpoints:
     def mock_client(self):
         """Create a mock async client."""
         client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"mock": "data"}
-        client._request = AsyncMock(return_value=mock_response)
+
+        # Define side_effect function to return different responses based on endpoint
+        def mock_request_side_effect(*args, **kwargs):
+            mock_response = MagicMock()
+
+            # Extract the endpoint path
+            if len(args) >= 2:
+                endpoint = args[1]
+            else:
+                endpoint = ""
+
+            # Return appropriate mock data based on endpoint
+            if "/transactions/" in endpoint and not endpoint.endswith("/transactions"):
+                # Single transaction response (get_transaction)
+                if "/sinceid" in endpoint:
+                    # get_transactions_since_id response
+                    mock_response.json.return_value = {
+                        "transactions": [
+                            {
+                                "id": "1001",
+                                "type": "ORDER_FILL",
+                                "time": "2024-01-01T12:00:00.000000000Z",
+                                "userID": 12345,
+                                "accountID": "101-001-123456-001",
+                                "batchID": "1001",
+                                "orderID": "5001",
+                                "instrument": "EUR_USD",
+                                "units": "1000",
+                            }
+                        ],
+                        "lastTransactionID": "1001",
+                    }
+                elif "/idrange" in endpoint:
+                    # get_transactions_range response
+                    mock_response.json.return_value = {
+                        "transactions": [
+                            {
+                                "id": "1500",
+                                "type": "MARKET_ORDER",
+                                "time": "2024-01-01T13:00:00.000000000Z",
+                                "userID": 12345,
+                                "accountID": "101-001-123456-001",
+                                "batchID": "1500",
+                                "instrument": "USD_JPY",
+                                "units": "5000",
+                                "timeInForce": "FOK",
+                                "positionFill": "DEFAULT",
+                                "reason": "CLIENT_ORDER",
+                            }
+                        ],
+                        "lastTransactionID": "2000",
+                    }
+                else:
+                    # Single transaction (get_transaction)
+                    mock_response.json.return_value = {
+                        "transaction": {
+                            "id": "12345",
+                            "type": "CREATE",
+                            "time": "2024-01-01T00:00:00.000000000Z",
+                            "userID": 12345,
+                            "accountID": "101-001-123456-001",
+                            "batchID": "12345",
+                            "divisionID": 1,
+                            "siteID": 1,
+                            "accountUserID": 12345,
+                            "accountNumber": 1,
+                            "homeCurrency": "USD",
+                        },
+                        "lastTransactionID": "12345",
+                    }
+            elif endpoint.endswith("/transactions"):
+                # Check if this is get_recent_transactions (has 'count' param)
+                params = kwargs.get("params", {})
+                if "count" in params:
+                    # get_recent_transactions response
+                    mock_response.json.return_value = {
+                        "transactions": [
+                            {
+                                "id": "9001",
+                                "type": "ORDER_FILL",
+                                "time": "2024-01-01T14:00:00.000000000Z",
+                                "userID": 12345,
+                                "accountID": "101-001-123456-001",
+                                "batchID": "9001",
+                                "orderID": "8001",
+                                "instrument": "GBP_USD",
+                                "units": "2000",
+                            }
+                        ],
+                        "lastTransactionID": "9001",
+                    }
+                else:
+                    # get_transactions response (time-based query)
+                    mock_response.json.return_value = {
+                        "from": "2024-01-01T00:00:00.000000000Z",
+                        "to": "2024-01-02T00:00:00.000000000Z",
+                        "pageSize": params.get("pageSize", "100"),
+                        "lastTransactionID": "5000",
+                    }
+            else:
+                # Default response
+                mock_response.json.return_value = {"mock": "data"}
+
+            return mock_response
+
+        client._request = AsyncMock(side_effect=mock_request_side_effect)
         return client
 
     @pytest.fixture

@@ -14,9 +14,62 @@ class TestAccountConfigurationEndpoints:
     def mock_client(self):
         """Create a mock async client."""
         client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"mock": "data"}
-        client._request = AsyncMock(return_value=mock_response)
+
+        # Create a side effect function that returns appropriate responses based on the request
+        async def mock_request(method, path, **kwargs):
+            mock_response = MagicMock()
+
+            # For PATCH /accounts/{id}/configuration
+            if method == "PATCH" and "/configuration" in path:
+                mock_response.json.return_value = {
+                    "clientConfigureTransaction": {
+                        "id": "123",
+                        "type": "CLIENT_CONFIGURE",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "123",
+                    },
+                    "lastTransactionID": "123",
+                }
+            # For GET /accounts/{id}/changes
+            elif method == "GET" and "/changes" in path:
+                mock_response.json.return_value = {
+                    "changes": {
+                        "ordersCancelled": [],
+                        "ordersCreated": [],
+                        "ordersFilled": [],
+                        "ordersTriggered": [],
+                        "tradesOpened": [],
+                        "tradesReduced": [],
+                        "tradesClosed": [],
+                        "positions": [],
+                        "transactions": [],
+                    },
+                    "state": {
+                        "unrealizedPL": "0.0000",
+                        "NAV": "100000.0000",
+                        "marginUsed": "0.0000",
+                        "marginAvailable": "100000.0000",
+                        "positionValue": "0.0000",
+                        "marginCloseoutUnrealizedPL": "0.0000",
+                        "marginCloseoutNAV": "100000.0000",
+                        "marginCloseoutMarginUsed": "0.0000",
+                        "marginCloseoutPositionValue": "0.0000",
+                        "marginCloseoutPercent": "0.0000",
+                        "withdrawalLimit": "100000.0000",
+                        "orders": [],
+                        "trades": [],
+                        "positions": [],
+                    },
+                    "lastTransactionID": "123",
+                }
+            else:
+                mock_response.json.return_value = {"mock": "data"}
+
+            return mock_response
+
+        client._request = AsyncMock(side_effect=mock_request)
         return client
 
     @pytest.fixture
