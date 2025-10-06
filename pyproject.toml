@@ -256,8 +256,6 @@ docs-serve = "python -m mkdocs serve"
 docs-build = "python -m mkdocs build --clean"
 
 # Documentation validation tasks
-docs-validate-list = "uv run python -m docs_validation.src.cli list-validators"
-
 # Fast validation - core validators only (development workflow)
 docs-validate-fast = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-fast.yml"
 
