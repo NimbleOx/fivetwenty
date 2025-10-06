@@ -202,9 +202,9 @@ async def main() -> None:
 
         # Step 4: Verify successful order execution and extract trade details
         # Order fill transaction confirms the order was executed at market prices
-        if order_response.order_fill_transaction:
+        if order_response.get("orderFillTransaction"):
             # Step 5: Extract comprehensive execution details for record keeping
-            fill = order_response.order_fill_transaction
+            fill = order_response["orderFillTransaction"]
 
             print("\nSuccess Order Executed Successfully!")
 
@@ -248,14 +248,11 @@ async def main() -> None:
             # Market orders rarely fail but may be rejected due to market conditions
             print("Error Order was not filled - market may be closed or halted")
 
-            # Step 14: Display specific error information if available
-            # Error details help diagnose and resolve execution issues
-            if hasattr(order_response, "error_message"):
-                print(f"   ⚠️ Error Details: {order_response.error_message}")
-            if hasattr(order_response, "order_reject_transaction"):
-                print(
-                    f"   🚫 Rejection Reason: {order_response.order_reject_transaction.reject_reason}"
-                )
+            # Step 14: Check for order rejection or cancellation
+            # Rejected orders contain details in orderReissueRejectTransaction
+            if order_response.get("orderReissueRejectTransaction"):
+                rejection = order_response["orderReissueRejectTransaction"]
+                print(f"   🚫 Rejection Reason: {rejection.reject_reason}")
 
 
 if __name__ == "__main__":

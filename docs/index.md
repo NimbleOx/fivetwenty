@@ -82,7 +82,8 @@ import asyncio
 
 from dotenv import load_dotenv
 from fivetwenty import AsyncClient
-from fivetwenty.models import AccountSummary, ClientPrice, InstrumentName, OrderResponse
+from fivetwenty.endpoints.orders import OrderResponse
+from fivetwenty.models import AccountSummary, ClientPrice, InstrumentName
 
 # Load environment variables from .env file
 load_dotenv()
@@ -122,8 +123,8 @@ async def main() -> None:
 
         # Step 5: Verify the order was filled
         # The order_fill_transaction contains execution details
-        if order.order_fill_transaction:
-            print(f"Trade executed at {order.order_fill_transaction.price}")
+        if order.get("orderFillTransaction"):
+            print(f"Trade executed at {order['orderFillTransaction'].price}")
 
         # Step 6: Close the position
         # To close, place an order with the opposite sign (-1000 sells what we bought)
@@ -136,8 +137,8 @@ async def main() -> None:
 
         # Step 7: Confirm the position was closed
         # Check the closing price to calculate profit/loss manually if needed
-        if close_order.order_fill_transaction:
-            print(f"Position closed at {close_order.order_fill_transaction.price}")
+        if close_order.get("orderFillTransaction"):
+            print(f"Position closed at {close_order['orderFillTransaction'].price}")
 
 
 # Run the async function
