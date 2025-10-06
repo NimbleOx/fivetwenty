@@ -112,6 +112,11 @@ class TestTransactionEndpoints:
                         "from": "2024-01-01T00:00:00.000000000Z",
                         "to": "2024-01-02T00:00:00.000000000Z",
                         "pageSize": params.get("pageSize", "100"),
+                        "count": "150",
+                        "pages": [
+                            "https://api-fxpractice.oanda.com/v3/accounts/101-001-123456-001/transactions?from=2024-01-01T00:00:00.000000000Z&to=2024-01-02T00:00:00.000000000Z&pageSize=100&page=1",
+                            "https://api-fxpractice.oanda.com/v3/accounts/101-001-123456-001/transactions?from=2024-01-01T00:00:00.000000000Z&to=2024-01-02T00:00:00.000000000Z&pageSize=100&page=2",
+                        ],
                         "lastTransactionID": "5000",
                     }
             else:

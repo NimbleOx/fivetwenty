@@ -202,6 +202,20 @@ class TestTradeEndpoints:
         """Test closing trade completely."""
         mock_response = MagicMock()
         mock_response.json.return_value = {
+            "orderCreateTransaction": {
+                "id": "12346",
+                "type": "MARKET_ORDER",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12346",
+                "requestID": "12346",
+                "instrument": "EUR_USD",
+                "units": "1000",
+                "timeInForce": "FOK",
+                "positionFill": "DEFAULT",
+                "reason": "TRADE_CLOSE",
+            },
             "orderFillTransaction": {
                 "id": "12347",
                 "type": "ORDER_FILL",
@@ -210,7 +224,7 @@ class TestTradeEndpoints:
                 "userID": 123456,
                 "batchID": "12347",
                 "requestID": "12347",
-                "orderID": "12347",
+                "orderID": "12346",
                 "instrument": "EUR_USD",
                 "units": "1000",
                 "price": "1.1000",
@@ -221,6 +235,7 @@ class TestTradeEndpoints:
                 "tradesClosed": [{"tradeID": "12345", "units": "1000", "price": "1.1000", "realizedPL": "5.0000"}],
                 "reason": "MARKET_ORDER",
             },
+            "relatedTransactionIDs": ["12346", "12347"],
             "lastTransactionID": "12347",
         }
         mock_client._request.return_value = mock_response
@@ -240,6 +255,20 @@ class TestTradeEndpoints:
         """Test partially closing trade."""
         mock_response = MagicMock()
         mock_response.json.return_value = {
+            "orderCreateTransaction": {
+                "id": "12346",
+                "type": "MARKET_ORDER",
+                "accountID": "101-001-123456-001",
+                "time": "2024-01-01T00:00:00.000000000Z",
+                "userID": 123456,
+                "batchID": "12346",
+                "requestID": "12346",
+                "instrument": "EUR_USD",
+                "units": "500",
+                "timeInForce": "FOK",
+                "positionFill": "DEFAULT",
+                "reason": "TRADE_CLOSE",
+            },
             "orderFillTransaction": {
                 "id": "12347",
                 "type": "ORDER_FILL",
@@ -248,7 +277,7 @@ class TestTradeEndpoints:
                 "userID": 123456,
                 "batchID": "12347",
                 "requestID": "12347",
-                "orderID": "12347",
+                "orderID": "12346",
                 "instrument": "EUR_USD",
                 "units": "500",
                 "price": "1.1000",
@@ -259,6 +288,7 @@ class TestTradeEndpoints:
                 "tradeReduced": {"tradeID": "12345", "units": "500", "price": "1.1000", "realizedPL": "2.5000"},
                 "reason": "MARKET_ORDER",
             },
+            "relatedTransactionIDs": ["12346", "12347"],
             "lastTransactionID": "12347",
         }
         mock_client._request.return_value = mock_response

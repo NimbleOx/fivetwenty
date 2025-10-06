@@ -101,6 +101,20 @@ class TestPositionEndpoints:
             # For PUT /accounts/{id}/positions/{instrument}/close - close position
             elif method == "PUT" and "/close" in path:
                 mock_response.json.return_value = {
+                    "longOrderCreateTransaction": {
+                        "id": "12346",
+                        "type": "MARKET_ORDER",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12346",
+                        "requestID": "12346",
+                        "instrument": "EUR_USD",
+                        "units": "-1000",
+                        "timeInForce": "FOK",
+                        "positionFill": "REDUCE_ONLY",
+                        "reason": "POSITION_CLOSEOUT",
+                    },
                     "longOrderFillTransaction": {
                         "id": "12347",
                         "type": "ORDER_FILL",
