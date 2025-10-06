@@ -7,6 +7,8 @@ from ..models import (
     AccountID,
     ClientExtensions,
     InstrumentName,
+    OrderCancelTransaction,
+    OrderFillTransaction,
     Position,
 )
 
@@ -31,12 +33,12 @@ class PositionResponse(TypedDict):
 class ClosePositionResponse(TypedDict, total=False):
     """Response from close_position endpoint."""
 
-    longOrderCreateTransaction: Any
-    longOrderFillTransaction: Any
-    longOrderCancelTransaction: Any
-    shortOrderCreateTransaction: Any
-    shortOrderFillTransaction: Any
-    shortOrderCancelTransaction: Any
+    longOrderCreateTransaction: Any  # Market order creation transaction
+    longOrderFillTransaction: OrderFillTransaction
+    longOrderCancelTransaction: OrderCancelTransaction
+    shortOrderCreateTransaction: Any  # Market order creation transaction
+    shortOrderFillTransaction: OrderFillTransaction
+    shortOrderCancelTransaction: OrderCancelTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
 
@@ -64,7 +66,11 @@ class PositionEndpoints:
             FiveTwentyError: On API errors
         """
         response = await self._client._request("GET", f"/accounts/{account_id}/positions")
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "positions": [Position.model_validate(p) for p in data["positions"]],
+            "lastTransactionID": data["lastTransactionID"],
+        }
 
     async def get_open_positions(self, account_id: AccountID) -> PositionsResponse:
         """
@@ -82,7 +88,11 @@ class PositionEndpoints:
             FiveTwentyError: On API errors
         """
         response = await self._client._request("GET", f"/accounts/{account_id}/openPositions")
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "positions": [Position.model_validate(p) for p in data["positions"]],
+            "lastTransactionID": data["lastTransactionID"],
+        }
 
     async def get_position(self, account_id: AccountID, instrument: InstrumentName) -> PositionResponse:
         """
@@ -100,7 +110,11 @@ class PositionEndpoints:
         """
         instrument_str = instrument.value if hasattr(instrument, "value") else str(instrument)
         response = await self._client._request("GET", f"/accounts/{account_id}/positions/{instrument_str}")
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "position": Position.model_validate(data["position"]),
+            "lastTransactionID": data["lastTransactionID"],
+        }
 
     async def close_position(
         self,
@@ -189,4 +203,30 @@ class PositionEndpoints:
             f"/accounts/{account_id}/positions/{instrument_str}/close",
             json_data=body,
         )
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+
+        # Parse transaction fields if present
+        result: ClosePositionResponse = {
+            "lastTransactionID": data["lastTransactionID"],
+        }
+
+        if "relatedTransactionIDs" in data:
+            result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
+
+        # Parse long position transactions
+        if "longOrderCreateTransaction" in data:
+            result["longOrderCreateTransaction"] = data["longOrderCreateTransaction"]
+        if "longOrderFillTransaction" in data:
+            result["longOrderFillTransaction"] = OrderFillTransaction.model_validate(data["longOrderFillTransaction"])
+        if "longOrderCancelTransaction" in data:
+            result["longOrderCancelTransaction"] = OrderCancelTransaction.model_validate(data["longOrderCancelTransaction"])
+
+        # Parse short position transactions
+        if "shortOrderCreateTransaction" in data:
+            result["shortOrderCreateTransaction"] = data["shortOrderCreateTransaction"]
+        if "shortOrderFillTransaction" in data:
+            result["shortOrderFillTransaction"] = OrderFillTransaction.model_validate(data["shortOrderFillTransaction"])
+        if "shortOrderCancelTransaction" in data:
+            result["shortOrderCancelTransaction"] = OrderCancelTransaction.model_validate(data["shortOrderCancelTransaction"])
+
+        return result

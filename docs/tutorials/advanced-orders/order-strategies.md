@@ -304,8 +304,8 @@ async def main() -> None:
 
         existing_long_units = 0
         for position in positions["positions"]:
-            if position["instrument"] == instrument:  # type: ignore[index]
-                existing_long_units = int(position["long"]["units"])  # type: ignore[index]
+            if position.instrument == instrument:
+                existing_long_units = int(position.long.units)
                 break
 
         if existing_long_units == 0:
@@ -340,8 +340,8 @@ async def main() -> None:
                 print("  Order closed/reduced existing opposite position")
                 positions = await client.positions.get_positions(account_id=client.account_id)
                 for position in positions["positions"]:
-                    if position["instrument"] == instrument:  # type: ignore[index]
-                        existing_long_units = int(position["long"]["units"])  # type: ignore[index]
+                    if position.instrument == instrument:
+                        existing_long_units = int(position.long.units)
                         break
 
                 if existing_long_units == 0:
@@ -423,8 +423,8 @@ async def main() -> None:
 
         new_short_units = 0
         for position in new_positions["positions"]:
-            if position["instrument"] == instrument:  # type: ignore[index]
-                new_short_units = int(position["short"]["units"])  # type: ignore[index]
+            if position.instrument == instrument:
+                new_short_units = int(position.short.units)
                 break
 
         # Place stop loss on new short position
