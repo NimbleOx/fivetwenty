@@ -75,7 +75,6 @@ __all__ = [
     "Candlestick",
     "CandlestickData",
     "CandlestickGranularity",
-    "CandlestickResponse",
     "ClientConfigureRejectTransaction",
     "ClientConfigureTransaction",
     # Order supporting models

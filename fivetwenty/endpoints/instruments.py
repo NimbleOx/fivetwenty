@@ -116,15 +116,12 @@ class InstrumentEndpoints:
             params=params,
         )
 
-        data = response.json()
-
-        # Parse response into proper types
         from ..models import Candlestick, CandlestickGranularity, InstrumentName
 
-        parsed_candles = [Candlestick.model_validate(candle) for candle in data.get("candles", [])]
+        data = response.json()
 
         return {
             "instrument": InstrumentName(data["instrument"]),
             "granularity": CandlestickGranularity(data["granularity"]),
-            "candles": parsed_candles,
+            "candles": [Candlestick.model_validate(c) for c in data["candles"]],
         }

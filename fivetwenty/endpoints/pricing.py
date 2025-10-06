@@ -5,7 +5,7 @@ from collections.abc import AsyncIterator
 from datetime import datetime
 from typing import TYPE_CHECKING, TypedDict
 
-from ..models import AccountID, CandlestickResponse, ClientPrice, HomeConversions, PricingHeartbeat
+from ..models import AccountID, Candlestick, CandlestickGranularity, ClientPrice, HomeConversions, InstrumentName, PricingHeartbeat
 from ..models.streaming import StreamingConfiguration, StreamState
 
 if TYPE_CHECKING:
@@ -20,10 +20,18 @@ class GetPricingResponse(TypedDict, total=False):
     time: str  # Required
 
 
+class CandlesResponse(TypedDict):
+    """Response from candles endpoints."""
+
+    instrument: InstrumentName
+    granularity: CandlestickGranularity
+    candles: list[Candlestick]
+
+
 class LatestCandlesResponse(TypedDict):
     """Response from get_latest_candles endpoint."""
 
-    latestCandles: list[CandlestickResponse]
+    latestCandles: list[CandlesResponse]
 
 
 class PricingEndpoints:
@@ -160,7 +168,7 @@ class PricingEndpoints:
         daily_alignment: int = 17,
         alignment_timezone: str = "America/New_York",
         weekly_alignment: str = "Friday",
-    ) -> CandlestickResponse:
+    ) -> CandlesResponse:
         """
         Get account-specific candlestick data for a specified instrument.
 
@@ -237,7 +245,13 @@ class PricingEndpoints:
             params=params,
         )
 
-        return CandlestickResponse.model_validate(response.json())
+        data = response.json()
+
+        return {
+            "instrument": InstrumentName(data["instrument"]),
+            "granularity": CandlestickGranularity(data["granularity"]),
+            "candles": [Candlestick.model_validate(c) for c in data["candles"]],
+        }
 
     async def get_latest_candles(
         self,
@@ -292,7 +306,14 @@ class PricingEndpoints:
 
         data = response.json()
         return {
-            "latestCandles": [CandlestickResponse.model_validate(c) for c in data["latestCandles"]]
+            "latestCandles": [
+                {
+                    "instrument": InstrumentName(c["instrument"]),
+                    "granularity": CandlestickGranularity(c["granularity"]),
+                    "candles": [Candlestick.model_validate(candle) for candle in c["candles"]],
+                }
+                for c in data["latestCandles"]
+            ]
         }
 
     async def stream_pricing_with_retries(
