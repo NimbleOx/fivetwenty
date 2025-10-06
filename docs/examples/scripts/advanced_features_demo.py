@@ -143,9 +143,9 @@ async def main() -> None:
         order_request = MarketOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("1000"), clientExtensions=extensions)
         order = await client.orders.post_order(account_id=client.account_id, order_request=order_request, client_request_id=client_request_id)
 
-        if order.order_fill_transaction:
+        if order.get("orderFillTransaction"):
             print("\n✅ Order placed with extensions")
-            print(f"Fill price: {order.order_fill_transaction.price}")
+            print(f"Fill price: {order['orderFillTransaction'].price}")
 
         # Section 4: Advanced streaming
         print("\n=== 4. Advanced Streaming ===")
@@ -184,9 +184,9 @@ async def main() -> None:
         )
         bracket_order = await client.orders.post_order(account_id=client.account_id, order_request=bracket_order_request)
 
-        if bracket_order.order_fill_transaction:
+        if bracket_order.get("orderFillTransaction"):
             print("\n✅ Bracket order filled")
-            print(f"Entry: {bracket_order.order_fill_transaction.price}")
+            print(f"Entry: {bracket_order['orderFillTransaction'].price}")
 
         # Section 6: Position fill strategies
         print("\n=== 6. Position Fill Strategies ===")
@@ -344,8 +344,8 @@ async def main() -> None:
         )
         risk_managed_order = await client.orders.post_order(account_id=client.account_id, order_request=risk_managed_request)
 
-        if risk_managed_order.order_fill_transaction:
-            print(f"\n✅ Risk-managed order filled at {risk_managed_order.order_fill_transaction.price}")
+        if risk_managed_order.get("orderFillTransaction"):
+            print(f"\n✅ Risk-managed order filled at {risk_managed_order['orderFillTransaction'].price}")
             print(f"   TP: {tp_price} (+50 pips, 2% profit)")
             print(f"   SL: {sl_price} (-25 pips, 1% loss)")
             print("   Risk/Reward: 2:1")

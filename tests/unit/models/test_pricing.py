@@ -3,11 +3,11 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
+from fivetwenty.endpoints.pricing import CandlesResponse  # noqa: TC001
 from fivetwenty.models import (
     Candlestick,
     CandlestickData,
     CandlestickGranularity,
-    CandlestickResponse,
     ClientPrice,
     Currency,
     DailyAlignment,
@@ -139,18 +139,16 @@ class TestPhase3PricingModels:
         assert candlestick.volume == 1500
 
     def test_candlestick_response(self) -> None:
-        """Test CandlestickResponse model."""
-        # Create test candlesticks
-        complete_candle = Candlestick(time="2024-01-01T12:00:00Z", complete=True, volume=1000, mid=CandlestickData(o="1.1000", h="1.1050", l="1.0990", c="1.1030"))
+        """Test CandlesResponse TypedDict."""
+        # Create test candlestick
+        complete_candle = Candlestick(time=datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc), complete=True, volume=1000, mid=CandlestickData(o="1.1000", h="1.1050", l="1.0990", c="1.1030"))
 
-        incomplete_candle = Candlestick(time="2024-01-01T12:01:00Z", complete=False, volume=500, mid=CandlestickData(o="1.1030", h="1.1040", l="1.1020", c="1.1035"))
-
-        response = CandlestickResponse(instrument=InstrumentName.EUR_USD, granularity=CandlestickGranularity.M1, candles=[complete_candle, incomplete_candle])
+        response: CandlesResponse = {"instrument": InstrumentName.EUR_USD, "granularity": CandlestickGranularity.M1, "candles": [complete_candle]}
 
         # Test basic fields
-        assert response.instrument == InstrumentName.EUR_USD
-        assert response.granularity == CandlestickGranularity.M1
-        assert len(response.candles) == 2
+        assert response["instrument"] == InstrumentName.EUR_USD
+        assert response["granularity"] == CandlestickGranularity.M1
+        assert len(response["candles"]) == 1
 
 
 class TestPhase3AliasTests:

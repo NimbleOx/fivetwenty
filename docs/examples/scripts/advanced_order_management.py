@@ -88,16 +88,17 @@ async def main() -> None:
         order_request = MarketOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("1000"), clientExtensions=extensions, takeProfitOnFill=take_profit, stopLossOnFill=stop_loss)
         order_response = await client.orders.post_order(account_id=client.account_id, order_request=order_request)
 
-        if order_response.order_fill_transaction:
-            fill = order_response.order_fill_transaction
+        if order_response.get("orderFillTransaction"):
+            fill = order_response["orderFillTransaction"]
             print(f"✅ Order filled at {fill.price}")
             print(f"Client ID: {extensions.id}")
 
             # Check if TP/SL were automatically created
-            if order_response.order_create_transaction and hasattr(order_response.order_create_transaction, "take_profit_on_fill"):
-                print(f"Take Profit: {order_response.order_create_transaction.take_profit_on_fill.price}")
-            if order_response.order_create_transaction and hasattr(order_response.order_create_transaction, "stop_loss_on_fill"):
-                print(f"Stop Loss: {order_response.order_create_transaction.stop_loss_on_fill.price}")
+            create_txn = order_response.get("orderCreateTransaction")
+            if create_txn and hasattr(create_txn, "take_profit_on_fill") and create_txn.take_profit_on_fill and hasattr(create_txn.take_profit_on_fill, "price"):
+                print(f"Take Profit: {create_txn.take_profit_on_fill.price}")
+            if create_txn and hasattr(create_txn, "stop_loss_on_fill") and create_txn.stop_loss_on_fill and hasattr(create_txn.stop_loss_on_fill, "price"):
+                print(f"Stop Loss: {create_txn.stop_loss_on_fill.price}")
 
         # Section 2: Limit orders
         # =======================
@@ -136,11 +137,14 @@ async def main() -> None:
         limit_order = await client.orders.post_order(account_id=client.account_id, order_request=limit_request)
 
         limit_order_id = None
-        if limit_order.order_create_transaction:
-            limit_order_id = limit_order.order_create_transaction.id
+        if limit_order.get("orderCreateTransaction"):
+            create_txn = limit_order["orderCreateTransaction"]
+            limit_order_id = create_txn.id
             print(f"✅ Limit order created: {limit_order_id}")
-            print(f"Price: {limit_order.order_create_transaction.price}")
-            print(f"Time in Force: {limit_order.order_create_transaction.time_in_force}")
+            if hasattr(create_txn, "price"):
+                print(f"Price: {create_txn.price}")
+            if hasattr(create_txn, "time_in_force"):
+                print(f"Time in Force: {create_txn.time_in_force}")
 
         # GTD = Good-Til-Date
         # Order automatically expires at specified time
@@ -155,10 +159,12 @@ async def main() -> None:
         gtd_order = await client.orders.post_order(account_id=client.account_id, order_request=gtd_request)
 
         gtd_order_id = None
-        if gtd_order.order_create_transaction:
-            gtd_order_id = gtd_order.order_create_transaction.id
+        if gtd_order.get("orderCreateTransaction"):
+            create_txn = gtd_order["orderCreateTransaction"]
+            gtd_order_id = create_txn.id
             print(f"✅ GTD limit order created: {gtd_order_id}")
-            print(f"Expires: {gtd_order.order_create_transaction.gtd_time}")
+            if hasattr(create_txn, "gtd_time"):
+                print(f"Expires: {create_txn.gtd_time}")
 
         # Section 3: Stop orders
         # ======================
@@ -197,10 +203,12 @@ async def main() -> None:
         stop_order = await client.orders.post_order(account_id=client.account_id, order_request=stop_request)
 
         stop_order_id = None
-        if stop_order.order_create_transaction:
-            stop_order_id = stop_order.order_create_transaction.id
+        if stop_order.get("orderCreateTransaction"):
+            create_txn = stop_order["orderCreateTransaction"]
+            stop_order_id = create_txn.id
             print(f"✅ Stop order created: {stop_order_id}")
-            print(f"Trigger Price: {stop_order.order_create_transaction.price}")
+            if hasattr(create_txn, "price"):
+                print(f"Trigger Price: {create_txn.price}")
 
         # Section 4: Market-if-touched (MIT) orders
         # ==========================================
@@ -246,10 +254,12 @@ async def main() -> None:
         mit_order = await client.orders.post_order(account_id=client.account_id, order_request=mit_request)
 
         mit_order_id = None
-        if mit_order.order_create_transaction:
-            mit_order_id = mit_order.order_create_transaction.id
+        if mit_order.get("orderCreateTransaction"):
+            create_txn = mit_order["orderCreateTransaction"]
+            mit_order_id = create_txn.id
             print(f"✅ MIT order created: {mit_order_id}")
-            print(f"Trigger Price: {mit_order.order_create_transaction.price}")
+            if hasattr(create_txn, "price"):
+                print(f"Trigger Price: {create_txn.price}")
 
         # Section 5: List and filter orders
         # ==================================
@@ -294,11 +304,14 @@ async def main() -> None:
         for order in pending_list[:5]:  # Show first 5
             print(f"\n  Order {order.id}:")
             print(f"    Type: {order.type}")
-            print(f"    Instrument: {order.instrument}")
-            print(f"    Units: {order.units}")
+            if hasattr(order, "instrument"):
+                print(f"    Instrument: {order.instrument}")
+            if hasattr(order, "units"):
+                print(f"    Units: {order.units}")
             if hasattr(order, "price"):
                 print(f"    Price: {order.price}")
-            print(f"    Time in Force: {order.time_in_force}")
+            if hasattr(order, "time_in_force"):
+                print(f"    Time in Force: {order.time_in_force}")
 
         # Section 7: Get specific order details
         # ======================================
@@ -312,9 +325,12 @@ async def main() -> None:
             print(f"\nDetails for order {order.id}:")
             print(f"  Type: {order.type}")
             print(f"  State: {order.state}")  # PENDING, FILLED, CANCELLED, etc.
-            print(f"  Instrument: {order.instrument}")
-            print(f"  Units: {order.units}")
-            print(f"  Price: {order.price}")
+            if hasattr(order, "instrument"):
+                print(f"  Instrument: {order.instrument}")
+            if hasattr(order, "units"):
+                print(f"  Units: {order.units}")
+            if hasattr(order, "price"):
+                print(f"  Price: {order.price}")
             print(f"  Created: {order.create_time}")
 
         # Section 8: Modify an existing order
@@ -410,7 +426,7 @@ async def main() -> None:
         print("\n\nCleaning up: Closing EUR/USD position...")
         close_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=-1000)
 
-        if close_response.order_fill_transaction:
+        if close_response.get("orderFillTransaction"):
             print("✅ Position closed")
 
     print("\n✅ Advanced order management example completed!")

@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
+from fivetwenty.endpoints.orders import OrderResponse  # noqa: TC001
 from fivetwenty.models import (
     ClientExtensions,
     GuaranteedStopLossOrderRequest,
@@ -11,7 +12,6 @@ from fivetwenty.models import (
     MarketIfTouchedOrderRequest,
     MarketOrderRequest,
     OrderPositionFill,
-    OrderResponse,
     OrderTriggerCondition,
     OrderType,
     StopLossDetails,
@@ -97,11 +97,9 @@ class TestOrderModels:
         assert order.guaranteed is True
 
     def test_order_response(self) -> None:
-        """Test OrderResponse model."""
-        response = OrderResponse(last_transaction_id="456", order_create_transaction={"id": "456", "type": "ORDER_CREATE"}, related_transaction_ids=["456"])
-        assert response.last_transaction_id == "456"
-        assert response.order_create_transaction == {"id": "456", "type": "ORDER_CREATE"}
-        assert response.related_transaction_ids == ["456"]
+        """Test OrderResponse TypedDict."""
+        response: OrderResponse = {"lastTransactionID": "456"}
+        assert response["lastTransactionID"] == "456"
 
 
 class TestAdvancedOrderModels:

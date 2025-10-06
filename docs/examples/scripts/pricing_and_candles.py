@@ -375,7 +375,7 @@ async def main() -> None:
                 body_size = abs(Decimal(candle.mid.c) - Decimal(candle.mid.o))
 
                 # Display date and OHLC with body size
-                print(f"  {candle.time[:10]}: O={candle.mid.o} H={candle.mid.h} L={candle.mid.l} C={candle.mid.c} (Body={body_size:.5f})")
+                print(f"  {candle.time.strftime('%Y-%m-%d')}: O={candle.mid.o} H={candle.mid.h} L={candle.mid.l} C={candle.mid.c} (Body={body_size:.5f})")
 
         # Section 7: Analyze different time frames
         # ========================================
@@ -420,7 +420,8 @@ async def main() -> None:
                 latest_candle = tf_candles[-1]
                 # Show latest close price for each timeframe
                 # Useful for quick trend alignment check
-                print(f"\n{granularity.value} - Latest close: {latest_candle.mid.c} ({len(tf_candles)} candles)")
+                if latest_candle.mid:
+                    print(f"\n{granularity.value} - Latest close: {latest_candle.mid.c} ({len(tf_candles)} candles)")
 
         # Section 8: Candlestick pattern analysis
         # ========================================
@@ -553,10 +554,12 @@ async def main() -> None:
             # )
             true_ranges = []
             for i in range(1, len(indicator_candles)):
-                if indicator_candles[i].mid and indicator_candles[i - 1].mid:
-                    high = Decimal(indicator_candles[i].mid.h)
-                    low = Decimal(indicator_candles[i].mid.l)
-                    prev_close = Decimal(indicator_candles[i - 1].mid.c)
+                current_mid = indicator_candles[i].mid
+                prev_mid = indicator_candles[i - 1].mid
+                if current_mid and prev_mid:
+                    high = Decimal(current_mid.h)
+                    low = Decimal(current_mid.l)
+                    prev_close = Decimal(prev_mid.c)
 
                     # True range accounts for gaps between candles
                     tr = max(high - low, abs(high - prev_close), abs(low - prev_close))
@@ -632,7 +635,7 @@ async def main() -> None:
 
         # Calculate mid price: (Bid + Ask) / 2
         # This is the "fair" price between buying and selling
-        current_mid = (Decimal(current_price.bids[0].price) + Decimal(current_price.asks[0].price)) / 2
+        live_mid_price = (Decimal(current_price.bids[0].price) + Decimal(current_price.asks[0].price)) / 2
 
         # Get latest M1 (1-minute) candles
         # M1 is the finest granularity commonly used for comparison with real-time prices
@@ -646,7 +649,7 @@ async def main() -> None:
             print("\nEUR/USD Current State:")
 
             # Real-time pricing data
-            print(f"  Live Price (mid): {current_mid:.5f}")
+            print(f"  Live Price (mid): {live_mid_price:.5f}")
             print(f"  Live Time: {current_price.time}")
 
             if latest_m1.mid:
@@ -670,7 +673,7 @@ async def main() -> None:
                     # Calculate movement within this candle
                     # Shows how much price has moved since candle opened
                     candle_open = Decimal(latest_m1.mid.o)
-                    movement = current_mid - candle_open
+                    movement = live_mid_price - candle_open
 
                     # Movement in pips (for EUR/USD, 0.0001 = 1 pip)
                     print(f"  Movement this candle: {movement:.5f} pips")
@@ -678,7 +681,7 @@ async def main() -> None:
                     # Additional insight: How close is candle close to current price?
                     # Should be very close (within milliseconds of lag)
                     candle_close = Decimal(latest_m1.mid.c)
-                    price_diff = abs(current_mid - candle_close)
+                    price_diff = abs(live_mid_price - candle_close)
                     print(f"  Price difference (live vs candle close): {price_diff:.5f}")
                     print("    (Should be very small - candle close tracks current price)")
 

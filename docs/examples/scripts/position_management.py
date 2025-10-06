@@ -210,8 +210,8 @@ async def main() -> None:
         # Negative units = SELL = SHORT position
         order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=2000)
 
-        if order_response.order_fill_transaction:
-            fill = order_response.order_fill_transaction
+        if order_response.get("orderFillTransaction"):
+            fill = order_response["orderFillTransaction"]
             print(f"✅ Position opened at {fill.price}")
 
             # Units: Actual units filled (usually matches request for market orders)
@@ -262,8 +262,8 @@ async def main() -> None:
         # This is the same as opening a position, just opposite direction with smaller size
         partial_close = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=close_50_percent)
 
-        if partial_close.order_fill_transaction:
-            fill = partial_close.order_fill_transaction
+        if partial_close.get("orderFillTransaction"):
+            fill = partial_close["orderFillTransaction"]
             print(f"✅ Partial close at {fill.price}")
 
             # Realized P/L: Profit/loss locked in from this partial close
@@ -354,8 +354,8 @@ async def main() -> None:
             units=-1000,  # Negative for short
         )
 
-        if short_order.order_fill_transaction:
-            print(f"✅ Short position opened at {short_order.order_fill_transaction.price}")
+        if short_order.get("orderFillTransaction"):
+            print(f"✅ Short position opened at {short_order['orderFillTransaction'].price}")
 
             # Now close the short position
             # To close short: Buy back the units you sold
@@ -426,13 +426,15 @@ async def main() -> None:
         if close_all.get("longOrderFillTransaction"):
             long_fill = close_all["longOrderFillTransaction"]
             print(f"✅ Long closed: P/L = {long_fill.pl}")
-            total_pl += Decimal(long_fill.pl)
+            if long_fill.pl is not None:
+                total_pl += Decimal(long_fill.pl)
 
         # Check if short side was closed
         if close_all.get("shortOrderFillTransaction"):
             short_fill = close_all["shortOrderFillTransaction"]
             print(f"✅ Short closed: P/L = {short_fill.pl}")
-            total_pl += Decimal(short_fill.pl)
+            if short_fill.pl is not None:
+                total_pl += Decimal(short_fill.pl)
 
         # Total P/L: Combined profit/loss from both sides
         # This is the actual impact on your account balance

@@ -5,8 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from fivetwenty.endpoints.orders import OrderEndpoints
-from fivetwenty.models import OrderResponse
+from fivetwenty.endpoints.orders import OrderEndpoints, OrderResponse
 
 
 class TestEnhancedOrderEndpoints:

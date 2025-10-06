@@ -125,13 +125,19 @@ async def main() -> None:
 
             # Show type-specific fields
             if txn.type == "ORDER_FILL":
-                print(f"  Instrument: {txn.instrument}")
-                print(f"  Units: {txn.units}")
-                print(f"  Price: {txn.price}")
-                print(f"  P/L: {txn.pl if hasattr(txn, 'pl') else 'N/A'}")
+                if hasattr(txn, "instrument"):
+                    print(f"  Instrument: {txn.instrument}")
+                if hasattr(txn, "units"):
+                    print(f"  Units: {txn.units}")
+                if hasattr(txn, "price"):
+                    print(f"  Price: {txn.price}")
+                if hasattr(txn, "pl"):
+                    print(f"  P/L: {txn.pl}")
             elif txn.type == "ORDER":
-                print(f"  Instrument: {txn.instrument}")
-                print(f"  Units: {txn.units}")
+                if hasattr(txn, "instrument"):
+                    print(f"  Instrument: {txn.instrument}")
+                if hasattr(txn, "units"):
+                    print(f"  Units: {txn.units}")
 
         # Section 4: Get transactions since ID
         print("\n=== 4. Transactions Since ID ===")
@@ -215,8 +221,8 @@ async def main() -> None:
             print(f"\nAnalyzing {len(fills)} order fills...")
 
             # Count wins vs losses
-            wins = sum(1 for txn in fills if hasattr(txn, "pl") and float(txn.pl) > 0)
-            losses = sum(1 for txn in fills if hasattr(txn, "pl") and float(txn.pl) < 0)
+            wins = sum(1 for txn in fills if hasattr(txn, "pl") and txn.pl and float(txn.pl) > 0)
+            losses = sum(1 for txn in fills if hasattr(txn, "pl") and txn.pl and float(txn.pl) < 0)
 
             print(f"  Wins: {wins}")
             print(f"  Losses: {losses}")
