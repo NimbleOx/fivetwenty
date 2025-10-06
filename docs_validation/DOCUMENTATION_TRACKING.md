@@ -10,8 +10,8 @@
 | `[x]` | `tutorials/basic-trading/position-management.md` | Tutorials | 4 |
 | `[x]` | `tutorials/basic-trading/strategy-building.md` | Tutorials | 3 |
 | `[x]` | `tutorials/basic-trading/complete-system.md` | Tutorials | 3 |
-| `[ ]` | `tutorials/advanced-orders/dynamic-management.md` | Tutorials | 8 |
-| `[ ]` | `tutorials/advanced-orders/stop-orders-mit.md` | Tutorials | 6 |
+| `[X]` | `tutorials/advanced-orders/dynamic-management.md` | Tutorials | 8 |
+| `[x]` | `tutorials/advanced-orders/stop-orders-mit.md` | Tutorials | 6 |
 | `[ ]` | `tutorials/advanced-orders/order-strategies.md` | Tutorials | 6 |
 | `[ ]` | `tutorials/account-management.md` | Tutorials | 3 |
 | `[ ]` | `tutorials/risk-management.md` | Tutorials | 4 |

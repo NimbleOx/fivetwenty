@@ -274,7 +274,7 @@ async def execute_strategy_trade(
         total_trades = strategy.strategy_stats["total_trades"]
         assert isinstance(total_trades, int)
         strategy.strategy_stats["total_trades"] = total_trades + 1
-        print(f"   ✓ {direction} ORDER EXECUTED SUCCESSFULLY")
+        print(f"    {direction} ORDER EXECUTED SUCCESSFULLY")
 
     except FiveTwentyError as e:
         print(f"   ERROR: Trade execution failed: {e.message}")
@@ -406,12 +406,12 @@ async def run_complete_trading_strategy(
                 if not has_position:
                     # Look for entry signals
                     if strategy.should_buy():
-                        print("   🔔 BUY SIGNAL DETECTED!")
+                        print("    BUY SIGNAL DETECTED!")
                         await execute_strategy_trade(
                             client, strategy, "BUY", current_price
                         )
                     elif strategy.should_sell():
-                        print("   🔔 SELL SIGNAL DETECTED!")
+                        print("    SELL SIGNAL DETECTED!")
                         await execute_strategy_trade(
                             client, strategy, "SELL", current_price
                         )
@@ -483,7 +483,7 @@ def print_strategy_performance(strategy: SimpleMovingAverageCrossover) -> None:
         print(f"Total P&L: ${total_pnl:+.2f}")
 
         if total_pnl > 0:
-            print("\n✓ Profitable strategy session")
+            print("\n Profitable strategy session")
         elif total_pnl < 0:
             print("\n⚠ Loss detected - review strategy parameters")
         else:
@@ -735,14 +735,14 @@ async def main() -> None:
         print(f"  Trend: {conditions['trend']}")
         print(f"  Volatility: {conditions['volatility']}")
         print(f"  Spread: {conditions['spread']}")
-        print(f"  Tradeable: {'YES ✓' if conditions['tradeable'] else 'NO ✗'}")
+        print(f"  Tradeable: {'YES ' if conditions['tradeable'] else 'NO ✗'}")
 
         if not conditions["tradeable"]:
             print("\n⚠ Market conditions not suitable for trading")
             print("  Reason: Spread too wide (>5 pips)")
             print("  Action: Wait for better conditions")
         else:
-            print("\n✓ Market conditions acceptable for trading")
+            print("\n Market conditions acceptable for trading")
 
         # ==============================================================================
         # STEP 2: DEMONSTRATE DYNAMIC POSITION SIZING
@@ -772,7 +772,7 @@ async def main() -> None:
             position_size = strategy.calculate_dynamic_position_size(
                 account_balance, volatility
             )
-            print(f"  {description:30s} → {position_size:5d} units")
+            print(f"  {description:30s}  {position_size:5d} units")
 
         # ==============================================================================
         # ENHANCEMENT IDEAS FOR PRODUCTION
@@ -1013,7 +1013,7 @@ class StrategyMonitor:
         # 3. Monitoring: Normal operation within acceptable parameters
 
         if total_pnl > 0:
-            return "PROFITABLE ✓"
+            return "PROFITABLE "
         elif total_pnl < -self.MAX_ACCEPTABLE_LOSS:
             return "REVIEW NEEDED ⚠"
         elif (

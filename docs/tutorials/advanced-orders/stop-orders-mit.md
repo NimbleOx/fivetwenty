@@ -158,7 +158,7 @@ async def main() -> None:
         buy_stop_id = buy_stop_response.order_create_transaction["id"]
         sell_stop_id = sell_stop_response.order_create_transaction["id"]
 
-        print("\n✓ Breakout stops successfully placed:")
+        print("\n Breakout stops successfully placed:")
         print(f"  Buy Stop Order ID: {buy_stop_id}")
         print(f"    Trigger: {bullish_trigger:.5f} (bullish breakout)")
         print("    Size: 10,000 units")
@@ -367,7 +367,7 @@ async def main() -> None:
         buy_id = buy_stop.order_create_transaction["id"]
         sell_id = sell_stop.order_create_transaction["id"]
 
-        print("\n✓ Dynamic breakout orders placed:")
+        print("\n Dynamic breakout orders placed:")
         print(f"  Buy Stop ID: {buy_id}")
         print(f"    Trigger: {upper_breakout:.5f}")
         print(f"    Size: {position_size:,} units")
@@ -469,6 +469,7 @@ class MultiTimeframeBreakout:
         Args:
             client: Authenticated AsyncClient for order execution
             account_id: Account ID for trading operations
+
         """
         self.client = client
         self.account_id = account_id
@@ -491,6 +492,7 @@ class MultiTimeframeBreakout:
 
         Returns:
             Dictionary mapping timeframes to their breakout levels and metadata
+
         """
         print(f"\nAnalyzing {instrument} breakout levels across timeframes:")
 
@@ -523,8 +525,9 @@ class MultiTimeframeBreakout:
         for timeframe, levels in breakout_levels.items():
             resistance = levels["resistance"]
             support = levels["support"]
-            assert isinstance(resistance, Decimal)
-            assert isinstance(support, Decimal)
+            if not isinstance(resistance, Decimal) or not isinstance(support, Decimal):
+                msg = f"Expected Decimal types for resistance and support in {timeframe}"
+                raise TypeError(msg)
 
             range_pips = (resistance - support) * 10000
             print(f"  {timeframe}: {support:.5f} - {resistance:.5f} ({range_pips:.0f} pips)")
@@ -546,6 +549,7 @@ class MultiTimeframeBreakout:
 
         Returns:
             List of order IDs for all placed stop orders
+
         """
         # ==============================================================================
         # STEP 1: GET MULTI-TIMEFRAME BREAKOUT ANALYSIS
@@ -584,8 +588,9 @@ class MultiTimeframeBreakout:
 
             resistance = level_data["resistance"]
             support = level_data["support"]
-            assert isinstance(resistance, Decimal)
-            assert isinstance(support, Decimal)
+            if not isinstance(resistance, Decimal) or not isinstance(support, Decimal):
+                msg = f"Expected Decimal types for resistance and support in {timeframe}"
+                raise TypeError(msg)
 
             buy_trigger = resistance + breakout_buffer   # Bullish breakout
             sell_trigger = support - breakout_buffer     # Bearish breakout
@@ -617,14 +622,15 @@ class MultiTimeframeBreakout:
             # ==============================================================================
 
             # Extract order IDs from responses
-            assert buy_stop.order_create_transaction is not None
-            assert sell_stop.order_create_transaction is not None
+            if buy_stop.order_create_transaction is None or sell_stop.order_create_transaction is None:
+                msg = "Order creation transaction missing from response"
+                raise ValueError(msg)
             buy_id = buy_stop.order_create_transaction["id"]
             sell_id = sell_stop.order_create_transaction["id"]
 
             self.active_stops.extend([buy_id, sell_id])
 
-            print(f"  ✓ Stops placed: {scaled_units:,} units each direction")
+            print(f"   Stops placed: {scaled_units:,} units each direction")
             print(f"    Buy trigger: {buy_trigger:.5f} (Order ID: {buy_id})")
             print(f"    Sell trigger: {sell_trigger:.5f} (Order ID: {sell_id})")
 
@@ -848,7 +854,7 @@ async def main() -> None:
         sell_mit_id = sell_mit_response.order_create_transaction["id"]
         buy_mit_id = buy_mit_response.order_create_transaction["id"]
 
-        print("\n✓ Mean reversion MIT orders placed:")
+        print("\n Mean reversion MIT orders placed:")
         print(f"  Sell MIT Order ID: {sell_mit_id}")
         print(f"    Trigger: {upper_reversion:.5f} (fade overbought)")
         print("    Size: 10,000 units short")
@@ -964,6 +970,7 @@ class MomentumBreakout:
         Args:
             client: Authenticated AsyncClient for order execution
             account_id: Account ID for trading operations
+
         """
         self.client = client
         self.account_id = account_id
@@ -984,6 +991,7 @@ class MomentumBreakout:
 
         Returns:
             Tuple of (buy_stop_id, sell_stop_id)
+
         """
         # ==============================================================================
         # STEP 1: GET CURRENT MARKET PRICE FOR CONTEXT
@@ -1082,12 +1090,13 @@ class MomentumBreakout:
         # STEP 5: EXTRACT ORDER IDS AND CONFIRM PLACEMENT
         # ==============================================================================
 
-        assert buy_stop_response.order_create_transaction is not None
-        assert sell_stop_response.order_create_transaction is not None
+        if buy_stop_response.order_create_transaction is None or sell_stop_response.order_create_transaction is None:
+            msg = "Order creation transaction missing from response"
+            raise ValueError(msg)
         buy_stop_id = buy_stop_response.order_create_transaction["id"]
         sell_stop_id = sell_stop_response.order_create_transaction["id"]
 
-        print("\n✓ Momentum-confirmed breakout orders placed:")
+        print("\n Momentum-confirmed breakout orders placed:")
         print(f"  Buy Stop Order ID: {buy_stop_id}")
         print(f"    Trigger: {bullish_trigger:.5f} (resistance + {self.momentum_threshold * 10000:.1f} pips)")
         print(f"    Size: {position_size:,} units long")
@@ -1350,7 +1359,7 @@ async def main() -> None:
         # STEP 4: CONFIRM BATCH PLACEMENT
         # ==============================================================================
 
-        print(f"\n✓ Successfully placed {len(placed_order_ids)} trigger orders:")
+        print(f"\n Successfully placed {len(placed_order_ids)} trigger orders:")
         for i, order_id in enumerate(placed_order_ids, 1):
             order_spec = orders_to_place[i - 1]
             price = order_spec["price"]

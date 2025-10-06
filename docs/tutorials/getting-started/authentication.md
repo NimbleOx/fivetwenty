@@ -69,7 +69,7 @@ async def main() -> None:
 
         # Step 3: Display the results
         # If you see this message, your API credentials are working correctly!
-        print(f"✓ Authentication successful - found {account_count} account(s)")
+        print(f" Authentication successful - found {account_count} account(s)")
         print(f"📋 Configuration: {client.config.summary()}")
 
 
@@ -161,9 +161,9 @@ async def main() -> None:
 
         # Step 3: Display the results
         # The config.summary() method shows your settings without exposing secrets
-        print(f"✓ Auto-loaded configuration: {client.config.summary()}")
-        print(f"✓ Authentication successful: {account_count} account(s) found")
-        print("✓ Ready for trading operations!")
+        print(f" Auto-loaded configuration: {client.config.summary()}")
+        print(f" Authentication successful: {account_count} account(s) found")
+        print(" Ready for trading operations!")
 
 
 # Step 4: Run the tutorial
@@ -503,16 +503,16 @@ token = os.environ["FIVETWENTY_OANDA_TOKEN"]
 account_id = os.environ.get("FIVETWENTY_OANDA_ACCOUNT")
 
 # Step 2: Match your token to the correct environment
-# ✓ CORRECT: Using practice token with practice environment
+#  CORRECT: Using practice token with practice environment
 correct_client = AsyncClient(
     token=token,
     account_id=account_id,
     environment=Environment.PRACTICE,  # Matches practice token
 )
-print("✓ CORRECT: Practice token paired with PRACTICE environment")
+print(" CORRECT: Practice token paired with PRACTICE environment")
 print(f"  Configuration: {correct_client.config.summary()}")
 
-# ❌ WRONG: Don't mix token types with environments
+#  WRONG: Don't mix token types with environments
 # This would fail authentication:
 # wrong_client = AsyncClient(
 #     token=token,  # Practice token
@@ -535,9 +535,9 @@ print(f"  Configuration: {correct_client.config.summary()}")
 #       environment=Environment.LIVE
 #   )
 
-print("\n💡 Always match token type to environment:")
-print("   • Practice tokens → Environment.PRACTICE")
-print("   • Live tokens → Environment.LIVE")
+print("\n Always match token type to environment:")
+print("   • Practice tokens  Environment.PRACTICE")
+print("   • Live tokens  Environment.LIVE")
 
 ```
 

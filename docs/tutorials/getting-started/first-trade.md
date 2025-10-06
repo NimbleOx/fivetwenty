@@ -137,7 +137,7 @@ async def main() -> None:
 
         # Step 5: Show bid price (highest price buyers are willing to pay)
         # Bid represents the price you receive when selling this currency pair
-        print(f"   📉 Bid: {price.bids[0].price if price.bids else 'N/A'} (sell price)")
+        print(f"    Bid: {price.bids[0].price if price.bids else 'N/A'} (sell price)")
 
         # Step 6: Show ask price (lowest price sellers are willing to accept)
         # Ask represents the price you pay when buying this currency pair
@@ -347,8 +347,8 @@ async def main() -> None:
                 )
                 print(f"   Open Trades: {updated_account.open_trade_count}")
 
-                print("\n✅ SUCCESS! Your first trade has been executed successfully!")
-                print("\n📚 Recommended Next Steps:")
+                print("\n SUCCESS! Your first trade has been executed successfully!")
+                print("\n Recommended Next Steps:")
                 print("   • Monitor your position regularly")
                 print("   • Consider setting stop-loss orders for risk management")
                 print("   • Practice with different currency pairs")
@@ -411,11 +411,11 @@ async def close_trade_example() -> None:
 
             # Step 3: Verify order execution and extract trade information
             if not order_response.order_fill_transaction:
-                print("❌ Order was not filled - market may be closed or halted")
+                print(" Order was not filled - market may be closed or halted")
                 return
 
             fill = order_response.order_fill_transaction
-            print("✅ Position opened successfully!")
+            print(" Position opened successfully!")
             print(f"   Trade ID: {fill.id}")
             print(f"   Entry Price: {fill.price}")
             print(f"   Instrument: {fill.instrument}\n")
@@ -453,7 +453,7 @@ async def close_trade_example() -> None:
                 # Step 9: Extract closure details for comprehensive reporting
                 close_fill = close_response["orderFillTransaction"]
 
-                print("✅ Trade closed successfully!")
+                print(" Trade closed successfully!")
                 print(f"   Trade ID: {trade_to_close.id}")
                 print(f"   Instrument: {trade_to_close.instrument}")
                 print(f"   Close Price: {close_fill['price']}")
@@ -473,17 +473,17 @@ async def close_trade_example() -> None:
 
                 # Step 11: Provide lifecycle completion confirmation
                 profit_or_loss = "profit" if float(close_fill["pl"]) >= 0 else "loss"
-                print(f"\n✅ Complete trade lifecycle finished with {profit_or_loss}")
+                print(f"\n Complete trade lifecycle finished with {profit_or_loss}")
             else:
                 # Step 12: Handle failed closure attempt
                 print(
-                    "❌ Failed to close trade - market may be halted or trade already closed"
+                    " Failed to close trade - market may be halted or trade already closed"
                 )
 
         except FiveTwentyError as e:
             # Step 13: Handle trading errors with specific guidance
             # Trading errors may indicate market conditions, permissions, or connectivity issues
-            print(f"❌ Trading Error: {e}")
+            print(f" Trading Error: {e}")
             print("   Troubleshooting:")
             print("   • Verify market hours (forex markets trade 24/5)")
             print("   • Check API token permissions")

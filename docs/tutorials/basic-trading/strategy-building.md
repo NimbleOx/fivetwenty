@@ -318,7 +318,7 @@ async def main() -> None:
         # Update strategy with recent price data from OANDA
         # This calls client.instruments.get_instrument_candles() internally
         if await strategy.update_prices(client):
-            print(f"✓ Loaded {len(strategy.prices)} price points\n")
+            print(f" Loaded {len(strategy.prices)} price points\n")
 
             # ==============================================================================
             # CALCULATE MOVING AVERAGES AND CHECK FOR SIGNALS

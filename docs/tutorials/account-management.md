@@ -136,9 +136,9 @@ async def main() -> None:
     # Multiple clients enable simultaneous management of long and short positions
     async with AsyncClient(config=long_config) as long_client:
         async with AsyncClient(config=short_config) as short_client:
-            print("📈 Executing multi-account hedging strategy")
-            print("📈 Long positions will be managed on dedicated account")
-            print("📉 Short positions will be managed on separate account")
+            print(" Executing multi-account hedging strategy")
+            print(" Long positions will be managed on dedicated account")
+            print(" Short positions will be managed on separate account")
 
             # Step 4: Execute bullish strategy on long account
             # Long account handles all buy positions for the strategy
@@ -157,9 +157,9 @@ async def execute_long_strategy(client: AsyncClient) -> None:
     accounts = await client.accounts.get_accounts()
 
     # Step 2: Confirm successful long account strategy execution
-    print(f"📈 Long strategy executed on account: {client.config.alias}")
-    print(f"✓ Account validation: {len(accounts)} account(s) accessible")
-    print(f"✓ Ready for bullish position management")
+    print(f" Long strategy executed on account: {client.config.alias}")
+    print(f" Account validation: {len(accounts)} account(s) accessible")
+    print(f" Ready for bullish position management")
 
 
 async def execute_short_strategy(client: AsyncClient) -> None:
@@ -170,9 +170,9 @@ async def execute_short_strategy(client: AsyncClient) -> None:
     accounts = await client.accounts.get_accounts()
 
     # Step 2: Confirm successful short account strategy execution
-    print(f"📉 Short strategy executed on account: {client.config.alias}")
-    print(f"✓ Account validation: {len(accounts)} account(s) accessible")
-    print(f"✓ Ready for bearish position management and hedging")
+    print(f" Short strategy executed on account: {client.config.alias}")
+    print(f" Account validation: {len(accounts)} account(s) accessible")
+    print(f" Ready for bearish position management and hedging")
 
 
 # Execute the multi-account hedging strategy
