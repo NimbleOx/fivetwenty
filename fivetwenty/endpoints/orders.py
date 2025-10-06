@@ -17,36 +17,61 @@ from typing import TYPE_CHECKING, Any, TypedDict
 from .._internal.utils import quantize_price
 from ..models import (
     AccountID,
+    FixedPriceOrder,
+    GuaranteedStopLossOrder,
     GuaranteedStopLossOrderRequest,
     InstrumentName,
+    LimitOrder,
     LimitOrderRequest,
+    MarketIfTouchedOrder,
     MarketIfTouchedOrderRequest,
+    MarketOrder,
     MarketOrderRequest,
+    OrderCancelTransaction,
+    OrderClientExtensionsModifyTransaction,
+    OrderFillTransaction,
     OrderResponse,
     StopLossDetails,
+    StopLossOrder,
     StopLossOrderRequest,
+    StopOrder,
     StopOrderRequest,
     TakeProfitDetails,
+    TakeProfitOrder,
     TakeProfitOrderRequest,
     TimeInForce,
+    TrailingStopLossOrder,
     TrailingStopLossOrderRequest,
 )
 
 if TYPE_CHECKING:
     from ..client import AsyncClient
 
+# Union type for all possible order types returned by the API
+Order = (
+    MarketOrder
+    | LimitOrder
+    | StopOrder
+    | MarketIfTouchedOrder
+    | TakeProfitOrder
+    | StopLossOrder
+    | GuaranteedStopLossOrder
+    | TrailingStopLossOrder
+    | FixedPriceOrder
+)
+
 
 class GetOrderResponse(TypedDict):
     """Response from get_order endpoint."""
 
-    order: Any
+    order: Order
     lastTransactionID: str
 
 
 class CancelOrderResponse(TypedDict, total=False):
     """Response from cancel_order endpoint."""
 
-    orderCancelTransaction: Any
+    orderCancelTransaction: OrderCancelTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
 
@@ -54,16 +79,16 @@ class CancelOrderResponse(TypedDict, total=False):
 class PendingOrdersResponse(TypedDict):
     """Response from get_pending_orders endpoint."""
 
-    orders: list[Any]
+    orders: list[Order]
     lastTransactionID: str
 
 
 class ReplaceOrderResponse(TypedDict, total=False):
     """Response from put_order endpoint."""
 
-    orderCancelTransaction: Any
-    orderCreateTransaction: Any
-    orderFillTransaction: Any
+    orderCancelTransaction: OrderCancelTransaction
+    orderCreateTransaction: Order
+    orderFillTransaction: OrderFillTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
 
@@ -71,7 +96,7 @@ class ReplaceOrderResponse(TypedDict, total=False):
 class OrderClientExtensionsResponse(TypedDict, total=False):
     """Response from put_order_client_extensions endpoint."""
 
-    orderClientExtensionsModifyTransaction: Any
+    orderClientExtensionsModifyTransaction: OrderClientExtensionsModifyTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
 
@@ -423,7 +448,7 @@ class OrderEndpoints:
         instrument: str | None = None,
         count: int = 50,
         before_id: str | None = None,
-    ) -> list[dict[str, Any]]:
+    ) -> list[Order]:
         """
         List orders for an account.
 
@@ -436,7 +461,7 @@ class OrderEndpoints:
             before_id: Get orders before this ID
 
         Returns:
-            List of orders
+            List of order models
 
         Raises:
             FiveTwentyError: On API errors
@@ -460,7 +485,8 @@ class OrderEndpoints:
         )
         data = response.json()
 
-        return data.get("orders", [])  # type: ignore[no-any-return]
+        # Parse each order based on its type field
+        return [self._parse_order(order_data) for order_data in data.get("orders", [])]
 
     async def get_order(self, account_id: AccountID, order_specifier: str) -> GetOrderResponse:
         """
@@ -483,7 +509,7 @@ class OrderEndpoints:
         data = response.json()
 
         return {
-            "order": data["order"],
+            "order": self._parse_order(data["order"]),
             "lastTransactionID": data["lastTransactionID"],
         }
 
@@ -521,7 +547,17 @@ class OrderEndpoints:
             headers=headers,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        result: CancelOrderResponse = {
+            "lastTransactionID": data["lastTransactionID"],
+        }
+
+        if "orderCancelTransaction" in data:
+            result["orderCancelTransaction"] = OrderCancelTransaction.model_validate(data["orderCancelTransaction"])
+        if "relatedTransactionIDs" in data:
+            result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
+
+        return result
 
     async def get_pending_orders(
         self,
@@ -547,7 +583,12 @@ class OrderEndpoints:
             f"/accounts/{account_id}/pendingOrders",
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+
+        return {
+            "orders": [self._parse_order(order_data) for order_data in data.get("orders", [])],
+            "lastTransactionID": data["lastTransactionID"],
+        }
 
     async def put_order(
         self,
@@ -588,7 +629,21 @@ class OrderEndpoints:
             headers=headers,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        result: ReplaceOrderResponse = {
+            "lastTransactionID": data["lastTransactionID"],
+        }
+
+        if "orderCancelTransaction" in data:
+            result["orderCancelTransaction"] = OrderCancelTransaction.model_validate(data["orderCancelTransaction"])
+        if "orderCreateTransaction" in data:
+            result["orderCreateTransaction"] = self._parse_order(data["orderCreateTransaction"])
+        if "orderFillTransaction" in data:
+            result["orderFillTransaction"] = OrderFillTransaction.model_validate(data["orderFillTransaction"])
+        if "relatedTransactionIDs" in data:
+            result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
+
+        return result
 
     async def put_order_client_extensions(
         self,
@@ -632,7 +687,19 @@ class OrderEndpoints:
             json_data=body,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        result: OrderClientExtensionsResponse = {
+            "lastTransactionID": data["lastTransactionID"],
+        }
+
+        if "orderClientExtensionsModifyTransaction" in data:
+            result["orderClientExtensionsModifyTransaction"] = OrderClientExtensionsModifyTransaction.model_validate(
+                data["orderClientExtensionsModifyTransaction"]
+            )
+        if "relatedTransactionIDs" in data:
+            result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
+
+        return result
 
     async def _get_precision(self, account_id: AccountID, instrument: str) -> int:
         """
@@ -654,6 +721,42 @@ class OrderEndpoints:
         precision: int = instruments_data[0].display_precision
         self._precision_cache[instrument] = precision
         return precision
+
+    def _parse_order(self, order_data: dict[str, Any]) -> Order:  # noqa: PLR0911
+        """
+        Parse order data into the appropriate Order model based on type discriminator.
+
+        Args:
+            order_data: Raw order data from API response
+
+        Returns:
+            Parsed Order model (MarketOrder, LimitOrder, StopOrder, etc.)
+
+        Raises:
+            ValueError: If order type is unknown
+        """
+        order_type = order_data.get("type")
+
+        if order_type == "MARKET":
+            return MarketOrder.model_validate(order_data)
+        if order_type == "LIMIT":
+            return LimitOrder.model_validate(order_data)
+        if order_type == "STOP":
+            return StopOrder.model_validate(order_data)
+        if order_type == "MARKET_IF_TOUCHED":
+            return MarketIfTouchedOrder.model_validate(order_data)
+        if order_type == "TAKE_PROFIT":
+            return TakeProfitOrder.model_validate(order_data)
+        if order_type == "STOP_LOSS":
+            return StopLossOrder.model_validate(order_data)
+        if order_type == "GUARANTEED_STOP_LOSS":
+            return GuaranteedStopLossOrder.model_validate(order_data)
+        if order_type == "TRAILING_STOP_LOSS":
+            return TrailingStopLossOrder.model_validate(order_data)
+        if order_type == "FIXED_PRICE":
+            return FixedPriceOrder.model_validate(order_data)
+
+        raise ValueError(f"Unknown order type: {order_type}")
 
     # =========================================================================
     # INTENTIONALLY OMITTED CONVENIENCE METHODS
