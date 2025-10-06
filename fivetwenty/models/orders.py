@@ -7,12 +7,8 @@ order details, and order responses used by the OANDA REST API.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
 
 from pydantic import Field
-
-if TYPE_CHECKING:
-    from .transactions import OrderCancelTransaction, OrderFillTransaction
 
 from .base import ApiModel
 from .enums import (
