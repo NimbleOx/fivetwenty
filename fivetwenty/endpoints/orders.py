@@ -63,41 +63,13 @@ if TYPE_CHECKING:
     from ..client import AsyncClient
 
 # Union type for all possible order types returned by the API
-Order = (
-    MarketOrder
-    | LimitOrder
-    | StopOrder
-    | MarketIfTouchedOrder
-    | TakeProfitOrder
-    | StopLossOrder
-    | GuaranteedStopLossOrder
-    | TrailingStopLossOrder
-    | FixedPriceOrder
-)
+Order = MarketOrder | LimitOrder | StopOrder | MarketIfTouchedOrder | TakeProfitOrder | StopLossOrder | GuaranteedStopLossOrder | TrailingStopLossOrder | FixedPriceOrder
 
 # Union type for order creation transactions
-OrderCreateTransaction = (
-    MarketOrderTransaction
-    | LimitOrderTransaction
-    | StopOrderTransaction
-    | MarketIfTouchedOrderTransaction
-    | TakeProfitOrderTransaction
-    | StopLossOrderTransaction
-    | TrailingStopLossOrderTransaction
-    | GuaranteedStopLossOrderTransaction
-)
+OrderCreateTransaction = MarketOrderTransaction | LimitOrderTransaction | StopOrderTransaction | MarketIfTouchedOrderTransaction | TakeProfitOrderTransaction | StopLossOrderTransaction | TrailingStopLossOrderTransaction | GuaranteedStopLossOrderTransaction
 
 # Union type for order rejection transactions
-OrderRejectTransaction = (
-    MarketOrderRejectTransaction
-    | LimitOrderRejectTransaction
-    | StopOrderRejectTransaction
-    | MarketIfTouchedOrderRejectTransaction
-    | TakeProfitOrderRejectTransaction
-    | StopLossOrderRejectTransaction
-    | TrailingStopLossOrderRejectTransaction
-    | GuaranteedStopLossOrderRejectTransaction
-)
+OrderRejectTransaction = MarketOrderRejectTransaction | LimitOrderRejectTransaction | StopOrderRejectTransaction | MarketIfTouchedOrderRejectTransaction | TakeProfitOrderRejectTransaction | StopLossOrderRejectTransaction | TrailingStopLossOrderRejectTransaction | GuaranteedStopLossOrderRejectTransaction
 
 
 class OrderResponse(TypedDict, total=False):
@@ -762,9 +734,7 @@ class OrderEndpoints:
         }
 
         if "orderClientExtensionsModifyTransaction" in data:
-            result["orderClientExtensionsModifyTransaction"] = OrderClientExtensionsModifyTransaction.model_validate(
-                data["orderClientExtensionsModifyTransaction"]
-            )
+            result["orderClientExtensionsModifyTransaction"] = OrderClientExtensionsModifyTransaction.model_validate(data["orderClientExtensionsModifyTransaction"])
         if "relatedTransactionIDs" in data:
             result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
 
