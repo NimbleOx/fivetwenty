@@ -284,9 +284,7 @@ class TradeEndpoints:
         }
 
         if "tradeClientExtensionsModifyTransaction" in response_data:
-            result["tradeClientExtensionsModifyTransaction"] = TradeClientExtensionsModifyTransaction.model_validate(
-                response_data["tradeClientExtensionsModifyTransaction"]
-            )
+            result["tradeClientExtensionsModifyTransaction"] = TradeClientExtensionsModifyTransaction.model_validate(response_data["tradeClientExtensionsModifyTransaction"])
         if "relatedTransactionIDs" in response_data:
             result["relatedTransactionIDs"] = response_data["relatedTransactionIDs"]
 
@@ -350,56 +348,32 @@ class TradeEndpoints:
 
         # Parse all possible transaction fields
         if "takeProfitOrderCancelTransaction" in response_data:
-            result["takeProfitOrderCancelTransaction"] = OrderCancelTransaction.model_validate(
-                response_data["takeProfitOrderCancelTransaction"]
-            )
+            result["takeProfitOrderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["takeProfitOrderCancelTransaction"])
         if "takeProfitOrderTransaction" in response_data:
-            result["takeProfitOrderTransaction"] = TakeProfitOrderTransaction.model_validate(
-                response_data["takeProfitOrderTransaction"]
-            )
+            result["takeProfitOrderTransaction"] = TakeProfitOrderTransaction.model_validate(response_data["takeProfitOrderTransaction"])
         if "takeProfitOrderFillTransaction" in response_data:
-            result["takeProfitOrderFillTransaction"] = OrderFillTransaction.model_validate(
-                response_data["takeProfitOrderFillTransaction"]
-            )
+            result["takeProfitOrderFillTransaction"] = OrderFillTransaction.model_validate(response_data["takeProfitOrderFillTransaction"])
         if "takeProfitOrderCreatedCancelTransaction" in response_data:
-            result["takeProfitOrderCreatedCancelTransaction"] = OrderCancelTransaction.model_validate(
-                response_data["takeProfitOrderCreatedCancelTransaction"]
-            )
+            result["takeProfitOrderCreatedCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["takeProfitOrderCreatedCancelTransaction"])
 
         if "stopLossOrderCancelTransaction" in response_data:
-            result["stopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(
-                response_data["stopLossOrderCancelTransaction"]
-            )
+            result["stopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["stopLossOrderCancelTransaction"])
         if "stopLossOrderTransaction" in response_data:
-            result["stopLossOrderTransaction"] = StopLossOrderTransaction.model_validate(
-                response_data["stopLossOrderTransaction"]
-            )
+            result["stopLossOrderTransaction"] = StopLossOrderTransaction.model_validate(response_data["stopLossOrderTransaction"])
         if "stopLossOrderFillTransaction" in response_data:
-            result["stopLossOrderFillTransaction"] = OrderFillTransaction.model_validate(
-                response_data["stopLossOrderFillTransaction"]
-            )
+            result["stopLossOrderFillTransaction"] = OrderFillTransaction.model_validate(response_data["stopLossOrderFillTransaction"])
         if "stopLossOrderCreatedCancelTransaction" in response_data:
-            result["stopLossOrderCreatedCancelTransaction"] = OrderCancelTransaction.model_validate(
-                response_data["stopLossOrderCreatedCancelTransaction"]
-            )
+            result["stopLossOrderCreatedCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["stopLossOrderCreatedCancelTransaction"])
 
         if "trailingStopLossOrderTransaction" in response_data:
-            result["trailingStopLossOrderTransaction"] = TrailingStopLossOrderTransaction.model_validate(
-                response_data["trailingStopLossOrderTransaction"]
-            )
+            result["trailingStopLossOrderTransaction"] = TrailingStopLossOrderTransaction.model_validate(response_data["trailingStopLossOrderTransaction"])
         if "trailingStopLossOrderCancelTransaction" in response_data:
-            result["trailingStopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(
-                response_data["trailingStopLossOrderCancelTransaction"]
-            )
+            result["trailingStopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["trailingStopLossOrderCancelTransaction"])
 
         if "guaranteedStopLossOrderTransaction" in response_data:
-            result["guaranteedStopLossOrderTransaction"] = GuaranteedStopLossOrderTransaction.model_validate(
-                response_data["guaranteedStopLossOrderTransaction"]
-            )
+            result["guaranteedStopLossOrderTransaction"] = GuaranteedStopLossOrderTransaction.model_validate(response_data["guaranteedStopLossOrderTransaction"])
         if "guaranteedStopLossOrderCancelTransaction" in response_data:
-            result["guaranteedStopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(
-                response_data["guaranteedStopLossOrderCancelTransaction"]
-            )
+            result["guaranteedStopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["guaranteedStopLossOrderCancelTransaction"])
 
         if "relatedTransactionIDs" in response_data:
             result["relatedTransactionIDs"] = response_data["relatedTransactionIDs"]
