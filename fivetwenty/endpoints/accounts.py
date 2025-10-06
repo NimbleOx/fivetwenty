@@ -3,7 +3,16 @@
 import builtins
 from typing import TYPE_CHECKING, Any, TypedDict
 
-from ..models import Account, AccountID, AccountProperties, AccountSummary, Instrument
+from ..models import (
+    Account,
+    AccountChanges,
+    AccountChangesState,
+    AccountID,
+    AccountProperties,
+    AccountSummary,
+    ClientConfigureTransaction,
+    Instrument,
+)
 
 if TYPE_CHECKING:
     from ..client import AsyncClient
@@ -27,6 +36,21 @@ class AccountInstrumentsResponse(TypedDict):
     """Response from get_account_instruments endpoint."""
 
     instruments: list[Instrument]
+    lastTransactionID: str
+
+
+class AccountConfigurationResponse(TypedDict):
+    """Response from patch_account_configuration endpoint."""
+
+    clientConfigureTransaction: ClientConfigureTransaction
+    lastTransactionID: str
+
+
+class AccountChangesResponse(TypedDict):
+    """Response from get_account_changes endpoint."""
+
+    changes: AccountChanges
+    state: AccountChangesState
     lastTransactionID: str
 
 
@@ -134,7 +158,7 @@ class AccountEndpoints:
         *,
         alias: str | None = None,
         margin_rate: str | None = None,
-    ) -> dict[str, Any]:
+    ) -> AccountConfigurationResponse:
         """
         Update account configuration settings.
 
@@ -147,7 +171,7 @@ class AccountEndpoints:
             margin_rate: New margin rate as decimal string (e.g., "0.05" for 5%)
 
         Returns:
-            Dictionary containing configuration update results
+            Dictionary containing configuration transaction and lastTransactionID
 
         Raises:
             FiveTwentyError: On API errors
@@ -168,14 +192,18 @@ class AccountEndpoints:
             json=body,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "clientConfigureTransaction": ClientConfigureTransaction.model_validate(data["clientConfigureTransaction"]),
+            "lastTransactionID": data["lastTransactionID"],
+        }
 
     async def get_account_changes(
         self,
         account_id: AccountID,
         *,
         since_transaction_id: str,
-    ) -> dict[str, Any]:
+    ) -> AccountChangesResponse:
         """
         Get account changes since a specific transaction ID.
 
@@ -188,7 +216,7 @@ class AccountEndpoints:
             since_transaction_id: Get changes since this transaction ID (required)
 
         Returns:
-            Dictionary containing account state changes and current state
+            Dictionary containing changes, state, and lastTransactionID
 
         Raises:
             FiveTwentyError: On API errors
@@ -201,4 +229,9 @@ class AccountEndpoints:
             params=params,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "changes": AccountChanges.model_validate(data["changes"]),
+            "state": AccountChangesState.model_validate(data["state"]),
+            "lastTransactionID": data["lastTransactionID"],
+        }

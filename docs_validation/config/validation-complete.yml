@@ -52,6 +52,8 @@ validators:
         - "INP001"  # Missing __init__.py
         # Allow educational print statements in tutorials
         - "T201"    # Print statements
+        # Allow direct imports in documentation examples
+        - "TC001"   # Move imports into TYPE_CHECKING block (not needed in docs)
         # Relax some documentation-specific rules
         - "D100"    # Missing module docstrings (for small examples)
         - "ANN401"  # Allow Any in examples for simplicity
@@ -143,6 +145,10 @@ validators:
         - "docs/tutorials/basic-trading/position-management.md"
         - "docs/tutorials/basic-trading/strategy-building.md"
         - "docs/tutorials/basic-trading/complete-system.md"
+        - "docs/tutorials/advanced-orders/index.md"
+        - "docs/tutorials/advanced-orders/dynamic-management.md"
+        - "docs/tutorials/advanced-orders/order-strategies.md"
+        - "docs/tutorials/advanced-orders/stop-orders-mit.md"
         # Add more files as they become fully standalone/executable
 
       # Mock API calls when executing code (prevents real API calls)

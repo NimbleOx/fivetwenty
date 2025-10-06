@@ -47,7 +47,6 @@ AccountChanges.model_rebuild()
 Account.model_rebuild()
 AccountSummary.model_rebuild()
 Trade.model_rebuild()
-OrderResponse.model_rebuild()
 
 __all__ = [
     "Account",
@@ -75,7 +74,6 @@ __all__ = [
     "Candlestick",
     "CandlestickData",
     "CandlestickGranularity",
-    "CandlestickResponse",
     "ClientConfigureRejectTransaction",
     "ClientConfigureTransaction",
     # Order supporting models
@@ -146,7 +144,6 @@ __all__ = [
     "OrderFillTransaction",
     "OrderID",
     "OrderPositionFill",
-    "OrderResponse",
     "OrderState",
     "OrderStateFilter",
     "OrderTriggerCondition",

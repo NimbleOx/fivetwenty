@@ -107,8 +107,8 @@ async def main() -> None:
         order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
         # Check if order was filled (it should be - market orders fill immediately)
-        if order_response.order_fill_transaction:
-            fill = order_response.order_fill_transaction
+        if order_response.get("orderFillTransaction"):
+            fill = order_response["orderFillTransaction"]
             print("✅ Order filled!")
 
             # Transaction ID: Unique identifier for this fill (useful for tracking/auditing)
@@ -130,7 +130,7 @@ async def main() -> None:
         else:
             # Rare case - market order didn't fill (market closed, insufficient margin, etc.)
             print("❌ Order was not filled")
-            print(f"Order Create Transaction: {order_response.order_create_transaction}")
+            print(f"Order Create Transaction: {order_response.get('orderCreateTransaction')}")
 
         # Section 5: Check positions
         # ==========================
@@ -186,8 +186,8 @@ async def main() -> None:
             units=-1000,  # Negative to close long position
         )
 
-        if close_response.order_fill_transaction:
-            close_fill = close_response.order_fill_transaction
+        if close_response.get("orderFillTransaction"):
+            close_fill = close_response["orderFillTransaction"]
             print("✅ Position closed!")
             print(f"Transaction ID: {close_fill.id}")
             print(f"Close Price: {close_fill.price}")

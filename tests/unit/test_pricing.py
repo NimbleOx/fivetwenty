@@ -15,9 +15,56 @@ class TestEnhancedPricingEndpoints:
     def mock_client(self):
         """Create a mock async client."""
         client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"mock": "data"}
-        client._request = AsyncMock(return_value=mock_response)
+
+        def side_effect(method, path, **kwargs):
+            """Return different responses based on endpoint."""
+            mock_response = MagicMock()
+
+            # Latest candles endpoint
+            if "/candles/latest" in path:
+                mock_response.json.return_value = {
+                    "latestCandles": [
+                        {
+                            "instrument": "EUR_USD",
+                            "granularity": "H1",
+                            "candles": [
+                                {
+                                    "time": "2024-01-15T14:00:00.000000000Z",
+                                    "complete": True,
+                                    "volume": 100,
+                                    "mid": {"o": "1.1000", "h": "1.1050", "l": "1.0950", "c": "1.1025"},
+                                }
+                            ],
+                        }
+                    ]
+                }
+            # Account instrument candles endpoint
+            elif "/instruments/" in path and "/candles" in path:
+                mock_response.json.return_value = {
+                    "instrument": "EUR_USD",
+                    "granularity": "S5",
+                    "candles": [
+                        {
+                            "time": "2024-01-15T14:00:00.000000000Z",
+                            "complete": True,
+                            "volume": 50,
+                            "mid": {"o": "1.1000", "h": "1.1010", "l": "1.0995", "c": "1.1005"},
+                        }
+                    ],
+                }
+            # Pricing endpoint
+            elif "/pricing" in path:
+                mock_response.json.return_value = {
+                    "prices": [],
+                    "time": "2024-01-15T14:30:00.000000000Z",
+                    "homeConversions": [],
+                }
+            else:
+                mock_response.json.return_value = {"mock": "data"}
+
+            return mock_response
+
+        client._request = AsyncMock(side_effect=side_effect)
         return client
 
     @pytest.fixture

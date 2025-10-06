@@ -12,7 +12,6 @@ from pydantic import Field
 
 from .base import ApiModel
 from .enums import (
-    CandlestickGranularity,
     Currency,
     InstrumentName,
     PriceStatus,
@@ -102,14 +101,6 @@ class Candlestick(ApiModel):
     mid: CandlestickData | None = None
 
 
-class CandlestickResponse(ApiModel):
-    """Container for multiple candlesticks with metadata."""
-
-    instrument: InstrumentName
-    granularity: CandlestickGranularity
-    candles: list[Candlestick]
-
-
 class OrderBook(ApiModel):
     """Represents an order book for an instrument."""
 
@@ -128,7 +119,6 @@ class OrderBook(ApiModel):
 __all__ = [
     "Candlestick",
     "CandlestickData",
-    "CandlestickResponse",
     "ClientPrice",
     "HomeConversions",
     "OrderBook",

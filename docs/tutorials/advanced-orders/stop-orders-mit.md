@@ -622,11 +622,11 @@ class MultiTimeframeBreakout:
             # ==============================================================================
 
             # Extract order IDs from responses
-            if buy_stop.order_create_transaction is None or sell_stop.order_create_transaction is None:
+            if buy_stop.get("orderCreateTransaction") is None or sell_stop.get("orderCreateTransaction") is None:
                 msg = "Order creation transaction missing from response"
                 raise ValueError(msg)
-            buy_id = buy_stop.order_create_transaction["id"]
-            sell_id = sell_stop.order_create_transaction["id"]
+            buy_id = buy_stop["orderCreateTransaction"].id
+            sell_id = sell_stop["orderCreateTransaction"].id
 
             self.active_stops.extend([buy_id, sell_id])
 
@@ -1090,11 +1090,11 @@ class MomentumBreakout:
         # STEP 5: EXTRACT ORDER IDS AND CONFIRM PLACEMENT
         # ==============================================================================
 
-        if buy_stop_response.order_create_transaction is None or sell_stop_response.order_create_transaction is None:
+        if buy_stop_response.get("orderCreateTransaction") is None or sell_stop_response.get("orderCreateTransaction") is None:
             msg = "Order creation transaction missing from response"
             raise ValueError(msg)
-        buy_stop_id = buy_stop_response.order_create_transaction["id"]
-        sell_stop_id = sell_stop_response.order_create_transaction["id"]
+        buy_stop_id = buy_stop_response["orderCreateTransaction"].id
+        sell_stop_id = sell_stop_response["orderCreateTransaction"].id
 
         print("\n Momentum-confirmed breakout orders placed:")
         print(f"  Buy Stop Order ID: {buy_stop_id}")

@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from fivetwenty.endpoints.orders import OrderEndpoints
-from fivetwenty.models import OrderResponse
 
 
 class TestEnhancedOrderEndpoints:
@@ -16,9 +15,180 @@ class TestEnhancedOrderEndpoints:
     def mock_client(self):
         """Create a mock async client."""
         client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"orderCreateTransaction": {"id": "12345", "type": "ORDER_CREATE", "instrument": "EUR_USD", "units": "1000"}, "lastTransactionID": "12345"}
-        client._request = AsyncMock(return_value=mock_response)
+
+        # Create a side effect function that returns appropriate responses based on the request
+        async def mock_request(method, path, **kwargs):
+            mock_response = MagicMock()
+
+            # For POST /accounts/{id}/orders - order creation
+            if method == "POST" and "/orders" in path and "/cancel" not in path and "/clientExtensions" not in path:
+                mock_response.json.return_value = {
+                    "orderCreateTransaction": {
+                        "id": "12345",
+                        "type": "MARKET_ORDER",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12345",
+                        "requestID": "12345",
+                        "instrument": "EUR_USD",
+                        "units": "1000",
+                        "timeInForce": "FOK",
+                        "positionFill": "DEFAULT",
+                        "reason": "CLIENT_ORDER",
+                    },
+                    "orderFillTransaction": {
+                        "id": "12346",
+                        "type": "ORDER_FILL",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12345",
+                        "requestID": "12345",
+                        "orderID": "12345",
+                        "instrument": "EUR_USD",
+                        "units": "1000",
+                        "price": "1.10000",
+                        "pl": "0.0000",
+                        "financing": "0.0000",
+                        "commission": "0.0000",
+                        "accountBalance": "100000.0000",
+                        "reason": "MARKET_ORDER",
+                    },
+                    "relatedTransactionIDs": ["12345", "12346"],
+                    "lastTransactionID": "12346",
+                }
+            # For GET /accounts/{id}/orders/{order_id} - get specific order
+            elif method == "GET" and "/orders/" in path and not path.endswith("/orders"):
+                order_id = path.split("/")[-1]
+                mock_response.json.return_value = {
+                    "order": {
+                        "id": order_id,
+                        "createTime": "2024-01-01T00:00:00.000000000Z",
+                        "state": "PENDING",
+                        "type": "LIMIT",
+                        "instrument": "EUR_USD",
+                        "units": "1000",
+                        "price": "1.10000",
+                        "timeInForce": "GTC",
+                        "positionFill": "DEFAULT",
+                        "triggerCondition": "DEFAULT",
+                    },
+                    "lastTransactionID": "6789",
+                }
+            # For GET /accounts/{id}/orders - list orders
+            elif method == "GET" and path.endswith("/orders"):
+                mock_response.json.return_value = {
+                    "orders": [
+                        {
+                            "id": "12345",
+                            "createTime": "2024-01-01T00:00:00.000000000Z",
+                            "state": "PENDING",
+                            "type": "LIMIT",
+                            "instrument": "EUR_USD",
+                            "units": "1000",
+                            "price": "1.10000",
+                            "timeInForce": "GTC",
+                            "positionFill": "DEFAULT",
+                            "triggerCondition": "DEFAULT",
+                        },
+                        {
+                            "id": "12346",
+                            "createTime": "2024-01-01T00:00:00.000000000Z",
+                            "state": "PENDING",
+                            "type": "LIMIT",
+                            "instrument": "GBP_USD",
+                            "units": "500",
+                            "price": "1.25000",
+                            "timeInForce": "GTC",
+                            "positionFill": "DEFAULT",
+                            "triggerCondition": "DEFAULT",
+                        },
+                    ]
+                }
+            # For GET /accounts/{id}/pendingOrders
+            elif method == "GET" and "/pendingOrders" in path:
+                mock_response.json.return_value = {
+                    "orders": [],
+                    "lastTransactionID": "12345",
+                }
+            # For PUT /accounts/{id}/orders/{id}/cancel
+            elif method == "PUT" and "/cancel" in path:
+                mock_response.json.return_value = {
+                    "orderCancelTransaction": {
+                        "id": "12346",
+                        "type": "ORDER_CANCEL",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12346",
+                        "requestID": "12346",
+                        "orderID": "12345",
+                        "reason": "CLIENT_REQUEST",
+                    },
+                    "relatedTransactionIDs": ["12346"],
+                    "lastTransactionID": "12346",
+                }
+            # For PUT /accounts/{id}/orders/{id}/clientExtensions
+            elif method == "PUT" and "/clientExtensions" in path:
+                mock_response.json.return_value = {
+                    "orderClientExtensionsModifyTransaction": {
+                        "id": "12347",
+                        "type": "ORDER_CLIENT_EXTENSIONS_MODIFY",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12347",
+                        "requestID": "12347",
+                        "orderID": "12345",
+                        "clientExtensionsModify": {
+                            "id": "my_order_id",
+                            "tag": "strategy_v1",
+                            "comment": "Breakout trade",
+                        },
+                    },
+                    "relatedTransactionIDs": ["12347"],
+                    "lastTransactionID": "12347",
+                }
+            # For PUT /accounts/{id}/orders/{id} - replace order
+            elif method == "PUT" and "/orders/" in path and "/cancel" not in path and "/clientExtensions" not in path:
+                mock_response.json.return_value = {
+                    "orderCancelTransaction": {
+                        "id": "12346",
+                        "type": "ORDER_CANCEL",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12346",
+                        "requestID": "12346",
+                        "orderID": "12345",
+                        "reason": "CLIENT_REQUEST_REPLACED",
+                    },
+                    "orderCreateTransaction": {
+                        "id": "12347",
+                        "type": "LIMIT_ORDER",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12346",
+                        "requestID": "12346",
+                        "instrument": "EUR_USD",
+                        "units": "1000",
+                        "price": "1.12000",
+                        "timeInForce": "GTC",
+                        "positionFill": "DEFAULT",
+                        "triggerCondition": "DEFAULT",
+                        "reason": "REPLACEMENT",
+                    },
+                    "relatedTransactionIDs": ["12346", "12347"],
+                    "lastTransactionID": "12347",
+                }
+            else:
+                mock_response.json.return_value = {"mock": "data"}
+
+            return mock_response
+
+        client._request = AsyncMock(side_effect=mock_request)
         return client
 
     @pytest.fixture
@@ -29,13 +199,11 @@ class TestEnhancedOrderEndpoints:
     @pytest.mark.asyncio
     async def test_get_orders_basic(self, orders, mock_client):
         """Test basic order listing."""
-        mock_client._request.return_value.json.return_value = {"orders": [{"id": "12345", "instrument": "EUR_USD", "state": "PENDING"}, {"id": "12346", "instrument": "GBP_USD", "state": "PENDING"}]}
-
         result = await orders.get_orders("101-001-123456-001")
 
         mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/orders", params={"state": "PENDING", "count": 50})
         assert len(result) == 2
-        assert result[0]["id"] == "12345"
+        assert result[0].id == "12345"
 
     @pytest.mark.asyncio
     async def test_get_orders_with_filters(self, orders, mock_client):
@@ -49,13 +217,11 @@ class TestEnhancedOrderEndpoints:
     @pytest.mark.asyncio
     async def test_get_order(self, orders, mock_client):
         """Test getting specific order details."""
-        mock_client._request.return_value.json.return_value = {"order": {"id": "12345", "instrument": "EUR_USD", "state": "PENDING", "type": "LIMIT"}, "lastTransactionID": "6789"}
-
         result = await orders.get_order("101-001-123456-001", "12345")
 
         mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/orders/12345")
-        assert result["order"]["id"] == "12345"
-        assert result["order"]["instrument"] == "EUR_USD"
+        assert result["order"].id == "12345"
+        assert result["order"].instrument == "EUR_USD"
         assert result["lastTransactionID"] == "6789"
 
     @pytest.mark.asyncio
@@ -195,7 +361,8 @@ class TestEnhancedOrderEndpoints:
         mock_client._request.assert_called_once_with(
             "POST", "/accounts/101-001-123456-001/orders", json_data={"order": {"type": "LIMIT", "instrument": "EUR_USD", "units": "1000", "price": "1.10000", "timeInForce": "GTC", "positionFill": "DEFAULT", "triggerCondition": "DEFAULT"}}, timeout=None, headers={"ClientRequestID": "core-test-001"}
         )
-        assert isinstance(result, OrderResponse)
+        assert "orderCreateTransaction" in result
+        assert result["lastTransactionID"] == "12346"
 
     @pytest.mark.asyncio
     async def test_post_order_without_client_request_id(self, orders, mock_client):
@@ -264,9 +431,55 @@ class TestOrderConvenienceMethods:
     def mock_client(self):
         """Create a mock async client."""
         client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"orderCreateTransaction": {"id": "12345", "type": "ORDER_CREATE", "instrument": "EUR_USD", "units": "1000"}, "lastTransactionID": "12345"}
-        client._request = AsyncMock(return_value=mock_response)
+
+        # Create a side effect function that returns appropriate responses based on the request
+        async def mock_request(method, path, **kwargs):
+            mock_response = MagicMock()
+
+            # For POST /accounts/{id}/orders - order creation
+            if method == "POST" and "/orders" in path:
+                mock_response.json.return_value = {
+                    "orderCreateTransaction": {
+                        "id": "12345",
+                        "type": "MARKET_ORDER",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12345",
+                        "requestID": "12345",
+                        "instrument": "EUR_USD",
+                        "units": "1000",
+                        "timeInForce": "FOK",
+                        "positionFill": "DEFAULT",
+                        "reason": "CLIENT_ORDER",
+                    },
+                    "orderFillTransaction": {
+                        "id": "12346",
+                        "type": "ORDER_FILL",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12345",
+                        "requestID": "12345",
+                        "orderID": "12345",
+                        "instrument": "EUR_USD",
+                        "units": "1000",
+                        "price": "1.10000",
+                        "pl": "0.0000",
+                        "financing": "0.0000",
+                        "commission": "0.0000",
+                        "accountBalance": "100000.0000",
+                        "reason": "MARKET_ORDER",
+                    },
+                    "relatedTransactionIDs": ["12345", "12346"],
+                    "lastTransactionID": "12346",
+                }
+            else:
+                mock_response.json.return_value = {"mock": "data"}
+
+            return mock_response
+
+        client._request = AsyncMock(side_effect=mock_request)
         return client
 
     @pytest.fixture
@@ -286,7 +499,8 @@ class TestOrderConvenienceMethods:
         mock_client._request.assert_called_once_with("POST", "/accounts/101-001-123456-001/orders", json_data={"order": {"type": "MARKET", "instrument": "EUR_USD", "units": "1000", "timeInForce": "FOK", "positionFill": "DEFAULT"}}, timeout=None, headers={})
 
         # Verify response is properly parsed
-        assert isinstance(result, OrderResponse)
+        assert "orderCreateTransaction" in result
+        assert result["lastTransactionID"] == "12346"
 
     @pytest.mark.asyncio
     async def test_post_market_order_with_tp_sl(self, orders, mock_client):

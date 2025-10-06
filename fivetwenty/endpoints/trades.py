@@ -4,10 +4,18 @@ from typing import TYPE_CHECKING, Any, TypedDict
 
 from ..models import (
     AccountID,
+    GuaranteedStopLossOrderTransaction,
     InstrumentName,
+    MarketOrderTransaction,
+    OrderCancelTransaction,
+    OrderFillTransaction,
+    StopLossOrderTransaction,
+    TakeProfitOrderTransaction,
     Trade,
+    TradeClientExtensionsModifyTransaction,
     TradeID,
     TradeStateFilter,
+    TrailingStopLossOrderTransaction,
 )
 
 if TYPE_CHECKING:
@@ -31,9 +39,9 @@ class TradeResponse(TypedDict):
 class CloseTradeResponse(TypedDict, total=False):
     """Response from close_trade endpoint."""
 
-    orderCreateTransaction: Any
-    orderFillTransaction: Any
-    orderCancelTransaction: Any
+    orderCreateTransaction: MarketOrderTransaction
+    orderFillTransaction: OrderFillTransaction
+    orderCancelTransaction: OrderCancelTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
 
@@ -41,7 +49,7 @@ class CloseTradeResponse(TypedDict, total=False):
 class TradeClientExtensionsResponse(TypedDict, total=False):
     """Response from put_trade_client_extensions endpoint."""
 
-    tradeClientExtensionsModifyTransaction: Any
+    tradeClientExtensionsModifyTransaction: TradeClientExtensionsModifyTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
 
@@ -49,18 +57,18 @@ class TradeClientExtensionsResponse(TypedDict, total=False):
 class TradeOrdersResponse(TypedDict, total=False):
     """Response from put_trade_orders endpoint."""
 
-    takeProfitOrderCancelTransaction: Any
-    takeProfitOrderTransaction: Any
-    takeProfitOrderFillTransaction: Any
-    takeProfitOrderCreatedCancelTransaction: Any
-    stopLossOrderCancelTransaction: Any
-    stopLossOrderTransaction: Any
-    stopLossOrderFillTransaction: Any
-    stopLossOrderCreatedCancelTransaction: Any
-    trailingStopLossOrderTransaction: Any
-    trailingStopLossOrderCancelTransaction: Any
-    guaranteedStopLossOrderTransaction: Any
-    guaranteedStopLossOrderCancelTransaction: Any
+    takeProfitOrderCancelTransaction: OrderCancelTransaction
+    takeProfitOrderTransaction: TakeProfitOrderTransaction
+    takeProfitOrderFillTransaction: OrderFillTransaction
+    takeProfitOrderCreatedCancelTransaction: OrderCancelTransaction
+    stopLossOrderCancelTransaction: OrderCancelTransaction
+    stopLossOrderTransaction: StopLossOrderTransaction
+    stopLossOrderFillTransaction: OrderFillTransaction
+    stopLossOrderCreatedCancelTransaction: OrderCancelTransaction
+    trailingStopLossOrderTransaction: TrailingStopLossOrderTransaction
+    trailingStopLossOrderCancelTransaction: OrderCancelTransaction
+    guaranteedStopLossOrderTransaction: GuaranteedStopLossOrderTransaction
+    guaranteedStopLossOrderCancelTransaction: OrderCancelTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
 
@@ -216,7 +224,21 @@ class TradeEndpoints:
             headers=headers,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        response_data = response.json()
+        result: CloseTradeResponse = {
+            "lastTransactionID": response_data["lastTransactionID"],
+        }
+
+        if "orderCreateTransaction" in response_data:
+            result["orderCreateTransaction"] = MarketOrderTransaction.model_validate(response_data["orderCreateTransaction"])
+        if "orderFillTransaction" in response_data:
+            result["orderFillTransaction"] = OrderFillTransaction.model_validate(response_data["orderFillTransaction"])
+        if "orderCancelTransaction" in response_data:
+            result["orderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["orderCancelTransaction"])
+        if "relatedTransactionIDs" in response_data:
+            result["relatedTransactionIDs"] = response_data["relatedTransactionIDs"]
+
+        return result
 
     async def put_trade_client_extensions(
         self,
@@ -256,7 +278,17 @@ class TradeEndpoints:
             headers=headers,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        response_data = response.json()
+        result: TradeClientExtensionsResponse = {
+            "lastTransactionID": response_data["lastTransactionID"],
+        }
+
+        if "tradeClientExtensionsModifyTransaction" in response_data:
+            result["tradeClientExtensionsModifyTransaction"] = TradeClientExtensionsModifyTransaction.model_validate(response_data["tradeClientExtensionsModifyTransaction"])
+        if "relatedTransactionIDs" in response_data:
+            result["relatedTransactionIDs"] = response_data["relatedTransactionIDs"]
+
+        return result
 
     async def put_trade_orders(
         self,
@@ -309,4 +341,41 @@ class TradeEndpoints:
             headers=headers,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        response_data = response.json()
+        result: TradeOrdersResponse = {
+            "lastTransactionID": response_data["lastTransactionID"],
+        }
+
+        # Parse all possible transaction fields
+        if "takeProfitOrderCancelTransaction" in response_data:
+            result["takeProfitOrderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["takeProfitOrderCancelTransaction"])
+        if "takeProfitOrderTransaction" in response_data:
+            result["takeProfitOrderTransaction"] = TakeProfitOrderTransaction.model_validate(response_data["takeProfitOrderTransaction"])
+        if "takeProfitOrderFillTransaction" in response_data:
+            result["takeProfitOrderFillTransaction"] = OrderFillTransaction.model_validate(response_data["takeProfitOrderFillTransaction"])
+        if "takeProfitOrderCreatedCancelTransaction" in response_data:
+            result["takeProfitOrderCreatedCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["takeProfitOrderCreatedCancelTransaction"])
+
+        if "stopLossOrderCancelTransaction" in response_data:
+            result["stopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["stopLossOrderCancelTransaction"])
+        if "stopLossOrderTransaction" in response_data:
+            result["stopLossOrderTransaction"] = StopLossOrderTransaction.model_validate(response_data["stopLossOrderTransaction"])
+        if "stopLossOrderFillTransaction" in response_data:
+            result["stopLossOrderFillTransaction"] = OrderFillTransaction.model_validate(response_data["stopLossOrderFillTransaction"])
+        if "stopLossOrderCreatedCancelTransaction" in response_data:
+            result["stopLossOrderCreatedCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["stopLossOrderCreatedCancelTransaction"])
+
+        if "trailingStopLossOrderTransaction" in response_data:
+            result["trailingStopLossOrderTransaction"] = TrailingStopLossOrderTransaction.model_validate(response_data["trailingStopLossOrderTransaction"])
+        if "trailingStopLossOrderCancelTransaction" in response_data:
+            result["trailingStopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["trailingStopLossOrderCancelTransaction"])
+
+        if "guaranteedStopLossOrderTransaction" in response_data:
+            result["guaranteedStopLossOrderTransaction"] = GuaranteedStopLossOrderTransaction.model_validate(response_data["guaranteedStopLossOrderTransaction"])
+        if "guaranteedStopLossOrderCancelTransaction" in response_data:
+            result["guaranteedStopLossOrderCancelTransaction"] = OrderCancelTransaction.model_validate(response_data["guaranteedStopLossOrderCancelTransaction"])
+
+        if "relatedTransactionIDs" in response_data:
+            result["relatedTransactionIDs"] = response_data["relatedTransactionIDs"]
+
+        return result

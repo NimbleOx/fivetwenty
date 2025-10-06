@@ -15,9 +15,133 @@ class TestPositionEndpoints:
     def mock_client(self):
         """Create a mock async client."""
         client = MagicMock()
-        mock_response = MagicMock()
-        mock_response.json.return_value = {"mock": "data"}
-        client._request = AsyncMock(return_value=mock_response)
+
+        # Create a side effect function that returns appropriate responses based on the request
+        async def mock_request(method, path, **kwargs):
+            mock_response = MagicMock()
+
+            # For GET /accounts/{id}/positions - list all positions
+            if (method == "GET" and path.endswith("/positions")) or (method == "GET" and "/openPositions" in path):
+                mock_response.json.return_value = {
+                    "positions": [
+                        {
+                            "instrument": "EUR_USD",
+                            "pl": "100.0000",
+                            "unrealizedPL": "50.0000",
+                            "marginUsed": "200.0000",
+                            "resettablePL": "100.0000",
+                            "financing": "1.0000",
+                            "commission": "0.5000",
+                            "dividendAdjustment": "0.0000",
+                            "guaranteedExecutionFees": "0.0000",
+                            "long": {
+                                "units": "1000",
+                                "averagePrice": "1.10000",
+                                "tradeIDs": ["12345"],
+                                "pl": "50.0000",
+                                "unrealizedPL": "25.0000",
+                                "resettablePL": "50.0000",
+                                "financing": "0.5000",
+                                "dividendAdjustment": "0.0000",
+                                "guaranteedExecutionFees": "0.0000",
+                            },
+                            "short": {
+                                "units": "0",
+                                "averagePrice": None,
+                                "tradeIDs": [],
+                                "pl": "0.0000",
+                                "unrealizedPL": "0.0000",
+                                "resettablePL": "0.0000",
+                                "financing": "0.0000",
+                                "dividendAdjustment": "0.0000",
+                                "guaranteedExecutionFees": "0.0000",
+                            },
+                        }
+                    ],
+                    "lastTransactionID": "12346",
+                }
+            # For GET /accounts/{id}/positions/{instrument} - get specific position
+            elif method == "GET" and "/positions/" in path:
+                mock_response.json.return_value = {
+                    "position": {
+                        "instrument": "EUR_USD",
+                        "pl": "100.0000",
+                        "unrealizedPL": "50.0000",
+                        "marginUsed": "200.0000",
+                        "resettablePL": "100.0000",
+                        "financing": "1.0000",
+                        "commission": "0.5000",
+                        "dividendAdjustment": "0.0000",
+                        "guaranteedExecutionFees": "0.0000",
+                        "long": {
+                            "units": "1000",
+                            "averagePrice": "1.10000",
+                            "tradeIDs": ["12345"],
+                            "pl": "50.0000",
+                            "unrealizedPL": "25.0000",
+                            "resettablePL": "50.0000",
+                            "financing": "0.5000",
+                            "dividendAdjustment": "0.0000",
+                            "guaranteedExecutionFees": "0.0000",
+                        },
+                        "short": {
+                            "units": "0",
+                            "averagePrice": None,
+                            "tradeIDs": [],
+                            "pl": "0.0000",
+                            "unrealizedPL": "0.0000",
+                            "resettablePL": "0.0000",
+                            "financing": "0.0000",
+                            "dividendAdjustment": "0.0000",
+                            "guaranteedExecutionFees": "0.0000",
+                        },
+                    },
+                    "lastTransactionID": "12346",
+                }
+            # For PUT /accounts/{id}/positions/{instrument}/close - close position
+            elif method == "PUT" and "/close" in path:
+                mock_response.json.return_value = {
+                    "longOrderCreateTransaction": {
+                        "id": "12346",
+                        "type": "MARKET_ORDER",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12346",
+                        "requestID": "12346",
+                        "instrument": "EUR_USD",
+                        "units": "-1000",
+                        "timeInForce": "FOK",
+                        "positionFill": "REDUCE_ONLY",
+                        "reason": "POSITION_CLOSEOUT",
+                    },
+                    "longOrderFillTransaction": {
+                        "id": "12347",
+                        "type": "ORDER_FILL",
+                        "time": "2024-01-01T00:00:00.000000000Z",
+                        "userID": 1,
+                        "accountID": "101-001-123456-001",
+                        "batchID": "12347",
+                        "requestID": "12347",
+                        "orderID": "12346",
+                        "instrument": "EUR_USD",
+                        "units": "-1000",
+                        "price": "1.10000",
+                        "pl": "100.0000",
+                        "financing": "0.0000",
+                        "commission": "0.0000",
+                        "accountBalance": "100100.0000",
+                        "reason": "POSITION_CLOSEOUT",
+                    },
+                    "relatedTransactionIDs": ["12346", "12347"],
+                    "lastTransactionID": "12347",
+                }
+            else:
+                mock_response.json.return_value = {"mock": "data"}
+
+            return mock_response
+
+        client._request = AsyncMock(side_effect=mock_request)
         return client
 
     @pytest.fixture

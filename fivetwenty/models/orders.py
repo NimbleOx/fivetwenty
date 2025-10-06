@@ -7,12 +7,8 @@ order details, and order responses used by the OANDA REST API.
 
 from datetime import datetime
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any
 
 from pydantic import Field
-
-if TYPE_CHECKING:
-    from .transactions import OrderCancelTransaction, OrderFillTransaction
 
 from .base import ApiModel
 from .enums import (
@@ -296,18 +292,6 @@ class DynamicOrderState(ApiModel):
     trailing_stop_value: PriceValue | None = Field(None, alias="trailingStopValue")
     trigger_distance: Decimal | None = Field(None, alias="triggerDistance")
     is_trigger_distance_exact: bool | None = Field(None, alias="isTriggerDistanceExact")
-
-
-class OrderResponse(ApiModel):
-    """Response from order creation."""
-
-    order_create_transaction: Any | None = Field(None, alias="orderCreateTransaction")
-    order_fill_transaction: "OrderFillTransaction | None" = Field(None, alias="orderFillTransaction")
-    order_cancel_transaction: "OrderCancelTransaction | None" = Field(None, alias="orderCancelTransaction")
-    order_reissue_transaction: Any | None = Field(None, alias="orderReissueTransaction")
-    order_reissue_reject_transaction: Any | None = Field(None, alias="orderReissueRejectTransaction")
-    related_transaction_ids: list[str] = Field(alias="relatedTransactionIDs", default_factory=list)
-    last_transaction_id: str = Field(alias="lastTransactionID")
 
 
 # === COMPLETE ORDER STATE MODELS ===
@@ -607,8 +591,6 @@ __all__ = [
     # Order request models (for creating orders)
     "MarketOrderRequest",
     "MarketOrderTradeClose",
-    # Response models
-    "OrderResponse",
     "StopLossDetails",
     "StopLossOrder",
     "StopLossOrderRequest",

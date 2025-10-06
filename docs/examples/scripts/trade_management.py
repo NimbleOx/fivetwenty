@@ -152,9 +152,9 @@ async def main() -> None:
         order_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
         trade_id = None
-        if order_response.order_fill_transaction and order_response.order_fill_transaction.trade_opened:
+        if order_response.get("orderFillTransaction") and order_response["orderFillTransaction"].trade_opened:
             # Get the trade ID from the order fill transaction
-            trade_id = order_response.order_fill_transaction.trade_opened.trade_id
+            trade_id = order_response["orderFillTransaction"].trade_opened.trade_id
             print(f"\nOpened trade: {trade_id}")
 
             # Fetch full trade details
@@ -220,10 +220,10 @@ async def main() -> None:
 
             order = await client.orders.post_order(account_id=client.account_id, order_request=order_request)
 
-            if order.order_fill_transaction and order.order_fill_transaction.trade_opened:
-                tid = order.order_fill_transaction.trade_opened.trade_id
+            if order.get("orderFillTransaction") and order["orderFillTransaction"].trade_opened:
+                tid = order["orderFillTransaction"].trade_opened.trade_id
                 trade_ids.append(tid)
-                print(f"  ✅ Trade {tid} opened at {order.order_fill_transaction.price}")
+                print(f"  ✅ Trade {tid} opened at {order['orderFillTransaction'].price}")
 
         print(f"\nCreated {len(trade_ids)} separate trades")
         print("Note: These form a single EUR/USD position but are tracked individually")
@@ -332,9 +332,9 @@ async def main() -> None:
         # Open a fresh trade for this example
         new_order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
-        if new_order.order_fill_transaction and new_order.order_fill_transaction.trade_opened:
-            new_trade_id = new_order.order_fill_transaction.trade_opened.trade_id
-            entry_price = Decimal(str(new_order.order_fill_transaction.price))
+        if new_order.get("orderFillTransaction") and new_order["orderFillTransaction"].trade_opened:
+            new_trade_id = new_order["orderFillTransaction"].trade_opened.trade_id
+            entry_price = Decimal(str(new_order["orderFillTransaction"].price))
 
             print(f"\nAdding TP/SL to trade {new_trade_id}...")
             print(f"Entry price: {entry_price}")

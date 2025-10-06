@@ -225,9 +225,9 @@ async def main() -> None:
 
         order = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=1000)
 
-        if order.order_fill_transaction:
+        if order.get("orderFillTransaction"):
             requested = 1000
-            filled = abs(int(order.order_fill_transaction.units))
+            filled = abs(int(order["orderFillTransaction"].units))
 
             if filled < requested:
                 print("⚠️  Partial fill detected!")

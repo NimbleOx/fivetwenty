@@ -3,9 +3,11 @@
 import json
 from collections.abc import AsyncIterator
 from datetime import datetime
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, TypedDict
 
-from ..models import AccountID, ClientPrice, HomeConversions, PricingHeartbeat
+from typing_extensions import Required
+
+from ..models import AccountID, Candlestick, CandlestickGranularity, ClientPrice, HomeConversions, InstrumentName, PricingHeartbeat
 from ..models.streaming import StreamingConfiguration, StreamState
 
 if TYPE_CHECKING:
@@ -15,23 +17,23 @@ if TYPE_CHECKING:
 class GetPricingResponse(TypedDict, total=False):
     """Response from get_pricing endpoint."""
 
-    prices: list[ClientPrice]  # Required
+    prices: Required[list[ClientPrice]]  # Always present
     homeConversions: list[HomeConversions]  # Optional
-    time: str  # Required
+    time: Required[str]  # Always present
 
 
 class CandlesResponse(TypedDict):
-    """Response from get_account_instrument_candles endpoint."""
+    """Response from candles endpoints."""
 
-    instrument: str
-    granularity: str
-    candles: list[Any]
+    instrument: InstrumentName
+    granularity: CandlestickGranularity
+    candles: list[Candlestick]
 
 
 class LatestCandlesResponse(TypedDict):
     """Response from get_latest_candles endpoint."""
 
-    latestCandles: list[Any]
+    latestCandles: list[CandlesResponse]
 
 
 class PricingEndpoints:
@@ -245,7 +247,13 @@ class PricingEndpoints:
             params=params,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+
+        return {
+            "instrument": InstrumentName(data["instrument"]),
+            "granularity": CandlestickGranularity(data["granularity"]),
+            "candles": [Candlestick.model_validate(c) for c in data["candles"]],
+        }
 
     async def get_latest_candles(
         self,
@@ -298,7 +306,17 @@ class PricingEndpoints:
             params=params,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        data = response.json()
+        return {
+            "latestCandles": [
+                {
+                    "instrument": InstrumentName(c["instrument"]),
+                    "granularity": CandlestickGranularity(c["granularity"]),
+                    "candles": [Candlestick.model_validate(candle) for candle in c["candles"]],
+                }
+                for c in data["latestCandles"]
+            ]
+        }
 
     async def stream_pricing_with_retries(
         self,
