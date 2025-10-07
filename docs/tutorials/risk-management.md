@@ -19,100 +19,179 @@ Learn essential risk management techniques using FiveTwenty's stop loss orders, 
 
 ### Stop Loss Orders
 
-<!-- fragment: Demo stop loss implementation with ternary operators and type annotation issues -->
+Stop loss orders are the foundation of effective risk management in trading. Without stop losses, a single adverse market move can wipe out weeks or months of profitable trades. By automatically closing positions at predetermined price levels, stop losses protect your capital from catastrophic losses while allowing profitable trades to run. Every professional trading strategy includes stop loss protection as a non-negotiable risk control.
+
+The FiveTwenty SDK provides a streamlined approach to stop loss management using the `stop_loss` parameter on market orders. This creates a "stopLossOnFill" order that automatically activates when your market order executes, ensuring immediate risk protection without the complexity of managing separate stop loss orders. This example demonstrates how to calculate appropriate stop levels based on position direction and attach them to trades in a single, atomic operation.
+
+<!-- filepath: docs/tutorials/risk-management/example_stop_loss.py -->
 ```python
+"""Demonstrate stop loss order placement for automated risk protection.
+
+This example shows how to:
+- Calculate stop loss price based on position direction and risk tolerance
+- Place a market order with automatic stop loss protection
+- Use stopLossOnFill for immediate risk management
+- Verify trade execution and stop loss attachment
+"""
+
 import asyncio
 from decimal import Decimal
+from typing import Any
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
-from fivetwenty.models import (
-    MarketOrderRequest,
-    StopLossOrderRequest,
-    TimeInForce
-)
+from fivetwenty.models import InstrumentName
+
+load_dotenv()
+
 
 async def place_order_with_stop_loss(
     client: AsyncClient,
     account_id: str,
-    instrument: str,
-    units: Decimal,
-    stop_loss_distance: Decimal
-) -> dict:
-    """Place market order with automatic stop loss protection for capital preservation."""
+    instrument: InstrumentName,
+    units: int,
+    stop_loss_pips: int,
+) -> dict[str, Any]:
+    """Place market order with automatic stop loss protection."""
 
-    # Step 1: Create market order with specific execution requirements
-    # FOK (Fill or Kill) ensures order executes completely or not at all
-    market_order = MarketOrderRequest(
-        instrument=instrument,           # Currency pair to trade
-        units=units,                    # Position size (positive=long, negative=short)
-        time_in_force=TimeInForce.FOK,  # Fill completely or cancel immediately
+    # ==============================================================================
+    # STEP 1: GET CURRENT PRICE FOR STOP LOSS CALCULATION
+    # ==============================================================================
+
+    # The SDK method: client.pricing.get_pricing()
+    #
+    # Parameters:
+    #   - account_id: Your OANDA account ID
+    #   - instruments: List of instruments to get pricing for
+    #
+    # Returns: PricingResponse TypedDict with structure:
+    #   {
+    #       "prices": list[ClientPrice],  # Current prices for requested instruments
+    #       "time": str
+    #   }
+
+    pricing_response = await client.pricing.get_pricing(
+        account_id=account_id,
+        instruments=[instrument],
     )
 
-    # Step 2: Execute market order and await immediate fill response
-    # This creates the primary trading position that needs protection
-    order_response = await client.orders.post_order(account_id, market_order)
+    # Extract current market price
+    current_price = pricing_response["prices"][0]
+    # Use ask for buys (long), bid for sells (short)
+    entry_price = (
+        Decimal(current_price.asks[0].price)
+        if units > 0
+        else Decimal(current_price.bids[0].price)
+    )
 
-    # Step 3: Verify order execution and proceed with stop loss placement
-    # Only add stop loss protection if the market order was successfully filled
-    if order_response.order_fill_transaction:
-        # Step 4: Extract actual fill price for precise stop loss calculation
-        # Use the exact price we traded at, not the requested price
-        fill_price = Decimal(order_response.order_fill_transaction.price)
+    # ==============================================================================
+    # STEP 2: CALCULATE STOP LOSS PRICE
+    # ==============================================================================
 
-        # Step 5: Calculate stop loss price based on position direction
-        # Long positions need stops below entry, short positions need stops above
-        if units > 0:  # Long position - protect against downward moves
-            stop_price = fill_price - stop_loss_distance  # Stop below entry price
-        else:  # Short position - protect against upward moves
-            stop_price = fill_price + stop_loss_distance  # Stop above entry price
+    # Calculate stop distance in price terms
+    # EUR/USD uses 4 decimal places: 1 pip = 0.0001
+    pip_size = Decimal("0.0001")
+    stop_distance = pip_size * stop_loss_pips
 
-        # Step 6: Create stop loss order linked to the opened trade
-        # GTC (Good Till Cancelled) keeps stop active until manually removed
-        stop_loss = StopLossOrderRequest(
-            tradeID=order_response.order_fill_transaction.tradeOpened.tradeID,  # Link to specific trade
-            price=str(stop_price),    # Price level that triggers stop loss
-            timeInForce="GTC"         # Remains active indefinitely
-        )
+    # Calculate stop price based on position direction
+    # Long positions (units > 0): stop below entry to limit downside
+    # Short positions (units < 0): stop above entry to limit upside
+    if units > 0:
+        stop_price = entry_price - stop_distance  # Long: stop below entry
+    else:
+        stop_price = entry_price + stop_distance  # Short: stop above entry
 
-        # Step 7: Submit stop loss order to provide automatic risk protection
-        # This creates a safety net that executes without human intervention
-        stop_response = await client.orders.post_order(account_id, stop_loss)
+    # ==============================================================================
+    # STEP 3: PLACE MARKET ORDER WITH STOP LOSS
+    # ==============================================================================
 
-        # Step 8: Return comprehensive trade details for monitoring and management
-        # This information enables position tracking and risk assessment
-        return {
-            "trade_id": order_response.order_fill_transaction.tradeOpened.tradeID,  # Primary trade identifier
-            "entry_price": fill_price,              # Actual execution price achieved
-            "stop_price": stop_price,               # Stop loss trigger level
-            "stop_order_id": stop_response.order_create_transaction.id  # Stop order identifier
-        }
+    # The SDK method: client.orders.post_market_order()
+    #
+    # Parameters:
+    #   - account_id: Your OANDA account ID
+    #   - instrument: Currency pair to trade
+    #   - units: Position size (positive=long, negative=short)
+    #   - stop_loss: Stop loss price (creates stopLossOnFill order)
+    #
+    # Returns: OrderResponse TypedDict with structure:
+    #   {
+    #       "orderFillTransaction": OrderFillTransaction or None
+    #       "orderCreateTransaction": OrderCreateTransaction or None
+    #       "relatedTransactionIDs": list[str]
+    #       "lastTransactionID": str
+    #   }
+    #
+    # NOTE: RECOMMENDED PATTERN - Use stop_loss parameter for automatic risk
+    #       management that activates when the order fills. This is preferred
+    #       over creating separate stop loss orders after the trade.
 
-    raise ValueError("Market order was not filled")
+    order_response = await client.orders.post_market_order(
+        account_id=account_id,
+        instrument=instrument,
+        units=units,
+        stop_loss=stop_price,  # Automatic stop loss on fill
+    )
 
-# Usage Example - Protected Trade Execution
-async def main():
-    """Demonstrate risk-managed trading with automatic stop loss protection."""
+    # Verify order was filled before proceeding
+    if not order_response.get("orderFillTransaction"):
+        raise ValueError("Market order was not filled")
 
-    # Step 1: Initialize client using environment-based authentication
-    # Zero-config approach reads OANDA credentials from environment variables
+    fill_transaction = order_response["orderFillTransaction"]
+
+    # ==============================================================================
+    # STEP 4: VERIFY TRADE AND STOP LOSS ATTACHMENT
+    # ==============================================================================
+
+    # Extract trade details from fill transaction
+    trade_opened = fill_transaction.trade_opened
+    if not trade_opened:
+        raise ValueError("No trade was opened by this order")
+
+    # Actual fill price may differ slightly from estimated entry price
+    actual_fill_price = fill_transaction.price
+
+    return {
+        "trade_id": trade_opened.trade_id,
+        "entry_price": actual_fill_price,
+        "stop_price": stop_price,
+        "stop_distance_pips": stop_loss_pips,
+        "fill_transaction_id": order_response["lastTransactionID"],
+    }
+
+
+async def main() -> None:
+    """Execute protected trade with automatic stop loss."""
+
+    # ==============================================================================
+    # CONNECT TO OANDA
+    # ==============================================================================
+
+    # AsyncClient automatically reads FIVETWENTY_OANDA_* environment variables
+    # Context manager ensures proper cleanup of HTTP connections
     async with AsyncClient() as client:
-        # Step 2: Execute trade with integrated stop loss protection
-        # This combines position opening with immediate risk protection
+        # ==============================================================================
+        # PLACE PROTECTED TRADE
+        # ==============================================================================
+
+        # Place trade with 20-pip stop loss protection
         result = await place_order_with_stop_loss(
-            client=client,                           # Authenticated FiveTwenty client
-            account_id=client.account_id,           # Account from environment config
-            instrument="EUR_USD",                   # Major currency pair with tight spreads
-            units=Decimal("1000"),                  # Conservative position size (1,000 units)
-            stop_loss_distance=Decimal("0.0020")   # 20 pips stop loss (2% protection)
+            client=client,
+            account_id=client.account_id,
+            instrument=InstrumentName.EUR_USD,
+            units=1000,  # Long position (buy)
+            stop_loss_pips=20,  # 20 pips = $20 risk on 1000 units
         )
 
-        # Step 3: Confirm successful execution with stop loss protection active
-        print(f"Success Protected trade executed: ID {result['trade_id']}")
-        print(f"   Entry Price: {result['entry_price']:.5f}")
-        print(f"   Stop Loss: {result['stop_price']:.5f} (automatic protection active)")
+        # Display execution details
+        print("Protected trade executed:")
+        print(f"  Trade ID: {result['trade_id']}")
+        print(f"  Entry Price: {result['entry_price']:.5f}")
+        print(f"  Stop Loss: {result['stop_price']:.5f}")
+        print(f"  Protection: {result['stop_distance_pips']} pips")
+
 
 if __name__ == "__main__":
-    from dotenv import load_dotenv
-    load_dotenv()
     asyncio.run(main())
 ```
 
