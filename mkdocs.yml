@@ -203,13 +203,6 @@ plugins:
               ignore_init_summary: true
             merge_init_into_class: true
             show_submodules: true
-  # Note: mkdocs-jupyter plugin disabled since examples moved to GitHub
-  # - mkdocs-jupyter:
-  #     execute: false
-  #     kernel_name: python3
-  #     include_source: true
-  #     ignore_h1_titles: true
-  #     allow_errors: true
 
 extra_css:
   - assets/custom.css

@@ -5,11 +5,12 @@ rules:
   # Allow longer lines for documentation and API specs
   line-length:
     max: 120
+    level: warning
 
   # Allow document start (---) to be omitted
   document-start: disable
 
-  # Allow indentation inconsistencies in some cases
+  # Enforce consistent indentation
   indentation:
     spaces: 2
     indent-sequences: true
@@ -17,9 +18,19 @@ rules:
   # Allow truthy values like "on", "off" which are common in GitHub workflows
   truthy:
     allowed-values: ['true', 'false', 'TRUE', 'FALSE', 'on', 'off', 'ON', 'OFF']
+    level: error
 
-  # Allow comments anywhere (needed for MkDocs configs)
-  comments: disable
+  # Keep comments-indentation enabled (enforces consistent comment indentation)
+  # but disable other comment checks
+  comments:
+    min-spaces-from-content: 1
+  comments-indentation: enable
 
   # Allow various quote styles
   quoted-strings: disable
+
+  # Require new line at end of file
+  new-line-at-end-of-file: enable
+
+  # Enforce trailing spaces removal
+  trailing-spaces: enable

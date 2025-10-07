@@ -25,7 +25,7 @@ jobs:
   maintenance:
     name: Documentation Maintenance
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -65,12 +65,17 @@ jobs:
         continue-on-error: true
 
       - name: Check for broken links
-        if: github.event.inputs.check_type == 'links-only' || github.event.inputs.check_type == 'full' || github.event.inputs.check_type == ''
+        if: >
+          github.event.inputs.check_type == 'links-only' ||
+          github.event.inputs.check_type == 'full' ||
+          github.event.inputs.check_type == ''
         id: link_check
         run: |
           echo "Checking for broken internal links..."
           # Use our validator's link checking functionality
-          uv run python scripts/validate-docs.py | grep "Broken internal link" > broken_links.txt || echo "No broken links found"
+          uv run python scripts/validate-docs.py | \
+            grep "Broken internal link" > broken_links.txt || \
+            echo "No broken links found"
           if [ -s broken_links.txt ]; then
             echo "broken_links_found=true" >> $GITHUB_OUTPUT
             echo "Found broken links:"
@@ -80,15 +85,18 @@ jobs:
           fi
 
       - name: Check dependency freshness
-        if: github.event.inputs.check_type == 'dependencies-only' || github.event.inputs.check_type == 'full' || github.event.inputs.check_type == ''
+        if: >
+          github.event.inputs.check_type == 'dependencies-only' ||
+          github.event.inputs.check_type == 'full' ||
+          github.event.inputs.check_type == ''
         id: deps_check
         run: |
           echo "Checking documentation dependencies..."
-          
+
           # Check if docs/requirements.txt packages have updates available
           echo "Current documentation dependencies:"
           cat docs/requirements.txt
-          
+
           # Check for outdated packages (this would normally use pip-audit or similar)
           echo "deps_check_completed=true" >> $GITHUB_OUTPUT
 
@@ -106,7 +114,7 @@ jobs:
           echo "**Date:** $(date)" >> maintenance_report.md
           echo "**Trigger:** ${{ github.event_name }}" >> maintenance_report.md
           echo "" >> maintenance_report.md
-          
+
           # Add validation results
           if [ -f validation_results.txt ]; then
             echo "## 🔍 Validation Results" >> maintenance_report.md
@@ -116,7 +124,7 @@ jobs:
             echo '```' >> maintenance_report.md
             echo "" >> maintenance_report.md
           fi
-          
+
           # Add broken links if found
           if [ "${{ steps.link_check.outputs.broken_links_found }}" = "true" ]; then
             echo "## 🔗 Broken Links Found" >> maintenance_report.md
@@ -128,7 +136,7 @@ jobs:
             echo "**Action Required:** Please fix these broken internal links." >> maintenance_report.md
             echo "" >> maintenance_report.md
           fi
-          
+
           # Add recommendations
           echo "## 📝 Recommendations" >> maintenance_report.md
           echo "" >> maintenance_report.md
@@ -136,9 +144,10 @@ jobs:
           echo "- 🔄 Consider updating examples with latest SDK patterns" >> maintenance_report.md
           echo "- 📚 Review user feedback for content improvements" >> maintenance_report.md
           echo "" >> maintenance_report.md
-          
+
           # Set output for issue creation
-          if [ "${{ steps.link_check.outputs.broken_links_found }}" = "true" ] || [ "${{ steps.validation.outputs.validation_exit_code }}" != "0" ]; then
+          if [ "${{ steps.link_check.outputs.broken_links_found }}" = "true" ] || \
+             [ "${{ steps.validation.outputs.validation_exit_code }}" != "0" ]; then
             echo "issues_found=true" >> $GITHUB_OUTPUT
           else
             echo "issues_found=false" >> $GITHUB_OUTPUT
@@ -151,7 +160,7 @@ jobs:
           script: |
             const fs = require('fs');
             const reportContent = fs.readFileSync('maintenance_report.md', 'utf8');
-            
+
             await github.rest.issues.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
@@ -177,9 +186,12 @@ jobs:
           echo "## 📋 Maintenance Summary" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           if [ "${{ steps.report.outputs.issues_found }}" = "true" ]; then
-            echo "❌ **Issues found** - Review the maintenance report and fix identified problems." >> $GITHUB_STEP_SUMMARY
+            echo "❌ **Issues found** - Review the maintenance report" \
+              "and fix identified problems." >> $GITHUB_STEP_SUMMARY
           else
-            echo "✅ **All checks passed** - Documentation is in good health!" >> $GITHUB_STEP_SUMMARY
+            echo "✅ **All checks passed**" \
+              "- Documentation is in good health!" >> $GITHUB_STEP_SUMMARY
           fi
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Next scheduled run:** Next Sunday at 2 AM UTC" >> $GITHUB_STEP_SUMMARY
+          echo "**Next scheduled run:** Next Sunday at 2 AM UTC" \
+            >> $GITHUB_STEP_SUMMARY

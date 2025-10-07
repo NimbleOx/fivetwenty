@@ -346,29 +346,39 @@ class AsyncClient:
         Raises:
             StreamStall: If no data received within stall_timeout
         """
-        headers = {"Authorization": f"Bearer {self._token}"}
+        headers = {
+            "Authorization": f"Bearer {self._token}",
+            "Accept": "application/json",
+            "Accept-Encoding": "gzip",
+        }
         stall_timer = MonotonicTimeout(stall_timeout)
 
+        # Use the streaming URL instead of REST API URL
+        # Create full absolute URL for streaming endpoint
+        full_url = f"{self._environment.stream_url}{path}"
+
         try:
-            async with self._http.stream(
-                "GET",
-                path,
-                params=params,
-                headers=headers,
-                timeout=timeout or self.timeout,
-            ) as response:
-                raise_for_fivetwenty(response)
+            # Use httpx.AsyncClient directly for streaming to avoid base_url conflicts
+            async with httpx.AsyncClient() as stream_client:
+                async with stream_client.stream(
+                    "GET",
+                    full_url,
+                    params=params,
+                    headers=headers,
+                    timeout=timeout or self.timeout,
+                ) as response:
+                    raise_for_fivetwenty(response)
 
-                async for line in response.aiter_lines():
-                    if not line.strip():
-                        # Empty line - check for stall
-                        if stall_timer.expired:
-                            raise StreamStall(f"No data for {stall_timeout}s")
-                        continue
+                    async for line in response.aiter_lines():
+                        if not line.strip():
+                            # Empty line - check for stall
+                            if stall_timer.expired:
+                                raise StreamStall(f"No data for {stall_timeout}s")
+                            continue
 
-                    # Reset stall timer on data
-                    stall_timer = MonotonicTimeout(stall_timeout)
-                    yield line
+                        # Reset stall timer on data
+                        stall_timer = MonotonicTimeout(stall_timeout)
+                        yield line
 
         except httpx.TimeoutException:
             raise StreamStall("Stream timed out")

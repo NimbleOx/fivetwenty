@@ -188,23 +188,6 @@ def check(files: tuple[Path, ...], config: Path | None) -> None:
     sys.exit(0)
 
 
-@cli.command("list-validators")
-def list_validators() -> None:
-    """List all available validators."""
-    from .base import registry
-
-    table = Table(title="Available Validators")
-    table.add_column("Name", style="cyan", no_wrap=True)
-    table.add_column("Description", style="white")
-
-    for validator_name in sorted(registry.list_validators()):
-        validator = registry.get_validator(validator_name)
-        if validator:
-            table.add_row(validator_name, validator.description)
-
-    console.print(table)
-
-
 def _display_results(
     summary: ValidationSummary,
 ) -> None:

@@ -113,6 +113,9 @@ jobs:
       - name: Build documentation
         run: uv run mkdocs build --strict --clean
 
+      - name: Add .nojekyll to site
+        run: touch site/.nojekyll
+
       - name: Setup Pages
         uses: actions/configure-pages@v4
 

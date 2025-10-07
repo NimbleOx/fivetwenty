@@ -75,6 +75,8 @@ validators:
         - "D204"    # 1 blank line required after class docstring
         - "D205"    # 1 blank line required between summary and description
         - "D212"    # Multi-line docstring summary should start at the first line
+        - "D213"    # Multi-line docstring summary should start at the second line
+        - "D413"    # Missing blank line after last section
         # Function and method annotation exceptions for examples
         - "ANN201"  # Missing return type annotation for public function
         - "ANN001"  # Missing type annotation for function argument
@@ -98,6 +100,10 @@ validators:
         - "ERA001"  # Found commented-out code (intentional examples)
         # Financial precision best practices
         - "FURB157" # Decimal string literals are best practice for financial code
+        # Additional style preferences for documentation examples
+        - "PLR2004" # Magic values in comparisons (acceptable in demos)
+        - "RET508"  # Unnecessary else after break (style preference)
+        - "SIM117"  # Nested with statements (clearer in some examples)
 
   # Type checking with mypy (strict mode - all type issues)
   code_typing:
@@ -149,6 +155,11 @@ validators:
         - "docs/tutorials/advanced-orders/dynamic-management.md"
         - "docs/tutorials/advanced-orders/order-strategies.md"
         - "docs/tutorials/advanced-orders/stop-orders-mit.md"
+        - "docs/tutorials/account-management.md"
+        - "docs/tutorials/index.md"
+        - "docs/tutorials/risk-management.md"
+        # streaming-data.md excluded: streaming examples exceed 5s timeout even with minimal limits
+        # All other 9 validators (linting, typing, syntax, security, etc.) validate streaming examples
         # Add more files as they become fully standalone/executable
 
       # Mock API calls when executing code (prevents real API calls)

@@ -37,7 +37,8 @@
 .highlight .c1,  /* Single-line comment */
 .highlight .cm,  /* Multi-line comment */
 .highlight .cp,  /* Preprocessor comment */
-.highlight .cs { /* Special comment */
+.highlight .cs,  /* Special comment */
+.highlight .sd { /* Docstring - styled like comments */
   color: #7cb342 !important;  /* Brighter green for light mode */
   font-style: italic;
   font-weight: 500;
@@ -48,7 +49,8 @@
 [data-md-color-scheme="slate"] .highlight .c1,
 [data-md-color-scheme="slate"] .highlight .cm,
 [data-md-color-scheme="slate"] .highlight .cp,
-[data-md-color-scheme="slate"] .highlight .cs {
+[data-md-color-scheme="slate"] .highlight .cs,
+[data-md-color-scheme="slate"] .highlight .sd {
   color: #9ccc65 !important;  /* Even brighter green for dark mode */
   font-style: italic;
   font-weight: 500;

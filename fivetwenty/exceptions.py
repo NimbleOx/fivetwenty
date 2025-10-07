@@ -1,12 +1,9 @@
 """OANDA API exceptions."""
 
-from typing import TYPE_CHECKING
+import httpx
 
 from .models.error_codes import ErrorCategory, ErrorSeverity, FiveTwentyErrorCode, get_error_category, get_error_severity
 from .models.error_details import ErrorDetails
-
-if TYPE_CHECKING:
-    import httpx
 
 
 class FiveTwentyError(Exception):
@@ -165,6 +162,11 @@ def raise_for_fivetwenty(response: "httpx.Response") -> None:
         content_type = response.headers.get("content-type") or ""
         if "application/json" in content_type:
             payload = response.json()
+    except httpx.ResponseNotRead:
+        # For streaming responses, we can't read the JSON error body
+        # without consuming the stream, which would break the streaming API
+        # Just skip JSON parsing and use status code
+        payload = {}
     except Exception:
         # Malformed JSON or not JSON at all
         payload = {}
@@ -176,9 +178,13 @@ def raise_for_fivetwenty(response: "httpx.Response") -> None:
 
     # Limit error text to prevent bloat
     try:
-        error_text = response.text[:500] if response.text else "Unknown error"
+        text = response.text
+        error_text = text[:500] if text else "Unknown error"
+    except httpx.ResponseNotRead:
+        # Handle streaming responses that haven't been read
+        error_text = f"HTTP {response.status_code} error"
     except Exception:
-        # Handle streaming responses or other edge cases
+        # Handle other edge cases
         error_text = f"HTTP {response.status_code} error"
 
     # Determine if the error is retryable
