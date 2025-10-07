@@ -13,7 +13,7 @@
 | `[X]` | `tutorials/advanced-orders/dynamic-management.md` | Tutorials | 8 |
 | `[x]` | `tutorials/advanced-orders/stop-orders-mit.md` | Tutorials | 6 |
 | `[ ]` | `tutorials/advanced-orders/order-strategies.md` | Tutorials | 6 |
-| `[ ]` | `tutorials/account-management.md` | Tutorials | 3 |
+| `[x]` | `tutorials/account-management.md` | Tutorials | 3 |
 | `[ ]` | `tutorials/risk-management.md` | Tutorials | 4 |
 | `[ ]` | `tutorials/streaming-data.md` | Tutorials | 7 |
 | `[ ]` | `tutorials/index.md` | Tutorials | 0 |
