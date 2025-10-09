@@ -42,7 +42,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Trades](https://developer.oanda.com/rest-live-v20/trade-ep/#get-trades)
 
-🔗 **FiveTwenty SDK**: [trades.get_trades](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
+🔗 **Source**: [trades.get_trades](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -102,7 +102,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Open Trades](https://developer.oanda.com/rest-live-v20/trade-ep/#get-open-trades)
 
-🔗 **FiveTwenty SDK**: [trades.get_open_trades](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
+🔗 **Source**: [trades.get_open_trades](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -158,7 +158,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Trade Details](https://developer.oanda.com/rest-live-v20/trade-ep/#get-trade-details)
 
-🔗 **FiveTwenty SDK**: [trades.get_trade](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
+🔗 **Source**: [trades.get_trade](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -214,7 +214,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Close Trade](https://developer.oanda.com/rest-live-v20/trade-ep/#close-trade)
 
-🔗 **FiveTwenty SDK**: [trades.close_trade](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
+🔗 **Source**: [trades.close_trade](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -275,7 +275,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Update Trade Client Extensions](https://developer.oanda.com/rest-live-v20/trade-ep/#update-trade-client-extensions)
 
-🔗 **FiveTwenty SDK**: [trades.put_trade_client_extensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
+🔗 **Source**: [trades.put_trade_client_extensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -336,7 +336,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Update Trade Dependent Orders](https://developer.oanda.com/rest-live-v20/trade-ep/#update-trade-dependent-orders)
 
-🔗 **FiveTwenty SDK**: [trades.put_trade_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
+🔗 **Source**: [trades.put_trade_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 

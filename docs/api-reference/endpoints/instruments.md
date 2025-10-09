@@ -43,7 +43,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
 
-🔗 **FiveTwenty SDK**: [instruments.get_instrument_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/instruments.py)
+🔗 **Source**: [instruments.get_instrument_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/instruments.py)
 
 **Parameters:**
 

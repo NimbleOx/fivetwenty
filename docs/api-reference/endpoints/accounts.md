@@ -35,7 +35,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Accounts](https://developer.oanda.com/rest-live-v20/account-ep/#get-accounts)
 
-🔗 **FiveTwenty SDK**: [accounts.get_accounts](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
+🔗 **Source**: [accounts.get_accounts](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -82,7 +82,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Account Details](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-details)
 
-🔗 **FiveTwenty SDK**: [accounts.get_account](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
+🔗 **Source**: [accounts.get_account](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -132,7 +132,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Account Summary](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-summary)
 
-🔗 **FiveTwenty SDK**: [accounts.get_account_summary](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
+🔗 **Source**: [accounts.get_account_summary](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -186,7 +186,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Account Instruments](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-instruments)
 
-🔗 **FiveTwenty SDK**: [accounts.get_account_instruments](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
+🔗 **Source**: [accounts.get_account_instruments](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -241,7 +241,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Configure Account](https://developer.oanda.com/rest-live-v20/account-ep/#configure-account)
 
-🔗 **FiveTwenty SDK**: [accounts.patch_account_configuration](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
+🔗 **Source**: [accounts.patch_account_configuration](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -297,7 +297,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Account Changes](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-changes)
 
-🔗 **FiveTwenty SDK**: [accounts.get_account_changes](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
+🔗 **Source**: [accounts.get_account_changes](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 

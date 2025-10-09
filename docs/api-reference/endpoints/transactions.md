@@ -44,7 +44,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Transactions](https://developer.oanda.com/rest-live-v20/transaction-ep/#get-transactions)
 
-🔗 **FiveTwenty SDK**: [transactions.get_transactions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
+🔗 **Source**: [transactions.get_transactions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
 
 **Parameters:**
 
@@ -106,7 +106,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Transaction](https://developer.oanda.com/rest-live-v20/transaction-ep/#get-transaction)
 
-🔗 **FiveTwenty SDK**: [transactions.get_transaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
+🔗 **Source**: [transactions.get_transaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
 
 **Parameters:**
 
@@ -166,7 +166,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Transactions Since ID](https://developer.oanda.com/rest-live-v20/transaction-ep/#get-transactions-since-id)
 
-🔗 **FiveTwenty SDK**: [transactions.get_transactions_since_id](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
+🔗 **Source**: [transactions.get_transactions_since_id](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
 
 **Parameters:**
 
@@ -229,7 +229,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Stream Transactions](https://developer.oanda.com/rest-live-v20/transaction-ep/#stream-transactions)
 
-🔗 **FiveTwenty SDK**: [transactions.get_transactions_stream](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
+🔗 **Source**: [transactions.get_transactions_stream](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
 
 **Parameters:**
 
@@ -291,7 +291,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Transaction Range](https://developer.oanda.com/rest-live-v20/transaction-ep/#get-transaction-range)
 
-🔗 **FiveTwenty SDK**: [transactions.get_transactions_range](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
+🔗 **Source**: [transactions.get_transactions_range](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
 
 **Parameters:**
 
@@ -355,7 +355,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Recent Transactions](https://developer.oanda.com/rest-live-v20/transaction-ep/#get-transactions)
 
-🔗 **FiveTwenty SDK**: [transactions.get_recent_transactions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
+🔗 **Source**: [transactions.get_recent_transactions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/transactions.py)
 
 **Parameters:**
 

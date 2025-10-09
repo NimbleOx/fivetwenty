@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **FiveTwenty SDK**: [orders.post_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L134)
+🔗 **Source**: [orders.post_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L134)
 
 **Parameters:**
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **FiveTwenty SDK**: [orders.post_market_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L213)
+🔗 **Source**: [orders.post_market_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L213)
 
 **Parameters:**
 
@@ -188,7 +188,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **FiveTwenty SDK**: [orders.post_limit_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L273)
+🔗 **Source**: [orders.post_limit_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L273)
 
 **Parameters:**
 
@@ -260,7 +260,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **FiveTwenty SDK**: [orders.post_stop_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L341)
+🔗 **Source**: [orders.post_stop_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L341)
 
 **Parameters:**
 
@@ -333,7 +333,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **FiveTwenty SDK**: [orders.post_market_if_touched_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L412)
+🔗 **Source**: [orders.post_market_if_touched_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L412)
 
 **Parameters:**
 
@@ -402,7 +402,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Get Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-orders)
 
-🔗 **FiveTwenty SDK**: [orders.get_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L483)
+🔗 **Source**: [orders.get_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L483)
 
 **Parameters:**
 
@@ -466,7 +466,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Get Order](https://developer.oanda.com/rest-live-v20/order-ep/#get-order)
 
-🔗 **FiveTwenty SDK**: [orders.get_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L532)
+🔗 **Source**: [orders.get_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L532)
 
 **Parameters:**
 
@@ -525,7 +525,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Cancel Order](https://developer.oanda.com/rest-live-v20/order-ep/#cancel-order)
 
-🔗 **FiveTwenty SDK**: [orders.cancel_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L557)
+🔗 **Source**: [orders.cancel_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L557)
 
 **Parameters:**
 
@@ -589,7 +589,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Get Pending Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-pending-orders)
 
-🔗 **FiveTwenty SDK**: [orders.get_pending_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L603)
+🔗 **Source**: [orders.get_pending_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L603)
 
 **Parameters:**
 
@@ -654,7 +654,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Replace Order](https://developer.oanda.com/rest-live-v20/order-ep/#replace-order)
 
-🔗 **FiveTwenty SDK**: [orders.put_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L634)
+🔗 **Source**: [orders.put_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L634)
 
 **Parameters:**
 
@@ -724,7 +724,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Update Order Client Extensions](https://developer.oanda.com/rest-live-v20/order-ep/#update-order-client-extensions)
 
-🔗 **FiveTwenty SDK**: [orders.put_order_client_extensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L689)
+🔗 **Source**: [orders.put_order_client_extensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L689)
 
 **Parameters:**
 

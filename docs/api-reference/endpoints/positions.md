@@ -43,7 +43,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Positions](https://developer.oanda.com/rest-live-v20/position-ep/#get-positions)
 
-🔗 **FiveTwenty SDK**: [positions.get_positions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/positions.py)
+🔗 **Source**: [positions.get_positions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/positions.py)
 
 **Parameters:**
 
@@ -100,7 +100,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Open Positions](https://developer.oanda.com/rest-live-v20/position-ep/#get-open-positions)
 
-🔗 **FiveTwenty SDK**: [positions.get_open_positions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/positions.py)
+🔗 **Source**: [positions.get_open_positions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/positions.py)
 
 **Parameters:**
 
@@ -159,7 +159,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Position](https://developer.oanda.com/rest-live-v20/position-ep/#get-position)
 
-🔗 **FiveTwenty SDK**: [positions.get_position](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/positions.py)
+🔗 **Source**: [positions.get_position](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/positions.py)
 
 **Parameters:**
 
@@ -220,7 +220,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Close Position](https://developer.oanda.com/rest-live-v20/position-ep/#close-position)
 
-🔗 **FiveTwenty SDK**: [positions.close_position](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/positions.py)
+🔗 **Source**: [positions.close_position](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/positions.py)
 
 **Parameters:**
 

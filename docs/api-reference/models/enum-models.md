@@ -10,7 +10,7 @@ Available trading instruments supported by OANDA.
 
 🔗 **OANDA Definition**: [InstrumentName](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_5)
 
-🔗 **FiveTwenty SDK**: [InstrumentName](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [InstrumentName](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -89,7 +89,7 @@ Trade direction for buy/sell operations.
 
 🔗 **OANDA Definition**: [Direction](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_16)
 
-🔗 **FiveTwenty SDK**: [Direction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [Direction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -102,7 +102,7 @@ Types of transactions that can occur in an account.
 
 🔗 **OANDA Definition**: [TransactionType](https://developer.oanda.com/rest-live-v20/transaction-df/#collapse_definition_41)
 
-🔗 **FiveTwenty SDK**: [TransactionType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [TransactionType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -153,7 +153,7 @@ Time intervals for candlestick data.
 
 🔗 **OANDA Definition**: [CandlestickGranularity](https://developer.oanda.com/rest-live-v20/instrument-df/#collapse_definition_1)
 
-🔗 **FiveTwenty SDK**: [CandlestickGranularity](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [CandlestickGranularity](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description | Alignment |
 |-------|-------------|-----------|
@@ -185,7 +185,7 @@ Status of price data.
 
 🔗 **OANDA Definition**: [PriceStatus](https://developer.oanda.com/rest-live-v20/pricing-df/#collapse_definition_2)
 
-🔗 **FiveTwenty SDK**: [PriceStatus](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [PriceStatus](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -199,7 +199,7 @@ Days of the week for weekly candlestick alignment.
 
 🔗 **OANDA Definition**: [WeeklyAlignment](https://developer.oanda.com/rest-live-v20/instrument-df/#collapse_definition_2)
 
-🔗 **FiveTwenty SDK**: [WeeklyAlignment](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [WeeklyAlignment](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -217,7 +217,7 @@ Days of the week enumeration.
 
 🔗 **OANDA Definition**: [DayOfWeek](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_7)
 
-🔗 **FiveTwenty SDK**: [DayOfWeek](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [DayOfWeek](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -237,7 +237,7 @@ Types of orders that can be placed.
 
 🔗 **OANDA Definition**: [OrderType](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_21)
 
-🔗 **FiveTwenty SDK**: [OrderType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [OrderType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -256,7 +256,7 @@ Current state of an order.
 
 🔗 **OANDA Definition**: [OrderState](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_23)
 
-🔗 **FiveTwenty SDK**: [OrderState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [OrderState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -271,7 +271,7 @@ Filter for querying orders by state.
 
 🔗 **OANDA Definition**: [OrderStateFilter](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_24)
 
-🔗 **FiveTwenty SDK**: [OrderStateFilter](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [OrderStateFilter](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -287,7 +287,7 @@ Types of orders that can be cancelled.
 
 🔗 **OANDA Definition**: [CancellableOrderType](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_22)
 
-🔗 **FiveTwenty SDK**: [CancellableOrderType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [CancellableOrderType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -307,7 +307,7 @@ Financing mode for an account.
 
 🔗 **OANDA Definition**: [AccountFinancingMode](https://developer.oanda.com/rest-live-v20/account-df/#collapse_definition_12)
 
-🔗 **FiveTwenty SDK**: [AccountFinancingMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [AccountFinancingMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -321,7 +321,7 @@ How positions are aggregated in the account.
 
 🔗 **OANDA Definition**: [PositionAggregationMode](https://developer.oanda.com/rest-live-v20/account-df/#collapse_definition_14)
 
-🔗 **FiveTwenty SDK**: [PositionAggregationMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [PositionAggregationMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -335,7 +335,7 @@ Guaranteed stop loss order modes for instruments.
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrderMode](https://developer.oanda.com/rest-live-v20/account-df/#collapse_definition_6)
 
-🔗 **FiveTwenty SDK**: [GuaranteedStopLossOrderMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [GuaranteedStopLossOrderMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -349,7 +349,7 @@ Guaranteed stop loss order modes specific to instruments.
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrderModeForInstrument](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_14)
 
-🔗 **FiveTwenty SDK**: [GuaranteedStopLossOrderModeForInstrument](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [GuaranteedStopLossOrderModeForInstrument](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -365,7 +365,7 @@ Filter for trade queries by state.
 
 🔗 **OANDA Definition**: [TradeStateFilter](https://developer.oanda.com/rest-live-v20/trade-df/#collapse_definition_3)
 
-🔗 **FiveTwenty SDK**: [TradeStateFilter](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+🔗 **Source**: [TradeStateFilter](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|

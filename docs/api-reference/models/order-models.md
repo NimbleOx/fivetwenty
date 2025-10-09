@@ -13,7 +13,7 @@ Request to create a market order (immediate execution at current market price).
 
 🔗 **OANDA Definition**: [MarketOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_12)
 
-🔗 **FiveTwenty SDK**: [MarketOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [MarketOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -34,7 +34,7 @@ Request to create a limit order (execution at specific price or better).
 
 🔗 **OANDA Definition**: [LimitOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_13)
 
-🔗 **FiveTwenty SDK**: [LimitOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [LimitOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -58,7 +58,7 @@ Request to create a stop order (market order triggered at specific price).
 
 🔗 **OANDA Definition**: [StopOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_14)
 
-🔗 **FiveTwenty SDK**: [StopOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [StopOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -83,7 +83,7 @@ Request to create a take profit order linked to an open trade.
 
 🔗 **OANDA Definition**: [TakeProfitOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#TakeProfitOrderRequest)
 
-🔗 **FiveTwenty SDK**: [TakeProfitOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [TakeProfitOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -100,7 +100,7 @@ Request to create a stop loss order linked to an open trade.
 
 🔗 **OANDA Definition**: [StopLossOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#StopLossOrderRequest)
 
-🔗 **FiveTwenty SDK**: [StopLossOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [StopLossOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -119,7 +119,7 @@ Request to create a trailing stop loss order linked to an open trade.
 
 🔗 **OANDA Definition**: [TrailingStopLossOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#TrailingStopLossOrderRequest)
 
-🔗 **FiveTwenty SDK**: [TrailingStopLossOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [TrailingStopLossOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -136,7 +136,7 @@ Request to create a guaranteed stop loss order linked to an open trade.
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#GuaranteedStopLossOrderRequest)
 
-🔗 **FiveTwenty SDK**: [GuaranteedStopLossOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [GuaranteedStopLossOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -155,7 +155,7 @@ Request to create a market-if-touched order (market order triggered at specific 
 
 🔗 **OANDA Definition**: [MarketIfTouchedOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#MarketIfTouchedOrderRequest)
 
-🔗 **FiveTwenty SDK**: [MarketIfTouchedOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [MarketIfTouchedOrderRequest](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -183,7 +183,7 @@ Market order that executes immediately at current market price.
 
 🔗 **OANDA Definition**: [MarketOrder](https://developer.oanda.com/rest-live-v20/order-df/#MarketOrder)
 
-🔗 **FiveTwenty SDK**: [MarketOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [MarketOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -220,7 +220,7 @@ Limit order that executes only at specified price or better.
 
 🔗 **OANDA Definition**: [LimitOrder](https://developer.oanda.com/rest-live-v20/order-df/#LimitOrder)
 
-🔗 **FiveTwenty SDK**: [LimitOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [LimitOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -254,7 +254,7 @@ Stop order that becomes a market order when price threshold is reached.
 
 🔗 **OANDA Definition**: [StopOrder](https://developer.oanda.com/rest-live-v20/order-df/#StopOrder)
 
-🔗 **FiveTwenty SDK**: [StopOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [StopOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -289,7 +289,7 @@ Guaranteed stop loss order linked to an open trade with guaranteed execution.
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrder](https://developer.oanda.com/rest-live-v20/order-df/#GuaranteedStopLossOrder)
 
-🔗 **FiveTwenty SDK**: [GuaranteedStopLossOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [GuaranteedStopLossOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -321,7 +321,7 @@ A Take Profit Order linked to an open Trade and created with a price threshold.
 
 🔗 **OANDA Definition**: [TakeProfitOrder](https://developer.oanda.com/rest-live-v20/order-df/#TakeProfitOrder)
 
-🔗 **FiveTwenty SDK**: [TakeProfitOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [TakeProfitOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -349,7 +349,7 @@ A Stop Loss Order linked to an open Trade and created with a price threshold.
 
 🔗 **OANDA Definition**: [StopLossOrder](https://developer.oanda.com/rest-live-v20/order-df/#StopLossOrder)
 
-🔗 **FiveTwenty SDK**: [StopLossOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [StopLossOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -379,7 +379,7 @@ A Trailing Stop Loss Order linked to an open Trade with a dynamic price distance
 
 🔗 **OANDA Definition**: [TrailingStopLossOrder](https://developer.oanda.com/rest-live-v20/order-df/#TrailingStopLossOrder)
 
-🔗 **FiveTwenty SDK**: [TrailingStopLossOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [TrailingStopLossOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -408,7 +408,7 @@ A Market-If-Touched Order created with a price threshold.
 
 🔗 **OANDA Definition**: [MarketIfTouchedOrder](https://developer.oanda.com/rest-live-v20/order-df/#MarketIfTouchedOrder)
 
-🔗 **FiveTwenty SDK**: [MarketIfTouchedOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [MarketIfTouchedOrder](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -479,7 +479,7 @@ Details for creating a Take Profit Order on fill.
 
 🔗 **OANDA Definition**: [TakeProfitDetails](https://developer.oanda.com/rest-live-v20/order-df/#TakeProfitDetails)
 
-🔗 **FiveTwenty SDK**: [TakeProfitDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [TakeProfitDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -493,7 +493,7 @@ Details for creating a Stop Loss Order on fill.
 
 🔗 **OANDA Definition**: [StopLossDetails](https://developer.oanda.com/rest-live-v20/order-df/#StopLossDetails)
 
-🔗 **FiveTwenty SDK**: [StopLossDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [StopLossDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -509,7 +509,7 @@ Details for creating a Trailing Stop Loss Order on fill.
 
 🔗 **OANDA Definition**: [TrailingStopLossDetails](https://developer.oanda.com/rest-live-v20/order-df/#TrailingStopLossDetails)
 
-🔗 **FiveTwenty SDK**: [TrailingStopLossDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [TrailingStopLossDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -523,7 +523,7 @@ Client-provided metadata for Orders and Trades.
 
 🔗 **OANDA Definition**: [ClientExtensions](https://developer.oanda.com/rest-live-v20/order-df/#ClientExtensions)
 
-🔗 **FiveTwenty SDK**: [ClientExtensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [ClientExtensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -536,7 +536,7 @@ Details for guaranteed stop loss orders that ensure execution at guaranteed pric
 
 🔗 **OANDA Definition**: [GuaranteedStopLossDetails](https://developer.oanda.com/rest-live-v20/order-df/#GuaranteedStopLossDetails)
 
-🔗 **FiveTwenty SDK**: [GuaranteedStopLossDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [GuaranteedStopLossDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -552,7 +552,7 @@ The dynamic state of an order, including current calculations and trigger inform
 
 🔗 **OANDA Definition**: [DynamicOrderState](https://developer.oanda.com/rest-live-v20/order-df/#DynamicOrderState)
 
-🔗 **FiveTwenty SDK**: [DynamicOrderState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [DynamicOrderState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -568,7 +568,7 @@ Details for closing specific trades with market orders.
 
 🔗 **OANDA Definition**: [MarketOrderTradeClose](https://developer.oanda.com/rest-live-v20/order-df/#MarketOrderTradeClose)
 
-🔗 **FiveTwenty SDK**: [MarketOrderTradeClose](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [MarketOrderTradeClose](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -581,7 +581,7 @@ Details for position closeout via market order.
 
 🔗 **OANDA Definition**: [MarketOrderPositionCloseout](https://developer.oanda.com/rest-live-v20/order-df/#MarketOrderPositionCloseout)
 
-🔗 **FiveTwenty SDK**: [MarketOrderPositionCloseout](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [MarketOrderPositionCloseout](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -593,7 +593,7 @@ Details for margin closeout market order.
 
 🔗 **OANDA Definition**: [MarketOrderMarginCloseout](https://developer.oanda.com/rest-live-v20/order-df/#MarketOrderMarginCloseout)
 
-🔗 **FiveTwenty SDK**: [MarketOrderMarginCloseout](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [MarketOrderMarginCloseout](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -604,7 +604,7 @@ Details for delayed trade close market order.
 
 🔗 **OANDA Definition**: [MarketOrderDelayedTradeClose](https://developer.oanda.com/rest-live-v20/order-df/#MarketOrderDelayedTradeClose)
 
-🔗 **FiveTwenty SDK**: [MarketOrderDelayedTradeClose](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
+🔗 **Source**: [MarketOrderDelayedTradeClose](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/orders.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|

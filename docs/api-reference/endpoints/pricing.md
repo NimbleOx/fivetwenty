@@ -42,7 +42,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#get-pricing)
 
-🔗 **FiveTwenty SDK**: [pricing.get_pricing](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
+🔗 **Source**: [pricing.get_pricing](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
 
 **Parameters:**
 
@@ -108,7 +108,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Stream Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#stream-pricing)
 
-🔗 **FiveTwenty SDK**: [pricing.get_pricing_stream](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
+🔗 **Source**: [pricing.get_pricing_stream](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
 
 **Parameters:**
 
@@ -170,7 +170,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
 
-🔗 **FiveTwenty SDK**: [pricing.get_account_instrument_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
+🔗 **Source**: [pricing.get_account_instrument_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
 
 **Parameters:**
 
@@ -240,7 +240,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Get Latest Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-latest-candles)
 
-🔗 **FiveTwenty SDK**: [pricing.get_latest_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
+🔗 **Source**: [pricing.get_latest_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
 
 **Parameters:**
 
@@ -326,7 +326,7 @@ asyncio.run(main())
 
 🔗 **OANDA Documentation**: [Stream Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#stream-pricing)
 
-🔗 **FiveTwenty SDK**: [pricing.stream_pricing_with_retries](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
+🔗 **Source**: [pricing.stream_pricing_with_retries](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
 
 **Parameters:**
 
