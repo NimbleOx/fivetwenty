@@ -7,7 +7,7 @@ Trade monitoring and management.
 ---
 
 ## get_trades
-<!-- fragment: Demo get_trades with return type annotations and unused import patterns -->
+
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -16,16 +16,15 @@ from fivetwenty.endpoints.trades import TradesResponse
 
 
 async def main() -> None:
-    async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
-        # trades.get_trades(account_id: AccountID, ids: list[TradeID] | None = None,
-        #            state: TradeStateFilter = TradeStateFilter.OPEN,
-        #            instrument: InstrumentName | None = None, count: int = 50,
-        #            before_id: TradeID | None = None) -> TradesResponse
+    async with AsyncClient() as client:
+        # trades.get_trades(account_id: AccountID, *, ids: list[TradeID] | None = None,
+        #                   state: TradeStateFilter = TradeStateFilter.OPEN,
+        #                   instrument: InstrumentName | None = None, count: int = 50,
+        #                   before_id: TradeID | None = None) -> TradesResponse
         # Returns: {"trades": list[Trade], "lastTransactionID": str}
 
-        # Example usage:
         result: TradesResponse = await client.trades.get_trades(
-            account_id="123-456-789",
+            client.account_id,
             state=TradeStateFilter.OPEN,
             count=20,
         )
@@ -63,23 +62,26 @@ Get a list of trades for an account.
 ---
 
 ## get_open_trades
-<!-- fragment: Demo get_open_trades with missing return type annotation patterns -->
+
 ```python
 import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import TradesResponse
 
 
-async def get_open_trades_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
+async def main() -> None:
+    async with AsyncClient() as client:
         # trades.get_open_trades(account_id: AccountID) -> TradesResponse
         # Returns: {"trades": list[Trade], "lastTransactionID": str}
 
-        # Example usage:
-        result: TradesResponse = await client.trades.get_open_trades(account_id="123-456-789")
+        result: TradesResponse = await client.trades.get_open_trades(client.account_id)
         trades = result["trades"]
         print(f"Open trades: {len(trades)}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openTrades`
 
@@ -102,26 +104,29 @@ Get all open trades for account.
 ---
 
 ## get_trade
-<!-- fragment: Demo get_trade with missing return type annotation patterns -->
+
 ```python
 import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import TradeResponse
 
 
-async def get_trade_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
+async def main() -> None:
+    async with AsyncClient() as client:
         # trades.get_trade(account_id: AccountID, trade_specifier: str) -> TradeResponse
         # Returns: {"trade": Trade, "lastTransactionID": str}
 
-        # Example usage:
         result: TradeResponse = await client.trades.get_trade(
-            account_id="123-456-789",
+            client.account_id,
             trade_specifier="12345"
         )
         trade = result["trade"]
         print(f"Trade ID: {trade.id}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades/{tradeSpecifier}`
 
@@ -145,28 +150,31 @@ Get specific trade details.
 ---
 
 ## close_trade
-<!-- fragment: Demo close_trade with missing return type annotation patterns -->
+
 ```python
 import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import CloseTradeResponse
 
 
-async def close_trade_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
-        # trades.close_trade(account_id: AccountID, trade_specifier: str,
-        #             units: str | None = None, idempotency_key: str | None = None) -> CloseTradeResponse
-        # Returns: {"orderCreateTransaction": Any, "orderFillTransaction": Any,
-        #           "orderCancelTransaction": Any, "relatedTransactionIDs": list[str],
+async def main() -> None:
+    async with AsyncClient() as client:
+        # trades.close_trade(account_id: AccountID, trade_specifier: str, *,
+        #                    units: str | None = None, idempotency_key: str | None = None) -> CloseTradeResponse
+        # Returns: {"orderCreateTransaction": MarketOrderTransaction, "orderFillTransaction": OrderFillTransaction,
+        #           "orderCancelTransaction": OrderCancelTransaction, "relatedTransactionIDs": list[str],
         #           "lastTransactionID": str} (fields are optional)
 
-        # Example usage:
         result: CloseTradeResponse = await client.trades.close_trade(
-            account_id="123-456-789",
+            client.account_id,
             trade_specifier="12345",
             units="1000"
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/close`
 
@@ -192,7 +200,7 @@ Close a trade (fully or partially).
 ---
 
 ## put_trade_client_extensions
-<!-- fragment: Demo put_trade_client_extensions with unused variables and return type patterns -->
+
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -201,21 +209,22 @@ from fivetwenty.endpoints.trades import TradeClientExtensionsResponse
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # trades.put_trade_client_extensions(account_id: AccountID, trade_specifier: str,
-        #                                client_extensions: dict[str, Any] | None = None,
-        #                                idempotency_key: str | None = None) -> TradeClientExtensionsResponse
-        # Returns: {"tradeClientExtensionsModifyTransaction": Any, "relatedTransactionIDs": list[str],
-        #           "lastTransactionID": str} (fields may be optional)
+        # trades.put_trade_client_extensions(account_id: AccountID, trade_specifier: str, *,
+        #                                    client_extensions: dict[str, Any] | None = None,
+        #                                    idempotency_key: str | None = None) -> TradeClientExtensionsResponse
+        # Returns: {"tradeClientExtensionsModifyTransaction": TradeClientExtensionsModifyTransaction,
+        #           "relatedTransactionIDs": list[str], "lastTransactionID": str} (fields may be optional)
 
-        # Example usage:
         result: TradeClientExtensionsResponse = await client.trades.put_trade_client_extensions(
-            account_id="123-456-789",
+            client.account_id,
             trade_specifier="12345",
             client_extensions={"comment": "Updated comment"},
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/clientExtensions`
 
@@ -241,7 +250,7 @@ Modify client extensions for existing trade.
 ---
 
 ## put_trade_orders
-<!-- fragment: Demo put_trade_orders with unused variables and return type patterns -->
+
 ```python
 import asyncio
 from fivetwenty import AsyncClient
@@ -251,24 +260,24 @@ from fivetwenty.endpoints.trades import TradeOrdersResponse
 async def main() -> None:
     async with AsyncClient() as client:
         # trades.put_trade_orders(account_id: AccountID, trade_specifier: str,
-        #              take_profit: dict[str, Any] | None = None,
-        #              stop_loss: dict[str, Any] | None = None,
-        #              trailing_stop_loss: dict[str, Any] | None = None,
-        #              guaranteed_stop_loss: dict[str, Any] | None = None,
-        #              idempotency_key: str | None = None) -> TradeOrdersResponse
-        # Returns: {"takeProfitOrderCancelTransaction": Any, "stopLossOrderTransaction": Any, ...
+        #                         **kwargs: Any) -> TradeOrdersResponse
+        # kwargs: take_profit, stop_loss, trailing_stop_loss, guaranteed_stop_loss, idempotency_key
+        # Returns: {"takeProfitOrderCancelTransaction": OrderCancelTransaction,
+        #           "takeProfitOrderTransaction": TakeProfitOrderTransaction,
+        #           "stopLossOrderTransaction": StopLossOrderTransaction, ...
         #           "relatedTransactionIDs": list[str], "lastTransactionID": str} (fields may be optional)
 
-        # Example usage:
         result: TradeOrdersResponse = await client.trades.put_trade_orders(
-            account_id="123-456-789",
+            client.account_id,
             trade_specifier="12345",
             take_profit={"price": "1.1500"},
             stop_loss={"price": "1.1200"}
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/orders`
 
