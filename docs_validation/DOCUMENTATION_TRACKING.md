@@ -39,7 +39,7 @@
 | `[ ]` | `guides/optimization/streaming-optimization.md` | Guides | 6 |
 | `[ ]` | `guides/index.md` | Guides | 0 |
 | `[ ]` | `guides/optimization/index.md` | Guides | 0 |
-| `[ ]` | `api-reference/client.md` | API Reference | 13 |
+| `[x]` | `api-reference/client.md` | API Reference | 13 |
 | `[ ]` | `api-reference/configuration.md` | API Reference | 34 |
 | `[ ]` | `api-reference/error-handling.md` | API Reference | 11 |
 | `[ ]` | `api-reference/exceptions.md` | API Reference | 5 |
