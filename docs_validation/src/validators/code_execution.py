@@ -181,6 +181,9 @@ class CodeExecutionValidator(BaseValidator):
         old_alarm_handler = signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(5)  # 5 second timeout
 
+        # Store original sys.modules state for fivetwenty (to restore later)
+        original_fivetwenty = sys.modules.get("fivetwenty")
+
         try:
             # Add security restrictions to namespace
             restricted_namespace = self._create_restricted_namespace(execution_namespace)
@@ -259,6 +262,17 @@ class CodeExecutionValidator(BaseValidator):
             # Restore resource limits
             self._restore_resource_limits(old_limits)
 
+            # Restore sys.modules state for fivetwenty and its submodules
+            if original_fivetwenty is not None:
+                sys.modules["fivetwenty"] = original_fivetwenty
+            elif "fivetwenty" in sys.modules:
+                del sys.modules["fivetwenty"]
+
+            # Clean up all fivetwenty submodules
+            submodules_to_remove = [key for key in sys.modules.keys() if key.startswith("fivetwenty.")]
+            for submodule in submodules_to_remove:
+                del sys.modules[submodule]
+
         return issues
 
     def _set_resource_limits(self) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -305,6 +319,63 @@ class CodeExecutionValidator(BaseValidator):
         """
         # Start with the base namespace
         restricted = base_namespace.copy()
+
+        # Create a mocked fivetwenty module to inject into sys.modules
+        # This ensures that imports of fivetwenty use mocks instead of the real module
+        mocked_fivetwenty = MagicMock()
+
+        # Set __path__ to make it look like a package (enables submodule imports)
+        mocked_fivetwenty.__path__ = []
+        mocked_fivetwenty.__package__ = "fivetwenty"
+        mocked_fivetwenty.__name__ = "fivetwenty"
+        mocked_fivetwenty.__version__ = "0.0.0-mock"
+
+        # Get the mocked AsyncClient and Client from base_namespace
+        if "AsyncClient" in base_namespace:
+            mocked_fivetwenty.AsyncClient = base_namespace["AsyncClient"]
+        if "Client" in base_namespace:
+            mocked_fivetwenty.Client = base_namespace["Client"]
+        if "AccountConfig" in base_namespace:
+            mocked_fivetwenty.AccountConfig = base_namespace["AccountConfig"]
+        if "AccountConfigLoader" in base_namespace:
+            mocked_fivetwenty.AccountConfigLoader = base_namespace["AccountConfigLoader"]
+        if "Environment" in base_namespace:
+            mocked_fivetwenty.Environment = base_namespace["Environment"]
+
+        # Create mock exception that inherits from BaseException for proper exception handling
+        class MockFiveTwentyError(Exception):
+            """Mock FiveTwentyError for exception handling."""
+            pass
+
+        # Create submodules that return MagicMocks for any attribute access
+        # This allows imports like: from fivetwenty.models import InstrumentName
+        mocked_submodules = ["models", "exceptions", "endpoints", "endpoints.orders",
+                            "endpoints.trades", "endpoints.accounts", "endpoints.pricing",
+                            "endpoints.positions", "endpoints.transactions", "endpoints.instruments"]
+
+        for submodule_name in mocked_submodules:
+            full_name = f"fivetwenty.{submodule_name}"
+            mock_submodule = MagicMock()
+            mock_submodule.__name__ = full_name
+            mock_submodule.__package__ = full_name.rsplit(".", 1)[0] if "." in submodule_name else "fivetwenty"
+
+            # Add FiveTwentyError to exceptions submodule
+            if submodule_name == "exceptions":
+                mock_submodule.FiveTwentyError = MockFiveTwentyError
+
+            sys.modules[full_name] = mock_submodule
+
+            # Set the submodule on the parent
+            parts = submodule_name.split(".")
+            parent = mocked_fivetwenty
+            for i, part in enumerate(parts[:-1]):
+                if not hasattr(parent, part):
+                    setattr(parent, part, MagicMock())
+                parent = getattr(parent, part)
+            setattr(parent, parts[-1], mock_submodule)
+
+        # Inject mocked module into sys.modules (cleanup happens in _execute_python_code finally block)
+        sys.modules["fivetwenty"] = mocked_fivetwenty
 
         # Create a safe __import__ that allows standard library and safe packages
         def safe_import(name: str, *args: Any, **kwargs: Any) -> Any:
@@ -429,7 +500,11 @@ class CodeExecutionValidator(BaseValidator):
         mock_async_client.orders = MagicMock()
         mock_async_client.orders.post_market_order = AsyncMock(return_value=mock_order_response)
         mock_async_client.trades = MagicMock()
+        # Add default AsyncMock for any attribute access on trades
+        mock_async_client.trades.__getattr__ = lambda name: AsyncMock()
         mock_async_client.pricing = MagicMock()
+        # Add default AsyncMock for any attribute access on pricing
+        mock_async_client.pricing.__getattr__ = lambda name: AsyncMock()
 
         # Mock Client (sync version)
         mock_client = MagicMock()
