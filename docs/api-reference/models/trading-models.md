@@ -13,6 +13,8 @@ Represents an open trade position.
 
 🔗 **OANDA Definition**: [Trade](https://developer.oanda.com/rest-live-v20/trade-df/)
 
+🔗 **Source**: [Trade](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/trades.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [TradeID](system-models.md#type-aliases) |✅ | Trade's identifier, unique within the Account (OANDA-assigned positive integer as string) |
@@ -41,6 +43,8 @@ Represents an open trade position.
 Condensed trade information for lists and overviews.
 
 🔗 **OANDA Definition**: [TradeSummary](https://developer.oanda.com/rest-live-v20/trade-df/)
+
+🔗 **Source**: [TradeSummary](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/trades.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -71,6 +75,8 @@ The identification of a Trade as referred to by clients.
 
 🔗 **OANDA Definition**: [TradeSpecifier](https://developer.oanda.com/rest-live-v20/trade-df/)
 
+🔗 **Source**: [TradeSpecifier](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/trades.py)
+
 | Type | Format | Description |
 |------|--------|-------------|
 | str | Trade ID or Client ID | Either the Trade's OANDA-assigned TradeID or the Trade's client-provided ClientID prefixed by the "@" symbol |
@@ -84,6 +90,8 @@ The identification of a Trade as referred to by clients.
 The dynamic (calculated) state of an open Trade.
 
 🔗 **OANDA Definition**: [CalculatedTradeState](https://developer.oanda.com/rest-live-v20/trade-df/)
+
+🔗 **Source**: [CalculatedTradeState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/trades.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -99,6 +107,8 @@ The dynamic (calculated) state of an open Trade.
 Aggregated position information for an instrument.
 
 🔗 **OANDA Definition**: [Position](https://developer.oanda.com/rest-live-v20/position-df/)
+
+🔗 **Source**: [Position](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/positions.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -119,6 +129,8 @@ One side (long or short) of a position.
 
 🔗 **OANDA Definition**: [PositionSide](https://developer.oanda.com/rest-live-v20/position-df/)
 
+🔗 **Source**: [PositionSide](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/positions.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `units` | Decimal | ✅ | Position units (positive for long, negative for short) |
@@ -135,6 +147,8 @@ One side (long or short) of a position.
 Dynamic calculated state of a position with real-time P&L calculations.
 
 🔗 **OANDA Definition**: [CalculatedPositionState](https://developer.oanda.com/rest-live-v20/position-df/)
+
+🔗 **Source**: [CalculatedPositionState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/positions.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
