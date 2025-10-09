@@ -24,8 +24,8 @@ Represents an open trade position.
 | `initial_margin_required` | [AccountUnits](system-models.md#type-aliases) |✅ | Margin required when trade was opened |
 | `current_units` | Decimal | ✅ | Units currently open (reduces toward 0 when closed) |
 | `realized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Total profit/loss realized on closed portion of Trade (string) |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Unrealized profit/loss on open portion using current market prices (string) |
-| `margin_used` | [AccountUnits](system-models.md#type-aliases) |✅ | Margin currently used by the Trade (string) |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |➖ | Unrealized profit/loss on open portion using current market prices (string, not present for closed trades) |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) |➖ | Margin currently used by the Trade (string, not present for closed trades) |
 | `average_close_price` | [PriceValue](system-models.md#type-aliases) |➖ | Average price of closed portions |
 | `closing_transaction_ids` | list[[TransactionID](system-models.md#type-aliases)] |✅ | IDs of transactions that closed portions of this trade |
 | `dividend_adjustment` | [AccountUnits](system-models.md#type-aliases) |➖ | Total dividend adjustments paid for the Trade (string, applicable to equity CFDs) |
@@ -53,8 +53,8 @@ Condensed trade information for lists and overviews.
 | `initial_margin_required` | [AccountUnits](system-models.md#type-aliases) |✅ | Margin required when trade was opened |
 | `current_units` | Decimal | ✅ | Units currently open (reduces toward 0 when closed) |
 | `realized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Total profit/loss realized on closed portion of Trade (string) |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Unrealized profit/loss on open portion using current market prices |
-| `margin_used` | [AccountUnits](system-models.md#type-aliases) |✅ | Margin currently used by the Trade |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |➖ | Unrealized profit/loss on open portion using current market prices (not present for closed trades) |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) |➖ | Margin currently used by the Trade (not present for closed trades) |
 | `average_close_price` | [PriceValue](system-models.md#type-aliases) |➖ | Average price of closed portions |
 | `closing_transaction_ids` | list[[TransactionID](system-models.md#type-aliases)] |✅ | IDs of transactions that closed portions of this trade |
 | `financing` | [AccountUnits](system-models.md#type-aliases) |➖ | Total financing paid/collected for the Trade |
@@ -118,8 +118,8 @@ Aggregated position information for an instrument.
 | `long` | [PositionSide](#positionside) | ✅ | Long side details (aggregation of all long trades) |
 | `short` | [PositionSide](#positionside) | ✅ | Short side details (aggregation of all short trades) |
 | `pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Lifetime realized profit/loss for the Position |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Unrealized profit/loss from all open Trades |
-| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ➖ | Margin currently used by the Position |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Unrealized profit/loss from all open Trades (not present for closed positions) |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ➖ | Margin currently used by the Position (not present for closed positions) |
 | `resettable_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Realized profit/loss since last reset |
 | `financing` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total financing paid/collected for the Position (lifetime) |
 | `commission` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total commission paid for the Position (lifetime) |
@@ -137,7 +137,7 @@ One side (long or short) of a position.
 | `average_price` | [PriceValue](system-models.md#type-aliases) |➖ | Volume-weighted average open price for this side |
 | `trade_ids` | list[[TradeID](system-models.md#type-aliases)] |✅ | Open Trade IDs contributing to this position side |
 | `pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Lifetime realized profit/loss for this side |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Unrealized profit/loss from open Trades on this side |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Unrealized profit/loss from open Trades on this side (not present for closed positions) |
 | `resettable_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Realized profit/loss since last reset for this side |
 | `financing` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total financing for this side (lifetime) |
 | `dividend_adjustment` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total dividend adjustments for this side |

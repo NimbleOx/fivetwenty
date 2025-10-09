@@ -43,8 +43,8 @@ class Trade(ApiModel):
     initial_margin_required: AccountUnits = Field(alias="initialMarginRequired")
     current_units: Decimal = Field(alias="currentUnits")
     realized_pl: AccountUnits = Field(alias="realizedPL")
-    unrealized_pl: AccountUnits = Field(alias="unrealizedPL")
-    margin_used: AccountUnits = Field(alias="marginUsed")
+    unrealized_pl: AccountUnits | None = Field(alias="unrealizedPL", default=None)
+    margin_used: AccountUnits | None = Field(alias="marginUsed", default=None)
     average_close_price: PriceValue | None = Field(alias="averageClosePrice", default=None)
     closing_transaction_ids: list[TransactionID] = Field(alias="closingTransactionIDs", default_factory=list)
     financing: AccountUnits = Field(default=Decimal("0"))
@@ -69,8 +69,8 @@ class TradeSummary(ApiModel):
     initial_margin_required: AccountUnits = Field(alias="initialMarginRequired")
     current_units: Decimal = Field(alias="currentUnits")
     realized_pl: AccountUnits = Field(alias="realizedPL")
-    unrealized_pl: AccountUnits = Field(alias="unrealizedPL")
-    margin_used: AccountUnits = Field(alias="marginUsed")
+    unrealized_pl: AccountUnits | None = Field(alias="unrealizedPL", default=None)
+    margin_used: AccountUnits | None = Field(alias="marginUsed", default=None)
     average_close_price: PriceValue | None = Field(alias="averageClosePrice", default=None)
     closing_transaction_ids: list[TransactionID] = Field(alias="closingTransactionIDs", default_factory=list)
     financing: AccountUnits = Field(default=Decimal("0"))
@@ -87,8 +87,8 @@ class CalculatedTradeState(ApiModel):
     """Dynamic calculated state of an open trade."""
 
     id: TradeID
-    unrealized_pl: AccountUnits = Field(alias="unrealizedPL")
-    margin_used: AccountUnits = Field(alias="marginUsed")
+    unrealized_pl: AccountUnits | None = Field(alias="unrealizedPL", default=None)
+    margin_used: AccountUnits | None = Field(alias="marginUsed", default=None)
 
 
 # Export all trade-related models
