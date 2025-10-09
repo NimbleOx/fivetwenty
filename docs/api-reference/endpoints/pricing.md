@@ -7,23 +7,20 @@ Real-time pricing data and streaming.
 ---
 
 ## get_pricing
-<!-- fragment: Demo get_pricing with unused imports and module attribute access issues -->
+
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
-from fivetwenty.endpoints.pricing import GetPricingResponse
+from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    # pricing.get_pricing(account_id: AccountID, instruments: list[str], since: str | None = None,
+    # pricing.get_pricing(account_id: AccountID, instruments: list[str], *, since: str | None = None,
     #             include_units_available: bool = True, include_home_conversions: bool = False) -> GetPricingResponse
-    # Returns: {"prices": list[ClientPrice], "time": str, "homeConversions": list[HomeConversions] (optional)}
+    # Returns: GetPricingResponse = {"prices": list[ClientPrice], "time": str, "homeConversions": list[HomeConversions] (optional)}
 
-    config = Configuration(token="your-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
-        result: GetPricingResponse = await client.pricing.get_pricing(
-            account_id="123-456-789",
+    async with AsyncClient() as client:
+        result = await client.pricing.get_pricing(
+            account_id=client.account_id,
             instruments=["EUR_USD", "GBP_USD"],
             include_units_available=True,
         )
@@ -35,6 +32,7 @@ async def main() -> None:
 
 asyncio.run(main())
 ```
+
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing`
 
 **OANDA Documentation**: [Get Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#get-pricing)
@@ -47,11 +45,11 @@ Get current prices for instruments.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account ID |
 | `instruments` | list[str] | ✅ | List of instruments to get prices for |
-| `since` | str | ➖ | Only get prices changed since this time |
-| `include_units_available` | bool | ➖ | Include units available info (default: True) |
-| `include_home_conversions` | bool | ➖ | Include home currency conversions (default: False) |
+| `since` | str | ➖ | Only get prices changed since this time (keyword-only) |
+| `include_units_available` | bool | ➖ | Include units available info (default: True) (keyword-only) |
+| `include_home_conversions` | bool | ➖ | Include home currency conversions (default: False) (keyword-only) |
 
-**Returns:** Dictionary containing prices (`list[ClientPrice]`), time (`str`), and optionally homeConversions (`list[HomeConversions]`)
+**Returns:** `GetPricingResponse` - Dictionary containing prices (`list[ClientPrice]`), time (`str`), and optionally homeConversions (`list[HomeConversions]`)
 
 **Raises:**
 
@@ -60,22 +58,20 @@ Get current prices for instruments.
 ---
 
 ## get_pricing_stream
-<!-- fragment: Demo get_pricing_stream with module attribute access patterns -->
+
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
+from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    # pricing.get_pricing_stream(account_id: AccountID, instruments: list[str], snapshot: bool = True,
+    # pricing.get_pricing_stream(account_id: AccountID, instruments: list[str], *, snapshot: bool = True,
     #               include_home_conversions: bool = False, stall_timeout: float = 30.0)
     #               -> AsyncIterator[ClientPrice | PricingHeartbeat]
 
-    config = Configuration(token="your-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
+    async with AsyncClient() as client:
         async for price in client.pricing.get_pricing_stream(
-            account_id="123-456-789",
+            account_id=client.account_id,
             instruments=["EUR_USD", "GBP_USD"],
             snapshot=True
         ):
@@ -83,6 +79,7 @@ async def main() -> None:
 
 asyncio.run(main())
 ```
+
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing/stream`
 
 **OANDA Documentation**: [Stream Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#stream-pricing)
@@ -95,11 +92,11 @@ Stream real-time pricing data.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account ID |
 | `instruments` | list[str] | ✅ | List of instruments to stream |
-| `snapshot` | bool | ➖ | Include initial snapshot (default: True) |
-| `include_home_conversions` | bool | ➖ | Include home currency conversion factors (default: False) |
-| `stall_timeout` | float | ➖ | Timeout for detecting stream stalls (default: 30.0) |
+| `snapshot` | bool | ➖ | Include initial snapshot (default: True) (keyword-only) |
+| `include_home_conversions` | bool | ➖ | Include home currency conversion factors (default: False) (keyword-only) |
+| `stall_timeout` | float | ➖ | Timeout for detecting stream stalls (default: 30.0) (keyword-only) |
 
-**Returns:** AsyncIterator yielding ClientPrice or PricingHeartbeat objects
+**Returns:** `AsyncIterator[ClientPrice | PricingHeartbeat]` - Async iterator yielding ClientPrice or PricingHeartbeat objects
 
 **Raises:**
 
@@ -108,39 +105,40 @@ Stream real-time pricing data.
 
 ---
 
-## get_instrument_candles
-<!-- fragment: Demo get_instrument_candles with unused imports and call argument issues -->
+## get_account_instrument_candles
+
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
-from typing import Any
+from datetime import datetime
+from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    # pricing.get_latest_candles(account_id: AccountID, instrument: str, price: str = "M",
+    # pricing.get_account_instrument_candles(account_id: AccountID, instrument: str, *, price: str = "M",
     #                granularity: str = "S5", count: int | None = None,
-    #                from_time: str | None = None, to_time: str | None = None,
+    #                from_time: datetime | None = None, to_time: datetime | None = None,
     #                smooth: bool = False, include_first: bool = True,
     #                daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
-    #                weekly_alignment: str = "Friday") -> dict[str, Any]
+    #                weekly_alignment: str = "Friday") -> CandlesResponse
+    # Returns: CandlesResponse = {"instrument": InstrumentName, "granularity": CandlestickGranularity, "candles": list[Candlestick]}
 
-    config = Configuration(token="your-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
-        candles = await client.pricing.get_latest_candles(
-            account_id="123-456-789",
+    async with AsyncClient() as client:
+        candles = await client.pricing.get_account_instrument_candles(
+            account_id=client.account_id,
             instrument="EUR_USD",
             granularity="H1",
             count=100,
         )
+        print(f"Got {len(candles['candles'])} candles for {candles['instrument']}")
 
 asyncio.run(main())
 ```
+
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/instruments/{instrument}/candles`
 
 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
 
-Get historical candle data for an instrument.
+Get account-specific historical candle data for an instrument.
 
 **Parameters:**
 
@@ -148,52 +146,52 @@ Get historical candle data for an instrument.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account ID |
 | `instrument` | str | ✅ | Instrument to get candles for |
-| `price` | str | ➖ | Price type ("M", "B", "A", "BA", "MB", "AM") (default: "M") |
-| `granularity` | str | ➖ | Granularity of candles (default: "S5") |
-| `count` | int | ➖ | Number of candles to return |
-| `from_time` | str | ➖ | Start time for candle range |
-| `to_time` | str | ➖ | End time for candle range |
-| `smooth` | bool | ➖ | Smooth candles (default: False) |
-| `include_first` | bool | ➖ | Include first candle (default: True) |
-| `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) |
-| `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") |
-| `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") |
+| `price` | str | ➖ | Price type ("M", "B", "A", "BA", "BM", "AM", "BAM") (default: "M") (keyword-only) |
+| `granularity` | str | ➖ | Granularity of candles (default: "S5") (keyword-only) |
+| `count` | int | ➖ | Number of candles to return (max 5000) (keyword-only) |
+| `from_time` | datetime | ➖ | Start time for candle range (keyword-only) |
+| `to_time` | datetime | ➖ | End time for candle range (keyword-only) |
+| `smooth` | bool | ➖ | Smooth candles (default: False) (keyword-only) |
+| `include_first` | bool | ➖ | Include first candle (default: True) (keyword-only) |
+| `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) (keyword-only) |
+| `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") (keyword-only) |
+| `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") (keyword-only) |
 
-**Returns:** Dictionary containing candle data
+**Returns:** `CandlesResponse` - Dictionary containing instrument, granularity, and list of candlesticks
 
 **Raises:**
 
 - `FiveTwentyError` - API errors
+- `ValueError` - If both count and time range are specified
 
 ---
 
 ## get_latest_candles
-<!-- fragment: Demo get_latest_candles with unused imports and unused variable patterns -->
+
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
-from fivetwenty.endpoints.pricing import LatestCandlesResponse
+from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    # pricing.get_latest_candles(account_id: AccountID, candle_specifications: list[str],
+    # pricing.get_latest_candles(account_id: AccountID, candle_specifications: list[str], *,
     #                       units: int = 1, smooth: bool = False,
     #                       daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
     #                       weekly_alignment: str = "Friday") -> LatestCandlesResponse
-    # Returns: {"latestCandles": list[...]}
+    # Returns: LatestCandlesResponse = {"latestCandles": list[CandlesResponse]}
 
-    config = Configuration(token="your-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
-        result: LatestCandlesResponse = await client.pricing.get_latest_candles(
-            account_id="123-456-789",
+    async with AsyncClient() as client:
+        result = await client.pricing.get_latest_candles(
+            account_id=client.account_id,
             candle_specifications=["EUR_USD:S5:BM", "GBP_USD:M1:BM"],
             units=50
         )
-        candles = result["latestCandles"]
+        for candle_data in result["latestCandles"]:
+            print(f"{candle_data['instrument']}: {len(candle_data['candles'])} candles")
 
 asyncio.run(main())
 ```
+
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/candles/latest`
 
 **OANDA Documentation**: [Get Latest Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-latest-candles)
@@ -206,43 +204,53 @@ Get latest candles for multiple instruments.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account ID |
 | `candle_specifications` | list[str] | ✅ | List of candle specifications (instrument:granularity:price) |
-| `units` | int | ➖ | Units for calculating volume-based candles (default: 1) |
-| `smooth` | bool | ➖ | Smooth candles (default: False) |
-| `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) |
-| `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") |
-| `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") |
+| `units` | int | ➖ | Units for calculating volume-based candles (1-5000, default: 1) (keyword-only) |
+| `smooth` | bool | ➖ | Smooth candles (default: False) (keyword-only) |
+| `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) (keyword-only) |
+| `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") (keyword-only) |
+| `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") (keyword-only) |
 
-**Returns:** Dictionary containing latest candle data for multiple instruments
+**Returns:** `LatestCandlesResponse` - Dictionary containing latest candle data for multiple instruments
 
 **Raises:**
 
 - `FiveTwentyError` - API errors
+- `ValueError` - On invalid parameters
 
 ---
 
-## get_pricing_stream_iter
-<!-- fragment: Demo get_pricing_stream_iter with module attribute access patterns -->
+## stream_pricing_with_retries
+
 ```python
-from fivetwenty import Client, Configuration
+import asyncio
+from fivetwenty import AsyncClient
+from fivetwenty.models.streaming import StreamingConfiguration, ReconnectionPolicy, StreamState
 
 
-def main() -> None:
-    # pricing.get_pricing_stream(account_id: AccountID, instruments: list[str],
+async def main() -> None:
+    # pricing.stream_pricing_with_retries(account_id: AccountID, instruments: list[str], *,
     #                    snapshot: bool = True, include_home_conversions: bool = False,
     #                    config: StreamingConfiguration | None = None)
-    #                    -> AsyncIterator[ClientPrice | PricingHeartbeat]
+    #                    -> AsyncIterator[tuple[ClientPrice | PricingHeartbeat, StreamState]]
 
-    config = Configuration(token="your-token", environment="practice")
-    with Client(config=config) as client:
-        # Example usage:
-        for price in client.pricing.get_pricing_stream(
-            account_id="123-456-789",
+    async with AsyncClient() as client:
+        config = StreamingConfiguration(
+            reconnection_policy=ReconnectionPolicy(max_attempts=5, delay_seconds=2.0)
+        )
+
+        async for price_data, state in client.pricing.stream_pricing_with_retries(
+            account_id=client.account_id,
             instruments=["EUR_USD", "GBP_USD"],
+            config=config
         ):
-            print(f"Price update: {price}")
+            if state == StreamState.RECONNECTING:
+                print("Connection lost, retrying...")
+            elif state == StreamState.CONNECTED:
+                print(f"Price update: {price_data}")
 
-main()
+asyncio.run(main())
 ```
+
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pricing/stream`
 
 **OANDA Documentation**: [Stream Pricing](https://developer.oanda.com/rest-live-v20/pricing-ep/#stream-pricing)
@@ -255,13 +263,13 @@ Stream pricing with automatic reconnection and configuration.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account ID |
 | `instruments` | list[str] | ✅ | List of instruments to stream |
-| `snapshot` | bool | ➖ | Include snapshot of current prices (default: True) |
-| `include_home_conversions` | bool | ➖ | Include home currency conversions (default: False) |
-| `config` | StreamingConfiguration | ➖ | Streaming configuration with reconnection policy |
+| `snapshot` | bool | ➖ | Include snapshot of current prices (default: True) (keyword-only) |
+| `include_home_conversions` | bool | ➖ | Include home currency conversions (default: False) (keyword-only) |
+| `config` | StreamingConfiguration | ➖ | Streaming configuration with reconnection policy (keyword-only) |
 
-**Returns:** AsyncIterator yielding ClientPrice or PricingHeartbeat objects
+**Returns:** `AsyncIterator[tuple[ClientPrice | PricingHeartbeat, StreamState]]` - Async iterator yielding tuples of (price_data, stream_state)
 
 **Raises:**
 
 - `FiveTwentyError` - API errors
-- `StreamStall` - On stream timeout or connection issues
+- `StreamStall` - If all retry attempts are exhausted

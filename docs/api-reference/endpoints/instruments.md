@@ -9,24 +9,27 @@ Instrument information and historical data.
 ## candles
 ```python
 import asyncio
+from datetime import datetime
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.instruments import CandlesResponse
+from fivetwenty.models import CandlestickGranularity, InstrumentName
 
 
 async def main() -> None:
-    # instruments.get_instrument_candles(instrument: str, price: str = "M", granularity: str = "S5",
-    #                    count: int | None = None, from_time: str | None = None,
-    #                    to_time: str | None = None, smooth: bool = False,
-    #                    include_first: bool = True, daily_alignment: int = 17,
-    #                    alignment_timezone: str = "America/New_York",
+    # instruments.get_instrument_candles(instrument: InstrumentName | str, *, price: str = "M",
+    #                    granularity: CandlestickGranularity, count: int | None = None,
+    #                    from_time: datetime | None = None, to_time: datetime | None = None,
+    #                    smooth: bool = False, include_first: bool = True,
+    #                    daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
     #                    weekly_alignment: str = "Friday") -> CandlesResponse
-    # Returns: {"instrument": str, "granularity": str, "candles": list[...]}
+    # Returns: TypedDict with {"instrument": InstrumentName, "granularity": CandlestickGranularity, "candles": list[Candlestick]}
 
-    async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
-        # Example usage:
+    async with AsyncClient() as client:
+        # Get 100 H1 candles for EUR_USD
         result: CandlesResponse = await client.instruments.get_instrument_candles(
             instrument="EUR_USD",
-            granularity="H1",
+            granularity=CandlestickGranularity.H1,
             count=100,
         )
         candles = result["candles"]
@@ -46,20 +49,24 @@ Get historical candle data for an instrument.
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `instrument` | str | ✅ | Instrument to get candles for |
-| `price` | str | ➖ | Price type ("M", "B", "A", "BA", "MB", "AM") (default: "M") |
-| `granularity` | str | ➖ | Granularity of candles (default: "S5") |
-| `count` | int | ➖ | Number of candles to return |
-| `from_time` | str | ➖ | Start time for candle range |
-| `to_time` | str | ➖ | End time for candle range |
+| `instrument` | InstrumentName \| str | ✅ | Instrument to get candles for |
+| `price` | str | ➖ | Price type ("M", "B", "A", "BA", "BM", "AM", "BAM") (default: "M") |
+| `granularity` | CandlestickGranularity | ✅ | Granularity enum (e.g., CandlestickGranularity.H1) |
+| `count` | int \| None | ➖ | Number of candles to return (max 5000, conflicts with time range) |
+| `from_time` | datetime \| None | ➖ | Start time for candle range |
+| `to_time` | datetime \| None | ➖ | End time for candle range |
 | `smooth` | bool | ➖ | Smooth candles (default: False) |
 | `include_first` | bool | ➖ | Include first candle (default: True) |
-| `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) |
+| `daily_alignment` | int | ➖ | Daily alignment hour (0-23, default: 17) |
 | `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") |
 | `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") |
 
-**Returns:** Dictionary containing instrument name, granularity, and candle data
+**Returns:** `CandlesResponse` TypedDict containing:
+- `instrument`: InstrumentName enum
+- `granularity`: CandlestickGranularity enum
+- `candles`: list of Candlestick models
 
 **Raises:**
 
 - `FiveTwentyError` - API errors
+- `ValueError` - If both count and time range are specified, or count exceeds 5000

@@ -7,28 +7,30 @@ Transaction history and monitoring.
 ---
 
 ## get_transactions
-<!-- fragment: Demo get_transactions with unused imports and assignment before return patterns -->
+
 ```python
 import asyncio
+from datetime import datetime
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.transactions import TransactionsResponse
 
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # transactions.get_transactions(account_id: AccountID, from_time: datetime | None = None,
-        #                   to_time: datetime | None = None, page_size: int = 100,
-        #                   transaction_type: list[str] | None = None) -> TransactionsResponse
-        # Returns: {"from": str, "to": str, "pageSize": int, "type": str, "count": int,
-        #           "pages": list[str], "lastTransactionID": str} (some fields may be optional)
+        # get_transactions(account_id: AccountID, *, from_time: datetime | None = None,
+        #                  to_time: datetime | None = None, page_size: int = 100,
+        #                  transaction_type: list[str] | None = None) -> TransactionsResponse
+        # Returns: TransactionsResponse (TypedDict with from_, to, pageSize, type, count, pages, lastTransactionID)
 
-        # Example usage:
         result: TransactionsResponse = await client.transactions.get_transactions(
-            account_id="123-456-789",
+            client.account_id,
+            from_time=datetime(2024, 1, 1),
+            to_time=datetime(2024, 12, 31),
             page_size=50,
             transaction_type=["ORDER_FILL", "MARKET_ORDER"],
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+        print(f"Page count: {len(result.get('pages', []))}")
 
 asyncio.run(main())
 ```
@@ -43,12 +45,12 @@ Get transaction history for account.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
-| `from_time` | str | ➖ | Start time for transaction range |
-| `to_time` | str | ➖ | End time for transaction range |
-| `page_size` | int | ➖ | Number of transactions per page (default: 100) |
-| `transaction_type` | list[str] | ➖ | Filter by transaction types |
+| `from_time` | datetime \| None | ➖ | Start time for transaction range (keyword-only) |
+| `to_time` | datetime \| None | ➖ | End time for transaction range (keyword-only) |
+| `page_size` | int | ➖ | Number of transactions per page (default: 100, max: 1000, keyword-only) |
+| `transaction_type` | list[str] \| None | ➖ | Filter by transaction types (keyword-only) |
 
-**Returns:** Dictionary containing transaction history and pagination info
+**Returns:** `TransactionsResponse` - TypedDict containing transaction history with pagination info (from_, to, pageSize, type, count, pages, lastTransactionID)
 
 **Raises:**
 
@@ -57,27 +59,27 @@ Get transaction history for account.
 ---
 
 ## get_transaction
-<!-- fragment: Demo get_transaction with missing return type annotation and call argument issues -->
+
 ```python
 import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.transactions import TransactionResponse
 
 
-async def get_transaction_example() -> None:
+async def main() -> None:
     async with AsyncClient() as client:
-        # transactions.get_transaction(account_id: AccountID, transaction_id: str) -> TransactionResponse
-        # Returns: {"transaction": Any, "lastTransactionID": str}
+        # get_transaction(account_id: AccountID, transaction_id: str) -> TransactionResponse
+        # Returns: TransactionResponse (TypedDict with transaction: TransactionUnion, lastTransactionID: str)
 
-        # Example usage:
         result: TransactionResponse = await client.transactions.get_transaction(
-            account_id="123-456-789",
+            client.account_id,
             transaction_id="12345"
         )
         transaction = result["transaction"]
+        print(f"Transaction type: {transaction.type}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(get_transaction_example())
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/{transactionID}`
 
@@ -92,7 +94,7 @@ Get specific transaction details.
 | `account_id` | AccountID | ✅ | Account identifier |
 | `transaction_id` | str | ✅ | Transaction identifier |
 
-**Returns:** Dictionary containing transaction details and last transaction ID (`str`)
+**Returns:** `TransactionResponse` - TypedDict containing transaction details (transaction: TransactionUnion, lastTransactionID: str)
 
 **Raises:**
 
@@ -101,22 +103,21 @@ Get specific transaction details.
 ---
 
 ## get_transactions_since_id
-<!-- fragment: Demo get_transactions_since_id with missing return type annotation and call argument patterns -->
+
 ```python
 import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.transactions import TransactionsSinceIdResponse
 
 
-async def get_transactions_since_id_example() -> None:
+async def main() -> None:
     async with AsyncClient() as client:
-        # transactions.get_transactions_since_id(account_id: AccountID, transaction_id: str,
-        #                        transaction_type: list[str] | None = None) -> TransactionsSinceIdResponse
-        # Returns: {"transactions": list[Any], "lastTransactionID": str}
+        # get_transactions_since_id(account_id: AccountID, transaction_id: str, *,
+        #                           transaction_type: list[str] | None = None) -> TransactionsSinceIdResponse
+        # Returns: TransactionsSinceIdResponse (TypedDict with transactions: list[TransactionUnion], lastTransactionID: str)
 
-        # Example usage:
         result: TransactionsSinceIdResponse = await client.transactions.get_transactions_since_id(
-            account_id="123-456-789",
+            client.account_id,
             transaction_id="100",
             transaction_type=["ORDER_FILL"]
         )
@@ -124,7 +125,7 @@ async def get_transactions_since_id_example() -> None:
         print(f"Found {len(transactions)} transactions")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(get_transactions_since_id_example())
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/sinceid`
 
@@ -138,9 +139,9 @@ Get transactions since specific transaction ID.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
 | `transaction_id` | str | ✅ | Starting transaction ID |
-| `transaction_type` | list[str] | ➖ | Filter by transaction types |
+| `transaction_type` | list[str] \| None | ➖ | Filter by transaction types (keyword-only) |
 
-**Returns:** Dictionary containing transactions (`list[Any]`) since ID and last transaction ID (`str`)
+**Returns:** `TransactionsSinceIdResponse` - TypedDict containing transactions since ID (transactions: list[TransactionUnion], lastTransactionID: str)
 
 **Raises:**
 
@@ -149,17 +150,28 @@ Get transactions since specific transaction ID.
 ---
 
 ## get_transactions_stream
-<!-- fragment: Demo get_transactions_stream with missing return type annotation patterns -->
-```python
-# transactions.get_transactions_stream(account_id: AccountID, stall_timeout: float = 30.0) -> AsyncIterator[dict[str, Any]]
 
-# Example usage:
-async def stream_transactions_example(client):
-    async for transaction in client.transactions.get_transactions_stream(
-        account_id="123-456-789",
-        stall_timeout=60.0
-    ):
-        print(f"Transaction: {transaction}")
+```python
+import asyncio
+from fivetwenty import AsyncClient
+
+
+async def main() -> None:
+    async with AsyncClient() as client:
+        # get_transactions_stream(account_id: AccountID, *, stall_timeout: float = 30.0)
+        #                         -> AsyncIterator[TransactionUnion | TransactionHeartbeat]
+        # Yields: Transaction objects or TransactionHeartbeat messages
+
+        async for item in client.transactions.get_transactions_stream(
+            client.account_id,
+            stall_timeout=60.0
+        ):
+            if hasattr(item, 'type') and item.type == "HEARTBEAT":
+                print(f"Heartbeat at {item.time}")
+            else:
+                print(f"Transaction: {item.type} - {item.id}")
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/stream`
 
@@ -172,9 +184,9 @@ Stream real-time transactions.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
-| `stall_timeout` | float | ➖ | Timeout for detecting stream stalls (default: 30.0) |
+| `stall_timeout` | float | ➖ | Timeout for detecting stream stalls (default: 30.0, keyword-only) |
 
-**Returns:** AsyncIterator yielding transaction data
+**Returns:** `AsyncIterator[TransactionUnion | TransactionHeartbeat]` - Yields transaction objects or heartbeat messages
 
 **Raises:**
 
@@ -184,23 +196,22 @@ Stream real-time transactions.
 ---
 
 ## get_transactions_range
-<!-- fragment: Demo get_transactions_range with unused imports and assignment before return issues -->
+
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
+from fivetwenty import AsyncClient
 from fivetwenty.endpoints.transactions import TransactionsRangeResponse
 
 
 async def main() -> None:
-    # transactions.get_transactions_range(account_id: AccountID, from_transaction_id: str,
-    #                       to_transaction_id: str, transaction_type: list[str] | None = None) -> TransactionsRangeResponse
-    # Returns: {"transactions": list[Any], "lastTransactionID": str}
+    async with AsyncClient() as client:
+        # get_transactions_range(account_id: AccountID, from_transaction_id: str,
+        #                        to_transaction_id: str, *, transaction_type: list[str] | None = None)
+        #                        -> TransactionsRangeResponse
+        # Returns: TransactionsRangeResponse (TypedDict with transactions: list[TransactionUnion], lastTransactionID: str)
 
-    config = Configuration(token="your-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
         result: TransactionsRangeResponse = await client.transactions.get_transactions_range(
-            account_id="123-456-789",
+            client.account_id,
             from_transaction_id="100",
             to_transaction_id="200"
         )
@@ -221,11 +232,11 @@ Get transactions in ID range.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
-| `from_transaction_id` | str | ✅ | Starting transaction ID |
-| `to_transaction_id` | str | ✅ | Ending transaction ID |
-| `transaction_type` | list[str] | ➖ | Filter by transaction types |
+| `from_transaction_id` | str | ✅ | Starting transaction ID (inclusive) |
+| `to_transaction_id` | str | ✅ | Ending transaction ID (inclusive) |
+| `transaction_type` | list[str] \| None | ➖ | Filter by transaction types (keyword-only) |
 
-**Returns:** Dictionary containing transactions (`list[Any]`) in range and last transaction ID (`str`)
+**Returns:** `TransactionsRangeResponse` - TypedDict containing transactions in range (transactions: list[TransactionUnion], lastTransactionID: str)
 
 **Raises:**
 
@@ -234,23 +245,21 @@ Get transactions in ID range.
 ---
 
 ## get_recent_transactions
-<!-- fragment: Demo get_recent_transactions with unused imports and assignment patterns -->
+
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
+from fivetwenty import AsyncClient
 from fivetwenty.endpoints.transactions import TransactionsRangeResponse
 
 
 async def main() -> None:
-    # transactions.get_recent_transactions(account_id: AccountID, count: int = 50,
-    #                     transaction_type: list[str] | None = None) -> TransactionsRangeResponse
-    # Returns: {"transactions": list[Any], "lastTransactionID": str}
+    async with AsyncClient() as client:
+        # get_recent_transactions(account_id: AccountID, *, count: int = 50,
+        #                         transaction_type: list[str] | None = None) -> TransactionsRangeResponse
+        # Returns: TransactionsRangeResponse (TypedDict with transactions: list[TransactionUnion], lastTransactionID: str)
 
-    config = Configuration(token="your-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
         result: TransactionsRangeResponse = await client.transactions.get_recent_transactions(
-            account_id="123-456-789",
+            client.account_id,
             count=100,
             transaction_type=["ORDER_FILL", "MARKET_ORDER"]
         )
@@ -271,10 +280,10 @@ Get recent transactions for account.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
-| `count` | int | ➖ | Number of recent transactions (default: 500, max: 500) |
-| `transaction_type` | list[str] | ➖ | Filter by transaction types |
+| `count` | int | ➖ | Number of recent transactions (default: 50, max: 500, keyword-only) |
+| `transaction_type` | list[str] \| None | ➖ | Filter by transaction types (keyword-only) |
 
-**Returns:** Dictionary containing recent transactions (`list[Any]`) and last transaction ID (`str`)
+**Returns:** `TransactionsRangeResponse` - TypedDict containing recent transactions (transactions: list[TransactionUnion], lastTransactionID: str)
 
 **Raises:**
 

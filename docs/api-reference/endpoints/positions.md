@@ -22,11 +22,13 @@ async def main() -> None:
         # positions.get_positions(account_id: AccountID) -> PositionsResponse
         # Returns: {"positions": list[Position], "lastTransactionID": str}
 
-        # Example usage:
-        result: PositionsResponse = await client.positions.get_positions(account_id="123-456-789")
+        result: PositionsResponse = await client.positions.get_positions(
+            account_id=client.account_id
+        )
         positions = result["positions"]
         print(f"Found {len(positions)} position(s)")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
 
 asyncio.run(main())
 ```
@@ -60,16 +62,19 @@ from fivetwenty import AsyncClient
 if TYPE_CHECKING:
     from fivetwenty.endpoints.positions import PositionsResponse
 
+
 async def main() -> None:
     async with AsyncClient() as client:
         # positions.get_open_positions(account_id: AccountID) -> PositionsResponse
         # Returns: {"positions": list[Position], "lastTransactionID": str}
 
-        # Example usage:
-        result: PositionsResponse = await client.positions.get_open_positions(account_id="123-456-789")
+        result: PositionsResponse = await client.positions.get_open_positions(
+            account_id=client.account_id
+        )
         open_positions = result["positions"]
         print(f"Found {len(open_positions)} open position(s)")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
 
 asyncio.run(main())
 ```
@@ -94,24 +99,29 @@ Get a list of all open positions for an account.
 ---
 
 ## get_position
-<!-- fragment: Demo get_position with argument type patterns -->
 ```python
 import asyncio
+from typing import TYPE_CHECKING
+
 from fivetwenty import AsyncClient
-from fivetwenty.endpoints.positions import PositionResponse
+
+if TYPE_CHECKING:
+    from fivetwenty.endpoints.positions import PositionResponse
+
 
 async def main() -> None:
     async with AsyncClient() as client:
         # positions.get_position(account_id: AccountID, instrument: InstrumentName) -> PositionResponse
         # Returns: {"position": Position, "lastTransactionID": str}
 
-        # Example usage:
         result: PositionResponse = await client.positions.get_position(
-            account_id="123-456-789",
+            account_id=client.account_id,
             instrument="EUR_USD"
         )
         position = result["position"]
+        print(f"Instrument: {position.instrument}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
 
 asyncio.run(main())
 ```
@@ -137,28 +147,33 @@ Get the position for a specific instrument in an account.
 ---
 
 ## close_position
-<!-- fragment: Demo close_position with argument type patterns -->
 ```python
 import asyncio
+from typing import TYPE_CHECKING
+
 from fivetwenty import AsyncClient
-from fivetwenty.endpoints.positions import ClosePositionResponse
+
+if TYPE_CHECKING:
+    from fivetwenty.endpoints.positions import ClosePositionResponse
 
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # positions.close_position(account_id: AccountID, instrument: InstrumentName,
-        #                long_units: str | Decimal | None = None,
-        #                short_units: str | Decimal | None = None,
-        #                long_client_extensions: ClientExtensions | dict[str, str] | None = None,
-        #                short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> ClosePositionResponse
+        # positions.close_position(account_id: AccountID, instrument: InstrumentName, *,
+        #                          long_units: str | Decimal | None = None,
+        #                          short_units: str | Decimal | None = None,
+        #                          long_client_extensions: ClientExtensions | dict[str, str] | None = None,
+        #                          short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> ClosePositionResponse
 
-        # Example usage:
         result: ClosePositionResponse = await client.positions.close_position(
-            account_id="123-456-789",
+            account_id=client.account_id,
             instrument="EUR_USD",
             long_units="ALL",
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+        if "longOrderFillTransaction" in result:
+            print(f"Long position closed: {result['longOrderFillTransaction']}")
+
 
 asyncio.run(main())
 ```
