@@ -38,31 +38,29 @@ Complete reference for FiveTwenty client interfaces and configuration.
 Primary async client for OANDA API operations. Recommended for production use.
 
 **Constructor:**
-<!-- fragment: Demo AsyncClient constructor with union type and attribute access issues -->
 ```python
 from logging import Logger
 from typing import Optional
 
 import httpx
 
-from fivetwenty import AsyncClient, Environment
-from fivetwenty.models import AccountConfig
+from fivetwenty import AsyncClient, AccountConfig, Environment
 
 # Constructor signature:
-
-client = AsyncClient(
-    token=str | None,
-    account_id=str | None,
-    environment=Environment.PRACTICE,
-    config=AccountConfig | None,
-    timeout=30.0,
-    max_retries=3,
-    transport=httpx.AsyncClient | None,
-    user_agent=str | None,
-    proxies=str | None,
-    verify=True,
-    cert=str | None,
-    logger=Optional[Logger] | None,
+AsyncClient(
+    token: str | None = None,
+    *,
+    account_id: str | None = None,
+    environment: Environment = Environment.PRACTICE,
+    config: AccountConfig | None = None,
+    timeout: float = 30.0,
+    max_retries: int = 3,
+    transport: httpx.AsyncClient | None = None,
+    user_agent: str | None = None,
+    proxies: str | None = None,
+    verify: bool | str = True,
+    cert: str | None = None,
+    logger: Optional[Logger] = None,
 )
 ```
 
@@ -73,7 +71,7 @@ client = AsyncClient(
 
 2. **Direct Parameters** (basic scripts):
    - `token` (str) - OANDA API token
-   - `account_id` (str, optional) - OANDA account ID for convenience
+   - `account_id` (str) - OANDA account ID (required when token is provided)
    - `environment` (Environment) - `Environment.PRACTICE` or `Environment.LIVE`
 
 3. **Environment Variables** (deployment):
@@ -103,6 +101,7 @@ async with AsyncClient() as client:
 # Direct parameters (basic scripts)
 async with AsyncClient(
     token="your-token",
+    account_id="your-account-id",
     environment=Environment.PRACTICE
 ) as client:
     accounts = await client.accounts.get_accounts()
@@ -131,8 +130,8 @@ When multiple configuration sources are provided:
 
 **Properties:**
 
-- `account_id` (str | None) - Configured account ID
-- `config` (AccountConfig | None) - Account configuration object
+- `account_id` (str) - Configured account ID
+- `config` (AccountConfig) - Account configuration object
 - `accounts` - [AccountEndpoints](endpoints/accounts.md)
 - `orders` - [OrderEndpoints](endpoints/orders.md)
 - `trades` - [TradeEndpoints](endpoints/trades.md)
@@ -145,14 +144,30 @@ When multiple configuration sources are provided:
 Synchronous wrapper around AsyncClient. Use for scripts and basic applications.
 
 **Constructor:**
-<!-- fragment: Demo Client constructor with undefined names -->
 ```python
-Client(**kwargs)
+from fivetwenty import Client
+
+# Constructor signature (same as AsyncClient):
+Client(
+    token: str | None = None,
+    *,
+    account_id: str | None = None,
+    environment: Environment = Environment.PRACTICE,
+    config: AccountConfig | None = None,
+    timeout: float = 30.0,
+    max_retries: int = 3,
+    transport: httpx.AsyncClient | None = None,
+    user_agent: str | None = None,
+    proxies: str | None = None,
+    verify: bool | str = True,
+    cert: str | None = None,
+    logger: Optional[Logger] = None,
+)
 ```
 
 **Parameters:**
 
-- Accepts all the same parameters as async client
+- Accepts all the same parameters as AsyncClient
 
 **Usage Examples:**
 
@@ -168,14 +183,20 @@ from fivetwenty import Client, Environment
 
 with Client(
     token="your-token",
+    account_id="your-account-id",
     environment=Environment.PRACTICE
 ) as client:
     accounts = client.accounts.get_accounts()
 
 # Configuration object
-from fivetwenty.models import AccountConfig
+from fivetwenty import AccountConfig
 
-config = AccountConfig(...)
+config = AccountConfig(
+    token="your-token",
+    account_id="your-account-id",
+    environment=Environment.PRACTICE,
+    alias="my_account"
+)
 with Client(config=config) as client:
     print(f"Using: {client.config.summary()}")
     accounts = client.accounts.get_accounts()
@@ -183,9 +204,9 @@ with Client(config=config) as client:
 
 **Properties:**
 
-- `account_id` (str | None) - Configured account ID
-- `config` (AccountConfig | None) - Account configuration object
-- Same endpoint structure as async client, but with synchronous methods
+- `account_id` (str) - Configured account ID
+- `config` (AccountConfig) - Account configuration object
+- Same endpoint structure as AsyncClient, but with synchronous methods
 
 ---
 
@@ -279,28 +300,28 @@ config = AccountConfigLoader.from_env_prefix("TRADING_")
 ### Configuration Errors
 
 **ValueError**: Raised when no valid configuration is provided:
-<!-- fragment: Demo ValueError handling with unused variable patterns -->
 ```python
 from fivetwenty import AsyncClient
 
 try:
-    client = AsyncClient()  # No config provided
+    client = AsyncClient()  # No config provided, no env vars
 except ValueError as e:
-    print("Set FIVETWENTY_OANDA_TOKEN environment variable or pass token parameter")
+    print(f"Configuration error: {e}")
+    print("Set FIVETWENTY_OANDA_TOKEN/FIVETWENTY_OANDA_ACCOUNT or pass parameters")
 ```
 
 **ValidationError**: Raised for invalid configuration values:
-<!-- fragment: Demo ValidationError handling with SecretStr argument type issues -->
 ```python
 from pydantic import ValidationError
+
 from fivetwenty import AccountConfig, Environment
 
 try:
     config = AccountConfig(
-        token="",  # Empty token
+        token="",  # Empty token - will fail validation
         account_id="account",
         environment=Environment.PRACTICE,
-        alias="123invalid",  # Invalid alias
+        alias="123invalid",  # Invalid alias - must start with letter
     )
 except ValidationError as e:
     print(f"Configuration error: {e}")
@@ -316,22 +337,25 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 - `details` (dict) - Additional error information
 
 **Example:**
-<!-- fragment: Demo FiveTwentyError handling with unused variables and return type issues -->
 ```python
 import asyncio
 
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty import AsyncClient, FiveTwentyError
 
-async def main():
+
+async def main() -> None:
     async with AsyncClient() as client:
         try:
             trade = await client.trades.get_trade(client.account_id, "invalid_id")
+            print(f"Trade: {trade}")
         except FiveTwentyError as e:
-            print(f"Error {e.status_code}: {e.message}")
-            if e.error_code == "TRADE_NOT_FOUND":
-                # Handle specific error
-                pass
+            print(f"Error {e.status_code}: {e.error_message}")
+            if e.error_code:
+                print(f"Error code: {e.error_code}")
+            # Handle specific errors
+            if e.status_code == 404:
+                print("Trade not found")
+
 
 asyncio.run(main())
 ```
@@ -420,9 +444,17 @@ export STRATEGY_B_OANDA_ENVIRONMENT="practice"
 export STRATEGY_B_OANDA_ACCOUNT_ALIAS="grid_strategy"
 ```
 
-<!-- fragment: Demo AccountConfigLoader usage with undefined name patterns -->
 ```python
-# Load configurations
+from fivetwenty import AccountConfigLoader, AsyncClient
+
+# Load configurations with custom prefixes
 momentum_config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")
 grid_config = AccountConfigLoader.from_env_prefix("STRATEGY_B_")
+
+# Use in clients
+async with AsyncClient(config=momentum_config) as momentum_client:
+    print(f"Momentum: {momentum_client.config.summary()}")
+
+async with AsyncClient(config=grid_config) as grid_client:
+    print(f"Grid: {grid_client.config.summary()}")
 ```
