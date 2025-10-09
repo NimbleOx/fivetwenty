@@ -19,16 +19,16 @@ class StreamState(str, Enum):
 class ReconnectionPolicy(ApiModel):
     """Policy for handling stream reconnections."""
 
-    max_attempts: int = Field(alias="maxAttempts", default=3, description="Maximum reconnection attempts")
-    delay_seconds: float = Field(alias="delaySeconds", default=1.0, description="Delay between reconnection attempts")
+    max_attempts: int = Field(default=3, description="Maximum reconnection attempts")
+    delay_seconds: float = Field(default=1.0, description="Delay between reconnection attempts")
 
 
 class StreamingConfiguration(ApiModel):
     """Configuration for streaming connections."""
 
-    include_heartbeats: bool = Field(alias="includeHeartbeats", default=True, description="Include heartbeat messages")
-    stall_timeout: float = Field(alias="stallTimeout", default=30.0, description="Seconds before considering stream stalled")
-    reconnection_policy: ReconnectionPolicy = Field(alias="reconnectionPolicy", default_factory=ReconnectionPolicy, description="Reconnection settings")
+    include_heartbeats: bool = Field(default=True, description="Include heartbeat messages")
+    stall_timeout: float = Field(default=30.0, description="Seconds before considering stream stalled")
+    reconnection_policy: ReconnectionPolicy = Field(default_factory=ReconnectionPolicy, description="Reconnection settings")
 
 
 # Removed extra streaming models that are not part of official OANDA v20 API:

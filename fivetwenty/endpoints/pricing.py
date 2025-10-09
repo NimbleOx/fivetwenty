@@ -225,7 +225,6 @@ class PricingEndpoints:
             "price": price,
             "granularity": granularity,
             "smooth": str(smooth).lower(),
-            "includeFirst": str(include_first).lower(),
             "dailyAlignment": str(daily_alignment),
             "alignmentTimezone": alignment_timezone,
             "weeklyAlignment": weekly_alignment,
@@ -238,6 +237,8 @@ class PricingEndpoints:
 
         if from_time is not None:
             params["from"] = from_time.isoformat()
+            # includeFirst only makes sense with from parameter
+            params["includeFirst"] = str(include_first).lower()
         if to_time is not None:
             params["to"] = to_time.isoformat()
 

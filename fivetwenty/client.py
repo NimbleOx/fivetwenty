@@ -353,15 +353,22 @@ class AsyncClient:
         # Create full absolute URL for streaming endpoint
         full_url = f"{self._environment.stream_url}{path}"
 
+        # Streaming needs longer connect timeout - OANDA streaming can take 60s+ to establish
+        stream_timeout = httpx.Timeout(
+            connect=120.0,  # Long connect timeout for streaming endpoints
+            read=timeout or self.timeout,
+            write=10.0,
+            pool=5.0,
+        )
+
         try:
             # Use httpx.AsyncClient directly for streaming to avoid base_url conflicts
-            async with httpx.AsyncClient() as stream_client:
+            async with httpx.AsyncClient(timeout=stream_timeout) as stream_client:
                 async with stream_client.stream(
                     "GET",
                     full_url,
                     params=params,
                     headers=headers,
-                    timeout=timeout or self.timeout,
                 ) as response:
                     raise_for_fivetwenty(response)
 
@@ -450,6 +457,32 @@ class AsyncClient:
                 # Log retry attempt (optional logging)
                 if hasattr(self, "_logger") and self._logger:
                     self._logger.warning(f"Stream stalled, retrying ({attempt}/{max_attempts}): {e}")
+
+            except Exception as e:  # noqa: PERF203
+                # Catch connection errors and HTTP 5xx errors (server issues) for retry
+                from .exceptions import FiveTwentyError
+
+                should_retry = False
+                if isinstance(e, FiveTwentyError):
+                    # Retry on HTTP 5xx errors (server issues) and 408 (timeout)
+                    if e.status >= 500 or e.status == 408:
+                        should_retry = True
+
+                if not should_retry:
+                    # Not a retriable error, re-raise
+                    raise
+
+                attempt += 1
+                current_state = StreamState.RECONNECTING
+
+                if attempt > max_attempts:
+                    # Final failure
+                    current_state = StreamState.DISCONNECTED
+                    raise StreamStall(f"Stream failed after {max_attempts} attempts: {e}")
+
+                # Log retry attempt (optional logging)
+                if hasattr(self, "_logger") and self._logger:
+                    self._logger.warning(f"Stream error, retrying ({attempt}/{max_attempts}): {e}")
 
         # Should not reach here, but satisfy mypy
         raise StreamStall(f"Stream failed after {max_attempts} attempts")
