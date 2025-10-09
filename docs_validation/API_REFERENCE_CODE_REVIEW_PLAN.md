@@ -15,12 +15,12 @@ Add markdown comment before each code block with unique name that includes a pre
 ...code...
 ```
 
-Save as:
+Save code block as as:
 - `docs/api-reference/endpoints/orders.md` → `orders/post_market_order.py`
 
 ## Process
 
-1. **Name**: Add `<!-- code-block: unique_name -->` before each ````python` block
+1. **Name**: Add `<!-- code-block: page__unique_name -->` before each ````python` block
 2. **Extract**: Save code blocks as `<page>/<unique_name>.py` with header:
    ```python
    # Source: docs/api-reference/endpoints/orders.md
