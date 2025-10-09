@@ -60,11 +60,10 @@
 | `[x]` | `api-reference/index.md` | API Reference | 1 |
 | `[x]` | `api-reference/endpoints/index.md` | API Reference | 2 |
 | `[x]` | `api-reference/models/index.md` | API Reference | 0 |
-| `[ ]` | `api-reference/oanda-openapi-spec.md` | API Reference | 0 |
-| `[ ]` | `contributing/code-style.md` | Contributing | 19 |
-| `[ ]` | `contributing/development-setup.md` | Contributing | 18 |
-| `[ ]` | `contributing/pull-request-template.md` | Contributing | 1 |
-| `[ ]` | `contributing/testing-guide.md` | Contributing | 18 |
-| `[ ]` | `contributing/index.md` | Contributing | 9 |
-| `[ ]` | `index.md` | Root | 3 |
-| `[ ]` | `examples.md` | Root | 0 |
+| `[x]` | `api-reference/oanda-openapi-spec.md` | API Reference | 0 |
+| `[x]` | `contributing/code-style.md` | Contributing | 19 |
+| `[x]` | `contributing/development-setup.md` | Contributing | 18 |
+| `[x]` | `contributing/testing-guide.md` | Contributing | 18 |
+| `[x]` | `contributing/index.md` | Contributing | 9 |
+| `[x]` | `index.md` | Root | 3 |
+| `[x]` | `examples.md` | Root | 0 |
