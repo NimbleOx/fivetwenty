@@ -109,15 +109,11 @@ Models for real-time pricing, historical data, and instrument specifications.
 | [QuoteHomeConversionFactors](market-data-models.md#quotehomeconversionfactors) | Currency conversion factors for calculating quote currency amounts in account home currency |
 | [HomeConversions](market-data-models.md#homeconversions) | Pre-calculated conversion factors for converting instrument P&L to account home currency |
 | [PricingHeartbeat](market-data-models.md#pricingheartbeat) | Streaming heartbeat message to confirm active price stream connection and prevent timeouts |
-| [Price](market-data-models.md#price) | General market price information with bid/ask levels for non-trading price displays |
 | [UnitsAvailable](market-data-models.md#unitsavailable) | Maximum tradeable units available for different order scenarios and position states |
 | [PriceBucket](market-data-models.md#pricebucket) | Market depth information showing available liquidity at specific price levels |
 | [Candlestick](market-data-models.md#candlestick) | Historical OHLC price data with volume for technical analysis and charting |
 | [CandlestickData](market-data-models.md#candlestickdata) | Open, High, Low, Close price values for a specific time period |
 | [Instrument](market-data-models.md#instrument) | Trading instrument specifications including precision, margins, and trading rules |
-| [CandlestickResponse](market-data-models.md#candlestickresponse) | Container response for historical candlestick data requests with metadata |
-| [CandlestickGranularity](market-data-models.md#candlestickgranularity) | Time interval enumeration for candlestick data ranging from seconds to months |
-| [WeeklyAlignment](market-data-models.md#weeklyalignment) | Day of week alignment setting for weekly candlestick data aggregation |
 | [InstrumentCommission](market-data-models.md#instrumentcommission) | Commission structure definition showing costs per trade for specific instruments |
 | [FinancingDayOfWeek](market-data-models.md#financingdayofweek) | Daily financing charge configuration specifying rollover costs by day of week |
 
