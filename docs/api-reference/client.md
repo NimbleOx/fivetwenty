@@ -250,7 +250,6 @@ config = AccountConfig(
 - `account_id` - OANDA account ID (automatically protected)
 - `environment` - Environment.PRACTICE or Environment.LIVE
 - `alias` - User-friendly identifier (valid Python identifier)
-- `description` - Optional human-readable description
 
 **Security Features:**
 
@@ -292,7 +291,7 @@ from fivetwenty import AccountConfigLoader
 
 # Load with custom prefix
 config = AccountConfigLoader.from_env_prefix("TRADING_")
-# Loads from TRADING_OANDA_TOKEN, TRADING_OANDA_ACCOUNT, etc.
+# Loads from TRADING_FIVETWENTY_OANDA_TOKEN, TRADING_FIVETWENTY_OANDA_ACCOUNT, etc.
 ```
 
 ## Error Handling
@@ -349,11 +348,11 @@ async def main() -> None:
             trade = await client.trades.get_trade(client.account_id, "invalid_id")
             print(f"Trade: {trade}")
         except FiveTwentyError as e:
-            print(f"Error {e.status_code}: {e.error_message}")
-            if e.error_code:
-                print(f"Error code: {e.error_code}")
+            print(f"Error {e.status}: {e.message}")
+            if e.code:
+                print(f"Error code: {e.code}")
             # Handle specific errors
-            if e.status_code == 404:
+            if e.status == 404:
                 print("Trade not found")
 
 
