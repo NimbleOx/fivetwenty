@@ -62,6 +62,7 @@ asyncio.run(main())
 **Raises:**
 
 `FiveTwentyError` - API errors:
+
   - 400: Invalid request parameters (check `e.is_bad_request`)
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
@@ -244,6 +245,7 @@ asyncio.run(main())
 **Raises:**
 
 `FiveTwentyError` - API errors:
+
   - 400: Invalid request parameters (check `e.is_bad_request`)
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
@@ -308,6 +310,7 @@ asyncio.run(main())
 **Raises:**
 
 `FiveTwentyError` - API errors:
+
   - 400: Invalid request parameters (check `e.is_bad_request`)
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
@@ -371,6 +374,7 @@ asyncio.run(main())
 **Raises:**
 
 `FiveTwentyError` - API errors:
+
   - 400: Invalid request parameters (check `e.is_bad_request`)
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
