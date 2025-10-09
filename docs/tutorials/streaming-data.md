@@ -785,7 +785,7 @@ class StreamingTradingSystem:
                     logger.error(f"Transaction processing error: {e}", exc_info=True)
 
                 # Demo mode: stop after 1 transaction
-                if self.demo_mode and transaction_count >= 1:
+                if self.demo_mode and transaction_count >= 20:
                     logger.info("Transaction monitoring complete (demo limit reached)")
                     break
 
