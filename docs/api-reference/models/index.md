@@ -1,12 +1,5 @@
 # Data Models Reference
 
-!!! note "Reference - Information-oriented content"
-    **Use this reference when:** You need to look up specific model structures, field types, and validation rules
-
-    **Content type:** Complete technical specifications for FiveTwenty data models
-
-    **Assumed knowledge:** Python type hints, Pydantic models, and OANDA API concepts
-
 Complete API reference for FiveTwenty's comprehensive data model system, covering all OANDA v20 API data structures.
 
 ---

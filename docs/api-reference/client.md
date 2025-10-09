@@ -145,34 +145,18 @@ Synchronous wrapper around AsyncClient. Use for scripts and basic applications.
 
 **Constructor:**
 ```python
-from logging import Logger
+from typing import Any
 
-import httpx
+from fivetwenty import Client
 
-from fivetwenty import Client, AccountConfig, Environment
-
-# Constructor signature (same as AsyncClient):
-def Client(
-    token: str | None = None,
-    *,
-    account_id: str | None = None,
-    environment: Environment = Environment.PRACTICE,
-    config: AccountConfig | None = None,
-    timeout: float = 30.0,
-    max_retries: int = 3,
-    transport: httpx.AsyncClient | None = None,
-    user_agent: str | None = None,
-    proxies: str | None = None,
-    verify: bool | str = True,
-    cert: str | None = None,
-    logger: Logger | None = None,
-) -> Client:
+# Constructor signature:
+def Client(**kwargs: Any) -> Client:
     ...
 ```
 
 **Parameters:**
 
-- Accepts all the same parameters as AsyncClient
+Accepts the same parameters as [AsyncClient](#asyncclient). See AsyncClient documentation for complete parameter list.
 
 **Usage Examples:**
 
