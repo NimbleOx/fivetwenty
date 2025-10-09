@@ -8,17 +8,27 @@ Order creation, modification, and management.
 
 ## post_order
 
+Create a new order using any order request type.
+
+**OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
+
+<!-- code-block: orders__post_order -->
 ```python
 import asyncio
 from decimal import Decimal
+
+from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
 from fivetwenty.models import InstrumentName, MarketOrderRequest
 
+load_dotenv()
+
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Create a market order using the generic post_order method
         order_response: OrderResponse = await client.orders.post_order(
             account_id=client.account_id,
             order_request=MarketOrderRequest(
@@ -29,13 +39,14 @@ async def main() -> None:
         )
         print(f"Last Transaction ID: {order_response['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-Create a new order using any order request type.
+🔗 **FiveTwenty SDK**: [orders.post_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L134)
 
 **Parameters:**
 
@@ -47,27 +58,49 @@ Create a new order using any order request type.
 | `timeout` | float \| None | ➖ | Request timeout override |
 | `client_request_id` | str \| None | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** `OrderResponse` - Order response with transaction details
+**Returns:** `OrderResponse` TypedDict containing:
+
+- `lastTransactionID`: Transaction ID string
+- `orderCreateTransaction`: Transaction details for the created order
+- `orderFillTransaction`: Transaction details if order was filled (optional)
+- `relatedTransactionIDs`: List of related transaction IDs
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid order parameters
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid order parameters (check `e.is_validation_error`)
+
+- `ValueError` - If order_request is invalid or missing required fields
 
 ---
 
 ## post_market_order
 
+Create a market order (convenience method for immediate execution at current market price).
+
+**OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
+
+<!-- code-block: orders__post_market_order -->
 ```python
 import asyncio
 from decimal import Decimal
+
+from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
 from fivetwenty.models import InstrumentName
 
+load_dotenv()
+
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Create a market order with take profit and stop loss
         order: OrderResponse = await client.orders.post_market_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
@@ -77,13 +110,14 @@ async def main() -> None:
         )
         print(f"Last Transaction ID: {order['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-Create a market order (convenience method).
+🔗 **FiveTwenty SDK**: [orders.post_market_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L213)
 
 **Parameters:**
 
@@ -98,27 +132,47 @@ Create a market order (convenience method).
 | `timeout` | float \| None | ➖ | Request timeout override |
 | `client_request_id` | str \| None | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** `OrderResponse` - Order response with transaction details
+**Returns:** `OrderResponse` TypedDict containing:
+
+- `lastTransactionID`: Transaction ID string
+- `orderCreateTransaction`: Transaction details for the created order
+- `orderFillTransaction`: Transaction details if order was filled (optional)
+- `relatedTransactionIDs`: List of related transaction IDs
 
 **Raises:**
 
-- `FiveTwentyError` - API errors, insufficient margin, or invalid parameters
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid parameters or insufficient margin (check `e.is_validation_error`)
 
 ---
 
 ## post_limit_order
 
+Create a limit order (convenience method for order execution at specified price or better).
+
+**OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
+
+<!-- code-block: orders__post_limit_order -->
 ```python
 import asyncio
 from decimal import Decimal
+
+from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
 from fivetwenty.models import InstrumentName
 
+load_dotenv()
+
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Create a limit order to buy EUR/USD at 1.1350
         order: OrderResponse = await client.orders.post_limit_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
@@ -127,13 +181,14 @@ async def main() -> None:
         )
         print(f"Last Transaction ID: {order['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-Create a limit order (convenience method).
+🔗 **FiveTwenty SDK**: [orders.post_limit_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L273)
 
 **Parameters:**
 
@@ -150,27 +205,46 @@ Create a limit order (convenience method).
 | `timeout` | float \| None | ➖ | Request timeout override |
 | `client_request_id` | str \| None | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** `OrderResponse` - Order response with transaction details
+**Returns:** `OrderResponse` TypedDict containing:
+
+- `lastTransactionID`: Transaction ID string
+- `orderCreateTransaction`: Transaction details for the created order
+- `relatedTransactionIDs`: List of related transaction IDs
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid parameters
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid parameters (check `e.is_validation_error`)
 
 ---
 
 ## post_stop_order
 
+Create a stop order (convenience method for order execution when market reaches trigger price).
+
+**OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
+
+<!-- code-block: orders__post_stop_order -->
 ```python
 import asyncio
 from decimal import Decimal
+
+from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
 from fivetwenty.models import InstrumentName
 
+load_dotenv()
+
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Create a stop order triggered when EUR/USD reaches 1.1200
         order: OrderResponse = await client.orders.post_stop_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
@@ -179,13 +253,14 @@ async def main() -> None:
         )
         print(f"Last Transaction ID: {order['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-Create a stop order (convenience method).
+🔗 **FiveTwenty SDK**: [orders.post_stop_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L341)
 
 **Parameters:**
 
@@ -203,27 +278,46 @@ Create a stop order (convenience method).
 | `timeout` | float \| None | ➖ | Request timeout override |
 | `client_request_id` | str \| None | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** `OrderResponse` - Order response with transaction details
+**Returns:** `OrderResponse` TypedDict containing:
+
+- `lastTransactionID`: Transaction ID string
+- `orderCreateTransaction`: Transaction details for the created order
+- `relatedTransactionIDs`: List of related transaction IDs
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid parameters
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid parameters (check `e.is_validation_error`)
 
 ---
 
 ## post_market_if_touched_order
 
+Create a market-if-touched order (convenience method for market order execution when price reaches trigger level).
+
+**OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
+
+<!-- code-block: orders__post_market_if_touched_order -->
 ```python
 import asyncio
 from decimal import Decimal
+
+from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
 from fivetwenty.models import InstrumentName
 
+load_dotenv()
+
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Create market-if-touched order triggered at 1.1400
         order: OrderResponse = await client.orders.post_market_if_touched_order(
             account_id=client.account_id,
             instrument=InstrumentName.EUR_USD,
@@ -232,13 +326,14 @@ async def main() -> None:
         )
         print(f"Last Transaction ID: {order['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `POST /v3/accounts/{accountID}/orders`
 
-**OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
+🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-Create a market-if-touched order (convenience method).
+🔗 **FiveTwenty SDK**: [orders.post_market_if_touched_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L412)
 
 **Parameters:**
 
@@ -256,23 +351,43 @@ Create a market-if-touched order (convenience method).
 | `timeout` | float \| None | ➖ | Request timeout override |
 | `client_request_id` | str \| None | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** `OrderResponse` - Order response with transaction details
+**Returns:** `OrderResponse` TypedDict containing:
+
+- `lastTransactionID`: Transaction ID string
+- `orderCreateTransaction`: Transaction details for the created order
+- `relatedTransactionIDs`: List of related transaction IDs
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid parameters
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid parameters (check `e.is_validation_error`)
 
 ---
 
 ## get_orders
 
+Get a list of orders for an account with optional filtering.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders`
+
+<!-- code-block: orders__get_orders -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
+
+load_dotenv()
 
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Get pending orders for the account
         orders = await client.orders.get_orders(
             account_id=client.account_id,
             state="PENDING",
@@ -280,13 +395,14 @@ async def main() -> None:
         )
         print(f"Found {len(orders)} orders")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders`
 
-**OANDA Documentation**: [Get Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-orders)
+🔗 **OANDA Documentation**: [Get Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-orders)
 
-Get list of orders for account.
+🔗 **FiveTwenty SDK**: [orders.get_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L483)
 
 **Parameters:**
 
@@ -304,20 +420,37 @@ Get list of orders for account.
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid parameters
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid filter parameters (check `e.is_validation_error`)
 
 ---
 
 ## get_order
 
+Get details for a specific order by order ID or specifier.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders/{orderSpecifier}`
+
+<!-- code-block: orders__get_order -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import GetOrderResponse
+
+load_dotenv()
 
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Get details for a specific order
+        # Replace with your actual order ID
         result: GetOrderResponse = await client.orders.get_order(
             account_id=client.account_id,
             order_specifier="12345",
@@ -326,13 +459,14 @@ async def main() -> None:
         print(f"Order type: {order.type}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders/{orderSpecifier}`
 
-**OANDA Documentation**: [Get Order](https://developer.oanda.com/rest-live-v20/order-ep/#get-order)
+🔗 **OANDA Documentation**: [Get Order](https://developer.oanda.com/rest-live-v20/order-ep/#get-order)
 
-Get order details.
+🔗 **FiveTwenty SDK**: [orders.get_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L532)
 
 **Parameters:**
 
@@ -341,37 +475,57 @@ Get order details.
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `order_specifier` | str | ✅ | Order identifier or specifier |
 
-**Returns:** `GetOrderResponse` - Dictionary containing order (`Order`) and lastTransactionID (`str`)
+**Returns:** `GetOrderResponse` TypedDict containing:
+
+- `order`: Order model with full order details
+- `lastTransactionID`: Transaction ID string
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or order not found
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Order or account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
 
 ---
 
 ## cancel_order
 
+Cancel a pending order by order ID or specifier.
+
+**OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}/cancel`
+
+<!-- code-block: orders__cancel_order -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import CancelOrderResponse
+
+load_dotenv()
 
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Cancel a pending order
+        # Replace with your actual order ID
         result: CancelOrderResponse = await client.orders.cancel_order(
             account_id=client.account_id,
             order_specifier="12345",
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}/cancel`
 
-**OANDA Documentation**: [Cancel Order](https://developer.oanda.com/rest-live-v20/order-ep/#cancel-order)
+🔗 **OANDA Documentation**: [Cancel Order](https://developer.oanda.com/rest-live-v20/order-ep/#cancel-order)
 
-Cancel pending order.
+🔗 **FiveTwenty SDK**: [orders.cancel_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L557)
 
 **Parameters:**
 
@@ -383,24 +537,44 @@ Cancel pending order.
 | `timeout` | float \| None | ➖ | Request timeout override |
 | `client_request_id` | str \| None | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** `CancelOrderResponse` - Dictionary containing orderCancelTransaction, relatedTransactionIDs, and lastTransactionID
+**Returns:** `CancelOrderResponse` TypedDict containing:
+
+- `orderCancelTransaction`: Transaction details for the cancellation
+- `relatedTransactionIDs`: List of related transaction IDs
+- `lastTransactionID`: Transaction ID string
 
 **Raises:**
 
-- `FiveTwentyError` - API errors, order not found, or order not cancellable
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Order or account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Order not cancellable (already filled or cancelled) (check `e.is_validation_error`)
 
 ---
 
 ## get_pending_orders
 
+Get all pending orders for an account.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/pendingOrders`
+
+<!-- code-block: orders__get_pending_orders -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import PendingOrdersResponse
+
+load_dotenv()
 
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Get all pending orders
         result: PendingOrdersResponse = await client.orders.get_pending_orders(
             account_id=client.account_id
         )
@@ -408,13 +582,14 @@ async def main() -> None:
         print(f"Found {len(pending_orders)} pending orders")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/pendingOrders`
 
-**OANDA Documentation**: [Get Pending Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-pending-orders)
+🔗 **OANDA Documentation**: [Get Pending Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-pending-orders)
 
-List all pending orders for an account.
+🔗 **FiveTwenty SDK**: [orders.get_pending_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L603)
 
 **Parameters:**
 
@@ -422,38 +597,64 @@ List all pending orders for an account.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 
-**Returns:** `PendingOrdersResponse` - Dictionary containing orders (`list[Order]`) and lastTransactionID (`str`)
+**Returns:** `PendingOrdersResponse` TypedDict containing:
+
+- `orders`: List of pending Order models
+- `lastTransactionID`: Transaction ID string
 
 **Raises:**
 
-- `FiveTwentyError` - API errors
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
 
 ---
 
 ## put_order
 
+Replace an existing order by cancelling it and creating a new order with updated parameters.
+
+**OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}`
+
+<!-- code-block: orders__put_order -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import ReplaceOrderResponse
+
+load_dotenv()
 
 
 async def main() -> None:
     async with AsyncClient() as client:
+        # Replace an existing limit order with new price
+        # Replace with your actual order ID
         result: ReplaceOrderResponse = await client.orders.put_order(
             account_id=client.account_id,
             order_specifier="12345",
-            order_request={"price": "1.1400"},
+            order_request={
+                "type": "LIMIT",
+                "instrument": "EUR_USD",
+                "units": "1000",
+                "price": "1.1400",
+                "timeInForce": "GTC",
+            },
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}`
 
-**OANDA Documentation**: [Replace Order](https://developer.oanda.com/rest-live-v20/order-ep/#replace-order)
+🔗 **OANDA Documentation**: [Replace Order](https://developer.oanda.com/rest-live-v20/order-ep/#replace-order)
 
-Replace existing order by cancelling and creating new order.
+🔗 **FiveTwenty SDK**: [orders.put_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L634)
 
 **Parameters:**
 
@@ -465,38 +666,64 @@ Replace existing order by cancelling and creating new order.
 | `*` | | | **Keyword-only parameters below** |
 | `client_request_id` | str \| None | ➖ | Client-provided request ID for debugging and correlation |
 
-**Returns:** `ReplaceOrderResponse` - Dictionary containing orderCancelTransaction, orderCreateTransaction, orderFillTransaction, relatedTransactionIDs, and lastTransactionID
+**Returns:** `ReplaceOrderResponse` TypedDict containing:
+
+- `orderCancelTransaction`: Transaction details for cancelled order (optional)
+- `orderCreateTransaction`: Transaction details for new order
+- `orderFillTransaction`: Transaction details if new order filled (optional)
+- `relatedTransactionIDs`: List of related transaction IDs
+- `lastTransactionID`: Transaction ID string
 
 **Raises:**
 
-- `FiveTwentyError` - API errors, order not found, or replacement failed
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Order or account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid order specification or replacement failed (check `e.is_validation_error`)
 
 ---
 
 ## put_order_client_extensions
 
+Modify client extensions for an existing order without replacing the order.
+
+**OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}/clientExtensions`
+
+<!-- code-block: orders__put_order_client_extensions -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderClientExtensionsResponse
+
+load_dotenv()
 
 
 async def main() -> None:
     async with AsyncClient() as client:
-        result: OrderClientExtensionsResponse = await client.orders.put_order_client_extensions(
-            account_id=client.account_id,
-            order_specifier="12345",
-            client_extensions={"comment": "Updated order"},
+        # Update client extensions for an order
+        # Replace with your actual order ID
+        result: OrderClientExtensionsResponse = (
+            await client.orders.put_order_client_extensions(
+                account_id=client.account_id,
+                order_specifier="12345",
+                client_extensions={"comment": "Updated order"},
+            )
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
-asyncio.run(main())
+
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/orders/{orderSpecifier}/clientExtensions`
 
-**OANDA Documentation**: [Update Order Client Extensions](https://developer.oanda.com/rest-live-v20/order-ep/#update-order-client-extensions)
+🔗 **OANDA Documentation**: [Update Order Client Extensions](https://developer.oanda.com/rest-live-v20/order-ep/#update-order-client-extensions)
 
-Modify client extensions for existing order.
+🔗 **FiveTwenty SDK**: [orders.put_order_client_extensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L689)
 
 **Parameters:**
 
@@ -508,8 +735,17 @@ Modify client extensions for existing order.
 | `client_extensions` | dict[str, Any] \| None | ➖ | New order client extensions |
 | `trade_client_extensions` | dict[str, Any] \| None | ➖ | New trade client extensions |
 
-**Returns:** `OrderClientExtensionsResponse` - Dictionary containing orderClientExtensionsModifyTransaction, relatedTransactionIDs, and lastTransactionID
+**Returns:** `OrderClientExtensionsResponse` TypedDict containing:
+
+- `orderClientExtensionsModifyTransaction`: Transaction details for the modification
+- `relatedTransactionIDs`: List of related transaction IDs
+- `lastTransactionID`: Transaction ID string
 
 **Raises:**
 
-- `FiveTwentyError` - API errors, order not found, or modification failed
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Order or account not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid client extensions or modification failed (check `e.is_validation_error`)

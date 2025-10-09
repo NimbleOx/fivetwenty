@@ -37,6 +37,7 @@ Save code block as as:
      - NO comments on self-explanatory code (print statements)
      - YES comments on SDK API calls explaining what they do
      - YES comments on code building up to API calls (parameter preparation, etc.)
+     - YES comments before any lines indicating that the value in question shouldbe changed by the user before running (order id, etc.)
      - Focus on "why" and "what" not "how" (which is obvious from the code)
 
 6. **Fix**: Update documentation code blocks to pass all checks
