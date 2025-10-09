@@ -95,7 +95,7 @@ async def main() -> None:
             instruments=["EUR_USD", "GBP_USD"],  # Change to your instruments
             snapshot=True,
         )
-        async with aclosing(stream):
+        async with aclosing(stream):  # type: ignore[type-var]
             async for price in stream:
                 print(f"Price update: {price}")
                 count += 1
@@ -310,7 +310,7 @@ async def main() -> None:
             instruments=["EUR_USD", "GBP_USD"],  # Change to your instruments
             config=config,
         )
-        async with aclosing(stream):
+        async with aclosing(stream):  # type: ignore[type-var]
             async for price_data, state in stream:
                 if state == StreamState.RECONNECTING:
                     print("Connection lost, retrying...")
