@@ -354,7 +354,7 @@ async def main() -> None:
 
             # Modification replaces entire order
             # Must provide all order parameters (not just changed fields)
-            modify_response = await client.orders.put_order(account_id=client.account_id, order_specifier=limit_order_id, order_request={"order": {"type": "LIMIT", "instrument": "EUR_USD", "units": "1000", "price": str(new_price), "timeInForce": "GTC"}})
+            modify_response = await client.orders.put_order(account_id=client.account_id, order_specifier=limit_order_id, order_request=LimitOrderRequest(instrument=InstrumentName.EUR_USD, units=Decimal("1000"), price=new_price))
 
             if modify_response.get("orderCreateTransaction"):
                 print("✅ Order modified successfully")
@@ -373,7 +373,7 @@ async def main() -> None:
 
             # Update metadata without changing order
             extensions_update = ClientExtensions(comment="Updated: High priority order", tag="priority-high")
-            extension_response = await client.orders.put_order_client_extensions(account_id=client.account_id, order_specifier=gtd_order_id, client_extensions=extensions_update.model_dump(by_alias=True, exclude_none=True))
+            extension_response = await client.orders.put_order_client_extensions(account_id=client.account_id, order_specifier=gtd_order_id, client_extensions=extensions_update)
 
             if extension_response.get("orderClientExtensionsModifyTransaction"):
                 print("✅ Client extensions updated")

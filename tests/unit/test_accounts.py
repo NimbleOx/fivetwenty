@@ -85,7 +85,7 @@ class TestAccountConfigurationEndpoints:
         mock_client._request.assert_called_once_with(
             "PATCH",
             "/accounts/101-001-123456-001/configuration",
-            json={"alias": "My Trading Account"},
+            json_data={"alias": "My Trading Account"},
         )
 
     @pytest.mark.asyncio
@@ -96,7 +96,7 @@ class TestAccountConfigurationEndpoints:
         mock_client._request.assert_called_once_with(
             "PATCH",
             "/accounts/101-001-123456-001/configuration",
-            json={"marginRate": "0.05"},
+            json_data={"marginRate": "0.05"},
         )
 
     @pytest.mark.asyncio
@@ -107,7 +107,7 @@ class TestAccountConfigurationEndpoints:
         mock_client._request.assert_called_once_with(
             "PATCH",
             "/accounts/101-001-123456-001/configuration",
-            json={"alias": "Professional Account", "marginRate": "0.02"},
+            json_data={"alias": "Professional Account", "marginRate": "0.02"},
         )
 
     @pytest.mark.asyncio
@@ -153,7 +153,7 @@ class TestAccountConfigurationEndpoints:
             mock_client._request.assert_called_once_with(
                 "PATCH",
                 "/accounts/101-001-123456-001/configuration",
-                json={"alias": alias},
+                json_data={"alias": alias},
             )
 
     @pytest.mark.asyncio
@@ -178,7 +178,7 @@ class TestAccountConfigurationEndpoints:
             mock_client._request.assert_called_once_with(
                 "PATCH",
                 "/accounts/101-001-123456-001/configuration",
-                json={"marginRate": margin_rate},
+                json_data={"marginRate": margin_rate},
             )
 
     @pytest.mark.asyncio
@@ -238,7 +238,7 @@ class TestAccountConfigurationEndpoints:
         mock_client._request.assert_called_once_with(
             "PATCH",
             "/accounts/101-001-123456-001/configuration",
-            json={"alias": "Final Account Name", "marginRate": "0.025"},
+            json_data={"alias": "Final Account Name", "marginRate": "0.025"},
         )
 
     @pytest.mark.asyncio
@@ -282,5 +282,5 @@ class TestAccountConfigurationEndpoints:
         mock_client._request.assert_called_once_with(
             "PATCH",
             "/accounts/101-001-123456-001/configuration",
-            json={"alias": long_alias},
+            json_data={"alias": long_alias},
         )

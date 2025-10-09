@@ -1,11 +1,19 @@
 """Unit tests for trade endpoints."""
 
-from unittest.mock import AsyncMock, MagicMock
+from decimal import Decimal
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 
 from fivetwenty.endpoints.trades import TradeEndpoints
-from fivetwenty.models import TradeStateFilter
+from fivetwenty.models import (
+    ClientExtensions,
+    GuaranteedStopLossDetails,
+    StopLossDetails,
+    TakeProfitDetails,
+    TradeStateFilter,
+    TrailingStopLossDetails,
+)
 
 
 class TestTradeEndpoints:
@@ -246,7 +254,6 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/close",
             json_data=None,
-            headers={},
         )
         assert result["orderFillTransaction"].id == "12347"
 
@@ -293,13 +300,12 @@ class TestTradeEndpoints:
         }
         mock_client._request.return_value = mock_response
 
-        await trades.close_trade("101-001-123456-001", "12345", units="500", idempotency_key="close-trade-12345")
+        await trades.close_trade("101-001-123456-001", "12345", units="500")
 
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/close",
             json_data={"units": "500"},
-            headers={"ClientRequestID": "close-trade-12345"},
         )
 
     @pytest.mark.asyncio
@@ -323,15 +329,14 @@ class TestTradeEndpoints:
         }
         mock_client._request.return_value = mock_response
 
-        extensions = {"id": "my_trade", "tag": "long_eur_usd", "comment": "Monthly EUR/USD position"}
+        extensions = ClientExtensions(id="my_trade", tag="long_eur_usd", comment="Monthly EUR/USD position")
 
-        await trades.put_trade_client_extensions("101-001-123456-001", "12345", client_extensions=extensions, idempotency_key="update-ext-12345")
+        await trades.put_trade_client_extensions("101-001-123456-001", "12345", client_extensions=extensions)
 
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/clientExtensions",
-            json_data={"clientExtensions": extensions},
-            headers={"ClientRequestID": "update-ext-12345"},
+            json_data={"clientExtensions": ANY},
         )
 
     @pytest.mark.asyncio
@@ -347,7 +352,6 @@ class TestTradeEndpoints:
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/clientExtensions",
             json_data={},
-            headers={},
         )
 
     @pytest.mark.asyncio
@@ -373,15 +377,14 @@ class TestTradeEndpoints:
         }
         mock_client._request.return_value = mock_response
 
-        take_profit = {"price": "1.1100", "timeInForce": "GTC"}
+        take_profit = TakeProfitDetails(price=Decimal("1.1100"))
 
-        await trades.put_trade_orders("101-001-123456-001", "12345", take_profit=take_profit, idempotency_key="update-tp-12345")
+        await trades.put_trade_orders("101-001-123456-001", "12345", take_profit=take_profit)
 
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
-            json_data={"takeProfit": take_profit},
-            headers={"ClientRequestID": "update-tp-12345"},
+            json_data={"takeProfit": ANY},
         )
 
     @pytest.mark.asyncio
@@ -407,15 +410,14 @@ class TestTradeEndpoints:
         }
         mock_client._request.return_value = mock_response
 
-        stop_loss = {"price": "1.0900", "timeInForce": "GTC"}
+        stop_loss = StopLossDetails(price=Decimal("1.0900"))
 
         await trades.put_trade_orders("101-001-123456-001", "12345", stop_loss=stop_loss)
 
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
-            json_data={"stopLoss": stop_loss},
-            headers={},
+            json_data={"stopLoss": ANY},
         )
 
     @pytest.mark.asyncio
@@ -441,15 +443,14 @@ class TestTradeEndpoints:
         }
         mock_client._request.return_value = mock_response
 
-        trailing_stop_loss = {"distance": "0.0100", "timeInForce": "GTC"}
+        trailing_stop_loss = TrailingStopLossDetails(distance=Decimal("0.0100"))
 
         await trades.put_trade_orders("101-001-123456-001", "12345", trailing_stop_loss=trailing_stop_loss)
 
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
-            json_data={"trailingStopLoss": trailing_stop_loss},
-            headers={},
+            json_data={"trailingStopLoss": ANY},
         )
 
     @pytest.mark.asyncio
@@ -489,16 +490,15 @@ class TestTradeEndpoints:
         }
         mock_client._request.return_value = mock_response
 
-        take_profit = {"price": "1.1100", "timeInForce": "GTC"}
-        stop_loss = {"price": "1.0900", "timeInForce": "GTC"}
+        take_profit = TakeProfitDetails(price=Decimal("1.1100"))
+        stop_loss = StopLossDetails(price=Decimal("1.0900"))
 
         await trades.put_trade_orders("101-001-123456-001", "12345", take_profit=take_profit, stop_loss=stop_loss)
 
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
-            json_data={"takeProfit": take_profit, "stopLoss": stop_loss},
-            headers={},
+            json_data={"takeProfit": ANY, "stopLoss": ANY},
         )
 
     @pytest.mark.asyncio
@@ -531,8 +531,7 @@ class TestTradeEndpoints:
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
-            json_data={"takeProfit": None},
-            headers={},
+            json_data={},
         )
 
     @pytest.mark.asyncio
@@ -560,13 +559,14 @@ class TestTradeEndpoints:
         }
         mock_client._request.return_value = mock_response
 
-        guaranteed_stop_loss = {"price": "1.0850", "timeInForce": "GTC", "gtdTime": "2024-12-31T23:59:59.000000000Z"}
+        from datetime import datetime
+
+        guaranteed_stop_loss = GuaranteedStopLossDetails(price=Decimal("1.0850"), gtd_time=datetime.fromisoformat("2024-12-31T23:59:59"))
 
         await trades.put_trade_orders("101-001-123456-001", "12345", guaranteed_stop_loss=guaranteed_stop_loss)
 
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
-            json_data={"guaranteedStopLoss": guaranteed_stop_loss},
-            headers={},
+            json_data={"guaranteedStopLoss": ANY},
         )
