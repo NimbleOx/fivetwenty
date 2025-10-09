@@ -90,6 +90,7 @@ def AsyncClient(
 
 **Usage Examples:**
 
+<!-- code-block: async_client_usage_examples -->
 ```python
 from fivetwenty import AsyncClient, Environment
 
@@ -107,11 +108,13 @@ async with AsyncClient(
     accounts = await client.accounts.get_accounts()
 
 # Configuration object (structured applications)
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig
 
 config = AccountConfig(
-    token="your-token",
-    account_id="your-account-id",
+    token=SecretStr("your-token"),
+    account_id=SecretStr("your-account-id"),
     environment=Environment.PRACTICE,
     alias="production_trading"
 )
@@ -160,6 +163,7 @@ Accepts the same parameters as [AsyncClient](#asyncclient). See AsyncClient docu
 
 **Usage Examples:**
 
+<!-- code-block: client_usage_examples -->
 ```python
 # Environment variables
 from fivetwenty import Client
@@ -178,11 +182,13 @@ with Client(
     accounts = client.accounts.get_accounts()
 
 # Configuration object
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig
 
 config = AccountConfig(
-    token="your-token",
-    account_id="your-account-id",
+    token=SecretStr("your-token"),
+    account_id=SecretStr("your-account-id"),
     environment=Environment.PRACTICE,
     alias="my_account"
 )
@@ -222,12 +228,15 @@ Each endpoint page contains complete method signatures, parameters, return types
 Structured configuration for account credentials and settings.
 
 **Constructor:**
+<!-- code-block: account_config_constructor -->
 ```python
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="your_token",
-    account_id="your_account_id",
+    token=SecretStr("your_token"),
+    account_id=SecretStr("your_account_id"),
     environment=Environment.PRACTICE,
     alias="my_config",
 )
@@ -251,18 +260,21 @@ config = AccountConfig(
 - `summary()` → str - Safe summary for logs ("alias (environment)")
 
 **Example:**
+<!-- code-block: account_config_example -->
 ```python
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token="your-api-token",
-    account_id="your-account-id",
+    token=SecretStr("your-api-token"),
+    account_id=SecretStr("your-account-id"),
     environment=Environment.PRACTICE,
     alias="demo_trading",
 )
 
 print(config.summary())  # "demo_trading (practice)"
-print(repr(config))      # Secrets are masked as '***'
+print(repr(config))  # Secrets are masked as '***'
 ```
 
 ### Environment Variable Loading
@@ -275,6 +287,7 @@ print(repr(config))      # Secrets are masked as '***'
 - `FIVETWENTY_OANDA_ACCOUNT_ALIAS` - Account alias
 
 **Custom Prefixes:**
+<!-- code-block: account_config_loader -->
 ```python
 from fivetwenty import AccountConfigLoader
 
@@ -288,6 +301,7 @@ config = AccountConfigLoader.from_env_prefix("TRADING_")
 ### Configuration Errors
 
 **ValueError**: Raised when no valid configuration is provided:
+<!-- code-block: value_error_example -->
 ```python
 from fivetwenty import AsyncClient
 
@@ -299,6 +313,7 @@ except ValueError as e:
 ```
 
 **ValidationError**: Raised for invalid configuration values:
+<!-- code-block: validation_error_example -->
 ```python
 from pydantic import SecretStr, ValidationError
 
@@ -325,6 +340,7 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 - `details` (dict) - Additional error information
 
 **Example:**
+<!-- code-block: fivetwenty_error_handling -->
 ```python
 import asyncio
 
@@ -432,6 +448,7 @@ export STRATEGY_B_OANDA_ENVIRONMENT="practice"
 export STRATEGY_B_OANDA_ACCOUNT_ALIAS="grid_strategy"
 ```
 
+<!-- code-block: multi_account_configuration -->
 ```python
 import asyncio
 
@@ -449,6 +466,7 @@ async def main() -> None:
 
     async with AsyncClient(config=grid_config) as grid_client:
         print(f"Grid: {grid_client.config.summary()}")
+
 
 asyncio.run(main())
 ```

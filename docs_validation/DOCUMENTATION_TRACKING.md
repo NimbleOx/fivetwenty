@@ -57,9 +57,9 @@
 | `[x]` | `api-reference/models/system-models.md` | API Reference | 0 |
 | `[x]` | `api-reference/models/trading-models.md` | API Reference | 0 |
 | `[x]` | `api-reference/models/transaction-models.md` | API Reference | 0 |
-| `[ ]` | `api-reference/index.md` | API Reference | 1 |
-| `[ ]` | `api-reference/endpoints/index.md` | API Reference | 2 |
-| `[ ]` | `api-reference/models/index.md` | API Reference | 0 |
+| `[x]` | `api-reference/index.md` | API Reference | 1 |
+| `[x]` | `api-reference/endpoints/index.md` | API Reference | 2 |
+| `[x]` | `api-reference/models/index.md` | API Reference | 0 |
 | `[ ]` | `api-reference/oanda-openapi-spec.md` | API Reference | 0 |
 | `[ ]` | `contributing/code-style.md` | Contributing | 19 |
 | `[ ]` | `contributing/development-setup.md` | Contributing | 18 |
