@@ -142,28 +142,28 @@ async def handle_trading_errors(client: AsyncClient, account_id: str) -> None:
             units=1000000,
         )
     except FiveTwentyError as e:
-        match e.code:
-            case FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
-                print("Not enough margin")
-                # Note: Implement position sizing logic
-                # Example: reduce position size or wait for more margin
+        # Check for specific error codes using if/elif
+        if e.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value:
+            print("Not enough margin")
+            # Note: Implement position sizing logic
+            # Example: reduce position size or wait for more margin
 
-            case FiveTwentyErrorCode.MARKET_HALTED:
-                print("Market is closed")
-                # Note: Implement market hours checking
-                # Example: wait until market opens or schedule for later
+        elif e.code == FiveTwentyErrorCode.MARKET_HALTED.value:
+            print("Market is closed")
+            # Note: Implement market hours checking
+            # Example: wait until market opens or schedule for later
 
-            case FiveTwentyErrorCode.INVALID_INSTRUMENT:
-                print("Invalid instrument")
+        elif e.code == FiveTwentyErrorCode.INVALID_INSTRUMENT.value:
+            print("Invalid instrument")
 
-            case FiveTwentyErrorCode.CLOSEOUT_POSITION_DOESNT_EXIST:
-                print("Position already closed")
+        elif e.code == FiveTwentyErrorCode.CLOSEOUT_POSITION_DOESNT_EXIST.value:
+            print("Position already closed")
 
-            case FiveTwentyErrorCode.STOP_LOSS_ORDER_ALREADY_EXISTS:
-                print("Stop loss already set")
+        elif e.code == FiveTwentyErrorCode.STOP_LOSS_ORDER_ALREADY_EXISTS.value:
+            print("Stop loss already set")
 
-            case _:
-                print(f"Other error: {e.code}")
+        else:
+            print(f"Other error: {e.code}")
 ```
 
 ### Error Categories
@@ -175,26 +175,26 @@ from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 def categorize_error(error: FiveTwentyError) -> str:
     """Categorize errors for different handling."""
 
-    # Account errors
+    # Account errors (using .value to get string representation)
     account_errors = {
-        FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
-        FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE,
-        FiveTwentyErrorCode.ACCOUNT_LOCKED,
-        FiveTwentyErrorCode.INSUFFICIENT_MARGIN,
+        FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value,
+        FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE.value,
+        FiveTwentyErrorCode.ACCOUNT_LOCKED.value,
+        FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value,
     }
 
     # Market errors
     market_errors = {
-        FiveTwentyErrorCode.MARKET_HALTED,
-        FiveTwentyErrorCode.INVALID_INSTRUMENT,
-        FiveTwentyErrorCode.INSTRUMENT_NOT_TRADEABLE,
+        FiveTwentyErrorCode.MARKET_HALTED.value,
+        FiveTwentyErrorCode.INVALID_INSTRUMENT.value,
+        FiveTwentyErrorCode.INSTRUMENT_NOT_TRADEABLE.value,
     }
 
     # Order errors
     order_errors = {
-        FiveTwentyErrorCode.INVALID_ORDER,
-        FiveTwentyErrorCode.ORDER_DOESNT_EXIST,
-        FiveTwentyErrorCode.PENDING_ORDER_ALREADY_EXISTS,
+        FiveTwentyErrorCode.INVALID_ORDER.value,
+        FiveTwentyErrorCode.ORDER_DOESNT_EXIST.value,
+        FiveTwentyErrorCode.PENDING_ORDER_ALREADY_EXISTS.value,
     }
 
     if error.code in account_errors:
@@ -459,7 +459,7 @@ class StatefulTrader:
                 print(f"Order failed: {e.message}")
 
                 # Try to recover based on error
-                if e.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
+                if e.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value:
                     # Reduce position size and retry
                     order["units"] = order["units"] // 2
                     self.pending_orders.append(order)
@@ -521,9 +521,9 @@ class ErrorLogger:
         """Determine error severity using error properties."""
 
         critical_errors = {
-            FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE,
-            FiveTwentyErrorCode.ACCOUNT_LOCKED,
-            FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
+            FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE.value,
+            FiveTwentyErrorCode.ACCOUNT_LOCKED.value,
+            FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value,
         }
 
         if error.code in critical_errors:
@@ -621,7 +621,7 @@ async def test_insufficient_funds_handling() -> None:
     mock_client = AsyncMock()
     mock_client.orders.post_market_order.side_effect = FiveTwentyError(
         status=400,
-        code=FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
+        code=FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value,
         message="Not enough margin",
     )
 
@@ -629,7 +629,7 @@ async def test_insufficient_funds_handling() -> None:
     with pytest.raises(FiveTwentyError) as exc_info:
         await place_order(mock_client, "account", "EUR_USD", 1000000)
 
-    if exc_info.value.code != FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
+    if exc_info.value.code != FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value:
         raise ValueError(f"Expected error code INSUFFICIENT_FUNDS, got '{exc_info.value.code}'")
 
 @pytest.mark.asyncio
