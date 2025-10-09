@@ -7,85 +7,102 @@ Trade monitoring and management.
 ---
 
 ## get_trades
-<!-- fragment: Demo get_trades with return type annotations and unused import patterns -->
+
+Get a list of trades for an account.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades`
+
+<!-- code-block: trades__get_trades -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
-from fivetwenty.models import TradeStateFilter
 from fivetwenty.endpoints.trades import TradesResponse
+from fivetwenty.models import TradeStateFilter
+
+load_dotenv()
 
 
 async def main() -> None:
-    async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
-        # trades.get_trades(account_id: AccountID, ids: list[TradeID] | None = None,
-        #            state: TradeStateFilter = TradeStateFilter.OPEN,
-        #            instrument: InstrumentName | None = None, count: int = 50,
-        #            before_id: TradeID | None = None) -> TradesResponse
-        # Returns: {"trades": list[Trade], "lastTransactionID": str}
-
-        # Example usage:
+    async with AsyncClient() as client:
+        # Get list of trades filtered by state
         result: TradesResponse = await client.trades.get_trades(
-            account_id="123-456-789",
-            state=TradeStateFilter.OPEN,
+            account_id=client.account_id,
+            state=TradeStateFilter.CLOSED,
             count=20,
         )
-        trades = result["trades"]
-        print(f"Found {len(trades)} trades")
+        print(f"Found {len(result['trades'])} trades")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 
-if __name__ == "__main__":
-    asyncio.run(main())
+asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades`
 
-**OANDA Documentation**: [Get Trades](https://developer.oanda.com/rest-live-v20/trade-ep/#get-trades)
+🔗 **OANDA Documentation**: [Get Trades](https://developer.oanda.com/rest-live-v20/trade-ep/#get-trades)
 
-Get a list of trades for an account.
+🔗 **Source**: [trades.get_trades](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
-| `ids` | list[TradeID] | ➖ | List of trade IDs to retrieve |
+| `*` | | | **Keyword-only parameters below** |
+| `ids` | list[TradeID] \| None | ➖ | List of trade IDs to retrieve |
 | `state` | TradeStateFilter | ➖ | Filter trades by state (default: OPEN) |
-| `instrument` | InstrumentName | ➖ | Filter trades by instrument |
+| `instrument` | InstrumentName \| None | ➖ | Filter trades by instrument |
 | `count` | int | ➖ | Maximum number of trades to return (default: 50, max: 500) |
-| `before_id` | TradeID | ➖ | Maximum trade ID to return |
+| `before_id` | TradeID \| None | ➖ | Maximum trade ID to return |
 
-**Returns:** Dictionary containing list of trades (`list[Trade]`) and last transaction ID (`str`)
+**Returns:** `TradesResponse` - Dictionary containing trades (`list[Trade]`) and lastTransactionID (`str`)
 
 **Raises:**
 
-- `FiveTwentyError` - API errors
+`FiveTwentyError` - API errors:
+
+- 400: Invalid request parameters (check `e.is_bad_request`)
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Account not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## get_open_trades
-<!-- fragment: Demo get_open_trades with missing return type annotation patterns -->
+
+Get all open trades for account.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/openTrades`
+
+<!-- code-block: trades__get_open_trades -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import TradesResponse
 
+load_dotenv()
 
-async def get_open_trades_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
-        # trades.get_open_trades(account_id: AccountID) -> TradesResponse
-        # Returns: {"trades": list[Trade], "lastTransactionID": str}
 
-        # Example usage:
-        result: TradesResponse = await client.trades.get_open_trades(account_id="123-456-789")
-        trades = result["trades"]
-        print(f"Open trades: {len(trades)}")
+async def main() -> None:
+    async with AsyncClient() as client:
+        # Get all currently open trades
+        result: TradesResponse = await client.trades.get_open_trades(
+            account_id=client.account_id
+        )
+        print(f"Open trades: {len(result['trades'])}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+
+asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/openTrades`
 
-**OANDA Documentation**: [Get Open Trades](https://developer.oanda.com/rest-live-v20/trade-ep/#get-open-trades)
+🔗 **OANDA Documentation**: [Get Open Trades](https://developer.oanda.com/rest-live-v20/trade-ep/#get-open-trades)
 
-Get all open trades for account.
+🔗 **Source**: [trades.get_open_trades](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -93,41 +110,55 @@ Get all open trades for account.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 
-**Returns:** Dictionary containing list of open trades (`list[Trade]`) and last transaction ID (`str`)
+**Returns:** `TradesResponse` - Dictionary containing trades (`list[Trade]`) and lastTransactionID (`str`)
 
 **Raises:**
 
-- `FiveTwentyError` - API errors
+`FiveTwentyError` - API errors:
+
+- 400: Invalid request parameters (check `e.is_bad_request`)
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Account not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## get_trade
-<!-- fragment: Demo get_trade with missing return type annotation patterns -->
+
+Get specific trade details.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades/{tradeSpecifier}`
+
+<!-- code-block: trades__get_trade -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import TradeResponse
 
+load_dotenv()
 
-async def get_trade_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
-        # trades.get_trade(account_id: AccountID, trade_specifier: str) -> TradeResponse
-        # Returns: {"trade": Trade, "lastTransactionID": str}
 
-        # Example usage:
+async def main() -> None:
+    async with AsyncClient() as client:
+        # Get details for a specific trade by ID
         result: TradeResponse = await client.trades.get_trade(
-            account_id="123-456-789",
-            trade_specifier="12345"
+            account_id=client.account_id,
+            trade_specifier="20984",  # Change to your trade ID
         )
         trade = result["trade"]
         print(f"Trade ID: {trade.id}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+
+asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/trades/{tradeSpecifier}`
 
-**OANDA Documentation**: [Get Trade Details](https://developer.oanda.com/rest-live-v20/trade-ep/#get-trade-details)
+🔗 **OANDA Documentation**: [Get Trade Details](https://developer.oanda.com/rest-live-v20/trade-ep/#get-trade-details)
 
-Get specific trade details.
+🔗 **Source**: [trades.get_trade](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -136,43 +167,54 @@ Get specific trade details.
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `trade_specifier` | str | ✅ | Trade ID or @clientID |
 
-**Returns:** Dictionary containing trade details (`Trade`) and last transaction ID (`str`)
+**Returns:** `TradeResponse` - Dictionary containing trade (`Trade`) and lastTransactionID (`str`)
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid trade ID
+`FiveTwentyError` - API errors:
+
+- 400: Invalid request parameters (check `e.is_bad_request`)
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Trade not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## close_trade
-<!-- fragment: Demo close_trade with missing return type annotation patterns -->
+
+Close a trade (fully or partially).
+
+**OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/close`
+
+<!-- code-block: trades__close_trade -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import CloseTradeResponse
 
+load_dotenv()
 
-async def close_trade_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
-        # trades.close_trade(account_id: AccountID, trade_specifier: str,
-        #             units: str | None = None, idempotency_key: str | None = None) -> CloseTradeResponse
-        # Returns: {"orderCreateTransaction": Any, "orderFillTransaction": Any,
-        #           "orderCancelTransaction": Any, "relatedTransactionIDs": list[str],
-        #           "lastTransactionID": str} (fields are optional)
 
-        # Example usage:
+async def main() -> None:
+    async with AsyncClient() as client:
+        # Close a trade partially or fully
         result: CloseTradeResponse = await client.trades.close_trade(
-            account_id="123-456-789",
-            trade_specifier="12345",
-            units="1000"
+            account_id=client.account_id,
+            trade_specifier="20984",  # Change to your trade ID
+            units="1000",  # Omit to close entire trade
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+
+asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/close`
 
-**OANDA Documentation**: [Close Trade](https://developer.oanda.com/rest-live-v20/trade-ep/#close-trade)
+🔗 **OANDA Documentation**: [Close Trade](https://developer.oanda.com/rest-live-v20/trade-ep/#close-trade)
 
-Close a trade (fully or partially).
+🔗 **Source**: [trades.close_trade](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -180,48 +222,60 @@ Close a trade (fully or partially).
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
 | `trade_specifier` | str | ✅ | Trade ID or @clientID |
-| `units` | str | ➖ | Number of units to close (default: ALL for full closure) |
-| `idempotency_key` | str | ➖ | Idempotency key for duplicate prevention |
+| `*` | | | **Keyword-only parameters below** |
+| `units` | str \| None | ➖ | Number of units to close (default: ALL for full closure) |
 
-**Returns:** Dictionary containing closure transaction details and last transaction ID (`str`)
+**Returns:** `CloseTradeResponse` - Dictionary containing orderCreateTransaction, orderFillTransaction, orderCancelTransaction, relatedTransactionIDs, and lastTransactionID
 
 **Raises:**
 
-- `FiveTwentyError` - API errors
+`FiveTwentyError` - API errors:
+
+- 400: Invalid request parameters (check `e.is_bad_request`)
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Trade not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## put_trade_client_extensions
-<!-- fragment: Demo put_trade_client_extensions with unused variables and return type patterns -->
+
+Modify client extensions for existing trade.
+
+**OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/clientExtensions`
+
+<!-- code-block: trades__put_trade_client_extensions -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import TradeClientExtensionsResponse
+from fivetwenty.models import ClientExtensions
+
+load_dotenv()
 
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # trades.put_trade_client_extensions(account_id: AccountID, trade_specifier: str,
-        #                                client_extensions: dict[str, Any] | None = None,
-        #                                idempotency_key: str | None = None) -> TradeClientExtensionsResponse
-        # Returns: {"tradeClientExtensionsModifyTransaction": Any, "relatedTransactionIDs": list[str],
-        #           "lastTransactionID": str} (fields may be optional)
-
-        # Example usage:
-        result: TradeClientExtensionsResponse = await client.trades.put_trade_client_extensions(
-            account_id="123-456-789",
-            trade_specifier="12345",
-            client_extensions={"comment": "Updated comment"},
+        # Update client extensions (comment, tag, id) for a trade
+        result: TradeClientExtensionsResponse = (
+            await client.trades.put_trade_client_extensions(
+                account_id=client.account_id,
+                trade_specifier="20984",  # Change to your trade ID
+                client_extensions=ClientExtensions(comment="Updated comment"),
+            )
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
+
 asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/clientExtensions`
 
-**OANDA Documentation**: [Update Trade Client Extensions](https://developer.oanda.com/rest-live-v20/trade-ep/#update-trade-client-extensions)
+🔗 **OANDA Documentation**: [Update Trade Client Extensions](https://developer.oanda.com/rest-live-v20/trade-ep/#update-trade-client-extensions)
 
-Modify client extensions for existing trade.
+🔗 **Source**: [trades.put_trade_client_extensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -229,52 +283,60 @@ Modify client extensions for existing trade.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `trade_specifier` | str | ✅ | Trade identifier to modify |
-| `client_extensions` | dict[str, Any] | ➖ | New trade client extensions |
-| `idempotency_key` | str | ➖ | Idempotency key for safe retries |
+| `*` | | | **Keyword-only parameters below** |
+| `client_extensions` | ClientExtensions \| None | ➖ | New trade client extensions |
 
-**Returns:** Dictionary containing modification transaction details and last transaction ID (`str`)
+**Returns:** `TradeClientExtensionsResponse` - Dictionary containing tradeClientExtensionsModifyTransaction, relatedTransactionIDs, and lastTransactionID
 
 **Raises:**
 
-- `FiveTwentyError` - API errors, trade not found, or modification failed
+`FiveTwentyError` - API errors:
+
+- 400: Invalid request parameters (check `e.is_bad_request`)
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Trade not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## put_trade_orders
-<!-- fragment: Demo put_trade_orders with unused variables and return type patterns -->
+
+Update trade-dependent orders (take profit, stop loss, etc.).
+
+**OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/orders`
+
+<!-- code-block: trades__put_trade_orders -->
 ```python
 import asyncio
+from decimal import Decimal
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import TradeOrdersResponse
+from fivetwenty.models import StopLossDetails, TakeProfitDetails
+
+load_dotenv()
 
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # trades.put_trade_orders(account_id: AccountID, trade_specifier: str,
-        #              take_profit: dict[str, Any] | None = None,
-        #              stop_loss: dict[str, Any] | None = None,
-        #              trailing_stop_loss: dict[str, Any] | None = None,
-        #              guaranteed_stop_loss: dict[str, Any] | None = None,
-        #              idempotency_key: str | None = None) -> TradeOrdersResponse
-        # Returns: {"takeProfitOrderCancelTransaction": Any, "stopLossOrderTransaction": Any, ...
-        #           "relatedTransactionIDs": list[str], "lastTransactionID": str} (fields may be optional)
-
-        # Example usage:
+        # Set or update take profit and stop loss orders for a trade
         result: TradeOrdersResponse = await client.trades.put_trade_orders(
-            account_id="123-456-789",
-            trade_specifier="12345",
-            take_profit={"price": "1.1500"},
-            stop_loss={"price": "1.1200"}
+            account_id=client.account_id,
+            trade_specifier="21001",  # Change to your trade ID
+            take_profit=TakeProfitDetails(price=Decimal("1.1500")),
+            stop_loss=StopLossDetails(price=Decimal("1.1200")),
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
+
 asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/orders`
 
-**OANDA Documentation**: [Update Trade Dependent Orders](https://developer.oanda.com/rest-live-v20/trade-ep/#update-trade-dependent-orders)
+🔗 **OANDA Documentation**: [Update Trade Dependent Orders](https://developer.oanda.com/rest-live-v20/trade-ep/#update-trade-dependent-orders)
 
-Update trade-dependent orders (take profit, stop loss, etc.).
+🔗 **Source**: [trades.put_trade_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/trades.py)
 
 **Parameters:**
 
@@ -282,14 +344,19 @@ Update trade-dependent orders (take profit, stop loss, etc.).
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `trade_specifier` | str | ✅ | Trade identifier to modify |
-| `take_profit` | dict[str, Any] | ➖ | Take profit order specification |
-| `stop_loss` | dict[str, Any] | ➖ | Stop loss order specification |
-| `trailing_stop_loss` | dict[str, Any] | ➖ | Trailing stop loss order specification |
-| `guaranteed_stop_loss` | dict[str, Any] | ➖ | Guaranteed stop loss order specification |
-| `idempotency_key` | str | ➖ | Idempotency key for safe retries |
+| `*` | | | **Keyword-only parameters below** |
+| `take_profit` | TakeProfitDetails \| None | ➖ | Take profit order specification |
+| `stop_loss` | StopLossDetails \| None | ➖ | Stop loss order specification |
+| `trailing_stop_loss` | TrailingStopLossDetails \| None | ➖ | Trailing stop loss order specification |
+| `guaranteed_stop_loss` | GuaranteedStopLossDetails \| None | ➖ | Guaranteed stop loss order specification |
 
-**Returns:** Dictionary containing order update transaction details and last transaction ID (`str`)
+**Returns:** `TradeOrdersResponse` - Dictionary containing order transaction details (takeProfitOrderCancelTransaction, takeProfitOrderTransaction, stopLossOrderTransaction, etc.), relatedTransactionIDs, and lastTransactionID
 
 **Raises:**
 
-- `FiveTwentyError` - API errors, trade not found, or update failed
+`FiveTwentyError` - API errors:
+
+- 400: Invalid request parameters (check `e.is_bad_request`)
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Trade not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)

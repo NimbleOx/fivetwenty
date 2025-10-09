@@ -181,6 +181,9 @@ class CodeExecutionValidator(BaseValidator):
         old_alarm_handler = signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(5)  # 5 second timeout
 
+        # Store original sys.modules state for fivetwenty (to restore later)
+        original_fivetwenty = sys.modules.get("fivetwenty")
+
         try:
             # Add security restrictions to namespace
             restricted_namespace = self._create_restricted_namespace(execution_namespace)
@@ -259,6 +262,17 @@ class CodeExecutionValidator(BaseValidator):
             # Restore resource limits
             self._restore_resource_limits(old_limits)
 
+            # Restore sys.modules state for fivetwenty and its submodules
+            if original_fivetwenty is not None:
+                sys.modules["fivetwenty"] = original_fivetwenty
+            elif "fivetwenty" in sys.modules:
+                del sys.modules["fivetwenty"]
+
+            # Clean up all fivetwenty submodules
+            submodules_to_remove = [key for key in sys.modules if key.startswith("fivetwenty.")]
+            for submodule in submodules_to_remove:
+                del sys.modules[submodule]
+
         return issues
 
     def _set_resource_limits(self) -> tuple[tuple[int, int], tuple[int, int]]:
@@ -305,6 +319,60 @@ class CodeExecutionValidator(BaseValidator):
         """
         # Start with the base namespace
         restricted = base_namespace.copy()
+
+        # Create a mocked fivetwenty module to inject into sys.modules
+        # This ensures that imports of fivetwenty use mocks instead of the real module
+        mocked_fivetwenty = MagicMock()
+
+        # Set __path__ to make it look like a package (enables submodule imports)
+        mocked_fivetwenty.__path__ = []
+        mocked_fivetwenty.__package__ = "fivetwenty"
+        mocked_fivetwenty.__name__ = "fivetwenty"
+        mocked_fivetwenty.__version__ = "0.0.0-mock"
+
+        # Get the mocked AsyncClient and Client from base_namespace
+        if "AsyncClient" in base_namespace:
+            mocked_fivetwenty.AsyncClient = base_namespace["AsyncClient"]
+        if "Client" in base_namespace:
+            mocked_fivetwenty.Client = base_namespace["Client"]
+        if "AccountConfig" in base_namespace:
+            mocked_fivetwenty.AccountConfig = base_namespace["AccountConfig"]
+        if "AccountConfigLoader" in base_namespace:
+            mocked_fivetwenty.AccountConfigLoader = base_namespace["AccountConfigLoader"]
+        if "Environment" in base_namespace:
+            mocked_fivetwenty.Environment = base_namespace["Environment"]
+
+        # Create mock exception that inherits from BaseException for proper exception handling
+        class MockFiveTwentyError(Exception):
+            """Mock FiveTwentyError for exception handling."""
+
+        # Create submodules that return MagicMocks for any attribute access
+        # This allows imports like: from fivetwenty.models import InstrumentName
+        mocked_submodules = ["models", "exceptions", "endpoints", "endpoints.orders", "endpoints.trades", "endpoints.accounts", "endpoints.pricing", "endpoints.positions", "endpoints.transactions", "endpoints.instruments"]
+
+        for submodule_name in mocked_submodules:
+            full_name = f"fivetwenty.{submodule_name}"
+            mock_submodule = MagicMock()
+            mock_submodule.__name__ = full_name
+            mock_submodule.__package__ = full_name.rsplit(".", 1)[0] if "." in submodule_name else "fivetwenty"
+
+            # Add FiveTwentyError to exceptions submodule
+            if submodule_name == "exceptions":
+                mock_submodule.FiveTwentyError = MockFiveTwentyError
+
+            sys.modules[full_name] = mock_submodule
+
+            # Set the submodule on the parent
+            parts = submodule_name.split(".")
+            parent = mocked_fivetwenty
+            for part in parts[:-1]:
+                if not hasattr(parent, part):
+                    setattr(parent, part, MagicMock())
+                parent = getattr(parent, part)
+            setattr(parent, parts[-1], mock_submodule)
+
+        # Inject mocked module into sys.modules (cleanup happens in _execute_python_code finally block)
+        sys.modules["fivetwenty"] = mocked_fivetwenty
 
         # Create a safe __import__ that allows standard library and safe packages
         def safe_import(name: str, *args: Any, **kwargs: Any) -> Any:
@@ -391,19 +459,70 @@ class CodeExecutionValidator(BaseValidator):
 
     def _create_mocks(self) -> dict[str, Any]:
         """Create mock objects for FiveTwenty API to prevent real API calls."""
-        # Create realistic mock account
-        mock_account = MagicMock()
-        mock_account.id = "001-001-0000000-001"
-        mock_account.alias = "Primary"
-        mock_account.currency = "USD"
-        mock_account.balance = Decimal("100000.00")
-        mock_account.unrealizedPL = Decimal("0.00")
-        mock_account.pl = Decimal("0.00")
-        mock_account.marginUsed = Decimal("0.00")
-        mock_account.marginAvailable = Decimal("100000.00")
-        mock_account.openTradeCount = 0
-        mock_account.openPositionCount = 0
-        mock_account.pendingOrderCount = 0
+
+        # Create realistic mock account with proper numeric field support
+        class MockAccount:
+            """Mock account that supports Decimal conversion and both camelCase/snake_case.
+
+            Note: Intentionally supports both naming conventions to match OANDA API (camelCase)
+            and Python conventions (snake_case) used in different parts of the codebase.
+            """
+
+            id = "001-001-0000000-001"
+            alias = "Primary"
+            currency = "USD"
+            balance = Decimal("100000.00")
+            # Support both camelCase (API) and snake_case (Python) naming
+            unrealizedPL = Decimal("0.00")  # noqa: N815
+            unrealized_pl = Decimal("0.00")
+            pl = Decimal("0.00")
+            marginUsed = Decimal("0.00")  # noqa: N815
+            margin_used = Decimal("0.00")
+            marginAvailable = Decimal("100000.00")  # noqa: N815
+            margin_available = Decimal("100000.00")
+            openTradeCount = 0  # noqa: N815
+            open_trade_count = 0
+            openPositionCount = 0  # noqa: N815
+            open_position_count = 0
+            pendingOrderCount = 0  # noqa: N815
+            pending_order_count = 0
+            NAV = Decimal("100000.00")
+            nav = Decimal("100000.00")
+            marginRate = Decimal("0.02")  # noqa: N815
+            margin_rate = Decimal("0.02")
+            marginCallMarginUsed = Decimal("0.00")  # noqa: N815
+            margin_call_margin_used = Decimal("0.00")
+            withdrawalLimit = Decimal("100000.00")  # noqa: N815
+            withdrawal_limit = Decimal("100000.00")
+            positionValue = Decimal("0.00")  # noqa: N815
+            position_value = Decimal("0.00")
+
+            def __getitem__(self, key):
+                """Support dict-like access."""
+                return getattr(self, key, None)
+
+        mock_account = MockAccount()
+
+        # Create realistic mock price data with proper object structure
+        # Create bid/ask objects
+        mock_bid = MagicMock()
+        mock_bid.price = Decimal("1.12345")
+        mock_bid.liquidity = 1000000
+
+        mock_ask = MagicMock()
+        mock_ask.price = Decimal("1.12350")
+        mock_ask.liquidity = 1000000
+
+        # Create ClientPrice object
+        mock_price = MagicMock()
+        mock_price.instrument = "EUR_USD"
+        mock_price.bids = [mock_bid]
+        mock_price.asks = [mock_ask]
+        mock_price.closeoutBid = Decimal("1.12340")
+        mock_price.closeoutAsk = Decimal("1.12355")
+        mock_price.time = "2024-01-01T00:00:00.000000000Z"
+        # Support indexing for prices[0]
+        mock_price.__getitem__ = lambda _self, key: mock_price if key == 0 else None
 
         # Create realistic mock order response
         mock_order_response = MagicMock()
@@ -422,14 +541,61 @@ class CodeExecutionValidator(BaseValidator):
         mock_async_client.config = MagicMock()
         mock_async_client.config.summary = MagicMock(return_value="mock_config (practice)")
 
-        # Mock common async methods with realistic responses
+        # Mock all async endpoint methods explicitly
+        # This is necessary because MagicMock doesn't work with 'await' -
+        # we need AsyncMock for any method that will be awaited
+
         mock_async_client.accounts = MagicMock()
+        # get_accounts returns list directly, not wrapped in dict
         mock_async_client.accounts.get_accounts = AsyncMock(return_value=[mock_account])
-        mock_async_client.accounts.get_account = AsyncMock(return_value=mock_account)
+        # get_account and get_account_summary return TypedDict with "account" key
+        mock_async_client.accounts.get_account = AsyncMock(return_value={"account": mock_account, "lastTransactionID": "12345"})
+        mock_async_client.accounts.get_account_summary = AsyncMock(return_value={"account": mock_account, "lastTransactionID": "12345"})
+        mock_async_client.accounts.get_account_instruments = AsyncMock(return_value={"instruments": []})
+        mock_async_client.accounts.patch_account_configuration = AsyncMock(return_value={})
+
         mock_async_client.orders = MagicMock()
         mock_async_client.orders.post_market_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.post_limit_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.post_stop_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.post_market_if_touched_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.post_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.get_orders = AsyncMock(return_value={"orders": [], "lastTransactionID": "12345"})
+        mock_async_client.orders.get_pending_orders = AsyncMock(return_value={"orders": [], "lastTransactionID": "12345"})
+        mock_async_client.orders.get_order = AsyncMock(return_value={"order": MagicMock(), "lastTransactionID": "12345"})
+        mock_async_client.orders.put_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.put_order_client_extensions = AsyncMock(return_value={"lastTransactionID": "12345"})
+        mock_async_client.orders.cancel_order = AsyncMock(return_value={"lastTransactionID": "12345"})
+
         mock_async_client.trades = MagicMock()
+        mock_async_client.trades.get_trades = AsyncMock(return_value={"trades": []})
+        mock_async_client.trades.get_open_trades = AsyncMock(return_value={"trades": []})
+        mock_async_client.trades.get_trade = AsyncMock(return_value={"trade": MagicMock()})
+        mock_async_client.trades.close_trade = AsyncMock(return_value={})
+        mock_async_client.trades.put_trade_client_extensions = AsyncMock(return_value={})
+        mock_async_client.trades.put_trade_orders = AsyncMock(return_value={})
+
         mock_async_client.pricing = MagicMock()
+        mock_async_client.pricing.get_pricing = AsyncMock(return_value={"prices": [mock_price], "time": "2024-01-01T00:00:00Z"})
+        mock_async_client.pricing.get_pricing_stream = AsyncMock(return_value=AsyncMock())
+        mock_async_client.pricing.get_account_instrument_candles = AsyncMock(return_value={"candles": [], "instrument": "EUR_USD", "granularity": "H1"})
+        mock_async_client.pricing.get_latest_candles = AsyncMock(return_value={"latestCandles": []})
+        mock_async_client.pricing.stream_pricing_with_retries = AsyncMock(return_value=AsyncMock())
+        mock_async_client.pricing.get_candles = AsyncMock(return_value={"candles": []})
+
+        mock_async_client.positions = MagicMock()
+        mock_async_client.positions.get_positions = AsyncMock(return_value={"positions": []})
+        mock_async_client.positions.get_open_positions = AsyncMock(return_value={"positions": []})
+        mock_async_client.positions.get_position = AsyncMock(return_value={"position": MagicMock()})
+        mock_async_client.positions.close_position = AsyncMock(return_value={})
+
+        mock_async_client.instruments = MagicMock()
+        mock_async_client.instruments.get_instrument_candles = AsyncMock(return_value={"candles": []})
+
+        mock_async_client.transactions = MagicMock()
+        mock_async_client.transactions.get_transactions = AsyncMock(return_value={"transactions": [], "lastTransactionID": "12345"})
+        mock_async_client.transactions.get_transaction = AsyncMock(return_value={"transaction": MagicMock(), "lastTransactionID": "12345"})
+        mock_async_client.transactions.get_recent_transactions = AsyncMock(return_value={"transactions": [], "lastTransactionID": "12345"})
 
         # Mock Client (sync version)
         mock_client = MagicMock()

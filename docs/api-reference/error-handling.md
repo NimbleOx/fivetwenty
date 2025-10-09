@@ -4,84 +4,46 @@ Complete reference for FiveTwenty SDK exception types, error codes, and handling
 
 ## Exception Classes
 
-### Base Exception
+The SDK provides two exception classes:
 
-#### `VeeTwentyError`
+### `FiveTwentyError`
 
-Base exception class for all FiveTwenty SDK errors.
-
-**Attributes:**
-- `code: int` - HTTP status code
-- `message: str` - Error description
-- `details: Optional[dict]` - Additional error details from OANDA API
-
-#### `BadRequest` (HTTP 400)
-
-Invalid request parameters or malformed requests.
-
-**Common causes:**
-- Invalid instrument names
-- Malformed order parameters
-- Insufficient margin/funds
-- Invalid account ID
-
-#### `Unauthorized` (HTTP 401)
-
-Authentication failures.
-
-**Common causes:**
-- Invalid or expired API token
-- Missing authentication headers
-- Token format errors
-
-#### `Forbidden` (HTTP 403)
-
-Permission denied for the requested operation.
-
-**Common causes:**
-- Account access restrictions
-- Insufficient permissions for operation
-- Trading restrictions on account
-
-#### `NotFound` (HTTP 404)
-
-Requested resource does not exist.
-
-**Common causes:**
-- Invalid account ID
-- Order ID not found
-- Trade ID not found
-- Unsupported instrument
-
-#### `MethodNotAllowed` (HTTP 405)
-
-HTTP method not supported for the endpoint.
-
-#### `TooManyRequests` (HTTP 429)
-
-Rate limit exceeded.
+Base exception class for all OANDA API errors.
 
 **Attributes:**
-- `retry_after: Optional[int]` - Seconds to wait before retrying
+- `status` *(int)* - HTTP status code (400, 401, 404, 429, 500, etc.)
+- `code` *(str | None)* - OANDA error code (e.g., "INSUFFICIENT_MARGIN")
+- `message` *(str)* - Human-readable error description
+- `request_id` *(str | None)* - Request ID for debugging
+- `retryable` *(bool)* - Whether the error can be retried
+- `response` *(httpx.Response | None)* - Original HTTP response
+- `details` *(ErrorDetails | None)* - Structured error details
 
-#### `InternalServerError` (HTTP 500+)
+**Properties for Error Classification:**
+- `is_client_error` - True for 4xx status codes
+- `is_server_error` - True for 5xx status codes
+- `is_authentication_error` - True for auth/permission errors
+- `is_validation_error` - True for validation errors
+- `is_rate_limited` - True for rate limiting (429)
+- `is_not_found` - True for 404 errors
+- `retry_after` - Seconds to wait (from Retry-After header)
 
-OANDA server errors.
+### `StreamStall`
 
-**Common causes:**
-- Temporary server issues
-- Maintenance periods
-- System overload
+Exception raised when a stream stalls (no data received within timeout).
+
+**Inheritance:** Directly inherits from `Exception`, not `FiveTwentyError`
 
 ## Error Handling Patterns
 
 ### Basic Exception Handling
 
-<!-- fragment: Demo basic exception handling with union attribute access and type issues -->
 ```python
 import os
+
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.models import InstrumentName
 
 # Setup
 token = os.getenv("OANDA_TOKEN")
@@ -92,10 +54,11 @@ async def safe_trade(client: AsyncClient, account_id: str) -> None:
     try:
         order = await client.orders.post_market_order(
             account_id=account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000,
         )
-        print(f"Order placed: {order.order_fill_transaction.id}")
+        if "orderFillTransaction" in order:
+            print(f"Order placed: {order['orderFillTransaction'].id}")
 
     except FiveTwentyError as e:
         print(f"OANDA error: {e}")
@@ -108,56 +71,59 @@ async def safe_trade(client: AsyncClient, account_id: str) -> None:
 
 ### Specific Error Types
 
-Handle different errors differently:
+Handle different errors using property-based checking:
 
-<!-- fragment: Demo error handling with non-existent exception imports -->
 ```python
 import asyncio
 
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import BadRequest, Forbidden, InternalServerError, NotFound, TooManyRequests, Unauthorized
+from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.models import InstrumentName
 
 
 async def handle_specific_errors(client: AsyncClient, account_id: str) -> None:
-    """Handle specific error types."""
+    """Handle specific error types using properties."""
     try:
         _ = await client.orders.post_market_order(
             account_id=account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000000,  # Large position
         )
 
-    except BadRequest as e:
-        # Invalid request parameters
-        print(f"Invalid request: {e.message}")
-        if "INSUFFICIENT_FUNDS" in str(e):
-            print("Not enough margin available")
+    except FiveTwentyError as e:
+        # Check error type using properties
+        if e.is_authentication_error:
+            # Invalid or expired token
+            print("Authentication failed - check your token")
+            # Note: Implement token refresh logic based on your auth system
+            # Example: await refresh_token() or restart with new token
 
-    except Unauthorized:
-        # Invalid or expired token
-        print("Authentication failed - check your token")
-        # Note: Implement token refresh logic based on your auth system
-        # Example: await refresh_token() or restart with new token
+        elif e.is_validation_error:
+            # Invalid request parameters
+            print(f"Invalid request: {e.message}")
+            validation_errors = e.get_validation_errors()
+            if validation_errors:
+                print(f"Validation errors: {validation_errors}")
 
-    except Forbidden as e:
-        # No permission for this operation
-        print(f"Permission denied: {e.message}")
+        elif e.is_not_found:
+            # Resource not found
+            print(f"Account or instrument not found: {e.message}")
 
-    except NotFound as e:
-        # Resource not found
-        print(f"Account or instrument not found: {e.message}")
+        elif e.is_rate_limited:
+            # Rate limited
+            retry_after = e.retry_after or 60
+            print(f"Rate limited - retry after {retry_after} seconds")
+            await asyncio.sleep(retry_after)
 
-    except TooManyRequests as e:
-        # Rate limited
-        retry_after = e.retry_after or 60
-        print(f"Rate limited - retry after {retry_after} seconds")
-        await asyncio.sleep(retry_after)
+        elif e.is_server_error:
+            # OANDA server error
+            print(f"OANDA server error: {e.message}")
+            # Note: Implement notification logic based on your monitoring system
+            # Example: await send_alert(e) or log to monitoring service
 
-    except InternalServerError as e:
-        # OANDA server error
-        print(f"OANDA server error: {e.message}")
-        # Note: Implement notification logic based on your monitoring system
-        # Example: await send_alert(e) or log to monitoring service
+        else:
+            # Other client errors
+            print(f"API error: {e.code} - {e.message}")
 ```
 
 ## OANDA Error Codes
@@ -166,10 +132,9 @@ The SDK includes 67 specific OANDA error codes:
 
 ### Common Trading Errors
 
-<!-- fragment: Demo trading error handling with enum attribute access and type issues -->
 ```python
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty import AsyncClient, FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.models import InstrumentName
 
 
 # Check for specific error codes
@@ -177,74 +142,75 @@ async def handle_trading_errors(client: AsyncClient, account_id: str) -> None:
     try:
         _ = await client.orders.post_market_order(
             account_id=account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000000,
         )
     except FiveTwentyError as e:
-        match e.code:
-            case FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
-                print("Not enough margin")
-                # Note: Implement position sizing logic
-                # Example: reduce position size or wait for more margin
+        # Check for specific error codes
+        if e.code == FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value:  # type: ignore[attr-defined]
+            print("Not enough margin")
+            # Note: Implement position sizing logic
+            # Example: reduce position size or wait for more margin
+            return
 
-            case FiveTwentyErrorCode.MARKET_HALTED:
-                print("Market is closed")
-                # Note: Implement market hours checking
-                # Example: wait until market opens or schedule for later
+        if e.code == FiveTwentyErrorCode.MARKET_HALTED.value:  # type: ignore[attr-defined]
+            print("Market is closed")
+            # Note: Implement market hours checking
+            # Example: wait until market opens or schedule for later
+            return
 
-            case FiveTwentyErrorCode.INVALID_INSTRUMENT:
-                print("Invalid instrument")
+        if e.code == FiveTwentyErrorCode.INVALID_INSTRUMENT.value:  # type: ignore[attr-defined]
+            print("Invalid instrument")
+            return
 
-            case FiveTwentyErrorCode.CLOSEOUT_POSITION_DOESNT_EXIST:
-                print("Position already closed")
+        if e.code == FiveTwentyErrorCode.TRADE_DOESNT_EXIST.value:  # type: ignore[attr-defined]
+            print("Position already closed")
+            return
 
-            case FiveTwentyErrorCode.STOP_LOSS_ORDER_ALREADY_EXISTS:
-                print("Stop loss already set")
+        if e.code == FiveTwentyErrorCode.PRICE_INVALID.value:  # type: ignore[attr-defined]
+            print("Stop loss already set")
+            return
 
-            case _:
-                print(f"Other error: {e.code}")
+        print(f"Other error: {e.code}")
 ```
 
 ### Error Categories
 
-<!-- fragment: Demo error categorization with elif patterns -->
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty import FiveTwentyError, FiveTwentyErrorCode
 
 
 def categorize_error(error: FiveTwentyError) -> str:
     """Categorize errors for different handling."""
 
-    # Account errors
+    # Account errors (using .value to get string representation)
     account_errors = {
-        FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
-        FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE,
-        FiveTwentyErrorCode.ACCOUNT_LOCKED,
-        FiveTwentyErrorCode.INSUFFICIENT_MARGIN,
+        FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.ACCOUNT_NOT_TRADEABLE.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.INSUFFICIENT_AUTHORIZATION.value,  # type: ignore[attr-defined]
     }
 
     # Market errors
     market_errors = {
-        FiveTwentyErrorCode.MARKET_HALTED,
-        FiveTwentyErrorCode.INVALID_INSTRUMENT,
-        FiveTwentyErrorCode.INSTRUMENT_NOT_TRADEABLE,
+        FiveTwentyErrorCode.MARKET_HALTED.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.INVALID_INSTRUMENT.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.INSTRUMENT_NOT_TRADEABLE.value,  # type: ignore[attr-defined]
     }
 
     # Order errors
     order_errors = {
-        FiveTwentyErrorCode.INVALID_ORDER,
-        FiveTwentyErrorCode.ORDER_DOESNT_EXIST,
-        FiveTwentyErrorCode.PENDING_ORDER_ALREADY_EXISTS,
+        FiveTwentyErrorCode.INVALID_REQUEST.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.ORDER_DOESNT_EXIST.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.UNITS_INVALID.value,  # type: ignore[attr-defined]
     }
 
     if error.code in account_errors:
         return "ACCOUNT"
-    elif error.code in market_errors:
+    if error.code in market_errors:
         return "MARKET"
-    elif error.code in order_errors:
+    if error.code in order_errors:
         return "ORDER"
-    else:
-        return "OTHER"
+    return "OTHER"
 ```
 
 ## Retry Strategies
@@ -253,7 +219,6 @@ def categorize_error(error: FiveTwentyError) -> str:
 
 The SDK includes built-in retry logic, but you can add your own:
 
-<!-- fragment: Retry implementation with exception patterns -->
 ```python
 import asyncio
 import random
@@ -261,7 +226,7 @@ from collections.abc import Callable
 from decimal import Decimal
 from typing import Awaitable, TypeVar
 
-from fivetwenty.exceptions import TooManyRequests, InternalServerError
+from fivetwenty.exceptions import FiveTwentyError
 
 T = TypeVar("T")
 
@@ -277,40 +242,48 @@ async def retry_with_backoff(
         try:
             return await func()
 
-        except TooManyRequests as e:
-            # Use server's retry-after if available
-            delay = getattr(e, 'retry_after', None) or (base_delay * (2 ** attempt))
-            delay = min(delay, max_delay)
+        except FiveTwentyError as e:
+            # Only retry rate limiting and server errors
+            if e.is_rate_limited:
+                # Use server's retry-after if available
+                delay = e.retry_after or (base_delay * (2 ** attempt))
+                delay = min(float(delay), max_delay)
 
-            # Add jitter
-            delay += random.uniform(0, float(delay * Decimal("0.1")))
+                # Add jitter
+                delay += random.uniform(0, float(delay * Decimal("0.1")))
 
-            if attempt == max_retries - 1:
+                if attempt == max_retries - 1:
+                    raise
+
+                print(f"Retry {attempt + 1}/{max_retries} after {delay:.1f}s")
+                await asyncio.sleep(delay)
+
+            elif e.is_server_error:
+                # Retry on server errors
+                if attempt == max_retries - 1:
+                    raise
+
+                delay = base_delay * (2 ** attempt)
+                await asyncio.sleep(delay)
+
+            else:
+                # Don't retry client errors
                 raise
-
-            print(f"Retry {attempt + 1}/{max_retries} after {delay:.1f}s")
-            await asyncio.sleep(delay)
-
-        except InternalServerError:
-            # Retry on server errors and timeouts
-            if attempt == max_retries - 1:
-                raise
-
-            delay = base_delay * (2 ** attempt)
-            await asyncio.sleep(delay)
 
     raise RuntimeError("Max retries exceeded")
 
 # Usage
 async def place_order_with_retry():
     from fivetwenty import AsyncClient
+    from fivetwenty.models import InstrumentName
+
     client = AsyncClient(token="your-token", account_id="your-account")
     account_id = "your-account-id"
 
     return await retry_with_backoff(
         lambda: client.orders.post_market_order(
             account_id=account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000,
         ),
     )
@@ -387,10 +360,12 @@ class CircuitBreaker:
 breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=30)
 
 async def protected_trade():
+    from fivetwenty.models import InstrumentName
+
     return await breaker.call(
         client.orders.post_market_order,
         account_id=account_id,
-        instrument="EUR_USD",
+        instrument=InstrumentName.EUR_USD,
         units=1000,
     )
 ```
@@ -401,11 +376,11 @@ async def protected_trade():
 
 Implement automatic recovery for common issues:
 
-<!-- fragment: Demo trading system with non-existent exception imports -->
 ```python
 import asyncio
+from typing import Any
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import Unauthorized, TooManyRequests, InternalServerError, StreamStall
+from fivetwenty.exceptions import FiveTwentyError, StreamStall
 
 class TradingSystem:
     def __init__(self, client: AsyncClient) -> None:
@@ -420,19 +395,24 @@ class TradingSystem:
             try:
                 return await self._place_order(account_id, instrument, units)
 
-            except Unauthorized:
-                # Token might be expired
-                await self.refresh_authentication()
-                self.reconnect_attempts += 1
+            except FiveTwentyError as e:
+                if e.is_authentication_error:
+                    # Token might be expired
+                    await self.refresh_authentication()
+                    self.reconnect_attempts += 1
 
-            except TooManyRequests as e:
-                # Rate limited - wait and retry
-                await asyncio.sleep(e.retry_after or 60)
+                elif e.is_rate_limited:
+                    # Rate limited - wait and retry
+                    await asyncio.sleep(e.retry_after or 60)
 
-            except InternalServerError:
-                # Server error - exponential backoff
-                await asyncio.sleep(2 ** self.reconnect_attempts)
-                self.reconnect_attempts += 1
+                elif e.is_server_error:
+                    # Server error - exponential backoff
+                    await asyncio.sleep(2 ** self.reconnect_attempts)
+                    self.reconnect_attempts += 1
+
+                else:
+                    # Don't retry other client errors
+                    raise
 
             except StreamStall:
                 # Stream disconnected - reconnect
@@ -442,9 +422,11 @@ class TradingSystem:
 
     async def _place_order(self, account_id: str, instrument: str, units: int) -> Any:
         """Place order implementation."""
+        from fivetwenty.models import InstrumentName
+
         return await self.client.orders.post_market_order(
             account_id=account_id,
-            instrument=instrument,
+            instrument=InstrumentName(instrument),
             units=units,
         )
 
@@ -463,12 +445,11 @@ class TradingSystem:
 
 Recover state after errors:
 
-<!-- fragment: Demo state recovery with try-except in loop performance patterns -->
 ```python
 import asyncio
 from typing import Any
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+
+from fivetwenty import AsyncClient, FiveTwentyError, FiveTwentyErrorCode
 
 
 class StatefulTrader:
@@ -484,13 +465,13 @@ class StatefulTrader:
                 result = await client.orders.post_market_order(**order)
                 self.completed_orders.append(result)
 
-            except FiveTwentyError as e:
+            except FiveTwentyError as e:  # noqa: PERF203
                 # Save failed order for retry
                 self.pending_orders.append(order)
                 print(f"Order failed: {e.message}")
 
                 # Try to recover based on error
-                if e.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
+                if e.code == FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value:  # type: ignore[attr-defined]
                     # Reduce position size and retry
                     order["units"] = order["units"] // 2
                     self.pending_orders.append(order)
@@ -512,7 +493,6 @@ class StatefulTrader:
 
 ### Structured Error Logging
 
-<!-- fragment: Error logging with non-existent exception imports -->
 ```python
 import json
 import logging
@@ -520,7 +500,7 @@ import traceback
 from datetime import datetime
 from typing import Any
 
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode, Unauthorized, Forbidden
+from fivetwenty import FiveTwentyError, FiveTwentyErrorCode
 
 
 class ErrorLogger:
@@ -550,20 +530,19 @@ class ErrorLogger:
             self.logger.warning(json.dumps(error_data))
 
     def _get_severity(self, error: FiveTwentyError) -> str:
-        """Determine error severity."""
+        """Determine error severity using error properties."""
 
         critical_errors = {
-            FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE,
-            FiveTwentyErrorCode.ACCOUNT_LOCKED,
-            FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
+            FiveTwentyErrorCode.ACCOUNT_NOT_TRADEABLE.value,  # type: ignore[attr-defined]
+            FiveTwentyErrorCode.INSUFFICIENT_AUTHORIZATION.value,  # type: ignore[attr-defined]
+            FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value,  # type: ignore[attr-defined]
         }
 
         if error.code in critical_errors:
             return "CRITICAL"
-        elif isinstance(error, (Unauthorized, Forbidden)):
+        if error.is_authentication_error:
             return "ERROR"
-        else:
-            return "WARNING"
+        return "WARNING"
 
     def send_alert(self, error_data: dict[str, Any]) -> None:
         """Send alerts for critical errors."""
@@ -620,29 +599,29 @@ class ErrorMetrics:
 
 ### Unit Tests
 
-<!-- fragment: Demo unit tests with f-string exceptions and magic number patterns -->
 ```python
 from unittest.mock import AsyncMock
 
 import pytest
 
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode, InternalServerError
+from fivetwenty import AsyncClient, FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.endpoints.orders import OrderResponse
+from fivetwenty.models import InstrumentName
 
 
-async def place_order(client: AsyncClient, account_id: str, instrument: str, units: int) -> dict:
+async def place_order(client: AsyncClient, account_id: str, instrument: str, units: int) -> OrderResponse:
     """Place order (stub for testing)."""
     return await client.orders.post_market_order(
         account_id=account_id,
-        instrument=instrument,
+        instrument=InstrumentName(instrument),
         units=units,
     )
 
-async def place_order_with_retry(client: AsyncClient, account_id: str, instrument: str, units: int) -> dict:
+async def place_order_with_retry(client: AsyncClient, account_id: str, instrument: str, units: int) -> OrderResponse:
     """Place order with retry (stub for testing)."""
     return await client.orders.post_market_order(
         account_id=account_id,
-        instrument=instrument,
+        instrument=InstrumentName(instrument),
         units=units,
     )
 
@@ -653,7 +632,8 @@ async def test_insufficient_funds_handling() -> None:
     # Mock client to raise error
     mock_client = AsyncMock()
     mock_client.orders.post_market_order.side_effect = FiveTwentyError(
-        code=FiveTwentyErrorCode.INSUFFICIENT_FUNDS,
+        status=400,
+        code=FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value,  # type: ignore[attr-defined]
         message="Not enough margin",
     )
 
@@ -661,8 +641,11 @@ async def test_insufficient_funds_handling() -> None:
     with pytest.raises(FiveTwentyError) as exc_info:
         await place_order(mock_client, "account", "EUR_USD", 1000000)
 
-    if exc_info.value.code != FiveTwentyErrorCode.INSUFFICIENT_FUNDS:
-        raise ValueError(f"Expected error code INSUFFICIENT_FUNDS, got '{exc_info.value.code}'")
+    if exc_info.value.code != FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value:  # type: ignore[attr-defined]
+        expected_code = "INSUFFICIENT_MARGIN"
+        actual_code = exc_info.value.code
+        error_message = f"Expected error code {expected_code}, got '{actual_code}'"
+        raise ValueError(error_message)
 
 @pytest.mark.asyncio
 async def test_retry_on_server_error() -> None:
@@ -670,19 +653,27 @@ async def test_retry_on_server_error() -> None:
 
     mock_client = AsyncMock()
 
-    # Fail twice, then succeed
+    # Fail twice with server error, then succeed
     mock_client.orders.post_market_order.side_effect = [
-        InternalServerError("Server error"),
-        InternalServerError("Server error"),
+        FiveTwentyError(status=500, message="Server error"),
+        FiveTwentyError(status=500, message="Server error"),
         {"order_fill_transaction": {"id": "123"}},
     ]
 
     result = await place_order_with_retry(mock_client, "account", "EUR_USD", 1000)
 
-    if result["order_fill_transaction"]["id"] != "123":
-        raise ValueError(f"Expected transaction id '123', got '{result['order_fill_transaction']['id']}'")
-    if mock_client.orders.post_market_order.call_count != 3:
-        raise ValueError(f"Expected 3 calls, got {mock_client.orders.post_market_order.call_count}")
+    if result["orderFillTransaction"].id != "123":
+        expected_id = "123"
+        actual_id = result["orderFillTransaction"].id
+        error_message = f"Expected transaction id '{expected_id}', got '{actual_id}'"
+        raise ValueError(error_message)
+
+    # Verify retry logic attempted the correct number of times
+    expected_calls = 3
+    if mock_client.orders.post_market_order.call_count != expected_calls:
+        actual_calls = mock_client.orders.post_market_order.call_count
+        error_message = f"Expected {expected_calls} calls, got {actual_calls}"
+        raise ValueError(error_message)
 ```
 
 ## Best Practices

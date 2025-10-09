@@ -7,28 +7,35 @@ Account management and information retrieval.
 ---
 
 ## get_accounts
-<!-- fragment: Demo get_accounts with module attribute access patterns -->
+
+Get list of all accounts for the authenticated user.
+
+**OANDA Endpoint**: `GET /v3/accounts`
+
+<!-- code-block: get_accounts_basic -->
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
+
+load_dotenv()
 
 
 async def main() -> None:
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # accounts.get_accounts() -> list[AccountProperties]
-
-        # Example usage:
+    async with AsyncClient() as client:
+        # Retrieve all accounts associated with the API token
         accounts = await client.accounts.get_accounts()
         print(f"Found {len(accounts)} accounts")
 
+
 asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts`
 
-**OANDA Documentation**: [Get Accounts](https://developer.oanda.com/rest-live-v20/account-ep/#get-accounts)
+🔗 **OANDA Documentation**: [Get Accounts](https://developer.oanda.com/rest-live-v20/account-ep/#get-accounts)
 
-Get list of all accounts for the authenticated user.
+🔗 **Source**: [accounts.get_accounts](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -38,34 +45,44 @@ Get list of all accounts for the authenticated user.
 
 **Raises:**
 
-- `FiveTwentyError` - API errors
+`FiveTwentyError` - API errors:
+
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## get_account
-<!-- fragment: Demo get_account with module attribute access and dict attribute patterns -->
+
+Get detailed information for specific account.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}`
+
+<!-- code-block: get_account_details -->
 ```python
-from fivetwenty import AsyncClient, Configuration
-from fivetwenty.endpoints.accounts import AccountResponse
+import asyncio
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
+
+load_dotenv()
 
 
-async def get_account_example() -> None:
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # accounts.get_account(account_id: AccountID) -> AccountResponse
-        # Returns: {"account": Account, "lastTransactionID": str}
-
-        # Example usage:
-        result: AccountResponse = await client.accounts.get_account(account_id="123-456-789")
+async def main() -> None:
+    async with AsyncClient() as client:
+        # Get full account details including all open trades and positions
+        result = await client.accounts.get_account(account_id=client.account_id)
         account = result["account"]
         print(f"Account balance: {account.balance}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}`
 
-**OANDA Documentation**: [Get Account Details](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-details)
+🔗 **OANDA Documentation**: [Get Account Details](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-details)
 
-Get detailed information for specific account.
+🔗 **Source**: [accounts.get_account](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -77,32 +94,45 @@ Get detailed information for specific account.
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid account ID
+`FiveTwentyError` - API errors:
+
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Account not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## get_account_summary
-<!-- fragment: Demo get_account_summary with undefined names and dict attribute access patterns -->
+
+Get condensed account information.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/summary`
+
+<!-- code-block: get_account_summary_basic -->
 ```python
-from fivetwenty.endpoints.accounts import AccountSummaryResponse
+import asyncio
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
+
+load_dotenv()
 
 
-async def get_account_summary_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
-        # accounts.get_account_summary(account_id: AccountID) -> AccountSummaryResponse
-        # Returns: {"account": AccountSummary, "lastTransactionID": str}
-
-        # Example usage:
-        result: AccountSummaryResponse = await client.accounts.get_account_summary(account_id="123-456-789")
+async def main() -> None:
+    async with AsyncClient() as client:
+        # Get condensed account summary (NAV, balance, P/L, margin) without trade details
+        result = await client.accounts.get_account_summary(account_id=client.account_id)
         summary = result["account"]
         print(f"Account NAV: {summary.nav}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/summary`
 
-**OANDA Documentation**: [Get Account Summary](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-summary)
+🔗 **OANDA Documentation**: [Get Account Summary](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-summary)
 
-Get condensed account information.
+🔗 **Source**: [accounts.get_account_summary](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -114,39 +144,49 @@ Get condensed account information.
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid account ID
+`FiveTwentyError` - API errors:
+
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Account not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## get_account_instruments
-<!-- fragment: Demo get_account_instruments with unused variables and module attribute patterns -->
+
+Get all tradeable instruments for account.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/instruments`
+
+<!-- code-block: get_account_instruments_filtered -->
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
-from fivetwenty.endpoints.accounts import AccountInstrumentsResponse
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
+
+load_dotenv()
 
 
 async def main() -> None:
-    # accounts.get_account_instruments(account_id: AccountID, instruments: list[str] | None = None) -> AccountInstrumentsResponse
-    # Returns: {"instruments": list[Instrument], "lastTransactionID": str}
-
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
-        result: AccountInstrumentsResponse = await client.accounts.get_account_instruments(
-            account_id="123-456-789",
+    async with AsyncClient() as client:
+        # Get instrument specifications (pip value, margin rate, etc.) filtered to specific pairs
+        result = await client.accounts.get_account_instruments(
+            account_id=client.account_id,
             instruments=["EUR_USD", "GBP_USD"]
         )
         instruments = result["instruments"]
+        print(f"Found {len(instruments)} instruments")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
 
 asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/instruments`
 
-**OANDA Documentation**: [Get Account Instruments](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-instruments)
+🔗 **OANDA Documentation**: [Get Account Instruments](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-instruments)
 
-Get all tradeable instruments for account.
+🔗 **Source**: [accounts.get_account_instruments](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -159,37 +199,49 @@ Get all tradeable instruments for account.
 
 **Raises:**
 
-- `FiveTwentyError` - API errors or invalid account ID
+`FiveTwentyError` - API errors:
+
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 404: Account not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## patch_account_configuration
-<!-- fragment: Demo patch_account_configuration with unused imports and unused variable patterns -->
+
+Update account configuration settings.
+
+**OANDA Endpoint**: `PATCH /v3/accounts/{accountID}/configuration`
+
+<!-- code-block: update_account_alias -->
 ```python
 import asyncio
-from typing import Any
-from fivetwenty import AsyncClient, Configuration
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
+
+load_dotenv()
 
 
 async def main() -> None:
-    # accounts.patch_account_configuration(account_id: AccountID, alias: str | None = None,
-    #                   margin_rate: str | None = None) -> dict[str, Any]
-
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
+    async with AsyncClient() as client:
+        # Update the account display name (alias)
         result = await client.accounts.patch_account_configuration(
-            account_id="123-456-789",
+            account_id=client.account_id,
             alias="My Trading Account"
         )
+        print("Configuration updated")
+        print(f"Transaction ID: {result['clientConfigureTransaction'].id}")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
+
 
 asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `PATCH /v3/accounts/{accountID}/configuration`
 
-**OANDA Documentation**: [Configure Account](https://developer.oanda.com/rest-live-v20/account-ep/#configure-account)
+🔗 **OANDA Documentation**: [Configure Account](https://developer.oanda.com/rest-live-v20/account-ep/#configure-account)
 
-Update account configuration settings.
+🔗 **Source**: [accounts.patch_account_configuration](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -199,40 +251,53 @@ Update account configuration settings.
 | `alias` | str | ➖ | Client-assigned account alias (display name) |
 | `margin_rate` | str | ➖ | Account margin rate as decimal string (e.g., "0.05" for 5%) |
 
-**Returns:** Updated account configuration
+**Returns:** Dictionary containing configuration transaction (`ClientConfigureTransaction`) and last transaction ID (`str`)
 
 **Raises:**
 
-- `FiveTwentyError` - API errors, invalid parameters, or insufficient permissions
+`FiveTwentyError` - API errors:
+
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 400: Invalid parameters (check `e.is_validation_error`)
+- 404: Account not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)
 
 ---
 
 ## get_account_changes
-<!-- fragment: Demo get_account_changes with unused imports and unused variable patterns -->
+
+Get account state changes since specified transaction ID.
+
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/changes`
+
+<!-- code-block: get_account_changes_since -->
 ```python
 import asyncio
-from typing import Any
-from fivetwenty import AsyncClient, Configuration
+
+from dotenv import load_dotenv
+
+from fivetwenty import AsyncClient
+
+load_dotenv()
 
 
 async def main() -> None:
-    # accounts.get_account_changes(account_id: AccountID, since_transaction_id: str) -> dict[str, Any]
-
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
-        # Example usage:
-        changes = await client.accounts.get_account_changes(
-            account_id="123-456-789",
+    async with AsyncClient() as client:
+        # Get all account state changes (orders, trades, positions) since transaction ID 100
+        result = await client.accounts.get_account_changes(
+            account_id=client.account_id,
             since_transaction_id="100"
         )
+        print(f"Changes: {len(result['changes'].orders_created)} orders created")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
+
 
 asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/changes`
 
-**OANDA Documentation**: [Get Account Changes](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-changes)
+🔗 **OANDA Documentation**: [Get Account Changes](https://developer.oanda.com/rest-live-v20/account-ep/#get-account-changes)
 
-Get account state changes since specified transaction ID.
+🔗 **Source**: [accounts.get_account_changes](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/accounts.py)
 
 **Parameters:**
 
@@ -241,8 +306,13 @@ Get account state changes since specified transaction ID.
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `since_transaction_id` | str | ✅ | Transaction ID to get changes since |
 
-**Returns:** Account changes and current state
+**Returns:** Dictionary containing changes (`AccountChanges`), state (`AccountChangesState`), and last transaction ID (`str`)
 
 **Raises:**
 
-- `FiveTwentyError` - API errors, invalid transaction ID, or account not found
+`FiveTwentyError` - API errors:
+
+- 401/403: Authentication failed (check `e.is_authentication_error`)
+- 400: Invalid transaction ID (check `e.is_validation_error`)
+- 404: Account not found (check `e.is_not_found`)
+- 429: Rate limit exceeded (check `e.is_rate_limited`)

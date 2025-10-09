@@ -94,7 +94,7 @@ def main() -> None:
         print("\nAccount Balance:")
         print(f"  Balance: {account.balance} {account.currency}")
         print(f"  NAV: {account.nav}")
-        print(f"  Unrealized P/L: {account.unrealized_pl}")
+        print(f"  Unrealized P/L: {account.unrealized_pl if account.unrealized_pl is not None else 'N/A'}")
 
         # Get current pricing - another blocking call
         # Each call waits for completion before moving to next line

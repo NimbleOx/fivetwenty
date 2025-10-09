@@ -8,7 +8,9 @@ This page documents all enumeration types used throughout FiveTwenty. These enum
 
 Available trading instruments supported by OANDA.
 
-**OANDA Definition**: [Instrument](https://developer.oanda.com/rest-live-v20/primitives-df/#Instrument)
+🔗 **OANDA Definition**: [InstrumentName](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_5)
+
+🔗 **Source**: [InstrumentName](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -40,7 +42,6 @@ Available trading instruments supported by OANDA.
 | `EUR_PLN` | Euro / Polish Zloty |
 | `EUR_SEK` | Euro / Swedish Krona |
 | `EUR_SGD` | Euro / Singapore Dollar |
-| `EUR_THB` | Euro / Thai Baht |
 | `EUR_TRY` | Euro / Turkish Lira |
 | `EUR_USD` | Euro / US Dollar |
 | `EUR_ZAR` | Euro / South African Rand |
@@ -62,7 +63,6 @@ Available trading instruments supported by OANDA.
 | `NZD_SGD` | New Zealand Dollar / Singapore Dollar |
 | `NZD_USD` | New Zealand Dollar / US Dollar |
 | `SGD_CHF` | Singapore Dollar / Swiss Franc |
-| `SGD_HKD` | Singapore Dollar / Hong Kong Dollar |
 | `SGD_JPY` | Singapore Dollar / Japanese Yen |
 | `TRY_JPY` | Turkish Lira / Japanese Yen |
 | `USD_CAD` | US Dollar / Canadian Dollar |
@@ -87,18 +87,68 @@ Available trading instruments supported by OANDA.
 
 Trade direction for buy/sell operations.
 
-**OANDA Definition**: [OrderFillTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#OrderFillTransaction)
+🔗 **OANDA Definition**: [Direction](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_16)
+
+🔗 **Source**: [Direction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
 | `LONG` | Buy direction - go long on the instrument |
 | `SHORT` | Sell direction - go short on the instrument |
 
+### Currency
+
+ISO 4217 currency codes for account and trading operations.
+
+🔗 **OANDA Definition**: [Currency](https://developer.oanda.com/rest-live-v20/primitives-df/#Currency)
+
+🔗 **Source**: [Currency](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `AUD` | Australian Dollar |
+| `CAD` | Canadian Dollar |
+| `CHF` | Swiss Franc |
+| `CNH` | Chinese Yuan (Offshore) |
+| `CZK` | Czech Koruna |
+| `DKK` | Danish Krone |
+| `EUR` | Euro |
+| `GBP` | British Pound Sterling |
+| `HKD` | Hong Kong Dollar |
+| `HUF` | Hungarian Forint |
+| `JPY` | Japanese Yen |
+| `MXN` | Mexican Peso |
+| `NOK` | Norwegian Krone |
+| `NZD` | New Zealand Dollar |
+| `PLN` | Polish Zloty |
+| `SEK` | Swedish Krona |
+| `SGD` | Singapore Dollar |
+| `THB` | Thai Baht |
+| `TRY` | Turkish Lira |
+| `USD` | United States Dollar |
+| `ZAR` | South African Rand |
+
+### InstrumentType
+
+Classification of tradeable instruments.
+
+🔗 **OANDA Definition**: [InstrumentType](https://developer.oanda.com/rest-live-v20/primitives-df/#InstrumentType)
+
+🔗 **Source**: [InstrumentType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CURRENCY` | Currency pairs (forex) |
+| `CFD` | Contracts for Difference |
+| `METAL` | Precious metals |
+
 ### TransactionType
 
 Types of transactions that can occur in an account.
 
-**OANDA Definition**: [Transaction](https://developer.oanda.com/rest-live-v20/transaction-df/#Transaction)
+🔗 **OANDA Definition**: [TransactionType](https://developer.oanda.com/rest-live-v20/transaction-df/#collapse_definition_41)
+
+🔗 **Source**: [TransactionType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -111,24 +161,21 @@ Types of transactions that can occur in an account.
 | `TRANSFER_FUNDS_REJECT` | Fund transfer rejected |
 | `MARKET_ORDER` | Market order placed |
 | `MARKET_ORDER_REJECT` | Market order rejected |
+| `FIXED_PRICE_ORDER` | Fixed price order placed |
 | `LIMIT_ORDER` | Limit order placed |
 | `LIMIT_ORDER_REJECT` | Limit order rejected |
-| `LIMIT_ORDER_REPLACE` | Limit order modified |
 | `STOP_ORDER` | Stop order placed |
 | `STOP_ORDER_REJECT` | Stop order rejected |
-| `STOP_ORDER_REPLACE` | Stop order modified |
 | `MARKET_IF_TOUCHED_ORDER` | MIT order placed |
 | `MARKET_IF_TOUCHED_ORDER_REJECT` | MIT order rejected |
-| `MARKET_IF_TOUCHED_ORDER_REPLACE` | MIT order modified |
 | `TAKE_PROFIT_ORDER` | Take profit order placed |
 | `TAKE_PROFIT_ORDER_REJECT` | Take profit order rejected |
-| `TAKE_PROFIT_ORDER_REPLACE` | Take profit order modified |
 | `STOP_LOSS_ORDER` | Stop loss order placed |
 | `STOP_LOSS_ORDER_REJECT` | Stop loss order rejected |
-| `STOP_LOSS_ORDER_REPLACE` | Stop loss order modified |
+| `GUARANTEED_STOP_LOSS_ORDER` | Guaranteed stop loss order placed |
+| `GUARANTEED_STOP_LOSS_ORDER_REJECT` | Guaranteed stop loss order rejected |
 | `TRAILING_STOP_LOSS_ORDER` | Trailing stop loss order placed |
 | `TRAILING_STOP_LOSS_ORDER_REJECT` | Trailing stop loss order rejected |
-| `TRAILING_STOP_LOSS_ORDER_REPLACE` | Trailing stop loss order modified |
 | `ORDER_FILL` | Order filled |
 | `ORDER_CANCEL` | Order canceled |
 | `ORDER_CANCEL_REJECT` | Order cancellation rejected |
@@ -150,7 +197,9 @@ Types of transactions that can occur in an account.
 
 Time intervals for candlestick data.
 
-**OANDA Definition**: [CandlestickGranularity](https://developer.oanda.com/rest-live-v20/instrument-df/#CandlestickGranularity)
+🔗 **OANDA Definition**: [CandlestickGranularity](https://developer.oanda.com/rest-live-v20/instrument-df/#collapse_definition_1)
+
+🔗 **Source**: [CandlestickGranularity](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description | Alignment |
 |-------|-------------|-----------|
@@ -180,7 +229,9 @@ Time intervals for candlestick data.
 
 Status of price data.
 
-**OANDA Definition**: [Price](https://developer.oanda.com/rest-live-v20/pricing-df/#Price)
+🔗 **OANDA Definition**: [PriceStatus](https://developer.oanda.com/rest-live-v20/pricing-df/#collapse_definition_2)
+
+🔗 **Source**: [PriceStatus](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -192,7 +243,9 @@ Status of price data.
 
 Days of the week for weekly candlestick alignment.
 
-**OANDA Definition**: [CandlestickGranularity](https://developer.oanda.com/rest-live-v20/instrument-df/#CandlestickGranularity)
+🔗 **OANDA Definition**: [WeeklyAlignment](https://developer.oanda.com/rest-live-v20/instrument-df/#collapse_definition_2)
+
+🔗 **Source**: [WeeklyAlignment](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -207,6 +260,10 @@ Days of the week for weekly candlestick alignment.
 ### DayOfWeek
 
 Days of the week enumeration.
+
+🔗 **OANDA Definition**: [DayOfWeek](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_7)
+
+🔗 **Source**: [DayOfWeek](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -224,7 +281,9 @@ Days of the week enumeration.
 
 Types of orders that can be placed.
 
-**OANDA Definition**: [Order](https://developer.oanda.com/rest-live-v20/order-df/#Order)
+🔗 **OANDA Definition**: [OrderType](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_21)
+
+🔗 **Source**: [OrderType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -241,7 +300,9 @@ Types of orders that can be placed.
 
 Current state of an order.
 
-**OANDA Definition**: [Order](https://developer.oanda.com/rest-live-v20/order-df/#Order)
+🔗 **OANDA Definition**: [OrderState](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_23)
+
+🔗 **Source**: [OrderState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -250,11 +311,60 @@ Current state of an order.
 | `TRIGGERED` | Order has been triggered |
 | `CANCELLED` | Order has been cancelled |
 
+### TimeInForce
+
+Order duration policies defining how long an order remains active.
+
+🔗 **OANDA Definition**: [TimeInForce](https://developer.oanda.com/rest-live-v20/order-df/#TimeInForce)
+
+🔗 **Source**: [TimeInForce](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `GTC` | Good 'Til Cancelled - order remains active until cancelled |
+| `GTD` | Good 'Til Date - order remains active until specified date |
+| `GFD` | Good For Day - order remains active until end of trading day |
+| `FOK` | Fill Or Kill - order must be filled immediately and completely |
+| `IOC` | Immediate Or Cancel - order must be filled immediately (partial fills accepted) |
+
+### OrderPositionFill
+
+Defines how positions are modified when an order is filled.
+
+🔗 **OANDA Definition**: [OrderPositionFill](https://developer.oanda.com/rest-live-v20/order-df/#OrderPositionFill)
+
+🔗 **Source**: [OrderPositionFill](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `OPEN_ONLY` | Order can only open new positions |
+| `REDUCE_FIRST` | Order reduces position first, then opens new position with remainder |
+| `REDUCE_ONLY` | Order can only reduce existing positions |
+| `DEFAULT` | Use default position fill behavior |
+
+### OrderTriggerCondition
+
+Specifies which price component to use for order triggering.
+
+🔗 **OANDA Definition**: [OrderTriggerCondition](https://developer.oanda.com/rest-live-v20/order-df/#OrderTriggerCondition)
+
+🔗 **Source**: [OrderTriggerCondition](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `DEFAULT` | Use default trigger condition (ask for buy, bid for sell) |
+| `INVERSE` | Use inverse trigger condition (ask for sell, bid for buy) |
+| `BID` | Use bid price as trigger condition |
+| `ASK` | Use ask price as trigger condition |
+| `MID` | Use mid price as trigger condition |
+
 ### OrderStateFilter
 
 Filter for querying orders by state.
 
-**OANDA Definition**: [Order Endpoints](https://developer.oanda.com/rest-live-v20/order-ep/)
+🔗 **OANDA Definition**: [OrderStateFilter](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_24)
+
+🔗 **Source**: [OrderStateFilter](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -268,7 +378,9 @@ Filter for querying orders by state.
 
 Types of orders that can be cancelled.
 
-**OANDA Definition**: [Order](https://developer.oanda.com/rest-live-v20/order-df/#Order)
+🔗 **OANDA Definition**: [CancellableOrderType](https://developer.oanda.com/rest-live-v20/order-df/#collapse_definition_22)
+
+🔗 **Source**: [CancellableOrderType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -286,7 +398,9 @@ Types of orders that can be cancelled.
 
 Financing mode for an account.
 
-**OANDA Definition**: [Account](https://developer.oanda.com/rest-live-v20/account-df/#Account)
+🔗 **OANDA Definition**: [AccountFinancingMode](https://developer.oanda.com/rest-live-v20/account-df/#collapse_definition_12)
+
+🔗 **Source**: [AccountFinancingMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -298,7 +412,9 @@ Financing mode for an account.
 
 How positions are aggregated in the account.
 
-**OANDA Definition**: [Account](https://developer.oanda.com/rest-live-v20/account-df/#Account)
+🔗 **OANDA Definition**: [PositionAggregationMode](https://developer.oanda.com/rest-live-v20/account-df/#collapse_definition_14)
+
+🔗 **Source**: [PositionAggregationMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -310,7 +426,9 @@ How positions are aggregated in the account.
 
 Guaranteed stop loss order modes for instruments.
 
-**OANDA Definition**: [GuaranteedStopLossOrderLevelRestriction](https://developer.oanda.com/rest-live-v20/primitives-df/#GuaranteedStopLossOrderLevelRestriction)
+🔗 **OANDA Definition**: [GuaranteedStopLossOrderMode](https://developer.oanda.com/rest-live-v20/account-df/#collapse_definition_6)
+
+🔗 **Source**: [GuaranteedStopLossOrderMode](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -322,7 +440,9 @@ Guaranteed stop loss order modes for instruments.
 
 Guaranteed stop loss order modes specific to instruments.
 
-**OANDA Definition**: [Instrument](https://developer.oanda.com/rest-live-v20/primitives-df/#Instrument)
+🔗 **OANDA Definition**: [GuaranteedStopLossOrderModeForInstrument](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_14)
+
+🔗 **Source**: [GuaranteedStopLossOrderModeForInstrument](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
@@ -330,88 +450,29 @@ Guaranteed stop loss order modes specific to instruments.
 | `ALLOWED` | GSL orders allowed for this instrument |
 | `REQUIRED` | GSL orders required for this instrument |
 
-## Error and Status Enums
-
-### FiveTwentyErrorCode
-
-Error codes specific to FiveTwenty.
-
-| Value | Description |
-|-------|-------------|
-| `STREAM_STALLED` | Streaming connection has stalled |
-| `CONNECTION_LOST` | Connection to OANDA API lost |
-| `AUTHENTICATION_FAILED` | API token authentication failed |
-| `RATE_LIMIT_EXCEEDED` | API rate limit exceeded |
-| `INVALID_CONFIGURATION` | SDK configuration is invalid |
-| `TIMEOUT` | Request timeout exceeded |
-
-### ErrorSeverity
-
-Severity levels for errors.
-
-| Value | Description |
-|-------|-------------|
-| `LOW` | Low severity - informational |
-| `MEDIUM` | Medium severity - warning |
-| `HIGH` | High severity - error |
-| `CRITICAL` | Critical severity - system failure |
-
-### ErrorCategory
-
-Categories of errors.
-
-| Value | Description |
-|-------|-------------|
-| `NETWORK` | Network-related errors |
-| `AUTHENTICATION` | Authentication errors |
-| `VALIDATION` | Input validation errors |
-| `BUSINESS` | Business logic errors |
-| `SYSTEM` | System-level errors |
-
-## Streaming Enums
-
-### StreamState
-
-State of a streaming connection.
-
-| Value | Description |
-|-------|-------------|
-| `CONNECTING` | Establishing connection |
-| `CONNECTED` | Successfully connected |
-| `DISCONNECTING` | Closing connection |
-| `DISCONNECTED` | Connection closed |
-| `FAILED` | Connection failed |
-| `RECONNECTING` | Attempting to reconnect |
-
 ## Filtering and Querying Enums
 
-### TransactionFilter
+### TradeState
 
-Filter for transaction queries.
+Current state of a trade in its lifecycle.
 
-**OANDA Definition**: [Transaction Endpoints](https://developer.oanda.com/rest-live-v20/transaction-ep/)
+🔗 **OANDA Definition**: [TradeState](https://developer.oanda.com/rest-live-v20/trade-df/#TradeState)
+
+🔗 **Source**: [TradeState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
-| `ORDER` | Order-related transactions |
-| `FUNDING` | Funding transactions |
-| `ADMIN` | Administrative transactions |
-| `CREATE` | Account creation transactions |
-| `CLOSE` | Account closure transactions |
-| `REOPEN` | Account reopening transactions |
-| `CLIENT_CONFIGURE` | Configuration transactions |
-| `TRANSFER_FUNDS` | Fund transfer transactions |
-| `MARKET_ORDER` | Market order transactions |
-| `ORDER_FILL` | Order fill transactions |
-| `ORDER_CANCEL` | Order cancellation transactions |
-| `MARGIN_CALL` | Margin call transactions |
-| `DAILY_FINANCING` | Daily financing transactions |
+| `OPEN` | Trade is currently open |
+| `CLOSED` | Trade has been fully closed |
+| `CLOSE_WHEN_TRADEABLE` | Trade will be closed as soon as the instrument becomes tradeable |
 
 ### TradeStateFilter
 
 Filter for trade queries by state.
 
-**OANDA Definition**: [Trade Endpoints](https://developer.oanda.com/rest-live-v20/trade-ep/)
+🔗 **OANDA Definition**: [TradeStateFilter](https://developer.oanda.com/rest-live-v20/trade-df/#collapse_definition_3)
+
+🔗 **Source**: [TradeStateFilter](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|

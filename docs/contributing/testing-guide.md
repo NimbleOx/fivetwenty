@@ -1,882 +1,170 @@
 # Testing Guide
 
-Comprehensive testing is essential for maintaining the reliability and security of FiveTwenty. This guide covers our testing strategies, tools, and best practices.
-
----
-
-## Testing Philosophy
-
-### **Testing Pyramid**
-
-FiveTwenty follows a balanced testing approach:
-
-```text
-     /\
-    /  \          ← Integration Tests (Live API, VCR recorded)
-   /____\
-  /      \        ← Unit Tests (Fast, isolated, mocked)
- /________\
-/          \      ← Static Analysis (Type checking, linting)
-```
-
-### **Test Categories**
-
-
-- **Unit Tests** - Fast, isolated tests with mocked dependencies
-- **Integration Tests** - Tests against real OANDA API (recorded with VCR.py)
-- **Static Analysis** - Type checking, linting, and code quality
-- **Performance Tests** - Memory usage, streaming performance
-- **Security Tests** - Credential handling, data validation
+Comprehensive testing ensures FiveTwenty's reliability for production trading.
 
 ---
 
 ## Running Tests
 
-### **Basic Test Commands**
 ```bash
-# All tests (unit + integration)
-uv run poe test
+# All tests
 uv run pytest
 
-# Unit tests only (fast)
+# Unit tests (fast)
 uv run poe test-unit
-uv run pytest tests/unit/
 
-# Integration tests only (slower, requires credentials)
+# Integration tests (requires credentials)
 uv run poe test-integration
-uv run pytest tests/integration/
 
-# With coverage report
-uv run poe test-cov
+# With coverage
 uv run pytest --cov=fivetwenty --cov-report=html
-```
 
-### **Test Selection**
+# Specific test
+uv run pytest tests/unit/test_client.py::test_name
 
-```bash
-# Run specific test file
-uv run pytest tests/unit/test_client.py
-
-# Run specific test method
-uv run pytest tests/unit/test_client.py::test_client_initialization
-
-# Run tests matching pattern
-uv run pytest -k "test_account"
-
-# Run tests with specific marker
+# By marker
 uv run pytest -m unit
 uv run pytest -m integration
-uv run pytest -m streaming
-```
-
-### **Test Output Control**
-
-```bash
-# Verbose output
-uv run pytest -v
-
-# Show local variables on failure
-uv run pytest -l
-
-# Stop on first failure
-uv run pytest -x
-
-# Run in parallel (if pytest-xdist installed)
-uv run pytest -n auto
 ```
 
 ---
 
-## Test Organization
-
-### **Directory Structure**
+## Test Structure
 
 ```text
 tests/
-├── conftest.py                 # Shared fixtures and configuration
-├── unit/                       # Fast, isolated tests
-│   ├── test_client.py         # Client initialization and configuration
-│   ├── test_models.py         # Pydantic model validation
-│   ├── test_exceptions.py     # Exception handling
-│   └── endpoints/             # Endpoint-specific tests
-│       ├── test_accounts.py
-│       ├── test_orders.py
-│       ├── test_trades.py
-│       └── test_streaming.py
-├── integration/               # Live API tests (VCR recorded)
-│   ├── test_accounts_integration.py
-│   ├── test_orders_integration.py
-│   ├── test_streaming_integration.py
-│   └── fixtures/             # VCR cassettes
-│       ├── accounts/
-│       ├── orders/
-│       └── streaming/
-└── performance/              # Performance and load tests
-    ├── test_streaming_performance.py
-    └── test_memory_usage.py
-```
-
-### **Test Markers**
-
-Tests are organized with pytest markers:
-
-<!-- fragment: pytest marker examples with test functions -->
-```python
-import pytest
-
-# Example test markers:
-@pytest.mark.unit          # Fast unit tests (default)
-@pytest.mark.integration   # Integration tests (requires API credentials)
-@pytest.mark.streaming     # Streaming-related tests
-@pytest.mark.trading       # Trading operation tests
-@pytest.mark.core          # Core functionality tests
-@pytest.mark.edge_cases    # Edge case and error condition tests
-@pytest.mark.slow          # Slower running tests
-@pytest.mark.compliance    # OANDA API compliance tests
-def test_example():
-    pass
+├── conftest.py           # Shared fixtures
+├── unit/                 # Fast, mocked
+│   ├── test_client.py
+│   └── endpoints/
+└── integration/          # Real API
+    └── test_accounts_integration.py
 ```
 
 ---
 
 ## Unit Testing
 
-### **Unit Test Principles**
+Fast, isolated tests with mocked HTTP:
 
-- **Fast execution** - Should run in milliseconds
-- **Isolated** - No external dependencies (API, network, files)
-- **Deterministic** - Same input always produces same output
-- **Focused** - Test one specific behavior per test
-
-### **Mocking HTTP Responses**
-
-<!-- fragment: unit test example with mock data and placeholder credentials -->
 ```python
 from decimal import Decimal
-
+from unittest.mock import patch
 import pytest
-from unittest.mock import AsyncMock, Mock, patch
-import httpx
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty import AsyncClient, Environment
 
-class TestAccountsEndpoint:
-    """Unit tests for accounts endpoint."""
 
-    @pytest.fixture
-    def client(self):
-        """Create test client."""
-        return AsyncClient(token="test-token", account_id="your-account-id", environment="practice")
+@pytest.mark.unit
+@pytest.mark.asyncio
+async def test_get_account() -> None:
+    client = AsyncClient(token="test", account_id="123", environment=Environment.PRACTICE)
 
-    @pytest.mark.unit
-    @pytest.mark.asyncio
-    async def test_get_account_summary_success(self, client):
-        """Test successful account summary retrieval."""
-        # Mock response data
-        mock_response_data = {
-            "account": {
-                "id": "123-456-789",
-                "currency": "USD",
-                "balance": "10000.0000",
-                "marginAvailable": "10000.0000",
-                "marginUsed": "0.0000",
-                "marginCloseoutPercent": "0.00000"
-            }
+    with patch.object(client, '_request') as mock_request:
+        mock_request.return_value.json.return_value = {
+            "account": {"id": "123", "balance": "10000.0000"},
+            "lastTransactionID": "456"
         }
 
-        # Mock the HTTP request
-        with patch.object(client, '_request') as mock_request:
-            mock_response = Mock()
-            mock_response.json.return_value = mock_response_data
-            mock_response.status_code = 200
-            mock_request.return_value = mock_response
+        result = await client.accounts.get_account("123")
 
-            # Execute test
-            result = await client.accounts.get_account_summary("123-456-789")
-
-            # Verify behavior
-            if result.id != "123-456-789":
-                raise ValueError(f"Expected id '123-456-789', got '{result.id}'")
-            if result.currency != "USD":
-                raise ValueError(f"Expected currency 'USD', got '{result.currency}'")
-            if result.balance != Decimal("10000.0000"):
-                raise ValueError(f"Expected balance '10000.0000', got '{result.balance}'")
-
-            # Verify HTTP call
-            mock_request.assert_called_once_with(
-                "GET",
-                "/accounts/123-456-789",
-                timeout=None
-            )
-
-    @pytest.mark.unit
-    @pytest.mark.asyncio
-    async def test_get_account_summary_not_found(self, client):
-        """Test account not found error handling."""
-        with patch.object(client, '_request') as mock_request:
-            # Mock HTTP 404 error
-            mock_response = Mock()
-            mock_response.status_code = 404
-            mock_response.json.return_value = {
-                "errorCode": "ACCOUNT_NOT_EXIST",
-                "errorMessage": "The account specified does not exist"
-            }
-
-            mock_request.side_effect = httpx.HTTPStatusError(
-                message="Not Found",
-                request=Mock(),
-                response=mock_response
-            )
-
-            # Test error handling
-            with pytest.raises(VeeTwentyError) as exc_info:
-                await client.accounts.get_account_summary("invalid-account")
-
-            # Verify exception details
-            if exc_info.value.error_code != "ACCOUNT_NOT_EXIST":
-                raise ValueError(f"Expected error code 'ACCOUNT_NOT_EXIST', got '{exc_info.value.error_code}'")
-            if "account specified does not exist" not in exc_info.value.message:
-                raise ValueError(f"Expected message to contain 'account specified does not exist', got '{exc_info.value.message}'")
-
-    @pytest.mark.unit
-    @pytest.mark.asyncio
-    async def test_get_account_summary_timeout(self, client):
-        """Test request timeout handling."""
-        with patch.object(client, '_request') as mock_request:
-            mock_request.side_effect = httpx.TimeoutException(
-                message="Request timed out"
-            )
-
-            with pytest.raises(VeeTwentyError) as exc_info:
-                await client.accounts.get_account_summary(
-                    "123-456-789",
-                    timeout=1.0
-                )
-
-            if "timed out" not in str(exc_info.value).lower():
-                raise ValueError(f"Expected error message to contain 'timed out', got '{str(exc_info.value)}'")
-```
-
-### **Model Testing**
-
-<!-- fragment: model testing example with test data and assertion patterns -->
-```python
-from datetime import datetime
-from decimal import Decimal
-
-import pytest
-from pydantic import ValidationError
-
-from fivetwenty.models import Order
-
-
-class TestOrderModel:
-    """Unit tests for Order model."""
-
-    @pytest.mark.unit
-    def test_order_model_validation(self):
-        """Test Order model with valid data."""
-        order_data = {
-            "id": "12345",
-            "instrument": "EUR_USD",
-            "units": "1000",
-            "price": "1.2345",
-            "timeInForce": "GTC",
-            "createTime": "2024-01-15T10:30:00.000000Z",
-            "state": "PENDING",
-        }
-
-        order = Order.model_validate(order_data)
-
-        if order.id != "12345":
-            raise ValueError(f"Expected id '12345', got '{order.id}'")
-        if order.instrument != "EUR_USD":
-            raise ValueError(f"Expected instrument 'EUR_USD', got '{order.instrument}'")
-        if order.units != 1000:
-            raise ValueError(f"Expected units 1000, got '{order.units}'")
-        if order.price != Decimal("1.2345"):
-            raise ValueError(f"Expected price '1.2345', got '{order.price}'")
-        if order.time_in_force != "GTC":
-            raise ValueError(f"Expected time_in_force 'GTC', got '{order.time_in_force}'")
-        if not isinstance(order.create_time, datetime):
-            raise TypeError(f"Expected create_time to be datetime, got '{type(order.create_time)}'")
-
-    @pytest.mark.unit
-    def test_order_model_invalid_data(self):
-        """Test Order model validation with invalid data."""
-        invalid_data = {
-            "id": "",  # Empty ID
-            "instrument": "INVALID",  # Invalid instrument format
-            "units": "not-a-number",  # Invalid units
-            "price": "invalid-price",  # Invalid price
-        }
-
-        with pytest.raises(ValidationError) as exc_info:
-            Order.model_validate(invalid_data)
-
-        errors = exc_info.value.errors()
-        MIN_EXPECTED_ERRORS = 3
-        if len(errors) < MIN_EXPECTED_ERRORS:
-            raise ValueError(f"Expected at least {MIN_EXPECTED_ERRORS} validation errors, got {len(errors)}")
-
-    @pytest.mark.unit
-    def test_order_serialization_roundtrip(self):
-        """Test Order serialization and deserialization."""
-        original_data = {
-            "id": "67890",
-            "instrument": "GBP_USD",
-            "units": "-500",
-            "price": "1.3456",
-            "timeInForce": "FOK",
-            "createTime": "2024-01-15T15:45:30.123456Z",
-        }
-
-        # Parse from dict
-        order = Order.model_validate(original_data)
-
-        # Serialize back to dict
-        serialized = order.model_dump(by_alias=True)
-
-        # Verify roundtrip consistency
-        if serialized["id"] != original_data["id"]:
-            raise ValueError(f"ID mismatch: expected '{original_data['id']}', got '{serialized['id']}'")
-        if serialized["instrument"] != original_data["instrument"]:
-            raise ValueError(f"Instrument mismatch: expected '{original_data['instrument']}', got '{serialized['instrument']}'")
-        if serialized["timeInForce"] != original_data["timeInForce"]:
-            raise ValueError(f"TimeInForce mismatch: expected '{original_data['timeInForce']}', got '{serialized['timeInForce']}'")
+        assert result["account"].id == "123"  # noqa: S101
+        assert result["account"].balance == Decimal("10000.0000")  # noqa: S101
 ```
 
 ---
 
 ## Integration Testing
 
-### **Integration Test Setup**
-
-Integration tests use real OANDA API calls recorded with VCR.py for reproducibility:
-
-<!-- fragment: integration test example with environment variables and API calls -->
-```python
-import os
-from decimal import Decimal
-
-import pytest
-
-from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import VeeTwentyError
-
-
-@pytest.mark.integration
-class TestAccountsIntegration:
-    """Integration tests for accounts endpoint."""
-
-    @pytest.fixture
-    def client(self):
-        """Create client with test credentials."""
-        return AsyncClient(
-            token=os.environ["TEST_OANDA_TOKEN"],
-            account_id=os.environ["TEST_OANDA_ACCOUNT"],
-            environment=Environment.PRACTICE,  # Always use practice for tests
-        )
-
-    @pytest.mark.asyncio
-    async def test_get_account_summary_real_api(self, client):
-        """Test account summary with real OANDA API."""
-        account_id = os.environ["TEST_OANDA_ACCOUNT"]
-
-        async with client:
-            # This call will be recorded by VCR on first run
-            # Subsequent runs will use the recorded response
-            summary = await client.accounts.get_account_summary(account_id)
-
-            # Verify response structure and types
-            if summary.id != account_id:
-                raise ValueError(f"Expected account id '{account_id}', got '{summary.id}'")
-            if not isinstance(summary.balance, Decimal):
-                raise TypeError(f"Expected balance to be Decimal, got '{type(summary.balance)}'")
-
-            valid_currencies = ["USD", "EUR", "GBP", "JPY", "CHF", "CAD", "AUD", "NZD"]
-            if summary.currency not in valid_currencies:
-                raise ValueError(f"Expected currency to be one of {valid_currencies}, got '{summary.currency}'")
-
-            if summary.margin_available < Decimal("0"):
-                raise ValueError(f"Expected margin_available >= 0, got '{summary.margin_available}'")
-            if summary.margin_used < Decimal("0"):
-                raise ValueError(f"Expected margin_used >= 0, got '{summary.margin_used}'")
-            if summary.open_trade_count < 0:
-                raise ValueError(f"Expected open_trade_count >= 0, got '{summary.open_trade_count}'")
-
-    @pytest.mark.asyncio
-    async def test_account_not_found_real_api(self, client):
-        """Test account not found error with real API."""
-        async with client:
-            with pytest.raises(VeeTwentyError) as exc_info:
-                await client.accounts.get_account_summary("999-999-999")
-
-            if exc_info.value.error_code != "ACCOUNT_NOT_EXIST":
-                raise ValueError(f"Expected error code 'ACCOUNT_NOT_EXIST', got '{exc_info.value.error_code}'")
-            if exc_info.value.response.status_code != 404:
-                raise ValueError(f"Expected status code 404, got '{exc_info.value.response.status_code}'")
-```
-
-### **VCR.py Configuration**
-
-VCR.py records HTTP interactions for reproducible tests:
-
-<!-- fragment: VCR configuration example with test fixtures -->
-```python
-# conftest.py
-
-import pytest
-import vcr
-
-
-@pytest.fixture(scope="function")
-def vcr_config():
-    """Configure VCR for integration tests."""
-    return {
-        "record_mode": "once",  # Record once, then replay
-        "match_on": ["uri", "method"],
-        "filter_headers": ["authorization"],  # Remove sensitive headers
-        "decode_compressed_response": True,
-        "cassette_library_dir": "tests/integration/fixtures/",
-    }
-
-@pytest.fixture
-def vcr_fixture(vcr_config):
-    """VCR fixture for recording/replaying HTTP interactions."""
-    with vcr.VCR(**vcr_config) as cassette:
-        yield cassette
-
-# Usage in test
-@pytest.mark.integration
-@pytest.mark.asyncio
-async def test_with_vcr_recording(client, vcr_fixture):
-    """Test that records HTTP interaction."""
-    with vcr_fixture.use_cassette("accounts/get_summary.yaml"):
-        summary = await client.accounts.get_account_summary("123-456-789")
-        if summary.id != "123-456-789":
-            raise ValueError(f"Expected account id '123-456-789', got '{summary.id}'")
-```
-
-### **Environment Variables for Testing**
+Tests against real OANDA API (practice only):
 
 ```bash
-# Required for integration tests
+# Setup .env
 export TEST_OANDA_TOKEN="your-practice-token"
-export TEST_OANDA_ACCOUNT="your-practice-account-id"
-export TEST_OANDA_ENVIRONMENT="practice"
-
-# VCR.py recording mode
-export VCR_RECORD_MODE="once"  # once, new_episodes, all, none
-
-# Optional: Enable debug logging for tests
-export FIVETWENTY_LOG_LEVEL="DEBUG"
+export TEST_OANDA_ACCOUNT="your-practice-account"
 ```
 
----
-
-## Streaming Tests
-
-### **Streaming Unit Tests**
-
-<!-- fragment: streaming test example with mock data and placeholder credentials -->
 ```python
+import os
 from decimal import Decimal
-
 import pytest
-import asyncio
-from unittest.mock import AsyncMock, patch
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import StreamStall
+from fivetwenty import AsyncClient, Environment
 
-@pytest.mark.streaming
-@pytest.mark.unit
-class TestPricingStreaming:
-    """Unit tests for pricing streams."""
 
-    @pytest.fixture
-    def client(self):
-        return AsyncClient(token="test-token", account_id="your-account-id", environment="practice")
-
-    @pytest.mark.asyncio
-    async def test_stream_pricing_success(self, client):
-        """Test successful price streaming."""
-        # Mock streaming data
-        mock_stream_data = [
-            '{"type":"PRICE","instrument":"EUR_USD","time":"2024-01-15T10:30:00Z","bids":[{"price":"1.0850","liquidity":10000}],"asks":[{"price":"1.0851","liquidity":10000}]}',
-            '{"type":"HEARTBEAT","time":"2024-01-15T10:30:05Z"}',
-            '{"type":"PRICE","instrument":"EUR_USD","time":"2024-01-15T10:30:10Z","bids":[{"price":"1.0852","liquidity":10000}],"asks":[{"price":"1.0853","liquidity":10000}]}'
-        ]
-
-        async def mock_stream():
-            for data in mock_stream_data:
-                yield data
-
-        with patch.object(client.pricing, '_stream_lines', return_value=mock_stream()):
-            prices = []
-            heartbeats = []
-
-            async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
-                if hasattr(item, 'instrument'):  # Price
-                    prices.append(item)
-                else:  # Heartbeat
-                    heartbeats.append(item)
-
-                if len(prices) >= 2:  # Stop after collecting test data
-                    break
-
-            if len(prices) != 2:
-                raise ValueError(f"Expected 2 prices, got {len(prices)}")
-            if len(heartbeats) != 1:
-                raise ValueError(f"Expected 1 heartbeat, got {len(heartbeats)}")
-            if prices[0].instrument != "EUR_USD":
-                raise ValueError(f"Expected instrument 'EUR_USD', got '{prices[0].instrument}'")
-            if prices[0].bids[0].price != Decimal("1.0850"):
-                raise ValueError(f"Expected price '1.0850', got '{prices[0].bids[0].price}'")
-
-    @pytest.mark.asyncio
-    async def test_stream_stall_detection(self, client):
-        """Test stream stall detection."""
-        async def slow_stream():
-            # Simulate stalled stream (no data for extended period)
-            yield '{"type":"PRICE","instrument":"EUR_USD","time":"2024-01-15T10:30:00Z","bids":[{"price":"1.0850","liquidity":10000}],"asks":[{"price":"1.0851","liquidity":10000}]}'
-            await asyncio.sleep(10)  # Simulate stall
-
-        with patch.object(client.pricing, '_stream_lines', return_value=slow_stream()):
-            with patch('fivetwenty.endpoints.pricing.HEARTBEAT_TIMEOUT', 1):  # 1 second timeout
-                with pytest.raises(StreamStall):
-                    async for _ in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
-                        pass
-```
-
-### **Streaming Integration Tests**
-
-<!-- fragment: streaming integration test example with environment variables -->
-```python
-@pytest.mark.streaming
 @pytest.mark.integration
-class TestStreamingIntegration:
-    """Integration tests for streaming functionality."""
+@pytest.mark.asyncio
+async def test_real_api() -> None:
+    client = AsyncClient(
+        token=os.environ["TEST_OANDA_TOKEN"],
+        account_id=os.environ["TEST_OANDA_ACCOUNT"],
+        environment=Environment.PRACTICE
+    )
 
-    @pytest.mark.asyncio
-    async def test_real_pricing_stream(self, client):
-        """Test real pricing stream with timeout."""
-        account_id = os.environ["TEST_OANDA_ACCOUNT"]
-        instruments = ["EUR_USD", "GBP_USD"]
-
-        async with client:
-            stream_count = 0
-            async for item in client.pricing.get_pricing_stream(account_id, instruments):
-                stream_count += 1
-
-                # Verify stream item structure
-                if hasattr(item, 'instrument'):  # Price
-                    if item.instrument not in instruments:
-                        raise ValueError(f"Expected instrument to be one of {instruments}, got '{item.instrument}'")
-                    if len(item.bids) == 0:
-                        raise ValueError("Expected at least one bid")
-                    if len(item.asks) == 0:
-                        raise ValueError("Expected at least one ask")
-                    if item.bids[0].price >= item.asks[0].price:
-                        raise ValueError(f"Expected bid price ({item.bids[0].price}) < ask price ({item.asks[0].price})")
-
-                # Stop after receiving some data
-                if stream_count >= 10:
-                    break
-
-            if stream_count < 10:
-                raise ValueError(f"Expected at least 10 stream items, got {stream_count}")
+    async with client:
+        response = await client.accounts.get_account_summary(
+            os.environ["TEST_OANDA_ACCOUNT"]
+        )
+        assert isinstance(response["account"].balance, Decimal)  # noqa: S101
 ```
+
+**Always use practice accounts**, never live trading accounts.
 
 ---
 
-## Test Fixtures
+## Common Fixtures
 
-### **Common Fixtures**
-
-<!-- fragment: test fixtures with mock credentials and sample data -->
 ```python
 # conftest.py
-import os
-from datetime import datetime
-from decimal import Decimal
-
 import pytest
-
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.models import AccountSummary, Order
 
 
 @pytest.fixture
-def test_client():
-    """Create test client with mock credentials."""
+def test_client() -> AsyncClient:
     return AsyncClient(
-        token="test-token-12345",
+        token="test-token",
+        account_id="123",
         environment=Environment.PRACTICE
     )
-
-@pytest.fixture
-def integration_client():
-    """Create client for integration tests."""
-    if not os.environ.get("TEST_OANDA_TOKEN"):
-        pytest.skip("Integration tests require TEST_OANDA_TOKEN")
-
-    return AsyncClient(
-        token=os.environ["TEST_OANDA_TOKEN"],
-        environment=Environment.PRACTICE
-    )
-
-@pytest.fixture
-def sample_account_summary():
-    """Sample account summary for testing."""
-    return AccountSummary(
-        id="123-456-789",
-        currency="USD",
-        balance=Decimal("10000.0000"),
-        margin_available=Decimal("10000.0000"),
-        margin_used=Decimal("0.0000"),
-        margin_closeout_percent=Decimal("0.00000"),
-        open_trade_count=0,
-        open_position_count=0,
-        pending_order_count=0,
-        hedging_enabled=False,
-        last_transaction_id="1000"
-    )
-
-@pytest.fixture
-def sample_order():
-    """Sample order for testing."""
-    return Order(
-        id="12345",
-        instrument="EUR_USD",
-        units=1000,
-        price=Decimal("1.2345"),
-        time_in_force="GTC",
-        create_time=datetime.now(),
-        state="PENDING",
-        type="LIMIT"
-    )
-
-@pytest.fixture
-def mock_responses():
-    """Common mock HTTP responses."""
-    return {
-        "account_summary": {
-            "account": {
-                "id": "123-456-789",
-                "currency": "USD",
-                "balance": "10000.0000",
-                "marginAvailable": "10000.0000",
-                "marginUsed": "0.0000"
-            }
-        },
-        "orders_list": {
-            "orders": [
-                {
-                    "id": "12345",
-                    "instrument": "EUR_USD",
-                    "units": "1000",
-                    "price": "1.2345",
-                    "timeInForce": "GTC",
-                    "createTime": "2024-01-15T10:30:00.000000Z",
-                    "state": "PENDING",
-                    "type": "LIMIT"
-                }
-            ]
-        }
-    }
 ```
 
 ---
 
-## Performance Testing
+## Best Practices
 
-### **Memory Usage Tests**
+**Unit Tests:**
+- Mock all HTTP calls
+- Test success and error paths
+- Use `Decimal` for financial assertions
 
-<!-- fragment: performance test example with environment variables and memory monitoring -->
-```python
-import pytest
-import asyncio
-import psutil
-import os
-from fivetwenty import AsyncClient
+**Integration Tests:**
+- Practice accounts only
+- Test real error conditions
 
-@pytest.mark.performance
-class TestMemoryUsage:
-    """Performance tests for memory usage."""
+**General:**
+- One focus per test
+- Descriptive test names
+- Keep tests independent
 
-    @pytest.mark.asyncio
-    async def test_streaming_memory_usage(self):
-        """Test that streaming doesn't leak memory."""
-        if not os.environ.get("TEST_OANDA_TOKEN"):
-            pytest.skip("Performance tests require API credentials")
+---
 
-        client = AsyncClient(
-            token=os.environ["TEST_OANDA_TOKEN"],
-            environment=Environment.PRACTICE
-        )
+## Coverage
 
-        process = psutil.Process()
-        initial_memory = process.memory_info().rss
+```bash
+# Generate report
+uv run pytest --cov=fivetwenty --cov-report=html
+open htmlcov/index.html
 
-        async with client:
-            stream_count = 0
-            async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
-                stream_count += 1
-
-                # Check memory every 100 items
-                if stream_count % 100 == 0:
-                    current_memory = process.memory_info().rss
-                    memory_growth = current_memory - initial_memory
-
-                    # Memory growth should be reasonable (< 50MB)
-                    max_memory_mb = 50
-                    max_memory_bytes = max_memory_mb * 1024 * 1024
-                    if memory_growth >= max_memory_bytes:
-                        raise ValueError(f"Memory growth: {memory_growth / 1024 / 1024:.1f}MB exceeds {max_memory_mb}MB limit")
-
-                if stream_count >= 1000:
-                    break
-
-    @pytest.mark.asyncio
-    async def test_concurrent_requests_performance(self):
-        """Test performance with concurrent requests."""
-        if not os.environ.get("TEST_OANDA_TOKEN"):
-            pytest.skip("Performance tests require API credentials")
-
-        client = AsyncClient(
-            token=os.environ["TEST_OANDA_TOKEN"],
-            environment=Environment.PRACTICE
-        )
-
-        async with client:
-            # Test concurrent account summary requests
-            tasks = [
-                client.accounts.get_account_summary(os.environ["TEST_OANDA_ACCOUNT"])
-                for _ in range(10)
-            ]
-
-            start_time = asyncio.get_event_loop().time()
-            results = await asyncio.gather(*tasks)
-            end_time = asyncio.get_event_loop().time()
-
-            # All requests should succeed
-            if len(results) != 10:
-                raise ValueError(f"Expected 10 results, got {len(results)}")
-
-            expected_account_id = os.environ["TEST_OANDA_ACCOUNT"]
-            for i, result in enumerate(results):
-                if result.id != expected_account_id:
-                    raise ValueError(f"Result {i}: expected account id '{expected_account_id}', got '{result.id}'")
-
-            # Should complete reasonably quickly (adjust threshold as needed)
-            elapsed = end_time - start_time
-            max_time = 5.0
-            if elapsed >= max_time:
-                raise ValueError(f"Concurrent requests took {elapsed:.2f}s, exceeding {max_time}s limit")
+# Goals
+# Overall: 80%+
+# Core modules: 90%+
+# Critical paths (orders/trades): 100%
 ```
 
 ---
 
-## Test Configuration
+## Before Committing
 
-### **pytest.ini**
-
-```ini
-[tool.pytest.ini_options]
-minversion = "7.0"
-addopts = "-ra -q --strict-markers --strict-config"
-testpaths = ["tests"]
-asyncio_mode = "auto"
-markers = [
-    "unit: mark test as a unit test",
-    "integration: mark test as an integration test (requires API credentials)",
-    "core: mark test as a core functionality test",
-    "streaming: mark test as a streaming-related test",
-    "trading: mark test as a trading operation test",
-    "edge_cases: mark test as an edge case test",
-    "slow: mark test as slow running",
-    "compliance: mark test as a compliance test",
-    "performance: mark test as a performance test"
-]
+```bash
+uv run poe test              # All tests pass
+uv run poe check             # Quality checks pass
 ```
-
-### **Coverage Configuration**
-
-```toml
-# pyproject.toml
-[tool.coverage.run]
-source = ["fivetwenty"]
-omit = [
-    "*/tests/*",
-    "*/examples/*",
-    "*/__pycache__/*"
-]
-
-[tool.coverage.report]
-exclude_lines = [
-    "pragma: no cover",
-    "def __repr__",
-    "raise AssertionError",
-    "raise NotImplementedError",
-    "if __name__ == .__main__.:"
-]
-```
-
----
-
-## Continuous Integration
-
-### **GitHub Actions Test Workflow**
-
-```yaml
-# .github/workflows/test.yml
-name: Test Suite
-
-on:
-  push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main]
-
-jobs:
-  test:
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: [3.10, 3.11, 3.12]
-
-    steps:
-    - uses: actions/checkout@v4
-
-    - name: Install uv
-      uses: astral-sh/setup-uv@v1
-      with:
-        version: "latest"
-
-    - name: Set up Python ${{ matrix.python-version }}
-      run: uv python install ${{ matrix.python-version }}
-
-    - name: Install dependencies
-      run: uv sync --dev
-
-    - name: Run unit tests
-      run: uv run pytest tests/unit/ -v
-
-    - name: Run integration tests
-      run: uv run pytest tests/integration/ -v
-      env:
-        TEST_OANDA_TOKEN: ${{ secrets.TEST_OANDA_TOKEN }}
-        TEST_OANDA_ACCOUNT: ${{ secrets.TEST_OANDA_ACCOUNT }}
-        VCR_RECORD_MODE: "none"  # Only use recorded cassettes in CI
-
-    - name: Generate coverage report
-      run: uv run pytest --cov=fivetwenty --cov-report=xml
-
-    - name: Upload coverage to Codecov
-      uses: codecov/codecov-action@v3
-```
-
----
-
-This comprehensive testing guide ensures that FiveTwenty maintains high quality, reliability, and security standards through thorough automated testing.

@@ -6,27 +6,31 @@ Instrument information and historical data.
 
 ---
 
-## candles
+## get_instrument_candles
+
+Get historical candle data for an instrument.
+
+**OANDA Endpoint**: `GET /v3/instruments/{instrument}/candles`
+
+<!-- code-block: instruments__get_instrument_candles -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.instruments import CandlesResponse
+from fivetwenty.models import CandlestickGranularity
+
+load_dotenv()
 
 
 async def main() -> None:
-    # instruments.get_instrument_candles(instrument: str, price: str = "M", granularity: str = "S5",
-    #                    count: int | None = None, from_time: str | None = None,
-    #                    to_time: str | None = None, smooth: bool = False,
-    #                    include_first: bool = True, daily_alignment: int = 17,
-    #                    alignment_timezone: str = "America/New_York",
-    #                    weekly_alignment: str = "Friday") -> CandlesResponse
-    # Returns: {"instrument": str, "granularity": str, "candles": list[...]}
-
-    async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
-        # Example usage:
+    async with AsyncClient() as client:
+        # Get historical hourly candle data for EUR_USD
         result: CandlesResponse = await client.instruments.get_instrument_candles(
             instrument="EUR_USD",
-            granularity="H1",
+            granularity=CandlestickGranularity.H1,
             count=100,
         )
         candles = result["candles"]
@@ -36,30 +40,40 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/instruments/{instrument}/candles`
 
-**OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
+🔗 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
 
-Get historical candle data for an instrument.
+🔗 **Source**: [instruments.get_instrument_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/instruments.py)
 
 **Parameters:**
 
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
-| `instrument` | str | ✅ | Instrument to get candles for |
-| `price` | str | ➖ | Price type ("M", "B", "A", "BA", "MB", "AM") (default: "M") |
-| `granularity` | str | ➖ | Granularity of candles (default: "S5") |
-| `count` | int | ➖ | Number of candles to return |
-| `from_time` | str | ➖ | Start time for candle range |
-| `to_time` | str | ➖ | End time for candle range |
-| `smooth` | bool | ➖ | Smooth candles (default: False) |
-| `include_first` | bool | ➖ | Include first candle (default: True) |
-| `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) |
-| `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") |
-| `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") |
+| `instrument` | InstrumentName \| str | ✅ | Instrument to get candles for |
+| `price` | str | ➖ | Price type ("M", "B", "A", "BA", "BM", "AM", "BAM") (default: "M") (keyword-only) |
+| `granularity` | CandlestickGranularity | ✅ | Granularity enum (e.g., CandlestickGranularity.H1) (keyword-only) |
+| `count` | int \| None | ➖ | Number of candles to return (max 5000, conflicts with time range) (keyword-only) |
+| `from_time` | datetime \| None | ➖ | Start time for candle range (keyword-only) |
+| `to_time` | datetime \| None | ➖ | End time for candle range (keyword-only) |
+| `smooth` | bool | ➖ | Smooth candles (default: False) (keyword-only) |
+| `include_first` | bool | ➖ | Include first candle (default: True) (keyword-only) |
+| `daily_alignment` | int | ➖ | Daily alignment hour (0-23, default: 17) (keyword-only) |
+| `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") (keyword-only) |
+| `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") (keyword-only) |
 
-**Returns:** Dictionary containing instrument name, granularity, and candle data
+**Returns:** `CandlesResponse` TypedDict containing:
+
+- `instrument`: InstrumentName enum
+- `granularity`: CandlestickGranularity enum
+- `candles`: list of Candlestick models
 
 **Raises:**
 
-- `FiveTwentyError` - API errors
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Instrument not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid parameters (check `e.is_validation_error`)
+
+- `ValueError` - If both count and time range are specified, or count exceeds 5000

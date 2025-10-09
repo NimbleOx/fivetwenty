@@ -17,6 +17,7 @@ from typing import TYPE_CHECKING, Any, TypedDict
 from .._internal.utils import quantize_price
 from ..models import (
     AccountID,
+    ClientExtensions,
     FixedPriceOrder,
     GuaranteedStopLossOrder,
     GuaranteedStopLossOrderRejectTransaction,
@@ -64,6 +65,9 @@ if TYPE_CHECKING:
 
 # Union type for all possible order types returned by the API
 Order = MarketOrder | LimitOrder | StopOrder | MarketIfTouchedOrder | TakeProfitOrder | StopLossOrder | GuaranteedStopLossOrder | TrailingStopLossOrder | FixedPriceOrder
+
+# Union type for order request objects (for order creation)
+OrderRequest = MarketOrderRequest | LimitOrderRequest | StopOrderRequest | TakeProfitOrderRequest | StopLossOrderRequest | MarketIfTouchedOrderRequest | TrailingStopLossOrderRequest | GuaranteedStopLossOrderRequest
 
 # Union type for order creation transactions
 OrderCreateTransaction = MarketOrderTransaction | LimitOrderTransaction | StopOrderTransaction | MarketIfTouchedOrderTransaction | TakeProfitOrderTransaction | StopLossOrderTransaction | TrailingStopLossOrderTransaction | GuaranteedStopLossOrderTransaction
@@ -134,7 +138,7 @@ class OrderEndpoints:
     async def post_order(
         self,
         account_id: AccountID,
-        order_request: (MarketOrderRequest | LimitOrderRequest | StopOrderRequest | TakeProfitOrderRequest | StopLossOrderRequest | MarketIfTouchedOrderRequest | TrailingStopLossOrderRequest | GuaranteedStopLossOrderRequest),
+        order_request: OrderRequest,
         *,
         timeout: float | None = None,
         client_request_id: str | None = None,
@@ -635,7 +639,7 @@ class OrderEndpoints:
         self,
         account_id: AccountID,
         order_specifier: str,
-        order_request: dict[str, Any],
+        order_request: OrderRequest,
         *,
         client_request_id: str | None = None,
     ) -> ReplaceOrderResponse:
@@ -649,7 +653,7 @@ class OrderEndpoints:
         Args:
             account_id: Account identifier
             order_specifier: Order ID or @clientID to replace
-            order_request: New order specification (OrderRequest object as dict)
+            order_request: New order specification (any OrderRequest type)
             client_request_id: Optional client-provided request ID for debugging and
                 correlation purposes. See post_order() for detailed explanation.
 
@@ -663,10 +667,13 @@ class OrderEndpoints:
         if client_request_id:
             headers["ClientRequestID"] = client_request_id
 
+        # Convert Pydantic model to dict with proper formatting
+        order_data = order_request.model_dump(by_alias=True, exclude_none=True, mode="json")
+
         response = await self._client._request(
             "PUT",
             f"/accounts/{account_id}/orders/{order_specifier}",
-            json_data={"order": order_request},
+            json_data={"order": order_data},
             headers=headers,
         )
 
@@ -691,8 +698,8 @@ class OrderEndpoints:
         account_id: AccountID,
         order_specifier: str,
         *,
-        client_extensions: dict[str, Any] | None = None,
-        trade_client_extensions: dict[str, Any] | None = None,
+        client_extensions: ClientExtensions | None = None,
+        trade_client_extensions: ClientExtensions | None = None,
     ) -> OrderClientExtensionsResponse:
         """
         Update the client extensions for an order.
@@ -718,9 +725,9 @@ class OrderEndpoints:
 
         body: dict[str, Any] = {}
         if client_extensions is not None:
-            body["clientExtensions"] = client_extensions
+            body["clientExtensions"] = client_extensions.model_dump(by_alias=True, exclude_none=True, mode="json")
         if trade_client_extensions is not None:
-            body["tradeClientExtensions"] = trade_client_extensions
+            body["tradeClientExtensions"] = trade_client_extensions.model_dump(by_alias=True, exclude_none=True, mode="json")
 
         response = await self._client._request(
             "PUT",

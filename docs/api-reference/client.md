@@ -1,12 +1,5 @@
 # Client API Reference
 
-!!! note "📚 Reference - Information-oriented content"
-    **Use this reference when:** You need to look up specific method signatures, parameters, or return values
-
-    **Content type:** Comprehensive technical specifications for quick lookup
-
-    **Assumed knowledge:** Familiarity with FiveTwenty concepts and Python async programming
-
 Complete reference for FiveTwenty client interfaces and configuration.
 
 ---
@@ -38,46 +31,53 @@ Complete reference for FiveTwenty client interfaces and configuration.
 Primary async client for OANDA API operations. Recommended for production use.
 
 **Constructor:**
-<!-- fragment: Demo AsyncClient constructor with union type and attribute access issues -->
 ```python
 from logging import Logger
-from typing import Optional
 
 import httpx
 
-from fivetwenty import AsyncClient, Environment
-from fivetwenty.models import AccountConfig
+from fivetwenty import AsyncClient, AccountConfig, Environment
 
 # Constructor signature:
-
-client = AsyncClient(
-    token=str | None,
-    account_id=str | None,
-    environment=Environment.PRACTICE,
-    config=AccountConfig | None,
-    timeout=30.0,
-    max_retries=3,
-    transport=httpx.AsyncClient | None,
-    user_agent=str | None,
-    proxies=str | None,
-    verify=True,
-    cert=str | None,
-    logger=Optional[Logger] | None,
-)
+def AsyncClient(
+    token: str | None = None,
+    *,
+    account_id: str | None = None,
+    environment: Environment = Environment.PRACTICE,
+    config: AccountConfig | None = None,
+    timeout: float = 30.0,
+    max_retries: int = 3,
+    transport: httpx.AsyncClient | None = None,
+    user_agent: str | None = None,
+    proxies: str | None = None,
+    verify: bool | str = True,
+    cert: str | None = None,
+    logger: Logger | None = None,
+) -> AsyncClient:
+    ...
 ```
 
 **Configuration Parameters (choose one approach):**
 
-1. **Configuration Object** (recommended for applications):
-   - `config` (AccountConfig) - Pre-configured account settings
+### Configuration Object
 
-2. **Direct Parameters** (basic scripts):
-   - `token` (str) - OANDA API token
-   - `account_id` (str, optional) - OANDA account ID for convenience
-   - `environment` (Environment) - `Environment.PRACTICE` or `Environment.LIVE`
+Recommended for applications.
 
-3. **Environment Variables** (deployment):
-   - No parameters needed - loads from `FIVETWENTY_*` environment variables
+- `config` (AccountConfig) - Pre-configured account settings
+
+### Direct Parameters
+
+For basic scripts.
+
+- `token` (str) - OANDA API token
+- `account_id` (str) - OANDA account ID (required when token is provided)
+- `environment` (Environment) - `Environment.PRACTICE` or `Environment.LIVE`
+
+### Environment Variables
+
+For deployment.
+
+- No parameters needed - loads from `FIVETWENTY_*` environment variables
 
 **HTTP Configuration:**
 
@@ -92,6 +92,7 @@ client = AsyncClient(
 
 **Usage Examples:**
 
+<!-- code-block: async_client_usage_examples -->
 ```python
 from fivetwenty import AsyncClient, Environment
 
@@ -103,16 +104,19 @@ async with AsyncClient() as client:
 # Direct parameters (basic scripts)
 async with AsyncClient(
     token="your-token",
+    account_id="your-account-id",
     environment=Environment.PRACTICE
 ) as client:
     accounts = await client.accounts.get_accounts()
 
 # Configuration object (structured applications)
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig
 
 config = AccountConfig(
-    token="your-token",
-    account_id="your-account-id",
+    token=SecretStr("your-token"),
+    account_id=SecretStr("your-account-id"),
     environment=Environment.PRACTICE,
     alias="production_trading"
 )
@@ -131,8 +135,8 @@ When multiple configuration sources are provided:
 
 **Properties:**
 
-- `account_id` (str | None) - Configured account ID
-- `config` (AccountConfig | None) - Account configuration object
+- `account_id` (str) - Configured account ID
+- `config` (AccountConfig) - Account configuration object
 - `accounts` - [AccountEndpoints](endpoints/accounts.md)
 - `orders` - [OrderEndpoints](endpoints/orders.md)
 - `trades` - [TradeEndpoints](endpoints/trades.md)
@@ -145,17 +149,23 @@ When multiple configuration sources are provided:
 Synchronous wrapper around AsyncClient. Use for scripts and basic applications.
 
 **Constructor:**
-<!-- fragment: Demo Client constructor with undefined names -->
 ```python
-Client(**kwargs)
+from typing import Any
+
+from fivetwenty import Client
+
+# Constructor signature:
+def Client(**kwargs: Any) -> Client:
+    ...
 ```
 
 **Parameters:**
 
-- Accepts all the same parameters as async client
+Accepts the same parameters as [AsyncClient](#asyncclient). See AsyncClient documentation for complete parameter list.
 
 **Usage Examples:**
 
+<!-- code-block: client_usage_examples -->
 ```python
 # Environment variables
 from fivetwenty import Client
@@ -168,14 +178,22 @@ from fivetwenty import Client, Environment
 
 with Client(
     token="your-token",
+    account_id="your-account-id",
     environment=Environment.PRACTICE
 ) as client:
     accounts = client.accounts.get_accounts()
 
 # Configuration object
-from fivetwenty.models import AccountConfig
+from pydantic import SecretStr
 
-config = AccountConfig(...)
+from fivetwenty import AccountConfig
+
+config = AccountConfig(
+    token=SecretStr("your-token"),
+    account_id=SecretStr("your-account-id"),
+    environment=Environment.PRACTICE,
+    alias="my_account"
+)
 with Client(config=config) as client:
     print(f"Using: {client.config.summary()}")
     accounts = client.accounts.get_accounts()
@@ -183,9 +201,9 @@ with Client(config=config) as client:
 
 **Properties:**
 
-- `account_id` (str | None) - Configured account ID
-- `config` (AccountConfig | None) - Account configuration object
-- Same endpoint structure as async client, but with synchronous methods
+- `account_id` (str) - Configured account ID
+- `config` (AccountConfig) - Account configuration object
+- Same endpoint structure as AsyncClient, but with synchronous methods
 
 ---
 
@@ -205,106 +223,13 @@ Each endpoint page contains complete method signatures, parameters, return types
 
 ---
 
-## Configuration Management
+## Configuration
 
-### AccountConfig Class
-
-Structured configuration for account credentials and settings.
-
-**Constructor:**
-```python
-from fivetwenty import AccountConfig, Environment
-
-config = AccountConfig(
-    token="your_token",
-    account_id="your_account_id",
-    environment=Environment.PRACTICE,
-    alias="my_config",
-)
-```
-
-**Parameters:**
-
-- `token` - OANDA API token (automatically protected)
-- `account_id` - OANDA account ID (automatically protected)
-- `environment` - Environment.PRACTICE or Environment.LIVE
-- `alias` - User-friendly identifier (valid Python identifier)
-- `description` - Optional human-readable description
-
-**Security Features:**
-
-- Automatically masks `token` and `account_id` in string representations
-- Validates alias format (must be valid identifier)
-- Prevents logging of sensitive credentials
-
-**Methods:**
-
-- `summary()` → str - Safe summary for logs ("alias (environment)")
-
-**Example:**
-```python
-from fivetwenty import AccountConfig, Environment
-
-config = AccountConfig(
-    token="your-api-token",
-    account_id="your-account-id",
-    environment=Environment.PRACTICE,
-    alias="demo_trading",
-)
-
-print(config.summary())  # "demo_trading (practice)"
-print(repr(config))      # Secrets are masked as '***'
-```
-
-### Environment Variable Loading
-
-**Standard Variables:**
-
-- `FIVETWENTY_OANDA_TOKEN` - API token
-- `FIVETWENTY_OANDA_ACCOUNT` - Account ID
-- `FIVETWENTY_OANDA_ENVIRONMENT` - "practice" or "live"
-- `FIVETWENTY_OANDA_ACCOUNT_ALIAS` - Account alias
-
-**Custom Prefixes:**
-```python
-from fivetwenty import AccountConfigLoader
-
-# Load with custom prefix
-config = AccountConfigLoader.from_env_prefix("TRADING_")
-# Loads from TRADING_OANDA_TOKEN, TRADING_OANDA_ACCOUNT, etc.
-```
+For detailed configuration documentation including `AccountConfig`, `AccountConfigLoader`, security best practices, and advanced patterns, see **[Configuration API Reference](configuration.md)**.
 
 ## Error Handling
 
-### Configuration Errors
-
-**ValueError**: Raised when no valid configuration is provided:
-<!-- fragment: Demo ValueError handling with unused variable patterns -->
-```python
-from fivetwenty import AsyncClient
-
-try:
-    client = AsyncClient()  # No config provided
-except ValueError as e:
-    print("Set FIVETWENTY_OANDA_TOKEN environment variable or pass token parameter")
-```
-
-**ValidationError**: Raised for invalid configuration values:
-<!-- fragment: Demo ValidationError handling with SecretStr argument type issues -->
-```python
-from pydantic import ValidationError
-from fivetwenty import AccountConfig, Environment
-
-try:
-    config = AccountConfig(
-        token="",  # Empty token
-        account_id="account",
-        environment=Environment.PRACTICE,
-        alias="123invalid",  # Invalid alias
-    )
-except ValidationError as e:
-    print(f"Configuration error: {e}")
-```
+For configuration errors (`ValueError`, `ValidationError`), see **[Configuration API Reference](configuration.md#error-reference)**.
 
 ### API Errors
 
@@ -316,22 +241,26 @@ All endpoint methods raise `FiveTwentyError` for API errors. The exception conta
 - `details` (dict) - Additional error information
 
 **Example:**
-<!-- fragment: Demo FiveTwentyError handling with unused variables and return type issues -->
+<!-- code-block: fivetwenty_error_handling -->
 ```python
 import asyncio
 
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty import AsyncClient, FiveTwentyError
 
-async def main():
+
+async def main() -> None:
     async with AsyncClient() as client:
         try:
             trade = await client.trades.get_trade(client.account_id, "invalid_id")
+            print(f"Trade: {trade}")
         except FiveTwentyError as e:
-            print(f"Error {e.status_code}: {e.message}")
-            if e.error_code == "TRADE_NOT_FOUND":
-                # Handle specific error
-                pass
+            print(f"Error {e.status}: {e.message}")
+            if e.code:
+                print(f"Error code: {e.code}")
+            # Handle specific errors
+            if e.status == 404:
+                print("Trade not found")
+
 
 asyncio.run(main())
 ```
@@ -371,58 +300,17 @@ OANDA API enforces rate limits:
 - Requires live trading account
 - Subject to margin requirements
 
-**Security Best Practices:**
+For security best practices, multi-account configuration, and environment variable setup, see **[Configuration API Reference](configuration.md)**.
 
-1. **Credential Protection:**
-   - Never commit tokens to version control
-   - Use environment variables or secure vaults for credentials
-   - Rotate tokens regularly
-   - Use separate tokens for practice and live environments
+---
 
-2. **Configuration Validation:**
-   - Always validate configuration before deployment
-   - Use structured `AccountConfig` objects in applications
-   - Test authentication before starting trading operations
+## Next Steps
 
-3. **Environment Separation:**
-   - Keep practice and live configurations fully separate
-   - Use different aliases to explicitly identify environments
-   - Never use live tokens in development or testing
+Now that you understand client configuration, explore the API endpoints:
 
-**Configuration Examples:**
-
-```bash
-# Production deployment with environment variables
-export FIVETWENTY_OANDA_TOKEN="live-token"
-export FIVETWENTY_OANDA_ACCOUNT="live-account"
-export FIVETWENTY_OANDA_ENVIRONMENT="live"
-export FIVETWENTY_OANDA_ACCOUNT_ALIAS="production_trading"
-
-# Development with separate practice credentials
-export FIVETWENTY_OANDA_TOKEN="practice-token"
-export FIVETWENTY_OANDA_ACCOUNT="practice-account"
-export FIVETWENTY_OANDA_ENVIRONMENT="practice"
-export FIVETWENTY_OANDA_ACCOUNT_ALIAS="development"
-```
-
-**Multi-Account Configuration:**
-
-```bash
-# Multiple strategies with prefixes
-export STRATEGY_A_OANDA_TOKEN="token-a"
-export STRATEGY_A_OANDA_ACCOUNT="account-a"
-export STRATEGY_A_OANDA_ENVIRONMENT="practice"
-export STRATEGY_A_OANDA_ACCOUNT_ALIAS="momentum_strategy"
-
-export STRATEGY_B_OANDA_TOKEN="token-b"
-export STRATEGY_B_OANDA_ACCOUNT="account-b"
-export STRATEGY_B_OANDA_ENVIRONMENT="practice"
-export STRATEGY_B_OANDA_ACCOUNT_ALIAS="grid_strategy"
-```
-
-<!-- fragment: Demo AccountConfigLoader usage with undefined name patterns -->
-```python
-# Load configurations
-momentum_config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")
-grid_config = AccountConfigLoader.from_env_prefix("STRATEGY_B_")
-```
+- **[Accounts](endpoints/accounts.md)** - Get account details and configuration
+- **[Pricing](endpoints/pricing.md)** - Stream real-time prices and get historical candles
+- **[Orders](endpoints/orders.md)** - Place and manage trading orders
+- **[Trades](endpoints/trades.md)** - Monitor and close open trades
+- **[Positions](endpoints/positions.md)** - Track instrument positions
+- **[Transactions](endpoints/transactions.md)** - View transaction history

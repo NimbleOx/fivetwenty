@@ -15,13 +15,9 @@ Complete reference for FiveTwenty exception types and error handling patterns.
 
 ```text
 Exception
-└── FiveTwentyError
-    ├── StreamStall
-    ├── AuthenticationError
-    ├── ValidationError
-    └── RateLimitError
+├── FiveTwentyError
+└── StreamStall
 ```
-
 
 ---
 
@@ -29,62 +25,111 @@ Exception
 
 ### `FiveTwentyError`
 
-Base exception for all OANDA API errors.
+Enhanced exception for all OANDA API errors with comprehensive error information.
+
+**Constructor Parameters:**
+
+- `status` *(int)* - HTTP status code
+- `code` *(str | None)* - OANDA API error code
+- `message` *(str)* - Human-readable error description
+- `request_id` *(str | None)* - Request ID from response headers
+- `retryable` *(bool)* - Whether the error is retryable (default: False)
+- `response` *(httpx.Response | None)* - Original HTTP response
+- `details` *(ErrorDetails | None)* - Structured error details with validation errors
 
 **Properties:**
 
+- `status` *(int)* - HTTP status code
+- `code` *(str | None)* - OANDA API error code
 - `message` *(str)* - Human-readable error description
-- `error_code` *(Optional[str])* - OANDA API error code
-- `error_details` *(Dict[str, Any])* - Additional error information
-- `response` *(Optional[httpx.Response])* - Original HTTP response
+- `request_id` *(str | None)* - Request ID for debugging
+- `retryable` *(bool)* - Whether this error can be retried
+- `response` *(httpx.Response | None)* - Original HTTP response
+- `details` *(ErrorDetails | None)* - Structured error details
+
+**Computed Properties:**
+
+- `error_category` *(ErrorCategory | None)* - Error category (AUTHENTICATION, VALIDATION, etc.)
+- `error_severity` *(ErrorSeverity)* - Error severity (INFO, WARNING, ERROR, CRITICAL)
+- `is_client_error` *(bool)* - True if 4xx status code
+- `is_server_error` *(bool)* - True if 5xx status code
+- `is_authentication_error` *(bool)* - True if authentication/authorization error
+- `is_validation_error` *(bool)* - True if validation error
+- `is_rate_limited` *(bool)* - True if rate limiting error
+- `is_not_found` *(bool)* - True if 404 or not found error
+- `retry_after` *(int | None)* - Seconds to wait before retrying (from Retry-After header)
+
+**Methods:**
+
+- `get_validation_errors() -> dict[str, list[str]]` - Get validation errors grouped by field
+- `get_remediation_message() -> str | None` - Get suggested fix for common errors
 
 **Example:**
-<!-- fragment: Demo FiveTwentyError usage with attribute access and return type issues -->
 ```python
 import asyncio
 
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty import AsyncClient, FiveTwentyError
+from fivetwenty.models import InstrumentName
 
 
-async def main():
+async def main() -> None:
     async with AsyncClient() as client:
         try:
             await client.orders.post_market_order(
-                account_id="invalid-account",
-                instrument="EUR_USD",
+                account_id=client.account_id,
+                instrument=InstrumentName.EUR_USD,
                 units=10000,
             )
         except FiveTwentyError as e:
-            print(f"Error: {e.message}")
-            print(f"Code: {e.error_code}")
-            print(f"Details: {e.error_details}")
+            print(f"Status: {e.status}")
+            print(f"Code: {e.code}")
+            print(f"Message: {e.message}")
+            print(f"Request ID: {e.request_id}")
+
+            # Check error type
+            if e.is_authentication_error:
+                print("Authentication issue")
+            elif e.is_validation_error:
+                print("Validation errors:", e.get_validation_errors())
+            elif e.is_rate_limited:
+                print(f"Rate limited - retry after {e.retry_after}s")
+
+            # Get remediation advice
+            if remediation := e.get_remediation_message():
+                print(f"Fix: {remediation}")
+
 
 asyncio.run(main())
 ```
 
 ### `StreamStall`
 
-Raised when a streaming connection stalls or times out.
+Exception raised when a stream stalls (no data received within timeout period).
+
+**Inheritance:** Inherits from `Exception` (not `FiveTwentyError`)
 
 **Example:**
-<!-- fragment: Demo StreamStall handling with loop control variables and async patterns -->
 ```python
 import asyncio
 
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import StreamStall
+from fivetwenty import AsyncClient, StreamStall
 
 
-async def main():
+async def main() -> None:
     async with AsyncClient() as client:
         try:
-            async for item in client.pricing.get_pricing_stream("123-456-789", ["EUR_USD"]):
-                pass
+            async for price in client.pricing.get_pricing_stream(
+                account_id=client.account_id,
+                instruments=["EUR_USD"],
+                stall_timeout=30.0,
+            ):
+                print(f"Price: {price}")
         except StreamStall as e:
-            print(f"Stream stalled: {e.message}")
-            # Implement reconnection logic
+            print(f"Stream stalled: {e}")
+            # Implement reconnection logic here
+            print("Reconnecting in 5 seconds...")
             await asyncio.sleep(5)
+
 
 asyncio.run(main())
 ```
@@ -121,50 +166,65 @@ asyncio.run(main())
 ## Error Handling Patterns
 
 ### Basic Error Handling
-<!-- fragment: Demo basic error handling with undefined names and try-except patterns -->
 ```python
-from fivetwenty.exceptions import AuthenticationError, FiveTwentyError
+from typing import Any
+
+from fivetwenty import AsyncClient, FiveTwentyError
 
 
-async def safe_api_call():
+async def safe_api_call(client: AsyncClient, account_id: str) -> Any:
+    """Safely call API with error handling."""
     try:
-        result = await client.accounts.get_account_summary("123-456-789")
-        return result
-
-    except AuthenticationError as e:
-        print(f"Authentication failed: {e.message}")
-        return None
-
+        return await client.accounts.get_account_summary(account_id)
     except FiveTwentyError as e:
-        print(f"OANDA API error: {e.error_code} - {e.message}")
+        # Check specific error types using properties
+        if e.is_authentication_error:
+            print(f"Authentication failed: {e.message}")
+            return None
+        if e.is_not_found:
+            print(f"Account not found: {account_id}")
+            return None
+        print(f"OANDA API error: {e.code} - {e.message}")
         return None
 ```
 
 ### Retry with Exponential Backoff
-<!-- fragment: Demo retry logic with performance issues and security patterns -->
 ```python
 import asyncio
-import random
+from collections.abc import Awaitable, Callable
+from secrets import SystemRandom
+from typing import TypeVar
 
-from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty import FiveTwentyError
+
+T = TypeVar("T")
+_random = SystemRandom()
 
 
-async def retry_api_call(func, max_retries: int = 3):
+async def retry_api_call(
+    func: Callable[[], Awaitable[T]], max_retries: int = 3
+) -> T | None:
     """Retry API call with exponential backoff."""
 
     for attempt in range(max_retries + 1):
         try:
             return await func()
+        except FiveTwentyError as e:  # noqa: PERF203
+            # Don't retry non-retryable errors
+            if not e.retryable:
+                raise
 
-        except FiveTwentyError as e:
-            # Don't retry certain errors
-            if e.error_code in ["ACCOUNT_NOT_EXIST", "INVALID_API_TOKEN"]:
+            # Don't retry client errors (4xx)
+            if e.is_client_error and not e.is_rate_limited:
                 raise
 
             if attempt == max_retries:
                 raise
 
-            delay = 2 ** attempt + random.uniform(0, 1)
+            # Use retry_after for rate limiting, otherwise exponential backoff
+            delay = float(e.retry_after) if e.retry_after else 2**attempt + _random.uniform(0, 1)
+
+            print(f"Retry attempt {attempt + 1}/{max_retries} after {delay:.1f}s")
             await asyncio.sleep(delay)
 
     return None

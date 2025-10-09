@@ -193,8 +193,8 @@ Use the validation CLI to test specific files:
 # Test a specific file
 uv run python -m docs_validation.src.cli validate --files "path/to/your/file.md"
 
-# Use fast validation for quicker testing
-uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-fast.yml --files "path/to/your/file.md"
+# Validate specific file
+uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml --files "path/to/your/file.md"
 ```
 
 ## Migration from Inline Comments

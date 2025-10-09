@@ -124,8 +124,8 @@ class PositionEndpoints:
         *,
         long_units: str | Decimal | None = None,
         short_units: str | Decimal | None = None,
-        long_client_extensions: ClientExtensions | dict[str, str] | None = None,
-        short_client_extensions: ClientExtensions | dict[str, str] | None = None,
+        long_client_extensions: ClientExtensions | None = None,
+        short_client_extensions: ClientExtensions | None = None,
     ) -> ClosePositionResponse:
         """
         Close the open position for a specific instrument.
@@ -188,15 +188,9 @@ class PositionEndpoints:
 
         # Add client extensions to request body
         if long_client_extensions is not None:
-            if isinstance(long_client_extensions, ClientExtensions):
-                body["longClientExtensions"] = long_client_extensions.model_dump(by_alias=True, exclude_none=True)
-            else:
-                body["longClientExtensions"] = long_client_extensions
+            body["longClientExtensions"] = long_client_extensions.model_dump(by_alias=True, exclude_none=True, mode="json")
         if short_client_extensions is not None:
-            if isinstance(short_client_extensions, ClientExtensions):
-                body["shortClientExtensions"] = short_client_extensions.model_dump(by_alias=True, exclude_none=True)
-            else:
-                body["shortClientExtensions"] = short_client_extensions
+            body["shortClientExtensions"] = short_client_extensions.model_dump(by_alias=True, exclude_none=True, mode="json")
 
         instrument_str = instrument.value if hasattr(instrument, "value") else str(instrument)
         response = await self._client._request(

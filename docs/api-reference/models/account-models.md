@@ -9,13 +9,15 @@ Models for managing account information, balance tracking, margin calculations, 
 ### Account
 Complete account information including balance, margin, and trading statistics.
 
-🔗 **OANDA Definition**: [Account](https://developer.oanda.com/rest-live-v20/account-df/#collapse_definition_2)
+🔗 **OANDA Definition**: [Account](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [Account](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [AccountID](system-models.md#type-aliases) | ✅ | Account's identifier using format "{siteID}-{divisionID}-{userID}-{accountNumber}" |
 | `alias` | str | ➖ | Client-assigned alias for the account (optional) |
-| `currency` | [Currency](system-models.md#currency) | ✅ | Home currency of the account |
+| `currency` | [Currency](enum-models.md#currency) | ✅ | Home currency of the account |
 | `balance` | [AccountUnits](system-models.md#type-aliases) | ✅ | Current account balance in account currency |
 | `created_by_user_id` | int | ✅ | User ID that created the account |
 | `created_time` | [DateTime](system-models.md#type-aliases) |✅ | Account creation timestamp |
@@ -58,11 +60,15 @@ Complete account information including balance, margin, and trading statistics.
 ### AccountSummary
 Condensed account information for quick overview.
 
+🔗 **OANDA Definition**: [AccountSummary](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [AccountSummary](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [AccountID](system-models.md#type-aliases) |✅ | Account's identifier |
 | `alias` | str | ➖ | Client-assigned alias for the account (optional) |
-| `currency` | [Currency](system-models.md#currency) | ✅ | Home currency of the account |
+| `currency` | [Currency](enum-models.md#currency) | ✅ | Home currency of the account |
 | `created_by_user_id` | int | ✅ | User ID that created the account |
 | `created_time` | [DateTime](system-models.md#type-aliases) |✅ | Account creation timestamp |
 | `guaranteed_stop_loss_order_parameters` | [GuaranteedStopLossOrderParameters](#guaranteedstoplossorderparameters) | ➖ | GSL order parameters (optional) |
@@ -101,6 +107,10 @@ Condensed account information for quick overview.
 ### AccountProperties
 Basic account identification information.
 
+🔗 **OANDA Definition**: [AccountProperties](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [AccountProperties](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [AccountID](system-models.md#type-aliases) |✅ | Account's identifier |
@@ -110,7 +120,9 @@ Basic account identification information.
 ### AccountChanges
 Used to represent changes to an Account's Orders, Trades and Positions since a specified Account TransactionID.
 
-🔗 **OANDA Definition**: [AccountChanges](https://developer.oanda.com/rest-live-v20/account-df/#AccountChanges)
+🔗 **OANDA Definition**: [AccountChanges](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [AccountChanges](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -122,35 +134,37 @@ Used to represent changes to an Account's Orders, Trades and Positions since a s
 | `trades_reduced` | list[[TradeSummary](trading-models.md#tradesummary)] | ✅ | Trades reduced |
 | `trades_closed` | list[[TradeSummary](trading-models.md#tradesummary)] | ✅ | Trades closed |
 | `positions` | list[[Position](trading-models.md#position)] | ✅ | Positions changed |
-| `transactions` | list[[Transaction](transaction-models.md#transaction)] | ✅ | Transactions generated |
+| `transactions` | list[dict[str, Any]] | ✅ | Transactions generated (transaction data as dictionaries) |
 
 ### AccountChangesState
 Represents an Account's current price-dependent state. Fields are omitted if their value hasn't changed since the specified transaction ID.
 
-🔗 **OANDA Definition**: [AccountChangesState](https://developer.oanda.com/rest-live-v20/account-df/#AccountChangesState)
+🔗 **OANDA Definition**: [AccountChangesState](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [AccountChangesState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `unrealized_pl` | Decimal | ➖ | Total unrealized profit/loss from all open trades |
-| `nav` | Decimal | ➖ | Net Asset Value (balance + unrealized P&L) |
-| `margin_used` | Decimal | ➖ | Currently used margin in account currency |
-| `margin_available` | Decimal | ➖ | Available margin for opening new positions |
-| `position_value` | Decimal | ➖ | Total value of all open positions in home currency |
-| `margin_closeout_unrealized_pl` | Decimal | ➖ | Margin closeout unrealized P&L |
-| `margin_closeout_nav` | Decimal | ➖ | Margin closeout NAV |
-| `margin_closeout_margin_used` | Decimal | ➖ | Margin closeout margin used |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total unrealized profit/loss from all open trades |
+| `nav` | [AccountUnits](system-models.md#type-aliases) | ➖ | Net Asset Value (balance + unrealized P&L) |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ➖ | Currently used margin in account currency |
+| `margin_available` | [AccountUnits](system-models.md#type-aliases) | ➖ | Available margin for opening new positions |
+| `position_value` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total value of all open positions in home currency |
+| `margin_closeout_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Margin closeout unrealized P&L |
+| `margin_closeout_nav` | [AccountUnits](system-models.md#type-aliases) | ➖ | Margin closeout NAV |
+| `margin_closeout_margin_used` | [AccountUnits](system-models.md#type-aliases) | ➖ | Margin closeout margin used |
 | `margin_closeout_percent` | Decimal | ➖ | Margin closeout percentage (≥1.0 = closeout) |
 | `margin_closeout_position_value` | Decimal | ➖ | Margin closeout position value |
-| `withdrawal_limit` | Decimal | ➖ | Current withdrawal limit |
-| `margin_call_margin_used` | Decimal | ➖ | Margin call margin used |
+| `withdrawal_limit` | [AccountUnits](system-models.md#type-aliases) | ➖ | Current withdrawal limit |
+| `margin_call_margin_used` | [AccountUnits](system-models.md#type-aliases) | ➖ | Margin call margin used |
 | `margin_call_percent` | Decimal | ➖ | Margin call percentage (≥1.0 = margin call) |
-| `balance` | Decimal | ➖ | Current account balance in account currency |
-| `pl` | Decimal | ➖ | Total lifetime profit/loss |
-| `resettable_pl` | Decimal | ➖ | Realized profit/loss since last reset |
-| `financing` | Decimal | ➖ | Total lifetime financing |
-| `commission` | Decimal | ➖ | Total lifetime commission |
-| `dividend_adjustment` | Decimal | ➖ | Total dividend adjustments |
-| `guaranteed_execution_fees` | Decimal | ➖ | Total guaranteed execution fees |
+| `balance` | [AccountUnits](system-models.md#type-aliases) | ➖ | Current account balance in account currency |
+| `pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total lifetime profit/loss |
+| `resettable_pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Realized profit/loss since last reset |
+| `financing` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total lifetime financing |
+| `commission` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total lifetime commission |
+| `dividend_adjustment` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total dividend adjustments |
+| `guaranteed_execution_fees` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total guaranteed execution fees |
 | `margin_call_enter_time` | [DateTime](system-models.md#type-aliases) |➖ | Margin call entry time (conditional) |
 | `margin_call_extension_count` | int | ➖ | Number of margin call extensions |
 | `last_margin_call_extension_time` | [DateTime](system-models.md#type-aliases) |➖ | Last margin call extension time |
@@ -161,28 +175,32 @@ Represents an Account's current price-dependent state. Fields are omitted if the
 ### CalculatedAccountState
 The dynamically calculated state of a client's Account.
 
-🔗 **OANDA Definition**: [CalculatedAccountState](https://developer.oanda.com/rest-live-v20/account-df/#CalculatedAccountState)
+🔗 **OANDA Definition**: [CalculatedAccountState](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [CalculatedAccountState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `unrealized_pl` | Decimal | ✅ | Total unrealized profit/loss from all open trades |
-| `nav` | Decimal | ✅ | Net Asset Value (balance + unrealized P&L) |
-| `margin_used` | Decimal | ✅ | Currently used margin in account currency |
-| `margin_available` | Decimal | ✅ | Available margin for opening new positions |
-| `position_value` | Decimal | ✅ | Total value of all open positions in home currency |
-| `margin_closeout_unrealized_pl` | Decimal | ✅ | Margin closeout unrealized P&L |
-| `margin_closeout_nav` | Decimal | ✅ | Margin closeout NAV |
-| `margin_closeout_margin_used` | Decimal | ✅ | Margin closeout margin used |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Total unrealized profit/loss from all open trades |
+| `nav` | [AccountUnits](system-models.md#type-aliases) | ✅ | Net Asset Value (balance + unrealized P&L) |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ✅ | Currently used margin in account currency |
+| `margin_available` | [AccountUnits](system-models.md#type-aliases) | ✅ | Available margin for opening new positions |
+| `position_value` | [AccountUnits](system-models.md#type-aliases) | ✅ | Total value of all open positions in home currency |
+| `margin_closeout_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Margin closeout unrealized P&L |
+| `margin_closeout_nav` | [AccountUnits](system-models.md#type-aliases) | ✅ | Margin closeout NAV |
+| `margin_closeout_margin_used` | [AccountUnits](system-models.md#type-aliases) | ✅ | Margin closeout margin used |
 | `margin_closeout_percent` | Decimal | ✅ | Margin closeout percentage (≥1.0 = closeout) |
 | `margin_closeout_position_value` | Decimal | ✅ | Margin closeout position value |
-| `withdrawal_limit` | Decimal | ✅ | Current withdrawal limit |
-| `margin_call_margin_used` | Decimal | ✅ | Margin call margin used |
+| `withdrawal_limit` | [AccountUnits](system-models.md#type-aliases) | ✅ | Current withdrawal limit |
+| `margin_call_margin_used` | [AccountUnits](system-models.md#type-aliases) | ✅ | Margin call margin used |
 | `margin_call_percent` | Decimal | ✅ | Margin call percentage (≥1.0 = margin call) |
 
 ### AccumulatedAccountState
 Interface for accumulated account state tracking.
 
-🔗 **OANDA Definition**: [AccumulatedAccountState](https://developer.oanda.com/rest-live-v20/account-df/#AccumulatedAccountState)
+🔗 **OANDA Definition**: [AccumulatedAccountState](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [AccumulatedAccountState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -197,7 +215,9 @@ Interface for accumulated account state tracking.
 ### GuaranteedStopLossOrderParameters
 The current mutability and hedging settings related to guaranteed Stop Loss orders.
 
-🔗 **OANDA Definition**: [GuaranteedStopLossOrderParameters](https://developer.oanda.com/rest-live-v20/account-df/#GuaranteedStopLossOrderParameters)
+🔗 **OANDA Definition**: [GuaranteedStopLossOrderParameters](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [GuaranteedStopLossOrderParameters](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -207,7 +227,9 @@ The current mutability and hedging settings related to guaranteed Stop Loss orde
 ### UserAttributes
 Contains the attributes of a user associated with an account.
 
-🔗 **OANDA Definition**: [UserAttributes](https://developer.oanda.com/rest-live-v20/account-df/#UserAttributes)
+🔗 **OANDA Definition**: [UserAttributes](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [UserAttributes](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -218,12 +240,14 @@ Contains the attributes of a user associated with an account.
 | `email` | str | ✅ | User's email address |
 | `division_abbreviation` | str | ✅ | Division abbreviation |
 | `language_abbreviation` | str | ✅ | Language preference abbreviation |
-| `home_currency` | [Currency](system-models.md#currency) | ✅ | User's home currency |
+| `home_currency` | [Currency](enum-models.md#currency) | ✅ | User's home currency |
 
 ### GuaranteedStopLossOrderMutability
 Describes the actions that can be performed on guaranteed Stop Loss Orders.
 
-🔗 **OANDA Definition**: [GuaranteedStopLossOrderMutability](https://developer.oanda.com/rest-live-v20/account-df/#GuaranteedStopLossOrderMutability)
+🔗 **OANDA Definition**: [GuaranteedStopLossOrderMutability](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **Source**: [GuaranteedStopLossOrderMutability](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|

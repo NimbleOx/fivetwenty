@@ -1,12 +1,5 @@
 # Data Models Reference
 
-!!! note "Reference - Information-oriented content"
-    **Use this reference when:** You need to look up specific model structures, field types, and validation rules
-
-    **Content type:** Complete technical specifications for FiveTwenty data models
-
-    **Assumed knowledge:** Python type hints, Pydantic models, and OANDA API concepts
-
 Complete API reference for FiveTwenty's comprehensive data model system, covering all OANDA v20 API data structures.
 
 ---
@@ -20,16 +13,35 @@ FiveTwenty provides 80+ comprehensive data models organized into logical categor
 
 Type-safe enumerations for all OANDA API parameters and values.
 
-| Category | Purpose |
-|----------|---------|
+| Enum | Purpose |
+|------|---------|
+| **Core Trading** | |
 | [InstrumentName](enum-models.md#instrumentname) | Available trading instrument pairs (EUR_USD, GBP_JPY, etc.) |
-| [OrderType](enum-models.md#ordertype) | Order types (MARKET, LIMIT, STOP, etc.) |
 | [Direction](enum-models.md#direction) | Trade direction (LONG, SHORT) |
+| [Currency](enum-models.md#currency) | ISO 4217 currency codes (USD, EUR, GBP, etc.) |
+| [InstrumentType](enum-models.md#instrumenttype) | Instrument classification (CURRENCY, CFD, METAL) |
 | [TransactionType](enum-models.md#transactiontype) | Transaction categories (ORDER_FILL, DAILY_FINANCING, etc.) |
+| **Price & Market Data** | |
 | [CandlestickGranularity](enum-models.md#candlestickgranularity) | Time intervals for candlestick data (M1, H1, D, etc.) |
 | [PriceStatus](enum-models.md#pricestatus) | Price data status (tradeable, non-tradeable, invalid) |
+| [WeeklyAlignment](enum-models.md#weeklyalignment) | Day of week for weekly candlestick alignment |
+| [DayOfWeek](enum-models.md#dayofweek) | Days of the week enumeration |
+| **Order Management** | |
+| [OrderType](enum-models.md#ordertype) | Order types (MARKET, LIMIT, STOP, etc.) |
+| [OrderState](enum-models.md#orderstate) | Order lifecycle state (PENDING, FILLED, CANCELLED) |
+| [TimeInForce](enum-models.md#timeinforce) | Order duration policies (GTC, GTD, GFD, FOK, IOC) |
+| [OrderPositionFill](enum-models.md#orderpositionfill) | Position modification behavior for orders |
+| [OrderTriggerCondition](enum-models.md#ordertriggercondition) | Price trigger conditions (DEFAULT, BID, ASK, MID) |
+| [OrderStateFilter](enum-models.md#orderstatefilter) | Filter for querying orders by state |
+| [CancellableOrderType](enum-models.md#cancellableordertype) | Types of orders that can be cancelled |
+| **Account & Position** | |
 | [AccountFinancingMode](enum-models.md#accountfinancingmode) | Account financing calculation modes |
-| [GuaranteedStopLossOrderMode](enum-models.md#guaranteedstoplossordermode) | GSL order availability and requirements |
+| [PositionAggregationMode](enum-models.md#positionaggregationmode) | Position aggregation methods |
+| [GuaranteedStopLossOrderMode](enum-models.md#guaranteedstoplossordermode) | GSL order availability for accounts |
+| [GuaranteedStopLossOrderModeForInstrument](enum-models.md#guaranteedstoplossordermodeforinstrument) | GSL order availability for instruments |
+| **Trade Filtering** | |
+| [TradeState](enum-models.md#tradestate) | Trade lifecycle state (OPEN, CLOSED, CLOSE_WHEN_TRADEABLE) |
+| [TradeStateFilter](enum-models.md#tradestatefilter) | Filter for querying trades by state |
 
 ### Account Models
 [**Account Management →**](account-models.md)
@@ -74,18 +86,17 @@ Comprehensive order creation, management, and execution models.
 | [StopLossOrderRequest](order-models.md#stoplossorderrequest) | Request to create a stop loss order to limit trade losses |
 | [TrailingStopLossOrderRequest](order-models.md#trailingstoplossorderrequest) | Request to create a trailing stop loss that follows favorable price movement |
 | [MarketIfTouchedOrderRequest](order-models.md#marketiftouchedorderrequest) | Request to create an order that becomes market order when price touched |
-| [FixedPriceOrderRequest](order-models.md#fixedpriceorderrequest) | Request to create an order with fixed execution price (no slippage) |
-| [OrderResponse](order-models.md#orderresponse) | Standardized response wrapper for all order operations |
+| [GuaranteedStopLossOrderRequest](order-models.md#guaranteedstoplossorderrequest) | Request to create a guaranteed stop loss order with guaranteed execution |
 | [TakeProfitOrder](order-models.md#takeprofitorder) | Active take profit order attached to a trade for profit realization |
 | [StopLossOrder](order-models.md#stoplossorder) | Active stop loss order attached to a trade for loss limitation |
 | [TrailingStopLossOrder](order-models.md#trailingstoplossorder) | Active trailing stop that automatically adjusts with favorable price moves |
 | [MarketIfTouchedOrder](order-models.md#marketiftouchedorder) | Pending order that triggers market execution when price level touched |
-| [FixedPriceOrder](order-models.md#fixedpriceorder) | Order with guaranteed execution price and no slippage risk |
+| [FixedPriceOrder](order-models.md#fixedpriceorder) | System-created order with fixed execution price (typically for dividends) |
 | [TakeProfitDetails](order-models.md#takeprofitdetails) | Configuration details for take profit order creation |
 | [StopLossDetails](order-models.md#stoplossdetails) | Configuration details for stop loss order creation |
 | [TrailingStopLossDetails](order-models.md#trailingstoplossdetails) | Configuration details for trailing stop loss order creation |
+| [GuaranteedStopLossDetails](order-models.md#guaranteedstoplossdetails) | Configuration details for guaranteed stop loss order creation |
 | [ClientExtensions](order-models.md#clientextensions) | Custom metadata and tags for client-side order tracking |
-| [OrderIdentifier](order-models.md#orderidentifier) | Flexible order identification using OANDA ID or client ID |
 
 ### Market Data Models
 [**Pricing & Instruments →**](market-data-models.md)
@@ -130,7 +141,7 @@ Models for transaction tracking, audit trails, and order execution history.
 ### System Models
 [**System & Utilities →**](system-models.md)
 
-Models for streaming configuration, error handling, and system enumerations.
+Models for streaming configuration, error handling, and type aliases.
 
 | Model | Purpose |
 |-------|---------|
@@ -138,12 +149,3 @@ Models for streaming configuration, error handling, and system enumerations.
 | [ReconnectionPolicy](system-models.md#reconnectionpolicy) | Automated reconnection strategy with exponential backoff for resilient streaming connections |
 | [ErrorDetails](system-models.md#errordetails) | Structured API error information with codes and messages for error handling and debugging |
 | [ValidationViolation](system-models.md#validationviolation) | Field-level validation error details showing rejected values and constraint violations |
-| [Currency](system-models.md#currency) | ISO 4217 standard currency code enumeration for all supported trading currencies |
-| [InstrumentType](system-models.md#instrumenttype) | Classification enumeration for different tradeable instrument categories and asset classes |
-| [OrderType](system-models.md#ordertype) | Order type enumeration defining execution behavior and pricing for different order categories |
-| [OrderState](system-models.md#orderstate) | Order lifecycle state enumeration tracking orders from creation through completion |
-| [TradeState](system-models.md#tradestate) | Trade lifecycle state enumeration showing current status from opening through closure |
-| [TimeInForce](system-models.md#timeinforce) | Order duration policy enumeration controlling how long orders remain active in market |
-| [OrderPositionFill](system-models.md#orderpositionfill) | Position handling behavior enumeration for orders affecting existing positions |
-| [OrderTriggerCondition](system-models.md#ordertriggercondition) | Price trigger condition enumeration for conditional order execution logic |
-| [CandlestickGranularity](system-models.md#candlestickgranularity) | Time interval enumeration for historical candlestick data aggregation periods |

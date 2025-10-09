@@ -257,7 +257,7 @@ async def main() -> None:
         print("\nCurrent Account State:")
         print(f"  Balance: {account_summary.balance}")
         print(f"  Realized P/L: {account_summary.pl}")
-        print(f"  Unrealized P/L: {account_summary.unrealized_pl}")
+        print(f"  Unrealized P/L: {account_summary.unrealized_pl if account_summary.unrealized_pl is not None else 'N/A'}")
 
         print("\n💡 Audit Trail:")
         print("   Transactions provide a complete, immutable audit trail")

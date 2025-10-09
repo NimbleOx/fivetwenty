@@ -135,7 +135,7 @@ async def main() -> None:
             # Unrealized P/L: Current profit/loss for this trade
             # = (Current Price - Entry Price) * Units
             # Changes constantly as market moves
-            print(f"    Unrealized P/L: {trade.unrealized_pl}")
+            print(f"    Unrealized P/L: {trade.unrealized_pl if trade.unrealized_pl is not None else 'N/A'}")
 
             # Financing: Rollover/swap charges for holding overnight
             # Positive or negative depending on interest rate differential
@@ -182,11 +182,11 @@ async def main() -> None:
             print(f"  Open Time: {trade.open_time}")
 
             # unrealized_pl: Current profit/loss
-            print(f"  Unrealized P/L: {trade.unrealized_pl}")
+            print(f"  Unrealized P/L: {trade.unrealized_pl if trade.unrealized_pl is not None else 'N/A'}")
 
             # margin_used: Capital required for this trade
             # = Units * Price * Margin Rate
-            print(f"  Margin Used: {trade.margin_used}")
+            print(f"  Margin Used: {trade.margin_used if trade.margin_used is not None else 'N/A'}")
 
             # financing: Cumulative rollover charges for this trade
             print(f"  Financing: {trade.financing}")
@@ -311,10 +311,10 @@ async def main() -> None:
                 extension_response = await client.trades.put_trade_client_extensions(
                     account_id=client.account_id,
                     trade_specifier=update_trade_id,
-                    client_extensions={
-                        "comment": "Updated: Important trade",  # New comment
-                        "tag": "high-priority",  # New tag
-                    },
+                    client_extensions=ClientExtensions(
+                        comment="Updated: Important trade",  # New comment
+                        tag="high-priority",  # New tag
+                    ),
                 )
 
                 if extension_response.get("tradeClientExtensionsModifyTransaction"):
@@ -438,7 +438,7 @@ async def main() -> None:
         if open_list:
             print("\nCurrent Open Trades Summary:")
             for trade in open_list[:5]:
-                print(f"  Trade {trade.id}: {trade.current_units} units, P/L: {trade.unrealized_pl}")
+                print(f"  Trade {trade.id}: {trade.current_units} units, P/L: {trade.unrealized_pl if trade.unrealized_pl is not None else 'N/A'}")
 
         # Clean up - close all our test trades
         print("\n\nCleaning up: Closing all EUR/USD trades...")

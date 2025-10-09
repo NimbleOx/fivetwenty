@@ -26,8 +26,8 @@ class Position(ApiModel):
 
     instrument: InstrumentName
     pl: AccountUnits = Field(alias="pl")
-    unrealized_pl: AccountUnits = Field(alias="unrealizedPL")
-    margin_used: AccountUnits = Field(alias="marginUsed", default=Decimal("0"))
+    unrealized_pl: AccountUnits | None = Field(alias="unrealizedPL", default=None)
+    margin_used: AccountUnits | None = Field(alias="marginUsed", default=None)
     resettable_pl: AccountUnits = Field(alias="resettablePL")
     financing: AccountUnits = Field(default=Decimal("0"))
     commission: AccountUnits = Field(default=Decimal("0"))
@@ -44,7 +44,7 @@ class PositionSide(ApiModel):
     average_price: PriceValue | None = Field(alias="averagePrice", default=None)
     trade_ids: list[TradeID] = Field(alias="tradeIDs", default_factory=list)
     pl: AccountUnits = Field(alias="pl")
-    unrealized_pl: AccountUnits = Field(alias="unrealizedPL")
+    unrealized_pl: AccountUnits | None = Field(alias="unrealizedPL", default=None)
     resettable_pl: AccountUnits = Field(alias="resettablePL")
     financing: AccountUnits = Field(default=Decimal("0"))
     dividend_adjustment: AccountUnits = Field(alias="dividendAdjustment", default=Decimal("0"))

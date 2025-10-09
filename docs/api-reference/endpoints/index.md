@@ -2,7 +2,7 @@
 
 **OANDA Reference**: [OANDA v20 REST API](https://developer.oanda.com/rest-live-v20/introduction/)
 
-Complete reference for all FiveTwenty endpoint implementations covering 100% of the OANDA v20 API.
+Complete reference for all FiveTwenty endpoint implementations.
 
 ---
 
@@ -37,54 +37,6 @@ Complete reference for all FiveTwenty endpoint implementations covering 100% of 
 
 ### **History & Monitoring**
 - **[Transactions Endpoint](transactions.md)** - Transaction history and real-time streaming
-
----
-
-## Coverage Statistics
-
-- **Total Endpoints**: 32 methods across 7 endpoint groups
-- **OANDA API Coverage**: 100% of v20 REST API
-- **Streaming Support**: Real-time pricing and transaction streams
-- **Error Handling**: Comprehensive error documentation for all methods
-
----
-
-## Usage Patterns
-
-### Async Client
-```python
-import asyncio
-from fivetwenty import AsyncClient
-
-
-async def main() -> None:
-    async with AsyncClient(token="demo-token", account_id="your-account-id") as client:
-        # Account operations
-        _accounts = await client.accounts.get_accounts()
-
-        # Trading operations
-        account_id = "your-account-id"
-        _order = await client.orders.post_market_order(account_id, "EUR_USD", 1000)
-
-        # Market data
-        _prices = await client.pricing.get_pricing(account_id, ["EUR_USD"])
-
-
-if __name__ == "__main__":
-    asyncio.run(main())
-```
-
-### Sync Client
-```python
-from fivetwenty import Client
-
-with Client(token="demo-token", account_id="your-account-id") as client:
-    # Same methods, synchronous execution
-    accounts = client.accounts.get_accounts()
-    account_id = "your-account-id"
-    order = client.orders.post_market_order(account_id, "EUR_USD", 1000)
-    prices = client.pricing.get_pricing(account_id, ["EUR_USD"])
-```
 
 ---
 

@@ -255,22 +255,15 @@ build = "python -m build"
 docs-serve = "python -m mkdocs serve"
 docs-build = "python -m mkdocs build --clean"
 
-# Documentation validation tasks
-# Fast validation - core validators only (development workflow)
-docs-validate-fast = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-fast.yml"
-
-# Ultra-fast validation - skips type checking for rapid iteration
-docs-validate-ultra-fast = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-ultra-fast.yml"
-
-# Complete validation - all validators including slow ones (CI/CD workflow)
-docs-validate-complete = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
+# Documentation validation task
+docs-validate = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
 
 # YAML tasks
 yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/workflows/ docs/api-reference/openapi.yaml"
 
 # Workflow tasks
 check-fast = ["format", "lint", "typecheck", "test"]
-check-full = ["format", "lint", "typecheck", "test", "docs-validate-complete"]
+check-full = ["format", "lint", "typecheck", "test", "docs-validate"]
 
 # Release tasks
 clean-dist = "rm -rf dist/ build/ *.egg-info"

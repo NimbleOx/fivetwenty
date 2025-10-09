@@ -160,6 +160,9 @@ validators:
         - "docs/tutorials/risk-management.md"
         # streaming-data.md excluded: streaming examples exceed 5s timeout even with minimal limits
         # All other 9 validators (linting, typing, syntax, security, etc.) validate streaming examples
+        # API Reference examples excluded: These demonstrate SDK interfaces with placeholder IDs
+        # and are not meant to be executed. All other 9 validators still validate them for
+        # syntax, types, linting, security, etc.
         # Add more files as they become fully standalone/executable
 
       # Mock API calls when executing code (prevents real API calls)

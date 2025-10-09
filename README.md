@@ -105,7 +105,7 @@ if __name__ == "__main__":
 
 MIT License - see LICENSE file for details.
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 **This library is provided for educational and demonstration purposes only.**
 

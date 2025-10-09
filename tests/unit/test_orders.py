@@ -1,11 +1,12 @@
 """Unit tests for enhanced order management endpoints."""
 
 from decimal import Decimal
-from unittest.mock import AsyncMock, MagicMock
+from unittest.mock import ANY, AsyncMock, MagicMock
 
 import pytest
 
 from fivetwenty.endpoints.orders import OrderEndpoints
+from fivetwenty.models import ClientExtensions, LimitOrderRequest, MarketIfTouchedOrderRequest, StopOrderRequest
 
 
 class TestEnhancedOrderEndpoints:
@@ -260,66 +261,66 @@ class TestEnhancedOrderEndpoints:
     @pytest.mark.asyncio
     async def test_replace_order(self, orders, mock_client):
         """Test replacing an existing order."""
-        order_request = {"type": "LIMIT", "instrument": "EUR_USD", "units": "1000", "price": "1.12000", "timeInForce": "GTC"}
+        order_request = LimitOrderRequest(instrument="EUR_USD", units=Decimal("1000"), price=Decimal("1.12000"))
 
         await orders.put_order("101-001-123456-001", "12345", order_request)
 
-        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/12345", json_data={"order": order_request}, headers={})
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/12345", json_data={"order": ANY}, headers={})
 
     @pytest.mark.asyncio
     async def test_replace_order_with_client_id(self, orders, mock_client):
         """Test replacing an order using @clientID format."""
-        order_request = {"type": "STOP", "instrument": "GBP_USD", "units": "-500", "price": "1.25000", "timeInForce": "GTC"}
+        order_request = StopOrderRequest(instrument="GBP_USD", units=Decimal("-500"), price=Decimal("1.25000"))
 
         await orders.put_order("101-001-123456-001", "@my_custom_order_123", order_request)
 
-        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/@my_custom_order_123", json_data={"order": order_request}, headers={})
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/@my_custom_order_123", json_data={"order": ANY}, headers={})
 
     @pytest.mark.asyncio
     async def test_replace_order_with_client_request_id(self, orders, mock_client):
         """Test replacing an order with client request ID."""
-        order_request = {"type": "MARKET_IF_TOUCHED", "instrument": "USD_JPY", "units": "2000", "price": "110.500", "timeInForce": "GTC"}
+        order_request = MarketIfTouchedOrderRequest(instrument="USD_JPY", units=Decimal("2000"), price=Decimal("110.500"))
 
         await orders.put_order("101-001-123456-001", "67890", order_request, client_request_id="replace_request_123")
 
-        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/67890", json_data={"order": order_request}, headers={"ClientRequestID": "replace_request_123"})
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/67890", json_data={"order": ANY}, headers={"ClientRequestID": "replace_request_123"})
 
     @pytest.mark.asyncio
     async def test_update_client_extensions_order_only(self, orders, mock_client):
         """Test updating only order client extensions."""
-        client_extensions = {"id": "my_order_id", "tag": "strategy_v1", "comment": "Breakout trade"}
+        client_extensions = ClientExtensions(id="my_order_id", tag="strategy_v1", comment="Breakout trade")
 
         await orders.put_order_client_extensions("101-001-123456-001", "12345", client_extensions=client_extensions)
 
-        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/12345/clientExtensions", json_data={"clientExtensions": client_extensions})
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/12345/clientExtensions", json_data={"clientExtensions": ANY})
 
     @pytest.mark.asyncio
     async def test_update_client_extensions_trade_only(self, orders, mock_client):
         """Test updating only trade client extensions."""
-        trade_extensions = {"id": "trade_tracking_456", "tag": "momentum", "comment": "Following trend"}
+        trade_extensions = ClientExtensions(id="trade_tracking_456", tag="momentum", comment="Following trend")
 
         await orders.put_order_client_extensions("101-001-123456-001", "98765", trade_client_extensions=trade_extensions)
 
-        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/98765/clientExtensions", json_data={"tradeClientExtensions": trade_extensions})
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/98765/clientExtensions", json_data={"tradeClientExtensions": ANY})
 
     @pytest.mark.asyncio
     async def test_update_client_extensions_both(self, orders, mock_client):
         """Test updating both order and trade client extensions."""
-        order_extensions = {"id": "order_123", "tag": "scalping", "comment": "Quick trade"}
-        trade_extensions = {"id": "trade_123", "tag": "scalping_result", "comment": "Filled order"}
+        order_extensions = ClientExtensions(id="order_123", tag="scalping", comment="Quick trade")
+        trade_extensions = ClientExtensions(id="trade_123", tag="scalping_result", comment="Filled order")
 
         await orders.put_order_client_extensions("101-001-123456-001", "55555", client_extensions=order_extensions, trade_client_extensions=trade_extensions)
 
-        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/55555/clientExtensions", json_data={"clientExtensions": order_extensions, "tradeClientExtensions": trade_extensions})
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/55555/clientExtensions", json_data={"clientExtensions": ANY, "tradeClientExtensions": ANY})
 
     @pytest.mark.asyncio
     async def test_update_client_extensions_with_client_id(self, orders, mock_client):
         """Test updating extensions using @clientID format."""
-        extensions = {"id": "updated_id", "tag": "revised"}
+        extensions = ClientExtensions(id="updated_id", tag="revised")
 
         await orders.put_order_client_extensions("101-001-123456-001", "@client_order_789", client_extensions=extensions)
 
-        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/@client_order_789/clientExtensions", json_data={"clientExtensions": extensions})
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/@client_order_789/clientExtensions", json_data={"clientExtensions": ANY})
 
     @pytest.mark.asyncio
     async def test_update_client_extensions_no_extensions_raises_error(self, orders, mock_client):
@@ -330,21 +331,24 @@ class TestEnhancedOrderEndpoints:
     @pytest.mark.asyncio
     async def test_replace_complex_order_request(self, orders, mock_client):
         """Test replacing order with complex order request including TP/SL."""
-        order_request = {
-            "type": "LIMIT",
-            "instrument": "EUR_USD",
-            "units": "10000",
-            "price": "1.15000",
-            "timeInForce": "GTD",
-            "gtdTime": "2024-12-31T23:59:59Z",
-            "takeProfitOnFill": {"price": "1.16000", "timeInForce": "GTC"},
-            "stopLossOnFill": {"price": "1.14000", "timeInForce": "GTC", "guaranteed": False},
-            "trailingStopLossOnFill": {"distance": "0.00100", "timeInForce": "GTC"},
-        }
+        from datetime import datetime
+
+        from fivetwenty.models import StopLossDetails, TakeProfitDetails, TimeInForce, TrailingStopLossDetails
+
+        order_request = LimitOrderRequest(
+            instrument="EUR_USD",
+            units=Decimal("10000"),
+            price=Decimal("1.15000"),
+            time_in_force=TimeInForce.GTD,
+            gtd_time=datetime.fromisoformat("2024-12-31T23:59:59"),
+            take_profit_on_fill=TakeProfitDetails(price=Decimal("1.16000")),
+            stop_loss_on_fill=StopLossDetails(price=Decimal("1.14000"), guaranteed=False),
+            trailing_stop_loss_on_fill=TrailingStopLossDetails(distance=Decimal("0.00100")),
+        )
 
         await orders.put_order("101-001-123456-001", "99999", order_request, client_request_id="complex_replace")
 
-        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/99999", json_data={"order": order_request}, headers={"ClientRequestID": "complex_replace"})
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/orders/99999", json_data={"order": ANY}, headers={"ClientRequestID": "complex_replace"})
 
     @pytest.mark.asyncio
     async def test_post_order_core_method(self, orders, mock_client):

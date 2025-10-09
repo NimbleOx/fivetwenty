@@ -148,6 +148,13 @@ nav:
   # EXAMPLES - Practical demonstrations
   - Examples: examples.md
 
+  # CONTRIBUTING - Contributor guidance
+  - Contributing:
+      - contributing/index.md
+      - Development Setup: contributing/development-setup.md
+      - Testing Guide: contributing/testing-guide.md
+      - Code Style: contributing/code-style.md
+
 
 markdown_extensions:
   - abbr
@@ -223,11 +230,11 @@ copyright: |
     <div class="footer-column">
       <h4>Documentation</h4>
       <ul>
-        <li><a href="tutorials/getting-started/installation/">Getting Started</a></li>
-        <li><a href="tutorials/">Tutorials</a></li>
-        <li><a href="guides/">Guides</a></li>
-        <li><a href="api-reference/">API Reference</a></li>
-        <li><a href="examples/">Examples</a></li>
+        <li><a href="/fivetwenty/tutorials/getting-started/installation/">Getting Started</a></li>
+        <li><a href="/fivetwenty/tutorials/">Tutorials</a></li>
+        <li><a href="/fivetwenty/guides/">Guides</a></li>
+        <li><a href="/fivetwenty/api-reference/">API Reference</a></li>
+        <li><a href="/fivetwenty/examples/">Examples</a></li>
       </ul>
     </div>
     <div class="footer-column">
@@ -242,10 +249,10 @@ copyright: |
     <div class="footer-column">
       <h4>Contributing</h4>
       <ul>
-        <li><a href="contributing/">Contributing Guide</a></li>
-        <li><a href="contributing/development-setup/">Development Setup</a></li>
-        <li><a href="contributing/testing-guide/">Testing Guide</a></li>
-        <li><a href="contributing/code-style/">Code Style</a></li>
+        <li><a href="/fivetwenty/contributing/">Contributing Guide</a></li>
+        <li><a href="/fivetwenty/contributing/development-setup/">Development Setup</a></li>
+        <li><a href="/fivetwenty/contributing/testing-guide/">Testing Guide</a></li>
+        <li><a href="/fivetwenty/contributing/code-style/">Code Style</a></li>
       </ul>
     </div>
     <div class="footer-column">

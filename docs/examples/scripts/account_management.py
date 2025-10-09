@@ -83,7 +83,7 @@ async def main() -> None:
         # Unrealized P/L: Profit/loss on currently open positions
         # Changes constantly as market moves
         # Not "locked in" yet - only realized when you close positions
-        print(f"  Unrealized P/L: {account.unrealized_pl}")
+        print(f"  Unrealized P/L: {account.unrealized_pl if account.unrealized_pl is not None else 'N/A'}")
 
         # Realized P/L: Total profit/loss from all closed trades
         # This is "locked in" - part of your balance
@@ -97,7 +97,7 @@ async def main() -> None:
         print("\nMargin Information:")
         # Margin Used: Capital currently tied up in open positions
         # You can't use this for new trades
-        print(f"  Margin Used: {account.margin_used}")
+        print(f"  Margin Used: {account.margin_used if account.margin_used is not None else 'N/A'}")
 
         # Margin Available: Capital available for new trades
         # = NAV - Margin Used - Margin Required for Pending Orders
