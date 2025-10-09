@@ -69,8 +69,8 @@
 /* Multi-column footer styling */
 .footer-links {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 2rem;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 1.5rem;
   margin-bottom: 1rem;
   padding: 1rem 0;
   width: 100%;
@@ -108,7 +108,7 @@
 /* Responsive adjustments */
 @media (max-width: 1024px) {
   .footer-links {
-    grid-template-columns: repeat(2, 1fr);
+    grid-template-columns: repeat(3, 1fr);
     gap: 1.5rem;
   }
 }
