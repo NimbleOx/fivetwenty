@@ -189,7 +189,7 @@ class AccountEndpoints:
         response = await self._client._request(
             "PATCH",
             f"/accounts/{account_id}/configuration",
-            json=body,
+            json_data=body,
         )
 
         data = response.json()
