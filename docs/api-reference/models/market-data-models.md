@@ -13,6 +13,8 @@ Current market prices for an instrument.
 
 🔗 **OANDA Definition**: [ClientPrice](https://developer.oanda.com/rest-live-v20/pricing-df/#collapse_definition_1)
 
+🔗 **FiveTwenty SDK**: [ClientPrice](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `type` | str | ➖ | Price type identifier (default: "PRICE") |
@@ -32,6 +34,8 @@ Conversion factors for quote currency calculations.
 
 🔗 **OANDA Definition**: [QuoteHomeConversionFactors](https://developer.oanda.com/rest-live-v20/pricing-df/#QuoteHomeConversionFactors)
 
+🔗 **FiveTwenty SDK**: [QuoteHomeConversionFactors](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `positive_units` | Decimal | ✅ | Conversion factor for positive (long) units |
@@ -41,6 +45,8 @@ Conversion factors for quote currency calculations.
 Currency conversion factors for account calculations.
 
 🔗 **OANDA Definition**: [HomeConversions](https://developer.oanda.com/rest-live-v20/pricing-df/#HomeConversions)
+
+🔗 **FiveTwenty SDK**: [HomeConversions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -54,6 +60,8 @@ Heartbeat message for pricing streams.
 
 🔗 **OANDA Definition**: [PricingHeartbeat](https://developer.oanda.com/rest-live-v20/pricing-df/#PricingHeartbeat)
 
+🔗 **FiveTwenty SDK**: [PricingHeartbeat](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `type` | str | ➖ | Always "HEARTBEAT" |
@@ -63,6 +71,8 @@ Heartbeat message for pricing streams.
 Representation of how many units of an Instrument are available to be traded.
 
 🔗 **OANDA Definition**: [UnitsAvailable](https://developer.oanda.com/rest-live-v20/order-df/#UnitsAvailable)
+
+🔗 **FiveTwenty SDK**: [UnitsAvailable](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -76,6 +86,8 @@ Price level with available liquidity.
 
 🔗 **OANDA Definition**: [PriceBucket](https://developer.oanda.com/rest-live-v20/pricing-common-df/#collapse_definition_2)
 
+🔗 **FiveTwenty SDK**: [PriceBucket](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `price` | [PriceValue](system-models.md#type-aliases) | ✅ | The quoted price at this level |
@@ -85,6 +97,8 @@ Price level with available liquidity.
 OHLC candlestick data for an instrument.
 
 🔗 **OANDA Definition**: [Candlestick](https://developer.oanda.com/rest-live-v20/instrument-df/#collapse_definition_3)
+
+🔗 **FiveTwenty SDK**: [Candlestick](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -100,6 +114,8 @@ Open, High, Low, Close data for one price type.
 
 🔗 **OANDA Definition**: [CandlestickData](https://developer.oanda.com/rest-live-v20/instrument-df/#collapse_definition_4)
 
+🔗 **FiveTwenty SDK**: [CandlestickData](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `o` | [PriceValue](system-models.md#type-aliases) | ✅ | Opening price for the time period |
@@ -113,6 +129,10 @@ Open, High, Low, Close data for one price type.
 
 ### Instrument
 Trading instrument information and specifications.
+
+🔗 **OANDA Definition**: [Instrument](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_10)
+
+🔗 **FiveTwenty SDK**: [Instrument](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/instruments.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -136,39 +156,12 @@ Trading instrument information and specifications.
 | `financing` | [InstrumentFinancing](#instrumentfinancing) | ➖ | Daily financing rate details for long and short positions |
 | `tags` | list[[Tag](#tag)] | ✅ | Descriptive tags for instrument categorization |
 
-### CandlestickGranularity
-Time intervals for candlestick data.
-
-🔗 **OANDA Definition**: [CandlestickGranularity](https://developer.oanda.com/rest-live-v20/instrument-df/#CandlestickGranularity)
-
-| Value | Description | Alignment |
-|-------|-------------|-----------|
-| `S5` | 5 second candlesticks | Minute aligned |
-| `S10` | 10 second candlesticks | Minute aligned |
-| `S15` | 15 second candlesticks | Minute aligned |
-| `S30` | 30 second candlesticks | Minute aligned |
-| `M1` | 1 minute candlesticks | Hour aligned |
-| `M2` | 2 minute candlesticks | Hour aligned |
-| `M4` | 4 minute candlesticks | Hour aligned |
-| `M5` | 5 minute candlesticks | Hour aligned |
-| `M10` | 10 minute candlesticks | Hour aligned |
-| `M15` | 15 minute candlesticks | Hour aligned |
-| `M30` | 30 minute candlesticks | Hour aligned |
-| `H1` | 1 hour candlesticks | Day aligned |
-| `H2` | 2 hour candlesticks | Day aligned |
-| `H3` | 3 hour candlesticks | Day aligned |
-| `H4` | 4 hour candlesticks | Day aligned |
-| `H6` | 6 hour candlesticks | Day aligned |
-| `H8` | 8 hour candlesticks | Day aligned |
-| `H12` | 12 hour candlesticks | Day aligned |
-| `D` | 1 day candlesticks | Week aligned |
-| `W` | 1 week candlesticks | Month aligned |
-| `M` | 1 month candlesticks | Year aligned |
-
 ### InstrumentCommission
 Commission structure for trading instruments.
 
 🔗 **OANDA Definition**: [InstrumentCommission](https://developer.oanda.com/rest-live-v20/primitives-df/#InstrumentCommission)
+
+🔗 **FiveTwenty SDK**: [InstrumentCommission](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/instruments.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -181,6 +174,8 @@ Daily financing rate details for specific days.
 
 🔗 **OANDA Definition**: [FinancingDayOfWeek](https://developer.oanda.com/rest-live-v20/primitives-df/#FinancingDayOfWeek)
 
+🔗 **FiveTwenty SDK**: [FinancingDayOfWeek](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/instruments.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `day_of_week` | [DayOfWeek](enum-models.md#dayofweek) | ✅ | Day of the week (SUNDAY through SATURDAY) |
@@ -190,6 +185,8 @@ Daily financing rate details for specific days.
 Financing data for an instrument including long/short rates and daily schedule.
 
 🔗 **OANDA Definition**: [InstrumentFinancing](https://developer.oanda.com/rest-live-v20/instrument-df/#InstrumentFinancing)
+
+🔗 **FiveTwenty SDK**: [InstrumentFinancing](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/instruments.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -202,6 +199,8 @@ A tag associated with an entity for categorization.
 
 🔗 **OANDA Definition**: [Tag](https://developer.oanda.com/rest-live-v20/primitives-df/#Tag)
 
+🔗 **FiveTwenty SDK**: [Tag](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/instruments.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `type` | str | ✅ | Type of the tag |
@@ -212,6 +211,8 @@ Units available for both long and short orders on an instrument.
 
 🔗 **OANDA Definition**: [UnitsAvailableDetails](https://developer.oanda.com/rest-live-v20/pricing-df/#UnitsAvailableDetails)
 
+🔗 **FiveTwenty SDK**: [UnitsAvailableDetails](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `long` | [UnitsAvailable](#unitsavailable) | ✅ | Long position units availability |
@@ -221,6 +222,8 @@ Units available for both long and short orders on an instrument.
 Order book depth data for an instrument showing bid/ask levels.
 
 🔗 **OANDA Definition**: [OrderBook](https://developer.oanda.com/rest-live-v20/pricing-df/#OrderBook)
+
+🔗 **FiveTwenty SDK**: [OrderBook](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -235,6 +238,8 @@ Details required by clients to add a Guaranteed Stop Loss Order for a specific i
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrderEntryData](https://developer.oanda.com/rest-live-v20/instrument-df/#GuaranteedStopLossOrderEntryData)
 
+🔗 **FiveTwenty SDK**: [GuaranteedStopLossOrderEntryData](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/instruments.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `minimum_distance` | Decimal | ✅ | Minimum distance from current price for GSL order |
@@ -245,6 +250,8 @@ Details required by clients to add a Guaranteed Stop Loss Order for a specific i
 Volume and price range restrictions for guaranteed stop loss orders.
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrderLevelRestriction](https://developer.oanda.com/rest-live-v20/instrument-df/#GuaranteedStopLossOrderLevelRestriction)
+
+🔗 **FiveTwenty SDK**: [GuaranteedStopLossOrderLevelRestriction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/instruments.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
