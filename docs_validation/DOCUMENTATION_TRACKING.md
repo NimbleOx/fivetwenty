@@ -54,9 +54,9 @@
 | `[x]` | `api-reference/models/enum-models.md` | API Reference | 1 |
 | `[x]` | `api-reference/models/market-data-models.md` | API Reference | 0 |
 | `[x]` | `api-reference/models/order-models.md` | API Reference | 0 |
-| `[ ]` | `api-reference/models/system-models.md` | API Reference | 0 |
-| `[ ]` | `api-reference/models/trading-models.md` | API Reference | 0 |
-| `[ ]` | `api-reference/models/transaction-models.md` | API Reference | 0 |
+| `[x]` | `api-reference/models/system-models.md` | API Reference | 0 |
+| `[x]` | `api-reference/models/trading-models.md` | API Reference | 0 |
+| `[x]` | `api-reference/models/transaction-models.md` | API Reference | 0 |
 | `[ ]` | `api-reference/index.md` | API Reference | 1 |
 | `[ ]` | `api-reference/endpoints/index.md` | API Reference | 2 |
 | `[ ]` | `api-reference/models/index.md` | API Reference | 0 |
