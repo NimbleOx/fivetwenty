@@ -458,7 +458,7 @@ class AsyncClient:
                 if hasattr(self, "_logger") and self._logger:
                     self._logger.warning(f"Stream stalled, retrying ({attempt}/{max_attempts}): {e}")
 
-            except Exception as e:  # noqa: PERF203
+            except Exception as e:
                 # Catch connection errors and HTTP 5xx errors (server issues) for retry
                 from .exceptions import FiveTwentyError
 
