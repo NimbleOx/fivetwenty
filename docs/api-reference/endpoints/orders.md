@@ -621,11 +621,13 @@ Replace an existing order by cancelling it and creating a new order with updated
 <!-- code-block: orders__put_order -->
 ```python
 import asyncio
+from decimal import Decimal
 
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import ReplaceOrderResponse
+from fivetwenty.models import InstrumentName, LimitOrderRequest
 
 load_dotenv()
 
@@ -637,13 +639,11 @@ async def main() -> None:
         result: ReplaceOrderResponse = await client.orders.put_order(
             account_id=client.account_id,
             order_specifier="12345",
-            order_request={
-                "type": "LIMIT",
-                "instrument": "EUR_USD",
-                "units": "1000",
-                "price": "1.1400",
-                "timeInForce": "GTC",
-            },
+            order_request=LimitOrderRequest(
+                instrument=InstrumentName.EUR_USD,
+                units=Decimal("1000"),
+                price=Decimal("1.1400"),
+            ),
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
@@ -662,7 +662,7 @@ if __name__ == "__main__":
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `order_specifier` | str | ✅ | Order identifier to replace |
-| `order_request` | dict[str, Any] | ✅ | New order specification |
+| `order_request` | MarketOrderRequest \| LimitOrderRequest \| StopOrderRequest \| TakeProfitOrderRequest \| StopLossOrderRequest \| MarketIfTouchedOrderRequest \| TrailingStopLossOrderRequest \| GuaranteedStopLossOrderRequest | ✅ | New order specification |
 | `*` | | | **Keyword-only parameters below** |
 | `client_request_id` | str \| None | ➖ | Client-provided request ID for debugging and correlation |
 
@@ -699,6 +699,7 @@ from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderClientExtensionsResponse
+from fivetwenty.models import ClientExtensions
 
 load_dotenv()
 
@@ -711,7 +712,7 @@ async def main() -> None:
             await client.orders.put_order_client_extensions(
                 account_id=client.account_id,
                 order_specifier="12345",
-                client_extensions={"comment": "Updated order"},
+                client_extensions=ClientExtensions(comment="Updated order"),
             )
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
@@ -732,8 +733,8 @@ if __name__ == "__main__":
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `order_specifier` | str | ✅ | Order identifier to modify |
 | `*` | | | **Keyword-only parameters below** |
-| `client_extensions` | dict[str, Any] \| None | ➖ | New order client extensions |
-| `trade_client_extensions` | dict[str, Any] \| None | ➖ | New trade client extensions |
+| `client_extensions` | ClientExtensions \| None | ➖ | New order client extensions |
+| `trade_client_extensions` | ClientExtensions \| None | ➖ | New trade client extensions |
 
 **Returns:** `OrderClientExtensionsResponse` TypedDict containing:
 

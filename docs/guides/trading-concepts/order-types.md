@@ -783,6 +783,7 @@ async def monitor_order_status(order_id: str) -> Any:
 ```python
 from decimal import Decimal
 from fivetwenty import AsyncClient
+from fivetwenty.models import LimitOrderRequest, InstrumentName
 from typing import Any
 
 
@@ -799,7 +800,7 @@ async def modify_pending_order(order_id: str, new_price: Decimal) -> Any:
             # Step 2: Retrieve current order details for comparison
             current_order = await client.orders.get_order(
                 account_id="your_account_id",
-                order_id=order_id
+                order_specifier=order_id
             )
 
             print(f"\nAnalysis Current Order Analysis:")
@@ -842,11 +843,12 @@ async def modify_pending_order(order_id: str, new_price: Decimal) -> Any:
             print(f"\nStarting Executing Order Modification...")
             response = await client.orders.put_order(
                 account_id="your_account_id",
-                order_id=order_id,
-                order={
-                    "price": str(new_price),
-                    "time_in_force": "GTC"  # Maintain GTC behavior
-                }
+                order_specifier=order_id,
+                order_request=LimitOrderRequest(
+                    instrument=current_order.instrument,
+                    units=current_order.units,
+                    price=new_price,
+                ),
             )
 
             # Step 6: Analyze modification results
