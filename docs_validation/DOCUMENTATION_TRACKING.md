@@ -48,7 +48,7 @@
 | `[x]` | `api-reference/endpoints/orders.md` | API Reference | 11 |
 | `[x]` | `api-reference/endpoints/positions.md` | API Reference | 4 |
 | `[x]` | `api-reference/endpoints/pricing.md` | API Reference | 5 |
-| `[ ]` | `api-reference/endpoints/trades.md` | API Reference | 6 |
+| `[x]` | `api-reference/endpoints/trades.md` | API Reference | 6 |
 | `[ ]` | `api-reference/endpoints/transactions.md` | API Reference | 6 |
 | `[ ]` | `api-reference/models/account-models.md` | API Reference | 0 |
 | `[ ]` | `api-reference/models/enum-models.md` | API Reference | 1 |
