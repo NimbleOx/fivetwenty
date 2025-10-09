@@ -11,8 +11,8 @@ uv sync
 # Run validation on all documentation
 uv run python -m docs_validation.src.cli validate
 
-# Run fast validation (core validators only)
-uv run python -m docs_validation.src.cli validate --config config/validation-fast.yml
+# Use specific configuration
+uv run python -m docs_validation.src.cli validate --config config/validation-complete.yml
 
 # Validate specific files
 uv run python -m docs_validation.src.cli validate --files "docs/tutorials/getting-started/authentication.md"
@@ -87,13 +87,9 @@ uv run python -m docs_validation.src.cli validate --sequential
 uv run python -m docs_validation.src.cli list-validators
 ```
 
-### Configuration Files
+### Configuration
 
-The system supports multiple configuration profiles:
-
-- **`config/validation-fast.yml`** - Core validators only, faster execution
-- **`config/validation-complete.yml`** - All validators, comprehensive analysis
-- **`config/validation.yml`** - Default balanced configuration
+The validation system uses **`config/validation-complete.yml`** for comprehensive analysis with all validators enabled.
 
 ### Fragment Marking System
 
