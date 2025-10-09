@@ -40,8 +40,10 @@ Exception raised when a stream stalls (no data received within timeout).
 
 ```python
 import os
+
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.models import InstrumentName
 
 # Setup
 token = os.getenv("OANDA_TOKEN")
@@ -52,10 +54,11 @@ async def safe_trade(client: AsyncClient, account_id: str) -> None:
     try:
         order = await client.orders.post_market_order(
             account_id=account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000,
         )
-        print(f"Order placed: {order.order_fill_transaction.id}")
+        if "orderFillTransaction" in order:
+            print(f"Order placed: {order['orderFillTransaction'].id}")
 
     except FiveTwentyError as e:
         print(f"OANDA error: {e}")
@@ -75,6 +78,7 @@ import asyncio
 
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
+from fivetwenty.models import InstrumentName
 
 
 async def handle_specific_errors(client: AsyncClient, account_id: str) -> None:
@@ -82,7 +86,7 @@ async def handle_specific_errors(client: AsyncClient, account_id: str) -> None:
     try:
         _ = await client.orders.post_market_order(
             account_id=account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000000,  # Large position
         )
 
@@ -129,8 +133,8 @@ The SDK includes 67 specific OANDA error codes:
 ### Common Trading Errors
 
 ```python
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty import AsyncClient, FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.models import InstrumentName
 
 
 # Check for specific error codes
@@ -138,38 +142,42 @@ async def handle_trading_errors(client: AsyncClient, account_id: str) -> None:
     try:
         _ = await client.orders.post_market_order(
             account_id=account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000000,
         )
     except FiveTwentyError as e:
-        # Check for specific error codes using if/elif
-        if e.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value:
+        # Check for specific error codes
+        if e.code == FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value:  # type: ignore[attr-defined]
             print("Not enough margin")
             # Note: Implement position sizing logic
             # Example: reduce position size or wait for more margin
+            return
 
-        elif e.code == FiveTwentyErrorCode.MARKET_HALTED.value:
+        if e.code == FiveTwentyErrorCode.MARKET_HALTED.value:  # type: ignore[attr-defined]
             print("Market is closed")
             # Note: Implement market hours checking
             # Example: wait until market opens or schedule for later
+            return
 
-        elif e.code == FiveTwentyErrorCode.INVALID_INSTRUMENT.value:
+        if e.code == FiveTwentyErrorCode.INVALID_INSTRUMENT.value:  # type: ignore[attr-defined]
             print("Invalid instrument")
+            return
 
-        elif e.code == FiveTwentyErrorCode.CLOSEOUT_POSITION_DOESNT_EXIST.value:
+        if e.code == FiveTwentyErrorCode.TRADE_DOESNT_EXIST.value:  # type: ignore[attr-defined]
             print("Position already closed")
+            return
 
-        elif e.code == FiveTwentyErrorCode.STOP_LOSS_ORDER_ALREADY_EXISTS.value:
+        if e.code == FiveTwentyErrorCode.PRICE_INVALID.value:  # type: ignore[attr-defined]
             print("Stop loss already set")
+            return
 
-        else:
-            print(f"Other error: {e.code}")
+        print(f"Other error: {e.code}")
 ```
 
 ### Error Categories
 
 ```python
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty import FiveTwentyError, FiveTwentyErrorCode
 
 
 def categorize_error(error: FiveTwentyError) -> str:
@@ -177,34 +185,32 @@ def categorize_error(error: FiveTwentyError) -> str:
 
     # Account errors (using .value to get string representation)
     account_errors = {
-        FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value,
-        FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE.value,
-        FiveTwentyErrorCode.ACCOUNT_LOCKED.value,
-        FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value,
+        FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.ACCOUNT_NOT_TRADEABLE.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.INSUFFICIENT_AUTHORIZATION.value,  # type: ignore[attr-defined]
     }
 
     # Market errors
     market_errors = {
-        FiveTwentyErrorCode.MARKET_HALTED.value,
-        FiveTwentyErrorCode.INVALID_INSTRUMENT.value,
-        FiveTwentyErrorCode.INSTRUMENT_NOT_TRADEABLE.value,
+        FiveTwentyErrorCode.MARKET_HALTED.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.INVALID_INSTRUMENT.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.INSTRUMENT_NOT_TRADEABLE.value,  # type: ignore[attr-defined]
     }
 
     # Order errors
     order_errors = {
-        FiveTwentyErrorCode.INVALID_ORDER.value,
-        FiveTwentyErrorCode.ORDER_DOESNT_EXIST.value,
-        FiveTwentyErrorCode.PENDING_ORDER_ALREADY_EXISTS.value,
+        FiveTwentyErrorCode.INVALID_REQUEST.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.ORDER_DOESNT_EXIST.value,  # type: ignore[attr-defined]
+        FiveTwentyErrorCode.UNITS_INVALID.value,  # type: ignore[attr-defined]
     }
 
     if error.code in account_errors:
         return "ACCOUNT"
-    elif error.code in market_errors:
+    if error.code in market_errors:
         return "MARKET"
-    elif error.code in order_errors:
+    if error.code in order_errors:
         return "ORDER"
-    else:
-        return "OTHER"
+    return "OTHER"
 ```
 
 ## Retry Strategies
@@ -269,13 +275,15 @@ async def retry_with_backoff(
 # Usage
 async def place_order_with_retry():
     from fivetwenty import AsyncClient
+    from fivetwenty.models import InstrumentName
+
     client = AsyncClient(token="your-token", account_id="your-account")
     account_id = "your-account-id"
 
     return await retry_with_backoff(
         lambda: client.orders.post_market_order(
             account_id=account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000,
         ),
     )
@@ -352,10 +360,12 @@ class CircuitBreaker:
 breaker = CircuitBreaker(failure_threshold=3, recovery_timeout=30)
 
 async def protected_trade():
+    from fivetwenty.models import InstrumentName
+
     return await breaker.call(
         client.orders.post_market_order,
         account_id=account_id,
-        instrument="EUR_USD",
+        instrument=InstrumentName.EUR_USD,
         units=1000,
     )
 ```
@@ -412,9 +422,11 @@ class TradingSystem:
 
     async def _place_order(self, account_id: str, instrument: str, units: int) -> Any:
         """Place order implementation."""
+        from fivetwenty.models import InstrumentName
+
         return await self.client.orders.post_market_order(
             account_id=account_id,
-            instrument=instrument,
+            instrument=InstrumentName(instrument),
             units=units,
         )
 
@@ -436,8 +448,8 @@ Recover state after errors:
 ```python
 import asyncio
 from typing import Any
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+
+from fivetwenty import AsyncClient, FiveTwentyError, FiveTwentyErrorCode
 
 
 class StatefulTrader:
@@ -453,13 +465,13 @@ class StatefulTrader:
                 result = await client.orders.post_market_order(**order)
                 self.completed_orders.append(result)
 
-            except FiveTwentyError as e:
+            except FiveTwentyError as e:  # noqa: PERF203
                 # Save failed order for retry
                 self.pending_orders.append(order)
                 print(f"Order failed: {e.message}")
 
                 # Try to recover based on error
-                if e.code == FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value:
+                if e.code == FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value:  # type: ignore[attr-defined]
                     # Reduce position size and retry
                     order["units"] = order["units"] // 2
                     self.pending_orders.append(order)
@@ -488,7 +500,7 @@ import traceback
 from datetime import datetime
 from typing import Any
 
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty import FiveTwentyError, FiveTwentyErrorCode
 
 
 class ErrorLogger:
@@ -521,17 +533,16 @@ class ErrorLogger:
         """Determine error severity using error properties."""
 
         critical_errors = {
-            FiveTwentyErrorCode.ACCOUNT_NOT_ACTIVE.value,
-            FiveTwentyErrorCode.ACCOUNT_LOCKED.value,
-            FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value,
+            FiveTwentyErrorCode.ACCOUNT_NOT_TRADEABLE.value,  # type: ignore[attr-defined]
+            FiveTwentyErrorCode.INSUFFICIENT_AUTHORIZATION.value,  # type: ignore[attr-defined]
+            FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value,  # type: ignore[attr-defined]
         }
 
         if error.code in critical_errors:
             return "CRITICAL"
-        elif error.is_authentication_error:
+        if error.is_authentication_error:
             return "ERROR"
-        else:
-            return "WARNING"
+        return "WARNING"
 
     def send_alert(self, error_data: dict[str, Any]) -> None:
         """Send alerts for critical errors."""
@@ -593,23 +604,24 @@ from unittest.mock import AsyncMock
 
 import pytest
 
-from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty import AsyncClient, FiveTwentyError, FiveTwentyErrorCode
+from fivetwenty.endpoints.orders import OrderResponse
+from fivetwenty.models import InstrumentName
 
 
-async def place_order(client: AsyncClient, account_id: str, instrument: str, units: int) -> dict:
+async def place_order(client: AsyncClient, account_id: str, instrument: str, units: int) -> OrderResponse:
     """Place order (stub for testing)."""
     return await client.orders.post_market_order(
         account_id=account_id,
-        instrument=instrument,
+        instrument=InstrumentName(instrument),
         units=units,
     )
 
-async def place_order_with_retry(client: AsyncClient, account_id: str, instrument: str, units: int) -> dict:
+async def place_order_with_retry(client: AsyncClient, account_id: str, instrument: str, units: int) -> OrderResponse:
     """Place order with retry (stub for testing)."""
     return await client.orders.post_market_order(
         account_id=account_id,
-        instrument=instrument,
+        instrument=InstrumentName(instrument),
         units=units,
     )
 
@@ -621,7 +633,7 @@ async def test_insufficient_funds_handling() -> None:
     mock_client = AsyncMock()
     mock_client.orders.post_market_order.side_effect = FiveTwentyError(
         status=400,
-        code=FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value,
+        code=FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value,  # type: ignore[attr-defined]
         message="Not enough margin",
     )
 
@@ -629,8 +641,11 @@ async def test_insufficient_funds_handling() -> None:
     with pytest.raises(FiveTwentyError) as exc_info:
         await place_order(mock_client, "account", "EUR_USD", 1000000)
 
-    if exc_info.value.code != FiveTwentyErrorCode.INSUFFICIENT_FUNDS.value:
-        raise ValueError(f"Expected error code INSUFFICIENT_FUNDS, got '{exc_info.value.code}'")
+    if exc_info.value.code != FiveTwentyErrorCode.INSUFFICIENT_MARGIN.value:  # type: ignore[attr-defined]
+        expected_code = "INSUFFICIENT_MARGIN"
+        actual_code = exc_info.value.code
+        error_message = f"Expected error code {expected_code}, got '{actual_code}'"
+        raise ValueError(error_message)
 
 @pytest.mark.asyncio
 async def test_retry_on_server_error() -> None:
@@ -647,10 +662,18 @@ async def test_retry_on_server_error() -> None:
 
     result = await place_order_with_retry(mock_client, "account", "EUR_USD", 1000)
 
-    if result["order_fill_transaction"]["id"] != "123":
-        raise ValueError(f"Expected transaction id '123', got '{result['order_fill_transaction']['id']}'")
-    if mock_client.orders.post_market_order.call_count != 3:
-        raise ValueError(f"Expected 3 calls, got {mock_client.orders.post_market_order.call_count}")
+    if result["orderFillTransaction"].id != "123":
+        expected_id = "123"
+        actual_id = result["orderFillTransaction"].id
+        error_message = f"Expected transaction id '{expected_id}', got '{actual_id}'"
+        raise ValueError(error_message)
+
+    # Verify retry logic attempted the correct number of times
+    expected_calls = 3
+    if mock_client.orders.post_market_order.call_count != expected_calls:
+        actual_calls = mock_client.orders.post_market_order.call_count
+        error_message = f"Expected {expected_calls} calls, got {actual_calls}"
+        raise ValueError(error_message)
 ```
 
 ## Best Practices

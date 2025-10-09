@@ -10,7 +10,8 @@ Transaction history and monitoring.
 
 ```python
 import asyncio
-from datetime import datetime
+from datetime import datetime, timezone
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.transactions import TransactionsResponse
 
@@ -24,8 +25,8 @@ async def main() -> None:
 
         result: TransactionsResponse = await client.transactions.get_transactions(
             client.account_id,
-            from_time=datetime(2024, 1, 1),
-            to_time=datetime(2024, 12, 31),
+            from_time=datetime(2024, 1, 1, tzinfo=timezone.utc),
+            to_time=datetime(2024, 12, 31, tzinfo=timezone.utc),
             page_size=50,
             transaction_type=["ORDER_FILL", "MARKET_ORDER"],
         )
@@ -154,7 +155,9 @@ Get transactions since specific transaction ID.
 
 ```python
 import asyncio
+
 from fivetwenty import AsyncClient
+from fivetwenty.models import TransactionHeartbeat
 
 
 async def main() -> None:
@@ -167,7 +170,7 @@ async def main() -> None:
             client.account_id,
             stall_timeout=60.0
         ):
-            if hasattr(item, 'type') and item.type == "HEARTBEAT":
+            if isinstance(item, TransactionHeartbeat):
                 print(f"Heartbeat at {item.time}")
             else:
                 print(f"Transaction: {item.type} - {item.id}")

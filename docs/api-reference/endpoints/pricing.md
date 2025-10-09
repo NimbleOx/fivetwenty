@@ -10,6 +10,7 @@ Real-time pricing data and streaming.
 
 ```python
 import asyncio
+
 from fivetwenty import AsyncClient
 
 
@@ -24,11 +25,10 @@ async def main() -> None:
             instruments=["EUR_USD", "GBP_USD"],
             include_units_available=True,
         )
-        prices = result["prices"]
-        time = result["time"]
+        print(f"Got {len(result['prices'])} prices at {result['time']}")
         # homeConversions is optional, only present if include_home_conversions=True
         if "homeConversions" in result:
-            home_conversions = result["homeConversions"]
+            print(f"Got {len(result['homeConversions'])} home conversions")
 
 asyncio.run(main())
 ```
@@ -109,7 +109,7 @@ Stream real-time pricing data.
 
 ```python
 import asyncio
-from datetime import datetime
+
 from fivetwenty import AsyncClient
 
 

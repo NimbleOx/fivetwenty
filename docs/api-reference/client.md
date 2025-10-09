@@ -40,14 +40,13 @@ Primary async client for OANDA API operations. Recommended for production use.
 **Constructor:**
 ```python
 from logging import Logger
-from typing import Optional
 
 import httpx
 
 from fivetwenty import AsyncClient, AccountConfig, Environment
 
 # Constructor signature:
-AsyncClient(
+def AsyncClient(
     token: str | None = None,
     *,
     account_id: str | None = None,
@@ -60,8 +59,9 @@ AsyncClient(
     proxies: str | None = None,
     verify: bool | str = True,
     cert: str | None = None,
-    logger: Optional[Logger] = None,
-)
+    logger: Logger | None = None,
+) -> AsyncClient:
+    ...
 ```
 
 **Configuration Parameters (choose one approach):**
@@ -145,10 +145,14 @@ Synchronous wrapper around AsyncClient. Use for scripts and basic applications.
 
 **Constructor:**
 ```python
-from fivetwenty import Client
+from logging import Logger
+
+import httpx
+
+from fivetwenty import Client, AccountConfig, Environment
 
 # Constructor signature (same as AsyncClient):
-Client(
+def Client(
     token: str | None = None,
     *,
     account_id: str | None = None,
@@ -161,8 +165,9 @@ Client(
     proxies: str | None = None,
     verify: bool | str = True,
     cert: str | None = None,
-    logger: Optional[Logger] = None,
-)
+    logger: Logger | None = None,
+) -> Client:
+    ...
 ```
 
 **Parameters:**
@@ -311,14 +316,14 @@ except ValueError as e:
 
 **ValidationError**: Raised for invalid configuration values:
 ```python
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from fivetwenty import AccountConfig, Environment
 
 try:
     config = AccountConfig(
-        token="",  # Empty token - will fail validation
-        account_id="account",
+        token=SecretStr(""),  # Empty token - will fail validation
+        account_id=SecretStr("account"),
         environment=Environment.PRACTICE,
         alias="123invalid",  # Invalid alias - must start with letter
     )
@@ -444,16 +449,22 @@ export STRATEGY_B_OANDA_ACCOUNT_ALIAS="grid_strategy"
 ```
 
 ```python
+import asyncio
+
 from fivetwenty import AccountConfigLoader, AsyncClient
 
-# Load configurations with custom prefixes
-momentum_config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")
-grid_config = AccountConfigLoader.from_env_prefix("STRATEGY_B_")
 
-# Use in clients
-async with AsyncClient(config=momentum_config) as momentum_client:
-    print(f"Momentum: {momentum_client.config.summary()}")
+async def main() -> None:
+    # Load configurations with custom prefixes
+    momentum_config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")
+    grid_config = AccountConfigLoader.from_env_prefix("STRATEGY_B_")
 
-async with AsyncClient(config=grid_config) as grid_client:
-    print(f"Grid: {grid_client.config.summary()}")
+    # Use in clients
+    async with AsyncClient(config=momentum_config) as momentum_client:
+        print(f"Momentum: {momentum_client.config.summary()}")
+
+    async with AsyncClient(config=grid_config) as grid_client:
+        print(f"Grid: {grid_client.config.summary()}")
+
+asyncio.run(main())
 ```

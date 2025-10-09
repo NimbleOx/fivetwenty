@@ -69,6 +69,7 @@ Enhanced exception for all OANDA API errors with comprehensive error information
 import asyncio
 
 from fivetwenty import AsyncClient, FiveTwentyError
+from fivetwenty.models import InstrumentName
 
 
 async def main() -> None:
@@ -76,7 +77,7 @@ async def main() -> None:
         try:
             await client.orders.post_market_order(
                 account_id=client.account_id,
-                instrument="EUR_USD",
+                instrument=InstrumentName.EUR_USD,
                 units=10000,
             )
         except FiveTwentyError as e:
@@ -166,37 +167,38 @@ asyncio.run(main())
 
 ### Basic Error Handling
 ```python
+from typing import Any
+
 from fivetwenty import AsyncClient, FiveTwentyError
 
 
-async def safe_api_call(client: AsyncClient, account_id: str):
+async def safe_api_call(client: AsyncClient, account_id: str) -> Any:
     """Safely call API with error handling."""
     try:
-        result = await client.accounts.get_account_summary(account_id)
-        return result
-
+        return await client.accounts.get_account_summary(account_id)
     except FiveTwentyError as e:
         # Check specific error types using properties
         if e.is_authentication_error:
             print(f"Authentication failed: {e.message}")
-        elif e.is_not_found:
+            return None
+        if e.is_not_found:
             print(f"Account not found: {account_id}")
-        else:
-            print(f"OANDA API error: {e.code} - {e.message}")
-
+            return None
+        print(f"OANDA API error: {e.code} - {e.message}")
         return None
 ```
 
 ### Retry with Exponential Backoff
 ```python
 import asyncio
-import random
 from collections.abc import Awaitable, Callable
+from secrets import SystemRandom
 from typing import TypeVar
 
 from fivetwenty import FiveTwentyError
 
 T = TypeVar("T")
+_random = SystemRandom()
 
 
 async def retry_api_call(
@@ -207,8 +209,7 @@ async def retry_api_call(
     for attempt in range(max_retries + 1):
         try:
             return await func()
-
-        except FiveTwentyError as e:
+        except FiveTwentyError as e:  # noqa: PERF203
             # Don't retry non-retryable errors
             if not e.retryable:
                 raise
@@ -221,10 +222,7 @@ async def retry_api_call(
                 raise
 
             # Use retry_after for rate limiting, otherwise exponential backoff
-            if e.retry_after:
-                delay = float(e.retry_after)
-            else:
-                delay = 2**attempt + random.uniform(0, 1)
+            delay = float(e.retry_after) if e.retry_after else 2**attempt + _random.uniform(0, 1)
 
             print(f"Retry attempt {attempt + 1}/{max_retries} after {delay:.1f}s")
             await asyncio.sleep(delay)

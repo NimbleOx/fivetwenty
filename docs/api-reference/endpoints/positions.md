@@ -104,6 +104,7 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from fivetwenty import AsyncClient
+from fivetwenty.models import InstrumentName
 
 if TYPE_CHECKING:
     from fivetwenty.endpoints.positions import PositionResponse
@@ -116,7 +117,7 @@ async def main() -> None:
 
         result: PositionResponse = await client.positions.get_position(
             account_id=client.account_id,
-            instrument="EUR_USD"
+            instrument=InstrumentName.EUR_USD
         )
         position = result["position"]
         print(f"Instrument: {position.instrument}")
@@ -152,6 +153,7 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from fivetwenty import AsyncClient
+from fivetwenty.models import InstrumentName
 
 if TYPE_CHECKING:
     from fivetwenty.endpoints.positions import ClosePositionResponse
@@ -167,7 +169,7 @@ async def main() -> None:
 
         result: ClosePositionResponse = await client.positions.close_position(
             account_id=client.account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             long_units="ALL",
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")

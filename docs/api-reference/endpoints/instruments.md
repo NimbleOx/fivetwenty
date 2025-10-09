@@ -9,11 +9,10 @@ Instrument information and historical data.
 ## candles
 ```python
 import asyncio
-from datetime import datetime
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.instruments import CandlesResponse
-from fivetwenty.models import CandlestickGranularity, InstrumentName
+from fivetwenty.models import CandlestickGranularity
 
 
 async def main() -> None:
@@ -62,6 +61,7 @@ Get historical candle data for an instrument.
 | `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") (keyword-only) |
 
 **Returns:** `CandlesResponse` TypedDict containing:
+
 - `instrument`: InstrumentName enum
 - `granularity`: CandlestickGranularity enum
 - `candles`: list of Candlestick models

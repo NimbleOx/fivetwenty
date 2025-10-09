@@ -10,18 +10,20 @@ Order creation, modification, and management.
 
 ```python
 import asyncio
+from decimal import Decimal
+
 from fivetwenty import AsyncClient
-from fivetwenty.models import MarketOrderRequest
 from fivetwenty.endpoints.orders import OrderResponse
+from fivetwenty.models import InstrumentName, MarketOrderRequest
 
 
-async def main():
+async def main() -> None:
     async with AsyncClient() as client:
         order_response: OrderResponse = await client.orders.post_order(
             account_id=client.account_id,
             order_request=MarketOrderRequest(
-                instrument="EUR_USD",
-                units=1000,
+                instrument=InstrumentName.EUR_USD,
+                units=Decimal(1000),
             ),
             client_request_id="my-order-123",
         )
@@ -58,15 +60,17 @@ Create a new order using any order request type.
 ```python
 import asyncio
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
+from fivetwenty.models import InstrumentName
 
 
-async def main():
+async def main() -> None:
     async with AsyncClient() as client:
         order: OrderResponse = await client.orders.post_market_order(
             account_id=client.account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000,
             take_profit=Decimal("1.1500"),
             stop_loss=Decimal("1.1200"),
@@ -107,15 +111,17 @@ Create a market order (convenience method).
 ```python
 import asyncio
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
+from fivetwenty.models import InstrumentName
 
 
-async def main():
+async def main() -> None:
     async with AsyncClient() as client:
         order: OrderResponse = await client.orders.post_limit_order(
             account_id=client.account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000,
             price=Decimal("1.1350"),
         )
@@ -157,15 +163,17 @@ Create a limit order (convenience method).
 ```python
 import asyncio
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
+from fivetwenty.models import InstrumentName
 
 
-async def main():
+async def main() -> None:
     async with AsyncClient() as client:
         order: OrderResponse = await client.orders.post_stop_order(
             account_id=client.account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000,
             price=Decimal("1.1200"),
         )
@@ -208,15 +216,17 @@ Create a stop order (convenience method).
 ```python
 import asyncio
 from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.orders import OrderResponse
+from fivetwenty.models import InstrumentName
 
 
-async def main():
+async def main() -> None:
     async with AsyncClient() as client:
         order: OrderResponse = await client.orders.post_market_if_touched_order(
             account_id=client.account_id,
-            instrument="EUR_USD",
+            instrument=InstrumentName.EUR_USD,
             units=1000,
             price=Decimal("1.1400"),
         )

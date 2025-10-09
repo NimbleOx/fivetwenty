@@ -30,10 +30,6 @@ Secure configuration object for OANDA account credentials and settings.
 ### Class Definition
 
 ```python
-from pydantic import BaseModel, SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
 # AccountConfig fields (in order):
 # - account_id: SecretStr (required)
 # - alias: str (required)
@@ -47,12 +43,13 @@ from fivetwenty import AccountConfig, Environment
 from fivetwenty import AccountConfig, Environment
 
 # Constructor signature:
-AccountConfig(
+def AccountConfig(
     account_id: str,
     alias: str,
     token: str,
     environment: Environment,
-)
+) -> AccountConfig:
+    ...
 ```
 
 **Parameters:**
@@ -71,21 +68,23 @@ AccountConfig(
 ```python
 import os
 
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 # Basic configuration
 config = AccountConfig(
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     alias="my_trading_account",
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
     environment=Environment.PRACTICE,
 )
 
 # Live trading configuration
 live_config = AccountConfig(
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     alias="production_trading",
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
     environment=Environment.LIVE,
 )
 ```
@@ -97,11 +96,14 @@ Protected API token that never appears in logs or string representations.
 
 ```python
 import os
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
+    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     environment=Environment.PRACTICE,
     alias="example"
 )
@@ -117,11 +119,14 @@ Protected account ID that never appears in logs or string representations.
 
 ```python
 import os
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
+    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     environment=Environment.PRACTICE,
     alias="example"
 )
@@ -137,11 +142,14 @@ Trading environment (practice or live).
 
 ```python
 import os
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
+    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     environment=Environment.PRACTICE,
     alias="example"
 )
@@ -156,12 +164,15 @@ User-friendly identifier for the account configuration.
 
 ```python
 import os
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
     alias="my_bot",
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
+    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     environment=Environment.PRACTICE
 )
 print("Bot name:", config.alias)  # Safe to log
@@ -177,16 +188,19 @@ Returns safe summary string suitable for logging.
 
 **Usage:**
 ```python
-from fivetwenty import AccountConfig, Environment
 import logging
+
+from pydantic import SecretStr
+
+from fivetwenty import AccountConfig, Environment
 
 logger = logging.getLogger(__name__)
 
 config = AccountConfig(
     alias="my_trader",
     environment=Environment.PRACTICE,
-    token="token",
-    account_id="account_id",
+    token=SecretStr("token"),
+    account_id=SecretStr("account_id"),
 )
 print(config.summary())
 logger.info("Starting trading session: %s", config.summary())
@@ -204,11 +218,14 @@ All secret values are automatically masked in string representations:
 
 ```python
 import os
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
+    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     alias="demo_account",
     environment=Environment.PRACTICE,
 )
@@ -230,15 +247,16 @@ print(config.summary())
 The configuration validates all inputs:
 
 ```python
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
+
 from fivetwenty import AccountConfig, Environment
 
 # Invalid alias (starts with number)
 try:
     AccountConfig(
         alias="123invalid",  # Must be valid identifier
-        token="token",
-        account_id="account",
+        token=SecretStr("token"),
+        account_id=SecretStr("account"),
         environment=Environment.PRACTICE,
     )
 except ValidationError:
@@ -247,8 +265,8 @@ except ValidationError:
 # Empty token
 try:
     AccountConfig(
-        token="   ",  # Whitespace-only
-        account_id="account",
+        token=SecretStr("   "),  # Whitespace-only
+        account_id=SecretStr("account"),
         environment=Environment.PRACTICE,
         alias="valid_alias",
     )
@@ -371,11 +389,13 @@ Validate an account configuration and return any errors found.
 
 **Usage:**
 ```python
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, ConfigValidator, Environment
 
 config = AccountConfig(
-    token="valid-token",
-    account_id="valid-account",
+    token=SecretStr("valid-token"),
+    account_id=SecretStr("valid-account"),
     environment=Environment.PRACTICE,
     alias="valid_alias",
 )
@@ -392,6 +412,8 @@ else:
 **Error Handling Example:**
 ```python
 # Create config with potential issues
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 # For this example, we define a simple validator
@@ -406,8 +428,8 @@ class ConfigValidator:
         return errors
 
 config = AccountConfig(
-    token="valid-token",
-    account_id="",  # Empty account ID
+    token=SecretStr("valid-token"),
+    account_id=SecretStr(""),  # Empty account ID
     environment=Environment.PRACTICE,
     alias="123invalid",  # Invalid alias
 )
@@ -461,20 +483,22 @@ Live trading environment with real money.
 ### Usage
 
 ```python
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 # Create configurations for different environments
 practice_config = AccountConfig(
     environment=Environment.PRACTICE,
-    token="practice_token",
-    account_id="practice_account_id",
+    token=SecretStr("practice_token"),
+    account_id=SecretStr("practice_account_id"),
     alias="practice",
 )
 
 live_config = AccountConfig(
     environment=Environment.LIVE,
-    token="live_token",
-    account_id="live_account_id",
+    token=SecretStr("live_token"),
+    account_id=SecretStr("live_account_id"),
     alias="live",
 )
 
@@ -495,11 +519,14 @@ print("API URL:", config.environment.base_url)
 
 ```python
 import os
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
-    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
-    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
+    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
+    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     environment=Environment.PRACTICE,
     alias="basic_trading"
 )
@@ -577,10 +604,9 @@ def load_production_config() -> AccountConfig:
         raise RuntimeError(env_error_msg)
 
     # Extra validation for live
-    if config.environment == Environment.LIVE:
-        if "practice" in config.token.get_secret_value().lower():
-            practice_error_msg = "Practice token detected in live environment"
-            raise RuntimeError(practice_error_msg)
+    if config.environment == Environment.LIVE and "practice" in config.token.get_secret_value().lower():
+        practice_error_msg = "Practice token detected in live environment"
+        raise RuntimeError(practice_error_msg)
 
     return config
 ```
@@ -593,13 +619,16 @@ def load_production_config() -> AccountConfig:
 
 ```python
 import logging
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 logger = logging.getLogger(__name__)
 # Define config for demonstration
 config = AccountConfig(
-    token="demo-token",
-    account_id="demo-account",
+    token=SecretStr("demo-token"),
+    account_id=SecretStr("demo-account"),
     environment=Environment.PRACTICE,
     alias="demo"
 )
@@ -621,7 +650,8 @@ def safe_client_creation(config: AccountConfig) -> AsyncClient:
     """Create client with validation."""
     errors = ConfigValidator.validate_account_config(config)
     if errors:
-        raise ValueError(f"Invalid config: {', '.join(errors)}")
+        error_message = f"Invalid config: {', '.join(errors)}"
+        raise ValueError(error_message)
 
     return AsyncClient(config=config)
 ```
@@ -640,7 +670,8 @@ def load_env_specific_config(env: str) -> AccountConfig:
     config = AccountConfigLoader.from_env_prefix(prefix)
 
     if not config:
-        raise ValueError(f"No {env} configuration found")
+        error_message = f"No {env} configuration found"
+        raise ValueError(error_message)
 
     return config
 ```
@@ -660,7 +691,8 @@ async def verify_config_connection(config: AccountConfig) -> bool:
             accounts = await client.accounts.get_accounts()
             return len(accounts) > 0
     except Exception as e:
-        logger.error(f"Config verification failed: {e}")
+        error_msg = f"Config verification failed: {e}"
+        logger.exception(error_msg)
         return False
 ```
 
@@ -672,6 +704,9 @@ async def verify_config_connection(config: AccountConfig) -> bool:
 
 ```python
 import os
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 class ConfigFactory:
@@ -681,8 +716,8 @@ class ConfigFactory:
     def create_practice_config(alias: str) -> AccountConfig:
         """Create practice configuration from environment."""
         return AccountConfig(
-            token=os.environ["FIVETWENTY_PRACTICE_TOKEN"],
-            account_id=os.environ["FIVETWENTY_PRACTICE_ACCOUNT"],
+            token=SecretStr(os.environ["FIVETWENTY_PRACTICE_TOKEN"]),
+            account_id=SecretStr(os.environ["FIVETWENTY_PRACTICE_ACCOUNT"]),
             environment=Environment.PRACTICE,
             alias=alias,
         )
@@ -692,14 +727,16 @@ class ConfigFactory:
         """Create live configuration with extra validation."""
         token = os.environ.get("FIVETWENTY_LIVE_TOKEN")
         if not token:
-            raise ValueError("Live token not found")
+            error_msg = "Live token not found"
+            raise ValueError(error_msg)
 
         if "practice" in token.lower():
-            raise ValueError("Practice token used for live config")
+            error_msg = "Practice token used for live config"
+            raise ValueError(error_msg)
 
         return AccountConfig(
-            token=token,
-            account_id=os.environ["FIVETWENTY_LIVE_ACCOUNT"],
+            token=SecretStr(token),
+            account_id=SecretStr(os.environ["FIVETWENTY_LIVE_ACCOUNT"]),
             environment=Environment.LIVE,
             alias=alias,
         )
@@ -736,7 +773,8 @@ class ConfigManager:
         """Get configuration by name."""
         config = self.configs.get(name)
         if not config:
-            raise ValueError(f"Configuration '{name}' not found")
+            error_msg = f"Configuration '{name}' not found"
+            raise ValueError(error_msg)
         return config
 
     def list_configs(self) -> dict[str, str]:
@@ -760,12 +798,14 @@ Raised by Pydantic when configuration parameters are invalid.
 **Example:**
 ```python
 from pydantic import ValidationError
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, Environment
 
 try:
     config = AccountConfig(
-        token="",
-        account_id="123",
+        token=SecretStr(""),
+        account_id=SecretStr("123"),
         environment=Environment.PRACTICE,
         alias="123invalid",
     )
@@ -784,7 +824,8 @@ from fivetwenty import AccountConfigLoader
 
 config = AccountConfigLoader.load_default()
 if not config:
-    raise ValueError("Required environment variables not set")
+    error_msg = "Required environment variables not set"
+    raise ValueError(error_msg)
 ```
 
 ---
@@ -795,6 +836,9 @@ if not config:
 
 ```python
 import os
+
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Old way
@@ -813,8 +857,8 @@ client = AsyncClient(
 
 # New way - Configuration object (recommended)
 config = AccountConfig(
-    token="token",
-    account_id="account",
+    token=SecretStr("token"),
+    account_id=SecretStr("account"),
     environment=Environment.PRACTICE,
     alias="my_account"
 )
@@ -841,12 +885,14 @@ client = AsyncClient(config=config)
 
 ```python
 # Add validation to existing configurations
+from pydantic import SecretStr
+
 from fivetwenty import AccountConfig, ConfigValidator, Environment
 
 # Sample config for validation
 config = AccountConfig(
-    token="demo-token",
-    account_id="demo-account",
+    token=SecretStr("demo-token"),
+    account_id=SecretStr("demo-account"),
     environment=Environment.PRACTICE,
     alias="demo"
 )
