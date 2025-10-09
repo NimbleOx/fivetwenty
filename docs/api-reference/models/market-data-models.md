@@ -59,21 +59,6 @@ Heartbeat message for pricing streams.
 | `type` | str | ➖ | Always "HEARTBEAT" |
 | `time` | [DateTime](system-models.md#type-aliases) |✅ | Heartbeat timestamp |
 
-### Price
-General price representation (alternative to ClientPrice for different contexts).
-
-🔗 **OANDA Definition**: [Price](https://developer.oanda.com/rest-live-v20/pricing-df/#Price)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument identifier |
-| `time` | [DateTime](system-models.md#type-aliases) |✅ | Timestamp when price was created |
-| `tradeable` | bool | ✅ | Whether the instrument is currently tradeable |
-| `bids` | list[[PriceBucket](#pricebucket)] | ✅ | Available bid prices and liquidity levels |
-| `asks` | list[[PriceBucket](#pricebucket)] | ✅ | Available ask prices and liquidity levels |
-| `closeout_bid` | [PriceValue](system-models.md#type-aliases) |✅ | Bid price used for position closeout (closing long positions) |
-| `closeout_ask` | [PriceValue](system-models.md#type-aliases) |✅ | Ask price used for position closeout (closing short positions) |
-
 ### UnitsAvailable
 Representation of how many units of an Instrument are available to be traded.
 
@@ -81,10 +66,10 @@ Representation of how many units of an Instrument are available to be traded.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `default` | Decimal | ✅ | Default units available |
-| `reduce_first` | Decimal | ✅ | Units available for reduce-first fills |
-| `reduce_only` | Decimal | ✅ | Units available for reduce-only fills |
-| `open_only` | Decimal | ✅ | Units available for open-only fills |
+| `default` | dict[str, Decimal] | ✅ | Default units available by instrument |
+| `reduce_first` | dict[str, Decimal] | ✅ | Units available for reduce-first fills by instrument |
+| `reduce_only` | dict[str, Decimal] | ✅ | Units available for reduce-only fills by instrument |
+| `open_only` | dict[str, Decimal] | ✅ | Units available for open-only fills by instrument |
 
 ### PriceBucket
 Price level with available liquidity.
@@ -93,8 +78,8 @@ Price level with available liquidity.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `price` | Decimal | ✅ | The quoted price at this level |
-| `liquidity` | int | ✅ | Available volume (units) at this price level |
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | The quoted price at this level |
+| `liquidity` | Decimal | ✅ | Available volume (units) at this price level |
 
 ### Candlestick
 OHLC candlestick data for an instrument.
@@ -117,10 +102,10 @@ Open, High, Low, Close data for one price type.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `o` | Decimal | ✅ | Opening price for the time period |
-| `h` | Decimal | ✅ | Highest price during the time period |
-| `l` | Decimal | ✅ | Lowest price during the time period |
-| `c` | Decimal | ✅ | Closing price for the time period |
+| `o` | [PriceValue](system-models.md#type-aliases) | ✅ | Opening price for the time period |
+| `h` | [PriceValue](system-models.md#type-aliases) | ✅ | Highest price during the time period |
+| `l` | [PriceValue](system-models.md#type-aliases) | ✅ | Lowest price during the time period |
+| `c` | [PriceValue](system-models.md#type-aliases) | ✅ | Closing price for the time period |
 
 ---
 
@@ -151,17 +136,6 @@ Trading instrument information and specifications.
 | `financing` | [InstrumentFinancing](#instrumentfinancing) | ➖ | Daily financing rate details for long and short positions |
 | `tags` | list[[Tag](#tag)] | ✅ | Descriptive tags for instrument categorization |
 
-### CandlestickResponse
-Container for multiple candlesticks with metadata.
-
-🔗 **OANDA Definition**: [CandlestickResponse](https://developer.oanda.com/rest-live-v20/instrument-df/#CandlestickResponse)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument identifier |
-| `granularity` | [CandlestickGranularity](enum-models.md#candlestickgranularity) | ✅ | Time interval of the candlesticks |
-| `candles` | list[[Candlestick](#candlestick)] | ✅ | Array of candlestick objects |
-
 ### CandlestickGranularity
 Time intervals for candlestick data.
 
@@ -190,21 +164,6 @@ Time intervals for candlestick data.
 | `D` | 1 day candlesticks | Week aligned |
 | `W` | 1 week candlesticks | Month aligned |
 | `M` | 1 month candlesticks | Year aligned |
-
-### WeeklyAlignment
-Days of the week for weekly alignment.
-
-🔗 **OANDA Definition**: [WeeklyAlignment](https://developer.oanda.com/rest-live-v20/instrument-df/#WeeklyAlignment)
-
-| Value | Description |
-|-------|-------------|
-| `Monday` | Weekly candlesticks aligned to Monday |
-| `Tuesday` | Weekly candlesticks aligned to Tuesday |
-| `Wednesday` | Weekly candlesticks aligned to Wednesday |
-| `Thursday` | Weekly candlesticks aligned to Thursday |
-| `Friday` | Weekly candlesticks aligned to Friday |
-| `Saturday` | Weekly candlesticks aligned to Saturday |
-| `Sunday` | Weekly candlesticks aligned to Sunday |
 
 ### InstrumentCommission
 Commission structure for trading instruments.

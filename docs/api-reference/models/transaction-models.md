@@ -54,12 +54,12 @@ Details of a new trade created as part of an OrderFill.
 |-------|------|----------|-------------|
 | `trade_id` | [TradeID](system-models.md#type-aliases) | ✅ | Unique identifier for the new trade |
 | `units` | Decimal | ✅ | Number of units in the new trade (positive for long, negative for short) |
-| `price` | Decimal | ✅ | Average price at which the trade was opened |
-| `guaranteed_execution_fee` | Decimal | ➖ | Guaranteed execution fee charged for the trade in account currency |
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Average price at which the trade was opened |
+| `guaranteed_execution_fee` | [AccountUnits](system-models.md#type-aliases) | ➖ | Guaranteed execution fee charged for the trade in account currency |
 | `quote_guaranteed_execution_fee` | Decimal | ➖ | Guaranteed execution fee in quote currency |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client-provided metadata for the trade |
-| `half_spread_cost` | Decimal | ➖ | Half-spread cost for opening the trade in account currency |
-| `initial_margin_required` | Decimal | ➖ | Initial margin requirement for the trade |
+| `half_spread_cost` | [AccountUnits](system-models.md#type-aliases) | ➖ | Half-spread cost for opening the trade in account currency |
+| `initial_margin_required` | [AccountUnits](system-models.md#type-aliases) | ➖ | Initial margin requirement for the trade |
 
 ### TradeReduce
 Details of a trade that was reduced or fully closed as part of an OrderFill.
@@ -70,15 +70,15 @@ Details of a trade that was reduced or fully closed as part of an OrderFill.
 |-------|------|----------|-------------|
 | `trade_id` | [TradeID](system-models.md#type-aliases) | ✅ | Unique identifier for the reduced/closed trade |
 | `units` | Decimal | ✅ | Number of units reduced from the trade (positive for long, negative for short) |
-| `price` | Decimal | ✅ | Average price at which the trade was reduced/closed |
-| `realized_pl` | Decimal | ➖ | Realized profit/loss from the reduction in account currency |
-| `financing` | Decimal | ➖ | Financing charges/credits applied during reduction in account currency |
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Average price at which the trade was reduced/closed |
+| `realized_pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Realized profit/loss from the reduction in account currency |
+| `financing` | [AccountUnits](system-models.md#type-aliases) | ➖ | Financing charges/credits applied during reduction in account currency |
 | `base_financing` | Decimal | ➖ | Financing in base currency |
 | `quote_financing` | Decimal | ➖ | Financing in quote currency |
 | `financing_rate` | Decimal | ➖ | Financing rate applied |
-| `guaranteed_execution_fee` | Decimal | ➖ | Guaranteed execution fee charged in account currency |
+| `guaranteed_execution_fee` | [AccountUnits](system-models.md#type-aliases) | ➖ | Guaranteed execution fee charged in account currency |
 | `quote_guaranteed_execution_fee` | Decimal | ➖ | Guaranteed execution fee in quote currency |
-| `half_spread_cost` | Decimal | ➖ | Half-spread cost for closing the trade in account currency |
+| `half_spread_cost` | [AccountUnits](system-models.md#type-aliases) | ➖ | Half-spread cost for closing the trade in account currency |
 
 ---
 
@@ -91,24 +91,25 @@ Transaction created when an order is filled.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the Order that was filled |
+| `order_id` | [OrderID](system-models.md#type-aliases) |✅ | ID of the Order that was filled |
 | `client_order_id` | str | ➖ | Client-specified order identifier |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the fill |
-| `units` | int | ✅ | Number of units filled by the order |
-| `price` | Decimal | ✅ | Execution price for the fill |
-| `pl` | Decimal | ✅ | Realized profit/loss from the fill |
-| `financing` | Decimal | ✅ | Financing applied to the fill |
-| `commission` | Decimal | ✅ | Commission charged for the fill |
-| `dividend_adjustment` | Decimal | ✅ | Dividend adjustment applied to the fill |
-| `account_balance` | Decimal | ✅ | Account balance after the fill transaction |
-| `trade_opened` | [TradeOpen](#tradeopen) | ➖ | Details of new trade created by the fill |
-| `trades_closed` | list[[TradeReduce](#tradereduce)] | ✅ | List of trades closed by the fill |
-| `trade_reduced` | [TradeReduce](#tradereduce) | ➖ | Details of trade reduced by the fill |
+| `units` | Decimal | ✅ | Number of units filled by the order |
+| `gain_quote_home_conversion_factor` | Decimal | ➖ | Conversion factor for gain calculation |
+| `loss_quote_home_conversion_factor` | Decimal | ➖ | Conversion factor for loss calculation |
+| `price` | [PriceValue](system-models.md#type-aliases) | ➖ | Execution price for the fill |
+| `full_vwap` | [PriceValue](system-models.md#type-aliases) | ➖ | Volume weighted average price for the fill |
+| `full_price` | FullPrice | ➖ | Complete pricing information including closeout bid/ask |
 | `reason` | str | ➖ | Reason for the order fill |
-| `guaranteed_execution_fee` | Decimal | ➖ | Guaranteed execution fee charged |
-| `quote_guaranteed_execution_fee` | Decimal | ➖ | Guaranteed execution fee in quote currency |
+| `pl` | Decimal | ➖ | Realized profit/loss from the fill |
+| `financing` | Decimal | ➖ | Financing applied to the fill |
+| `commission` | Decimal | ➖ | Commission charged for the fill |
+| `guarantee_execution_fee` | Decimal | ➖ | Guaranteed execution fee charged |
+| `account_balance` | Decimal | ➖ | Account balance after the fill transaction |
+| `trade_opened` | [TradeOpen](#tradeopen) | ➖ | Details of new trade created by the fill |
+| `trades_closed` | list[[TradeReduce](#tradereduce)] | ➖ | List of trades closed by the fill |
+| `trade_reduced` | [TradeReduce](#tradereduce) | ➖ | Details of trade reduced by the fill |
 | `half_spread_cost` | Decimal | ➖ | Half spread cost for the fill |
-| `full_vwap` | Decimal | ➖ | Volume weighted average price for the fill |
 
 ### OrderCancelTransaction
 Transaction created when an order is cancelled.
@@ -136,20 +137,20 @@ Transaction created when a Market Order is submitted.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
-| `units` | int | ✅ | Number of units to trade |
+| `units` | Decimal | ✅ | Number of units to trade |
 | `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy (FOK or IOC only) |
-| `price_bound` | Decimal | ➖ | Worst acceptable fill price |
+| `price_bound` | [PriceValue](system-models.md#type-aliases) | ➖ | Worst acceptable fill price |
 | `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
-| `trade_close` | [MarketOrderTradeClose](order-models.md#marketordertradeclose) | ➖ | Trade close details |
-| `long_position_closeout` | [MarketOrderPositionCloseout](order-models.md#marketorderpositioncloseout) | ➖ | Long position closeout details |
-| `short_position_closeout` | [MarketOrderPositionCloseout](order-models.md#marketorderpositioncloseout) | ➖ | Short position closeout details |
-| `margin_closeout` | [MarketOrderMarginCloseout](order-models.md#marketordermargincloseout) | ➖ | Margin closeout details |
-| `delayed_trade_close` | [MarketOrderDelayedTradeClose](order-models.md#marketorderdelayedtradeclose) | ➖ | Delayed trade close details |
+| `trade_close` | dict | ➖ | Trade close details |
+| `long_position_closeout` | dict | ➖ | Long position closeout details |
+| `short_position_closeout` | dict | ➖ | Short position closeout details |
+| `margin_closeout` | dict | ➖ | Margin closeout details |
+| `delayed_trade_close` | dict | ➖ | Delayed trade close details |
 | `reason` | str | ➖ | Reason for creating the market order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
-| `take_profit_on_fill` | [TakeProfitDetails](order-models.md#takeprofitdetails) | ➖ | Take profit order creation details |
-| `stop_loss_on_fill` | [StopLossDetails](order-models.md#stoplossdetails) | ➖ | Stop loss order creation details |
-| `trailing_stop_loss_on_fill` | [TrailingStopLossDetails](order-models.md#trailingstoplossdetails) | ➖ | Trailing stop loss order creation details |
+| `take_profit_on_fill` | dict | ➖ | Take profit order creation details |
+| `stop_loss_on_fill` | dict | ➖ | Stop loss order creation details |
+| `trailing_stop_loss_on_fill` | dict | ➖ | Trailing stop loss order creation details |
 | `trade_client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for created trades |
 
 ### LimitOrderTransaction
@@ -162,20 +163,18 @@ Transaction created when a Limit Order is submitted.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
-| `units` | int | ✅ | Number of units to trade |
-| `price` | Decimal | ✅ | Price threshold for order execution |
+| `units` | Decimal | ✅ | Number of units to trade |
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Price threshold for order execution |
 | `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
 | `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
 | `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `reason` | str | ➖ | Reason for creating the limit order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
-| `take_profit_on_fill` | [TakeProfitDetails](order-models.md#takeprofitdetails) | ➖ | Take profit order creation details |
-| `stop_loss_on_fill` | [StopLossDetails](order-models.md#stoplossdetails) | ➖ | Stop loss order creation details |
-| `trailing_stop_loss_on_fill` | [TrailingStopLossDetails](order-models.md#trailingstoplossdetails) | ➖ | Trailing stop loss order creation details |
+| `take_profit_on_fill` | dict | ➖ | Take profit order creation details |
+| `stop_loss_on_fill` | dict | ➖ | Stop loss order creation details |
+| `trailing_stop_loss_on_fill` | dict | ➖ | Trailing stop loss order creation details |
 | `trade_client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for created trades |
-| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
-| `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | ID of transaction that cancelled this order |
 
 ### StopOrderTransaction
 Transaction created when a Stop Order is submitted.
@@ -187,21 +186,19 @@ Transaction created when a Stop Order is submitted.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
-| `units` | int | ✅ | Number of units to trade |
-| `price` | Decimal | ✅ | Stop price threshold |
-| `price_bound` | Decimal | ➖ | Worst acceptable fill price after trigger |
+| `units` | Decimal | ✅ | Number of units to trade |
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Stop price threshold |
+| `price_bound` | [PriceValue](system-models.md#type-aliases) | ➖ | Worst acceptable fill price after trigger |
 | `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
 | `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
 | `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `reason` | str | ➖ | Reason for creating the stop order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
-| `take_profit_on_fill` | [TakeProfitDetails](order-models.md#takeprofitdetails) | ➖ | Take profit order creation details |
-| `stop_loss_on_fill` | [StopLossDetails](order-models.md#stoplossdetails) | ➖ | Stop loss order creation details |
-| `trailing_stop_loss_on_fill` | [TrailingStopLossDetails](order-models.md#trailingstoplossdetails) | ➖ | Trailing stop loss order creation details |
+| `take_profit_on_fill` | dict | ➖ | Take profit order creation details |
+| `stop_loss_on_fill` | dict | ➖ | Stop loss order creation details |
+| `trailing_stop_loss_on_fill` | dict | ➖ | Trailing stop loss order creation details |
 | `trade_client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for created trades |
-| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
-| `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | ID of transaction that cancelled this order |
 
 ## Specialized Order Transactions
 
@@ -215,15 +212,13 @@ Transaction created when a Take Profit Order is submitted.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close with take profit order |
-| `price` | Decimal | ✅ | Take profit trigger price |
+| `client_trade_id` | str | ➖ | Client-provided trade identifier |
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Take profit trigger price |
 | `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
 | `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `reason` | str | ➖ | Reason for creating the take profit order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
-| `order_fill_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | ID of transaction that filled this order |
-| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
-| `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | ID of transaction that cancelled this order |
 
 ### StopLossOrderTransaction
 Transaction created when a Stop Loss Order is submitted.
@@ -235,17 +230,15 @@ Transaction created when a Stop Loss Order is submitted.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close with stop loss order |
-| `price` | Decimal | ➖ | Stop loss trigger price (either price or distance required) |
-| `distance` | Decimal | ➖ | Distance from trade price (either price or distance required) |
+| `client_trade_id` | str | ➖ | Client-provided trade identifier |
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Stop loss trigger price |
+| `distance` | Decimal | ➖ | Distance from trade price (alternative to price) |
 | `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
 | `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
-| `guaranteed` | bool | ✅ | Guaranteed execution flag |
+| `guaranteed` | bool | ➖ | Guaranteed execution flag (default: False) |
 | `reason` | str | ➖ | Reason for creating the stop loss order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
-| `order_fill_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | ID of transaction that filled this order |
-| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
-| `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | ID of transaction that cancelled this order |
 
 ### TrailingStopLossOrderTransaction
 Transaction created when a Trailing Stop Loss Order is submitted.
@@ -257,12 +250,10 @@ Transaction created when a Trailing Stop Loss Order is submitted.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close with trailing stop loss order |
+| `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `distance` | Decimal | ✅ | Trailing distance from trade price |
 | `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
 | `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `reason` | str | ➖ | Reason for creating the trailing stop loss order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
-| `order_fill_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | ID of transaction that filled this order |
-| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
-| `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | ID of transaction that cancelled this order |

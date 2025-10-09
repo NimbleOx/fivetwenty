@@ -11,7 +11,7 @@ Models for trade lifecycle management, position tracking, and P&L calculations.
 ### Trade
 Represents an open trade position.
 
-🔗 **OANDA Definition**: [Trade](https://developer.oanda.com/rest-live-v20/trade-df/#collapse_definition_5)
+🔗 **OANDA Definition**: [Trade](https://developer.oanda.com/rest-live-v20/trade-df/)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -40,7 +40,7 @@ Represents an open trade position.
 ### TradeSummary
 Condensed trade information for lists and overviews.
 
-🔗 **OANDA Definition**: [TradeSummary](https://developer.oanda.com/rest-live-v20/trade-df/#collapse_definition_6)
+🔗 **OANDA Definition**: [TradeSummary](https://developer.oanda.com/rest-live-v20/trade-df/)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -69,7 +69,7 @@ Condensed trade information for lists and overviews.
 ### TradeSpecifier
 The identification of a Trade as referred to by clients.
 
-🔗 **OANDA Definition**: [TradeSpecifier](https://developer.oanda.com/rest-live-v20/trade-df/#TradeSpecifier)
+🔗 **OANDA Definition**: [TradeSpecifier](https://developer.oanda.com/rest-live-v20/trade-df/)
 
 | Type | Format | Description |
 |------|--------|-------------|
@@ -83,7 +83,7 @@ The identification of a Trade as referred to by clients.
 ### TradeStateFilter
 The state to filter the Trades by.
 
-🔗 **OANDA Definition**: [TradeStateFilter](https://developer.oanda.com/rest-live-v20/trade-df/#TradeStateFilter)
+🔗 **OANDA Definition**: [TradeStateFilter](https://developer.oanda.com/rest-live-v20/trade-df/)
 
 | Value | Description |
 |-------|-------------|
@@ -95,13 +95,13 @@ The state to filter the Trades by.
 ### CalculatedTradeState
 The dynamic (calculated) state of an open Trade.
 
-🔗 **OANDA Definition**: [CalculatedTradeState](https://developer.oanda.com/rest-live-v20/trade-df/#CalculatedTradeState)
+🔗 **OANDA Definition**: [CalculatedTradeState](https://developer.oanda.com/rest-live-v20/trade-df/)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [TradeID](system-models.md#type-aliases) |✅ | Trade's identifier |
-| `unrealized_pl` | Decimal | ✅ | Trade's unrealized profit/loss |
-| `margin_used` | Decimal | ✅ | Margin currently used by the Trade |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Trade's unrealized profit/loss |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ✅ | Margin currently used by the Trade |
 
 ---
 
@@ -110,48 +110,48 @@ The dynamic (calculated) state of an open Trade.
 ### Position
 Aggregated position information for an instrument.
 
-🔗 **OANDA Definition**: [Position](https://developer.oanda.com/rest-live-v20/position-df/#collapse_definition_1)
+🔗 **OANDA Definition**: [Position](https://developer.oanda.com/rest-live-v20/position-df/)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Position's Instrument |
 | `long` | [PositionSide](#positionside) | ✅ | Long side details (aggregation of all long trades) |
 | `short` | [PositionSide](#positionside) | ✅ | Short side details (aggregation of all short trades) |
-| `pl` | Decimal | ✅ | Lifetime realized profit/loss for the Position |
-| `unrealized_pl` | Decimal | ✅ | Unrealized profit/loss from all open Trades |
-| `margin_used` | Decimal | ➖ | Margin currently used by the Position |
-| `resettable_pl` | Decimal | ✅ | Realized profit/loss since last reset |
-| `financing` | Decimal | ➖ | Total financing paid/collected for the Position (lifetime) |
-| `commission` | Decimal | ➖ | Total commission paid for the Position (lifetime) |
-| `dividend_adjustment` | Decimal | ➖ | Total dividend adjustments for the Position (lifetime) |
-| `guaranteed_execution_fees` | Decimal | ➖ | Total guaranteed stop loss fees for the Position (lifetime) |
+| `pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Lifetime realized profit/loss for the Position |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Unrealized profit/loss from all open Trades |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ➖ | Margin currently used by the Position |
+| `resettable_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Realized profit/loss since last reset |
+| `financing` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total financing paid/collected for the Position (lifetime) |
+| `commission` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total commission paid for the Position (lifetime) |
+| `dividend_adjustment` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total dividend adjustments for the Position (lifetime) |
+| `guaranteed_execution_fees` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total guaranteed stop loss fees for the Position (lifetime) |
 
 ### PositionSide
 One side (long or short) of a position.
 
-🔗 **OANDA Definition**: [PositionSide](https://developer.oanda.com/rest-live-v20/position-df/#collapse_definition_2)
+🔗 **OANDA Definition**: [PositionSide](https://developer.oanda.com/rest-live-v20/position-df/)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `units` | Decimal | ✅ | Position units (positive for long, negative for short) |
 | `average_price` | [PriceValue](system-models.md#type-aliases) |➖ | Volume-weighted average open price for this side |
 | `trade_ids` | list[[TradeID](system-models.md#type-aliases)] |✅ | Open Trade IDs contributing to this position side |
-| `pl` | Decimal | ✅ | Lifetime realized profit/loss for this side |
-| `unrealized_pl` | Decimal | ✅ | Unrealized profit/loss from open Trades on this side |
-| `resettable_pl` | Decimal | ✅ | Realized profit/loss since last reset for this side |
-| `financing` | Decimal | ➖ | Total financing for this side (lifetime) |
-| `dividend_adjustment` | Decimal | ➖ | Total dividend adjustments for this side |
-| `guaranteed_execution_fees` | Decimal | ➖ | Total guaranteed stop loss fees for this side (lifetime) |
+| `pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Lifetime realized profit/loss for this side |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Unrealized profit/loss from open Trades on this side |
+| `resettable_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Realized profit/loss since last reset for this side |
+| `financing` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total financing for this side (lifetime) |
+| `dividend_adjustment` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total dividend adjustments for this side |
+| `guaranteed_execution_fees` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total guaranteed stop loss fees for this side (lifetime) |
 
 ### CalculatedPositionState
 Dynamic calculated state of a position with real-time P&L calculations.
 
-🔗 **OANDA Definition**: [CalculatedPositionState](https://developer.oanda.com/rest-live-v20/position-df/#CalculatedPositionState)
+🔗 **OANDA Definition**: [CalculatedPositionState](https://developer.oanda.com/rest-live-v20/position-df/)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Position's instrument identifier |
-| `net_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Net unrealized profit/loss for the entire position |
-| `long_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Unrealized profit/loss for the long position side |
-| `short_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Unrealized profit/loss for the short position side |
-| `margin_used` | [AccountUnits](system-models.md#type-aliases) |➖ | Current margin used by the position |
+| `net_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Net unrealized profit/loss for the entire position |
+| `long_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Unrealized profit/loss for the long position side |
+| `short_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Unrealized profit/loss for the short position side |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ➖ | Current margin used by the position |

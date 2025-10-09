@@ -13,9 +13,9 @@ Configuration for streaming connections.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `include_heartbeats` | bool | ➖ | Include heartbeat messages (default: True) |
+| `include_heartbeats` | bool | ➖ | Include heartbeat messages in stream (default: True) |
 | `stall_timeout` | float | ➖ | Seconds before considering stream stalled (default: 30.0) |
-| `reconnection_policy` | [ReconnectionPolicy](#reconnectionpolicy) | ✅ | Reconnection settings (default: ReconnectionPolicy()) |
+| `reconnection_policy` | [ReconnectionPolicy](#reconnectionpolicy) | ➖ | Reconnection settings (default: ReconnectionPolicy()) |
 
 ### ReconnectionPolicy
 Policy for automatic reconnection.
@@ -34,10 +34,10 @@ Structured error information from API responses.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `error_code` | [FiveTwentyErrorCode](enum-models.md#fivetwentyerrorcode) | ✅ | Standardized error code |
-| `error_message` | str | ✅ | Human-readable error description |
-| `details` | dict | ✅ | Additional error context |
-| `violations` | list[[ValidationViolation](#validationviolation)] | ✅ | Field validation errors |
+| `message` | str | ✅ | Primary error message |
+| `code` | str | ➖ | Primary error code |
+| `violations` | list[[ValidationViolation](#validationviolation)] | ➖ | Field validation errors (default: empty list) |
+| `additional_fields` | dict[str, any] | ➖ | Additional error context from API response (default: empty dict) |
 
 ### ValidationViolation
 Specific field validation error.
@@ -46,7 +46,7 @@ Specific field validation error.
 |-------|------|----------|-------------|
 | `field` | str | ✅ | Field name with validation error |
 | `message` | str | ✅ | Validation error message |
-| `rejected_value` | any | ✅ | Value that failed validation |
+| `code` | str | ➖ | Machine-readable error code for the violation |
 
 ---
 
@@ -102,7 +102,6 @@ Types of orders that can be created.
 | `STOP_LOSS` | Stop Loss Order - closes trade to limit losses |
 | `GUARANTEED_STOP_LOSS` | Guaranteed Stop Loss Order - guaranteed execution with slippage protection |
 | `TRAILING_STOP_LOSS` | Trailing Stop Loss Order - dynamic stop loss that follows price |
-| `FIXED_PRICE` | Fixed Price Order - immediate execution at specified price |
 
 #### OrderState
 Current state of an order in its lifecycle.

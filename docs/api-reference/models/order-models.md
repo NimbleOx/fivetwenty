@@ -159,23 +159,6 @@ Request to create a market-if-touched order (market order triggered at specific 
 | `trailing_stop_loss_on_fill` | [TrailingStopLossDetails](#trailingstoplossdetails) | ➖ | Trailing stop loss order creation details to be applied on fill |
 | `trade_client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for any trades created by this order |
 
-### FixedPriceOrderRequest
-Request to create a fixed price order (immediate execution at specified price).
-
-🔗 **OANDA Definition**: [FixedPriceOrderRequest](https://developer.oanda.com/rest-live-v20/order-df/#FixedPriceOrderRequest)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to FIXED_PRICE) |
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
-| `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
-| `price` | [PriceValue](system-models.md#type-aliases) |✅ | Exact execution price |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled (default: DEFAULT) |
-| `trade_state` | str | ✅ | Resulting trade state |
-| `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details to be applied on fill |
-| `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details to be applied on fill |
-| `trailing_stop_loss_on_fill` | [TrailingStopLossDetails](#trailingstoplossdetails) | ➖ | Trailing stop loss order creation details to be applied on fill |
-| `trade_client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for any trades created by this order |
 
 ## Order Response Models
 
@@ -308,18 +291,6 @@ Guaranteed stop loss order linked to an open trade with guaranteed execution.
 | `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
 | `replaced_by_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order that replaced this one |
 
-### OrderResponse
-Response from order creation/modification requests.
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `order_create_transaction` | [Transaction](transaction-models.md#transaction) | ➖ | Transaction that created the order |
-| `order_fill_transaction` | [OrderFillTransaction](transaction-models.md#orderfilltransaction) | ➖ | Transaction that filled the order (if immediately filled) |
-| `order_cancel_transaction` | [OrderCancelTransaction](transaction-models.md#ordercanceltransaction) | ➖ | Transaction that cancelled the order |
-| `order_reissue_transaction` | [Transaction](transaction-models.md#transaction) | ➖ | Transaction that reissued the order |
-| `order_reissue_reject_transaction` | [Transaction](transaction-models.md#transaction) | ➖ | Transaction that rejected order reissue |
-| `related_transaction_ids` | list[[TransactionID](system-models.md#type-aliases)] |✅ | IDs of all transactions related to this order request |
-| `last_transaction_id` | [TransactionID](system-models.md#type-aliases) |✅ | Most recent transaction ID in the account |
 
 ### TakeProfitOrder
 A Take Profit Order linked to an open Trade and created with a price threshold.
@@ -443,6 +414,8 @@ A Fixed Price Order filled immediately at specified price.
 
 🔗 **OANDA Definition**: [FixedPriceOrder](https://developer.oanda.com/rest-live-v20/order-df/#FixedPriceOrder)
 
+**Note**: Fixed price orders are typically created by OANDA for specific circumstances (e.g., dividend adjustments). They cannot be directly created via API requests.
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |➖ | Order's identifier, unique within Account |
@@ -476,7 +449,7 @@ Details for creating a Take Profit Order on fill.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `price` | Decimal | ✅ | Take profit trigger price |
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Take profit trigger price |
 | `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the take profit order |
@@ -587,12 +560,3 @@ Details for delayed trade close market order.
 | `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `source_transaction_id` | [TransactionID](system-models.md#type-aliases) |✅ | Transaction that initiated the delay |
 
-### OrderIdentifier
-Identification information for an Order.
-
-🔗 **OANDA Definition**: [OrderIdentifier](https://developer.oanda.com/rest-live-v20/order-df/#OrderIdentifier)
-
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `order_id` | [OrderID](system-models.md#type-aliases) |✅ | Order's OANDA-assigned identifier |
-| `client_order_id` | str | ➖ | Client-provided order identifier |

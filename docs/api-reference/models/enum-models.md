@@ -40,7 +40,6 @@ Available trading instruments supported by OANDA.
 | `EUR_PLN` | Euro / Polish Zloty |
 | `EUR_SEK` | Euro / Swedish Krona |
 | `EUR_SGD` | Euro / Singapore Dollar |
-| `EUR_THB` | Euro / Thai Baht |
 | `EUR_TRY` | Euro / Turkish Lira |
 | `EUR_USD` | Euro / US Dollar |
 | `EUR_ZAR` | Euro / South African Rand |
@@ -62,7 +61,6 @@ Available trading instruments supported by OANDA.
 | `NZD_SGD` | New Zealand Dollar / Singapore Dollar |
 | `NZD_USD` | New Zealand Dollar / US Dollar |
 | `SGD_CHF` | Singapore Dollar / Swiss Franc |
-| `SGD_HKD` | Singapore Dollar / Hong Kong Dollar |
 | `SGD_JPY` | Singapore Dollar / Japanese Yen |
 | `TRY_JPY` | Turkish Lira / Japanese Yen |
 | `USD_CAD` | US Dollar / Canadian Dollar |
@@ -111,6 +109,7 @@ Types of transactions that can occur in an account.
 | `TRANSFER_FUNDS_REJECT` | Fund transfer rejected |
 | `MARKET_ORDER` | Market order placed |
 | `MARKET_ORDER_REJECT` | Market order rejected |
+| `FIXED_PRICE_ORDER` | Fixed price order placed |
 | `LIMIT_ORDER` | Limit order placed |
 | `LIMIT_ORDER_REJECT` | Limit order rejected |
 | `LIMIT_ORDER_REPLACE` | Limit order modified |
@@ -126,6 +125,8 @@ Types of transactions that can occur in an account.
 | `STOP_LOSS_ORDER` | Stop loss order placed |
 | `STOP_LOSS_ORDER_REJECT` | Stop loss order rejected |
 | `STOP_LOSS_ORDER_REPLACE` | Stop loss order modified |
+| `GUARANTEED_STOP_LOSS_ORDER` | Guaranteed stop loss order placed |
+| `GUARANTEED_STOP_LOSS_ORDER_REJECT` | Guaranteed stop loss order rejected |
 | `TRAILING_STOP_LOSS_ORDER` | Trailing stop loss order placed |
 | `TRAILING_STOP_LOSS_ORDER_REJECT` | Trailing stop loss order rejected |
 | `TRAILING_STOP_LOSS_ORDER_REPLACE` | Trailing stop loss order modified |
@@ -330,82 +331,7 @@ Guaranteed stop loss order modes specific to instruments.
 | `ALLOWED` | GSL orders allowed for this instrument |
 | `REQUIRED` | GSL orders required for this instrument |
 
-## Error and Status Enums
-
-### FiveTwentyErrorCode
-
-Error codes specific to FiveTwenty.
-
-| Value | Description |
-|-------|-------------|
-| `STREAM_STALLED` | Streaming connection has stalled |
-| `CONNECTION_LOST` | Connection to OANDA API lost |
-| `AUTHENTICATION_FAILED` | API token authentication failed |
-| `RATE_LIMIT_EXCEEDED` | API rate limit exceeded |
-| `INVALID_CONFIGURATION` | SDK configuration is invalid |
-| `TIMEOUT` | Request timeout exceeded |
-
-### ErrorSeverity
-
-Severity levels for errors.
-
-| Value | Description |
-|-------|-------------|
-| `LOW` | Low severity - informational |
-| `MEDIUM` | Medium severity - warning |
-| `HIGH` | High severity - error |
-| `CRITICAL` | Critical severity - system failure |
-
-### ErrorCategory
-
-Categories of errors.
-
-| Value | Description |
-|-------|-------------|
-| `NETWORK` | Network-related errors |
-| `AUTHENTICATION` | Authentication errors |
-| `VALIDATION` | Input validation errors |
-| `BUSINESS` | Business logic errors |
-| `SYSTEM` | System-level errors |
-
-## Streaming Enums
-
-### StreamState
-
-State of a streaming connection.
-
-| Value | Description |
-|-------|-------------|
-| `CONNECTING` | Establishing connection |
-| `CONNECTED` | Successfully connected |
-| `DISCONNECTING` | Closing connection |
-| `DISCONNECTED` | Connection closed |
-| `FAILED` | Connection failed |
-| `RECONNECTING` | Attempting to reconnect |
-
 ## Filtering and Querying Enums
-
-### TransactionFilter
-
-Filter for transaction queries.
-
-**OANDA Definition**: [Transaction Endpoints](https://developer.oanda.com/rest-live-v20/transaction-ep/)
-
-| Value | Description |
-|-------|-------------|
-| `ORDER` | Order-related transactions |
-| `FUNDING` | Funding transactions |
-| `ADMIN` | Administrative transactions |
-| `CREATE` | Account creation transactions |
-| `CLOSE` | Account closure transactions |
-| `REOPEN` | Account reopening transactions |
-| `CLIENT_CONFIGURE` | Configuration transactions |
-| `TRANSFER_FUNDS` | Fund transfer transactions |
-| `MARKET_ORDER` | Market order transactions |
-| `ORDER_FILL` | Order fill transactions |
-| `ORDER_CANCEL` | Order cancellation transactions |
-| `MARGIN_CALL` | Margin call transactions |
-| `DAILY_FINANCING` | Daily financing transactions |
 
 ### TradeStateFilter
 

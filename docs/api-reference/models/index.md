@@ -74,18 +74,17 @@ Comprehensive order creation, management, and execution models.
 | [StopLossOrderRequest](order-models.md#stoplossorderrequest) | Request to create a stop loss order to limit trade losses |
 | [TrailingStopLossOrderRequest](order-models.md#trailingstoplossorderrequest) | Request to create a trailing stop loss that follows favorable price movement |
 | [MarketIfTouchedOrderRequest](order-models.md#marketiftouchedorderrequest) | Request to create an order that becomes market order when price touched |
-| [FixedPriceOrderRequest](order-models.md#fixedpriceorderrequest) | Request to create an order with fixed execution price (no slippage) |
-| [OrderResponse](order-models.md#orderresponse) | Standardized response wrapper for all order operations |
+| [GuaranteedStopLossOrderRequest](order-models.md#guaranteedstoplossorderrequest) | Request to create a guaranteed stop loss order with guaranteed execution |
 | [TakeProfitOrder](order-models.md#takeprofitorder) | Active take profit order attached to a trade for profit realization |
 | [StopLossOrder](order-models.md#stoplossorder) | Active stop loss order attached to a trade for loss limitation |
 | [TrailingStopLossOrder](order-models.md#trailingstoplossorder) | Active trailing stop that automatically adjusts with favorable price moves |
 | [MarketIfTouchedOrder](order-models.md#marketiftouchedorder) | Pending order that triggers market execution when price level touched |
-| [FixedPriceOrder](order-models.md#fixedpriceorder) | Order with guaranteed execution price and no slippage risk |
+| [FixedPriceOrder](order-models.md#fixedpriceorder) | System-created order with fixed execution price (typically for dividends) |
 | [TakeProfitDetails](order-models.md#takeprofitdetails) | Configuration details for take profit order creation |
 | [StopLossDetails](order-models.md#stoplossdetails) | Configuration details for stop loss order creation |
 | [TrailingStopLossDetails](order-models.md#trailingstoplossdetails) | Configuration details for trailing stop loss order creation |
+| [GuaranteedStopLossDetails](order-models.md#guaranteedstoplossdetails) | Configuration details for guaranteed stop loss order creation |
 | [ClientExtensions](order-models.md#clientextensions) | Custom metadata and tags for client-side order tracking |
-| [OrderIdentifier](order-models.md#orderidentifier) | Flexible order identification using OANDA ID or client ID |
 
 ### Market Data Models
 [**Pricing & Instruments →**](market-data-models.md)
