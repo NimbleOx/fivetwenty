@@ -203,7 +203,7 @@ Update account configuration settings.
 | `alias` | str | ➖ | Client-assigned account alias (display name) |
 | `margin_rate` | str | ➖ | Account margin rate as decimal string (e.g., "0.05" for 5%) |
 
-**Returns:** Updated account configuration
+**Returns:** Dictionary containing configuration transaction (`ClientConfigureTransaction`) and last transaction ID (`str`)
 
 **Raises:**
 
@@ -244,7 +244,7 @@ Get account state changes since specified transaction ID.
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `since_transaction_id` | str | ✅ | Transaction ID to get changes since |
 
-**Returns:** Account changes and current state
+**Returns:** Dictionary containing changes (`AccountChanges`), state (`AccountChangesState`), and last transaction ID (`str`)
 
 **Raises:**
 

@@ -47,11 +47,12 @@ Get a list of trades for an account.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
-| `ids` | list[TradeID] | ➖ | List of trade IDs to retrieve |
+| `*` | | | **Keyword-only parameters below** |
+| `ids` | list[TradeID] \| None | ➖ | List of trade IDs to retrieve |
 | `state` | TradeStateFilter | ➖ | Filter trades by state (default: OPEN) |
-| `instrument` | InstrumentName | ➖ | Filter trades by instrument |
+| `instrument` | InstrumentName \| None | ➖ | Filter trades by instrument |
 | `count` | int | ➖ | Maximum number of trades to return (default: 50, max: 500) |
-| `before_id` | TradeID | ➖ | Maximum trade ID to return |
+| `before_id` | TradeID \| None | ➖ | Maximum trade ID to return |
 
 **Returns:** Dictionary containing list of trades (`list[Trade]`) and last transaction ID (`str`)
 
@@ -188,8 +189,9 @@ Close a trade (fully or partially).
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
 | `trade_specifier` | str | ✅ | Trade ID or @clientID |
-| `units` | str | ➖ | Number of units to close (default: ALL for full closure) |
-| `idempotency_key` | str | ➖ | Idempotency key for duplicate prevention |
+| `*` | | | **Keyword-only parameters below** |
+| `units` | str \| None | ➖ | Number of units to close (default: ALL for full closure) |
+| `idempotency_key` | str \| None | ➖ | Idempotency key for duplicate prevention |
 
 **Returns:** Dictionary containing closure transaction details and last transaction ID (`str`)
 
@@ -238,8 +240,9 @@ Modify client extensions for existing trade.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `trade_specifier` | str | ✅ | Trade identifier to modify |
-| `client_extensions` | dict[str, Any] | ➖ | New trade client extensions |
-| `idempotency_key` | str | ➖ | Idempotency key for safe retries |
+| `*` | | | **Keyword-only parameters below** |
+| `client_extensions` | dict[str, Any] \| None | ➖ | New trade client extensions |
+| `idempotency_key` | str \| None | ➖ | Idempotency key for safe retries |
 
 **Returns:** Dictionary containing modification transaction details and last transaction ID (`str`)
 
@@ -291,11 +294,12 @@ Update trade-dependent orders (take profit, stop loss, etc.).
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `trade_specifier` | str | ✅ | Trade identifier to modify |
-| `take_profit` | dict[str, Any] | ➖ | Take profit order specification |
-| `stop_loss` | dict[str, Any] | ➖ | Stop loss order specification |
-| `trailing_stop_loss` | dict[str, Any] | ➖ | Trailing stop loss order specification |
-| `guaranteed_stop_loss` | dict[str, Any] | ➖ | Guaranteed stop loss order specification |
-| `idempotency_key` | str | ➖ | Idempotency key for safe retries |
+| `**kwargs` | Any | ➖ | **Keyword arguments below** |
+| `take_profit` | Any | ➖ | Take profit order specification |
+| `stop_loss` | Any | ➖ | Stop loss order specification |
+| `trailing_stop_loss` | Any | ➖ | Trailing stop loss order specification |
+| `guaranteed_stop_loss` | Any | ➖ | Guaranteed stop loss order specification |
+| `idempotency_key` | Any | ➖ | Idempotency key for safe retries |
 
 **Returns:** Dictionary containing order update transaction details and last transaction ID (`str`)
 

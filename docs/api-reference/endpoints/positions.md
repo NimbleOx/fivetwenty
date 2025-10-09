@@ -189,10 +189,11 @@ Close the open position for a specific instrument.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
 | `instrument` | InstrumentName | ✅ | Name of the instrument |
-| `long_units` | str &#124; Decimal | ➖ | Units of long position to close ("ALL", "NONE", or number) |
-| `short_units` | str &#124; Decimal | ➖ | Units of short position to close ("ALL", "NONE", or number) |
-| `long_client_extensions` | ClientExtensions &#124; dict[str, str] | ➖ | Client extensions for long position closure order |
-| `short_client_extensions` | ClientExtensions &#124; dict[str, str] | ➖ | Client extensions for short position closure order |
+| `*` | | | **Keyword-only parameters below** |
+| `long_units` | str \| Decimal \| None | ➖ | Units of long position to close ("ALL", "NONE", or number) |
+| `short_units` | str \| Decimal \| None | ➖ | Units of short position to close ("ALL", "NONE", or number) |
+| `long_client_extensions` | ClientExtensions \| dict[str, str] \| None | ➖ | Client extensions for long position closure order |
+| `short_client_extensions` | ClientExtensions \| dict[str, str] \| None | ➖ | Client extensions for short position closure order |
 
 **Returns:** Dictionary containing closure transaction details and last transaction ID (`str`)
 
