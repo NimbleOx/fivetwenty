@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, TypedDict
 
 from ..models import (
     AccountID,
+    ClientExtensions,
     GuaranteedStopLossOrderTransaction,
     InstrumentName,
     MarketOrderTransaction,
@@ -245,7 +246,7 @@ class TradeEndpoints:
         account_id: AccountID,
         trade_specifier: str,
         *,
-        client_extensions: dict[str, Any] | None = None,
+        client_extensions: ClientExtensions | None = None,
         idempotency_key: str | None = None,
     ) -> TradeClientExtensionsResponse:
         """
@@ -265,7 +266,7 @@ class TradeEndpoints:
         """
         data: dict[str, Any] = {}
         if client_extensions:
-            data["clientExtensions"] = client_extensions
+            data["clientExtensions"] = client_extensions.model_dump(by_alias=True, exclude_none=True, mode="json")
 
         headers: dict[str, str] = {}
         if idempotency_key:

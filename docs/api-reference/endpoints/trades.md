@@ -207,12 +207,13 @@ Close a trade (fully or partially).
 import asyncio
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import TradeClientExtensionsResponse
+from fivetwenty.models import ClientExtensions
 
 
 async def main() -> None:
     async with AsyncClient() as client:
         # trades.put_trade_client_extensions(account_id: AccountID, trade_specifier: str, *,
-        #                                    client_extensions: dict[str, Any] | None = None,
+        #                                    client_extensions: ClientExtensions | None = None,
         #                                    idempotency_key: str | None = None) -> TradeClientExtensionsResponse
         # Returns: {"tradeClientExtensionsModifyTransaction": TradeClientExtensionsModifyTransaction,
         #           "relatedTransactionIDs": list[str], "lastTransactionID": str} (fields may be optional)
@@ -220,7 +221,7 @@ async def main() -> None:
         result: TradeClientExtensionsResponse = await client.trades.put_trade_client_extensions(
             client.account_id,
             trade_specifier="12345",
-            client_extensions={"comment": "Updated comment"},
+            client_extensions=ClientExtensions(comment="Updated comment"),
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
@@ -241,7 +242,7 @@ Modify client extensions for existing trade.
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `trade_specifier` | str | ✅ | Trade identifier to modify |
 | `*` | | | **Keyword-only parameters below** |
-| `client_extensions` | dict[str, Any] \| None | ➖ | New trade client extensions |
+| `client_extensions` | ClientExtensions \| None | ➖ | New trade client extensions |
 | `idempotency_key` | str \| None | ➖ | Idempotency key for safe retries |
 
 **Returns:** Dictionary containing modification transaction details and last transaction ID (`str`)

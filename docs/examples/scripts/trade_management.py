@@ -311,10 +311,10 @@ async def main() -> None:
                 extension_response = await client.trades.put_trade_client_extensions(
                     account_id=client.account_id,
                     trade_specifier=update_trade_id,
-                    client_extensions={
-                        "comment": "Updated: Important trade",  # New comment
-                        "tag": "high-priority",  # New tag
-                    },
+                    client_extensions=ClientExtensions(
+                        comment="Updated: Important trade",  # New comment
+                        tag="high-priority",  # New tag
+                    ),
                 )
 
                 if extension_response.get("tradeClientExtensionsModifyTransaction"):

@@ -164,8 +164,8 @@ async def main() -> None:
         # positions.close_position(account_id: AccountID, instrument: InstrumentName, *,
         #                          long_units: str | Decimal | None = None,
         #                          short_units: str | Decimal | None = None,
-        #                          long_client_extensions: ClientExtensions | dict[str, str] | None = None,
-        #                          short_client_extensions: ClientExtensions | dict[str, str] | None = None) -> ClosePositionResponse
+        #                          long_client_extensions: ClientExtensions | None = None,
+        #                          short_client_extensions: ClientExtensions | None = None) -> ClosePositionResponse
 
         result: ClosePositionResponse = await client.positions.close_position(
             account_id=client.account_id,
@@ -194,8 +194,8 @@ Close the open position for a specific instrument.
 | `*` | | | **Keyword-only parameters below** |
 | `long_units` | str \| Decimal \| None | ➖ | Units of long position to close ("ALL", "NONE", or number) |
 | `short_units` | str \| Decimal \| None | ➖ | Units of short position to close ("ALL", "NONE", or number) |
-| `long_client_extensions` | ClientExtensions \| dict[str, str] \| None | ➖ | Client extensions for long position closure order |
-| `short_client_extensions` | ClientExtensions \| dict[str, str] \| None | ➖ | Client extensions for short position closure order |
+| `long_client_extensions` | ClientExtensions \| None | ➖ | Client extensions for long position closure order |
+| `short_client_extensions` | ClientExtensions \| None | ➖ | Client extensions for short position closure order |
 
 **Returns:** Dictionary containing closure transaction details and last transaction ID (`str`)
 
