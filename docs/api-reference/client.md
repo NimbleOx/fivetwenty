@@ -1,12 +1,5 @@
 # Client API Reference
 
-!!! note "📚 Reference - Information-oriented content"
-    **Use this reference when:** You need to look up specific method signatures, parameters, or return values
-
-    **Content type:** Comprehensive technical specifications for quick lookup
-
-    **Assumed knowledge:** Familiarity with FiveTwenty concepts and Python async programming
-
 Complete reference for FiveTwenty client interfaces and configuration.
 
 ---
@@ -399,23 +392,26 @@ OANDA API enforces rate limits:
 - Requires live trading account
 - Subject to margin requirements
 
-**Security Best Practices:**
+## Security Best Practices
 
-1. **Credential Protection:**
-   - Never commit tokens to version control
-   - Use environment variables or secure vaults for credentials
-   - Rotate tokens regularly
-   - Use separate tokens for practice and live environments
+### Credential Protection
 
-2. **Configuration Validation:**
-   - Always validate configuration before deployment
-   - Use structured `AccountConfig` objects in applications
-   - Test authentication before starting trading operations
+- Never commit tokens to version control
+- Use environment variables or secure vaults for credentials
+- Rotate tokens regularly
+- Use separate tokens for practice and live environments
 
-3. **Environment Separation:**
-   - Keep practice and live configurations fully separate
-   - Use different aliases to explicitly identify environments
-   - Never use live tokens in development or testing
+### Configuration Validation
+
+- Always validate configuration before deployment
+- Use structured `AccountConfig` objects in applications
+- Test authentication before starting trading operations
+
+### Environment Separation
+
+- Keep practice and live configurations fully separate
+- Use different aliases to explicitly identify environments
+- Never use live tokens in development or testing
 
 **Configuration Examples:**
 
@@ -470,3 +466,18 @@ async def main() -> None:
 
 asyncio.run(main())
 ```
+
+---
+
+## Next Steps
+
+Now that you understand client configuration, explore the API endpoints:
+
+- **[Accounts](endpoints/accounts.md)** - Get account details and configuration
+- **[Pricing](endpoints/pricing.md)** - Stream real-time prices and get historical candles
+- **[Orders](endpoints/orders.md)** - Place and manage trading orders
+- **[Trades](endpoints/trades.md)** - Monitor and close open trades
+- **[Positions](endpoints/positions.md)** - Track instrument positions
+- **[Transactions](endpoints/transactions.md)** - View transaction history
+
+For hands-on examples, see the [Getting Started Guide](../guides/getting-started.md).
