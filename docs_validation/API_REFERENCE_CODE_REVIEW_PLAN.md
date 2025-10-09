@@ -28,6 +28,7 @@ Save code block as as:
    ```
 3. **Test**: Run `uv run python <file>` to verify execution
 4. **Lint**: Run `ruff format --check`, `ruff check`, `mypy --strict`
+   - Note: Use the linting and typing ignore rules from `docs_validation/config/validation-complete.yml`
 5. **Review Code**:
    - Zero-config AsyncClient pattern, including use of python-dotenv
    - No emojis in code blocks
@@ -53,7 +54,7 @@ Save code block as as:
      6. FiveTwenty SDK Link
      7. Parameters table
      8. Returns (as TypedDict definition)
-     9. Raises (as bulleted list with specific error conditions):
+     9. Raises (as bulleted list with specific error conditions - the `FiveTwentyError` - API errors: line is not bulleted):
         `FiveTwentyError` with specific HTTP codes and conditions (as bulleted list with specific error conditions)
         - Include property checks (e.g., `e.is_authentication_error`, `e.is_rate_limited`)
         - Common conditions: 401/403 (authentication), 404 (not found), 429 (rate limit), 400 (validation)

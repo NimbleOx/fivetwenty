@@ -6,26 +6,28 @@ Instrument information and historical data.
 
 ---
 
-## candles
+## get_instrument_candles
+
+Get historical candle data for an instrument.
+
+**OANDA Endpoint**: `GET /v3/instruments/{instrument}/candles`
+
+<!-- code-block: instruments__get_instrument_candles -->
 ```python
 import asyncio
+
+from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.instruments import CandlesResponse
 from fivetwenty.models import CandlestickGranularity
 
+load_dotenv()
+
 
 async def main() -> None:
-    # instruments.get_instrument_candles(instrument: InstrumentName | str, *, price: str = "M",
-    #                    granularity: CandlestickGranularity, count: int | None = None,
-    #                    from_time: datetime | None = None, to_time: datetime | None = None,
-    #                    smooth: bool = False, include_first: bool = True,
-    #                    daily_alignment: int = 17, alignment_timezone: str = "America/New_York",
-    #                    weekly_alignment: str = "Friday") -> CandlesResponse
-    # Returns: TypedDict with {"instrument": InstrumentName, "granularity": CandlestickGranularity, "candles": list[Candlestick]}
-
     async with AsyncClient() as client:
-        # Get 100 H1 candles for EUR_USD
+        # Get historical hourly candle data for EUR_USD
         result: CandlesResponse = await client.instruments.get_instrument_candles(
             instrument="EUR_USD",
             granularity=CandlestickGranularity.H1,
@@ -38,11 +40,10 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 ```
-🔗 **OANDA Endpoint**: `GET /v3/instruments/{instrument}/candles`
 
-**OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
+🔗 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
 
-Get historical candle data for an instrument.
+🔗 **FiveTwenty SDK**: [instruments.get_instrument_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/instruments.py)
 
 **Parameters:**
 
@@ -68,5 +69,11 @@ Get historical candle data for an instrument.
 
 **Raises:**
 
-- `FiveTwentyError` - API errors
+`FiveTwentyError` - API errors:
+
+  - 401/403: Authentication failed (check `e.is_authentication_error`)
+  - 404: Instrument not found (check `e.is_not_found`)
+  - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
+  - 400: Invalid parameters (check `e.is_validation_error`)
+
 - `ValueError` - If both count and time range are specified, or count exceeds 5000
