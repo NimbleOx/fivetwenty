@@ -59,16 +59,25 @@ def AsyncClient(
 
 **Configuration Parameters (choose one approach):**
 
-1. **Configuration Object** (recommended for applications):
-   - `config` (AccountConfig) - Pre-configured account settings
+### Configuration Object
 
-2. **Direct Parameters** (basic scripts):
-   - `token` (str) - OANDA API token
-   - `account_id` (str) - OANDA account ID (required when token is provided)
-   - `environment` (Environment) - `Environment.PRACTICE` or `Environment.LIVE`
+Recommended for applications.
 
-3. **Environment Variables** (deployment):
-   - No parameters needed - loads from `FIVETWENTY_*` environment variables
+- `config` (AccountConfig) - Pre-configured account settings
+
+### Direct Parameters
+
+For basic scripts.
+
+- `token` (str) - OANDA API token
+- `account_id` (str) - OANDA account ID (required when token is provided)
+- `environment` (Environment) - `Environment.PRACTICE` or `Environment.LIVE`
+
+### Environment Variables
+
+For deployment.
+
+- No parameters needed - loads from `FIVETWENTY_*` environment variables
 
 **HTTP Configuration:**
 
