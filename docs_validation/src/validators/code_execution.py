@@ -462,31 +462,64 @@ class CodeExecutionValidator(BaseValidator):
 
     def _create_mocks(self) -> dict[str, Any]:
         """Create mock objects for FiveTwenty API to prevent real API calls."""
-        # Create realistic mock account
-        mock_account = MagicMock()
-        mock_account.id = "001-001-0000000-001"
-        mock_account.alias = "Primary"
-        mock_account.currency = "USD"
-        mock_account.balance = Decimal("100000.00")
-        mock_account.unrealizedPL = Decimal("0.00")
-        mock_account.pl = Decimal("0.00")
-        mock_account.marginUsed = Decimal("0.00")
-        mock_account.marginAvailable = Decimal("100000.00")
-        mock_account.openTradeCount = 0
-        mock_account.openPositionCount = 0
-        mock_account.pendingOrderCount = 0
-        # Make numeric fields return Decimal for conversions
-        mock_account.__float__ = lambda self: 100000.0
-        mock_account.__int__ = lambda self: 100000
+        # Create realistic mock account with proper numeric field support
+        class MockAccount:
+            """Mock account that supports Decimal conversion and both camelCase/snake_case."""
+            id = "001-001-0000000-001"
+            alias = "Primary"
+            currency = "USD"
+            balance = Decimal("100000.00")
+            # Support both camelCase (API) and snake_case (Python) naming
+            unrealizedPL = Decimal("0.00")
+            unrealized_pl = Decimal("0.00")
+            pl = Decimal("0.00")
+            marginUsed = Decimal("0.00")
+            margin_used = Decimal("0.00")
+            marginAvailable = Decimal("100000.00")
+            margin_available = Decimal("100000.00")
+            openTradeCount = 0
+            open_trade_count = 0
+            openPositionCount = 0
+            open_position_count = 0
+            pendingOrderCount = 0
+            pending_order_count = 0
+            NAV = Decimal("100000.00")
+            nav = Decimal("100000.00")
+            marginRate = Decimal("0.02")
+            margin_rate = Decimal("0.02")
+            marginCallMarginUsed = Decimal("0.00")
+            margin_call_margin_used = Decimal("0.00")
+            withdrawalLimit = Decimal("100000.00")
+            withdrawal_limit = Decimal("100000.00")
+            positionValue = Decimal("0.00")
+            position_value = Decimal("0.00")
 
-        # Create realistic mock price data
+            def __getitem__(self, key):
+                """Support dict-like access."""
+                return getattr(self, key, None)
+
+        mock_account = MockAccount()
+
+        # Create realistic mock price data with proper object structure
+        # Create bid/ask objects
+        mock_bid = MagicMock()
+        mock_bid.price = Decimal("1.12345")
+        mock_bid.liquidity = 1000000
+
+        mock_ask = MagicMock()
+        mock_ask.price = Decimal("1.12350")
+        mock_ask.liquidity = 1000000
+
+        # Create ClientPrice object
         mock_price = MagicMock()
         mock_price.instrument = "EUR_USD"
-        mock_price.bids = [{"price": Decimal("1.12345"), "liquidity": 1000000}]
-        mock_price.asks = [{"price": Decimal("1.12350"), "liquidity": 1000000}]
+        mock_price.bids = [mock_bid]
+        mock_price.asks = [mock_ask]
         mock_price.closeoutBid = Decimal("1.12340")
         mock_price.closeoutAsk = Decimal("1.12355")
         mock_price.time = "2024-01-01T00:00:00.000000000Z"
+        # Support indexing for prices[0]
+        mock_price.__getitem__ = lambda self, key: mock_price if key == 0 else None
 
         # Create realistic mock order response
         mock_order_response = MagicMock()
@@ -510,21 +543,26 @@ class CodeExecutionValidator(BaseValidator):
         # we need AsyncMock for any method that will be awaited
 
         mock_async_client.accounts = MagicMock()
-        mock_async_client.accounts.get_accounts = AsyncMock(return_value={"accounts": [mock_account]})
-        mock_async_client.accounts.get_account = AsyncMock(return_value={"account": mock_account})
-        mock_async_client.accounts.get_account_summary = AsyncMock(return_value={"account": mock_account})
+        # get_accounts returns list directly, not wrapped in dict
+        mock_async_client.accounts.get_accounts = AsyncMock(return_value=[mock_account])
+        # get_account and get_account_summary return TypedDict with "account" key
+        mock_async_client.accounts.get_account = AsyncMock(return_value={"account": mock_account, "lastTransactionID": "12345"})
+        mock_async_client.accounts.get_account_summary = AsyncMock(return_value={"account": mock_account, "lastTransactionID": "12345"})
         mock_async_client.accounts.get_account_instruments = AsyncMock(return_value={"instruments": []})
         mock_async_client.accounts.patch_account_configuration = AsyncMock(return_value={})
 
         mock_async_client.orders = MagicMock()
         mock_async_client.orders.post_market_order = AsyncMock(return_value=mock_order_response)
         mock_async_client.orders.post_limit_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.post_stop_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.post_market_if_touched_order = AsyncMock(return_value=mock_order_response)
         mock_async_client.orders.post_order = AsyncMock(return_value=mock_order_response)
-        mock_async_client.orders.get_orders = AsyncMock(return_value={"orders": []})
-        mock_async_client.orders.get_pending_orders = AsyncMock(return_value={"orders": []})
-        mock_async_client.orders.get_order = AsyncMock(return_value={"order": MagicMock()})
+        mock_async_client.orders.get_orders = AsyncMock(return_value={"orders": [], "lastTransactionID": "12345"})
+        mock_async_client.orders.get_pending_orders = AsyncMock(return_value={"orders": [], "lastTransactionID": "12345"})
+        mock_async_client.orders.get_order = AsyncMock(return_value={"order": MagicMock(), "lastTransactionID": "12345"})
         mock_async_client.orders.put_order = AsyncMock(return_value=mock_order_response)
-        mock_async_client.orders.cancel_order = AsyncMock(return_value={})
+        mock_async_client.orders.put_order_client_extensions = AsyncMock(return_value={"lastTransactionID": "12345"})
+        mock_async_client.orders.cancel_order = AsyncMock(return_value={"lastTransactionID": "12345"})
 
         mock_async_client.trades = MagicMock()
         mock_async_client.trades.get_trades = AsyncMock(return_value={"trades": []})
@@ -552,8 +590,9 @@ class CodeExecutionValidator(BaseValidator):
         mock_async_client.instruments.get_instrument_candles = AsyncMock(return_value={"candles": []})
 
         mock_async_client.transactions = MagicMock()
-        mock_async_client.transactions.get_transactions = AsyncMock(return_value={"transactions": []})
-        mock_async_client.transactions.get_transaction = AsyncMock(return_value={"transaction": MagicMock()})
+        mock_async_client.transactions.get_transactions = AsyncMock(return_value={"transactions": [], "lastTransactionID": "12345"})
+        mock_async_client.transactions.get_transaction = AsyncMock(return_value={"transaction": MagicMock(), "lastTransactionID": "12345"})
+        mock_async_client.transactions.get_recent_transactions = AsyncMock(return_value={"transactions": [], "lastTransactionID": "12345"})
 
         # Mock Client (sync version)
         mock_client = MagicMock()
