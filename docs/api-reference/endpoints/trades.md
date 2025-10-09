@@ -161,7 +161,7 @@ from fivetwenty.endpoints.trades import CloseTradeResponse
 async def main() -> None:
     async with AsyncClient() as client:
         # trades.close_trade(account_id: AccountID, trade_specifier: str, *,
-        #                    units: str | None = None, idempotency_key: str | None = None) -> CloseTradeResponse
+        #                    units: str | None = None) -> CloseTradeResponse
         # Returns: {"orderCreateTransaction": MarketOrderTransaction, "orderFillTransaction": OrderFillTransaction,
         #           "orderCancelTransaction": OrderCancelTransaction, "relatedTransactionIDs": list[str],
         #           "lastTransactionID": str} (fields are optional)
@@ -191,7 +191,6 @@ Close a trade (fully or partially).
 | `trade_specifier` | str | ✅ | Trade ID or @clientID |
 | `*` | | | **Keyword-only parameters below** |
 | `units` | str \| None | ➖ | Number of units to close (default: ALL for full closure) |
-| `idempotency_key` | str \| None | ➖ | Idempotency key for duplicate prevention |
 
 **Returns:** Dictionary containing closure transaction details and last transaction ID (`str`)
 
@@ -213,8 +212,7 @@ from fivetwenty.models import ClientExtensions
 async def main() -> None:
     async with AsyncClient() as client:
         # trades.put_trade_client_extensions(account_id: AccountID, trade_specifier: str, *,
-        #                                    client_extensions: ClientExtensions | None = None,
-        #                                    idempotency_key: str | None = None) -> TradeClientExtensionsResponse
+        #                                    client_extensions: ClientExtensions | None = None) -> TradeClientExtensionsResponse
         # Returns: {"tradeClientExtensionsModifyTransaction": TradeClientExtensionsModifyTransaction,
         #           "relatedTransactionIDs": list[str], "lastTransactionID": str} (fields may be optional)
 
@@ -243,7 +241,6 @@ Modify client extensions for existing trade.
 | `trade_specifier` | str | ✅ | Trade identifier to modify |
 | `*` | | | **Keyword-only parameters below** |
 | `client_extensions` | ClientExtensions \| None | ➖ | New trade client extensions |
-| `idempotency_key` | str \| None | ➖ | Idempotency key for safe retries |
 
 **Returns:** Dictionary containing modification transaction details and last transaction ID (`str`)
 
@@ -265,7 +262,7 @@ async def main() -> None:
     async with AsyncClient() as client:
         # trades.put_trade_orders(account_id: AccountID, trade_specifier: str,
         #                         **kwargs: Any) -> TradeOrdersResponse
-        # kwargs: take_profit, stop_loss, trailing_stop_loss, guaranteed_stop_loss, idempotency_key
+        # kwargs: take_profit, stop_loss, trailing_stop_loss, guaranteed_stop_loss
         # Returns: {"takeProfitOrderCancelTransaction": OrderCancelTransaction,
         #           "takeProfitOrderTransaction": TakeProfitOrderTransaction,
         #           "stopLossOrderTransaction": StopLossOrderTransaction, ...
@@ -300,7 +297,6 @@ Update trade-dependent orders (take profit, stop loss, etc.).
 | `stop_loss` | Any | ➖ | Stop loss order specification |
 | `trailing_stop_loss` | Any | ➖ | Trailing stop loss order specification |
 | `guaranteed_stop_loss` | Any | ➖ | Guaranteed stop loss order specification |
-| `idempotency_key` | Any | ➖ | Idempotency key for safe retries |
 
 **Returns:** Dictionary containing order update transaction details and last transaction ID (`str`)
 

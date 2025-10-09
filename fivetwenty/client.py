@@ -219,7 +219,6 @@ class AsyncClient:
         *,
         timeout: float | None = None,
         retries: int | None = None,
-        idempotency_key: str | None = None,
         params: dict[str, Any] | None = None,
         json_data: dict[str, Any] | None = None,
         **kwargs: Any,
@@ -232,7 +231,6 @@ class AsyncClient:
             path: Request path (relative to base URL)
             timeout: Request timeout override
             retries: Retry count override
-            idempotency_key: Idempotency key for writes
             params: Query parameters
             json_data: JSON request body
             **kwargs: Additional httpx arguments
@@ -248,16 +246,14 @@ class AsyncClient:
 
         # Add standard headers (never log the token!)
         headers["Authorization"] = f"Bearer {self._token}"
-        if idempotency_key:
-            headers["Idempotency-Key"] = idempotency_key
 
         # Convert Decimals to strings in JSON data
         if json_data:
             json_data = stringify_decimals(json_data)
 
-        # Only retry writes if idempotency key provided
+        # Only retry safe operations (GET requests only)
         is_write = method in {"POST", "PUT", "PATCH", "DELETE"}
-        allow_retry = not is_write or bool(idempotency_key)
+        allow_retry = not is_write
 
         for attempt in range(max_tries):
             try:

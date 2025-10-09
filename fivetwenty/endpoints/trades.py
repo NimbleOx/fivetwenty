@@ -193,7 +193,6 @@ class TradeEndpoints:
         trade_specifier: str,
         *,
         units: str | None = None,
-        idempotency_key: str | None = None,
     ) -> CloseTradeResponse:
         """
         Close a trade (fully or partially).
@@ -202,7 +201,6 @@ class TradeEndpoints:
             account_id: Account identifier
             trade_specifier: Trade ID or @clientID
             units: Number of units to close (default: ALL for full closure)
-            idempotency_key: Idempotency key for duplicate prevention
 
         Returns:
             Dictionary containing closure transaction details
@@ -214,15 +212,10 @@ class TradeEndpoints:
         if units is not None:
             data["units"] = units
 
-        headers: dict[str, str] = {}
-        if idempotency_key:
-            headers["ClientRequestID"] = idempotency_key
-
         response = await self._client._request(
             "PUT",
             f"/accounts/{account_id}/trades/{trade_specifier}/close",
             json_data=data if data else None,
-            headers=headers,
         )
 
         response_data = response.json()
@@ -247,7 +240,6 @@ class TradeEndpoints:
         trade_specifier: str,
         *,
         client_extensions: ClientExtensions | None = None,
-        idempotency_key: str | None = None,
     ) -> TradeClientExtensionsResponse:
         """
         Update client extensions for a trade.
@@ -256,7 +248,6 @@ class TradeEndpoints:
             account_id: Account identifier
             trade_specifier: Trade ID or @clientID
             client_extensions: Client extensions to update
-            idempotency_key: Idempotency key for duplicate prevention
 
         Returns:
             Dictionary containing update transaction details
@@ -268,15 +259,10 @@ class TradeEndpoints:
         if client_extensions:
             data["clientExtensions"] = client_extensions.model_dump(by_alias=True, exclude_none=True, mode="json")
 
-        headers: dict[str, str] = {}
-        if idempotency_key:
-            headers["ClientRequestID"] = idempotency_key
-
         response = await self._client._request(
             "PUT",
             f"/accounts/{account_id}/trades/{trade_specifier}/clientExtensions",
             json_data=data,
-            headers=headers,
         )
 
         response_data = response.json()
@@ -308,7 +294,6 @@ class TradeEndpoints:
                 stop_loss: Stop loss order specification (optional)
                 trailing_stop_loss: Trailing stop loss order specification (optional)
                 guaranteed_stop_loss: Guaranteed stop loss order specification (optional)
-                idempotency_key: Idempotency key for duplicate prevention
 
         Returns:
             Dictionary containing order update transaction details
@@ -316,9 +301,6 @@ class TradeEndpoints:
         Raises:
             FiveTwentyError: On API errors
         """
-        # Extract idempotency key
-        idempotency_key = kwargs.pop("idempotency_key", None)
-
         data: dict[str, Any] = {}
 
         # Handle order parameters - None means cancel, absence means leave unchanged
@@ -331,15 +313,10 @@ class TradeEndpoints:
         if "guaranteed_stop_loss" in kwargs:
             data["guaranteedStopLoss"] = kwargs["guaranteed_stop_loss"]
 
-        headers: dict[str, str] = {}
-        if idempotency_key:
-            headers["ClientRequestID"] = idempotency_key
-
         response = await self._client._request(
             "PUT",
             f"/accounts/{account_id}/trades/{trade_specifier}/orders",
             json_data=data,
-            headers=headers,
         )
 
         response_data = response.json()
