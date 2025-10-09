@@ -55,6 +55,7 @@ Get transaction history for account.
 **Raises:**
 
 - `FiveTwentyError` - API errors
+- `ValueError` - If page_size exceeds 1000
 
 ---
 
@@ -241,6 +242,7 @@ Get transactions in ID range.
 **Raises:**
 
 - `FiveTwentyError` - API errors
+- `ValueError` - If from_transaction_id > to_transaction_id or if transaction IDs are not numeric
 
 ---
 
@@ -288,3 +290,4 @@ Get recent transactions for account.
 **Raises:**
 
 - `FiveTwentyError` - API errors
+- `ValueError` - If count exceeds 500

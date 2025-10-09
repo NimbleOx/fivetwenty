@@ -204,7 +204,7 @@ Get latest candles for multiple instruments.
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account ID |
 | `candle_specifications` | list[str] | ✅ | List of candle specifications (instrument:granularity:price) |
-| `units` | int | ➖ | Units for calculating volume-based candles (1-5000, default: 1) (keyword-only) |
+| `units` | int | ➖ | Number of units for each candle spec (1-5000, default: 1) (keyword-only) |
 | `smooth` | bool | ➖ | Smooth candles (default: False) (keyword-only) |
 | `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) (keyword-only) |
 | `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") (keyword-only) |

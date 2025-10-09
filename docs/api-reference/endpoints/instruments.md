@@ -50,16 +50,16 @@ Get historical candle data for an instrument.
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `instrument` | InstrumentName \| str | ✅ | Instrument to get candles for |
-| `price` | str | ➖ | Price type ("M", "B", "A", "BA", "BM", "AM", "BAM") (default: "M") |
-| `granularity` | CandlestickGranularity | ✅ | Granularity enum (e.g., CandlestickGranularity.H1) |
-| `count` | int \| None | ➖ | Number of candles to return (max 5000, conflicts with time range) |
-| `from_time` | datetime \| None | ➖ | Start time for candle range |
-| `to_time` | datetime \| None | ➖ | End time for candle range |
-| `smooth` | bool | ➖ | Smooth candles (default: False) |
-| `include_first` | bool | ➖ | Include first candle (default: True) |
-| `daily_alignment` | int | ➖ | Daily alignment hour (0-23, default: 17) |
-| `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") |
-| `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") |
+| `price` | str | ➖ | Price type ("M", "B", "A", "BA", "BM", "AM", "BAM") (default: "M") (keyword-only) |
+| `granularity` | CandlestickGranularity | ✅ | Granularity enum (e.g., CandlestickGranularity.H1) (keyword-only) |
+| `count` | int \| None | ➖ | Number of candles to return (max 5000, conflicts with time range) (keyword-only) |
+| `from_time` | datetime \| None | ➖ | Start time for candle range (keyword-only) |
+| `to_time` | datetime \| None | ➖ | End time for candle range (keyword-only) |
+| `smooth` | bool | ➖ | Smooth candles (default: False) (keyword-only) |
+| `include_first` | bool | ➖ | Include first candle (default: True) (keyword-only) |
+| `daily_alignment` | int | ➖ | Daily alignment hour (0-23, default: 17) (keyword-only) |
+| `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") (keyword-only) |
+| `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") (keyword-only) |
 
 **Returns:** `CandlesResponse` TypedDict containing:
 - `instrument`: InstrumentName enum
