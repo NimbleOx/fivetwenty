@@ -269,7 +269,7 @@ class CodeExecutionValidator(BaseValidator):
                 del sys.modules["fivetwenty"]
 
             # Clean up all fivetwenty submodules
-            submodules_to_remove = [key for key in sys.modules.keys() if key.startswith("fivetwenty.")]
+            submodules_to_remove = [key for key in sys.modules if key.startswith("fivetwenty.")]
             for submodule in submodules_to_remove:
                 del sys.modules[submodule]
 
@@ -345,13 +345,10 @@ class CodeExecutionValidator(BaseValidator):
         # Create mock exception that inherits from BaseException for proper exception handling
         class MockFiveTwentyError(Exception):
             """Mock FiveTwentyError for exception handling."""
-            pass
 
         # Create submodules that return MagicMocks for any attribute access
         # This allows imports like: from fivetwenty.models import InstrumentName
-        mocked_submodules = ["models", "exceptions", "endpoints", "endpoints.orders",
-                            "endpoints.trades", "endpoints.accounts", "endpoints.pricing",
-                            "endpoints.positions", "endpoints.transactions", "endpoints.instruments"]
+        mocked_submodules = ["models", "exceptions", "endpoints", "endpoints.orders", "endpoints.trades", "endpoints.accounts", "endpoints.pricing", "endpoints.positions", "endpoints.transactions", "endpoints.instruments"]
 
         for submodule_name in mocked_submodules:
             full_name = f"fivetwenty.{submodule_name}"
@@ -368,7 +365,7 @@ class CodeExecutionValidator(BaseValidator):
             # Set the submodule on the parent
             parts = submodule_name.split(".")
             parent = mocked_fivetwenty
-            for i, part in enumerate(parts[:-1]):
+            for part in parts[:-1]:
                 if not hasattr(parent, part):
                     setattr(parent, part, MagicMock())
                 parent = getattr(parent, part)
@@ -462,36 +459,42 @@ class CodeExecutionValidator(BaseValidator):
 
     def _create_mocks(self) -> dict[str, Any]:
         """Create mock objects for FiveTwenty API to prevent real API calls."""
+
         # Create realistic mock account with proper numeric field support
         class MockAccount:
-            """Mock account that supports Decimal conversion and both camelCase/snake_case."""
+            """Mock account that supports Decimal conversion and both camelCase/snake_case.
+
+            Note: Intentionally supports both naming conventions to match OANDA API (camelCase)
+            and Python conventions (snake_case) used in different parts of the codebase.
+            """
+
             id = "001-001-0000000-001"
             alias = "Primary"
             currency = "USD"
             balance = Decimal("100000.00")
             # Support both camelCase (API) and snake_case (Python) naming
-            unrealizedPL = Decimal("0.00")
+            unrealizedPL = Decimal("0.00")  # noqa: N815
             unrealized_pl = Decimal("0.00")
             pl = Decimal("0.00")
-            marginUsed = Decimal("0.00")
+            marginUsed = Decimal("0.00")  # noqa: N815
             margin_used = Decimal("0.00")
-            marginAvailable = Decimal("100000.00")
+            marginAvailable = Decimal("100000.00")  # noqa: N815
             margin_available = Decimal("100000.00")
-            openTradeCount = 0
+            openTradeCount = 0  # noqa: N815
             open_trade_count = 0
-            openPositionCount = 0
+            openPositionCount = 0  # noqa: N815
             open_position_count = 0
-            pendingOrderCount = 0
+            pendingOrderCount = 0  # noqa: N815
             pending_order_count = 0
             NAV = Decimal("100000.00")
             nav = Decimal("100000.00")
-            marginRate = Decimal("0.02")
+            marginRate = Decimal("0.02")  # noqa: N815
             margin_rate = Decimal("0.02")
-            marginCallMarginUsed = Decimal("0.00")
+            marginCallMarginUsed = Decimal("0.00")  # noqa: N815
             margin_call_margin_used = Decimal("0.00")
-            withdrawalLimit = Decimal("100000.00")
+            withdrawalLimit = Decimal("100000.00")  # noqa: N815
             withdrawal_limit = Decimal("100000.00")
-            positionValue = Decimal("0.00")
+            positionValue = Decimal("0.00")  # noqa: N815
             position_value = Decimal("0.00")
 
             def __getitem__(self, key):
@@ -519,7 +522,7 @@ class CodeExecutionValidator(BaseValidator):
         mock_price.closeoutAsk = Decimal("1.12355")
         mock_price.time = "2024-01-01T00:00:00.000000000Z"
         # Support indexing for prices[0]
-        mock_price.__getitem__ = lambda self, key: mock_price if key == 0 else None
+        mock_price.__getitem__ = lambda _self, key: mock_price if key == 0 else None
 
         # Create realistic mock order response
         mock_order_response = MagicMock()
