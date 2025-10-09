@@ -11,6 +11,8 @@ Complete account information including balance, margin, and trading statistics.
 
 🔗 **OANDA Definition**: [Account](https://developer.oanda.com/rest-live-v20/account-df/)
 
+🔗 **FiveTwenty SDK**: [Account](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [AccountID](system-models.md#type-aliases) | ✅ | Account's identifier using format "{siteID}-{divisionID}-{userID}-{accountNumber}" |
@@ -58,6 +60,10 @@ Complete account information including balance, margin, and trading statistics.
 ### AccountSummary
 Condensed account information for quick overview.
 
+🔗 **OANDA Definition**: [AccountSummary](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **FiveTwenty SDK**: [AccountSummary](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [AccountID](system-models.md#type-aliases) |✅ | Account's identifier |
@@ -101,6 +107,10 @@ Condensed account information for quick overview.
 ### AccountProperties
 Basic account identification information.
 
+🔗 **OANDA Definition**: [AccountProperties](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **FiveTwenty SDK**: [AccountProperties](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [AccountID](system-models.md#type-aliases) |✅ | Account's identifier |
@@ -111,6 +121,8 @@ Basic account identification information.
 Used to represent changes to an Account's Orders, Trades and Positions since a specified Account TransactionID.
 
 🔗 **OANDA Definition**: [AccountChanges](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **FiveTwenty SDK**: [AccountChanges](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -128,6 +140,8 @@ Used to represent changes to an Account's Orders, Trades and Positions since a s
 Represents an Account's current price-dependent state. Fields are omitted if their value hasn't changed since the specified transaction ID.
 
 🔗 **OANDA Definition**: [AccountChangesState](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **FiveTwenty SDK**: [AccountChangesState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -163,6 +177,8 @@ The dynamically calculated state of a client's Account.
 
 🔗 **OANDA Definition**: [CalculatedAccountState](https://developer.oanda.com/rest-live-v20/account-df/)
 
+🔗 **FiveTwenty SDK**: [CalculatedAccountState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Total unrealized profit/loss from all open trades |
@@ -184,6 +200,8 @@ Interface for accumulated account state tracking.
 
 🔗 **OANDA Definition**: [AccumulatedAccountState](https://developer.oanda.com/rest-live-v20/account-df/)
 
+🔗 **FiveTwenty SDK**: [AccumulatedAccountState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `balance` | [AccountUnits](system-models.md#type-aliases) | ✅ | Current account balance in account currency |
@@ -199,6 +217,8 @@ The current mutability and hedging settings related to guaranteed Stop Loss orde
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrderParameters](https://developer.oanda.com/rest-live-v20/account-df/)
 
+🔗 **FiveTwenty SDK**: [GuaranteedStopLossOrderParameters](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `mutability_market_open` | [GuaranteedStopLossOrderMutability](#guaranteedstoplossordermutability) | ✅ | GSL mutability when market open |
@@ -208,6 +228,8 @@ The current mutability and hedging settings related to guaranteed Stop Loss orde
 Contains the attributes of a user associated with an account.
 
 🔗 **OANDA Definition**: [UserAttributes](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **FiveTwenty SDK**: [UserAttributes](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/accounts.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -224,6 +246,8 @@ Contains the attributes of a user associated with an account.
 Describes the actions that can be performed on guaranteed Stop Loss Orders.
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrderMutability](https://developer.oanda.com/rest-live-v20/account-df/)
+
+🔗 **FiveTwenty SDK**: [GuaranteedStopLossOrderMutability](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 
 | Value | Description |
 |-------|-------------|
