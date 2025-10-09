@@ -475,6 +475,18 @@ class CodeExecutionValidator(BaseValidator):
         mock_account.openTradeCount = 0
         mock_account.openPositionCount = 0
         mock_account.pendingOrderCount = 0
+        # Make numeric fields return Decimal for conversions
+        mock_account.__float__ = lambda self: 100000.0
+        mock_account.__int__ = lambda self: 100000
+
+        # Create realistic mock price data
+        mock_price = MagicMock()
+        mock_price.instrument = "EUR_USD"
+        mock_price.bids = [{"price": Decimal("1.12345"), "liquidity": 1000000}]
+        mock_price.asks = [{"price": Decimal("1.12350"), "liquidity": 1000000}]
+        mock_price.closeoutBid = Decimal("1.12340")
+        mock_price.closeoutAsk = Decimal("1.12355")
+        mock_price.time = "2024-01-01T00:00:00.000000000Z"
 
         # Create realistic mock order response
         mock_order_response = MagicMock()
@@ -493,18 +505,55 @@ class CodeExecutionValidator(BaseValidator):
         mock_async_client.config = MagicMock()
         mock_async_client.config.summary = MagicMock(return_value="mock_config (practice)")
 
-        # Mock common async methods with realistic responses
+        # Mock all async endpoint methods explicitly
+        # This is necessary because MagicMock doesn't work with 'await' -
+        # we need AsyncMock for any method that will be awaited
+
         mock_async_client.accounts = MagicMock()
-        mock_async_client.accounts.get_accounts = AsyncMock(return_value=[mock_account])
-        mock_async_client.accounts.get_account = AsyncMock(return_value=mock_account)
+        mock_async_client.accounts.get_accounts = AsyncMock(return_value={"accounts": [mock_account]})
+        mock_async_client.accounts.get_account = AsyncMock(return_value={"account": mock_account})
+        mock_async_client.accounts.get_account_summary = AsyncMock(return_value={"account": mock_account})
+        mock_async_client.accounts.get_account_instruments = AsyncMock(return_value={"instruments": []})
+        mock_async_client.accounts.patch_account_configuration = AsyncMock(return_value={})
+
         mock_async_client.orders = MagicMock()
         mock_async_client.orders.post_market_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.post_limit_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.post_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.get_orders = AsyncMock(return_value={"orders": []})
+        mock_async_client.orders.get_pending_orders = AsyncMock(return_value={"orders": []})
+        mock_async_client.orders.get_order = AsyncMock(return_value={"order": MagicMock()})
+        mock_async_client.orders.put_order = AsyncMock(return_value=mock_order_response)
+        mock_async_client.orders.cancel_order = AsyncMock(return_value={})
+
         mock_async_client.trades = MagicMock()
-        # Add default AsyncMock for any attribute access on trades
-        mock_async_client.trades.__getattr__ = lambda name: AsyncMock()
+        mock_async_client.trades.get_trades = AsyncMock(return_value={"trades": []})
+        mock_async_client.trades.get_open_trades = AsyncMock(return_value={"trades": []})
+        mock_async_client.trades.get_trade = AsyncMock(return_value={"trade": MagicMock()})
+        mock_async_client.trades.close_trade = AsyncMock(return_value={})
+        mock_async_client.trades.put_trade_client_extensions = AsyncMock(return_value={})
+        mock_async_client.trades.put_trade_orders = AsyncMock(return_value={})
+
         mock_async_client.pricing = MagicMock()
-        # Add default AsyncMock for any attribute access on pricing
-        mock_async_client.pricing.__getattr__ = lambda name: AsyncMock()
+        mock_async_client.pricing.get_pricing = AsyncMock(return_value={"prices": [mock_price], "time": "2024-01-01T00:00:00Z"})
+        mock_async_client.pricing.get_pricing_stream = AsyncMock(return_value=AsyncMock())
+        mock_async_client.pricing.get_account_instrument_candles = AsyncMock(return_value={"candles": [], "instrument": "EUR_USD", "granularity": "H1"})
+        mock_async_client.pricing.get_latest_candles = AsyncMock(return_value={"latestCandles": []})
+        mock_async_client.pricing.stream_pricing_with_retries = AsyncMock(return_value=AsyncMock())
+        mock_async_client.pricing.get_candles = AsyncMock(return_value={"candles": []})
+
+        mock_async_client.positions = MagicMock()
+        mock_async_client.positions.get_positions = AsyncMock(return_value={"positions": []})
+        mock_async_client.positions.get_open_positions = AsyncMock(return_value={"positions": []})
+        mock_async_client.positions.get_position = AsyncMock(return_value={"position": MagicMock()})
+        mock_async_client.positions.close_position = AsyncMock(return_value={})
+
+        mock_async_client.instruments = MagicMock()
+        mock_async_client.instruments.get_instrument_candles = AsyncMock(return_value={"candles": []})
+
+        mock_async_client.transactions = MagicMock()
+        mock_async_client.transactions.get_transactions = AsyncMock(return_value={"transactions": []})
+        mock_async_client.transactions.get_transaction = AsyncMock(return_value={"transaction": MagicMock()})
 
         # Mock Client (sync version)
         mock_client = MagicMock()
