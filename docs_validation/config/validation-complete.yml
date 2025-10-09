@@ -160,6 +160,10 @@ validators:
         - "docs/tutorials/risk-management.md"
         # streaming-data.md excluded: streaming examples exceed 5s timeout even with minimal limits
         # All other 9 validators (linting, typing, syntax, security, etc.) validate streaming examples
+        # API Reference endpoints (extracted examples)
+        - "docs/api-reference/endpoints/accounts.md"
+        - "docs/api-reference/endpoints/instruments.md"
+        - "docs/api-reference/endpoints/orders.md"
         # Add more files as they become fully standalone/executable
 
       # Mock API calls when executing code (prevents real API calls)
