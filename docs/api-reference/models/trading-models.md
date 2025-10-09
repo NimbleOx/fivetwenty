@@ -19,7 +19,7 @@ Represents an open trade position.
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trade's Instrument (e.g., "EUR_USD") |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Execution price of the Trade (string for precision) |
 | `open_time` | [DateTime](system-models.md#type-aliases) |✅ | Date/time when Trade was opened |
-| `state` | [TradeState](system-models.md#tradestate) | ✅ | Current state of the Trade (OPEN, CLOSED, CLOSE_WHEN_TRADEABLE) |
+| `state` | [TradeState](enum-models.md#tradestate) | ✅ | Current state of the Trade (OPEN, CLOSED, CLOSE_WHEN_TRADEABLE) |
 | `initial_units` | Decimal | ✅ | Initial size of the Trade (positive for long, negative for short) |
 | `initial_margin_required` | [AccountUnits](system-models.md#type-aliases) |✅ | Margin required when trade was opened |
 | `current_units` | Decimal | ✅ | Units currently open (reduces toward 0 when closed) |
@@ -48,7 +48,7 @@ Condensed trade information for lists and overviews.
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trade's Instrument |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Execution price of the Trade (string for precision) |
 | `open_time` | [DateTime](system-models.md#type-aliases) |✅ | Date/time when Trade was opened |
-| `state` | [TradeState](system-models.md#tradestate) | ✅ | Current state of the Trade (OPEN, CLOSED, CLOSE_WHEN_TRADEABLE) |
+| `state` | [TradeState](enum-models.md#tradestate) | ✅ | Current state of the Trade (OPEN, CLOSED, CLOSE_WHEN_TRADEABLE) |
 | `initial_units` | Decimal | ✅ | Initial size of the Trade (positive for long, negative for short) |
 | `initial_margin_required` | [AccountUnits](system-models.md#type-aliases) |✅ | Margin required when trade was opened |
 | `current_units` | Decimal | ✅ | Units currently open (reduces toward 0 when closed) |
@@ -79,18 +79,6 @@ The identification of a Trade as referred to by clients.
 
 - `"1523"` - OANDA-assigned Trade ID
 - `"@my_trade_id"` - Client-provided ID with @ prefix
-
-### TradeStateFilter
-The state to filter the Trades by.
-
-🔗 **OANDA Definition**: [TradeStateFilter](https://developer.oanda.com/rest-live-v20/trade-df/)
-
-| Value | Description |
-|-------|-------------|
-| `OPEN` | The Trades that are currently open |
-| `CLOSED` | The Trades that have been fully closed |
-| `CLOSE_WHEN_TRADEABLE` | The Trades that will be closed as soon as the trades' instrument becomes tradeable |
-| `ALL` | The Trades that are in any of the possible states listed above |
 
 ### CalculatedTradeState
 The dynamic (calculated) state of an open Trade.

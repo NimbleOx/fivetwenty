@@ -50,7 +50,7 @@ Currency conversion factors for account calculations.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `currency` | [Currency](system-models.md#currency) | ✅ | The currency being converted |
+| `currency` | [Currency](enum-models.md#currency) | ✅ | The currency being converted |
 | `account_gain` | Decimal | ✅ | Factor for converting gains to account currency |
 | `account_loss` | Decimal | ✅ | Factor for converting losses to account currency |
 | `position_value` | Decimal | ✅ | Factor for converting position values |
@@ -137,7 +137,7 @@ Trading instrument information and specifications.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `name` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Unique instrument identifier (e.g., "EUR_USD") |
-| `type` | [InstrumentType](system-models.md#instrumenttype) | ✅ | Classification of instrument (CURRENCY, CFD, METAL) |
+| `type` | [InstrumentType](enum-models.md#instrumenttype) | ✅ | Classification of instrument (CURRENCY, CFD, METAL) |
 | `display_name` | str | ✅ | Human-readable instrument name |
 | `pip_location` | int | ✅ | Location of pip value (decimal places from right) |
 | `display_precision` | int | ✅ | Number of decimal places for display formatting |

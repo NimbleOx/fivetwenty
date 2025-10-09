@@ -96,6 +96,52 @@ Trade direction for buy/sell operations.
 | `LONG` | Buy direction - go long on the instrument |
 | `SHORT` | Sell direction - go short on the instrument |
 
+### Currency
+
+ISO 4217 currency codes for account and trading operations.
+
+🔗 **OANDA Definition**: [Currency](https://developer.oanda.com/rest-live-v20/primitives-df/#Currency)
+
+🔗 **Source**: [Currency](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `AUD` | Australian Dollar |
+| `CAD` | Canadian Dollar |
+| `CHF` | Swiss Franc |
+| `CNH` | Chinese Yuan (Offshore) |
+| `CZK` | Czech Koruna |
+| `DKK` | Danish Krone |
+| `EUR` | Euro |
+| `GBP` | British Pound Sterling |
+| `HKD` | Hong Kong Dollar |
+| `HUF` | Hungarian Forint |
+| `JPY` | Japanese Yen |
+| `MXN` | Mexican Peso |
+| `NOK` | Norwegian Krone |
+| `NZD` | New Zealand Dollar |
+| `PLN` | Polish Zloty |
+| `SEK` | Swedish Krona |
+| `SGD` | Singapore Dollar |
+| `THB` | Thai Baht |
+| `TRY` | Turkish Lira |
+| `USD` | United States Dollar |
+| `ZAR` | South African Rand |
+
+### InstrumentType
+
+Classification of tradeable instruments.
+
+🔗 **OANDA Definition**: [InstrumentType](https://developer.oanda.com/rest-live-v20/primitives-df/#InstrumentType)
+
+🔗 **Source**: [InstrumentType](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CURRENCY` | Currency pairs (forex) |
+| `CFD` | Contracts for Difference |
+| `METAL` | Precious metals |
+
 ### TransactionType
 
 Types of transactions that can occur in an account.
@@ -265,6 +311,53 @@ Current state of an order.
 | `TRIGGERED` | Order has been triggered |
 | `CANCELLED` | Order has been cancelled |
 
+### TimeInForce
+
+Order duration policies defining how long an order remains active.
+
+🔗 **OANDA Definition**: [TimeInForce](https://developer.oanda.com/rest-live-v20/order-df/#TimeInForce)
+
+🔗 **Source**: [TimeInForce](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `GTC` | Good 'Til Cancelled - order remains active until cancelled |
+| `GTD` | Good 'Til Date - order remains active until specified date |
+| `GFD` | Good For Day - order remains active until end of trading day |
+| `FOK` | Fill Or Kill - order must be filled immediately and completely |
+| `IOC` | Immediate Or Cancel - order must be filled immediately (partial fills accepted) |
+
+### OrderPositionFill
+
+Defines how positions are modified when an order is filled.
+
+🔗 **OANDA Definition**: [OrderPositionFill](https://developer.oanda.com/rest-live-v20/order-df/#OrderPositionFill)
+
+🔗 **Source**: [OrderPositionFill](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `OPEN_ONLY` | Order can only open new positions |
+| `REDUCE_FIRST` | Order reduces position first, then opens new position with remainder |
+| `REDUCE_ONLY` | Order can only reduce existing positions |
+| `DEFAULT` | Use default position fill behavior |
+
+### OrderTriggerCondition
+
+Specifies which price component to use for order triggering.
+
+🔗 **OANDA Definition**: [OrderTriggerCondition](https://developer.oanda.com/rest-live-v20/order-df/#OrderTriggerCondition)
+
+🔗 **Source**: [OrderTriggerCondition](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `DEFAULT` | Use default trigger condition (ask for buy, bid for sell) |
+| `INVERSE` | Use inverse trigger condition (ask for sell, bid for buy) |
+| `BID` | Use bid price as trigger condition |
+| `ASK` | Use ask price as trigger condition |
+| `MID` | Use mid price as trigger condition |
+
 ### OrderStateFilter
 
 Filter for querying orders by state.
@@ -358,6 +451,20 @@ Guaranteed stop loss order modes specific to instruments.
 | `REQUIRED` | GSL orders required for this instrument |
 
 ## Filtering and Querying Enums
+
+### TradeState
+
+Current state of a trade in its lifecycle.
+
+🔗 **OANDA Definition**: [TradeState](https://developer.oanda.com/rest-live-v20/trade-df/#TradeState)
+
+🔗 **Source**: [TradeState](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `OPEN` | Trade is currently open |
+| `CLOSED` | Trade has been fully closed |
+| `CLOSE_WHEN_TRADEABLE` | Trade will be closed as soon as the instrument becomes tradeable |
 
 ### TradeStateFilter
 

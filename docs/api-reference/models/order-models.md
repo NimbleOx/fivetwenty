@@ -17,11 +17,11 @@ Request to create a market order (immediate execution at current market price).
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to MARKET) |
+| `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to MARKET) |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (restricted to "FOK" or "IOC" for market orders) |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled (OPEN_ONLY, REDUCE_FIRST, REDUCE_ONLY, DEFAULT) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (restricted to "FOK" or "IOC" for market orders) |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled (OPEN_ONLY, REDUCE_FIRST, REDUCE_ONLY, DEFAULT) |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details to be applied on fill |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details to be applied on fill |
@@ -38,14 +38,14 @@ Request to create a limit order (execution at specific price or better).
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to LIMIT) |
+| `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to LIMIT) |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Price threshold for order execution (string, equal to or better price required) |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (GTC, GTD, GFD, FOK, IOC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (GTC, GTD, GFD, FOK, IOC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details to be applied on fill |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details to be applied on fill |
@@ -62,15 +62,15 @@ Request to create a stop order (market order triggered at specific price).
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to STOP) |
+| `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to STOP) |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Stop price threshold (equal to or worse price triggers execution) |
 | `price_bound` | [PriceValue](system-models.md#type-aliases) |➖ | Worst acceptable fill price after trigger to prevent excessive slippage |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details to be applied on fill |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details to be applied on fill |
@@ -87,12 +87,12 @@ Request to create a take profit order linked to an open trade.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to TAKE_PROFIT) |
+| `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to TAKE_PROFIT) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade identifier to close |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Price threshold for order execution |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 
 ### StopLossOrderRequest
@@ -104,13 +104,13 @@ Request to create a stop loss order linked to an open trade.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to STOP_LOSS) |
+| `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to STOP_LOSS) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade identifier to close |
 | `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price threshold for order execution (either price or distance required) |
 | `distance` | Decimal | ➖ | Distance from current price (either price or distance required) |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
 | `guaranteed` | bool | ➖ | Guaranteed execution flag |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 
@@ -123,12 +123,12 @@ Request to create a trailing stop loss order linked to an open trade.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to TRAILING_STOP_LOSS) |
+| `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to TRAILING_STOP_LOSS) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade identifier to close |
 | `distance` | Decimal | ✅ | Trailing distance from current price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 
 ### GuaranteedStopLossOrderRequest
@@ -140,13 +140,13 @@ Request to create a guaranteed stop loss order linked to an open trade.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to GUARANTEED_STOP_LOSS) |
+| `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to GUARANTEED_STOP_LOSS) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade identifier to close |
 | `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price threshold for order execution (either price or distance required) |
 | `distance` | Decimal | ➖ | Distance from current price (either price or distance required) |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
 | `guaranteed_execution_premium` | [AccountUnits](system-models.md#type-aliases) |➖ | Premium cost for guaranteed execution |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 
@@ -159,15 +159,15 @@ Request to create a market-if-touched order (market order triggered at specific 
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `type` | [OrderType](system-models.md#ordertype) | ➖ | Order type identifier (automatically set to MARKET_IF_TOUCHED) |
+| `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to MARKET_IF_TOUCHED) |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Price threshold that triggers market execution |
 | `price_bound` | [PriceValue](system-models.md#type-aliases) |➖ | Worst acceptable fill price after trigger to prevent excessive slippage |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details to be applied on fill |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details to be applied on fill |
@@ -189,14 +189,14 @@ Market order that executes immediately at current market price.
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |✅ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |✅ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ✅ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "MARKET" (default) |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `price_bound` | [PriceValue](system-models.md#type-aliases) |➖ | Worst acceptable fill price |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ✅ | Position modification behavior |
 | `trade_close` | [MarketOrderTradeClose](#marketordertradeclose) | ➖ | Trade close details (conditional) |
 | `long_position_closeout` | [MarketOrderPositionCloseout](#marketorderpositioncloseout) | ➖ | Long position closeout details |
 | `short_position_closeout` | [MarketOrderPositionCloseout](#marketorderpositioncloseout) | ➖ | Short position closeout details |
@@ -226,16 +226,16 @@ Limit order that executes only at specified price or better.
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |✅ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |✅ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ✅ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "LIMIT" (default) |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Price threshold for order execution |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ✅ | Position modification behavior |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details |
 | `guaranteed_stop_loss_on_fill` | [GuaranteedStopLossDetails](#guaranteedstoplossdetails) | ➖ | Guaranteed stop loss order creation details |
@@ -260,17 +260,17 @@ Stop order that becomes a market order when price threshold is reached.
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |✅ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |✅ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ✅ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "STOP" (default) |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Price threshold for order execution |
 | `price_bound` | [PriceValue](system-models.md#type-aliases) |➖ | Worst acceptable fill price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ✅ | Position modification behavior |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details |
 | `guaranteed_stop_loss_on_fill` | [GuaranteedStopLossDetails](#guaranteedstoplossdetails) | ➖ | Guaranteed stop loss order creation details |
@@ -295,15 +295,15 @@ Guaranteed stop loss order linked to an open trade with guaranteed execution.
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |✅ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |✅ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ✅ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "GUARANTEED_STOP_LOSS" (default) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Price threshold for order execution |
 | `distance` | Decimal | ➖ | Distance from current price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `guaranteed_execution_premium` | Decimal | ✅ | Premium charged for guaranteed execution |
 | `filling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Fill transaction ID (when FILLED) |
 | `filled_time` | [DateTime](system-models.md#type-aliases) |➖ | Fill timestamp (when FILLED) |
@@ -327,15 +327,15 @@ A Take Profit Order linked to an open Trade and created with a price threshold.
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |✅ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |✅ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ✅ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "TAKE_PROFIT" |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close |
 | `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Trigger price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering (default: DEFAULT) |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering (default: DEFAULT) |
 | `filling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Fill transaction ID (when FILLED) |
 | `filled_time` | [DateTime](system-models.md#type-aliases) |➖ | Fill timestamp (when FILLED) |
 | `trade_opened_id` | [TradeID](system-models.md#type-aliases) |➖ | Opened trade ID (when FILLED) |
@@ -355,16 +355,16 @@ A Stop Loss Order linked to an open Trade and created with a price threshold.
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |✅ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |✅ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ✅ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "STOP_LOSS" |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close |
 | `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) |➖ | Trigger price |
 | `distance` | Decimal | ➖ | Distance from current price (alternative to price) |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering (default: DEFAULT) |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering (default: DEFAULT) |
 | `guaranteed` | bool | ➖ | Guaranteed execution flag |
 | `filling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Fill transaction ID (when FILLED) |
 | `filled_time` | [DateTime](system-models.md#type-aliases) |➖ | Fill timestamp (when FILLED) |
@@ -385,15 +385,15 @@ A Trailing Stop Loss Order linked to an open Trade with a dynamic price distance
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |✅ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |✅ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ✅ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "TRAILING_STOP_LOSS" (default) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close |
 | `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `distance` | Decimal | ✅ | Trailing distance |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `trailing_stop_value` | [PriceValue](system-models.md#type-aliases) |➖ | Current trailing stop price |
 | `filling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Fill transaction ID (when FILLED) |
 | `filled_time` | [DateTime](system-models.md#type-aliases) |➖ | Fill timestamp (when FILLED) |
@@ -414,17 +414,17 @@ A Market-If-Touched Order created with a price threshold.
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |✅ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |✅ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ✅ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "MARKET_IF_TOUCHED" |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Trigger price threshold |
 | `price_bound` | [PriceValue](system-models.md#type-aliases) |➖ | Worst acceptable fill price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior (default: DEFAULT) |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering (default: DEFAULT) |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ✅ | Position modification behavior (default: DEFAULT) |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering (default: DEFAULT) |
 | `initial_market_price` | [PriceValue](system-models.md#type-aliases) |➖ | Initial market price when order was created |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details |
@@ -452,13 +452,13 @@ A Fixed Price Order filled immediately at specified price.
 |-------|------|----------|-------------|
 | `id` | [OrderID](system-models.md#type-aliases) |➖ | Order's identifier, unique within Account |
 | `create_time` | [DateTime](system-models.md#type-aliases) |➖ | Time when Order was created |
-| `state` | [OrderState](system-models.md#orderstate) | ➖ | Current state of the Order |
+| `state` | [OrderState](enum-models.md#orderstate) | ➖ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "FIXED_PRICE" |
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Exact fill price |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ➖ | Position modification behavior (default: DEFAULT) |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ➖ | Position modification behavior (default: DEFAULT) |
 | `trade_state` | str | ✅ | Resulting trade state |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details |
@@ -484,7 +484,7 @@ Details for creating a Take Profit Order on fill.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Take profit trigger price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the take profit order |
 
@@ -499,7 +499,7 @@ Details for creating a Stop Loss Order on fill.
 |-------|------|----------|-------------|
 | `price` | [PriceValue](system-models.md#type-aliases) |➖ | Stop loss trigger price (either price or distance required) |
 | `distance` | Decimal | ➖ | Distance from fill price (either price or distance required) |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
 | `guaranteed` | bool | ➖ | Guaranteed execution flag (default: False) |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the stop loss order |
@@ -514,7 +514,7 @@ Details for creating a Trailing Stop Loss Order on fill.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `distance` | Decimal | ✅ | Trailing distance from fill price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the trailing stop loss order |
 
@@ -542,7 +542,7 @@ Details for guaranteed stop loss orders that ensure execution at guaranteed pric
 |-------|------|----------|-------------|
 | `distance` | Decimal | ➖ | Distance from current price to guaranteed stop loss price |
 | `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price threshold for guaranteed stop loss execution |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ➖ | Order duration policy (defaults to GTC) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (defaults to GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order |
 | `guaranteed_execution_premium` | [AccountUnits](system-models.md#type-aliases) |➖ | Premium charged for guaranteed execution |

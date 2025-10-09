@@ -49,11 +49,11 @@
 | `[x]` | `api-reference/endpoints/positions.md` | API Reference | 4 |
 | `[x]` | `api-reference/endpoints/pricing.md` | API Reference | 5 |
 | `[x]` | `api-reference/endpoints/trades.md` | API Reference | 6 |
-| `[ ]` | `api-reference/endpoints/transactions.md` | API Reference | 6 |
-| `[ ]` | `api-reference/models/account-models.md` | API Reference | 0 |
-| `[ ]` | `api-reference/models/enum-models.md` | API Reference | 1 |
-| `[ ]` | `api-reference/models/market-data-models.md` | API Reference | 0 |
-| `[ ]` | `api-reference/models/order-models.md` | API Reference | 0 |
+| `[x]` | `api-reference/endpoints/transactions.md` | API Reference | 6 |
+| `[x]` | `api-reference/models/account-models.md` | API Reference | 0 |
+| `[x]` | `api-reference/models/enum-models.md` | API Reference | 1 |
+| `[x]` | `api-reference/models/market-data-models.md` | API Reference | 0 |
+| `[x]` | `api-reference/models/order-models.md` | API Reference | 0 |
 | `[ ]` | `api-reference/models/system-models.md` | API Reference | 0 |
 | `[ ]` | `api-reference/models/trading-models.md` | API Reference | 0 |
 | `[ ]` | `api-reference/models/transaction-models.md` | API Reference | 0 |

@@ -137,12 +137,12 @@ Models for streaming configuration, error handling, and system enumerations.
 | [ReconnectionPolicy](system-models.md#reconnectionpolicy) | Automated reconnection strategy with exponential backoff for resilient streaming connections |
 | [ErrorDetails](system-models.md#errordetails) | Structured API error information with codes and messages for error handling and debugging |
 | [ValidationViolation](system-models.md#validationviolation) | Field-level validation error details showing rejected values and constraint violations |
-| [Currency](system-models.md#currency) | ISO 4217 standard currency code enumeration for all supported trading currencies |
-| [InstrumentType](system-models.md#instrumenttype) | Classification enumeration for different tradeable instrument categories and asset classes |
-| [OrderType](system-models.md#ordertype) | Order type enumeration defining execution behavior and pricing for different order categories |
-| [OrderState](system-models.md#orderstate) | Order lifecycle state enumeration tracking orders from creation through completion |
-| [TradeState](system-models.md#tradestate) | Trade lifecycle state enumeration showing current status from opening through closure |
-| [TimeInForce](system-models.md#timeinforce) | Order duration policy enumeration controlling how long orders remain active in market |
-| [OrderPositionFill](system-models.md#orderpositionfill) | Position handling behavior enumeration for orders affecting existing positions |
-| [OrderTriggerCondition](system-models.md#ordertriggercondition) | Price trigger condition enumeration for conditional order execution logic |
-| [CandlestickGranularity](system-models.md#candlestickgranularity) | Time interval enumeration for historical candlestick data aggregation periods |
+| [Currency](enum-models.md#currency) | ISO 4217 standard currency code enumeration for all supported trading currencies |
+| [InstrumentType](enum-models.md#instrumenttype) | Classification enumeration for different tradeable instrument categories and asset classes |
+| [OrderType](enum-models.md#ordertype) | Order type enumeration defining execution behavior and pricing for different order categories |
+| [OrderState](enum-models.md#orderstate) | Order lifecycle state enumeration tracking orders from creation through completion |
+| [TradeState](enum-models.md#tradestate) | Trade lifecycle state enumeration showing current status from opening through closure |
+| [TimeInForce](enum-models.md#timeinforce) | Order duration policy enumeration controlling how long orders remain active in market |
+| [OrderPositionFill](enum-models.md#orderpositionfill) | Position handling behavior enumeration for orders affecting existing positions |
+| [OrderTriggerCondition](enum-models.md#ordertriggercondition) | Price trigger condition enumeration for conditional order execution logic |
+| [CandlestickGranularity](enum-models.md#candlestickgranularity) | Time interval enumeration for historical candlestick data aggregation periods |

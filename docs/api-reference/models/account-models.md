@@ -17,7 +17,7 @@ Complete account information including balance, margin, and trading statistics.
 |-------|------|----------|-------------|
 | `id` | [AccountID](system-models.md#type-aliases) | ✅ | Account's identifier using format "{siteID}-{divisionID}-{userID}-{accountNumber}" |
 | `alias` | str | ➖ | Client-assigned alias for the account (optional) |
-| `currency` | [Currency](system-models.md#currency) | ✅ | Home currency of the account |
+| `currency` | [Currency](enum-models.md#currency) | ✅ | Home currency of the account |
 | `balance` | [AccountUnits](system-models.md#type-aliases) | ✅ | Current account balance in account currency |
 | `created_by_user_id` | int | ✅ | User ID that created the account |
 | `created_time` | [DateTime](system-models.md#type-aliases) |✅ | Account creation timestamp |
@@ -68,7 +68,7 @@ Condensed account information for quick overview.
 |-------|------|----------|-------------|
 | `id` | [AccountID](system-models.md#type-aliases) |✅ | Account's identifier |
 | `alias` | str | ➖ | Client-assigned alias for the account (optional) |
-| `currency` | [Currency](system-models.md#currency) | ✅ | Home currency of the account |
+| `currency` | [Currency](enum-models.md#currency) | ✅ | Home currency of the account |
 | `created_by_user_id` | int | ✅ | User ID that created the account |
 | `created_time` | [DateTime](system-models.md#type-aliases) |✅ | Account creation timestamp |
 | `guaranteed_stop_loss_order_parameters` | [GuaranteedStopLossOrderParameters](#guaranteedstoplossorderparameters) | ➖ | GSL order parameters (optional) |
@@ -240,7 +240,7 @@ Contains the attributes of a user associated with an account.
 | `email` | str | ✅ | User's email address |
 | `division_abbreviation` | str | ✅ | Division abbreviation |
 | `language_abbreviation` | str | ✅ | Language preference abbreviation |
-| `home_currency` | [Currency](system-models.md#currency) | ✅ | User's home currency |
+| `home_currency` | [Currency](enum-models.md#currency) | ✅ | User's home currency |
 
 ### GuaranteedStopLossOrderMutability
 Describes the actions that can be performed on guaranteed Stop Loss Orders.

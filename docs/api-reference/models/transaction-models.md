@@ -138,9 +138,9 @@ Transaction created when a Market Order is submitted.
 |-------|------|----------|-------------|
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
 | `units` | Decimal | ✅ | Number of units to trade |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy (FOK or IOC only) |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy (FOK or IOC only) |
 | `price_bound` | [PriceValue](system-models.md#type-aliases) | ➖ | Worst acceptable fill price |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ✅ | Position modification behavior |
 | `trade_close` | dict | ➖ | Trade close details |
 | `long_position_closeout` | dict | ➖ | Long position closeout details |
 | `short_position_closeout` | dict | ➖ | Short position closeout details |
@@ -165,10 +165,10 @@ Transaction created when a Limit Order is submitted.
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
 | `units` | Decimal | ✅ | Number of units to trade |
 | `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Price threshold for order execution |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ✅ | Position modification behavior |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `reason` | str | ➖ | Reason for creating the limit order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
 | `take_profit_on_fill` | dict | ➖ | Take profit order creation details |
@@ -189,10 +189,10 @@ Transaction created when a Stop Order is submitted.
 | `units` | Decimal | ✅ | Number of units to trade |
 | `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Stop price threshold |
 | `price_bound` | [PriceValue](system-models.md#type-aliases) | ➖ | Worst acceptable fill price after trigger |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
-| `position_fill` | [OrderPositionFill](system-models.md#orderpositionfill) | ✅ | Position modification behavior |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ✅ | Position modification behavior |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `reason` | str | ➖ | Reason for creating the stop order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
 | `take_profit_on_fill` | dict | ➖ | Take profit order creation details |
@@ -214,9 +214,9 @@ Transaction created when a Take Profit Order is submitted.
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close with take profit order |
 | `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Take profit trigger price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `reason` | str | ➖ | Reason for creating the take profit order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
 
@@ -233,9 +233,9 @@ Transaction created when a Stop Loss Order is submitted.
 | `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Stop loss trigger price |
 | `distance` | Decimal | ➖ | Distance from trade price (alternative to price) |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `guaranteed` | bool | ➖ | Guaranteed execution flag (default: False) |
 | `reason` | str | ➖ | Reason for creating the stop loss order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
@@ -252,8 +252,8 @@ Transaction created when a Trailing Stop Loss Order is submitted.
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close with trailing stop loss order |
 | `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `distance` | Decimal | ✅ | Trailing distance from trade price |
-| `time_in_force` | [TimeInForce](system-models.md#timeinforce) | ✅ | Order duration policy |
+| `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp |
-| `trigger_condition` | [OrderTriggerCondition](system-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
+| `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ✅ | Price component used for triggering |
 | `reason` | str | ➖ | Reason for creating the trailing stop loss order |
 | `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions for the order |
