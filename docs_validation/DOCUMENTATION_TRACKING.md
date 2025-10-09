@@ -15,7 +15,7 @@
 | `[X]` | `tutorials/advanced-orders/order-strategies.md` | Tutorials | 6 |
 | `[x]` | `tutorials/account-management.md` | Tutorials | 3 |
 | `[x]` | `tutorials/risk-management.md` | Tutorials | 4 |
-| `[ ]` | `tutorials/streaming-data.md` | Tutorials | 7 |
+| `[x]` | `tutorials/streaming-data.md` | Tutorials | 7 |
 | `[x]` | `tutorials/index.md` | Tutorials | 0 |
 | `[x]` | `tutorials/basic-trading/index.md` | Tutorials | 0 |
 | `[x]` | `tutorials/advanced-orders/index.md` | Tutorials | 1 |
@@ -43,10 +43,10 @@
 | `[ ]` | `api-reference/configuration.md` | API Reference | 34 |
 | `[ ]` | `api-reference/error-handling.md` | API Reference | 11 |
 | `[ ]` | `api-reference/exceptions.md` | API Reference | 5 |
-| `[ ]` | `api-reference/endpoints/accounts.md` | API Reference | 6 |
-| `[ ]` | `api-reference/endpoints/instruments.md` | API Reference | 1 |
-| `[ ]` | `api-reference/endpoints/orders.md` | API Reference | 11 |
-| `[ ]` | `api-reference/endpoints/positions.md` | API Reference | 4 |
+| `[x]` | `api-reference/endpoints/accounts.md` | API Reference | 6 |
+| `[x]` | `api-reference/endpoints/instruments.md` | API Reference | 1 |
+| `[x]` | `api-reference/endpoints/orders.md` | API Reference | 11 |
+| `[x]` | `api-reference/endpoints/positions.md` | API Reference | 4 |
 | `[ ]` | `api-reference/endpoints/pricing.md` | API Reference | 5 |
 | `[ ]` | `api-reference/endpoints/trades.md` | API Reference | 6 |
 | `[ ]` | `api-reference/endpoints/transactions.md` | API Reference | 6 |
@@ -68,21 +68,3 @@
 | `[ ]` | `contributing/index.md` | Contributing | 9 |
 | `[ ]` | `index.md` | Root | 3 |
 | `[ ]` | `examples.md` | Root | 0 |
-
----
-
-## Summary Statistics
-
-**Total Files**: 67
-**Total Code Blocks**: 510
-
-### By Category
-- Tutorials: 17 files (8 complete) - 82 code blocks
-- Guides: 21 files - 234 code blocks
-- API Reference: 25 files - 106 code blocks
-- Contributing: 5 files - 65 code blocks
-- Root: 2 files - 3 code blocks
-
-### By Status
-- Not Started: 59 files - 463 code blocks
-- Complete: 8 files - 47 code blocks
