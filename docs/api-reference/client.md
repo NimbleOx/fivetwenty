@@ -314,5 +314,3 @@ Now that you understand client configuration, explore the API endpoints:
 - **[Trades](endpoints/trades.md)** - Monitor and close open trades
 - **[Positions](endpoints/positions.md)** - Track instrument positions
 - **[Transactions](endpoints/transactions.md)** - View transaction history
-
-For hands-on examples, see the [Getting Started Guide](../guides/getting-started.md).
