@@ -160,8 +160,8 @@ from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
     alias="my_bot",
-    token=os.environ["FIVETWENTY_API_TOKEN"],
-    account_id=os.environ["FIVETWENTY_ACCOUNT_ID"],
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE
 )
 print("Bot name:", config.alias)  # Safe to log
@@ -368,7 +368,6 @@ Validate an account configuration and return any errors found.
 - Account ID is not empty or whitespace-only
 - Alias is a valid Python identifier
 - Environment is valid enum value
-- Description (if provided) is not empty
 
 **Usage:**
 ```python
@@ -600,7 +599,9 @@ logger = logging.getLogger(__name__)
 # Define config for demonstration
 config = AccountConfig(
     token="demo-token",
-    environment=Environment.PRACTICE
+    account_id="demo-account",
+    environment=Environment.PRACTICE,
+    alias="demo"
 )
 
 # ✅ Safe - uses automatic masking
@@ -798,14 +799,15 @@ from fivetwenty import AccountConfig, AsyncClient, Environment
 
 # Old way
 client = AsyncClient(
-    token=os.environ["FIVETWENTY_API_TOKEN"],
-    account_id=os.environ["FIVETWENTY_ACCOUNT_ID"],
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE
 )
 
 # New way - Direct parameters (still supported)
 client = AsyncClient(
-    token=os.environ["FIVETWENTY_API_TOKEN"],
+    token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+    account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
     environment=Environment.PRACTICE
 )
 
@@ -827,7 +829,8 @@ from fivetwenty import AccountConfigLoader, AsyncClient, Environment
 
 # Old way
 token = os.environ["FIVETWENTY_OANDA_TOKEN"]
-client = AsyncClient(token=token, account_id="your-account-id", environment=Environment.PRACTICE)
+account_id = os.environ["FIVETWENTY_OANDA_ACCOUNT"]
+client = AsyncClient(token=token, account_id=account_id, environment=Environment.PRACTICE)
 
 # New way
 config = AccountConfigLoader.load_default()  # Loads FIVETWENTY_* variables
@@ -838,13 +841,14 @@ client = AsyncClient(config=config)
 
 ```python
 # Add validation to existing configurations
-from fivetwenty import AccountConfig, ConfigValidator
+from fivetwenty import AccountConfig, ConfigValidator, Environment
 
 # Sample config for validation
 config = AccountConfig(
     token="demo-token",
     account_id="demo-account",
-    environment=Environment.PRACTICE
+    environment=Environment.PRACTICE,
+    alias="demo"
 )
 errors = ConfigValidator.validate_account_config(config)
 if errors:
