@@ -12,13 +12,13 @@
 | `[x]` | `tutorials/basic-trading/complete-system.md` | Tutorials | 3 |
 | `[X]` | `tutorials/advanced-orders/dynamic-management.md` | Tutorials | 8 |
 | `[x]` | `tutorials/advanced-orders/stop-orders-mit.md` | Tutorials | 6 |
-| `[ ]` | `tutorials/advanced-orders/order-strategies.md` | Tutorials | 6 |
+| `[X]` | `tutorials/advanced-orders/order-strategies.md` | Tutorials | 6 |
 | `[x]` | `tutorials/account-management.md` | Tutorials | 3 |
-| `[ ]` | `tutorials/risk-management.md` | Tutorials | 4 |
+| `[x]` | `tutorials/risk-management.md` | Tutorials | 4 |
 | `[ ]` | `tutorials/streaming-data.md` | Tutorials | 7 |
-| `[ ]` | `tutorials/index.md` | Tutorials | 0 |
-| `[ ]` | `tutorials/basic-trading/index.md` | Tutorials | 0 |
-| `[ ]` | `tutorials/advanced-orders/index.md` | Tutorials | 1 |
+| `[x]` | `tutorials/index.md` | Tutorials | 0 |
+| `[x]` | `tutorials/basic-trading/index.md` | Tutorials | 0 |
+| `[x]` | `tutorials/advanced-orders/index.md` | Tutorials | 1 |
 | `[ ]` | `guides/understanding/async-vs-sync.md` | Guides | 7 |
 | `[ ]` | `guides/understanding/best-practices.md` | Guides | 22 |
 | `[ ]` | `guides/understanding/configuration.md` | Guides | 23 |
