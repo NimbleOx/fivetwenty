@@ -7,14 +7,18 @@ Account management and information retrieval.
 ---
 
 ## get_accounts
-<!-- fragment: Demo get_accounts with module attribute access patterns -->
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
+from fivetwenty import AsyncClient, AccountConfig, Environment
 
 
 async def main() -> None:
-    config = Configuration(token="demo-token", environment="practice")
+    config = AccountConfig(
+        account_id="your-account-id",
+        alias="demo",
+        token="demo-token",
+        environment=Environment.PRACTICE,
+    )
     async with AsyncClient(config=config) as client:
         # accounts.get_accounts() -> list[AccountProperties]
 
@@ -43,23 +47,23 @@ Get list of all accounts for the authenticated user.
 ---
 
 ## get_account
-<!-- fragment: Demo get_account with module attribute access and dict attribute patterns -->
 ```python
-from fivetwenty import AsyncClient, Configuration
-from fivetwenty.endpoints.accounts import AccountResponse
+import asyncio
+from fivetwenty import AsyncClient
 
 
-async def get_account_example() -> None:
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
+async def main() -> None:
+    async with AsyncClient() as client:
         # accounts.get_account(account_id: AccountID) -> AccountResponse
         # Returns: {"account": Account, "lastTransactionID": str}
 
         # Example usage:
-        result: AccountResponse = await client.accounts.get_account(account_id="123-456-789")
+        result = await client.accounts.get_account(account_id=client.account_id)
         account = result["account"]
         print(f"Account balance: {account.balance}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}`
 
@@ -82,21 +86,23 @@ Get detailed information for specific account.
 ---
 
 ## get_account_summary
-<!-- fragment: Demo get_account_summary with undefined names and dict attribute access patterns -->
 ```python
-from fivetwenty.endpoints.accounts import AccountSummaryResponse
+import asyncio
+from fivetwenty import AsyncClient
 
 
-async def get_account_summary_example() -> None:
-    async with AsyncClient(token="demo-token") as client:
+async def main() -> None:
+    async with AsyncClient() as client:
         # accounts.get_account_summary(account_id: AccountID) -> AccountSummaryResponse
         # Returns: {"account": AccountSummary, "lastTransactionID": str}
 
         # Example usage:
-        result: AccountSummaryResponse = await client.accounts.get_account_summary(account_id="123-456-789")
+        result = await client.accounts.get_account_summary(account_id=client.account_id)
         summary = result["account"]
         print(f"Account NAV: {summary.nav}")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
+
+asyncio.run(main())
 ```
 🔗 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/summary`
 
@@ -119,25 +125,23 @@ Get condensed account information.
 ---
 
 ## get_account_instruments
-<!-- fragment: Demo get_account_instruments with unused variables and module attribute patterns -->
 ```python
 import asyncio
-from fivetwenty import AsyncClient, Configuration
-from fivetwenty.endpoints.accounts import AccountInstrumentsResponse
+from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    # accounts.get_account_instruments(account_id: AccountID, instruments: list[str] | None = None) -> AccountInstrumentsResponse
+    # accounts.get_account_instruments(account_id: AccountID, *, instruments: list[str] | None = None) -> AccountInstrumentsResponse
     # Returns: {"instruments": list[Instrument], "lastTransactionID": str}
 
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
+    async with AsyncClient() as client:
         # Example usage:
-        result: AccountInstrumentsResponse = await client.accounts.get_account_instruments(
-            account_id="123-456-789",
+        result = await client.accounts.get_account_instruments(
+            account_id=client.account_id,
             instruments=["EUR_USD", "GBP_USD"]
         )
         instruments = result["instruments"]
+        print(f"Found {len(instruments)} instruments")
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
@@ -164,24 +168,24 @@ Get all tradeable instruments for account.
 ---
 
 ## patch_account_configuration
-<!-- fragment: Demo patch_account_configuration with unused imports and unused variable patterns -->
 ```python
 import asyncio
-from typing import Any
-from fivetwenty import AsyncClient, Configuration
+from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    # accounts.patch_account_configuration(account_id: AccountID, alias: str | None = None,
-    #                   margin_rate: str | None = None) -> dict[str, Any]
+    # accounts.patch_account_configuration(account_id: AccountID, *, alias: str | None = None,
+    #                   margin_rate: str | None = None) -> AccountConfigurationResponse
 
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
+    async with AsyncClient() as client:
         # Example usage:
         result = await client.accounts.patch_account_configuration(
-            account_id="123-456-789",
+            account_id=client.account_id,
             alias="My Trading Account"
         )
+        print(f"Configuration updated")
+        print(f"Transaction ID: {result['clientConfigureTransaction'].id}")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
@@ -208,23 +212,22 @@ Update account configuration settings.
 ---
 
 ## get_account_changes
-<!-- fragment: Demo get_account_changes with unused imports and unused variable patterns -->
 ```python
 import asyncio
-from typing import Any
-from fivetwenty import AsyncClient, Configuration
+from fivetwenty import AsyncClient
 
 
 async def main() -> None:
-    # accounts.get_account_changes(account_id: AccountID, since_transaction_id: str) -> dict[str, Any]
+    # accounts.get_account_changes(account_id: AccountID, *, since_transaction_id: str) -> AccountChangesResponse
 
-    config = Configuration(token="demo-token", environment="practice")
-    async with AsyncClient(config=config) as client:
+    async with AsyncClient() as client:
         # Example usage:
-        changes = await client.accounts.get_account_changes(
-            account_id="123-456-789",
+        result = await client.accounts.get_account_changes(
+            account_id=client.account_id,
             since_transaction_id="100"
         )
+        print(f"Changes: {len(result['changes'].orders_created)} orders created")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 asyncio.run(main())
 ```
