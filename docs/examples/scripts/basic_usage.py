@@ -55,8 +55,8 @@ async def main() -> None:
         # - margin_available: Capital still available for new trades
         print(f"Balance: {account.balance} {account.currency}")
         print(f"NAV: {account.nav} {account.currency}")
-        print(f"Unrealized P/L: {account.unrealized_pl} {account.currency}")
-        print(f"Margin Used: {account.margin_used} {account.currency}")
+        print(f"Unrealized P/L: {account.unrealized_pl if account.unrealized_pl is not None else 'N/A'} {account.currency}")
+        print(f"Margin Used: {account.margin_used if account.margin_used is not None else 'N/A'} {account.currency}")
         print(f"Margin Available: {account.margin_available} {account.currency}")
         print(f"Open Trades: {account.open_trade_count}")
         print(f"Open Positions: {account.open_position_count}")

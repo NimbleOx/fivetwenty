@@ -75,12 +75,12 @@ async def main() -> None:
                 # Unrealized P/L: Current profit/loss on all long trades
                 # = (Current Price - Average Entry Price) * Units
                 # This changes constantly as market moves
-                print(f"    Unrealized P/L: {position.long.unrealized_pl}")
+                print(f"    Unrealized P/L: {position.long.unrealized_pl if position.long.unrealized_pl is not None else 'N/A'}")
 
             # Check short side (negative units = selling the base currency)
             if position.short.units != "0":
                 print(f"    Short: {position.short.units} units @ {position.short.average_price}")
-                print(f"    Unrealized P/L: {position.short.unrealized_pl}")
+                print(f"    Unrealized P/L: {position.short.unrealized_pl if position.short.unrealized_pl is not None else 'N/A'}")
 
         # Section 2: Get only open positions
         # ===================================
@@ -118,11 +118,11 @@ async def main() -> None:
             if position.long.units != "0":
                 print(f"    Long: {position.long.units} units")
                 # Unrealized P/L: How much you'd gain/lose if you closed now
-                print(f"    P/L: {position.long.unrealized_pl}")
+                print(f"    P/L: {position.long.unrealized_pl if position.long.unrealized_pl is not None else 'N/A'}")
 
             if position.short.units != "0":
                 print(f"    Short: {position.short.units} units")
-                print(f"    P/L: {position.short.unrealized_pl}")
+                print(f"    P/L: {position.short.unrealized_pl if position.short.unrealized_pl is not None else 'N/A'}")
 
         # Section 3: Get position for specific instrument
         # ================================================
@@ -161,7 +161,7 @@ async def main() -> None:
 
             # Unrealized P/L: Current floating profit/loss
             # This is NOT locked in - it changes with every price tick
-            print(f"    Unrealized P/L: {eur_position.long.unrealized_pl}")
+            print(f"    Unrealized P/L: {eur_position.long.unrealized_pl if eur_position.long.unrealized_pl is not None else 'N/A'}")
 
             # Trade IDs: List of individual trades that make up this position
             # IMPORTANT: A position can consist of multiple trades
@@ -181,7 +181,7 @@ async def main() -> None:
 
         if eur_position.short.units != "0":
             print(f"    Average Price: {eur_position.short.average_price}")
-            print(f"    Unrealized P/L: {eur_position.short.unrealized_pl}")
+            print(f"    Unrealized P/L: {eur_position.short.unrealized_pl if eur_position.short.unrealized_pl is not None else 'N/A'}")
 
             # Trade IDs for short side
             # You can have different trades on long and short sides simultaneously
@@ -482,7 +482,7 @@ async def main() -> None:
         # Total Unrealized P/L: Sum of all open positions' P/L
         # If positive: Your open positions are winning overall
         # If negative: Your open positions are losing overall
-        print(f"  Total Unrealized P/L: {account.unrealized_pl}")
+        print(f"  Total Unrealized P/L: {account.unrealized_pl if account.unrealized_pl is not None else 'N/A'}")
 
         # Total Realized P/L: Cumulative P/L from all closed trades
         # This is your actual trading profit/loss (locked in)
@@ -499,8 +499,8 @@ async def main() -> None:
             for position in positions:
                 # Calculate P/L for each side
                 # Use Decimal for accurate financial calculations
-                long_pl = Decimal(position.long.unrealized_pl) if position.long.units != "0" else Decimal("0")
-                short_pl = Decimal(position.short.unrealized_pl) if position.short.units != "0" else Decimal("0")
+                long_pl = Decimal(position.long.unrealized_pl) if position.long.units != "0" and position.long.unrealized_pl is not None else Decimal("0")
+                short_pl = Decimal(position.short.unrealized_pl) if position.short.units != "0" and position.short.unrealized_pl is not None else Decimal("0")
 
                 # Total position P/L: Combined long and short P/L
                 # This shows net P/L for this instrument
