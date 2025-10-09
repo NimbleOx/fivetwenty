@@ -20,16 +20,35 @@ FiveTwenty provides 80+ comprehensive data models organized into logical categor
 
 Type-safe enumerations for all OANDA API parameters and values.
 
-| Category | Purpose |
-|----------|---------|
+| Enum | Purpose |
+|------|---------|
+| **Core Trading** | |
 | [InstrumentName](enum-models.md#instrumentname) | Available trading instrument pairs (EUR_USD, GBP_JPY, etc.) |
-| [OrderType](enum-models.md#ordertype) | Order types (MARKET, LIMIT, STOP, etc.) |
 | [Direction](enum-models.md#direction) | Trade direction (LONG, SHORT) |
+| [Currency](enum-models.md#currency) | ISO 4217 currency codes (USD, EUR, GBP, etc.) |
+| [InstrumentType](enum-models.md#instrumenttype) | Instrument classification (CURRENCY, CFD, METAL) |
 | [TransactionType](enum-models.md#transactiontype) | Transaction categories (ORDER_FILL, DAILY_FINANCING, etc.) |
+| **Price & Market Data** | |
 | [CandlestickGranularity](enum-models.md#candlestickgranularity) | Time intervals for candlestick data (M1, H1, D, etc.) |
 | [PriceStatus](enum-models.md#pricestatus) | Price data status (tradeable, non-tradeable, invalid) |
+| [WeeklyAlignment](enum-models.md#weeklyalignment) | Day of week for weekly candlestick alignment |
+| [DayOfWeek](enum-models.md#dayofweek) | Days of the week enumeration |
+| **Order Management** | |
+| [OrderType](enum-models.md#ordertype) | Order types (MARKET, LIMIT, STOP, etc.) |
+| [OrderState](enum-models.md#orderstate) | Order lifecycle state (PENDING, FILLED, CANCELLED) |
+| [TimeInForce](enum-models.md#timeinforce) | Order duration policies (GTC, GTD, GFD, FOK, IOC) |
+| [OrderPositionFill](enum-models.md#orderpositionfill) | Position modification behavior for orders |
+| [OrderTriggerCondition](enum-models.md#ordertriggercondition) | Price trigger conditions (DEFAULT, BID, ASK, MID) |
+| [OrderStateFilter](enum-models.md#orderstatefilter) | Filter for querying orders by state |
+| [CancellableOrderType](enum-models.md#cancellableordertype) | Types of orders that can be cancelled |
+| **Account & Position** | |
 | [AccountFinancingMode](enum-models.md#accountfinancingmode) | Account financing calculation modes |
-| [GuaranteedStopLossOrderMode](enum-models.md#guaranteedstoplossordermode) | GSL order availability and requirements |
+| [PositionAggregationMode](enum-models.md#positionaggregationmode) | Position aggregation methods |
+| [GuaranteedStopLossOrderMode](enum-models.md#guaranteedstoplossordermode) | GSL order availability for accounts |
+| [GuaranteedStopLossOrderModeForInstrument](enum-models.md#guaranteedstoplossordermodeforinstrument) | GSL order availability for instruments |
+| **Trade Filtering** | |
+| [TradeState](enum-models.md#tradestate) | Trade lifecycle state (OPEN, CLOSED, CLOSE_WHEN_TRADEABLE) |
+| [TradeStateFilter](enum-models.md#tradestatefilter) | Filter for querying trades by state |
 
 ### Account Models
 [**Account Management →**](account-models.md)
@@ -129,7 +148,7 @@ Models for transaction tracking, audit trails, and order execution history.
 ### System Models
 [**System & Utilities →**](system-models.md)
 
-Models for streaming configuration, error handling, and system enumerations.
+Models for streaming configuration, error handling, and type aliases.
 
 | Model | Purpose |
 |-------|---------|
@@ -137,12 +156,3 @@ Models for streaming configuration, error handling, and system enumerations.
 | [ReconnectionPolicy](system-models.md#reconnectionpolicy) | Automated reconnection strategy with exponential backoff for resilient streaming connections |
 | [ErrorDetails](system-models.md#errordetails) | Structured API error information with codes and messages for error handling and debugging |
 | [ValidationViolation](system-models.md#validationviolation) | Field-level validation error details showing rejected values and constraint violations |
-| [Currency](enum-models.md#currency) | ISO 4217 standard currency code enumeration for all supported trading currencies |
-| [InstrumentType](enum-models.md#instrumenttype) | Classification enumeration for different tradeable instrument categories and asset classes |
-| [OrderType](enum-models.md#ordertype) | Order type enumeration defining execution behavior and pricing for different order categories |
-| [OrderState](enum-models.md#orderstate) | Order lifecycle state enumeration tracking orders from creation through completion |
-| [TradeState](enum-models.md#tradestate) | Trade lifecycle state enumeration showing current status from opening through closure |
-| [TimeInForce](enum-models.md#timeinforce) | Order duration policy enumeration controlling how long orders remain active in market |
-| [OrderPositionFill](enum-models.md#orderpositionfill) | Position handling behavior enumeration for orders affecting existing positions |
-| [OrderTriggerCondition](enum-models.md#ordertriggercondition) | Price trigger condition enumeration for conditional order execution logic |
-| [CandlestickGranularity](enum-models.md#candlestickgranularity) | Time interval enumeration for historical candlestick data aggregation periods |
