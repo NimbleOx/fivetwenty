@@ -61,20 +61,27 @@ ISO 4217 currency codes for account and trading operations.
 
 | Value | Description |
 |-------|-------------|
-| `USD` | United States Dollar |
-| `EUR` | Euro |
-| `GBP` | British Pound Sterling |
-| `JPY` | Japanese Yen |
 | `AUD` | Australian Dollar |
 | `CAD` | Canadian Dollar |
 | `CHF` | Swiss Franc |
-| `NZD` | New Zealand Dollar |
-| `SEK` | Swedish Krona |
-| `NOK` | Norwegian Krone |
-| `DKK` | Danish Krone |
-| `PLN` | Polish Zloty |
+| `CNH` | Chinese Yuan (Offshore) |
 | `CZK` | Czech Koruna |
+| `DKK` | Danish Krone |
+| `EUR` | Euro |
+| `GBP` | British Pound Sterling |
+| `HKD` | Hong Kong Dollar |
 | `HUF` | Hungarian Forint |
+| `JPY` | Japanese Yen |
+| `MXN` | Mexican Peso |
+| `NOK` | Norwegian Krone |
+| `NZD` | New Zealand Dollar |
+| `PLN` | Polish Zloty |
+| `SEK` | Swedish Krona |
+| `SGD` | Singapore Dollar |
+| `THB` | Thai Baht |
+| `TRY` | Turkish Lira |
+| `USD` | United States Dollar |
+| `ZAR` | South African Rand |
 
 #### InstrumentType
 Classification of tradeable instruments.

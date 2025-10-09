@@ -112,24 +112,18 @@ Types of transactions that can occur in an account.
 | `FIXED_PRICE_ORDER` | Fixed price order placed |
 | `LIMIT_ORDER` | Limit order placed |
 | `LIMIT_ORDER_REJECT` | Limit order rejected |
-| `LIMIT_ORDER_REPLACE` | Limit order modified |
 | `STOP_ORDER` | Stop order placed |
 | `STOP_ORDER_REJECT` | Stop order rejected |
-| `STOP_ORDER_REPLACE` | Stop order modified |
 | `MARKET_IF_TOUCHED_ORDER` | MIT order placed |
 | `MARKET_IF_TOUCHED_ORDER_REJECT` | MIT order rejected |
-| `MARKET_IF_TOUCHED_ORDER_REPLACE` | MIT order modified |
 | `TAKE_PROFIT_ORDER` | Take profit order placed |
 | `TAKE_PROFIT_ORDER_REJECT` | Take profit order rejected |
-| `TAKE_PROFIT_ORDER_REPLACE` | Take profit order modified |
 | `STOP_LOSS_ORDER` | Stop loss order placed |
 | `STOP_LOSS_ORDER_REJECT` | Stop loss order rejected |
-| `STOP_LOSS_ORDER_REPLACE` | Stop loss order modified |
 | `GUARANTEED_STOP_LOSS_ORDER` | Guaranteed stop loss order placed |
 | `GUARANTEED_STOP_LOSS_ORDER_REJECT` | Guaranteed stop loss order rejected |
 | `TRAILING_STOP_LOSS_ORDER` | Trailing stop loss order placed |
 | `TRAILING_STOP_LOSS_ORDER_REJECT` | Trailing stop loss order rejected |
-| `TRAILING_STOP_LOSS_ORDER_REPLACE` | Trailing stop loss order modified |
 | `ORDER_FILL` | Order filled |
 | `ORDER_CANCEL` | Order canceled |
 | `ORDER_CANCEL_REJECT` | Order cancellation rejected |

@@ -122,7 +122,7 @@ Used to represent changes to an Account's Orders, Trades and Positions since a s
 | `trades_reduced` | list[[TradeSummary](trading-models.md#tradesummary)] | ✅ | Trades reduced |
 | `trades_closed` | list[[TradeSummary](trading-models.md#tradesummary)] | ✅ | Trades closed |
 | `positions` | list[[Position](trading-models.md#position)] | ✅ | Positions changed |
-| `transactions` | list[[Transaction](transaction-models.md#transaction)] | ✅ | Transactions generated |
+| `transactions` | list[dict[str, Any]] | ✅ | Transactions generated (transaction data as dictionaries) |
 
 ### AccountChangesState
 Represents an Account's current price-dependent state. Fields are omitted if their value hasn't changed since the specified transaction ID.
