@@ -5,17 +5,21 @@ from typing import TYPE_CHECKING, Any, TypedDict
 from ..models import (
     AccountID,
     ClientExtensions,
+    GuaranteedStopLossDetails,
     GuaranteedStopLossOrderTransaction,
     InstrumentName,
     MarketOrderTransaction,
     OrderCancelTransaction,
     OrderFillTransaction,
+    StopLossDetails,
     StopLossOrderTransaction,
+    TakeProfitDetails,
     TakeProfitOrderTransaction,
     Trade,
     TradeClientExtensionsModifyTransaction,
     TradeID,
     TradeStateFilter,
+    TrailingStopLossDetails,
     TrailingStopLossOrderTransaction,
 )
 
@@ -281,7 +285,11 @@ class TradeEndpoints:
         self,
         account_id: AccountID,
         trade_specifier: str,
-        **kwargs: Any,
+        *,
+        take_profit: TakeProfitDetails | None = None,
+        stop_loss: StopLossDetails | None = None,
+        trailing_stop_loss: TrailingStopLossDetails | None = None,
+        guaranteed_stop_loss: GuaranteedStopLossDetails | None = None,
     ) -> TradeOrdersResponse:
         """
         Create, replace, or cancel dependent orders (TP/SL) for a trade.
@@ -289,11 +297,10 @@ class TradeEndpoints:
         Args:
             account_id: Account identifier
             trade_specifier: Trade ID or @clientID
-            **kwargs: Order specifications and options
-                take_profit: Take profit order specification (optional)
-                stop_loss: Stop loss order specification (optional)
-                trailing_stop_loss: Trailing stop loss order specification (optional)
-                guaranteed_stop_loss: Guaranteed stop loss order specification (optional)
+            take_profit: Take profit order specification
+            stop_loss: Stop loss order specification
+            trailing_stop_loss: Trailing stop loss order specification
+            guaranteed_stop_loss: Guaranteed stop loss order specification
 
         Returns:
             Dictionary containing order update transaction details
@@ -303,15 +310,15 @@ class TradeEndpoints:
         """
         data: dict[str, Any] = {}
 
-        # Handle order parameters - None means cancel, absence means leave unchanged
-        if "take_profit" in kwargs:
-            data["takeProfit"] = kwargs["take_profit"]
-        if "stop_loss" in kwargs:
-            data["stopLoss"] = kwargs["stop_loss"]
-        if "trailing_stop_loss" in kwargs:
-            data["trailingStopLoss"] = kwargs["trailing_stop_loss"]
-        if "guaranteed_stop_loss" in kwargs:
-            data["guaranteedStopLoss"] = kwargs["guaranteed_stop_loss"]
+        # Handle order parameters - convert Pydantic models to dicts
+        if take_profit is not None:
+            data["takeProfit"] = take_profit.model_dump(by_alias=True, exclude_none=True, mode="json")
+        if stop_loss is not None:
+            data["stopLoss"] = stop_loss.model_dump(by_alias=True, exclude_none=True, mode="json")
+        if trailing_stop_loss is not None:
+            data["trailingStopLoss"] = trailing_stop_loss.model_dump(by_alias=True, exclude_none=True, mode="json")
+        if guaranteed_stop_loss is not None:
+            data["guaranteedStopLoss"] = guaranteed_stop_loss.model_dump(by_alias=True, exclude_none=True, mode="json")
 
         response = await self._client._request(
             "PUT",

@@ -729,7 +729,7 @@ from decimal import Decimal
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
-from fivetwenty.models import InstrumentName
+from fivetwenty.models import InstrumentName, StopLossDetails
 
 load_dotenv()
 
@@ -824,9 +824,7 @@ async def main() -> None:
         await client.trades.put_trade_orders(
             account_id=client.account_id,
             trade_specifier=trade_id,
-            stop_loss={
-                "price": str(initial_stop),
-            },
+            stop_loss=StopLossDetails(price=initial_stop),
         )
 
         print(f"    Stop Loss: {initial_stop:.5f}")
@@ -849,9 +847,7 @@ async def main() -> None:
         await client.trades.put_trade_orders(
             account_id=client.account_id,
             trade_specifier=trade_id,
-            stop_loss={
-                "price": str(tighter_stop),
-            },
+            stop_loss=StopLossDetails(price=tighter_stop),
         )
 
         print(f"    Original Stop: {initial_stop:.5f} (50 pips below)")

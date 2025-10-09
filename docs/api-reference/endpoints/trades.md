@@ -254,15 +254,20 @@ Modify client extensions for existing trade.
 
 ```python
 import asyncio
+from decimal import Decimal
+
 from fivetwenty import AsyncClient
 from fivetwenty.endpoints.trades import TradeOrdersResponse
+from fivetwenty.models import StopLossDetails, TakeProfitDetails
 
 
 async def main() -> None:
     async with AsyncClient() as client:
-        # trades.put_trade_orders(account_id: AccountID, trade_specifier: str,
-        #                         **kwargs: Any) -> TradeOrdersResponse
-        # kwargs: take_profit, stop_loss, trailing_stop_loss, guaranteed_stop_loss
+        # trades.put_trade_orders(account_id: AccountID, trade_specifier: str, *,
+        #                         take_profit: TakeProfitDetails | None = None,
+        #                         stop_loss: StopLossDetails | None = None,
+        #                         trailing_stop_loss: TrailingStopLossDetails | None = None,
+        #                         guaranteed_stop_loss: GuaranteedStopLossDetails | None = None) -> TradeOrdersResponse
         # Returns: {"takeProfitOrderCancelTransaction": OrderCancelTransaction,
         #           "takeProfitOrderTransaction": TakeProfitOrderTransaction,
         #           "stopLossOrderTransaction": StopLossOrderTransaction, ...
@@ -271,8 +276,8 @@ async def main() -> None:
         result: TradeOrdersResponse = await client.trades.put_trade_orders(
             client.account_id,
             trade_specifier="12345",
-            take_profit={"price": "1.1500"},
-            stop_loss={"price": "1.1200"}
+            take_profit=TakeProfitDetails(price=Decimal("1.1500")),
+            stop_loss=StopLossDetails(price=Decimal("1.1200")),
         )
         print(f"Last Transaction ID: {result['lastTransactionID']}")
 
@@ -292,11 +297,11 @@ Update trade-dependent orders (take profit, stop loss, etc.).
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `trade_specifier` | str | ✅ | Trade identifier to modify |
-| `**kwargs` | Any | ➖ | **Keyword arguments below** |
-| `take_profit` | Any | ➖ | Take profit order specification |
-| `stop_loss` | Any | ➖ | Stop loss order specification |
-| `trailing_stop_loss` | Any | ➖ | Trailing stop loss order specification |
-| `guaranteed_stop_loss` | Any | ➖ | Guaranteed stop loss order specification |
+| `*` | | | **Keyword-only parameters below** |
+| `take_profit` | TakeProfitDetails \| None | ➖ | Take profit order specification |
+| `stop_loss` | StopLossDetails \| None | ➖ | Stop loss order specification |
+| `trailing_stop_loss` | TrailingStopLossDetails \| None | ➖ | Trailing stop loss order specification |
+| `guaranteed_stop_loss` | GuaranteedStopLossDetails \| None | ➖ | Guaranteed stop loss order specification |
 
 **Returns:** Dictionary containing order update transaction details and last transaction ID (`str`)
 

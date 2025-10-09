@@ -27,7 +27,7 @@ from decimal import Decimal
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
-from fivetwenty.models import InstrumentName
+from fivetwenty.models import InstrumentName, StopLossDetails
 
 load_dotenv()
 
@@ -157,7 +157,7 @@ async def main() -> None:
                 await client.trades.put_trade_orders(
                     account_id=client.account_id,
                     trade_specifier=trade_id,
-                    stop_loss={"price": str(stop_loss_price)},
+                    stop_loss=StopLossDetails(price=stop_loss_price),
                 )
 
                 print(f"    Stop Loss: {stop_loss_price:.5f} (protecting breakout)")
@@ -251,7 +251,7 @@ from decimal import Decimal
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient
-from fivetwenty.models import InstrumentName, TradeStateFilter
+from fivetwenty.models import InstrumentName, StopLossDetails, TradeStateFilter
 
 load_dotenv()
 
@@ -441,7 +441,7 @@ async def main() -> None:
                     await client.trades.put_trade_orders(
                         account_id=client.account_id,
                         trade_specifier=trade.id,
-                        stop_loss={"price": str(stop_loss_price)},
+                        stop_loss=StopLossDetails(price=stop_loss_price),
                     )
                     print(f"    Stop Loss: {stop_loss_price:.5f} (protecting short)")
                     break
