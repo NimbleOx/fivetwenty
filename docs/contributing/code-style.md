@@ -1,23 +1,17 @@
 # Code Style and Patterns
 
-FiveTwenty follows strict code quality standards to ensure maintainability, security, and performance. This guide outlines our coding conventions and patterns.
+FiveTwenty follows strict code quality standards to ensure maintainability, security, and performance.
 
 ---
 
-## Code Quality Standards
+## Core Standards
 
-### **Type Safety - 100% MyPy Strict Compliance**
+### Type Safety - 100% MyPy Strict
 
-All code must pass mypy strict mode with no errors:
+All code must pass `mypy --strict` with zero errors:
 
-<!-- fragment: Demo code style examples with non-existent model imports -->
 ```python
-from typing import Any
-
-from fivetwenty.models import OrderRequest, OrderResponse
-
-
-# Success Good - Full type annotations
+# ✓ Good - Full type annotations
 async def create_order(
     self,
     account_id: str,
@@ -26,866 +20,271 @@ async def create_order(
     timeout: float | None = None,
 ) -> OrderResponse:
     """Create an order with proper typing."""
-    # Implementation would go here
-    raise NotImplementedError
-
-
-# Error Bad - Missing type annotations
-async def create_order_bad(self, account_id: Any, order: Any, timeout: Any = None) -> None:
-    """Bad example with missing annotations."""
-    # Implementation would go here
-    raise NotImplementedError
+    ...
 ```
 
-### **Financial Precision - Decimal Only**
+### Financial Precision - Decimal Only
 
-**Critical**: Always use `Decimal` for financial calculations:
+**Critical**: Always use `Decimal` for money:
 
 ```python
 from decimal import Decimal
 
-
-# Success Good - Decimal for financial values
-def calculate_position_value(
-    units: int,
-    price: Decimal,
-) -> Decimal:
-    """Calculate position value with proper decimal precision."""
+# ✓ Good
+def calculate_value(units: int, price: Decimal) -> Decimal:
     return Decimal(str(units)) * price
 
-
-# Error Bad - Float causes precision errors
-def calculate_position_value_bad(units: int, price: Decimal) -> Decimal:
-    """Bad example with precision loss."""
+# ✗ Bad - Float causes precision loss
+def bad_calc(units: int, price: Decimal) -> Decimal:
     return units * price  # Precision loss!
-
-
-# Success Good - Accept Decimal or convert from string/int
-def parse_price(value: str | int | Decimal) -> Decimal:
-    """Parse price from various input types to Decimal."""
-    if isinstance(value, Decimal):
-        return value
-    return Decimal(str(value))
 ```
 
-### **Error Handling - Structured Exceptions**
+### Error Handling
 
-Use FiveTwenty's exception hierarchy:
+Use structured exceptions with proper context:
 
-<!-- fragment: Demo error handling with FiveTwentyError status argument -->
 ```python
+from typing import Any
 import httpx
 from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import AccountSummary
 
 
-# Success Good - Specific exception types
-async def get_account(self, account_id: str) -> AccountSummary:
-    """Get account with proper error handling."""
+async def get_account_example(self: Any, account_id: str) -> AccountSummary:
+    """Show proper error handling pattern."""
     try:
         response = await self._request("GET", f"/accounts/{account_id}")
         return AccountSummary.model_validate(response.json())
     except httpx.HTTPError as e:
         raise FiveTwentyError(
+            status=e.response.status_code if hasattr(e, "response") else 500,
             message=f"Failed to get account {account_id}",
             response=e.response if hasattr(e, "response") else None,
         ) from e
-
-
-# Error Bad - Generic exceptions
-async def get_account_bad(self, account_id: str) -> AccountSummary:
-    """Bad example without proper error handling."""
-    response = await self._request("GET", f"/accounts/{account_id}")
-    return AccountSummary.model_validate(response.json())  # May raise various exceptions
-
-
-async def _request(self, method: str, url: str) -> httpx.Response:
-    """Mock request method."""
-    pass
 ```
 
 ---
 
-## Architecture Patterns
+## Architecture
 
-### **Async-First Design**
+### Async-First Design
 
-async client is the primary interface, Client is a sync wrapper:
+- **AsyncClient** is primary interface
+- **Client** is sync wrapper using `asyncio.run()`
+- All endpoint methods are async first, wrapped for sync
+
+### Endpoint Organization
+
+Group methods by OANDA API sections:
 
 ```python
-import asyncio
-from typing import Any
-from fivetwenty.models import AccountSummary
-
-
-# Success Good - async client method
-class AccountsEndpoint:
-    """Accounts endpoint implementation."""
-
-    def __init__(self, client: Any) -> None:
-        """Initialize accounts endpoint."""
-        self._client = client
-
-    async def get_summary(
-        self,
-        account_id: str,
-        *,
-        _timeout: float | None = None,
-    ) -> AccountSummary:
-        """Get account summary (async method)."""
-        # Use public interface instead of private methods
-        response = await self._client.accounts.get_account(
-            account_id=account_id
-        )
-        return AccountSummary.model_validate(response.json())
-
-
-# Success Good - Sync wrapper delegates to async
-class SyncAccountsEndpoint:
-    """Sync wrapper for accounts endpoint."""
-
-    def __init__(self, client: Any, async_endpoint: AccountsEndpoint) -> None:
-        """Initialize sync accounts endpoint."""
-        self._client = client
-        self._async_endpoint = async_endpoint
-
-    def get_summary(
-        self,
-        account_id: str,
-        *,
-        timeout: float | None = None,
-    ) -> AccountSummary:
-        """Get account summary (sync wrapper)."""
-        # Use public interface instead of private methods
-        return asyncio.run(
-            self._async_endpoint.get_summary(account_id, _timeout=timeout)
-        )
-```
-
-### **Endpoint Organization**
-
-Group related methods into endpoint classes:
-
-<!-- fragment: Demo API endpoint organization with undefined Order types -->
-```python
-from typing import Any
-from fivetwenty.models import Order, OrderRequest, OrderResponse
-
-
-# Success Good - Organized by OANDA API endpoints
 class OrdersEndpoint:
     """Order management operations."""
 
-    def __init__(self, client: Any) -> None:
-        """Initialize orders endpoint."""
-        self._client = client
-
-    async def list_orders(self, account_id: str) -> list[Order]:
-        """List pending orders."""
-        pass
-
-    async def create_order(self, account_id: str, order: OrderRequest) -> OrderResponse:
-        """Create new order."""
-        pass
-
-    async def get_order(self, account_id: str, order_id: str) -> Order:
-        """Get specific order."""
-        pass
-
-
-class AccountsEndpoint:
-    """Account management operations."""
-
-    def __init__(self, client: Any) -> None:
-        """Initialize accounts endpoint."""
-        self._client = client
-
-
-class TradesEndpoint:
-    """Trades management operations."""
-
-    def __init__(self, client: Any) -> None:
-        """Initialize trades endpoint."""
-        self._client = client
-
-
-# Attach to client
-class AsyncClient:
-    """Main async client."""
-
-    def __init__(self) -> None:
-        """Initialize async client."""
-        self.orders = OrdersEndpoint(self)
-        self.accounts = AccountsEndpoint(self)
-        self.trades = TradesEndpoint(self)
+    async def list_orders(self, account_id: str) -> list[Order]: ...
+    async def create_order(self, account_id: str, order: OrderRequest) -> OrderResponse: ...
+    async def get_order(self, account_id: str, order_id: str) -> Order: ...
 ```
 
-### **Model Validation**
+### Model Validation
 
 Use Pydantic models for all API data:
 
 ```python
-from datetime import datetime
 from decimal import Decimal
-from typing import Any
 from pydantic import BaseModel, Field
 
 
-# Success Good - Complete Pydantic model
 class Order(BaseModel):
-    """Represents an OANDA order."""
-
-    id: str = Field(alias="id", description="Order ID")
-    instrument: str = Field(alias="instrument", description="Trading instrument")
-    units: int = Field(alias="units", description="Order size")
-    price: Decimal | None = Field(alias="price", description="Order price")
-    time_in_force: str = Field(alias="timeInForce", description="Time in force")
-    create_time: datetime = Field(alias="createTime", description="Creation time")
+    id: str = Field(alias="id")
+    instrument: str = Field(alias="instrument")
+    units: int = Field(alias="units")
+    price: Decimal | None = Field(alias="price")
 
     class Config:
-        # Allow field aliases for OANDA API compatibility
         populate_by_name = True
-        # Use enum values in serialization
         use_enum_values = True
-
-
-# Success Good - Model usage with validation
-def parse_order_response(data: Any) -> Order:
-    """Parse order response data into model."""
-    return Order.model_validate(data)
 ```
 
 ---
 
 ## Naming Conventions
 
-### **Methods and Functions**
+### Methods
+- Use full words: `get_accounts()`, `post_market_order()`, `stream_pricing()`
+- Avoid abbreviations: ~~`get_acct()`~~, ~~`mk_ord()`~~
 
-<!-- fragment: Demo interface examples with undefined imports and missing implementations -->
+### Variables
 ```python
-from collections.abc import AsyncIterator
-from fivetwenty.models import AccountSummary, OrderResponse
-
-
-# Success Good - Clear, descriptive names
-async def get_accounts(self, account_id: str) -> AccountSummary:
-    """Get account summary."""
-    pass
-
-
-async def post_market_order(
-    self,
-    account_id: str,
-    instrument: str,
-    units: int,
-) -> OrderResponse:
-    """Post market order."""
-    pass
-
-
-async def stream_pricing(
-    self,
-    account_id: str,
-    instruments: list[str],
-) -> AsyncIterator[Price]:
-    """Stream pricing data."""
-    pass
-
-
-# Error Bad - Unclear abbreviations
-async def get_acct(self, account_id: str) -> AccountSummary:
-    """Bad example with unclear abbreviations."""
-    pass
-
-
-async def mk_ord(self, acct: str, instr: str, u: int) -> OrderResponse:
-    """Bad example with unclear abbreviations."""
-    pass
-```
-
-### **Variables and Parameters**
-
-<!-- fragment: Demo variable naming with undefined OrderRequest -->
-```python
-from fivetwenty.models import OrderRequest
-
-
-# Success Good - Full words, clear purpose
+# ✓ Good
 account_id: str
 instrument_name: str
-order_request: OrderRequest
 timeout_seconds: float
-client_request_id: str | None
 
-# Error Bad - Cryptic abbreviations
+# ✗ Bad
 acct_id: str
 instr: str
-req: OrderRequest
 timeout: float  # Ambiguous units
-req_id: str | None
 ```
 
-### **Model Classes**
-
-```python
-from pydantic import BaseModel
-
-
-# Success Good - Descriptive, matches OANDA terminology
-class AccountSummary(BaseModel):
-    """Account summary information."""
-    pass
-
-
-class MarketOrderRequest(BaseModel):
-    """Market order request."""
-    pass
-
-
-class PricingHeartbeat(BaseModel):
-    """Pricing heartbeat message."""
-    pass
-
-
-# Error Bad - Generic or unclear names
-
-<!-- fragment: Demo bad naming examples with empty class implementations -->
-```python
-class Account(BaseModel):  # Too generic - summary? details?
-    """Bad example - too generic."""
-    pass
-
-
-class Request(BaseModel):  # What kind of request?
-    """Bad example - too generic."""
-    pass
-```
+### Models
+- Descriptive names matching OANDA terminology in the v20 API
+- `AccountSummary`, `MarketOrderRequest`, `PricingHeartbeat`
+- Avoid generic names: ~~`Account`~~, ~~`Request`~~
 
 ---
 
-## Documentation Patterns
-
-### **Method Documentation**
+## Documentation
 
 All public methods require comprehensive docstrings:
 
 ```python
-from decimal import Decimal
-from fivetwenty.models import OrderResponse
-
-
 async def post_limit_order(
     self,
     account_id: str,
     instrument: str,
     units: int,
     price: Decimal,
-    *,
-    time_in_force: str = "GTC",
-    client_request_id: str | None = None,
-    timeout: float | None = None,
 ) -> OrderResponse:
     """Create a limit order for execution at a specific price.
 
     Args:
         account_id: OANDA account identifier
-        instrument: Trading instrument (e.g., "EUR_USD", "GBP_JPY")
-        units: Order size (positive for buy, negative for sell)
+        instrument: Trading instrument (e.g., "EUR_USD")
+        units: Order size (positive=buy, negative=sell)
         price: Limit price for order execution
-        time_in_force: Order duration ("GTC", "IOC", "FOK", "GTD")
-        client_request_id: Optional client-provided request identifier
-        timeout: Request timeout in seconds
 
     Returns:
-        OrderResponse containing order details, fill information, and related transactions
+        OrderResponse with order details and transactions
 
     Raises:
-        FiveTwentyError: If order creation fails due to API error
-        ValidationError: If parameters are invalid or missing
-        TimeoutError: If request exceeds specified timeout
-
-    Example:
-        Create a limit buy order for EUR/USD:
-
-        >>> response = await client.orders.post_limit_order(
-        ...     account_id="123-456-789",
-        ...     instrument="EUR_USD",
-        ...     units=1000,
-        ...     price=Decimal("1.2500")
-        ... )
-        >>> print(f"Order ID: {response.order_create_transaction.id}")
-
-    Note:
-        - Limit orders may not fill immediately if price is not available
-        - Use positive units for buy orders, negative for sell orders
-        - Price precision depends on instrument (typically 4-5 decimal places)
+        FiveTwentyError: If order creation fails
+        ValidationError: If parameters are invalid
     """
-    pass
-```
-
-### **Model Documentation**
-
-<!-- fragment: Demo docstring formatting issues -->
-```python
-from decimal import Decimal
-from pydantic import BaseModel, Field
-from fivetwenty.models import PositionSide
-
-
-class Position(BaseModel):
-    """Represents a trading position for a specific instrument.
-
-    A position aggregates all trades for an instrument into long and short sides,
-    showing net exposure, unrealized P&L, and margin requirements.
-
-    Attributes:
-        instrument: Trading instrument (e.g., "EUR_USD")
-        long: Long side position details (aggregated long trades)
-        short: Short side position details (aggregated short trades)
-        pl: Total realized profit/loss for the position
-        unrealized_pl: Current unrealized profit/loss
-        margin_used: Margin currently required for this position
-    """
-
-    instrument: str = Field(description="Position's trading instrument")
-    long: PositionSide = Field(description="Long side aggregation")
-    short: PositionSide = Field(description="Short side aggregation")
-    pl: Decimal = Field(description="Realized profit/loss")
-    unrealized_pl: Decimal = Field(alias="unrealizedPL", description="Unrealized P&L")
-    margin_used: Decimal = Field(alias="marginUsed", description="Required margin")
+    ...
 ```
 
 ---
 
-## Error Handling Patterns
+## Testing
 
-### **Exception Hierarchy Usage**
-
-```python
-import json
-import logging
-import time
-from datetime import datetime
-from collections.abc import AsyncIterator
-
-import httpx
-from pydantic import ValidationError
-
-from fivetwenty.exceptions import FiveTwentyError, StreamStall
-from fivetwenty.models import Price, PricingHeartbeat
-
-
-# Success Good - Appropriate exception types
-async def get_pricing(self, account_id: str, instruments: list[str]) -> list[Price]:
-    """Get current pricing with proper error handling."""
-    try:
-        response = await self._request(
-            "GET",
-            "/pricing",
-            params={
-                "accountID": account_id,
-                "instruments": ",".join(instruments),
-            },
-        )
-
-        pricing_data = response.json()
-        return [Price.model_validate(price) for price in pricing_data["prices"]]
-
-    except httpx.HTTPStatusError as e:
-        if e.response.status_code == 404:
-            raise FiveTwentyError(
-                message=f"Account {account_id} not found",
-                error_code="ACCOUNT_NOT_EXIST",
-                response=e.response,
-            ) from e
-        elif e.response.status_code == 400:
-            raise FiveTwentyError(
-                message="Invalid instruments specified",
-                error_code="INVALID_INSTRUMENTS",
-                response=e.response,
-            ) from e
-        else:
-            raise FiveTwentyError(
-                message=f"Pricing request failed: {e.response.status_code}",
-                response=e.response,
-            ) from e
-
-    except httpx.TimeoutException as e:
-        raise FiveTwentyError(
-            message="Pricing request timed out",
-            error_code="REQUEST_TIMEOUT",
-        ) from e
-
-# Success Good - Streaming-specific error handling
-HEARTBEAT_TIMEOUT = 30
-logger = logging.getLogger(__name__)
-
-
-async def stream_pricing(
-    self,
-    account_id: str,
-    instruments: list[str],
-) -> AsyncIterator[Price | PricingHeartbeat]:
-    """Stream pricing with reconnection logic."""
-    last_heartbeat = time.monotonic()
-
-    # Build streaming URL and headers
-    url = f"/v3/accounts/{account_id}/pricing/stream"
-    headers = {"Authorization": "Bearer token", "Accept": "application/stream+json"}
-
-    async for line in self._stream_lines(url, headers):
-        if not line.strip():
-            continue
-
-        # Check for stall condition
-        if time.monotonic() - last_heartbeat > HEARTBEAT_TIMEOUT:
-            raise StreamStall(
-                message="Pricing stream stalled - no heartbeat received",
-                last_heartbeat_time=datetime.fromtimestamp(last_heartbeat),
-            )
-
-        try:
-            data = json.loads(line)
-            if data["type"] == "PRICE":
-                yield Price.model_validate(data)
-            elif data["type"] == "HEARTBEAT":
-                last_heartbeat = time.monotonic()
-                yield PricingHeartbeat.model_validate(data)
-
-        except (json.JSONDecodeError, KeyError, ValidationError) as e:
-            # Log but don't crash stream for individual parsing errors
-            logger.warning(f"Failed to parse streaming data: {e}")
-            continue
-```
-
-### **Validation Patterns**
-
-<!-- fragment: Demo input validation with undefined OrderRequest -->
-```python
-import re
-from typing import Any
-
-from pydantic import ValidationError
-from fivetwenty.models import OrderRequest
-
-
-# Success Good - Validate inputs early
-def create_order_request(
-    instrument: str,
-    units: int,
-    order_type: str,
-    **kwargs: Any,
-) -> OrderRequest:
-    """Create validated order request."""
-    # Validate instrument format
-    if not re.match(r"^[A-Z]{3}_[A-Z]{3}$", instrument):
-        msg = f"Invalid instrument format: {instrument}"
-        raise ValueError(msg)
-
-    # Validate units
-    if units == 0:
-        msg = "Order units cannot be zero"
-        raise ValueError(msg)
-
-    if abs(units) > 100_000_000:
-        msg = f"Order size too large: {abs(units)}"
-        raise ValueError(msg)
-
-    # Build request data
-    request_data = {
-        "instrument": instrument,
-        "units": str(units),
-        "type": order_type.upper(),
-        **kwargs,
-    }
-
-    try:
-        return OrderRequest.model_validate(request_data)
-    except ValidationError as e:
-        msg = f"Invalid order parameters: {e}"
-        raise ValueError(msg) from e
-```
-
----
-
-## Testing Patterns
-
-### **Unit Test Structure**
+### Unit Tests
 
 ```python
-from decimal import Decimal
-from unittest.mock import Mock, patch
-
-import httpx
 import pytest
-
+from unittest.mock import patch
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import FiveTwentyError
 
 
-class TestAccountsEndpoint:
-    """Test suite for accounts endpoint."""
-
-    @pytest.fixture
-    def client(self) -> AsyncClient:
-        """Create test client with mocked HTTP."""
-        return AsyncClient(
-            token="test-token",
-            account_id="your-account-id",
-            environment="practice",
-        )
-
-    @pytest.mark.asyncio
-    async def test_get_accounts_success(self, client: AsyncClient) -> None:
-        """Test successful account summary retrieval."""
-        # Arrange
-        expected_response = {
-            "account": {
-                "id": "123-456-789",
-                "currency": "USD",
-                "balance": "10000.00",
-            }
-        }
-
-        with patch.object(client, "_request") as mock_request:
-            mock_response = Mock()
-            mock_response.json.return_value = expected_response
-            mock_request.return_value = mock_response
-
-            # Act
-            result = await client.accounts.get_accounts("123-456-789")
-
-            # Assert
-            if result.id != "123-456-789":
-                raise ValueError(f"Expected id '123-456-789', got '{result.id}'")
-            if result.currency != "USD":
-                raise ValueError(f"Expected currency 'USD', got '{result.currency}'")
-            if result.balance != Decimal("10000.00"):
-                raise ValueError(f"Expected balance '10000.00', got '{result.balance}'")
-            mock_request.assert_called_once_with("GET", "/accounts/123-456-789")
-
-    @pytest.mark.asyncio
-    async def test_get_accounts_not_found(self, client: AsyncClient) -> None:
-        """Test account not found error handling."""
-        with patch.object(client, "_request") as mock_request:
-            mock_request.side_effect = httpx.HTTPStatusError(
-                message="Not Found",
-                request=Mock(),
-                response=Mock(status_code=404),
-            )
-
-            with pytest.raises(FiveTwentyError) as exc_info:
-                await client.accounts.get_accounts("invalid-id")
-
-            if "Account invalid-id not found" not in str(exc_info.value):
-                raise ValueError(f"Expected error message to contain 'Account invalid-id not found', got '{str(exc_info.value)}'")
-            if exc_info.value.error_code != "ACCOUNT_NOT_EXIST":
-                raise ValueError(f"Expected error code 'ACCOUNT_NOT_EXIST', got '{exc_info.value.error_code}'")
+@pytest.mark.asyncio
+async def test_get_account_success(client: AsyncClient) -> None:
+    """Test successful account retrieval."""
+    with patch.object(client, "_request") as mock:
+        mock.return_value.json.return_value = {"account": {"id": "123"}, "lastTransactionID": "456"}
+        result = await client.accounts.get_account("123")
+        assert result["account"].id == "123"  # noqa: S101
 ```
 
-### **Integration Test Patterns**
+### Integration Tests
 
 ```python
-import os
 from decimal import Decimal
-from typing import Any
-
 import pytest
-
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
 
 @pytest.mark.integration
-class TestAccountsIntegration:
-    """Integration tests for accounts endpoint."""
-
-    @pytest.fixture
-    def client(self) -> AsyncClient:
-        """Create client with real credentials."""
-        return AsyncClient(
-            token=os.environ["TEST_OANDA_TOKEN"],
-            environment=Environment.PRACTICE,  # Always practice for tests
-        )
-
-    @pytest.mark.asyncio
-    async def test_get_accounts_real_api(self, client: AsyncClient, vcr: Any) -> None:
-        """Test against real OANDA API (recorded with VCR)."""
-        account_id = os.environ["TEST_OANDA_ACCOUNT"]
-
-        async with client:
-            summary = await client.accounts.get_accounts(account_id)
-
-            # Verify response structure
-            if summary.id != account_id:
-                raise ValueError(f"Expected account id '{account_id}', got '{summary.id}'")
-            if not isinstance(summary.balance, Decimal):
-                raise TypeError(f"Expected balance to be Decimal, got '{type(summary.balance)}'")
-
-            valid_currencies = ["USD", "EUR", "GBP", "JPY"]
-            if summary.currency not in valid_currencies:
-                raise ValueError(f"Expected currency to be one of {valid_currencies}, got '{summary.currency}'")
-            if summary.margin_available < Decimal("0"):
-                raise ValueError(f"Expected margin_available >= 0, got '{summary.margin_available}'")
-
+async def test_real_api(client: AsyncClient, account_id: str) -> None:
+    """Test against real OANDA API (practice account)."""
+    async with client:
+        response = await client.accounts.get_account_summary(account_id)
+        assert isinstance(response["account"].balance, Decimal)  # noqa: S101
 ```
 
 ---
 
-## Performance Patterns
+## Performance
 
-### **Async Best Practices**
+### Async Patterns
 
 ```python
 import asyncio
-import logging
-from contextlib import asynccontextmanager
-from collections.abc import AsyncIterator
-
 from fivetwenty import AsyncClient
-from fivetwenty.models import AccountConfig, AccountSummary
-
-logger = logging.getLogger(__name__)
+from fivetwenty.models import AccountSummary
 
 
-# Success Good - Proper async context management
-@asynccontextmanager
-async def trading_session(config: AccountConfig) -> AsyncIterator[AsyncClient]:
-    """Managed trading session with proper cleanup."""
-    client = AsyncClient(config=config)
-    try:
-        await client.__aenter__()
-        yield client
-    finally:
-        await client.__aexit__(None, None, None)
-
-
-# Success Good - Concurrent operations
-async def get_multiple_accounts(
-    client: AsyncClient,
-    account_ids: list[str],
-) -> list[AccountSummary]:
-    """Fetch multiple accounts concurrently."""
-    tasks = [
-        client.accounts.get_accounts(account_id) for account_id in account_ids
-    ]
-
+# ✓ Good - Concurrent operations
+async def get_multiple(client: AsyncClient, account_ids: list[str]) -> list[AccountSummary]:
+    tasks = [client.accounts.get_account_summary(acc_id) for acc_id in account_ids]
     results = await asyncio.gather(*tasks, return_exceptions=True)
-
-    summaries = []
-    for result in results:
-        if isinstance(result, Exception):
-            logger.warning(f"Failed to get account: {result}")
-        else:
-            summaries.append(result)
-
-    return summaries
+    # Filter out exceptions and extract account summaries
+    return [
+        result["account"]  # type: ignore[index]
+        for result in results
+        if not isinstance(result, BaseException)
+    ]
 ```
 
-### **Memory Management**
+### Memory Management
 
-<!-- fragment: Demo undefined Any type usage -->
 ```python
-# Success Good - Streaming with backpressure
-
+from typing import Any
 from fivetwenty import AsyncClient
-from fivetwenty.models import PricingHeartbeat
 
 
-async def process_price_stream(
-    client: AsyncClient,
-    account_id: str,
-    instruments: list[str],
-    max_buffer_size: int = 1000,
-) -> None:
-    """Process price stream with memory management."""
-    # Memory-efficient processing
+async def process_batch(buffer: list[Any]) -> None:
+    """Process a batch of prices."""
+    pass  # Implementation here
+
+
+# ✓ Good - Streaming with buffer limits
+async def process_stream(client: AsyncClient, account_id: str, max_buffer: int = 1000) -> None:
     buffer: list[Any] = []
-
-    async for price in client.pricing.get_pricing_stream(account_id, instruments):
-        if isinstance(price, PricingHeartbeat):
-            continue  # Skip heartbeats
-
+    async for price in client.pricing.get_pricing_stream(account_id, instruments=["EUR_USD"]):
         buffer.append(price)
-
-        # Process buffer when full
-        if len(buffer) >= max_buffer_size:
-            await process_price_batch(buffer)
-            buffer.clear()  # Clear to prevent memory growth
-
-    # Process remaining prices
-    if buffer:
-        await process_price_batch(buffer)
-
-
-async def process_price_batch(prices: list[Any]) -> None:
-    """Process batch of prices efficiently."""
-    # Batch processing logic here
-    pass
+        if len(buffer) >= max_buffer:
+            await process_batch(buffer)
+            buffer.clear()
 ```
 
 ---
 
-## Security Patterns
+## Security
 
-### **Credential Handling**
+### Credential Handling
 
-<!-- fragment: Demo batch processing with undefined Environment and Trade -->
+Always use `SecretStr` for sensitive data:
+
 ```python
-import logging
+from pydantic import SecretStr
 
-from pydantic import BaseModel, SecretStr
-from fivetwenty.models import Environment, Trade
-
-logger = logging.getLogger(__name__)
-
-
-# Success Good - Secure credential handling
 class AccountConfig(BaseModel):
-    """Secure account configuration."""
-
-    token: SecretStr  # Never logged or printed
+    token: SecretStr  # Never logged
     account_id: SecretStr
-    environment: Environment
-    alias: str
 
     def summary(self) -> str:
-        """Safe representation for logging."""
         return f"{self.alias} ({self.environment.value})"
 
-    def __str__(self) -> str:
-        """Never expose secrets in string representation."""
-        return self.summary()
-
     def __repr__(self) -> str:
-        """Never expose secrets in repr."""
-        return (
-            f"AccountConfig("
-            f"alias={self.alias!r}, "
-            f"environment={self.environment.value}, "
-            f"token=SecretStr('***'), "
-            f"account_id=SecretStr('***')"
-            f")"
-        )
+        return f"AccountConfig(token=SecretStr('***'), ...)"
 
+# ✓ Good - Safe logging
+logger.info(f"Trade executed (account: {config.summary()})")
 
-# Success Good - Safe logging practices
-def log_trade_result(trade: Trade, config: AccountConfig) -> None:
-    """Log trade result safely."""
-    logger.info(
-        f"Trade executed: {trade.instrument} "
-        f"{trade.units} units at {trade.price} "
-        f"(account: {config.summary()})",  # Safe summary only
-    )
-
-
-# Error Bad - Exposes credentials
-<!-- fragment: Demo bad logging with undefined types and security issues -->
-```python
-def bad_logging(trade: Trade, config: AccountConfig) -> None:
-    """Bad example that may expose secrets."""
-    logger.info(f"Trade: {trade} Config: {config}")  # May expose secrets!
+# ✗ Bad - May expose secrets
+logger.info(f"Config: {config}")
 ```
 
 ---
 
-This comprehensive code style guide ensures consistency, security, and maintainability across the FiveTwenty codebase. Follow these patterns when contributing to maintain the project's high quality standards.
+## Conclusion
+
+These standards ensure FiveTwenty remains reliable and maintainable for production trading. Before submitting a pull request:
+
+1. Run `poe quality` - All checks must pass
+2. Run `poe test` - 100% test success required
+3. Review this guide - Your code should match these patterns
+
+When in doubt, look at existing code in `fivetwenty/` for reference patterns. Consistency matters more than perfection.
+
+**Questions?** Open a [GitHub Discussion](https://github.com/NimbleOx/fivetwenty/discussions) - we're here to help!

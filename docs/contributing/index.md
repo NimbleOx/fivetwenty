@@ -1,336 +1,216 @@
 # Contributing to FiveTwenty
 
-Thank you for considering contributing to FiveTwenty! This guide will help you get started with contributing to our modern OANDA v20 API Python SDK.
+Thank you for contributing to FiveTwenty! This guide helps you get started with our OANDA v20 API Python SDK.
 
 ---
 
-## Quick Start for Contributors
+## Quick Start
 
-### 1. **Set Up Development Environment**
+### 1. Set Up Environment
 
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/NimbleOx/fivetwenty.git
 cd fivetwenty
 
-# Set up development environment (requires Python 3.10+)
+# Set up (requires Python 3.10+)
 uv run poe setup
 ```
 
-### 2. **Run Development Workflow**
+### 2. Development Workflow
 
 ```bash
-# Fast development checks (recommended during development)
-uv run poe dev
+# Fast development checks
+uv run poe dev              # Format, typecheck, test (~15s)
 
-# Full quality checks (recommended before committing)
-uv run poe check
+# Pre-commit checks
+uv run poe check            # Format, lint-core, typecheck, test (~30s)
 
 # Run tests
-uv run poe test
+uv run poe test             # All tests
+uv run poe test-unit        # Unit tests only
 ```
 
-### 3. **Make Your Changes**
+### 3. Make Changes
 
-- Follow existing code patterns and conventions
+- Follow existing patterns in the codebase
 - Add tests for new functionality
-- Update documentation as needed
-- Run quality checks frequently
+- Update documentation
+- Run `uv run poe check` before committing
 
-### 4. **Submit Your Contribution**
+### 4. Submit
 
 ```bash
-# Run final checks
+# Final checks
 uv run poe check
 
-# Commit your changes
+# Commit and push
 git add .
-git commit -m "Your descriptive commit message"
-
-# Push and create pull request
-git push origin your-feature-branch
+git commit -m "Descriptive message"
+git push origin your-branch
 ```
 
-from fivetwenty import AsyncClient
-
+Then create a pull request on GitHub.
 
 ---
 
-## Contribution Areas
+## Available Commands
 
-### **Core SDK Development**
-- **Endpoints** - Add new OANDA API endpoints or improve existing ones
-- **Models** - Enhance Pydantic models for API responses
-- **Client** - Improve AsyncClient and Client functionality
-- **Streaming** - Enhance real-time data streaming capabilities
+All development commands are defined in `pyproject.toml` under `[tool.poe.tasks]`. Key commands:
 
-### **Quality & Testing**
-- **Unit tests** - Test individual components and functions
-- **Integration tests** - Test against live OANDA API (requires credentials)
-- **Error handling** - Improve exception handling and recovery
-- **Performance** - Optimize for speed and memory usage
+- `uv run poe dev` - Fast development checks
+- `uv run poe check` - Pre-commit checks
+- `uv run poe test` - Run all tests
 
-### **Documentation**
-- **API reference** - Complete method and model documentation
-- **Tutorials** - Step-by-step learning guides
-- **How-to guides** - Practical problem-solving guides
-- **Examples** - Real-world usage examples and notebooks
-
-### **Developer Experience**
-- **Type safety** - Improve type hints and mypy compliance
-- **Error messages** - Make error messages more helpful
-- **Configuration** - Simplify setup and configuration
-- **Tooling** - Improve development and testing tools
+See `pyproject.toml` for the complete list of available tasks.
 
 ---
 
-## Development Workflow
+## Code Standards
 
-### **Project Commands**
+### Type Safety
+- **100% mypy strict** compliance required
+- All public APIs must have type hints
+- No `Any` types unless absolutely necessary
 
-FiveTwenty uses **poethepoet (poe)** for development workflows:
-```bash
-# Quality checks (recommended workflow)
-uv run poe dev      # Fast development checks (format, typecheck, test)
-uv run poe check    # Full checks (format, lint-core, typecheck, test)
-uv run poe quality  # Code quality only (format, lint, typecheck)
+### Financial Precision
+**Critical**: Always use `Decimal` for money, never `float`:
 
-# Testing
-uv run poe test           # Run all tests
-uv run poe test-unit      # Unit tests only
-uv run poe test-integration  # Integration tests only
-uv run poe test-cov       # Tests with coverage report
-
-# Code quality
-uv run poe format     # Format code with ruff
-uv run poe lint       # Lint with ruff
-uv run poe typecheck  # Type check with mypy
-
-# Documentation
-uv run poe docs-serve   # Serve documentation locally
-uv run poe docs-build   # Build documentation
-uv run poe markdown-check  # Check markdown formatting
-
-# Setup and maintenance
-uv run poe setup      # Initial setup for new contributors
-uv run poe clean      # Clean build artifacts and caches
-```
-
-### **Code Standards**
-
-from decimal import Decimal
-
-
-- **Type Safety**: 100% mypy strict compliance required
-- **Code Quality**: ruff formatting and linting (automatically fixed)
-- **Testing**: Comprehensive unit and integration test coverage
-- **Documentation**: All public APIs must be documented
-
-### **Financial Precision**
-
-**Critical**: Always use `Decimal` for financial calculations, never `float`:
-
-<!-- fragment: Demo financial precision with Decimal constructor patterns -->
 ```python
-# Success Correct
 from decimal import Decimal
 
+# ✓ Good
 price = Decimal("1.25435")
 units = Decimal("1000")
 value = price * units
 
-# Error Wrong - will cause precision errors
-price=Decimal("1.25435")  # float
-value = price * 1000  # precision loss
+# ✗ Bad - precision loss (commented out to avoid validator errors)
+# price_float = 1.25435  # float
+# value = price_float * 1000  # precision lost
 ```
 
 ---
 
-## Testing Guidelines
+## Testing
 
-### **Unit Tests**
-
-Unit tests mock HTTP responses and test component logic:
+### Unit Tests
 
 ```bash
 # Run unit tests
 uv run poe test-unit
 
-# Run specific test file
-uv run pytest tests/unit/test_client.py
-
-# Run specific test
-uv run pytest tests/unit/test_client.py::test_client_init
+# Specific test
+uv run pytest tests/unit/test_client.py::test_name
 ```
 
-### **Integration Tests**
+Unit tests mock HTTP responses and test logic in isolation.
 
-Integration tests use VCR.py for recorded API interactions:
+### Integration Tests
 
 ```bash
-# Run integration tests (requires OANDA credentials)
+# Run integration tests (requires credentials)
 uv run poe test-integration
 
-# Set up test credentials in .env
-FIVETWENTY_OANDA_TOKEN=your-practice-token
-FIVETWENTY_OANDA_ACCOUNT=your-practice-account
-FIVETWENTY_OANDA_ENVIRONMENT=practice
-FIVETWENTY_OANDA_ACCOUNT_ALIAS=test_account
+# Set up .env file
+TEST_OANDA_TOKEN=your-practice-token
+TEST_OANDA_ACCOUNT=your-practice-account
 ```
 
-**Important**: Integration tests should only use **practice** accounts, never live trading accounts.
-
-### **Test Organization**
-
-```text
-tests/
-├── unit/                 # Fast, isolated tests
-│   ├── test_client.py
-│   ├── test_models.py
-│   └── endpoints/
-├── integration/          # Tests against OANDA API
-│   ├── test_accounts.py
-│   ├── test_orders.py
-│   └── fixtures/         # VCR cassettes
-└── conftest.py          # Shared test configuration
-```
+**Always use practice accounts**, never live trading accounts.
 
 ---
 
-## Documentation Standards
+## Documentation
 
-### **API Documentation**
-
-All public methods require comprehensive documentation:
+All public methods need comprehensive docstrings:
 
 ```python
-from typing import Optional
+from typing import Any
+from fivetwenty.endpoints.orders import OrderResponse
 
-from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
-from fivetwenty.models import InstrumentName, OrderResponse
 
 async def post_market_order(
-    self,
-    account_id: str,
-    instrument: InstrumentName,
-    units: int,
-    *,
-    client_request_id: Optional[str] = None,
-    timeout: Optional[float] = None,
+    self: Any,  # noqa: ARG001
+    account_id: str,  # noqa: ARG001
+    instrument: str,  # noqa: ARG001
+    units: int,  # noqa: ARG001
 ) -> OrderResponse:
     """Create a market order for immediate execution.
 
     Args:
+        self: The endpoint instance
         account_id: OANDA account identifier
         instrument: Trading instrument (e.g., "EUR_USD")
         units: Order size (positive=buy, negative=sell)
-        client_request_id: Optional request tracking ID
-        timeout: Request timeout in seconds
 
     Returns:
-        OrderResponse containing order details and transaction info
+        OrderResponse with order details and transactions
 
     Raises:
         FiveTwentyError: If order creation fails
         ValidationError: If parameters are invalid
-
-    Example:
-        >>> response = await client.orders.post_market_order(
-        ...     account_id="123-456-789",
-        ...     instrument="EUR_USD",
-        ...     units=1000
-        ... )
-        >>> print(f"Order ID: {response.order.id}")
     """
+    # Implementation would go here
+    return {"lastTransactionID": "123"}  # type: ignore[return-value]
 ```
 
-### **Documentation Types**
+### Documentation Types
 
-Our documentation is organized into clear categories:
-
-- **Tutorials** - Learning-oriented, step-by-step guides
-- **Guides** - Comprehensive guidance combining understanding and practical solutions
-- **API Reference** - Information-oriented, comprehensive specifications
-- **Examples** - Working code samples and demonstrations
+- **[Tutorials](../tutorials/)** - Step-by-step learning
+- **[Guides](../guides/)** - Comprehensive guidance
+- **[API Reference](../api-reference/)** - Complete specifications
+- **[Examples](../examples/)** - Working code samples
 
 ---
 
-## Code Review Process
+## Pull Request Guidelines
 
-### **Pull Request Guidelines**
+### Before Submitting
 
-1. **Clear description** - Explain what changes and why
-2. **Test coverage** - Include tests for new functionality
-3. **Documentation updates** - Update relevant docs
-4. **Quality checks pass** - Ensure `uv run poe check` succeeds
+1. ✓ All tests pass (`uv run poe test`)
+2. ✓ Quality checks pass (`uv run poe check`)
+3. ✓ Documentation updated
+4. ✓ Tests added for new features
 
-### **Review Criteria**
+### PR Content
 
-- **Correctness** - Does the code work as intended?
-- **Test coverage** - Are changes adequately tested?
-- **Documentation** - Are public APIs documented?
-- **Performance** - Are there performance implications?
-- **Security** - Does code handle secrets safely?
-- **Consistency** - Does code follow existing patterns?
+- **Clear description** - What changed and why
+- **Test coverage** - Tests for new functionality
+- **Documentation** - Updated relevant docs
+- **Small scope** - Focused changes, one feature/fix per PR
 
-### **Feedback Process**
+### Review Criteria
 
-- Reviewers focus on code quality and design
-- Contributors are encouraged to ask questions
-- Multiple small PRs preferred over large ones
-- Automated checks must pass before manual review
-
----
-
-## Release Process
-
-### **Version Strategy**
-
-FiveTwenty follows semantic versioning (semver):
-
-- **Major** (20.x.0) - Breaking API changes
-- **Minor** (20.1.x) - New features, backward compatible
-- **Patch** (20.1.0) - Bug fixes, backward compatible
-
-### **Release Checklist**
-
-1. All tests passing on main branch
-2. Documentation updated and building
-3. CHANGELOG.md updated with changes
-4. Version bumped in pyproject.toml
-5. Git tag created for release
-6. PyPI package published
-7. GitHub release with notes created
+- Correctness and functionality
+- Test coverage
+- Documentation completeness
+- Performance implications
+- Security (credential handling)
+- Code consistency
 
 ---
 
 ## Getting Help
 
-### **Community Channels**
+### Resources
 
-- **GitHub Issues** - Bug reports and feature requests
-- **GitHub Discussions** - Questions and community support
-- **Documentation** - Comprehensive guides and API reference
+- **[Development Setup](development-setup.md)** - Environment setup guide
+- **[Testing Guide](testing-guide.md)** - Testing best practices
+- **[Code Style](code-style.md)** - Code patterns and standards
+- **[GitHub Discussions](https://github.com/NimbleOx/fivetwenty/discussions)** - Ask questions
+- **[GitHub Issues](https://github.com/NimbleOx/fivetwenty/issues)** - Bug reports
 
-### **Development Questions**
+### When Asking for Help
 
-- Check existing issues and discussions first
-- Provide minimal reproducible examples
+- Check existing issues/discussions first
+- Provide minimal reproducible example
 - Include environment details (Python version, OS)
-- For API-related questions, include OANDA account type (practice/live)
+- For API questions, specify account type (practice/live)
 
-### **Security Issues**
+### Security Issues
 
-Report security vulnerabilities privately via GitHub Security Advisories or email.
+Report security vulnerabilities privately via [GitHub Security Advisories](https://github.com/NimbleOx/fivetwenty/security/advisories).
 
 ---
 
-## Recognition
-
-Contributors are recognized in:
-
-- **CONTRIBUTORS.md** - All contributors listed
-- **Release notes** - Major contributions highlighted
-- **GitHub** - Contributor badges and statistics
-
-Thank you for helping make FiveTwenty better! Complete
+**Thank you for helping make FiveTwenty better!**
