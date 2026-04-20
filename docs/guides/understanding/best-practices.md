@@ -239,7 +239,7 @@ Use specific exception types for targeted handling:
 import asyncio
 import os
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 
 # Step 1: Configure authentication parameters
 token = os.getenv("OANDA_TOKEN")  # API token from environment
@@ -332,7 +332,7 @@ import secrets
 from collections.abc import Callable
 from typing import Any
 
-from fivetwenty.exceptions import InternalServerError, TooManyRequests
+from fivetwenty.exceptions import FiveTwentyError
 
 async def retry_with_backoff(
     operation: Callable[[], Any],
@@ -343,7 +343,9 @@ async def retry_with_backoff(
     for attempt in range(max_retries):
         try:
             return await operation()
-        except (InternalServerError, TooManyRequests):
+        except FiveTwentyError as e:
+            if not (e.is_server_error or e.is_rate_limited):
+                raise
             if attempt == max_retries - 1:
                 raise
 
@@ -587,7 +589,7 @@ import logging
 import os
 from decimal import Decimal
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import VeeTwentyError, TooManyRequests
+from fivetwenty.exceptions import FiveTwentyError
 
 # Step 1: Configure structured logging for production applications
 logger = logging.getLogger(__name__)
@@ -638,7 +640,7 @@ async def good_error_handling():
                 units=1000
             )
             print(f"Success Order placed successfully")
-        except VeeTwentyError as e:
+        except FiveTwentyError as e:
             # Structured logging with specific error details
             logger.error(f"Order placement failed: {e}")
             print(f"Notes Error logged with specific details for debugging")
@@ -653,7 +655,9 @@ async def good_rate_limit_handling():
             print(f"Global Making API request with rate limit awareness...")
             await client.accounts.get_account(account_id)
             print(f"Success API request completed successfully")
-        except TooManyRequests as e:
+        except FiveTwentyError as e:
+            if not e.is_rate_limited:
+                raise
             # Honor API rate limits to maintain good standing
             retry_after = e.retry_after or 60  # Use server-specified delay or default
             print(f"Time Rate limit hit - waiting {retry_after} seconds")
@@ -905,7 +909,7 @@ from typing import Any, Callable, Optional
 import traceback
 import asyncio
 
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 
 
 class ErrorCategory(Enum):
@@ -1007,7 +1011,7 @@ class TradingErrorHandler:
             return ErrorCategory.RATE_LIMITING
         if "validation" in error_message or "invalid" in error_message:
             return ErrorCategory.VALIDATION
-        if isinstance(error, VeeTwentyError):
+        if isinstance(error, FiveTwentyError):
             return ErrorCategory.ORDER_EXECUTION
 
         return ErrorCategory.SYSTEM

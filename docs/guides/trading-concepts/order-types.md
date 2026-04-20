@@ -935,7 +935,7 @@ async def modify_pending_order(order_id: str, new_price: Decimal) -> Any:
 ```python
 from decimal import Decimal
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 from typing import Any, Optional
 
 
@@ -986,7 +986,7 @@ async def robust_order_placement() -> Optional[Any]:
 
                 return response
 
-            except VeeTwentyError as e:
+            except FiveTwentyError as e:
                 retry_count += 1
                 error_message = str(e)
                 print(f"\nError Order Placement Failed (Attempt #{retry_count}):")

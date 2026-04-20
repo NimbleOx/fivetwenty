@@ -297,7 +297,7 @@ Exceptions propagate directly through the call stack:
 ```python
 import os
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 
 # Step 1: Configure authentication and account parameters
 token = os.getenv("OANDA_TOKEN")  # API token from environment for security
@@ -318,7 +318,7 @@ async def async_error_example():
             )
             print(f"Success Order placed successfully: {order.id}")
 
-        except VeeTwentyError as e:
+        except FiveTwentyError as e:
             # Step 3: Handle OANDA API errors with direct exception access
             # No thread marshalling - original exception with full context
             print(f"⚠️ AsyncClient: Direct OANDA API error")
@@ -345,7 +345,7 @@ Exceptions are marshalled across thread boundaries:
 ```python
 import os
 from fivetwenty import Client, Environment
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 
 # Step 1: Configure authentication and account parameters
 token = os.getenv("OANDA_TOKEN")  # API token from environment for security
@@ -366,7 +366,7 @@ def sync_error_example():
             )
             print(f"Success Order placed successfully: {order.id}")
 
-        except VeeTwentyError as e:
+        except FiveTwentyError as e:
             # Step 3: Handle OANDA API errors marshalled from background thread
             # Same exception type, but transferred across thread boundary
             print(f"⚠️ Sync Client: OANDA API error (thread-marshalled)")

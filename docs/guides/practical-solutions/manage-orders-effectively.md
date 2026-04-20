@@ -49,7 +49,7 @@ from fivetwenty.models import (
     ClientPrice,
     OrderFillTransaction
 )
-from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError, BadRequest, TooManyRequests, InternalServerError
+from fivetwenty.exceptions import FiveTwentyError
 
 
 async def main() -> None:
@@ -354,7 +354,7 @@ async def add_regular_stop_loss(client: AsyncClient, account_id: str, trade_id: 
 <!-- fragment: Demo robust trade setup with union attribute access -->
 ```python
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import TakeProfitOrderRequest
 
 
@@ -735,7 +735,7 @@ from decimal import Decimal
 from typing import Any
 
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import AccountID, InstrumentName
 
 
@@ -827,7 +827,7 @@ import os
 from datetime import datetime, timedelta, timezone
 
 from fivetwenty import AsyncClient, Environment
-from fivetwenty.exceptions import VeeTwentyError as FiveTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 from fivetwenty.models import AccountID
 
 
