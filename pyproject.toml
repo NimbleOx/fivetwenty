@@ -168,6 +168,15 @@ ignore = [
     "I001",    # Import sorting (notebooks have different import patterns)
     "RUF013",  # Implicit Optional (notebooks can use simpler syntax)
 ]
+"docs_validation/src/parity/**/*" = [
+    "PERF401", # Use list.extend (clearer as explicit append loop in report builders)
+    "PERF102", # When using only the values of a dict (clarity > terseness)
+    "B007",    # Unused loop control variable (common in iteration helpers)
+    "RET504",  # Unnecessary assignment before return
+    "SIM110",  # Use any() (loop is clearer when scanning bases)
+    "PIE810",  # endswith with tuple (separate calls match the OANDA convention list)
+    "TC003",   # Move stdlib import into TYPE_CHECKING (this tooling is not perf-critical)
+]
 
 [tool.ruff.format]
 # Use ruff's formatter instead of black
