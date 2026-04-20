@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fivetwenty"
-version = "0.3.0"
+version = "0.3.1"
 description = "Simple, elegant Python client for OANDA's REST API v20"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -285,7 +285,9 @@ clean-dist = "rm -rf dist/ build/ *.egg-info"
 
 bump-version = "uv run python scripts/bump_version.py"
 
-[tool.poe.tasks.publish-pypi]
+[tool.poe.tasks._publish-pypi-upload]
+# Internal task: uploads whatever is in dist/. Use `publish-pypi` instead, which
+# always cleans + builds first so `dist/*` is guaranteed to exist and be fresh.
 shell = """
 source .env
 uv run python -m twine upload dist/* --username __token__ --password $PYPI_TOKEN
@@ -293,6 +295,10 @@ uv run python -m twine upload dist/* --username __token__ --password $PYPI_TOKEN
 interpreter = "bash"
 # test pypi upload command for reference
 # uv run python -m twine upload --repository testpypi dist/* --username __token__ --password $PYPI_TOKEN
+
+[tool.poe.tasks.publish-pypi]
+help = "Clean, build, and upload the package to PyPI"
+sequence = ["clean-dist", "build", "_publish-pypi-upload"]
 
 [tool.poe.tasks.release-github]
 shell = """
@@ -307,6 +313,6 @@ sequence = [
     "bump-version",
     "clean-dist",
     "build",
-    "publish-pypi",
+    "_publish-pypi-upload",
     "release-github"
 ]
