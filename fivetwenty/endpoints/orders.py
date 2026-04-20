@@ -116,6 +116,9 @@ class ReplaceOrderResponse(TypedDict, total=False):
     orderCancelTransaction: OrderCancelTransaction
     orderCreateTransaction: OrderCreateTransaction
     orderFillTransaction: OrderFillTransaction
+    orderReissueTransaction: OrderCreateTransaction
+    orderReissueRejectTransaction: OrderRejectTransaction
+    replacingOrderCancelTransaction: OrderCancelTransaction
     relatedTransactionIDs: list[str]
     lastTransactionID: str
 
@@ -688,6 +691,12 @@ class OrderEndpoints:
             result["orderCreateTransaction"] = self._parse_order_transaction(data["orderCreateTransaction"])
         if "orderFillTransaction" in data:
             result["orderFillTransaction"] = OrderFillTransaction.model_validate(data["orderFillTransaction"])
+        if "orderReissueTransaction" in data:
+            result["orderReissueTransaction"] = self._parse_order_transaction(data["orderReissueTransaction"])
+        if "orderReissueRejectTransaction" in data:
+            result["orderReissueRejectTransaction"] = self._parse_order_reject_transaction(data["orderReissueRejectTransaction"])
+        if "replacingOrderCancelTransaction" in data:
+            result["replacingOrderCancelTransaction"] = OrderCancelTransaction.model_validate(data["replacingOrderCancelTransaction"])
         if "relatedTransactionIDs" in data:
             result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
 
