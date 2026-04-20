@@ -125,12 +125,15 @@ class TestAdvancedOrderModels:
         assert order.trigger_condition == OrderTriggerCondition.DEFAULT
 
     def test_guaranteed_stop_loss_order_request(self) -> None:
-        """Test GuaranteedStopLossOrderRequest model."""
-        order = GuaranteedStopLossOrderRequest(trade_id="456", price="1.0900", guaranteed_execution_premium="2.50")
+        """Test GuaranteedStopLossOrderRequest model.
+
+        Note: guaranteed_execution_premium is reported by OANDA on the resulting
+        GuaranteedStopLossOrder, not specified by the client on the request.
+        """
+        order = GuaranteedStopLossOrderRequest(trade_id="456", price="1.0900")
         assert order.type == OrderType.GUARANTEED_STOP_LOSS
         assert order.trade_id == "456"
         assert order.price == Decimal("1.0900")
-        assert order.guaranteed_execution_premium == Decimal("2.50")
         assert order.distance is None
 
     def test_guaranteed_stop_loss_with_distance(self) -> None:
