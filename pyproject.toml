@@ -264,8 +264,14 @@ build = "python -m build"
 docs-serve = "python -m mkdocs serve"
 docs-build = "python -m mkdocs build --clean"
 
-# Documentation validation task
-docs-validate = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
+# Documentation validation tasks
+# `docs-validate-existing` runs the file-by-file validators (syntax, lint, types, links, etc.)
+# `docs-validate-parity` runs the parity pipeline (library ↔ live OANDA ↔ project docs)
+# `docs-validate` runs both in sequence so a single command catches everything.
+docs-validate-existing = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
+docs-validate-parity = "uv run python -m docs_validation.src.parity.run_all --no-fetch"
+docs-validate-parity-refresh = "uv run python -m docs_validation.src.parity.run_all --refresh"
+docs-validate = ["docs-validate-existing", "docs-validate-parity"]
 
 # YAML tasks
 yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/workflows/ docs/api-reference/openapi.yaml"
