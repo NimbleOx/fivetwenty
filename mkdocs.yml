@@ -263,4 +263,12 @@ copyright: |
         <li><a href="https://github.com/NimbleOx">Contact</a></li>
       </ul>
     </div>
+    <div class="footer-column">
+      <h4>OANDA Info</h4>
+      <ul>
+        <li><a href="https://www.oanda.com/us-en/">OANDA Website</a></li>
+        <li><a href="https://developer.oanda.com">Developer Portal</a></li>
+        <li><a href="https://developer.oanda.com/rest-live-v20/introduction/">OANDA v20 API</a></li>
+      </ul>
+    </div>
   </div>

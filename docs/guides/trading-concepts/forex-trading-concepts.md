@@ -3366,7 +3366,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import Optional
 from fivetwenty import AsyncClient
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 
 
 async def handle_trading_errors() -> None:
@@ -3439,7 +3439,7 @@ print(f" Fill price: {order.order_fill_transaction.price}")
 
 return order
 
-    except VeeTwentyError as e:
+    except FiveTwentyError as e:
 # Step 5: Analyze error type and implement specific recovery
 error_type = str(e)
 error_stats["errors_by_type"][error_type] = error_stats["errors_by_type"].get(error_type, 0) + 1

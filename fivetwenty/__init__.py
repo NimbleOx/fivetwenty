@@ -10,7 +10,7 @@ Usage:
     # Method 1: Direct parameters
     async def main():
         async with AsyncClient(token="your-token", account_id="your-account-id", environment=Environment.PRACTICE) as client:
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
 
     asyncio.run(main())
 
@@ -24,7 +24,7 @@ Usage:
 
     async def main():
         async with AsyncClient(config=config) as client:
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
 
     asyncio.run(main())
 
@@ -32,13 +32,13 @@ Usage:
     # Set FIVETWENTY_OANDA_TOKEN, FIVETWENTY_OANDA_ACCOUNT, etc.
     async def main():
         async with AsyncClient() as client:
-            accounts = await client.accounts.list()
+            accounts = await client.accounts.get_accounts()
 
     asyncio.run(main())
 
     # Sync wrapper (same patterns)
     with Client(token="your-token", account_id="your-account-id") as client:
-        accounts = client.accounts.list()
+        accounts = client.accounts.get_accounts()
 """
 
 try:
@@ -47,7 +47,7 @@ try:
     __version__ = version("fivetwenty")
 except ImportError:
     # Fallback for development installs
-    __version__ = "0.1.1"
+    __version__ = "0.3.0"
 
 from ._internal.environment import Environment
 from .client import AsyncClient, Client

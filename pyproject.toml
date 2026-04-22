@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fivetwenty"
-version = "0.2.0"
+version = "0.3.1"
 description = "Simple, elegant Python client for OANDA's REST API v20"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -168,6 +168,15 @@ ignore = [
     "I001",    # Import sorting (notebooks have different import patterns)
     "RUF013",  # Implicit Optional (notebooks can use simpler syntax)
 ]
+"docs_validation/src/parity/**/*" = [
+    "PERF401", # Use list.extend (clearer as explicit append loop in report builders)
+    "PERF102", # When using only the values of a dict (clarity > terseness)
+    "B007",    # Unused loop control variable (common in iteration helpers)
+    "RET504",  # Unnecessary assignment before return
+    "SIM110",  # Use any() (loop is clearer when scanning bases)
+    "PIE810",  # endswith with tuple (separate calls match the OANDA convention list)
+    "TC003",   # Move stdlib import into TYPE_CHECKING (this tooling is not perf-critical)
+]
 
 [tool.ruff.format]
 # Use ruff's formatter instead of black
@@ -255,8 +264,14 @@ build = "python -m build"
 docs-serve = "python -m mkdocs serve"
 docs-build = "python -m mkdocs build --clean"
 
-# Documentation validation task
-docs-validate = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
+# Documentation validation tasks
+# `docs-validate-existing` runs the file-by-file validators (syntax, lint, types, links, etc.)
+# `docs-validate-parity` runs the parity pipeline (library ↔ live OANDA ↔ project docs)
+# `docs-validate` runs both in sequence so a single command catches everything.
+docs-validate-existing = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
+docs-validate-parity = "uv run python -m docs_validation.src.parity.run_all --no-fetch"
+docs-validate-parity-refresh = "uv run python -m docs_validation.src.parity.run_all --refresh"
+docs-validate = ["docs-validate-existing", "docs-validate-parity"]
 
 # YAML tasks
 yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/workflows/ docs/api-reference/openapi.yaml"
@@ -270,7 +285,9 @@ clean-dist = "rm -rf dist/ build/ *.egg-info"
 
 bump-version = "uv run python scripts/bump_version.py"
 
-[tool.poe.tasks.publish-pypi]
+[tool.poe.tasks._publish-pypi-upload]
+# Internal task: uploads whatever is in dist/. Use `publish-pypi` instead, which
+# always cleans + builds first so `dist/*` is guaranteed to exist and be fresh.
 shell = """
 source .env
 uv run python -m twine upload dist/* --username __token__ --password $PYPI_TOKEN
@@ -278,6 +295,10 @@ uv run python -m twine upload dist/* --username __token__ --password $PYPI_TOKEN
 interpreter = "bash"
 # test pypi upload command for reference
 # uv run python -m twine upload --repository testpypi dist/* --username __token__ --password $PYPI_TOKEN
+
+[tool.poe.tasks.publish-pypi]
+help = "Clean, build, and upload the package to PyPI"
+sequence = ["clean-dist", "build", "_publish-pypi-upload"]
 
 [tool.poe.tasks.release-github]
 shell = """
@@ -292,6 +313,6 @@ sequence = [
     "bump-version",
     "clean-dist",
     "build",
-    "publish-pypi",
+    "_publish-pypi-upload",
     "release-github"
 ]

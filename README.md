@@ -1,5 +1,10 @@
 # FiveTwenty
 
+[![Documentation](https://img.shields.io/badge/docs-mkdocs-blue)](https://nimbleox.github.io/fivetwenty/)
+[![Python](https://img.shields.io/badge/python-3.10+-blue.svg)](https://www.python.org/downloads/)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE)
+[![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
+
 A comprehensive, production-ready Python client for the OANDA v20 REST API.
 
 ## Features

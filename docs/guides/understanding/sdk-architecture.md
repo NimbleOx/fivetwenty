@@ -1345,7 +1345,7 @@ asyncio.run(main())
 ```python
 # Step 1: Import proper exception types for comprehensive error handling
 import logging
-from fivetwenty.exceptions import VeeTwentyError
+from fivetwenty.exceptions import FiveTwentyError
 
 # Step 2: Set up structured logging for trading operations
 logger = logging.getLogger(__name__)
@@ -1360,9 +1360,9 @@ try:
     # )
     pass
 
-except VeeTwentyError as e:
+except FiveTwentyError as e:
     # Step 4: Handle known OANDA API errors with specific strategies
-    # VeeTwentyError provides structured error information for decision making
+    # FiveTwentyError provides structured error information for decision making
 
     if "INSUFFICIENT_FUNDS" in str(e.error_code):
         # Step 5: Implement specific recovery for insufficient funds
@@ -1407,7 +1407,7 @@ except Exception as e:
     # Alert monitoring systems for immediate attention
 
 # Step 8: Error handling best practices for trading systems
-# - Always handle VeeTwentyError specifically (OANDA business logic)
+# - Always handle FiveTwentyError specifically (OANDA business logic)
 # - Log sufficient detail for debugging without exposing sensitive data
 # - Implement appropriate recovery strategies for each error type
 # - Use structured logging for monitoring and alerting

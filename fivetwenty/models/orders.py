@@ -110,6 +110,7 @@ class MarketOrderRequest(ApiModel):
     instrument: InstrumentName
     units: Decimal
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.FOK)
+    price_bound: PriceValue | None = Field(alias="priceBound", default=None)
     position_fill: OrderPositionFill = Field(alias="positionFill", default=OrderPositionFill.DEFAULT)
     client_extensions: ClientExtensions | None = Field(alias="clientExtensions", default=None)
     take_profit_on_fill: TakeProfitDetails | None = Field(alias="takeProfitOnFill", default=None)
@@ -168,6 +169,7 @@ class TakeProfitOrderRequest(ApiModel):
 
     type: OrderType = OrderType.TAKE_PROFIT
     trade_id: TradeID = Field(alias="tradeID")
+    client_trade_id: str | None = Field(alias="clientTradeID", default=None)
     price: PriceValue
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(alias="gtdTime", default=None)
@@ -185,6 +187,7 @@ class StopLossOrderRequest(ApiModel):
 
     type: OrderType = OrderType.STOP_LOSS
     trade_id: TradeID = Field(alias="tradeID")
+    client_trade_id: str | None = Field(alias="clientTradeID", default=None)
     price: PriceValue | None = None
     distance: Decimal | None = None
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
@@ -224,6 +227,7 @@ class TrailingStopLossOrderRequest(ApiModel):
 
     type: OrderType = OrderType.TRAILING_STOP_LOSS
     trade_id: TradeID = Field(alias="tradeID")
+    client_trade_id: str | None = Field(alias="clientTradeID", default=None)
     distance: Decimal
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(alias="gtdTime", default=None)
@@ -243,12 +247,12 @@ class GuaranteedStopLossOrderRequest(ApiModel):
 
     type: OrderType = OrderType.GUARANTEED_STOP_LOSS
     trade_id: TradeID = Field(alias="tradeID")
+    client_trade_id: str | None = Field(alias="clientTradeID", default=None)
     price: PriceValue | None = None
     distance: Decimal | None = None
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(alias="gtdTime", default=None)
     trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition", default=OrderTriggerCondition.DEFAULT)
-    guaranteed_execution_premium: AccountUnits | None = Field(alias="guaranteedExecutionPremium", default=None)
     client_extensions: ClientExtensions | None = Field(alias="clientExtensions", default=None)
 
 
@@ -262,7 +266,7 @@ class FixedPriceOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Fixed price order specific fields
-    type: str = Field(default="FIXED_PRICE")
+    type: OrderType = Field(default=OrderType.FIXED_PRICE)
     instrument: InstrumentName
     units: Decimal  # Required: +ve = long, -ve = short
     price: PriceValue  # Required: exact fill price
@@ -272,6 +276,7 @@ class FixedPriceOrder(ApiModel):
     # On-fill orders (conditional)
     take_profit_on_fill: TakeProfitDetails | None = Field(None, alias="takeProfitOnFill")
     stop_loss_on_fill: StopLossDetails | None = Field(None, alias="stopLossOnFill")
+    guaranteed_stop_loss_on_fill: GuaranteedStopLossDetails | None = Field(None, alias="guaranteedStopLossOnFill")
     trailing_stop_loss_on_fill: TrailingStopLossDetails | None = Field(None, alias="trailingStopLossOnFill")
     trade_client_extensions: ClientExtensions | None = Field(None, alias="tradeClientExtensions")
 
@@ -373,6 +378,8 @@ class LimitOrder(ApiModel):
     trade_closed_ids: list[TradeID] = Field(default_factory=list, alias="tradeClosedIDs")
     cancelling_transaction_id: TransactionID | None = Field(None, alias="cancellingTransactionID")
     cancelled_time: datetime | None = Field(None, alias="cancelledTime")
+    replaces_order_id: OrderID | None = Field(None, alias="replacesOrderID")
+    replaced_by_order_id: OrderID | None = Field(None, alias="replacedByOrderID")
 
 
 class StopOrder(ApiModel):
@@ -410,6 +417,8 @@ class StopOrder(ApiModel):
     trade_closed_ids: list[TradeID] = Field(default_factory=list, alias="tradeClosedIDs")
     cancelling_transaction_id: TransactionID | None = Field(None, alias="cancellingTransactionID")
     cancelled_time: datetime | None = Field(None, alias="cancelledTime")
+    replaces_order_id: OrderID | None = Field(None, alias="replacesOrderID")
+    replaced_by_order_id: OrderID | None = Field(None, alias="replacedByOrderID")
 
 
 class MarketIfTouchedOrder(ApiModel):
@@ -478,6 +487,8 @@ class TakeProfitOrder(ApiModel):
     trade_closed_ids: list[TradeID] = Field(default_factory=list, alias="tradeClosedIDs")
     cancelling_transaction_id: TransactionID | None = Field(None, alias="cancellingTransactionID")
     cancelled_time: datetime | None = Field(None, alias="cancelledTime")
+    replaces_order_id: OrderID | None = Field(None, alias="replacesOrderID")
+    replaced_by_order_id: OrderID | None = Field(None, alias="replacedByOrderID")
 
 
 class StopLossOrder(ApiModel):
@@ -491,6 +502,7 @@ class StopLossOrder(ApiModel):
 
     # Stop loss order specific fields
     type: str = Field(default="STOP_LOSS", frozen=True)
+    guaranteed_execution_premium: Decimal | None = Field(None, alias="guaranteedExecutionPremium")
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     price: PriceValue | None = None
@@ -508,6 +520,8 @@ class StopLossOrder(ApiModel):
     trade_closed_ids: list[TradeID] = Field(default_factory=list, alias="tradeClosedIDs")
     cancelling_transaction_id: TransactionID | None = Field(None, alias="cancellingTransactionID")
     cancelled_time: datetime | None = Field(None, alias="cancelledTime")
+    replaces_order_id: OrderID | None = Field(None, alias="replacesOrderID")
+    replaced_by_order_id: OrderID | None = Field(None, alias="replacedByOrderID")
 
 
 class GuaranteedStopLossOrder(ApiModel):
@@ -522,12 +536,13 @@ class GuaranteedStopLossOrder(ApiModel):
     # Guaranteed stop loss order specific fields
     type: str = Field(default="GUARANTEED_STOP_LOSS", frozen=True)
     trade_id: TradeID = Field(alias="tradeID")
+    client_trade_id: str | None = Field(None, alias="clientTradeID")
     price: PriceValue
     distance: Decimal | None = None
     time_in_force: TimeInForce = Field(alias="timeInForce")
     gtd_time: datetime | None = Field(None, alias="gtdTime")
     trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition")
-    guaranteed_execution_premium: Decimal = Field(alias="guaranteedExecutionPremium")
+    guaranteed_execution_premium: Decimal | None = Field(None, alias="guaranteedExecutionPremium")
 
     # Fill/cancel state fields (when FILLED or CANCELLED)
     filling_transaction_id: TransactionID | None = Field(None, alias="fillingTransactionID")
@@ -568,6 +583,8 @@ class TrailingStopLossOrder(ApiModel):
     trade_closed_ids: list[TradeID] = Field(default_factory=list, alias="tradeClosedIDs")
     cancelling_transaction_id: TransactionID | None = Field(None, alias="cancellingTransactionID")
     cancelled_time: datetime | None = Field(None, alias="cancelledTime")
+    replaces_order_id: OrderID | None = Field(None, alias="replacesOrderID")
+    replaced_by_order_id: OrderID | None = Field(None, alias="replacedByOrderID")
 
 
 # Export all order-related models

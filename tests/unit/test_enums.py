@@ -125,7 +125,7 @@ class TestOrderEnums:
 
     def test_order_type_completeness(self):
         """Test OrderType has all expected values."""
-        expected_types = {"MARKET", "LIMIT", "STOP", "MARKET_IF_TOUCHED", "TAKE_PROFIT", "STOP_LOSS", "GUARANTEED_STOP_LOSS", "TRAILING_STOP_LOSS"}
+        expected_types = {"MARKET", "LIMIT", "STOP", "MARKET_IF_TOUCHED", "TAKE_PROFIT", "STOP_LOSS", "GUARANTEED_STOP_LOSS", "TRAILING_STOP_LOSS", "FIXED_PRICE"}
 
         actual_types = {order_type.value for order_type in OrderType}
         assert actual_types == expected_types

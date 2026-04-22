@@ -21,6 +21,7 @@ Request to create a market order (immediate execution at current market price).
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument for the order |
 | `units` | Decimal | ✅ | Number of units to trade (positive for long, negative for short) |
 | `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (restricted to "FOK" or "IOC" for market orders) |
+| `price_bound` | [PriceValue](system-models.md#type-aliases) |➖ | Worst acceptable fill price (slippage protection) |
 | `position_fill` | [OrderPositionFill](enum-models.md#orderpositionfill) | ➖ | How positions are modified when order is filled (OPEN_ONLY, REDUCE_FIRST, REDUCE_ONLY, DEFAULT) |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details to be applied on fill |
@@ -89,6 +90,7 @@ Request to create a take profit order linked to an open trade.
 |-------|------|----------|-------------|
 | `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to TAKE_PROFIT) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade identifier to close |
+| `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Price threshold for order execution |
 | `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
@@ -106,6 +108,7 @@ Request to create a stop loss order linked to an open trade.
 |-------|------|----------|-------------|
 | `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to STOP_LOSS) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade identifier to close |
+| `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price threshold for order execution (either price or distance required) |
 | `distance` | Decimal | ➖ | Distance from current price (either price or distance required) |
 | `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
@@ -125,6 +128,7 @@ Request to create a trailing stop loss order linked to an open trade.
 |-------|------|----------|-------------|
 | `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to TRAILING_STOP_LOSS) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade identifier to close |
+| `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `distance` | Decimal | ✅ | Trailing distance from current price |
 | `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
@@ -142,12 +146,12 @@ Request to create a guaranteed stop loss order linked to an open trade.
 |-------|------|----------|-------------|
 | `type` | [OrderType](enum-models.md#ordertype) | ➖ | Order type identifier (automatically set to GUARANTEED_STOP_LOSS) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade identifier to close |
+| `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price threshold for order execution (either price or distance required) |
 | `distance` | Decimal | ➖ | Distance from current price (either price or distance required) |
 | `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) |➖ | Good-till-date expiration timestamp (required when time_in_force is "GTD") |
 | `trigger_condition` | [OrderTriggerCondition](enum-models.md#ordertriggercondition) | ➖ | Price component used for triggering (DEFAULT, INVERSE, BID, ASK) |
-| `guaranteed_execution_premium` | [AccountUnits](system-models.md#type-aliases) |➖ | Premium cost for guaranteed execution |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for the order (not available for MT4 accounts) |
 
 ### MarketIfTouchedOrderRequest
@@ -248,6 +252,8 @@ Limit order that executes only at specified price or better.
 | `trade_closed_ids` | list[[TradeID](system-models.md#type-aliases)] |✅ | Closed trade IDs (when FILLED) |
 | `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Cancel transaction ID (when CANCELLED) |
 | `cancelled_time` | [DateTime](system-models.md#type-aliases) |➖ | Cancel timestamp (when CANCELLED) |
+| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
+| `replaced_by_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order that replaced this one |
 
 ### StopOrder
 Stop order that becomes a market order when price threshold is reached.
@@ -283,6 +289,8 @@ Stop order that becomes a market order when price threshold is reached.
 | `trade_closed_ids` | list[[TradeID](system-models.md#type-aliases)] |✅ | Closed trade IDs (when FILLED) |
 | `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Cancel transaction ID (when CANCELLED) |
 | `cancelled_time` | [DateTime](system-models.md#type-aliases) |➖ | Cancel timestamp (when CANCELLED) |
+| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
+| `replaced_by_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order that replaced this one |
 
 ### GuaranteedStopLossOrder
 Guaranteed stop loss order linked to an open trade with guaranteed execution.
@@ -299,6 +307,7 @@ Guaranteed stop loss order linked to an open trade with guaranteed execution.
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "GUARANTEED_STOP_LOSS" (default) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close |
+| `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) |✅ | Price threshold for order execution |
 | `distance` | Decimal | ➖ | Distance from current price |
 | `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ✅ | Order duration policy |
@@ -343,6 +352,8 @@ A Take Profit Order linked to an open Trade and created with a price threshold.
 | `trade_closed_ids` | list[[TradeID](system-models.md#type-aliases)] |✅ | Closed trade IDs (when FILLED) |
 | `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Cancel transaction ID (when CANCELLED) |
 | `cancelled_time` | [DateTime](system-models.md#type-aliases) |➖ | Cancel timestamp (when CANCELLED) |
+| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
+| `replaced_by_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order that replaced this one |
 
 ### StopLossOrder
 A Stop Loss Order linked to an open Trade and created with a price threshold.
@@ -358,6 +369,7 @@ A Stop Loss Order linked to an open Trade and created with a price threshold.
 | `state` | [OrderState](enum-models.md#orderstate) | ✅ | Current state of the Order |
 | `client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions (not for MT4 accounts) |
 | `type` | str | ➖ | Always "STOP_LOSS" |
+| `guaranteed_execution_premium` | Decimal | ➖ | Premium charged for guaranteed execution (when `guaranteed` is True) |
 | `trade_id` | [TradeID](system-models.md#type-aliases) |✅ | Trade to close |
 | `client_trade_id` | str | ➖ | Client-provided trade identifier |
 | `price` | [PriceValue](system-models.md#type-aliases) |➖ | Trigger price |
@@ -373,6 +385,8 @@ A Stop Loss Order linked to an open Trade and created with a price threshold.
 | `trade_closed_ids` | list[[TradeID](system-models.md#type-aliases)] |✅ | Closed trade IDs (when FILLED) |
 | `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Cancel transaction ID (when CANCELLED) |
 | `cancelled_time` | [DateTime](system-models.md#type-aliases) |➖ | Cancel timestamp (when CANCELLED) |
+| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
+| `replaced_by_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order that replaced this one |
 
 ### TrailingStopLossOrder
 A Trailing Stop Loss Order linked to an open Trade with a dynamic price distance.
@@ -402,6 +416,8 @@ A Trailing Stop Loss Order linked to an open Trade with a dynamic price distance
 | `trade_closed_ids` | list[[TradeID](system-models.md#type-aliases)] |✅ | Closed trade IDs (when FILLED) |
 | `cancelling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Cancel transaction ID (when CANCELLED) |
 | `cancelled_time` | [DateTime](system-models.md#type-aliases) |➖ | Cancel timestamp (when CANCELLED) |
+| `replaces_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order being replaced |
+| `replaced_by_order_id` | [OrderID](system-models.md#type-aliases) |➖ | ID of the order that replaced this one |
 
 ### MarketIfTouchedOrder
 A Market-If-Touched Order created with a price threshold.
@@ -462,6 +478,7 @@ A Fixed Price Order filled immediately at specified price.
 | `trade_state` | str | ✅ | Resulting trade state |
 | `take_profit_on_fill` | [TakeProfitDetails](#takeprofitdetails) | ➖ | Take profit order creation details |
 | `stop_loss_on_fill` | [StopLossDetails](#stoplossdetails) | ➖ | Stop loss order creation details |
+| `guaranteed_stop_loss_on_fill` | [GuaranteedStopLossDetails](#guaranteedstoplossdetails) | ➖ | Guaranteed stop loss order creation details |
 | `trailing_stop_loss_on_fill` | [TrailingStopLossDetails](#trailingstoplossdetails) | ➖ | Trailing stop loss order creation details |
 | `trade_client_extensions` | [ClientExtensions](#clientextensions) | ➖ | Client extensions for created trades |
 | `filling_transaction_id` | [TransactionID](system-models.md#type-aliases) |➖ | Fill transaction ID (when FILLED) |
