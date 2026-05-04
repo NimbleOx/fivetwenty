@@ -84,10 +84,10 @@ class ClientPrice(ApiModel):
     """Real-time price data."""
 
     type: str = Field(default="PRICE")
-    instrument: InstrumentName
-    time: datetime
+    instrument: InstrumentName | None = None
+    time: datetime | None = None
     status: PriceStatus | None = None  # Deprecated but may still be present
-    tradeable: bool
+    tradeable: bool | None = None
     bids: list[PriceBucket] = Field(default_factory=list)
     asks: list[PriceBucket] = Field(default_factory=list)
     closeout_bid: PriceValue = Field(alias="closeoutBid")

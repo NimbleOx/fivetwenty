@@ -172,6 +172,35 @@ class TestPhase4TransactionModels:
         assert fill_back_to_api["fullPrice"]["closeoutAsk"] == "1.0955"
         assert fill_back_to_api["accountBalance"] == "10000.00"
 
+    def test_order_fill_transaction_partial_full_price(self) -> None:
+        """Test transaction-embedded fullPrice payloads without ClientPrice identity fields."""
+        api_data = {
+            "id": "12346",
+            "time": "2024-01-15T12:00:01.000000000Z",
+            "userID": 123456,
+            "accountID": "101-001-123456-001",
+            "batchID": "12346",
+            "type": "ORDER_FILL",
+            "orderID": "order-123",
+            "instrument": "EUR_USD",
+            "units": "10000",
+            "fullPrice": {
+                "closeoutBid": "1.0945",
+                "closeoutAsk": "1.0955",
+                "bids": [{"price": "1.0945", "liquidity": "10000000"}],
+                "asks": [{"price": "1.0955", "liquidity": "10000000"}],
+            },
+        }
+
+        fill = OrderFillTransaction(**api_data)
+
+        assert fill.full_price is not None
+        assert fill.full_price.instrument is None
+        assert fill.full_price.time is None
+        assert fill.full_price.tradeable is None
+        assert fill.full_price.closeout_bid == Decimal("1.0945")
+        assert fill.full_price.bids[0].liquidity == Decimal("10000000")
+
     def test_order_cancel_transaction(self) -> None:
         """Test OrderCancelTransaction model."""
         cancel_data = {
