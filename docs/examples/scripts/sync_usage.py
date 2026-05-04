@@ -144,19 +144,22 @@ def main() -> None:
     start_time = time.time()
     event_count = 0
 
-    # Regular for loop (not async for)
-    # Each iteration blocks waiting for next price event
-    for event in client.pricing.stream_iter(account_id=client.account_id, instruments=[InstrumentName.EUR_USD]):
-        # Check event type - PRICE events contain market data
-        if event.type == "PRICE" and hasattr(event, "bids") and hasattr(event, "asks"):
-            event_count += 1
-            if event.bids and event.asks:
-                print(f"  Price #{event_count}: {event.bids[0].price}/{event.asks[0].price}")
+    with Client() as client:
+        pricing_stream = client.pricing
 
-        # Stop after 3 seconds
-        # Important: always have a way to exit the loop!
-        if time.time() - start_time > 3:
-            break
+        # Regular for loop (not async for)
+        # Each iteration blocks waiting for next price event
+        for event in pricing_stream.stream_iter(account_id=client.account_id, instruments=[InstrumentName.EUR_USD]):
+            # Check event type - PRICE events contain market data
+            if event.type == "PRICE" and hasattr(event, "bids") and hasattr(event, "asks"):
+                event_count += 1
+                if event.bids and event.asks:
+                    print(f"  Price #{event_count}: {event.bids[0].price}/{event.asks[0].price}")
+
+            # Stop after 3 seconds
+            # Important: always have a way to exit the loop!
+            if time.time() - start_time > 3:
+                break
 
     print(f"✅ Received {event_count} price updates in 3 seconds")
 

@@ -1045,7 +1045,7 @@ class ExtendedClient(AsyncClient):
 
         # Step 5: Add custom endpoint as an attribute
         self.analytics = CustomAnalyticsEndpoint(self)
-        # Now accessible as: client.analytics.get_performance_metrics()
+        # Now accessible through ExtendedClient.analytics
 
     # Additional custom methods could be added here:
     # async def execute_strategy(self, strategy_config: dict) -> Any:
@@ -1053,11 +1053,11 @@ class ExtendedClient(AsyncClient):
     #     pass
 
 # Step 6: Usage example demonstrating extension benefits
-# async with ExtendedClient(token="your-token") as client:
+# async with ExtendedClient(token="your-token") as extended_client:
 #     # Standard FiveTwenty functionality
-#     accounts = await client.accounts.get_accounts()
+#     accounts = await extended_client.accounts.get_accounts()
 #     # Custom analytics functionality
-#     metrics = await client.analytics.get_performance_metrics(account_id)
+#     metrics = await extended_client.analytics.get_performance_metrics(account_id)
 #     # Combined capabilities for sophisticated trading applications
 
 # Extension benefits:

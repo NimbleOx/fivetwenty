@@ -34,7 +34,7 @@ def _collect_library_enums() -> tuple[dict[str, list[str]], dict[str, str]]:
 
     enums_path = REPO_ROOT / "fivetwenty" / "models" / "enums.py"
     data = extract_module(enums_path)
-    enums = {name: list(body.get("values", {}).keys()) for name, body in data.get("enums", {}).items()}
+    enums = {name: [value.strip("\"'") for value in body.get("values", {}).values()] for name, body in data.get("enums", {}).items()}
     aliases = data.get("type_aliases", {})
     return enums, aliases
 
