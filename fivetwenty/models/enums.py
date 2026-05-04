@@ -4,6 +4,7 @@ Enumerations for OANDA API.
 Contains all enum types used throughout the OANDA API models.
 """
 
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 
@@ -598,10 +599,6 @@ class TransactionRejectReason(str, Enum):
     REPLACING_ORDER_INVALID = "REPLACING_ORDER_INVALID"
     REPLACING_TRADE_ID_INVALID = "REPLACING_TRADE_ID_INVALID"
     ORDER_CANCEL_WOULD_TRIGGER_CLOSEOUT = "ORDER_CANCEL_WOULD_TRIGGER_CLOSEOUT"
-    # Additional values not present on the OANDA transaction-df page but kept for
-    # backwards compatibility with older library users:
-    MARKET_HALTED = "MARKET_HALTED"
-    ORDER_ID_INVALID = "ORDER_ID_INVALID"
 
 
 class FundingReason(str, Enum):
@@ -730,11 +727,38 @@ TransactionID = str
 RequestID = str
 """Request identifier for correlation."""
 
+ClientRequestID = str
+"""Client-provided request identifier."""
+
+ClientID = str
+"""Client-provided identifier for orders or trades."""
+
+ClientTag = str
+"""Client-provided tag for orders or trades."""
+
+ClientComment = str
+"""Client-provided comment for orders or trades."""
+
+OrderSpecifier = str
+"""Order identifier accepted by order endpoints."""
+
+TradeSpecifier = str
+"""Trade identifier accepted by trade endpoints."""
+
 PriceValue = Decimal
 """Price value handled as Decimal internally, serialized as string for API precision."""
 
 AccountUnits = Decimal
 """Account currency units handled as Decimal internally, serialized as string for API precision."""
+
+DecimalNumber = Decimal
+"""Decimal number handled as Decimal internally, serialized as string for API precision."""
+
+DateTime = datetime
+"""Date/time value represented as a Python datetime."""
+
+CandleSpecification = str
+"""Candlestick request specification."""
 
 PricingComponent = str
 """Price component selector for candlestick data, such as M, B, A, BA, BM, AM, or BAM."""

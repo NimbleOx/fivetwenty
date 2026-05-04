@@ -28,7 +28,7 @@ from .enums import (
 from .orders import ClientExtensions
 
 if TYPE_CHECKING:
-    from .orders import GuaranteedStopLossOrder, StopLossOrder, TakeProfitOrder, TrailingStopLossOrder
+    from .orders import StopLossOrder, TakeProfitOrder, TrailingStopLossOrder
 
 
 class Trade(ApiModel):
@@ -53,7 +53,6 @@ class Trade(ApiModel):
     client_extensions: ClientExtensions | None = Field(alias="clientExtensions", default=None)
     take_profit_order: "TakeProfitOrder | None" = Field(alias="takeProfitOrder", default=None)
     stop_loss_order: "StopLossOrder | None" = Field(alias="stopLossOrder", default=None)
-    guaranteed_stop_loss_order: "GuaranteedStopLossOrder | None" = Field(alias="guaranteedStopLossOrder", default=None)
     trailing_stop_loss_order: "TrailingStopLossOrder | None" = Field(alias="trailingStopLossOrder", default=None)
 
 

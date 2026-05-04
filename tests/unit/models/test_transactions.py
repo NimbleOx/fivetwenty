@@ -59,7 +59,6 @@ class TestPhase4TransactionModels:
         """Test TransactionRejectReason enum values."""
         assert TransactionRejectReason.INTERNAL_SERVER_ERROR == "INTERNAL_SERVER_ERROR"
         assert TransactionRejectReason.INSUFFICIENT_MARGIN == "INSUFFICIENT_MARGIN"
-        assert TransactionRejectReason.MARKET_HALTED == "MARKET_HALTED"
         assert TransactionRejectReason.ACCOUNT_NOT_ACTIVE == "ACCOUNT_NOT_ACTIVE"
 
     def test_funding_reason_enum(self) -> None:
@@ -346,7 +345,6 @@ class TestPhase4AliasTests:
             },
             "accountBalance": "10000.00",
             "halfSpreadCost": "0.25",
-            "guaranteeExecutionFee": "0.10",
         }
 
         fill = OrderFillTransaction(**api_data)
@@ -358,7 +356,6 @@ class TestPhase4AliasTests:
         assert fill_roundtrip.client_order_id == fill.client_order_id
         assert fill_roundtrip.gain_quote_home_conversion_factor == fill.gain_quote_home_conversion_factor
         assert fill_roundtrip.full_vwap == fill.full_vwap
-        assert fill_roundtrip.guarantee_execution_fee == fill.guarantee_execution_fee
 
     def test_market_order_transaction_roundtrip_validation(self) -> None:
         """Test MarketOrderTransaction model roundtrip with API data."""
