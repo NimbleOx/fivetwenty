@@ -168,7 +168,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-🔗 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-candles)
+🔗 **OANDA Documentation**: [Get Candles](https://developer.oanda.com/rest-live-v20/pricing-ep/#get-candles)
 
 🔗 **Source**: [pricing.get_account_instrument_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
 
@@ -238,7 +238,7 @@ async def main() -> None:
 asyncio.run(main())
 ```
 
-🔗 **OANDA Documentation**: [Get Latest Candles](https://developer.oanda.com/rest-live-v20/instrument-ep/#get-latest-candles)
+🔗 **OANDA Documentation**: [Get Latest Candles](https://developer.oanda.com/rest-live-v20/pricing-ep/#get-latest-candles)
 
 🔗 **Source**: [pricing.get_latest_candles](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/pricing.py)
 

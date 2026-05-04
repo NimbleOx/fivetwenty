@@ -16,7 +16,6 @@ Complete reference for all FiveTwenty endpoint implementations.
 | [trades](trades.md) | Trade management | `list_open()`, `get()`, `close()`, `modify()`, `list()` |
 | [positions](positions.md) | Position tracking | `list_open()`, `get()`, `close()`, `list()` |
 | [pricing](pricing.md) | Market data | `get()`, `stream()`, `candles()`, `latest_candles()` |
-| [instruments](instruments.md) | Instrument data | `get_all()`, `candles()`, `order_book()` |
 | [transactions](transactions.md) | Transaction history | `list()`, `get()`, `get_range()`, `stream()`, `list_since()` |
 
 ---
@@ -32,8 +31,7 @@ Complete reference for all FiveTwenty endpoint implementations.
 - **[Positions Endpoint](positions.md)** - Position tracking and management
 
 ### **Market Data**
-- **[Pricing Endpoint](pricing.md)** - Real-time prices and account-specific candlesticks
-- **[Instruments Endpoint](instruments.md)** - Instrument specifications and historical data
+- **[Pricing Endpoint](pricing.md)** - Real-time prices, account-specific candlesticks, and latest candle data
 
 ### **History & Monitoring**
 - **[Transactions Endpoint](transactions.md)** - Transaction history and real-time streaming
