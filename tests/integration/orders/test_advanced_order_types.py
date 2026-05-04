@@ -5,6 +5,7 @@ from decimal import Decimal
 import pytest
 
 from fivetwenty import AsyncClient
+from tests.integration.helpers import skip_or_raise_environment_error
 
 
 @pytest.mark.asyncio
@@ -129,14 +130,7 @@ class TestAdvancedOrderTypes:
                 print(f"✓ Orders already cancelled or completed: {e}")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "insufficient", "funds"]):
-                pytest.skip("Insufficient margin for stop order creation")
-            elif any(term in error_msg for term in ["closed", "trading", "market"]):
-                pytest.skip("Market closed or trading disabled")
-            else:
-                print(f"⚠️  Stop order test failed: {e}")
-                pytest.skip(f"Stop order creation failed: {e}")
+            skip_or_raise_environment_error(e, "Stop order creation test")
 
     async def test_market_if_touched_order_creation(self, sandbox_client: AsyncClient, test_account_id: str, test_instruments):
         """Test creation and validation of market-if-touched orders."""
@@ -254,14 +248,7 @@ class TestAdvancedOrderTypes:
                 print(f"✓ Orders already cancelled or completed: {e}")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "insufficient", "funds"]):
-                pytest.skip("Insufficient margin for MIT order creation")
-            elif any(term in error_msg for term in ["closed", "trading", "market"]):
-                pytest.skip("Market closed or trading disabled")
-            else:
-                print(f"⚠️  MIT order test failed: {e}")
-                pytest.skip(f"MIT order creation failed: {e}")
+            skip_or_raise_environment_error(e, "MIT order creation test")
 
     async def test_advanced_time_in_force_options(self, sandbox_client: AsyncClient, test_account_id: str, test_instruments):
         """Test advanced time-in-force options for orders."""

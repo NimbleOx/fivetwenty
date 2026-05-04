@@ -255,7 +255,7 @@ class TestPostTradeRiskManagement:
                 invalid_tp = TakeProfitOrderRequest(tradeID="INVALID_TRADE_ID", price=str(current_price + Decimal("0.0050")), timeInForce="GTC")
 
                 await sandbox_client.orders.post_order(account_id=test_account_id, order_request=invalid_tp)
-                print("⚠️ Invalid trade ID was unexpectedly accepted")
+                pytest.fail("Invalid trade ID was unexpectedly accepted")
             except Exception as e:
                 print(f"✓ Invalid trade ID properly rejected: {type(e).__name__}")
 
@@ -265,7 +265,7 @@ class TestPostTradeRiskManagement:
                 nonexistent_sl = StopLossOrderRequest(tradeID="99999999", price=str(current_price - Decimal("0.0050")), timeInForce="GTC")
 
                 await sandbox_client.orders.post_order(account_id=test_account_id, order_request=nonexistent_sl)
-                print("⚠️ Non-existent trade ID was unexpectedly accepted")
+                pytest.fail("Non-existent trade ID was unexpectedly accepted")
             except Exception as e:
                 print(f"✓ Non-existent trade ID properly rejected: {type(e).__name__}")
 

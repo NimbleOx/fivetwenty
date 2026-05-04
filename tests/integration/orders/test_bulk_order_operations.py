@@ -6,6 +6,7 @@ from decimal import Decimal
 import pytest
 
 from fivetwenty import AsyncClient
+from tests.integration.helpers import skip_or_raise_environment_error
 
 
 @pytest.mark.asyncio
@@ -211,12 +212,7 @@ class TestBulkOperationsAndRisk:
             print("✓ Account remains stable after bulk operations")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "funds", "closed", "trading"]):
-                pytest.skip(f"Bulk operations test skipped: {e}")
-            else:
-                print(f"⚠️  Bulk operations test failed: {e}")
-                pytest.skip(f"Bulk operations failed: {e}")
+            skip_or_raise_environment_error(e, "Bulk operations test")
 
         print("✓ Bulk order operations test completed")
 
@@ -470,11 +466,6 @@ class TestBulkOperationsAndRisk:
                 print(f"✓ Position cleanup error (non-critical): {position_error}")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "funds", "closed", "trading"]):
-                pytest.skip(f"Risk management test skipped: {e}")
-            else:
-                print(f"⚠️  Risk management test failed: {e}")
-                pytest.skip(f"Risk management test failed: {e}")
+            skip_or_raise_environment_error(e, "Risk management test")
 
         print("✓ Post-trade risk management test completed")

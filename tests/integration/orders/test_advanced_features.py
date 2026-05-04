@@ -150,7 +150,7 @@ class TestAdvancedFeatures:
 
             try:
                 await sandbox_client.orders.post_order(account_id=test_account_id, order_request=invalid_gtd_request, client_request_id=f"invalid-gtd-{int(asyncio.get_event_loop().time() * 1000)}")
-                print("⚠ Invalid GTD order unexpectedly accepted")
+                pytest.fail("Invalid GTD order was unexpectedly accepted")
             except Exception as e:
                 print(f"✓ Invalid GTD properly rejected: {type(e).__name__}")
 
@@ -368,9 +368,8 @@ class TestAdvancedFeatures:
             try:
                 invalid_trigger_order = LimitOrderRequest(instrument=test_instrument, units="100", price=price_text(current_price - Decimal("0.0050")), timeInForce="GTC", triggerCondition="INVALID_CONDITION")
 
-                response = await sandbox_client.orders.post_order(account_id=test_account_id, order_request=invalid_trigger_order)
-
-                print("⚠ Invalid trigger condition was unexpectedly accepted")
+                await sandbox_client.orders.post_order(account_id=test_account_id, order_request=invalid_trigger_order)
+                pytest.fail("Invalid trigger condition was unexpectedly accepted")
             except Exception as e:
                 print(f"✓ Invalid trigger condition properly rejected: {str(e)[:100]}...")
 

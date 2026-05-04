@@ -247,7 +247,8 @@ dev = [
 [tool.poe.tasks]
 # Testing tasks
 test = "python -m pytest tests/unit/"
-test-integration = "python -m pytest tests/integration/"
+test-integration = "python -m pytest tests/integration/ --run-integration-live"
+test-integration-live = "python -m pytest tests/integration/ --run-integration-live"
 
 # Code quality tasks
 lint = "ruff check ."

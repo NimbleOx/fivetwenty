@@ -27,8 +27,8 @@ uv run poe dev              # Format, typecheck, test (~15s)
 uv run poe check            # Format, lint-core, typecheck, test (~30s)
 
 # Run tests
-uv run poe test             # All tests
-uv run poe test-unit        # Unit tests only
+uv run poe test             # Unit tests only
+uv run pytest               # Unit tests plus skipped live integration tests
 ```
 
 ### 3. Make Changes
@@ -97,7 +97,7 @@ value = price * units
 
 ```bash
 # Run unit tests
-uv run poe test-unit
+uv run poe test
 
 # Specific test
 uv run pytest tests/unit/test_client.py::test_name
@@ -112,8 +112,8 @@ Unit tests mock HTTP responses and test logic in isolation.
 uv run poe test-integration
 
 # Set up .env file
-TEST_OANDA_TOKEN=your-practice-token
-TEST_OANDA_ACCOUNT=your-practice-account
+FIVETWENTY_OANDA_TOKEN=your-practice-token
+FIVETWENTY_OANDA_ACCOUNT=your-practice-account
 ```
 
 **Always use practice accounts**, never live trading accounts.

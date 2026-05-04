@@ -186,7 +186,7 @@ class TestTransactionQuerying:
                         )
                     print("  ✓ Invalid range (from > to) correctly rejected")
                 except AssertionError:
-                    print("  ⚠ Invalid range was unexpectedly accepted")
+                    pytest.fail("Invalid transaction range was unexpectedly accepted")
                 except Exception as e:
                     print(f"  ✓ Invalid range rejected: {type(e).__name__}")
 

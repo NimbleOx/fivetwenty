@@ -7,13 +7,13 @@ Comprehensive testing ensures FiveTwenty's reliability for production trading.
 ## Running Tests
 
 ```bash
-# All tests
+# Default local run (unit tests plus skipped live integration tests)
 uv run pytest
 
 # Unit tests (fast)
-uv run poe test-unit
+uv run poe test
 
-# Integration tests (requires credentials)
+# Live integration tests (requires OANDA practice credentials)
 uv run poe test-integration
 
 # With coverage
@@ -24,7 +24,7 @@ uv run pytest tests/unit/test_client.py::test_name
 
 # By marker
 uv run pytest -m unit
-uv run pytest -m integration
+uv run pytest -m integration --run-integration-live
 ```
 
 ---
@@ -79,8 +79,11 @@ Tests against real OANDA API (practice only):
 
 ```bash
 # Setup .env
-export TEST_OANDA_TOKEN="your-practice-token"
-export TEST_OANDA_ACCOUNT="your-practice-account"
+export FIVETWENTY_OANDA_TOKEN="your-practice-token"
+export FIVETWENTY_OANDA_ACCOUNT="your-practice-account"
+
+# Run explicitly; live integration tests are skipped without this opt-in flag.
+uv run pytest tests/integration/ --run-integration-live
 ```
 
 ```python
@@ -94,19 +97,19 @@ from fivetwenty import AsyncClient, Environment
 @pytest.mark.asyncio
 async def test_real_api() -> None:
     client = AsyncClient(
-        token=os.environ["TEST_OANDA_TOKEN"],
-        account_id=os.environ["TEST_OANDA_ACCOUNT"],
+        token=os.environ["FIVETWENTY_OANDA_TOKEN"],
+        account_id=os.environ["FIVETWENTY_OANDA_ACCOUNT"],
         environment=Environment.PRACTICE
     )
 
     async with client:
         response = await client.accounts.get_account_summary(
-            os.environ["TEST_OANDA_ACCOUNT"]
+            os.environ["FIVETWENTY_OANDA_ACCOUNT"]
         )
         assert isinstance(response["account"].balance, Decimal)  # noqa: S101
 ```
 
-**Always use practice accounts**, never live trading accounts.
+**Always use practice accounts**, never live trading accounts. Set `SKIP_INTEGRATION=1` to force integration tests to skip even when a live integration command is used.
 
 ---
 

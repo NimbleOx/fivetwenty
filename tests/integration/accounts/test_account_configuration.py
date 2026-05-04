@@ -75,7 +75,7 @@ class TestAccountConfiguration:
             print("  ✓ Empty configuration correctly rejected")
         except AssertionError:
             # If no exception was raised
-            print("  ⚠ Empty configuration was unexpectedly accepted")
+            pytest.fail("Empty account configuration was unexpectedly accepted")
         except Exception as e:
             print(f"  ✓ Empty configuration rejected: {type(e).__name__}")
 

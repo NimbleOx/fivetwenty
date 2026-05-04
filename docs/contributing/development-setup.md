@@ -78,9 +78,9 @@ uv run poe quality          # Format, lint, typecheck (~10s)
 ### Testing
 
 ```bash
-uv run pytest               # All tests
-uv run poe test-unit        # Unit tests only
-uv run poe test-integration # Integration tests only
+uv run pytest               # Unit tests plus skipped live integration tests
+uv run poe test             # Unit tests only
+uv run poe test-integration # Live integration tests only; requires practice credentials
 uv run pytest --cov=fivetwenty --cov-report=html  # Coverage report
 ```
 
@@ -122,8 +122,8 @@ FIVETWENTY_DEFAULT_TIMEOUT=30
 ### Testing (Optional)
 
 ```bash
-TEST_OANDA_TOKEN=your-practice-token
-TEST_OANDA_ACCOUNT=your-practice-account
+FIVETWENTY_OANDA_TOKEN=your-practice-token
+FIVETWENTY_OANDA_ACCOUNT=your-practice-account
 ```
 
 **Security:**
@@ -240,7 +240,7 @@ uv run python -c "import fivetwenty; print(fivetwenty.__file__)"
 
 ```bash
 uv run poe dev              # Fastest - Use during active development
-uv run poe test-unit        # Unit tests only - Quick iteration
+uv run poe test             # Unit tests only - Quick iteration
 uv run pytest -n auto       # Parallel tests (if pytest-xdist installed)
 ```
 

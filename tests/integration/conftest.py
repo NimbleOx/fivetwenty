@@ -8,6 +8,7 @@ import pytest
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient, Client, Environment
+from tests.integration.helpers import cleanup_error_message, is_tolerated_cleanup_error
 
 # Load .env file from project root if it exists
 env_path = Path(__file__).parent.parent.parent / ".env"
@@ -92,6 +93,7 @@ async def sandbox_client(integration_config, test_account_id):
         # Cleanup
         order_cleanup_count = 0
         trade_cleanup_count = 0
+        cleanup_errors: list[str] = []
 
         # Clean up orders
         for order_id in created_order_ids:
@@ -102,8 +104,9 @@ async def sandbox_client(integration_config, test_account_id):
                     if order.get("state") == "PENDING":
                         await client.orders.cancel_order(test_account_id, order_id)
                         order_cleanup_count += 1
-            except Exception:
-                pass  # Order may already be cancelled or filled
+            except Exception as exc:
+                if not is_tolerated_cleanup_error(exc):
+                    cleanup_errors.append(cleanup_error_message("order", order_id, exc))
 
         # Clean up trades
         for trade_id in created_trade_ids:
@@ -111,11 +114,15 @@ async def sandbox_client(integration_config, test_account_id):
                 close_response = await client.trades.close_trade(account_id=test_account_id, trade_specifier=trade_id)
                 if close_response:
                     trade_cleanup_count += 1
-            except Exception:
-                pass  # Trade may already be closed
+            except Exception as exc:
+                if not is_tolerated_cleanup_error(exc):
+                    cleanup_errors.append(cleanup_error_message("trade", trade_id, exc))
 
         if order_cleanup_count > 0 or trade_cleanup_count > 0:
             print(f"✓ Auto-cleaned up {order_cleanup_count} orders and {trade_cleanup_count} trades")
+
+        if cleanup_errors:
+            pytest.fail("Automatic integration cleanup failed:\n" + "\n".join(cleanup_errors), pytrace=False)
 
 
 # Alias for backward compatibility
@@ -223,6 +230,7 @@ class CleanupTracker:
         self.account_id = account_id
         self.created_orders = []
         self.created_trades = []
+        self.cleanup_errors: list[str] = []
 
     def track_order(self, order_id):
         """Track an order for cleanup."""
@@ -247,8 +255,9 @@ class CleanupTracker:
                         await self.client.orders.cancel_order(self.account_id, order_id)
                         cleanup_count += 1
                 self.created_orders.remove(order_id)
-            except Exception:
-                # Order may already be filled, cancelled, or non-existent - remove from tracking
+            except Exception as exc:
+                if not is_tolerated_cleanup_error(exc):
+                    self.cleanup_errors.append(cleanup_error_message("order", order_id, exc))
                 self.created_orders.remove(order_id)
         return cleanup_count
 
@@ -262,8 +271,9 @@ class CleanupTracker:
                 if close_response:
                     cleanup_count += 1
                 self.created_trades.remove(trade_id)
-            except Exception:
-                # Trade may already be closed or non-existent - remove from tracking
+            except Exception as exc:
+                if not is_tolerated_cleanup_error(exc):
+                    self.cleanup_errors.append(cleanup_error_message("trade", trade_id, exc))
                 self.created_trades.remove(trade_id)
         return cleanup_count
 
@@ -271,7 +281,7 @@ class CleanupTracker:
         """Clean up all tracked orders and trades."""
         orders_cleaned = await self.cleanup_orders()
         trades_cleaned = await self.cleanup_trades()
-        return orders_cleaned, trades_cleaned
+        return orders_cleaned, trades_cleaned, self.cleanup_errors
 
 
 @pytest.fixture
@@ -282,12 +292,11 @@ async def cleanup_tracker(sandbox_client, test_account_id):
     yield tracker
 
     # Cleanup after test
-    try:
-        orders_cleaned, trades_cleaned = await tracker.cleanup_all()
-        if orders_cleaned > 0 or trades_cleaned > 0:
-            print(f"✓ Cleaned up {orders_cleaned} orders and {trades_cleaned} trades")
-    except Exception as e:
-        print(f"⚠ Cleanup failed: {type(e).__name__}")
+    orders_cleaned, trades_cleaned, cleanup_errors = await tracker.cleanup_all()
+    if orders_cleaned > 0 or trades_cleaned > 0:
+        print(f"✓ Cleaned up {orders_cleaned} orders and {trades_cleaned} trades")
+    if cleanup_errors:
+        pytest.fail("Tracked integration cleanup failed:\n" + "\n".join(cleanup_errors), pytrace=False)
 
 
 @pytest.fixture
@@ -329,6 +338,7 @@ async def auto_cleanup_orders(sandbox_client, test_account_id):
 
     # Cleanup
     cleanup_count = 0
+    cleanup_errors: list[str] = []
     for order_id in created_order_ids:
         try:
             order_response = await sandbox_client.orders.get_order(test_account_id, order_id)
@@ -337,8 +347,11 @@ async def auto_cleanup_orders(sandbox_client, test_account_id):
                 if order.get("state") == "PENDING":
                     await sandbox_client.orders.cancel_order(test_account_id, order_id)
                     cleanup_count += 1
-        except Exception:
-            pass  # Order may already be cancelled or filled
+        except Exception as exc:
+            if not is_tolerated_cleanup_error(exc):
+                cleanup_errors.append(cleanup_error_message("order", order_id, exc))
 
     if cleanup_count > 0:
         print(f"✓ Auto-cleaned up {cleanup_count} orders")
+    if cleanup_errors:
+        pytest.fail("Automatic order cleanup failed:\n" + "\n".join(cleanup_errors), pytrace=False)
