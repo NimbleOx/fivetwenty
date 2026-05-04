@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from docs_validation.src.models import FileInfo
+from docs_validation.src.models import FileInfo, ValidationResult, ValidationSummary
 from docs_validation.src.reporters.markdown_reporter import MarkdownReporter
 from docs_validation.src.validators.code_execution import CodeExecutionValidator
 from docs_validation.src.validators.fragments import (
@@ -101,3 +101,46 @@ def test_fragment_reporter_flags_validation_debt_wording_variants() -> None:
 
     for reason in flagged_reasons:
         assert reporter._fragment_marker_needs_review(reason)
+
+
+def test_fragment_reporter_outputs_audit_flag_section(tmp_path: Path) -> None:
+    reporter = MarkdownReporter(project_root=Path.cwd())
+    output_path = tmp_path / "validation-report.md"
+    summary = ValidationSummary(
+        total_files=1,
+        total_validators=1,
+        passed_files=1,
+        failed_files=0,
+        total_issues=0,
+        error_count=0,
+        warning_count=0,
+        duration_ms=1.0,
+        results=[
+            ValidationResult(
+                validator_name="code_typing",
+                file_path=Path("docs/example.md"),
+                passed=True,
+                metadata={
+                    "skipped_blocks": [
+                        {
+                            "code_block_start_line": 10,
+                            "marker_line": 9,
+                            "marker": "<!-- fragment: response indexing issues -->",
+                            "marker_kind": "all",
+                            "reason": "response indexing issues",
+                        }
+                    ]
+                },
+            )
+        ],
+        validator_summaries=[],
+    )
+
+    reporter.generate_report(summary, [], output_path)
+
+    report = output_path.read_text(encoding="utf-8")
+    assert "Fragment Marker Usage" in report
+    assert "- **Unique marked code blocks:** 1" in report
+    assert "- **Validator skips:** 1" in report
+    assert "- **Audit flags:** 1" in report
+    assert "response indexing issues" in report
