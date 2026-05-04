@@ -4,13 +4,13 @@ Pipeline:
   1. Extract library models  → <stem>-library.json
   2. Extract library endpoints → <stem>-endpoints-library.json
   3. Extract OANDA definitions (live cache) → <stem>-df-oanda-definitions.json
-  4. Extract OANDA endpoints (live cache) → <stem>-ep-oanda-endpoints.json
-  5. Extract project doc tables (endpoints + grouped models) → <stem>-docs.json
+  4. Extract OANDA endpoints when the official endpoint page exists
+  5. Extract project doc tables (endpoint page when present + grouped models)
   6. Run model diffs (lib↔OANDA, lib↔docs)
-  7. Run endpoint diffs (lib↔docs)
+  7. Run endpoint diffs when endpoint docs exist (lib↔docs)
   8. Render a domain parity report into docs_validation/reports/<domain>-parity.md
 
-Domain configuration is hardcoded for the 7 OANDA domains.
+Domain configuration is hardcoded for the OANDA definition domains.
 
 Usage:
     uv run python -m docs_validation.src.parity.run_domain orders
@@ -31,7 +31,7 @@ CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "parity"
 OANDA_CACHE = REPO_ROOT / "docs_validation" / ".cache" / "oanda"
 REPORTS_DIR = REPO_ROOT / "docs_validation" / "reports"
 
-# domain_name → {library_module_stem, oanda_stem, doc_endpoint_stem, doc_model_stems}
+# domain_name → {library_module_stem, oanda_stem, doc_endpoint_stem, doc_model_stems, has_oanda_endpoint}
 DOMAINS: dict[str, dict[str, Any]] = {
     "accounts": {
         "library_module": "accounts",
@@ -42,8 +42,9 @@ DOMAINS: dict[str, dict[str, Any]] = {
     "instruments": {
         "library_module": "instruments",
         "oanda_stem": "instrument",
-        "doc_endpoint": "instruments",
+        "doc_endpoint": None,
         "doc_models": ["market-data-models"],
+        "has_oanda_endpoint": False,
     },
     "orders": {
         "library_module": "orders",
@@ -105,6 +106,7 @@ def run_domain(domain: str, *, inventory: dict[str, Any] | None = None) -> dict[
     oanda_stem = cfg["oanda_stem"]
     doc_endpoint = cfg["doc_endpoint"]
     doc_models: list[str] = cfg["doc_models"]
+    has_oanda_endpoint = bool(cfg.get("has_oanda_endpoint", True))
 
     # 1. Extract library models
     _run(
@@ -135,34 +137,48 @@ def run_domain(domain: str, *, inventory: dict[str, Any] | None = None) -> dict[
         "definition",
         f"docs_validation/.cache/oanda/{oanda_stem}-df.md",
     )
-    # 4. Extract OANDA endpoints
-    _run(
-        "uv",
-        "run",
-        "python",
-        "-m",
-        "docs_validation.src.parity.extract_oanda_md",
-        "--kind",
-        "endpoint",
-        f"docs_validation/.cache/oanda/{oanda_stem}-ep.md",
-    )
+    oanda_eps_json = CACHE_DIR / f"{oanda_stem}-ep-oanda-endpoints.json"
+    if has_oanda_endpoint:
+        # 4. Extract OANDA endpoints
+        _run(
+            "uv",
+            "run",
+            "python",
+            "-m",
+            "docs_validation.src.parity.extract_oanda_md",
+            "--kind",
+            "endpoint",
+            f"docs_validation/.cache/oanda/{oanda_stem}-ep.md",
+        )
+    else:
+        oanda_eps_json.write_text(
+            json.dumps(
+                {
+                    "source": f"docs_validation/.cache/oanda/{oanda_stem}-ep.md",
+                    "endpoints": [],
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
     # 5. Extract project doc tables
+    doc_paths = [f"docs/api-reference/models/{m}.md" for m in doc_models]
+    if doc_endpoint is not None:
+        doc_paths.insert(0, f"docs/api-reference/endpoints/{doc_endpoint}.md")
     _run(
         "uv",
         "run",
         "python",
         "-m",
         "docs_validation.src.parity.extract_doc_tables",
-        f"docs/api-reference/endpoints/{doc_endpoint}.md",
-        *[f"docs/api-reference/models/{m}.md" for m in doc_models],
+        *doc_paths,
     )
 
     # 6 / 7: Run diffs
     lib_models_json = CACHE_DIR / f"{lib_module}-library.json"
     lib_endpoints_json = CACHE_DIR / f"{lib_module}-endpoints-library.json"
     oanda_models_json = CACHE_DIR / f"{oanda_stem}-df-oanda-definitions.json"
-    oanda_eps_json = CACHE_DIR / f"{oanda_stem}-ep-oanda-endpoints.json"
-    docs_eps_json = CACHE_DIR / f"{doc_endpoint}-docs.json"
+    docs_eps_json = CACHE_DIR / f"{doc_endpoint}-docs.json" if doc_endpoint is not None else None
 
     _run(
         "uv",
@@ -221,30 +237,35 @@ def run_domain(domain: str, *, inventory: dict[str, Any] | None = None) -> dict[
         )
         lib_vs_docs_outs.append(out_md)
 
-    _run(
-        "uv",
-        "run",
-        "python",
-        "-m",
-        "docs_validation.src.parity.diff",
-        "endpoints",
-        "--left",
-        str(lib_endpoints_json),
-        "--right",
-        str(docs_eps_json),
-        "--left-source",
-        "library",
-        "--right-source",
-        "docs",
-        "--left-label",
-        "library",
-        "--right-label",
-        "docs",
-        "--out",
-        str(CACHE_DIR / f"{domain}-endpoints-library-vs-docs.md"),
-        "--title",
-        f"{domain} endpoints: library vs docs",
-    )
+    lib_vs_docs_eps_md: str | None = None
+    docs_eps: dict[str, Any] = {"methods": {}}
+    if docs_eps_json is not None:
+        _run(
+            "uv",
+            "run",
+            "python",
+            "-m",
+            "docs_validation.src.parity.diff",
+            "endpoints",
+            "--left",
+            str(lib_endpoints_json),
+            "--right",
+            str(docs_eps_json),
+            "--left-source",
+            "library",
+            "--right-source",
+            "docs",
+            "--left-label",
+            "library",
+            "--right-label",
+            "docs",
+            "--out",
+            str(CACHE_DIR / f"{domain}-endpoints-library-vs-docs.md"),
+            "--title",
+            f"{domain} endpoints: library vs docs",
+        )
+        lib_vs_docs_eps_md = (CACHE_DIR / f"{domain}-endpoints-library-vs-docs.md").read_text()
+        docs_eps = _load(docs_eps_json)
 
     # Final assembly: render a single per-domain report.
     return assemble_domain_report(
@@ -253,11 +274,12 @@ def run_domain(domain: str, *, inventory: dict[str, Any] | None = None) -> dict[
         lib_eps=_load(lib_endpoints_json),
         oanda_defs=_load(oanda_models_json),
         oanda_eps=_load(oanda_eps_json),
-        docs_eps=_load(docs_eps_json),
+        docs_eps=docs_eps,
         lib_vs_oanda_md=(CACHE_DIR / f"{domain}-library-vs-oanda.md").read_text(),
         lib_vs_docs_mds={dm: (CACHE_DIR / f"{domain}-library-vs-docs-{dm}.md").read_text() for dm in doc_models},
-        lib_vs_docs_eps_md=(CACHE_DIR / f"{domain}-endpoints-library-vs-docs.md").read_text(),
+        lib_vs_docs_eps_md=lib_vs_docs_eps_md,
         inventory=inventory,
+        has_oanda_endpoint=has_oanda_endpoint,
     )
 
 
@@ -319,8 +341,9 @@ def assemble_domain_report(
     docs_eps: dict[str, Any],
     lib_vs_oanda_md: str,
     lib_vs_docs_mds: dict[str, str],
-    lib_vs_docs_eps_md: str,
+    lib_vs_docs_eps_md: str | None,
     inventory: dict[str, Any],
+    has_oanda_endpoint: bool,
 ) -> dict[str, Any]:
     """Compose the per-domain parity report and write it to reports/<domain>-parity.md."""
     out_path = REPORTS_DIR / f"{domain}-parity.md"
@@ -329,7 +352,7 @@ def assemble_domain_report(
     n_oanda_defs = len(oanda_defs.get("definitions", {}))
     n_lib_methods = sum(len(m) for m in lib_eps.get("endpoint_classes", {}).values())
     n_oanda_eps = len(oanda_eps.get("endpoints", []))
-    n_docs_methods = len(docs_eps.get("methods", {}))
+    n_docs_methods = len(docs_eps.get("methods", {})) if lib_vs_docs_eps_md is not None else None
 
     # Symbols known elsewhere — used to suppress cross-page false positives.
     library_known = set(inventory.get("library_models", [])) | set(inventory.get("library_enums", [])) | set(inventory.get("library_typeddicts", [])) | set(inventory.get("library_aliases", []))
@@ -338,11 +361,12 @@ def assemble_domain_report(
     parts: list[str] = []
     parts.append(f"# {domain.title()} Parity Report")
     parts.append("")
-    parts.append("Generated by `docs_validation/src/parity/run_domain.py`. Three diffs:")
+    parts.append("Generated by `docs_validation/src/parity/run_domain.py`. Diffs:")
     parts.append("")
     parts.append("- **Diff A1**: library ↔ live OANDA docs (this domain's OANDA page only)")
     parts.append("- **Diff B-models**: library ↔ project docs (model field tables)")
-    parts.append("- **Diff B-endpoints**: library ↔ project docs (endpoint method signatures)")
+    if lib_vs_docs_eps_md is not None:
+        parts.append("- **Diff B-endpoints**: library ↔ project docs (endpoint method signatures)")
     parts.append("")
     parts.append("Cross-page references (e.g. `ClientExtensions` shared with trades) are suppressed in the *missing* lists when the symbol exists somewhere in the inventory.")
     parts.append("")
@@ -354,8 +378,11 @@ def assemble_domain_report(
     parts.append(f"| Library endpoint methods | {n_lib_methods} |")
     parts.append(f"| OANDA definitions (live page) | {n_oanda_defs} |")
     parts.append(f"| OANDA endpoints (live page) | {n_oanda_eps} |")
-    parts.append(f"| Project-doc methods | {n_docs_methods} |")
+    parts.append(f"| Project-doc methods | {n_docs_methods if n_docs_methods is not None else 'n/a'} |")
     parts.append("")
+    if not has_oanda_endpoint:
+        parts.append("This domain has official OANDA definitions but no official OANDA endpoint page.")
+        parts.append("")
 
     # Endpoint coverage with normalized path matching.
     oanda_paths = sorted({(e["verb"], _normalize_path(e["path_template"])) for e in oanda_eps.get("endpoints", [])})
@@ -391,10 +418,11 @@ def assemble_domain_report(
         parts.append(md.split("\n", 1)[1] if "\n" in md else md)
         parts.append("")
 
-    parts.append("## Diff B-endpoints — library ↔ project docs (method signatures)")
-    parts.append("")
-    parts.append(lib_vs_docs_eps_md.split("\n", 1)[1] if "\n" in lib_vs_docs_eps_md else lib_vs_docs_eps_md)
-    parts.append("")
+    if lib_vs_docs_eps_md is not None:
+        parts.append("## Diff B-endpoints — library ↔ project docs (method signatures)")
+        parts.append("")
+        parts.append(lib_vs_docs_eps_md.split("\n", 1)[1] if "\n" in lib_vs_docs_eps_md else lib_vs_docs_eps_md)
+        parts.append("")
 
     parts.append("## Punch list (auto-generated, prioritize manually)")
     parts.append("")

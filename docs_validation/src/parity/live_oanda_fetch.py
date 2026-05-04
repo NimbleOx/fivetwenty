@@ -9,8 +9,8 @@ Usage:
     uv run python -m docs_validation.src.parity.live_oanda_fetch order    # specific page slugs
 
 Pages fetched:
-  - <domain>-ep/  (endpoints) for: account, instrument, order, position, pricing, trade, transaction
-  - <domain>-df/  (definitions) for the same domains, plus pricing-common-df and primitives-df
+  - <domain>-ep/  (endpoints) for: account, order, position, pricing, trade, transaction
+  - <domain>-df/  (definitions) for: account, instrument, order, position, pricing, trade, transaction, plus pricing-common-df and primitives-df
   - introduction/, authentication/, troubleshooting-errors/, best-practices/, development-guide/
 
 Conversion strategy:
@@ -41,12 +41,13 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "oanda"
 BASE_URL = "https://developer.oanda.com/rest-live-v20"
 
-DOMAINS = ["account", "instrument", "order", "position", "pricing", "trade", "transaction"]
+ENDPOINT_DOMAINS = ["account", "order", "position", "pricing", "trade", "transaction"]
+DEFINITION_DOMAINS = ["account", "instrument", "order", "position", "pricing", "trade", "transaction"]
 EXTRA_PAGES = ["introduction", "authentication", "troubleshooting-errors", "best-practices", "development-guide", "pricing-common-df", "primitives-df"]
 
 
 def _all_slugs() -> list[str]:
-    slugs = [f"{d}-ep" for d in DOMAINS] + [f"{d}-df" for d in DOMAINS] + EXTRA_PAGES
+    slugs = [f"{d}-ep" for d in ENDPOINT_DOMAINS] + [f"{d}-df" for d in DEFINITION_DOMAINS] + EXTRA_PAGES
     return slugs
 
 

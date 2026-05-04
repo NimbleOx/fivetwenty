@@ -3,7 +3,7 @@
 Steps:
   1. Fetch live OANDA pages into .cache/oanda/ (skip if cached unless --refresh)
   2. Build the global inventory
-  3. Run the 7 per-domain parity reports
+  3. Run the per-domain parity reports
   4. Run the cross-cutting enums report
   5. Run the docs-surface reports (tutorials/guides/examples/readme)
   6. Run strict field-by-field validation against official OANDA definitions
@@ -40,7 +40,6 @@ REQUIRED_OANDA_PAGES = [
     "account-df.md",
     "account-ep.md",
     "instrument-df.md",
-    "instrument-ep.md",
     "order-df.md",
     "order-ep.md",
     "position-df.md",
