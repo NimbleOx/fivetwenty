@@ -235,3 +235,14 @@ class TestInstrumentEndpoints:
                 "weeklyAlignment": "Friday",
             },
         )
+
+    @pytest.mark.asyncio
+    async def test_candle_response_supports_compatibility_access(self, instruments):
+        """Test instrument candle responses support attribute access."""
+        from fivetwenty.models import CandlestickGranularity, InstrumentName
+
+        response = await instruments.get_instrument_candles("EUR_USD", granularity=CandlestickGranularity.S5)
+
+        assert response.instrument == InstrumentName.EUR_USD
+        assert response.granularity == CandlestickGranularity.S5
+        assert len(response.candles) == 1

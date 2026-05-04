@@ -278,3 +278,21 @@ class TestEnhancedPricingEndpoints:
         from_time = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
         with pytest.raises(ValueError, match="Cannot specify both count and time range"):
             await pricing.get_account_instrument_candles("101-001-123456-001", "EUR_USD", count=100, from_time=from_time)
+
+    @pytest.mark.asyncio
+    async def test_pricing_responses_support_compatibility_access(self, pricing):
+        """Test pricing endpoint responses support attribute and snake_case access."""
+        pricing_response = await pricing.get_pricing("101-001-123456-001", ["EUR_USD"], include_home_conversions=True)
+
+        assert pricing_response.time == "2024-01-15T14:30:00.000000000Z"
+        assert pricing_response.home_conversions == []
+        assert pricing_response["home_conversions"] == []
+
+        candles_response = await pricing.get_account_instrument_candles("101-001-123456-001", "EUR_USD")
+
+        assert candles_response.instrument == "EUR_USD"
+        assert candles_response.granularity == "S5"
+
+        latest_response = await pricing.get_latest_candles("101-001-123456-001", ["EUR_USD:H1:M"])
+
+        assert latest_response.latest_candles[0].instrument == "EUR_USD"

@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import builtins  # noqa: TC003
 import json
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 
+from .._internal.response import ApiResponse
 from ..models import (
     ClientConfigureRejectTransaction,
     ClientConfigureTransaction,
@@ -181,7 +182,7 @@ class TransactionEndpoints:
             params=params,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        return cast("TransactionsResponse", ApiResponse(response.json()))
 
     async def get_transaction(
         self,
@@ -207,10 +208,15 @@ class TransactionEndpoints:
         )
 
         data = response.json()
-        return {
-            "transaction": self._parse_transaction(data["transaction"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TransactionResponse",
+            ApiResponse(
+                {
+                    "transaction": self._parse_transaction(data["transaction"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_transactions_since_id(
         self,
@@ -248,10 +254,15 @@ class TransactionEndpoints:
         )
 
         data = response.json()
-        return {
-            "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TransactionsSinceIdResponse",
+            ApiResponse(
+                {
+                    "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_transactions_stream(
         self,
@@ -355,10 +366,15 @@ class TransactionEndpoints:
         )
 
         data = response.json()
-        return {
-            "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TransactionsRangeResponse",
+            ApiResponse(
+                {
+                    "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_recent_transactions(
         self,
@@ -400,10 +416,15 @@ class TransactionEndpoints:
         )
 
         data = response.json()
-        return {
-            "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TransactionsRangeResponse",
+            ApiResponse(
+                {
+                    "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     def _parse_transaction(self, transaction_data: dict[str, Any]) -> TransactionUnion:  # noqa: PLR0911
         """

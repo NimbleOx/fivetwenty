@@ -284,3 +284,18 @@ class TestAccountConfigurationEndpoints:
             "/accounts/101-001-123456-001/configuration",
             json_data={"alias": long_alias},
         )
+
+    @pytest.mark.asyncio
+    async def test_account_responses_support_compatibility_access(self, accounts):
+        """Test account endpoint responses support attribute and snake_case access."""
+        config_response = await accounts.patch_account_configuration("101-001-123456-001", alias="My Account")
+
+        assert config_response.client_configure_transaction.id == "123"
+        assert config_response["client_configure_transaction"].id == "123"
+        assert config_response.last_transaction_id == "123"
+        assert config_response["last_transaction_id"] == "123"
+
+        changes_response = await accounts.get_account_changes("101-001-123456-001", since_transaction_id="123")
+
+        assert changes_response.last_transaction_id == "123"
+        assert changes_response.state.get("marginUsed") == "0.0000"

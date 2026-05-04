@@ -63,7 +63,7 @@ class ApiResponse(dict[str, Any]):
             return default
 
     def _single_nested_model(self) -> ApiModel | None:
-        for key in ("order", "trade", "position", "account"):
+        for key in ("order", "trade", "position", "account", "transaction"):
             value = dict.get(self, key)
             if isinstance(value, ApiModel):
                 return value

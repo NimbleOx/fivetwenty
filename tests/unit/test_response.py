@@ -9,12 +9,14 @@ def test_api_response_resolves_snake_case_aliases() -> None:
     response = ApiResponse(
         {
             "orderFillTransaction": {"id": "123"},
+            "from": "2024-01-01T00:00:00Z",
             "lastTransactionID": "456",
         }
     )
 
     assert response.order_fill_transaction == {"id": "123"}
     assert response["order_fill_transaction"] == {"id": "123"}
+    assert response.from_ == "2024-01-01T00:00:00Z"
     assert response.get("last_transaction_id") == "456"
     assert "order_fill_transaction" in response
 

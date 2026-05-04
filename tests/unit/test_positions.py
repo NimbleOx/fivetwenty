@@ -265,3 +265,18 @@ class TestPositionEndpoints:
         instrument = InstrumentName.USD_JPY
         await positions.close_position(account_id, instrument, long_units="ALL")
         mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/positions/USD_JPY/close", json_data={"longUnits": "ALL"})
+
+    @pytest.mark.asyncio
+    async def test_position_responses_support_compatibility_access(self, positions):
+        """Test position endpoint responses support attribute and nested model access."""
+        position_response = await positions.get_position("101-001-123456-001", "EUR_USD")
+
+        assert position_response.last_transaction_id == "12346"
+        assert position_response["last_transaction_id"] == "12346"
+        assert position_response["instrument"] == "EUR_USD"
+        assert position_response.position.get("marginUsed") == "200.0000"
+
+        close_response = await positions.close_position("101-001-123456-001", "EUR_USD", long_units="ALL")
+
+        assert close_response.long_order_fill_transaction.id == "12347"
+        assert close_response["long_order_fill_transaction"].id == "12347"

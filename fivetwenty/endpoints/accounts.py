@@ -1,8 +1,9 @@
 """Account management endpoints."""
 
 import builtins
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 
+from .._internal.response import ApiResponse
 from ..models import (
     Account,
     AccountChanges,
@@ -91,10 +92,15 @@ class AccountEndpoints:
         response = await self._client._request("GET", f"/accounts/{account_id}")
         data = response.json()
 
-        return {
-            "account": Account.model_validate(data["account"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "AccountResponse",
+            ApiResponse(
+                {
+                    "account": Account.model_validate(data["account"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_account_summary(self, account_id: AccountID) -> AccountSummaryResponse:
         """
@@ -112,10 +118,15 @@ class AccountEndpoints:
         response = await self._client._request("GET", f"/accounts/{account_id}/summary")
         data = response.json()
 
-        return {
-            "account": AccountSummary.model_validate(data["account"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "AccountSummaryResponse",
+            ApiResponse(
+                {
+                    "account": AccountSummary.model_validate(data["account"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_account_instruments(
         self,
@@ -147,10 +158,15 @@ class AccountEndpoints:
         )
         data = response.json()
 
-        return {
-            "instruments": [Instrument.model_validate(instrument_data) for instrument_data in data["instruments"]],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "AccountInstrumentsResponse",
+            ApiResponse(
+                {
+                    "instruments": [Instrument.model_validate(instrument_data) for instrument_data in data["instruments"]],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def patch_account_configuration(
         self,
@@ -193,10 +209,15 @@ class AccountEndpoints:
         )
 
         data = response.json()
-        return {
-            "clientConfigureTransaction": ClientConfigureTransaction.model_validate(data["clientConfigureTransaction"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "AccountConfigurationResponse",
+            ApiResponse(
+                {
+                    "clientConfigureTransaction": ClientConfigureTransaction.model_validate(data["clientConfigureTransaction"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_account_changes(
         self,
@@ -230,8 +251,13 @@ class AccountEndpoints:
         )
 
         data = response.json()
-        return {
-            "changes": AccountChanges.model_validate(data["changes"]),
-            "state": AccountChangesState.model_validate(data["state"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "AccountChangesResponse",
+            ApiResponse(
+                {
+                    "changes": AccountChanges.model_validate(data["changes"]),
+                    "state": AccountChangesState.model_validate(data["state"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )

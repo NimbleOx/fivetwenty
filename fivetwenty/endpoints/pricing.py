@@ -3,10 +3,11 @@
 import json
 from collections.abc import AsyncIterator
 from datetime import datetime
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, cast
 
 from typing_extensions import Required
 
+from .._internal.response import ApiResponse
 from ..models import AccountID, Candlestick, CandlestickGranularity, ClientPrice, HomeConversions, InstrumentName, PricingHeartbeat
 from ..models.streaming import StreamingConfiguration, StreamState
 
@@ -85,16 +86,18 @@ class PricingEndpoints:
         data = response.json()
 
         # Parse prices into ClientPrice models
-        result: GetPricingResponse = {
-            "prices": [ClientPrice.model_validate(p) for p in data.get("prices", [])],
-            "time": data["time"],
-        }
+        result = ApiResponse(
+            {
+                "prices": [ClientPrice.model_validate(p) for p in data.get("prices", [])],
+                "time": data["time"],
+            }
+        )
 
         # Parse homeConversions if present
         if "homeConversions" in data:
             result["homeConversions"] = [HomeConversions.model_validate(hc) for hc in data["homeConversions"]]
 
-        return result
+        return cast("GetPricingResponse", result)
 
     async def get_pricing_stream(
         self,
@@ -250,11 +253,16 @@ class PricingEndpoints:
 
         data = response.json()
 
-        return {
-            "instrument": InstrumentName(data["instrument"]),
-            "granularity": CandlestickGranularity(data["granularity"]),
-            "candles": [Candlestick.model_validate(c) for c in data["candles"]],
-        }
+        return cast(
+            "CandlesResponse",
+            ApiResponse(
+                {
+                    "instrument": InstrumentName(data["instrument"]),
+                    "granularity": CandlestickGranularity(data["granularity"]),
+                    "candles": [Candlestick.model_validate(c) for c in data["candles"]],
+                }
+            ),
+        )
 
     async def get_latest_candles(
         self,
@@ -308,16 +316,23 @@ class PricingEndpoints:
         )
 
         data = response.json()
-        return {
-            "latestCandles": [
+        return cast(
+            "LatestCandlesResponse",
+            ApiResponse(
                 {
-                    "instrument": InstrumentName(c["instrument"]),
-                    "granularity": CandlestickGranularity(c["granularity"]),
-                    "candles": [Candlestick.model_validate(candle) for candle in c["candles"]],
+                    "latestCandles": [
+                        ApiResponse(
+                            {
+                                "instrument": InstrumentName(c["instrument"]),
+                                "granularity": CandlestickGranularity(c["granularity"]),
+                                "candles": [Candlestick.model_validate(candle) for candle in c["candles"]],
+                            }
+                        )
+                        for c in data["latestCandles"]
+                    ]
                 }
-                for c in data["latestCandles"]
-            ]
-        }
+            ),
+        )
 
     async def stream_pricing_with_retries(
         self,

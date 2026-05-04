@@ -424,3 +424,17 @@ class TestTransactionEndpoints:
                 "type": expected_types,
             },
         )
+
+    @pytest.mark.asyncio
+    async def test_transaction_responses_support_compatibility_access(self, transactions):
+        """Test transaction endpoint responses support attribute and nested model access."""
+        list_response = await transactions.get_transactions("101-001-123456-001")
+
+        assert list_response.from_ == "2024-01-01T00:00:00.000000000Z"
+        assert list_response.last_transaction_id == "5000"
+
+        detail_response = await transactions.get_transaction("101-001-123456-001", "12345")
+
+        assert detail_response.last_transaction_id == "12345"
+        assert detail_response.transaction.id == "12345"
+        assert detail_response["id"] == "12345"
