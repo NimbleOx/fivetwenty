@@ -151,6 +151,9 @@ class TestPhase4TransactionModels:
             "units": "10000",
             "fullVWAP": "1.0950",
             "fullPrice": {
+                "instrument": "EUR_USD",
+                "time": "2024-01-15T12:00:01.000000000Z",
+                "tradeable": True,
                 "closeoutBid": "1.0945",
                 "closeoutAsk": "1.0955",
                 "liquidity": 10000000,
@@ -334,6 +337,9 @@ class TestPhase4AliasTests:
             "lossQuoteHomeConversionFactor": "1.0",
             "fullVWAP": "1.0950",
             "fullPrice": {
+                "instrument": "EUR_USD",
+                "time": "2024-01-15T12:00:01.000000000Z",
+                "tradeable": True,
                 "closeoutBid": "1.0945",
                 "closeoutAsk": "1.0955",
                 "liquidity": 10000000,

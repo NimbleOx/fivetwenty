@@ -64,20 +64,20 @@ class HomeConversionFactors(ApiModel):
     loss_base_home: ConversionFactor | None = Field(None, alias="lossBaseHome")
 
 
-class UnitsAvailable(ApiModel):
-    """Available units for trading calculations."""
-
-    default: dict[str, Decimal] = Field(default_factory=dict)
-    reduce_first: dict[str, Decimal] = Field(alias="reduceFirst", default_factory=dict)
-    reduce_only: dict[str, Decimal] = Field(alias="reduceOnly", default_factory=dict)
-    open_only: dict[str, Decimal] = Field(alias="openOnly", default_factory=dict)
-
-
 class UnitsAvailableDetails(ApiModel):
     """Units available for both long and short orders."""
 
-    long: UnitsAvailable  # Long units availability
-    short: UnitsAvailable  # Short units availability
+    long: Decimal  # Long units availability
+    short: Decimal  # Short units availability
+
+
+class UnitsAvailable(ApiModel):
+    """Available units for trading calculations."""
+
+    default: UnitsAvailableDetails
+    reduce_first: UnitsAvailableDetails = Field(alias="reduceFirst")
+    reduce_only: UnitsAvailableDetails = Field(alias="reduceOnly")
+    open_only: UnitsAvailableDetails = Field(alias="openOnly")
 
 
 class ClientPrice(ApiModel):

@@ -332,6 +332,8 @@ def _strip_optional(type_text: str) -> str:
 
 def _normalize_type(type_text: str) -> str:
     t = _strip_optional(type_text)
+    if t.strip().lower() == "integer or decimal if available":
+        return "Decimal"
     t = t.replace(" ", "")
     t = t.replace("typing.", "")
     if t in PY_PRIMITIVE_MAP:

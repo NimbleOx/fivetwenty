@@ -14,6 +14,7 @@ from .base import ApiModel
 from .enums import (
     AccountUnits,
     InstrumentName,
+    MarketOrderMarginCloseoutReason,
     OrderID,
     OrderPositionFill,
     OrderState,
@@ -79,20 +80,20 @@ class MarketOrderTradeClose(ApiModel):
 
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
-    units: Decimal
+    units: str
 
 
 class MarketOrderPositionCloseout(ApiModel):
     """Details for position closeout via market order."""
 
     instrument: InstrumentName
-    units: Decimal | str
+    units: str
 
 
 class MarketOrderMarginCloseout(ApiModel):
     """Details for margin closeout market order."""
 
-    reason: str
+    reason: MarketOrderMarginCloseoutReason
 
 
 class MarketOrderDelayedTradeClose(ApiModel):
@@ -320,7 +321,7 @@ class MarketOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Market order specific fields
-    type: str = Field(default="MARKET", frozen=True)
+    type: OrderType = Field(default=OrderType.MARKET, frozen=True)
     instrument: InstrumentName
     units: Decimal
     time_in_force: TimeInForce = Field(alias="timeInForce")
@@ -361,7 +362,7 @@ class LimitOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Limit order specific fields
-    type: str = Field(default="LIMIT", frozen=True)
+    type: OrderType = Field(default=OrderType.LIMIT, frozen=True)
     instrument: InstrumentName
     units: Decimal
     price: PriceValue
@@ -399,7 +400,7 @@ class StopOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Stop order specific fields
-    type: str = Field(default="STOP", frozen=True)
+    type: OrderType = Field(default=OrderType.STOP, frozen=True)
     instrument: InstrumentName
     units: Decimal
     price: PriceValue
@@ -438,7 +439,7 @@ class MarketIfTouchedOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Market-if-touched order specific fields
-    type: str = Field(default="MARKET_IF_TOUCHED", frozen=True)
+    type: OrderType = Field(default=OrderType.MARKET_IF_TOUCHED, frozen=True)
     instrument: InstrumentName
     units: Decimal
     price: PriceValue
@@ -478,7 +479,7 @@ class TakeProfitOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Take profit order specific fields
-    type: str = Field(default="TAKE_PROFIT", frozen=True)
+    type: OrderType = Field(default=OrderType.TAKE_PROFIT, frozen=True)
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     price: PriceValue
@@ -508,7 +509,7 @@ class StopLossOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Stop loss order specific fields
-    type: str = Field(default="STOP_LOSS", frozen=True)
+    type: OrderType = Field(default=OrderType.STOP_LOSS, frozen=True)
     guaranteed_execution_premium: Decimal | None = Field(None, alias="guaranteedExecutionPremium")
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
@@ -541,7 +542,7 @@ class GuaranteedStopLossOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Guaranteed stop loss order specific fields
-    type: str = Field(default="GUARANTEED_STOP_LOSS", frozen=True)
+    type: OrderType = Field(default=OrderType.GUARANTEED_STOP_LOSS, frozen=True)
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     price: PriceValue
@@ -573,7 +574,7 @@ class TrailingStopLossOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Trailing stop loss order specific fields
-    type: str = Field(default="TRAILING_STOP_LOSS", frozen=True)
+    type: OrderType = Field(default=OrderType.TRAILING_STOP_LOSS, frozen=True)
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     distance: Decimal

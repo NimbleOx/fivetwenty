@@ -16,12 +16,15 @@ from .enums import (
     AccountFinancingMode,
     AccountUnits,
     Currency,
+    FixedPriceOrderReason,
     FundingReason,
     GuaranteedStopLossOrderReason,
     InstrumentName,
     LimitOrderReason,
     MarketIfTouchedOrderReason,
     MarketOrderReason,
+    OrderCancelReason,
+    OrderFillReason,
     OrderID,
     OrderPositionFill,
     OrderTriggerCondition,
@@ -47,7 +50,7 @@ from .orders import (
     TakeProfitDetails,
     TrailingStopLossDetails,
 )
-from .pricing import HomeConversionFactors
+from .pricing import ClientPrice, HomeConversionFactors
 
 # Forward references for type checking
 
@@ -68,7 +71,7 @@ class Transaction(ApiModel):
     """Base transaction model with common fields for all transaction types."""
 
     id: str = Field(alias="id")
-    time: str
+    time: datetime
     user_id: int = Field(alias="userID")
     account_id: str = Field(alias="accountID")
     batch_id: str = Field(alias="batchID")
@@ -168,8 +171,8 @@ class OrderFillTransaction(Transaction):
     loss_quote_home_conversion_factor: Decimal | None = Field(None, alias="lossQuoteHomeConversionFactor")
     price: PriceValue | None = None
     full_vwap: PriceValue | None = Field(None, alias="fullVWAP")
-    full_price: FullPrice | None = Field(None, alias="fullPrice")
-    reason: str | None = None
+    full_price: ClientPrice | None = Field(None, alias="fullPrice")
+    reason: OrderFillReason | None = None
     pl: Decimal | None = Field(None, alias="pl")
     quote_pl: Decimal | None = Field(None, alias="quotePL")
     financing: Decimal | None = None
@@ -192,7 +195,7 @@ class OrderCancelTransaction(Transaction):
 
     order_id: str = Field(alias="orderID")
     client_order_id: str | None = Field(None, alias="clientOrderID")
-    reason: str | None = None
+    reason: OrderCancelReason | None = None
     replaced_by_order_id: str | None = Field(None, alias="replacedByOrderID")
 
 
@@ -243,7 +246,7 @@ class ClientConfigureRejectTransaction(Transaction):
     type: TransactionType = Field(default=TransactionType.CLIENT_CONFIGURE_REJECT, frozen=True)
     alias: str | None = None
     margin_rate: Decimal | None = Field(None, alias="marginRate")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class LimitOrderTransaction(Transaction):
@@ -287,7 +290,7 @@ class LimitOrderRejectTransaction(Transaction):
     trailing_stop_loss_on_fill: TrailingStopLossDetails | None = Field(None, alias="trailingStopLossOnFill")
     trade_client_extensions: ClientExtensions | None = Field(None, alias="tradeClientExtensions")
     intended_replaces_order_id: OrderID | None = Field(None, alias="intendedReplacesOrderID")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class MarketOrderRejectTransaction(Transaction):
@@ -311,7 +314,7 @@ class MarketOrderRejectTransaction(Transaction):
     guaranteed_stop_loss_on_fill: GuaranteedStopLossDetails | None = Field(None, alias="guaranteedStopLossOnFill")
     trailing_stop_loss_on_fill: TrailingStopLossDetails | None = Field(None, alias="trailingStopLossOnFill")
     trade_client_extensions: ClientExtensions | None = Field(None, alias="tradeClientExtensions")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class StopOrderTransaction(Transaction):
@@ -357,7 +360,7 @@ class StopOrderRejectTransaction(Transaction):
     trailing_stop_loss_on_fill: TrailingStopLossDetails | None = Field(None, alias="trailingStopLossOnFill")
     trade_client_extensions: ClientExtensions | None = Field(None, alias="tradeClientExtensions")
     intended_replaces_order_id: OrderID | None = Field(None, alias="intendedReplacesOrderID")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class TakeProfitOrderTransaction(Transaction):
@@ -391,7 +394,7 @@ class TakeProfitOrderRejectTransaction(Transaction):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
     intended_replaces_order_id: OrderID | None = Field(None, alias="intendedReplacesOrderID")
     order_fill_transaction_id: TransactionID | None = Field(None, alias="orderFillTransactionID")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class StopLossOrderTransaction(Transaction):
@@ -430,7 +433,7 @@ class StopLossOrderRejectTransaction(Transaction):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
     intended_replaces_order_id: OrderID | None = Field(None, alias="intendedReplacesOrderID")
     order_fill_transaction_id: TransactionID | None = Field(None, alias="orderFillTransactionID")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class TrailingStopLossOrderTransaction(Transaction):
@@ -464,7 +467,7 @@ class TrailingStopLossOrderRejectTransaction(Transaction):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
     intended_replaces_order_id: OrderID | None = Field(None, alias="intendedReplacesOrderID")
     order_fill_transaction_id: TransactionID | None = Field(None, alias="orderFillTransactionID")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class GuaranteedStopLossOrderTransaction(Transaction):
@@ -501,7 +504,7 @@ class GuaranteedStopLossOrderRejectTransaction(Transaction):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
     intended_replaces_order_id: OrderID | None = Field(None, alias="intendedReplacesOrderID")
     order_fill_transaction_id: TransactionID | None = Field(None, alias="orderFillTransactionID")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class MarketIfTouchedOrderTransaction(Transaction):
@@ -547,7 +550,7 @@ class MarketIfTouchedOrderRejectTransaction(Transaction):
     trailing_stop_loss_on_fill: TrailingStopLossDetails | None = Field(None, alias="trailingStopLossOnFill")
     trade_client_extensions: ClientExtensions | None = Field(None, alias="tradeClientExtensions")
     intended_replaces_order_id: OrderID | None = Field(None, alias="intendedReplacesOrderID")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class OrderCancelRejectTransaction(Transaction):
@@ -556,7 +559,7 @@ class OrderCancelRejectTransaction(Transaction):
     type: TransactionType = Field(default=TransactionType.ORDER_CANCEL_REJECT, frozen=True)
     order_id: str = Field(alias="orderID")
     client_order_id: str | None = Field(None, alias="clientOrderID")
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class OrderClientExtensionsModifyTransaction(Transaction):
@@ -666,9 +669,9 @@ class TransferFundsRejectTransaction(Transaction):
 
     type: TransactionType = Field(default=TransactionType.TRANSFER_FUNDS_REJECT, frozen=True)
     amount: AccountUnits
-    funding_reason: str = Field(alias="fundingReason")
+    funding_reason: FundingReason = Field(alias="fundingReason")
     comment: str | None = None
-    reject_reason: str = Field(alias="rejectReason")
+    reject_reason: TransactionRejectReason = Field(alias="rejectReason")
 
 
 class MarginCallExtendTransaction(Transaction):
@@ -687,7 +690,7 @@ class FixedPriceOrderTransaction(Transaction):
     price: PriceValue
     position_fill: OrderPositionFill = Field(alias="positionFill")
     trade_state: str = Field(alias="tradeState")
-    reason: str
+    reason: FixedPriceOrderReason
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
     take_profit_on_fill: TakeProfitDetails | None = Field(None, alias="takeProfitOnFill")
     stop_loss_on_fill: StopLossDetails | None = Field(None, alias="stopLossOnFill")
@@ -701,9 +704,9 @@ class DelayedTradeCloseTransaction(Transaction):
 
     type: TransactionType = Field(default=TransactionType.ORDER_FILL, frozen=True)  # Use closest match
     trade_id: str = Field(alias="tradeID")
-    trade_ids: list[TradeID] = Field(default_factory=list, alias="tradeIDs")
+    trade_ids: TradeID = Field(alias="tradeIDs")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
-    reason: str
+    reason: MarketOrderReason
     source_transaction_id: str = Field(alias="sourceTransactionID")
 
 

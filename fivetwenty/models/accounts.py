@@ -8,7 +8,7 @@ information, account summaries, account change tracking, and streaming updates.
 from __future__ import annotations
 
 # Forward references for type checking
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -39,8 +39,9 @@ from .orders import (
 if TYPE_CHECKING:
     from decimal import Decimal
 
-    from .positions import Position
-    from .trades import TradeSummary
+    from .positions import CalculatedPositionState, Position
+    from .trades import CalculatedTradeState, TradeSummary
+    from .transactions import Transaction
 
 # Union type for all possible order types in an account
 Order = MarketOrder | LimitOrder | StopOrder | MarketIfTouchedOrder | TakeProfitOrder | StopLossOrder | GuaranteedStopLossOrder | TrailingStopLossOrder
@@ -210,7 +211,7 @@ class AccountChanges(ApiModel):
     trades_reduced: list[TradeSummary] = Field(default_factory=list, alias="tradesReduced")
     trades_closed: list[TradeSummary] = Field(default_factory=list, alias="tradesClosed")
     positions: list[Position] = Field(default_factory=list)
-    transactions: list[dict[str, Any]] = Field(default_factory=list)
+    transactions: list[Transaction] = Field(default_factory=list)
 
 
 class AccountChangesState(ApiModel):
@@ -240,8 +241,8 @@ class AccountChangesState(ApiModel):
     margin_call_extension_count: int | None = Field(None, alias="marginCallExtensionCount")
     last_margin_call_extension_time: datetime | None = Field(None, alias="lastMarginCallExtensionTime")
     orders: list[DynamicOrderState] = Field(default_factory=list)
-    trades: list[dict[str, Any]] = Field(default_factory=list)  # CalculatedTradeState
-    positions: list[dict[str, Any]] = Field(default_factory=list)  # CalculatedPositionState
+    trades: list[CalculatedTradeState] = Field(default_factory=list)
+    positions: list[CalculatedPositionState] = Field(default_factory=list)
 
 
 # Export all account-related models

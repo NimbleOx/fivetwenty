@@ -131,7 +131,7 @@ class TestPositionEndpoints:
                         "financing": "0.0000",
                         "commission": "0.0000",
                         "accountBalance": "100100.0000",
-                        "reason": "POSITION_CLOSEOUT",
+                        "reason": "MARKET_ORDER_POSITION_CLOSEOUT",
                     },
                     "relatedTransactionIDs": ["12346", "12347"],
                     "lastTransactionID": "12347",
