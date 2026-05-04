@@ -33,7 +33,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 
 ### Initialize Clients with Custom Prefixes
 
-<!-- fragment: Demo multi-account configuration with unused asyncio import -->
+<!-- fragment: partial multi-account configuration example -->
 ```python
 import asyncio
 from typing import Any
@@ -131,7 +131,7 @@ async def multi_account_example() -> None:
 
 ### Single Account with Custom Prefix
 
-<!-- fragment: Demo single account setup with unused asyncio import -->
+<!-- fragment: partial single account setup example -->
 ```python
 import asyncio
 from typing import Any
@@ -312,7 +312,7 @@ def sync_example() -> None:
 
 Create configurations programmatically without environment variables:
 
-<!-- fragment: Demo direct configuration with unused asyncio import -->
+<!-- fragment: partial direct configuration example -->
 ```python
 import asyncio
 from typing import List, Any
@@ -450,7 +450,7 @@ async def direct_config_example() -> None:
 
 Combine environment variables with direct configuration:
 
-<!-- fragment: Demo mixed approach configuration with unused asyncio import -->
+<!-- fragment: partial mixed approach configuration example -->
 ```python
 import asyncio
 from typing import Dict, Any, Optional

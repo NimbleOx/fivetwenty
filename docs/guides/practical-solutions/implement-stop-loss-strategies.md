@@ -21,7 +21,7 @@
 
 Attach a stop-loss immediately when placing a trade:
 
-<!-- fragment: Demo stop-loss implementation with unused imports -->
+<!-- fragment: partial stop-loss implementation example -->
 ```python
 import asyncio
 import os
@@ -106,7 +106,7 @@ if __name__ == "__main__":
 
 Set stop-loss at fixed pip distance from entry:
 
-<!-- fragment: Demo pip-based stop-loss with unused os import -->
+<!-- fragment: partial pip-based stop-loss example -->
 ```python
 import os
 from decimal import Decimal
@@ -221,7 +221,7 @@ async def example_usage():
 
 Limit risk to fixed percentage of account balance:
 
-<!-- fragment: Demo percentage-based stop-loss with unused imports -->
+<!-- fragment: partial percentage-based stop-loss example -->
 ```python
 import os
 from decimal import Decimal
@@ -319,7 +319,7 @@ async def example_usage():
 
 Stop-loss that follows favorable price movement:
 
-<!-- fragment: Demo trailing stop loss with undefined Any type and API issues -->
+<!-- fragment: partial trailing stop loss example -->
 ```python
 from decimal import Decimal
 from typing import Any
@@ -420,7 +420,7 @@ async def main() -> None:
 
 Stop-loss based on market volatility using Average True Range:
 
-<!-- fragment: Demo ATR-based stop-loss with unused imports and external libraries -->
+<!-- fragment: partial ATR-based stop-loss example -->
 ```python
 import os
 from decimal import Decimal
@@ -561,7 +561,7 @@ async def main() -> None:
 
 Update stop-loss on existing positions:
 
-<!-- fragment: Demo trailing stop-loss update with unused imports -->
+<!-- fragment: partial trailing stop-loss update example -->
 ```python
 import os
 from decimal import Decimal
@@ -610,7 +610,7 @@ async def main() -> None:
 
 Move stop-loss to entry price after favorable movement:
 
-<!-- fragment: Demo breakeven function with undefined Any type -->
+<!-- fragment: partial breakeven function example -->
 ```python
 from decimal import Decimal
 from typing import Any
@@ -684,7 +684,7 @@ async def main() -> None:
 
 Partial position closure at multiple levels:
 
-<!-- fragment: Demo tiered stop loss with undefined Any type and linting violations -->
+<!-- fragment: partial tiered stop loss example -->
 ```python
 from decimal import Decimal
 from typing import Any
@@ -783,7 +783,7 @@ async def main() -> None:
 
 Monitor positions and stop-loss orders:
 
-<!-- fragment: Demo stop-loss monitoring with unused asyncio import -->
+<!-- fragment: partial stop-loss monitoring example -->
 ```python
 import asyncio
 from decimal import Decimal
@@ -1012,7 +1012,7 @@ async def main() -> None:
 
 ### Emergency Position Exit
 
-<!-- fragment: Demo emergency position exit with attr-defined issues and performance overhead -->
+<!-- fragment: partial emergency position exit example -->
 ```python
 from typing import Any
 from fivetwenty import AsyncClient

@@ -1,6 +1,7 @@
 from pathlib import Path
 
 from docs_validation.src.models import FileInfo
+from docs_validation.src.reporters.markdown_reporter import MarkdownReporter
 from docs_validation.src.validators.code_execution import CodeExecutionValidator
 from docs_validation.src.validators.fragments import (
     FragmentTarget,
@@ -86,3 +87,17 @@ def test_code_execution_honors_skip_execution_marker() -> None:
     assert result.passed
     assert result.metadata["skipped_block_count"] == 1
     assert result.metadata["skipped_blocks"][0]["marker_kind"] == "execution"
+
+
+def test_fragment_reporter_flags_validation_debt_wording_variants() -> None:
+    reporter = MarkdownReporter()
+
+    flagged_reasons = [
+        "response indexing issues",
+        "await outside function patterns",
+        "f-string patterns",
+        "type assignment and argument type issues",
+    ]
+
+    for reason in flagged_reasons:
+        assert reporter._fragment_marker_needs_review(reason)

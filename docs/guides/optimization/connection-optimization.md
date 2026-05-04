@@ -10,7 +10,7 @@
 
 Reuse connections to minimize latency:
 
-<!-- fragment: Demo optimized client with undefined imports and unused variables -->
+<!-- fragment: partial optimized client example -->
 ```python
 import asyncio
 import time
@@ -98,7 +98,7 @@ async def setup_hft_client() -> Any:
 
 Batch multiple operations to reduce round trips:
 
-<!-- fragment: Demo batch request manager with performance timing and undefined imports -->
+<!-- fragment: partial batch request manager example -->
 ```python
 import asyncio
 import time

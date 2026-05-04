@@ -61,7 +61,7 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 
 FiveTwenty automatically handles Decimal conversion for financial fields:
 
-<!-- fragment: Demo Decimal conversion with type compatibility and f-string exception issues -->
+<!-- fragment: partial Decimal conversion example -->
 ```python
 from decimal import Decimal
 
@@ -573,7 +573,7 @@ Exception
 
 The SDK provides complete type information:
 
-<!-- fragment: Demo type inference with attribute access on dict types -->
+<!-- fragment: partial type inference example -->
 ```python
 from decimal import Decimal
 from fivetwenty import AsyncClient
@@ -612,7 +612,7 @@ async def get_account_balance(client: AsyncClient, account_id: str) -> Decimal:
 
 Types are enforced at runtime via Pydantic:
 
-<!-- fragment: Demo runtime validation with intentional type incompatibility -->
+<!-- fragment: partial runtime validation example -->
 ```python
 from fivetwenty.models import MarketOrderRequest
 
@@ -895,7 +895,7 @@ class AsyncClient:
 
 Integration tests use recorded HTTP interactions:
 
-<!-- fragment: Demo VCR test integration with missing return type annotation -->
+<!-- fragment: partial VCR test integration example -->
 ```python
 import pytest
 

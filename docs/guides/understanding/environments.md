@@ -1813,7 +1813,7 @@ print(f"Remember: Proper validation prevents costly configuration mistakes")
 
 **Solution**: Verify account ownership and permissions:
 
-<!-- fragment: Demo account verification with undefined AsyncClient -->
+<!-- fragment: partial account verification example -->
 <!-- fragment: Demo comprehensive account access verification with detailed permission analysis -->
 ```python
 import time

@@ -641,7 +641,7 @@ if __name__ == "__main__":
 
 For advanced HTTP configuration:
 
-<!-- fragment: custom HTTP transport configuration example with unused variables -->
+<!-- fragment: partial custom HTTP transport configuration example -->
 ```python
 import asyncio
 import os
@@ -694,7 +694,7 @@ asyncio.run(main())
 
 ### Logging Configuration
 
-<!-- fragment: logging configuration example with unused logger variable -->
+<!-- fragment: partial logging configuration example -->
 ```python
 import asyncio
 import logging
@@ -744,7 +744,7 @@ if __name__ == "__main__":
 
 The sync `Client` supports the same configuration patterns:
 
-<!-- fragment: Demo sync client configuration with SecretStr type mismatches -->
+<!-- fragment: partial sync client configuration example -->
 ```python
 import os
 from fivetwenty import Client, AccountConfig, Environment
@@ -852,7 +852,7 @@ class ConfigBuilder:
 
 ### Multi-Environment Manager
 
-<!-- fragment: configuration manager class with unused variables and f-string exception -->
+<!-- fragment: partial configuration manager class -->
 ```python
 from fivetwenty import AccountConfig, AccountConfigLoader, AsyncClient
 
