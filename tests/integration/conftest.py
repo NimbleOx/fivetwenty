@@ -1,14 +1,19 @@
 """Integration test configuration and fixtures."""
 
+import hashlib
 import os
+import re
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 import pytest
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient, Client, Environment
 from tests.integration.helpers import cleanup_error_message, is_tolerated_cleanup_error
+
+CLIENT_REQUEST_ID_PREFIX = "fivetwenty-itest"
 
 # Load .env file from project root if it exists
 env_path = Path(__file__).parent.parent.parent / ".env"
@@ -28,8 +33,45 @@ def integration_config():
     }
 
 
+def _resource_id(resource: Any) -> str | None:
+    """Extract an OANDA resource id from a dict or model."""
+    if isinstance(resource, dict):
+        value = resource.get("id")
+    else:
+        value = getattr(resource, "id", None)
+    return str(value) if value is not None else None
+
+
+async def _pending_order_ids(client: AsyncClient, account_id: str) -> set[str]:
+    """Return currently pending order ids for safety checks."""
+    response = await client.orders.get_pending_orders(account_id)
+    orders = response.get("orders", []) if isinstance(response, dict) else []
+    return {order_id for order in orders if (order_id := _resource_id(order))}
+
+
+async def _open_trade_ids(client: AsyncClient, account_id: str) -> set[str]:
+    """Return currently open trade ids for safety checks."""
+    response = await client.trades.get_open_trades(account_id)
+    trades = response.get("trades", []) if isinstance(response, dict) else []
+    return {trade_id for trade in trades if (trade_id := _resource_id(trade))}
+
+
+def _client_request_id_factory(nodeid: str):
+    """Create deterministic, short ClientRequestID values for a pytest node."""
+    node_hash = hashlib.sha1(nodeid.encode("utf-8")).hexdigest()[:10]
+    counter = 0
+
+    def make_client_request_id(existing: str | None = None) -> str:
+        nonlocal counter
+        counter += 1
+        suffix = re.sub(r"[^A-Za-z0-9_-]+", "-", existing or "request").strip("-")[:48]
+        return f"{CLIENT_REQUEST_ID_PREFIX}-{node_hash}-{counter}-{suffix}"[:128]
+
+    return make_client_request_id
+
+
 @pytest.fixture
-async def sandbox_client_no_cleanup(integration_config):
+async def sandbox_client_no_cleanup(integration_config, test_account_id):
     """Async client configured for sandbox testing WITHOUT automatic cleanup."""
     if not integration_config["token"]:
         pytest.skip("FIVETWENTY_OANDA_TOKEN environment variable not set")
@@ -37,11 +79,23 @@ async def sandbox_client_no_cleanup(integration_config):
         pytest.skip("FIVETWENTY_OANDA_ACCOUNT environment variable not set")
 
     async with AsyncClient(token=integration_config["token"], account_id=integration_config["account_id"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
+        preflight_pending_orders = await _pending_order_ids(client, test_account_id)
+        preflight_open_trades = await _open_trade_ids(client, test_account_id)
         yield client
+
+        postflight_pending_orders = await _pending_order_ids(client, test_account_id)
+        postflight_open_trades = await _open_trade_ids(client, test_account_id)
+        leaked_orders = postflight_pending_orders - preflight_pending_orders
+        leaked_trades = postflight_open_trades - preflight_open_trades
+        if leaked_orders or leaked_trades:
+            pytest.fail(
+                f"Live integration test left account state behind: pending_orders={sorted(leaked_orders)}, open_trades={sorted(leaked_trades)}",
+                pytrace=False,
+            )
 
 
 @pytest.fixture
-async def sandbox_client(integration_config, test_account_id):
+async def sandbox_client(integration_config, test_account_id, request: pytest.FixtureRequest):
     """Async client with automatic order and trade cleanup enabled by default."""
     if not integration_config["token"]:
         pytest.skip("FIVETWENTY_OANDA_TOKEN environment variable not set")
@@ -49,8 +103,11 @@ async def sandbox_client(integration_config, test_account_id):
         pytest.skip("FIVETWENTY_OANDA_ACCOUNT environment variable not set")
 
     async with AsyncClient(token=integration_config["token"], account_id=integration_config["account_id"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
-        created_order_ids = []
-        created_trade_ids = []
+        created_order_ids: list[str] = []
+        created_trade_ids: list[str] = []
+        make_client_request_id = _client_request_id_factory(request.node.nodeid)
+        preflight_pending_orders = await _pending_order_ids(client, test_account_id)
+        preflight_open_trades = await _open_trade_ids(client, test_account_id)
 
         # Store original methods
         original_post_limit_order = client.orders.post_limit_order
@@ -61,6 +118,7 @@ async def sandbox_client(integration_config, test_account_id):
 
         async def track_order_creation(original_method, *args, **kwargs):
             """Wrapper to track order creation."""
+            kwargs["client_request_id"] = make_client_request_id(kwargs.get("client_request_id"))
             response = await original_method(*args, **kwargs)
             if response and hasattr(response, "order_create_transaction") and response.order_create_transaction:
                 order_id = response.order_create_transaction.get("id")
@@ -123,6 +181,16 @@ async def sandbox_client(integration_config, test_account_id):
 
         if cleanup_errors:
             pytest.fail("Automatic integration cleanup failed:\n" + "\n".join(cleanup_errors), pytrace=False)
+
+        postflight_pending_orders = await _pending_order_ids(client, test_account_id)
+        postflight_open_trades = await _open_trade_ids(client, test_account_id)
+        leaked_orders = postflight_pending_orders - preflight_pending_orders
+        leaked_trades = postflight_open_trades - preflight_open_trades
+        if leaked_orders or leaked_trades:
+            pytest.fail(
+                f"Live integration test left account state behind after cleanup: pending_orders={sorted(leaked_orders)}, open_trades={sorted(leaked_trades)}",
+                pytrace=False,
+            )
 
 
 # Alias for backward compatibility
