@@ -86,7 +86,7 @@ class MarketOrderPositionCloseout(ApiModel):
     """Details for position closeout via market order."""
 
     instrument: InstrumentName
-    units: Decimal
+    units: Decimal | str
 
 
 class MarketOrderMarginCloseout(ApiModel):
@@ -101,6 +101,13 @@ class MarketOrderDelayedTradeClose(ApiModel):
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     source_transaction_id: TransactionID = Field(alias="sourceTransactionID")
+
+
+class OrderIdentifier(ApiModel):
+    """Reference to an order by OANDA ID and optional client order ID."""
+
+    order_id: OrderID | None = Field(None, alias="orderID")
+    client_order_id: str | None = Field(None, alias="clientOrderID")
 
 
 class MarketOrderRequest(ApiModel):
@@ -608,6 +615,7 @@ __all__ = [
     # Order request models (for creating orders)
     "MarketOrderRequest",
     "MarketOrderTradeClose",
+    "OrderIdentifier",
     "StopLossDetails",
     "StopLossOrder",
     "StopLossOrderRequest",

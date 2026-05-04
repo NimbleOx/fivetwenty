@@ -49,6 +49,21 @@ class QuoteHomeConversionFactors(ApiModel):
     negative_units: Decimal = Field(alias="negativeUnits")
 
 
+class ConversionFactor(ApiModel):
+    """Factor used to convert an instrument amount to account home currency."""
+
+    factor: Decimal | None = None
+
+
+class HomeConversionFactors(ApiModel):
+    """Conversion factors for instrument base and quote currency amounts."""
+
+    gain_quote_home: ConversionFactor | None = Field(None, alias="gainQuoteHome")
+    loss_quote_home: ConversionFactor | None = Field(None, alias="lossQuoteHome")
+    gain_base_home: ConversionFactor | None = Field(None, alias="gainBaseHome")
+    loss_base_home: ConversionFactor | None = Field(None, alias="lossBaseHome")
+
+
 class UnitsAvailable(ApiModel):
     """Available units for trading calculations."""
 
@@ -120,6 +135,8 @@ __all__ = [
     "Candlestick",
     "CandlestickData",
     "ClientPrice",
+    "ConversionFactor",
+    "HomeConversionFactors",
     "HomeConversions",
     "OrderBook",
     "PriceBucket",

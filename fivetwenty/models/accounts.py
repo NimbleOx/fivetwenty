@@ -117,6 +117,7 @@ class AccountSummary(ApiModel):
     created_time: datetime = Field(alias="createdTime")
     guaranteed_stop_loss_order_parameters: GuaranteedStopLossOrderParameters | None = Field(None, alias="guaranteedStopLossOrderParameters")
     guaranteed_stop_loss_order_mode: GuaranteedStopLossOrderMode = Field(alias="guaranteedStopLossOrderMode")
+    guaranteed_stop_loss_order_mutability: GuaranteedStopLossOrderMutability | None = Field(None, alias="guaranteedStopLossOrderMutability")
     resettable_pl_time: datetime | None = Field(None, alias="resettablePLTime")
     margin_rate: Decimal | None = Field(None, alias="marginRate")
     open_trade_count: int = Field(alias="openTradeCount")
@@ -172,6 +173,9 @@ class AccumulatedAccountState(ApiModel):
     commission: AccountUnits
     dividend_adjustment: AccountUnits = Field(alias="dividendAdjustment")
     guaranteed_execution_fees: AccountUnits = Field(alias="guaranteedExecutionFees")
+    margin_call_enter_time: datetime | None = Field(None, alias="marginCallEnterTime")
+    margin_call_extension_count: int | None = Field(None, alias="marginCallExtensionCount")
+    last_margin_call_extension_time: datetime | None = Field(None, alias="lastMarginCallExtensionTime")
 
 
 class CalculatedAccountState(ApiModel):

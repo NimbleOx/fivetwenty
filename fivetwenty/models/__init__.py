@@ -81,6 +81,7 @@ __all__ = [
     # Pricing models
     "ClientPrice",
     "CloseTransaction",
+    "ConversionFactor",
     "CreateTransaction",
     # Enums and core types
     "Currency",
@@ -111,6 +112,7 @@ __all__ = [
     "GuaranteedStopLossOrderParameters",
     "GuaranteedStopLossOrderRequest",
     "GuaranteedStopLossOrderTransaction",
+    "HomeConversionFactors",
     "HomeConversions",
     # Instrument models
     "Instrument",
@@ -122,6 +124,8 @@ __all__ = [
     "LimitOrderRejectTransaction",
     "LimitOrderRequest",
     "LimitOrderTransaction",
+    "LiquidityRegenerationSchedule",
+    "LiquidityRegenerationScheduleStep",
     "MarginCallEnterTransaction",
     "MarginCallExitTransaction",
     "MarginCallExtendTransaction",
@@ -137,12 +141,16 @@ __all__ = [
     "MarketOrderRequest",
     "MarketOrderTradeClose",
     "MarketOrderTransaction",
+    "OpenTradeDividendAdjustment",
+    "OpenTradeFinancing",
     "OrderBook",
     "OrderCancelRejectTransaction",
     "OrderCancelTransaction",
+    "OrderClientExtensionsModifyRejectTransaction",
     "OrderClientExtensionsModifyTransaction",
     "OrderFillTransaction",
     "OrderID",
+    "OrderIdentifier",
     "OrderPositionFill",
     "OrderState",
     "OrderStateFilter",
@@ -151,6 +159,7 @@ __all__ = [
     # Position models
     "Position",
     "PositionAggregationMode",
+    "PositionFinancing",
     "PositionSide",
     "PriceBucket",
     "PriceStatus",
@@ -180,6 +189,7 @@ __all__ = [
     "TimeInForce",
     # Trade models
     "Trade",
+    "TradeClientExtensionsModifyRejectTransaction",
     "TradeClientExtensionsModifyTransaction",
     "TradeID",
     "TradePL",

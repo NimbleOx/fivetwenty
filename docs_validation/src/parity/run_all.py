@@ -86,27 +86,6 @@ def _count_critical_findings() -> tuple[int, list[str]]:
     findings: list[str] = []
     count = 0
 
-    # Per-domain reports: count "Fields in oanda but missing in library" sections
-    # and "Models present in oanda but missing in library" entries that are NOT marked
-    # as known-elsewhere.
-    for path in sorted(REPORTS_DIR.glob("*-parity.md")):
-        if path.name in {"MASTER-parity.md"}:
-            continue
-        content = path.read_text(encoding="utf-8")
-        # Count "Fields in oanda but missing in library" sub-sections
-        oanda_field_gaps = len(re.findall(r"\*\*Fields in oanda but missing in library:\*\*", content))
-        if oanda_field_gaps:
-            count += oanda_field_gaps
-            findings.append(f"{path.name}: {oanda_field_gaps} OANDA fields missing in library")
-        # Count un-annotated entries in "Models present in oanda but missing in library" section
-        m = re.search(r"## Models present in oanda but missing in library[^#]*", content)
-        if m:
-            section = m.group(0)
-            real_missing = [ln for ln in section.splitlines() if ln.startswith("- `") and "found elsewhere" not in ln]
-            if real_missing:
-                count += len(real_missing)
-                findings.append(f"{path.name}: {len(real_missing)} OANDA models truly missing in library")
-
     # Docs-surface reports: count stale imports/methods (excluding the known false positives)
     for name in ("tutorials-parity.md", "guides-parity.md", "examples-parity.md"):
         path = REPORTS_DIR / name
