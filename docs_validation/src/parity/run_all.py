@@ -37,13 +37,20 @@ REPORTS_DIR = REPO_ROOT / "docs_validation" / "reports"
 
 # Required cached pages — if any are missing, we must fetch.
 REQUIRED_OANDA_PAGES = [
-    "account-df.md", "account-ep.md",
-    "instrument-df.md", "instrument-ep.md",
-    "order-df.md", "order-ep.md",
-    "position-df.md", "position-ep.md",
-    "pricing-df.md", "pricing-ep.md",
-    "trade-df.md", "trade-ep.md",
-    "transaction-df.md", "transaction-ep.md",
+    "account-df.md",
+    "account-ep.md",
+    "instrument-df.md",
+    "instrument-ep.md",
+    "order-df.md",
+    "order-ep.md",
+    "position-df.md",
+    "position-ep.md",
+    "pricing-df.md",
+    "pricing-ep.md",
+    "trade-df.md",
+    "trade-ep.md",
+    "transaction-df.md",
+    "transaction-ep.md",
     "pricing-common-df.md",
     "primitives-df.md",
 ]
@@ -96,10 +103,7 @@ def _count_critical_findings() -> tuple[int, list[str]]:
         m = re.search(r"## Models present in oanda but missing in library[^#]*", content)
         if m:
             section = m.group(0)
-            real_missing = [
-                ln for ln in section.splitlines()
-                if ln.startswith("- `") and "found elsewhere" not in ln
-            ]
+            real_missing = [ln for ln in section.splitlines() if ln.startswith("- `") and "found elsewhere" not in ln]
             if real_missing:
                 count += len(real_missing)
                 findings.append(f"{path.name}: {len(real_missing)} OANDA models truly missing in library")
