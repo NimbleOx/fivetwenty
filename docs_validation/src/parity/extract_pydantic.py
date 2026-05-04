@@ -127,8 +127,10 @@ def extract_module(path: Path) -> dict[str, Any]:
     out: dict[str, Any] = {
         "source_file": str(path.relative_to(REPO_ROOT)),
         "models": {},
+        "model_bases": {},
         "enums": {},
         "typeddicts": {},
+        "typeddict_bases": {},
         "type_aliases": {},
         "exports": [],
     }
@@ -149,28 +151,40 @@ def extract_module(path: Path) -> dict[str, Any]:
         if not added:
             break
 
-    for node in tree.body:
-        if isinstance(node, ast.ClassDef):
-            if _is_typeddict(node):
-                out["typeddicts"][node.name] = _extract_class_fields(node)
-            elif _is_enum(node):
-                out["enums"][node.name] = _extract_enum_values(node)
-            elif node.name in pydantic_classes:
-                out["models"][node.name] = _extract_class_fields(node)
-        elif isinstance(node, ast.Assign):
+    for item in tree.body:
+        if isinstance(item, ast.ClassDef):
+            if _is_typeddict(item):
+                out["typeddicts"][item.name] = _extract_class_fields(item)
+                out["typeddict_bases"][item.name] = [_base_name(b) for b in item.bases]
+            elif _is_enum(item):
+                out["enums"][item.name] = _extract_enum_values(item)
+            elif item.name in pydantic_classes:
+                out["models"][item.name] = _extract_class_fields(item)
+                out["model_bases"][item.name] = [_base_name(b) for b in item.bases]
+        elif isinstance(item, ast.Assign):
             # Module-level assignments: __all__ exports + simple type aliases
-            for target in node.targets:
+            for target in item.targets:
                 if isinstance(target, ast.Name):
-                    if target.id == "__all__" and isinstance(node.value, (ast.List, ast.Tuple)):
-                        out["exports"] = [elt.value for elt in node.value.elts if isinstance(elt, ast.Constant)]
+                    if target.id == "__all__" and isinstance(item.value, (ast.List, ast.Tuple)):
+                        out["exports"] = [elt.value for elt in item.value.elts if isinstance(elt, ast.Constant)]
                     else:
                         # Simple type alias e.g. `OrderID = str`
-                        out["type_aliases"][target.id] = _value_to_str(node.value)
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+                        out["type_aliases"][target.id] = _value_to_str(item.value)
+        elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
             # Module-level annotated alias e.g. `OrderID: TypeAlias = str`
-            out["type_aliases"][node.target.id] = _ann_to_str(node.annotation) or ""
+            out["type_aliases"][item.target.id] = _ann_to_str(item.annotation) or ""
 
     return out
+
+
+def _base_name(node: ast.AST) -> str:
+    """Return a stable class base name from an AST node."""
+    raw = _ann_to_str(node)
+    if "[" in raw:
+        raw = raw.split("[", 1)[0]
+    if "." in raw:
+        raw = raw.rsplit(".", 1)[-1]
+    return raw
 
 
 def _extract_class_fields(node: ast.ClassDef) -> dict[str, Any]:

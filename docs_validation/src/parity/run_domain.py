@@ -24,7 +24,7 @@ import json
 import subprocess
 import sys
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "parity"
@@ -88,7 +88,7 @@ def _run(*cmd: str) -> None:
 
 
 def _load(p: Path) -> dict[str, Any]:
-    return json.loads(p.read_text())
+    return cast("dict[str, Any]", json.loads(p.read_text()))
 
 
 def run_domain(domain: str, *, inventory: dict[str, Any] | None = None) -> dict[str, Any]:

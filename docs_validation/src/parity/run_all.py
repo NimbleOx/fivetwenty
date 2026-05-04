@@ -6,6 +6,7 @@ Steps:
   3. Run the 7 per-domain parity reports
   4. Run the cross-cutting enums report
   5. Run the docs-surface reports (tutorials/guides/examples/readme)
+  6. Run strict field-by-field validation against official OANDA definitions
 
 Designed to be invoked from a `poe` task. Exits non-zero on any P0-class drift
 that the user should know about (so CI can gate on it).
@@ -24,12 +25,14 @@ Exit codes:
 from __future__ import annotations
 
 import argparse
+import json
 import re
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OANDA_CACHE = REPO_ROOT / "docs_validation" / ".cache" / "oanda"
+CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "parity"
 REPORTS_DIR = REPO_ROOT / "docs_validation" / "reports"
 
 # Required cached pages — if any are missing, we must fetch.
@@ -41,6 +44,7 @@ REQUIRED_OANDA_PAGES = [
     "pricing-df.md", "pricing-ep.md",
     "trade-df.md", "trade-ep.md",
     "transaction-df.md", "transaction-ep.md",
+    "pricing-common-df.md",
     "primitives-df.md",
 ]
 
@@ -83,12 +87,6 @@ def _count_critical_findings() -> tuple[int, list[str]]:
         if path.name in {"MASTER-parity.md"}:
             continue
         content = path.read_text(encoding="utf-8")
-        # Real "missing in library" gaps (not annotated as found-elsewhere)
-        missing_models = [
-            line.strip()
-            for line in content.splitlines()
-            if line.startswith("- `") and "missing in library" in line == False  # placeholder
-        ]
         # Count "Fields in oanda but missing in library" sub-sections
         oanda_field_gaps = len(re.findall(r"\*\*Fields in oanda but missing in library:\*\*", content))
         if oanda_field_gaps:
@@ -121,7 +119,32 @@ def _count_critical_findings() -> tuple[int, list[str]]:
             # Don't fail CI on these by default — they include known false positives
             # (sync proxy, hypothetical extension examples). User can opt-in via --strict.
 
+    field_validation_json = CACHE_DIR / "field-validation.json"
+    if field_validation_json.exists():
+        payload = json.loads(field_validation_json.read_text(encoding="utf-8"))
+        summary = payload.get("summary", {})
+        p0_count = int(summary.get("P0", 0))
+        p1_count = int(summary.get("P1", 0))
+        if p0_count:
+            count += p0_count
+            findings.append(f"field-validation.md: {p0_count} P0 field-level drift items")
+        if p1_count:
+            findings.append(f"field-validation.md: {p1_count} P1 enum/primitive drift items")
+
     return count, findings
+
+
+def _run_field_validation() -> None:
+    from .field_validate import build_library_catalog, build_official_catalog, validate, write_json, write_markdown
+
+    official = build_official_catalog()
+    library = build_library_catalog()
+    issues = validate(official, library)
+    write_json(issues, CACHE_DIR / "field-validation.json")
+    write_markdown(issues, REPORTS_DIR / "field-validation.md")
+
+    summary = {severity: sum(1 for issue in issues if issue.severity == severity) for severity in ("P0", "P1", "P2", "P3")}
+    print("field validation:", ", ".join(f"{severity}={summary[severity]}" for severity in ("P0", "P1", "P2", "P3")))
 
 
 def main() -> int:
@@ -147,7 +170,7 @@ def main() -> int:
     for d in DOMAINS:
         try:
             run_domain(d, inventory=inventory)
-        except SystemExit as e:
+        except SystemExit as e:  # noqa: PERF203
             print(f"BLOCKED on {d}: {e}", file=sys.stderr)
             (REPORTS_DIR / f"BLOCKED-{d}.md").write_text(f"# Blocked: {d}\n\n{e}\n", encoding="utf-8")
 
@@ -161,6 +184,9 @@ def main() -> int:
     from .run_docs_surface import main as run_docs_surface_main
 
     run_docs_surface_main()
+
+    print("\n=== Running field validation ===")
+    _run_field_validation()
 
     # Summarize
     count, findings = _count_critical_findings()

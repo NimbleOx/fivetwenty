@@ -10,7 +10,7 @@ Usage:
 
 Pages fetched:
   - <domain>-ep/  (endpoints) for: account, instrument, order, position, pricing, trade, transaction
-  - <domain>-df/  (definitions) for the same domains, plus primitives-df
+  - <domain>-df/  (definitions) for the same domains, plus pricing-common-df and primitives-df
   - introduction/, authentication/, troubleshooting-errors/, best-practices/, development-guide/
 
 Conversion strategy:
@@ -31,16 +31,18 @@ import argparse
 import sys
 import time
 from pathlib import Path
+from typing import cast
 
 import httpx
-from bs4 import BeautifulSoup, NavigableString, Tag
+from bs4 import BeautifulSoup, Tag
+from bs4.element import NavigableString
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "oanda"
 BASE_URL = "https://developer.oanda.com/rest-live-v20"
 
 DOMAINS = ["account", "instrument", "order", "position", "pricing", "trade", "transaction"]
-EXTRA_PAGES = ["introduction", "authentication", "troubleshooting-errors", "best-practices", "development-guide", "primitives-df"]
+EXTRA_PAGES = ["introduction", "authentication", "troubleshooting-errors", "best-practices", "development-guide", "pricing-common-df", "primitives-df"]
 
 
 def _all_slugs() -> list[str]:
@@ -93,9 +95,11 @@ def _table_to_md(table: Tag) -> str:
     """Convert an HTML table to a markdown pipe table."""
     rows: list[list[str]] = []
     for tr in table.find_all("tr"):
+        tr_tag = cast("Tag", tr)
         cells = []
-        for cell in tr.find_all(["th", "td"]):
-            text = cell.get_text(" ", strip=True).replace("|", r"\|").replace("\n", " ")
+        for cell in tr_tag.find_all(["th", "td"]):
+            cell_tag = cast("Tag", cell)
+            text = cell_tag.get_text(" ", strip=True).replace("|", r"\|").replace("\n", " ")
             cells.append(text)
         if cells:
             rows.append(cells)
@@ -126,7 +130,7 @@ def fetch_page(slug: str, *, force: bool = False) -> Path:
     container = soup.find("div", id="content") or soup.find("main") or soup.body
     if container is None:
         container = soup
-    md = _walk_to_md(container)
+    md = _walk_to_md(cast("Tag", container))
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(f"# Source: {url}\n\n{md.strip()}\n", encoding="utf-8")
     return out_path

@@ -101,9 +101,9 @@ def _build_library_surface() -> dict[str, set[str]]:
             continue
         ep_tree = ast.parse(ep_path.read_text(encoding="utf-8"))
         methods: set[str] = set()
-        for node in ast.walk(ep_tree):
-            if isinstance(node, ast.ClassDef) and node.name == class_name:
-                for item in node.body:
+        for walked in ast.walk(ep_tree):
+            if isinstance(walked, ast.ClassDef) and walked.name == class_name:
+                for item in walked.body:
                     if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and not item.name.startswith("_"):
                         methods.add(item.name)
         endpoint_methods[attr_name] = methods
