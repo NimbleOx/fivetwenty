@@ -24,6 +24,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from ..base import BaseValidator
 from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
+from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, marker_skip_metadata
 
 
 class CodeExecutionValidator(BaseValidator):
@@ -81,6 +82,7 @@ class CodeExecutionValidator(BaseValidator):
         code_block_lines: list[str] = []
         code_block_start = 0
         code_block_language = ""
+        skipped_blocks: list[dict[str, Any]] = []
 
         # Create a shared namespace for code execution across all blocks in this file
         execution_namespace: dict[str, Any] = {}
@@ -107,13 +109,17 @@ class CodeExecutionValidator(BaseValidator):
 
                     # Execute the code block if it's Python
                     if code_block_language in ["python", "py", ""] and code_block_lines:
-                        block_issues = self._execute_python_code(
-                            code_block_lines,
-                            code_block_start + 1,  # +1 because code starts after ```
-                            file_info.path,
-                            execution_namespace,
-                        )
-                        issues.extend(block_issues)
+                        skip_marker = find_fragment_marker(lines, code_block_start, FragmentTarget.EXECUTION)
+                        if skip_marker is not None:
+                            skipped_blocks.append(marker_skip_metadata(skip_marker, code_block_start))
+                        else:
+                            block_issues = self._execute_python_code(
+                                code_block_lines,
+                                code_block_start + 1,  # +1 because code starts after ```
+                                file_info.path,
+                                execution_namespace,
+                            )
+                            issues.extend(block_issues)
 
                     # Reset for next block
                     code_block_lines = []
@@ -122,7 +128,7 @@ class CodeExecutionValidator(BaseValidator):
                 # Collect code block content
                 code_block_lines.append(line)
 
-        return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues)
+        return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues, metadata=fragment_metadata(skipped_blocks))
 
     def _is_placeholder_code(self, code: str) -> bool:
         """Check if code is clearly a placeholder/example that shouldn't be executed."""
@@ -497,7 +503,7 @@ class CodeExecutionValidator(BaseValidator):
             positionValue = Decimal("0.00")  # noqa: N815
             position_value = Decimal("0.00")
 
-            def __getitem__(self, key):
+            def __getitem__(self, key: str) -> Any:
                 """Support dict-like access."""
                 return getattr(self, key, None)
 

@@ -3,6 +3,7 @@
 from collections import defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 from ..models import IssueSeverity, ValidationIssue, ValidationSummary
 
@@ -52,6 +53,9 @@ class MarkdownReporter:
 
         # Validator performance analysis
         content.extend(self._generate_validator_analysis(summary, issues_by_validator))
+
+        # Explicit validation skips
+        content.extend(self._generate_fragment_marker_section(summary))
 
         # File-level analysis
         content.extend(self._generate_file_analysis(issues_by_file))
@@ -165,6 +169,170 @@ class MarkdownReporter:
 
         content.append("")
         return content
+
+    def _generate_fragment_marker_section(self, summary: ValidationSummary) -> list[str]:
+        """Generate explicit fragment-marker skip reporting."""
+        skipped_entries = self._collect_fragment_skips(summary)
+        if not skipped_entries:
+            return []
+
+        unique_blocks: dict[tuple[str, int, int, str], dict[str, Any]] = {}
+        validator_counts: dict[str, int] = defaultdict(int)
+        kind_counts: dict[str, int] = defaultdict(int)
+
+        for entry in skipped_entries:
+            validator_counts[str(entry["validator"])] += 1
+            key = (
+                str(entry["file"]),
+                int(entry["code_block_start_line"]),
+                int(entry["marker_line"]),
+                str(entry["marker"]),
+            )
+            record = unique_blocks.setdefault(
+                key,
+                {
+                    "file": entry["file"],
+                    "code_block_start_line": entry["code_block_start_line"],
+                    "marker_line": entry["marker_line"],
+                    "marker": entry["marker"],
+                    "marker_kind": entry["marker_kind"],
+                    "reason": entry["reason"],
+                    "validators": set(),
+                },
+            )
+            validators = record["validators"]
+            if isinstance(validators, set):
+                validators.add(entry["validator"])
+            kind_counts[str(entry["marker_kind"])] += 1
+
+        flagged_blocks = [record for record in unique_blocks.values() if self._fragment_marker_needs_review(str(record["reason"]))]
+
+        content = [
+            "## 🧩 Fragment Marker Usage",
+            "",
+            f"- **Unique marked code blocks:** {len(unique_blocks)}",
+            f"- **Validator skips:** {len(skipped_entries)}",
+            f"- **Audit flags:** {len(flagged_blocks)}",
+            "",
+            "### Skips by Validator",
+            "",
+            "| Validator | Skipped Blocks |",
+            "|-----------|----------------|",
+        ]
+
+        for validator, count in sorted(validator_counts.items()):
+            content.append(f"| `{validator}` | {count} |")
+
+        content.extend(["", "### Skips by Marker Kind", "", "| Marker Kind | Validator Skips |", "|-------------|-----------------|"])
+
+        for kind, count in sorted(kind_counts.items()):
+            content.append(f"| `{kind}` | {count} |")
+
+        if flagged_blocks:
+            content.extend(
+                [
+                    "",
+                    "### Audit Flags",
+                    "",
+                    "These markers use wording that may indicate validation debt rather than an intentionally incomplete or placeholder snippet.",
+                    "",
+                    "| File | Code Line | Validators | Reason |",
+                    "|------|-----------|------------|--------|",
+                ]
+            )
+            for record in sorted(flagged_blocks, key=lambda item: (str(item["file"]), int(item["code_block_start_line"]))):
+                validators = ", ".join(f"`{validator}`" for validator in sorted(record["validators"])) if isinstance(record["validators"], set) else ""
+                content.append(f"| `{record['file']}` | {record['code_block_start_line']} | {validators} | {self._escape_table_cell(self._truncate(str(record['reason']), 96))} |")
+
+        content.extend(
+            [
+                "",
+                "### Marked Blocks",
+                "",
+                "| File | Code Line | Marker Line | Validators | Marker |",
+                "|------|-----------|-------------|------------|--------|",
+            ]
+        )
+        for record in sorted(unique_blocks.values(), key=lambda item: (str(item["file"]), int(item["code_block_start_line"]))):
+            validators = ", ".join(f"`{validator}`" for validator in sorted(record["validators"])) if isinstance(record["validators"], set) else ""
+            marker = self._code_table_cell(self._truncate(str(record["marker"]), 96))
+            content.append(f"| `{record['file']}` | {record['code_block_start_line']} | {record['marker_line']} | {validators} | {marker} |")
+
+        content.append("")
+        return content
+
+    def _collect_fragment_skips(self, summary: ValidationSummary) -> list[dict[str, Any]]:
+        """Collect explicit marker skips from validation result metadata."""
+        entries: list[dict[str, Any]] = []
+        for result in summary.results:
+            skipped_blocks = result.metadata.get("skipped_blocks", [])
+            if not isinstance(skipped_blocks, list):
+                continue
+
+            for block in skipped_blocks:
+                if not isinstance(block, dict):
+                    continue
+
+                entries.append(
+                    {
+                        "validator": result.validator_name,
+                        "file": self._relative_path(result.file_path),
+                        "code_block_start_line": block.get("code_block_start_line", 0),
+                        "marker_line": block.get("marker_line", 0),
+                        "marker": block.get("marker", ""),
+                        "marker_kind": block.get("marker_kind", ""),
+                        "reason": block.get("reason", ""),
+                    }
+                )
+
+        return entries
+
+    def _fragment_marker_needs_review(self, reason: str) -> bool:
+        """Return whether a marker reason looks like validation debt."""
+        normalized = reason.lower()
+        debt_terms = (
+            "api issue",
+            "argument issue",
+            "attr-defined",
+            "attribute access",
+            "deprecated typing",
+            "f-string issue",
+            "index access",
+            "linting violation",
+            "magic number",
+            "missing import",
+            "naming violation",
+            "return type",
+            "type compatibility",
+            "type incompatibility",
+            "type mismatch",
+            "undefined",
+            "union attribute",
+            "unused",
+        )
+        return any(term in normalized for term in debt_terms)
+
+    def _relative_path(self, path: Path) -> str:
+        """Return a project-relative path when possible."""
+        try:
+            return str(path.resolve().relative_to(self.project_root.resolve()))
+        except ValueError:
+            return str(path)
+
+    def _truncate(self, value: str, max_length: int) -> str:
+        """Truncate long table values."""
+        if len(value) <= max_length:
+            return value
+        return f"{value[: max_length - 1]}…"
+
+    def _escape_table_cell(self, value: str) -> str:
+        """Escape markdown table delimiters."""
+        return value.replace("|", "\\|")
+
+    def _code_table_cell(self, value: str) -> str:
+        """Format a value as an inline-code markdown table cell."""
+        escaped = self._escape_table_cell(value).replace("`", "\\`")
+        return f"`{escaped}`"
 
     def _generate_file_analysis(self, issues_by_file: dict[str, list[ValidationIssue]]) -> list[str]:
         """Generate file-level analysis."""

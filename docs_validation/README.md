@@ -210,7 +210,6 @@ validation tooling, then regenerate the reports.
 ```text
 docs_validation/
   README.md
-  FRAGMENT_MARKING.md
   config/
     validation-complete.yml
   reports/
@@ -244,7 +243,10 @@ Key parity modules:
 ## Fragment Markers
 
 Documentation examples can opt out of specific validators with HTML comments
-placed immediately before a code block.
+placed in the three lines before a code block. Fragment markers are an escape
+hatch for intentionally incomplete snippets, placeholder configuration, or
+examples that are built up across multiple blocks. They should not be used to
+hide stale SDK usage or code that should be corrected.
 
 Example:
 
@@ -255,15 +257,49 @@ client = make_client_from_context()
 ```
 ````
 
-Common markers:
+Supported markers:
 
-- `<!-- validation: skip -->`: skip all validation for the next code block.
-- `<!-- validation: skip-linting -->`: skip linting only.
-- `<!-- validation: skip-typing -->`: skip typing only.
-- `<!-- fragment: partial example -->`: mark an intentionally incomplete
-  example.
+- `<!-- validation: skip -->` and `<!-- validation: skip-all -->`: skip all
+  code-block validators for the next block.
+- `<!-- fragment: partial example -->`, `<!-- partial: configuration snippet -->`,
+  and `<!-- example: incomplete code -->`: skip all code-block validators and
+  record the human-readable reason in the validation report.
+- `<!-- validation: skip-linting -->`, `<!-- skip-linting -->`,
+  `<!-- no-linting -->`, `<!-- skip-lint -->`, and `<!-- no-lint -->`: skip
+  Ruff linting only.
+- `<!-- validation: skip-typing -->`, `<!-- skip-typing -->`,
+  `<!-- no-typing -->`, `<!-- skip-type -->`, and `<!-- no-type -->`: skip
+  type checking only.
+- `<!-- validation: skip-syntax -->`, `<!-- skip-syntax -->`, and
+  `<!-- no-syntax -->`: skip Python syntax validation only.
+- `<!-- validation: skip-execution -->`, `<!-- skip-execution -->`, and
+  `<!-- no-execution -->`: skip execution validation only.
 
-See `docs_validation/FRAGMENT_MARKING.md` for the full marker list and rules.
+Marker matching is case-insensitive and only applies to HTML comments. Specific
+markers are not treated as broader skips, so `validation: skip-linting` does not
+also skip typing or execution.
+
+The generated `docs_validation/reports/validation-report.md` includes a
+fragment-marker usage section with skipped-block counts, the validators skipped,
+and audit flags for marker reasons that look like validation debt rather than an
+intentionally incomplete or placeholder snippet.
+
+Good uses:
+
+- Tutorial steps that rely on state introduced in surrounding prose.
+- Configuration examples with placeholder credentials.
+- Intentionally failing examples that demonstrate validation or error handling.
+- Small fragments that illustrate one pattern rather than a complete runnable
+  program.
+
+Avoid using markers for:
+
+- Stale SDK method names or response shapes.
+- Type errors caused by incorrect examples.
+- Lint violations that are easy to fix without hurting readability.
+- Complete examples that should be valid under the normal validators.
+
+When in doubt, fix the snippet instead of marking it.
 
 ## Development Workflow
 
