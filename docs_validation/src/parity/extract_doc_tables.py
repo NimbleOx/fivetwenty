@@ -26,6 +26,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .markdown_utils import parse_first_table_rows, split_sections
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ENDPOINTS_DOCS = REPO_ROOT / "docs" / "api-reference" / "endpoints"
 MODELS_DOCS = REPO_ROOT / "docs" / "api-reference" / "models"
@@ -37,45 +39,6 @@ ENDPOINT_LINE_RE = re.compile(r"^\*\*OANDA Endpoint\*\*:\s*`([A-Z]+)\s+(.+)`", r
 CODEBLOCK_ANCHOR_RE = re.compile(r"<!--\s*code-block:\s*([^\s]+)\s*-->")
 
 
-def _split_sections(content: str, level: int) -> list[tuple[str, str]]:
-    """Split markdown by header level, return [(title, body), ...]."""
-    pattern = re.compile(rf"^{'#' * level} (.+)$", re.MULTILINE)
-    matches = list(pattern.finditer(content))
-    sections: list[tuple[str, str]] = []
-    for i, m in enumerate(matches):
-        start = m.end()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
-        sections.append((m.group(1).strip(), content[start:end]))
-    return sections
-
-
-def _parse_first_table(body: str) -> list[dict[str, str]]:
-    """Find the first markdown pipe-table in body, return list of row dicts.
-
-    Assumes header row + alignment row + body rows.
-    """
-    lines = body.splitlines()
-    # Find a header row that looks like `| ... | ... |`
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith("|") and stripped.endswith("|") and i + 1 < len(lines):
-            sep = lines[i + 1].strip()
-            if sep.startswith("|") and re.match(r"^\|[\s\-:|]+\|$", sep):
-                # Found a table
-                headers = [h.strip() for h in stripped.strip("|").split("|")]
-                rows: list[dict[str, str]] = []
-                for body_line in lines[i + 2 :]:
-                    if not body_line.strip().startswith("|"):
-                        break
-                    # Mask escaped pipes so we don't split on them, then restore.
-                    masked = body_line.strip().strip("|").replace(r"\|", "\x00")
-                    cells = [c.strip().replace("\x00", "|") for c in masked.split("|")]
-                    if len(cells) == len(headers):
-                        rows.append(dict(zip(headers, cells, strict=True)))
-                return rows
-    return []
-
-
 def _strip_md_link(s: str) -> str:
     """Replace `[text](url)` with `text`."""
     return re.sub(r"\[([^\]]+)\]\([^)]+\)", r"\1", s)
@@ -83,7 +46,7 @@ def _strip_md_link(s: str) -> str:
 
 def extract_endpoint_doc(path: Path) -> dict[str, Any]:
     content = path.read_text(encoding="utf-8")
-    sections = _split_sections(content, 2)
+    sections = split_sections(content, 2)
     out: dict[str, Any] = {
         "source_file": str(path.relative_to(REPO_ROOT)),
         "methods": {},
@@ -93,8 +56,8 @@ def extract_endpoint_doc(path: Path) -> dict[str, Any]:
         if title.startswith(("post_", "get_", "put_", "delete_", "patch_", "stream_", "cancel_", "close_")) or "_" in title:
             method_name = title.strip()
             ep_match = ENDPOINT_LINE_RE.search(body)
-            param_table = _parse_first_table(body)
-            params: list[dict[str, str]] = []
+            param_table = parse_first_table_rows(body)
+            params: list[dict[str, Any]] = []
             for row in param_table:
                 pname_raw = row.get("Parameter", "").strip("`* ")
                 if pname_raw == "*" or not pname_raw:
@@ -127,9 +90,9 @@ def extract_model_doc(path: Path) -> dict[str, Any]:
         "source_file": str(path.relative_to(REPO_ROOT)),
         "models": {},
     }
-    for title, body in _split_sections(content, 3):
+    for title, body in split_sections(content, 3):
         model_name = title.strip()
-        field_table = _parse_first_table(body)
+        field_table = parse_first_table_rows(body)
         fields: list[dict[str, Any]] = []
         for row in field_table:
             fname = row.get("Field", "").strip("`* ")

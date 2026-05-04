@@ -20,17 +20,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .ast_utils import ann_to_str, value_to_str
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 ENDPOINTS_DIR = REPO_ROOT / "fivetwenty" / "endpoints"
 CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "parity"
-
-
-def _ann_to_str(node: ast.AST | None) -> str:
-    return "" if node is None else ast.unparse(node)
-
-
-def _value_to_str(node: ast.AST | None) -> str:
-    return "" if node is None else ast.unparse(node)
 
 
 def _extract_request_calls(body: list[ast.stmt]) -> list[dict[str, str]]:
@@ -49,9 +43,9 @@ def _extract_request_calls(body: list[ast.stmt]) -> list[dict[str, str]]:
                 if isinstance(node.args[0], ast.Constant):
                     verb = str(node.args[0].value)
                 else:
-                    verb = _value_to_str(node.args[0])
+                    verb = value_to_str(node.args[0])
             if len(node.args) > 1:
-                path = _value_to_str(node.args[1]).strip("\"'")
+                path = value_to_str(node.args[1]).strip("\"'")
             calls.append({"verb": verb, "path_template": path, "via": func.attr})
     return calls
 
@@ -71,11 +65,11 @@ def _extract_args(args: ast.arguments) -> dict[str, Any]:
             continue
         default_repr = None
         if i >= pos_default_offset:
-            default_repr = _value_to_str(pos_defaults[i - pos_default_offset])
+            default_repr = value_to_str(pos_defaults[i - pos_default_offset])
         out["positional"].append(
             {
                 "name": arg.arg,
-                "annotation": _ann_to_str(arg.annotation),
+                "annotation": ann_to_str(arg.annotation),
                 "default": default_repr,
             }
         )
@@ -84,8 +78,8 @@ def _extract_args(args: ast.arguments) -> dict[str, Any]:
         out["keyword_only"].append(
             {
                 "name": kw.arg,
-                "annotation": _ann_to_str(kw.annotation),
-                "default": _value_to_str(kwd) if kwd else None,
+                "annotation": ann_to_str(kw.annotation),
+                "default": value_to_str(kwd) if kwd else None,
             }
         )
 
@@ -98,7 +92,7 @@ def _extract_method(item: ast.AsyncFunctionDef | ast.FunctionDef) -> dict[str, A
         "is_async": isinstance(item, ast.AsyncFunctionDef),
         "line": item.lineno,
         "params": _extract_args(item.args),
-        "return_annotation": _ann_to_str(item.returns),
+        "return_annotation": ann_to_str(item.returns),
         "request_calls": _extract_request_calls(item.body),
         "docstring_first_line": (ast.get_docstring(item) or "").splitlines()[0] if ast.get_docstring(item) else "",
     }
@@ -125,27 +119,27 @@ def extract_module(path: Path) -> dict[str, Any]:
                 out["endpoint_classes"][node.name] = methods
             else:
                 # Capture TypedDicts (e.g. OrderResponse) for response-shape parity
-                base_strs = {_ann_to_str(b) for b in node.bases}
+                base_strs = {ann_to_str(b) for b in node.bases}
                 if "TypedDict" in base_strs:
                     fields: dict[str, Any] = {}
                     for item in node.body:
                         if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
                             fields[item.target.id] = {
-                                "annotation": _ann_to_str(item.annotation),
+                                "annotation": ann_to_str(item.annotation),
                                 "line": item.lineno,
                             }
                     out["typeddicts"][node.name] = {
                         "fields": fields,
                         "line": node.lineno,
                         "total": next(
-                            (_value_to_str(kw.value) for b in node.bases if isinstance(b, ast.Call) for kw in b.keywords if kw.arg == "total"),
+                            (value_to_str(kw.value) for b in node.bases if isinstance(b, ast.Call) for kw in b.keywords if kw.arg == "total"),
                             "True",
                         ),
                     }
         elif isinstance(node, ast.Assign):
             for target in node.targets:
                 if isinstance(target, ast.Name):
-                    out["type_aliases"][target.id] = _value_to_str(node.value)
+                    out["type_aliases"][target.id] = value_to_str(node.value)
 
     return out
 

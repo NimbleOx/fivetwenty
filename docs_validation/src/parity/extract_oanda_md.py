@@ -33,6 +33,8 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .markdown_utils import parse_first_table, split_sections
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "parity"
 
@@ -56,37 +58,6 @@ HTTP_LINE_RE = re.compile(r"^(POST|GET|PUT|DELETE|PATCH)\s+(/[^\s]+)\s+(.+?)\s*$
 ENUM_BULLET_RE = re.compile(r"^\s*-\s+([A-Z][A-Z0-9_]+)\b", re.MULTILINE)
 
 
-def _split_sections(content: str, level: int) -> list[tuple[str, str]]:
-    pattern = re.compile(rf"^{'#' * level} (.+)$", re.MULTILINE)
-    matches = list(pattern.finditer(content))
-    sections: list[tuple[str, str]] = []
-    for i, m in enumerate(matches):
-        start = m.end()
-        end = matches[i + 1].start() if i + 1 < len(matches) else len(content)
-        sections.append((m.group(1).strip(), content[start:end]))
-    return sections
-
-
-def _parse_first_table(body: str) -> tuple[list[str], list[dict[str, str]]]:
-    lines = body.splitlines()
-    for i, line in enumerate(lines):
-        stripped = line.strip()
-        if stripped.startswith("|") and stripped.endswith("|") and i + 1 < len(lines):
-            sep = lines[i + 1].strip()
-            if sep.startswith("|") and re.match(r"^\|[\s\-:|]+\|$", sep):
-                headers = [h.strip() for h in stripped.strip("|").split("|")]
-                rows: list[dict[str, str]] = []
-                for body_line in lines[i + 2 :]:
-                    if not body_line.strip().startswith("|"):
-                        break
-                    masked = body_line.strip().strip("|").replace(r"\|", "\x00")
-                    cells = [c.strip().replace("\x00", "|") for c in masked.split("|")]
-                    if len(cells) == len(headers):
-                        rows.append(dict(zip(headers, cells, strict=True)))
-                return (headers, rows)
-    return ([], [])
-
-
 def _parse_field_modifiers(spec: str) -> dict[str, Any]:
     """Parse "Type, required, default=X" into {type, required, default}."""
     parts = [p.strip() for p in spec.split(",")]
@@ -101,13 +72,33 @@ def _parse_field_modifiers(spec: str) -> dict[str, Any]:
     return {"type": type_str, "required": required, "default": default}
 
 
-def _extract_schema_blocks(content: str) -> dict[str, list[dict[str, Any]]]:
+def _line_number(content: str, index: int) -> int:
+    return content.count("\n", 0, index) + 1
+
+
+def _source_url(content: str) -> str | None:
+    first = content.splitlines()[0] if content.splitlines() else ""
+    if first.startswith("# Source: "):
+        return first.removeprefix("# Source: ").strip()
+    return None
+
+
+def _public_field(field: dict[str, Any]) -> dict[str, Any]:
+    return {
+        "name": field.get("name", ""),
+        "type": field.get("type", ""),
+        "required": bool(field.get("required")),
+        "default": field.get("default"),
+    }
+
+
+def _extract_schema_blocks_with_source(content: str) -> dict[str, dict[str, Any]]:
     """For each `TypeName is an application/json object with the following Schema:` heading,
     find the immediately-following code block and parse its fields.
 
-    Returns: {TypeName: [{name, type, required, default}, ...]}
+    Returns: {TypeName: {source_line, fields: [{name, type, required, default, source_line}, ...]}}
     """
-    out: dict[str, list[dict[str, Any]]] = {}
+    out: dict[str, dict[str, Any]] = {}
     for intro in SCHEMA_INTRO_RE.finditer(content):
         type_name = intro.group(1)
         # Find the next code fence after this intro
@@ -123,12 +114,31 @@ def _extract_schema_blocks(content: str) -> dict[str, list[dict[str, Any]]]:
         fields: list[dict[str, Any]] = []
         for fm in FIELD_RE.finditer(code):
             mod = _parse_field_modifiers(fm.group(2))
-            fields.append({"name": fm.group(1), **mod})
-        out[type_name] = fields
+            fields.append({"name": fm.group(1), **mod, "source_line": _line_number(content, intro.end() + fence_open.end() + fm.start())})
+        out[type_name] = {
+            "source_line": _line_number(content, intro.start()),
+            "fields": fields,
+        }
     # Also handle ArrayType:
     for arr in ARRAY_INTRO_RE.finditer(content):
-        out[arr.group(1)] = [{"name": "items", "type": arr.group(2), "required": True, "default": None}]
+        out[arr.group(1)] = {
+            "source_line": _line_number(content, arr.start()),
+            "fields": [
+                {
+                    "name": "items",
+                    "type": arr.group(2),
+                    "required": True,
+                    "default": None,
+                    "source_line": _line_number(content, arr.start()),
+                }
+            ],
+        }
     return out
+
+
+def _extract_schema_blocks(content: str) -> dict[str, list[dict[str, Any]]]:
+    """Extract schema blocks without source metadata."""
+    return {name: [_public_field(field) for field in body["fields"]] for name, body in _extract_schema_blocks_with_source(content).items()}
 
 
 def _extract_enums(content: str) -> dict[str, list[str]]:
@@ -222,20 +232,23 @@ def _extract_primitive_tables(content: str) -> dict[str, dict[str, str]]:
     return out
 
 
-def extract_definition(path: Path) -> dict[str, Any]:
+def extract_definition_with_source(path: Path) -> dict[str, Any]:
+    """Extract OANDA definitions with source file, URL, and line metadata."""
     content = path.read_text(encoding="utf-8")
+    rel = str(path.relative_to(REPO_ROOT))
+    url = _source_url(content)
 
     # Live OANDA path
-    schemas = _extract_schema_blocks(content)
+    schemas = _extract_schema_blocks_with_source(content)
     enums = _extract_enum_tables(content)
     primitives = _extract_primitive_tables(content)
 
     # Local snapshot fallback (### / ## sections with optional bullet lists)
     if not schemas and not enums and not primitives:
-        sections = _split_sections(content, 3) or _split_sections(content, 2)
+        sections = split_sections(content, 3) or split_sections(content, 2)
         for title, body in sections:
             name = title.strip()
-            headers, rows = _parse_first_table(body)
+            headers, rows = parse_first_table(body)
             if headers and "Field" in headers:
                 fields = [
                     {
@@ -243,30 +256,79 @@ def extract_definition(path: Path) -> dict[str, Any]:
                         "type": r.get("Type", ""),
                         "required": r.get("Required", "").lower() in {"yes", "y", "✅"},
                         "default": r.get("Default", "") or None,
+                        "source_line": None,
                     }
                     for r in rows
                 ]
-                schemas[name] = fields
+                schemas[name] = {"source_line": None, "fields": fields}
             else:
                 vals = [m.group(1) for m in ENUM_BULLET_RE.finditer(body)]
                 if vals:
                     enums[name] = vals
 
     out: dict[str, Any] = {
-        "source_file": str(path.relative_to(REPO_ROOT)),
-        "definitions": {name: {"fields": fields, "enum_values": [], "primitive": {}} for name, fields in schemas.items()},
+        "source_file": rel,
+        "source_url": url,
+        "definitions": {
+            name: {
+                "fields": [
+                    {
+                        **_public_field(field),
+                        "source_file": rel,
+                        "source_line": field.get("source_line"),
+                        "source_url": url,
+                    }
+                    for field in body["fields"]
+                ],
+                "enum_values": [],
+                "primitive": {},
+                "source_file": rel,
+                "source_line": body.get("source_line"),
+                "source_url": url,
+            }
+            for name, body in schemas.items()
+        },
     }
     for name, vals in enums.items():
         if name not in out["definitions"]:
-            out["definitions"][name] = {"fields": [], "enum_values": vals, "primitive": {}}
+            out["definitions"][name] = {
+                "fields": [],
+                "enum_values": vals,
+                "primitive": {},
+                "source_file": rel,
+                "source_line": None,
+                "source_url": url,
+            }
         else:
             out["definitions"][name]["enum_values"] = vals
     for name, prim in primitives.items():
         if name not in out["definitions"]:
-            out["definitions"][name] = {"fields": [], "enum_values": [], "primitive": prim}
+            out["definitions"][name] = {
+                "fields": [],
+                "enum_values": [],
+                "primitive": prim,
+                "source_file": rel,
+                "source_line": None,
+                "source_url": url,
+            }
         else:
             out["definitions"][name]["primitive"] = prim
     return out
+
+
+def extract_definition(path: Path) -> dict[str, Any]:
+    sourced = extract_definition_with_source(path)
+    return {
+        "source_file": sourced["source_file"],
+        "definitions": {
+            name: {
+                "fields": [_public_field(field) for field in body.get("fields", [])],
+                "enum_values": body.get("enum_values", []),
+                "primitive": body.get("primitive", {}),
+            }
+            for name, body in sourced["definitions"].items()
+        },
+    }
 
 
 def extract_endpoint(path: Path) -> dict[str, Any]:
@@ -298,7 +360,7 @@ def extract_endpoint(path: Path) -> dict[str, Any]:
         summary = m.group(3).strip()
 
         # Parse Request Parameters table
-        headers, rows = _parse_first_table(block)
+        headers, rows = parse_first_table(block)
         params: list[dict[str, Any]] = []
         if headers and ("Name" in headers or "Parameter" in headers):
             for r in rows:

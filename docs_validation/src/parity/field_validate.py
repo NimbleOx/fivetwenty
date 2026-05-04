@@ -26,7 +26,7 @@ from pathlib import Path
 from typing import Any
 
 from .extract_endpoints import extract_module as extract_endpoints_module
-from .extract_oanda_md import ARRAY_INTRO_RE, CODE_FENCE_RE, FIELD_RE, SCHEMA_INTRO_RE, _extract_enum_tables, _extract_primitive_tables, _parse_field_modifiers
+from .extract_oanda_md import extract_definition_with_source
 from .extract_pydantic import extract_module as extract_pydantic_module
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
@@ -162,17 +162,6 @@ def _snake_to_oanda(name: str) -> str:
     return "".join(out)
 
 
-def _source_url(content: str) -> str | None:
-    first = content.splitlines()[0] if content.splitlines() else ""
-    if first.startswith("# Source: "):
-        return first.removeprefix("# Source: ").strip()
-    return None
-
-
-def _line_number(content: str, index: int) -> int:
-    return content.count("\n", 0, index) + 1
-
-
 def _source_ref(path: str | None, line: int | None, url: str | None = None) -> str | None:
     if path is None:
         return None
@@ -183,90 +172,32 @@ def _source_ref(path: str | None, line: int | None, url: str | None = None) -> s
 
 
 def _extract_official_definition(path: Path) -> dict[str, OfficialDefinition]:
-    content = path.read_text(encoding="utf-8")
-    rel = str(path.relative_to(REPO_ROOT))
-    url = _source_url(content)
+    data = extract_definition_with_source(path)
     definitions: dict[str, OfficialDefinition] = {}
 
-    for intro in SCHEMA_INTRO_RE.finditer(content):
-        type_name = intro.group(1)
-        rest = content[intro.end() :]
-        fence_open = CODE_FENCE_RE.search(rest)
-        if not fence_open:
-            continue
-        after_open_start = intro.end() + fence_open.end()
-        after_open = content[after_open_start:]
-        fence_close = CODE_FENCE_RE.search(after_open)
-        if not fence_close:
-            continue
-        code = after_open[: fence_close.start()]
+    for type_name, body in data.get("definitions", {}).items():
         definition = definitions.setdefault(
             type_name,
             OfficialDefinition(
                 name=type_name,
-                source_file=rel,
-                source_line=_line_number(content, intro.start()),
-                source_url=url,
+                source_file=body.get("source_file", data["source_file"]),
+                source_line=body.get("source_line"),
+                source_url=body.get("source_url", data.get("source_url")),
             ),
         )
-        for field_match in FIELD_RE.finditer(code):
-            modifiers = _parse_field_modifiers(field_match.group(2))
-            absolute_index = after_open_start + field_match.start()
-            field_name = field_match.group(1)
+        for field_data in body.get("fields", []):
+            field_name = field_data["name"]
             definition.fields[field_name] = OfficialField(
                 name=field_name,
-                type=modifiers["type"],
-                required=bool(modifiers["required"]),
-                default=modifiers["default"],
-                source_file=rel,
-                source_line=_line_number(content, absolute_index),
-                source_url=url,
+                type=field_data.get("type", ""),
+                required=bool(field_data.get("required")),
+                default=field_data.get("default"),
+                source_file=field_data.get("source_file", definition.source_file),
+                source_line=field_data.get("source_line"),
+                source_url=field_data.get("source_url", definition.source_url),
             )
-
-    for array_match in ARRAY_INTRO_RE.finditer(content):
-        type_name = array_match.group(1)
-        definition = definitions.setdefault(
-            type_name,
-            OfficialDefinition(
-                name=type_name,
-                source_file=rel,
-                source_line=_line_number(content, array_match.start()),
-                source_url=url,
-            ),
-        )
-        definition.fields["items"] = OfficialField(
-            name="items",
-            type=array_match.group(2),
-            required=True,
-            default=None,
-            source_file=rel,
-            source_line=_line_number(content, array_match.start()),
-            source_url=url,
-        )
-
-    for enum_name, values in _extract_enum_tables(content).items():
-        definition = definitions.setdefault(
-            enum_name,
-            OfficialDefinition(
-                name=enum_name,
-                source_file=rel,
-                source_line=None,
-                source_url=url,
-            ),
-        )
-        definition.enum_values = values
-
-    for prim_name, primitive in _extract_primitive_tables(content).items():
-        definition = definitions.setdefault(
-            prim_name,
-            OfficialDefinition(
-                name=prim_name,
-                source_file=rel,
-                source_line=None,
-                source_url=url,
-            ),
-        )
-        definition.primitive = primitive
+        definition.enum_values = body.get("enum_values", [])
+        definition.primitive = body.get("primitive", {})
 
     return definitions
 
