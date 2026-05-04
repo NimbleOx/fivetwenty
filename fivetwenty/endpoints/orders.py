@@ -12,8 +12,9 @@ OANDA Order Management Patterns:
 """
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 
+from .._internal.response import ApiResponse
 from .._internal.utils import quantize_price
 from ..models import (
     AccountID,
@@ -141,7 +142,7 @@ class OrderEndpoints:
     async def post_order(
         self,
         account_id: AccountID,
-        order_request: OrderRequest,
+        order_request: OrderRequest | dict[str, Any],
         *,
         timeout: float | None = None,
         client_request_id: str | None = None,
@@ -181,7 +182,7 @@ class OrderEndpoints:
             ValueError: On invalid parameters
         """
         # Convert to dict and wrap in "order" parameter as required by OANDA API
-        order_data = order_request.model_dump(by_alias=True, exclude_none=True, mode="json")
+        order_data = order_request if isinstance(order_request, dict) else order_request.model_dump(by_alias=True, exclude_none=True, mode="json")
         body = {"order": order_data}
 
         # Add ClientRequestID header for request correlation and debugging
@@ -198,9 +199,11 @@ class OrderEndpoints:
         )
 
         data = response.json()
-        result: OrderResponse = {
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        result = ApiResponse(
+            {
+                "lastTransactionID": data["lastTransactionID"],
+            }
+        )
 
         if "orderCreateTransaction" in data:
             result["orderCreateTransaction"] = self._parse_order_transaction(data["orderCreateTransaction"])
@@ -215,7 +218,7 @@ class OrderEndpoints:
         if "relatedTransactionIDs" in data:
             result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
 
-        return result
+        return cast("OrderResponse", result)
 
     async def post_market_order(
         self,
@@ -556,10 +559,15 @@ class OrderEndpoints:
         )
         data = response.json()
 
-        return {
-            "order": self._parse_order(data["order"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "GetOrderResponse",
+            ApiResponse(
+                {
+                    "order": self._parse_order(data["order"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def cancel_order(
         self,
@@ -596,16 +604,18 @@ class OrderEndpoints:
         )
 
         data = response.json()
-        result: CancelOrderResponse = {
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        result = ApiResponse(
+            {
+                "lastTransactionID": data["lastTransactionID"],
+            }
+        )
 
         if "orderCancelTransaction" in data:
             result["orderCancelTransaction"] = OrderCancelTransaction.model_validate(data["orderCancelTransaction"])
         if "relatedTransactionIDs" in data:
             result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
 
-        return result
+        return cast("CancelOrderResponse", result)
 
     async def get_pending_orders(
         self,
@@ -633,16 +643,21 @@ class OrderEndpoints:
 
         data = response.json()
 
-        return {
-            "orders": [self._parse_order(order_data) for order_data in data.get("orders", [])],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "PendingOrdersResponse",
+            ApiResponse(
+                {
+                    "orders": [self._parse_order(order_data) for order_data in data.get("orders", [])],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def put_order(
         self,
         account_id: AccountID,
         order_specifier: str,
-        order_request: OrderRequest,
+        order_request: OrderRequest | dict[str, Any],
         *,
         client_request_id: str | None = None,
     ) -> ReplaceOrderResponse:
@@ -671,7 +686,7 @@ class OrderEndpoints:
             headers["ClientRequestID"] = client_request_id
 
         # Convert Pydantic model to dict with proper formatting
-        order_data = order_request.model_dump(by_alias=True, exclude_none=True, mode="json")
+        order_data = order_request if isinstance(order_request, dict) else order_request.model_dump(by_alias=True, exclude_none=True, mode="json")
 
         response = await self._client._request(
             "PUT",
@@ -681,9 +696,11 @@ class OrderEndpoints:
         )
 
         data = response.json()
-        result: ReplaceOrderResponse = {
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        result = ApiResponse(
+            {
+                "lastTransactionID": data["lastTransactionID"],
+            }
+        )
 
         if "orderCancelTransaction" in data:
             result["orderCancelTransaction"] = OrderCancelTransaction.model_validate(data["orderCancelTransaction"])
@@ -700,7 +717,7 @@ class OrderEndpoints:
         if "relatedTransactionIDs" in data:
             result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
 
-        return result
+        return cast("ReplaceOrderResponse", result)
 
     async def put_order_client_extensions(
         self,
@@ -745,16 +762,18 @@ class OrderEndpoints:
         )
 
         data = response.json()
-        result: OrderClientExtensionsResponse = {
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        result = ApiResponse(
+            {
+                "lastTransactionID": data["lastTransactionID"],
+            }
+        )
 
         if "orderClientExtensionsModifyTransaction" in data:
             result["orderClientExtensionsModifyTransaction"] = OrderClientExtensionsModifyTransaction.model_validate(data["orderClientExtensionsModifyTransaction"])
         if "relatedTransactionIDs" in data:
             result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
 
-        return result
+        return cast("OrderClientExtensionsResponse", result)
 
     async def _get_precision(self, account_id: AccountID, instrument: str) -> int:
         """

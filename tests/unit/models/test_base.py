@@ -3,6 +3,8 @@
 from datetime import datetime, timezone
 from decimal import Decimal
 
+import pytest
+
 from fivetwenty.models import (
     CalculatedTradeState,
     InstrumentName,
@@ -130,6 +132,52 @@ class TestApiModel:
         assert api_data["realizedPL"] == "5.00"
         assert api_data["unrealizedPL"] == "10.00"
         assert api_data["marginUsed"] == "50.00"
+
+    def test_attribute_access_resolves_aliases(self) -> None:
+        """Test ApiModel attribute compatibility for OANDA aliases."""
+        trade = Trade(
+            id="123",
+            instrument="EUR_USD",
+            price="1.1000",
+            openTime="2024-01-01T12:00:00Z",
+            state="OPEN",
+            initialUnits="1000",
+            initialMarginRequired="50.00",
+            currentUnits="1000",
+            realizedPL="5.00",
+            marginUsed="50.00",
+        )
+
+        assert trade.openTime == trade.open_time
+        assert trade.realizedPL == Decimal("5.00")
+        assert trade.marginUsed == Decimal("50.00")
+
+    def test_dict_like_access_resolves_fields_and_aliases(self) -> None:
+        """Test ApiModel dict-like access for Python names and OANDA aliases."""
+        trade = Trade(
+            id="123",
+            instrument="EUR_USD",
+            price="1.1000",
+            openTime="2024-01-01T12:00:00Z",
+            state="OPEN",
+            initialUnits="1000",
+            initialMarginRequired="50.00",
+            currentUnits="1000",
+            realizedPL="5.00",
+            marginUsed="50.00",
+        )
+
+        assert trade["open_time"] == "2024-01-01T12:00:00Z"
+        assert trade["openTime"] == "2024-01-01T12:00:00Z"
+        assert trade.get("realizedPL") == "5.00"
+        assert trade.get("realized_pl") == "5.00"
+        assert "marginUsed" in trade
+        assert "margin_used" in trade
+        assert "unrealizedPL" not in trade
+        assert trade.get("missing", "default") == "default"
+
+        with pytest.raises(KeyError):
+            trade["missing"]
 
     def test_take_profit_order_aliases(self) -> None:
         """Test TakeProfitOrderRequest camelCase aliases."""
