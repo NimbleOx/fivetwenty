@@ -1,0 +1,6 @@
+# Known OANDA parity waivers.
+#
+# Waivers are intentionally exact: `code` and `target` must match one generated
+# field-validation issue. Use this file only for reviewed drift that cannot be
+# fixed immediately. Expired or unused waivers are reported as validation issues.
+waivers: []

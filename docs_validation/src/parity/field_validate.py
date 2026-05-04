@@ -28,6 +28,7 @@ from typing import Any
 from .extract_endpoints import extract_module as extract_endpoints_module
 from .extract_oanda_md import extract_definition_with_source
 from .extract_pydantic import extract_module as extract_pydantic_module
+from .waivers import DEFAULT_WAIVERS_PATH, ParityWaiver, WaivedIssue, load_waivers, split_waived_issues
 
 REPO_ROOT = Path(__file__).resolve().parents[3]
 OANDA_CACHE = REPO_ROOT / "docs_validation" / ".cache" / "oanda"
@@ -601,21 +602,64 @@ def _validate_primitive(definition: OfficialDefinition, library: LibraryCatalog)
     ]
 
 
-def write_json(issues: list[ValidationIssue], out_path: Path) -> None:
+def _waiver_audit_issues(unused_waivers: list[ParityWaiver], expired_waivers: list[ParityWaiver]) -> list[ValidationIssue]:
+    issues: list[ValidationIssue] = []
+    for waiver in expired_waivers:
+        issues.append(
+            ValidationIssue(
+                severity="P1",
+                code="expired_waiver",
+                model=waiver.target,
+                message=f"Parity waiver `{waiver.code}` for `{waiver.target}` expired on {waiver.expires}. Remove it or re-review the drift.",
+                official=waiver.source_url,
+                expected=waiver.reason,
+            ),
+        )
+    for waiver in unused_waivers:
+        issues.append(
+            ValidationIssue(
+                severity="P3",
+                code="unused_waiver",
+                model=waiver.target,
+                message=f"Parity waiver `{waiver.code}` for `{waiver.target}` did not match any current issue. Remove stale waiver entries.",
+                official=waiver.source_url,
+                expected=waiver.reason,
+            ),
+        )
+    return issues
+
+
+def apply_waivers(issues: list[ValidationIssue], waiver_path: Path) -> tuple[list[ValidationIssue], list[WaivedIssue[ValidationIssue]]]:
+    result = split_waived_issues(issues, load_waivers(waiver_path))
+    active_issues = [*result.active_issues, *_waiver_audit_issues(result.unused_waivers, result.expired_waivers)]
+    return sorted(active_issues, key=lambda issue: (SEVERITY_ORDER[issue.severity], issue.model or "", issue.field or "", issue.code)), result.waived_issues
+
+
+def write_json(issues: list[ValidationIssue], out_path: Path, waived_issues: list[WaivedIssue[ValidationIssue]] | None = None) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
     payload = {
         "summary": _summary(issues),
         "issues": [asdict(issue) for issue in issues],
+        "waived_issues": [
+            {
+                "issue": asdict(waived.issue),
+                "waiver": asdict(waived.waiver),
+            }
+            for waived in (waived_issues or [])
+        ],
     }
     out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
 
 
-def write_markdown(issues: list[ValidationIssue], out_path: Path) -> None:
+def write_markdown(issues: list[ValidationIssue], out_path: Path, waived_issues: list[WaivedIssue[ValidationIssue]] | None = None) -> None:
     out_path.parent.mkdir(parents=True, exist_ok=True)
+    waived_issues = waived_issues or []
     lines = [
         "# Field Validation Report",
         "",
         "Source of truth: official OANDA REST v20 documentation under `https://developer.oanda.com/rest-live-v20/`.",
+        "",
+        "Waivers are loaded from `docs_validation/config/parity-waivers.yml`. Active waivers are reported separately and are excluded from the severity summary.",
         "",
         "## Summary",
         "",
@@ -626,8 +670,10 @@ def write_markdown(issues: list[ValidationIssue], out_path: Path) -> None:
     for severity in ("P0", "P1", "P2", "P3"):
         lines.append(f"| {severity} | {summary.get(severity, 0)} |")
     lines.append("")
+    if waived_issues:
+        lines.extend(["| Waived | Count |", "|---|---:|", f"| active | {len(waived_issues)} |", ""])
 
-    if not issues:
+    if not issues and not waived_issues:
         lines.extend(["No field-level drift detected.", ""])
         out_path.write_text("\n".join(lines), encoding="utf-8")
         return
@@ -648,6 +694,20 @@ def write_markdown(issues: list[ValidationIssue], out_path: Path) -> None:
                 lines.append(f"  - official: `{issue.official}`")
             if issue.library:
                 lines.append(f"  - library: `{issue.library}`")
+        lines.append("")
+
+    if waived_issues:
+        lines.extend(["## Waived", ""])
+        for waived in waived_issues:
+            issue = waived.issue
+            waiver = waived.waiver
+            label = issue.model or "global"
+            if issue.field:
+                label = f"{label}.{issue.field}"
+            lines.append(f"- `{issue.code}` `{label}`: {issue.message}")
+            lines.append(f"  - waiver reason: {waiver.reason}")
+            lines.append(f"  - waiver source: `{waiver.source_url}`")
+            lines.append(f"  - waiver expires: `{waiver.expires}`")
         lines.append("")
 
     out_path.write_text("\n".join(lines), encoding="utf-8")
@@ -691,6 +751,7 @@ def main() -> int:
     parser.add_argument("--refresh", action="store_true", help="Re-fetch official OANDA pages before validating.")
     parser.add_argument("--out-json", default=str(CACHE_DIR / "field-validation.json"))
     parser.add_argument("--out-md", default=str(REPORTS_DIR / "field-validation.md"))
+    parser.add_argument("--waivers", default=str(DEFAULT_WAIVERS_PATH), help="YAML file containing reviewed parity waivers.")
     parser.add_argument("--fail-on", choices=("P0", "P1", "P2", "P3", "none"), default="none", help="Exit 1 if any issue at or above this severity exists.")
     args = parser.parse_args()
 
@@ -708,14 +769,17 @@ def main() -> int:
     official = build_official_catalog()
     library = build_library_catalog()
     issues = validate(official, library)
+    issues, waived_issues = apply_waivers(issues, Path(args.waivers))
 
-    write_json(issues, Path(args.out_json))
-    write_markdown(issues, Path(args.out_md))
+    write_json(issues, Path(args.out_json), waived_issues)
+    write_markdown(issues, Path(args.out_md), waived_issues)
 
     summary = _summary(issues)
     print(f"wrote {Path(args.out_json).relative_to(REPO_ROOT)}")
     print(f"wrote {Path(args.out_md).relative_to(REPO_ROOT)}")
     print("field validation:", ", ".join(f"{severity}={summary[severity]}" for severity in ("P0", "P1", "P2", "P3")))
+    if waived_issues:
+        print(f"field validation: waived={len(waived_issues)}")
 
     return 1 if _should_fail(issues, args.fail_on) else 0
 

@@ -117,16 +117,20 @@ def _count_critical_findings() -> tuple[int, list[str]]:
 
 
 def _run_field_validation() -> None:
-    from .field_validate import build_library_catalog, build_official_catalog, validate, write_json, write_markdown
+    from .field_validate import apply_waivers, build_library_catalog, build_official_catalog, validate, write_json, write_markdown
+    from .waivers import DEFAULT_WAIVERS_PATH
 
     official = build_official_catalog()
     library = build_library_catalog()
     issues = validate(official, library)
-    write_json(issues, CACHE_DIR / "field-validation.json")
-    write_markdown(issues, REPORTS_DIR / "field-validation.md")
+    issues, waived_issues = apply_waivers(issues, DEFAULT_WAIVERS_PATH)
+    write_json(issues, CACHE_DIR / "field-validation.json", waived_issues)
+    write_markdown(issues, REPORTS_DIR / "field-validation.md", waived_issues)
 
     summary = {severity: sum(1 for issue in issues if issue.severity == severity) for severity in ("P0", "P1", "P2", "P3")}
     print("field validation:", ", ".join(f"{severity}={summary[severity]}" for severity in ("P0", "P1", "P2", "P3")))
+    if waived_issues:
+        print(f"field validation: waived={len(waived_issues)}")
 
 
 def main() -> int:

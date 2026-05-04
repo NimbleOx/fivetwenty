@@ -170,6 +170,18 @@ Severity levels:
 - `P2`: type, requiredness, or default drift that needs review.
 - `P3`: SDK extras or lower-risk drift.
 
+Known parity drift can be waived in:
+
+```text
+docs_validation/config/parity-waivers.yml
+```
+
+Each waiver must name the generated issue code, exact target, reason, source
+URL, expiry date, and optional severity. Active waivers are excluded from the
+field-validation severity summary but are shown in the report. Expired waivers
+do not suppress drift, and unused waivers are reported so stale exceptions get
+cleaned up.
+
 ## Reports and Cache
 
 Generated files are intentionally kept out of git:
@@ -282,7 +294,8 @@ also skip typing or execution.
 The generated `docs_validation/reports/validation-report.md` includes a
 fragment-marker usage section with skipped-block counts, the validators skipped,
 and audit flags for marker reasons that look like validation debt rather than an
-intentionally incomplete or placeholder snippet.
+intentionally incomplete or placeholder snippet. `docs-validate-files` fails
+when those audit flags are present.
 
 Good uses:
 
