@@ -447,9 +447,14 @@ async def main() -> None:
         # close_position closes ALL trades for an instrument at once
         # More efficient than closing trades one by one
         # This is what most traders use for "flatten everything"
-        close_position_response = await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
+        close_position_response = await client.positions.close_position(
+            account_id=client.account_id,
+            instrument=InstrumentName.EUR_USD,
+            long_units="ALL",
+            short_units="ALL",
+        )
 
-        if close_position_response.get("longOrderFillTransaction"):
+        if close_position_response.get("longOrderFillTransaction") or close_position_response.get("shortOrderFillTransaction"):
             print("✅ All trades closed")
             print("   (Position is now flat - 0 units)")
 
