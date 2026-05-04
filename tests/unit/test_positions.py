@@ -152,32 +152,43 @@ class TestPositionEndpoints:
     @pytest.mark.asyncio
     async def test_list_all_positions(self, positions, mock_client):
         """Test listing all positions for an account."""
-        await positions.get_positions("101-001-123456-001")
+        result = await positions.get_positions("101-001-123456-001")
         mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/positions")
+        assert result["positions"][0].instrument == InstrumentName.EUR_USD
+        assert result["positions"][0].long.units == 1000
+        assert result["lastTransactionID"] == "12346"
 
     @pytest.mark.asyncio
     async def test_list_open_positions(self, positions, mock_client):
         """Test listing only open positions."""
-        await positions.get_open_positions("101-001-123456-001")
+        result = await positions.get_open_positions("101-001-123456-001")
         mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/openPositions")
+        assert result["positions"][0].instrument == InstrumentName.EUR_USD
+        assert result["positions"][0].long.trade_ids == ["12345"]
 
     @pytest.mark.asyncio
     async def test_get_position_for_instrument(self, positions, mock_client):
         """Test getting position for specific instrument."""
-        await positions.get_position("101-001-123456-001", "EUR_USD")
+        result = await positions.get_position("101-001-123456-001", "EUR_USD")
         mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/positions/EUR_USD")
+        assert result["position"].instrument == InstrumentName.EUR_USD
+        assert result["position"].pl == 100
 
     @pytest.mark.asyncio
     async def test_get_position_with_instrument_name_enum(self, positions, mock_client):
         """Test getting position using InstrumentName enum."""
-        await positions.get_position("101-001-123456-001", InstrumentName.EUR_USD)
+        result = await positions.get_position("101-001-123456-001", InstrumentName.EUR_USD)
         mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/positions/EUR_USD")
+        assert result["position"].instrument == InstrumentName.EUR_USD
 
     @pytest.mark.asyncio
     async def test_close_position_all_long(self, positions, mock_client):
         """Test closing entire long position."""
-        await positions.close_position("101-001-123456-001", "EUR_USD", long_units="ALL")
+        result = await positions.close_position("101-001-123456-001", "EUR_USD", long_units="ALL")
         mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/positions/EUR_USD/close", json_data={"longUnits": "ALL"})
+        assert result["longOrderCreateTransaction"].instrument == InstrumentName.EUR_USD
+        assert result["longOrderFillTransaction"].order_id == "12346"
+        assert result["lastTransactionID"] == "12347"
 
     @pytest.mark.asyncio
     async def test_close_position_all_short(self, positions, mock_client):
