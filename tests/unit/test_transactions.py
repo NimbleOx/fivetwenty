@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from fivetwenty.endpoints.transactions import TransactionEndpoints
+from fivetwenty.models import TransactionFilter
 
 
 class TestTransactionEndpoints:
@@ -208,7 +209,7 @@ class TestTransactionEndpoints:
     @pytest.mark.asyncio
     async def test_get_since_id_with_type_filter(self, transactions, mock_client):
         """Test getting transactions since ID with type filtering."""
-        transaction_types = ["ORDER_FILL", "TRANSFER_FUNDS"]
+        transaction_types = [TransactionFilter.ORDER_FILL, TransactionFilter.TRANSFER_FUNDS]
 
         await transactions.get_transactions_since_id("101-001-123456-001", "2000", transaction_type=transaction_types)
 

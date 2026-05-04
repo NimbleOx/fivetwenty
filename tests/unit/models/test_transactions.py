@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 from fivetwenty.models import (
+    AcceptDatetimeFormat,
     FundingReason,
     InstrumentName,
     MarketOrderTransaction,
@@ -13,6 +14,7 @@ from fivetwenty.models import (
     Transaction,
     TransactionFilter,
     TransactionIDRange,
+    TransactionQueryFilter,
     TransactionRejectReason,
     TransactionType,
 )
@@ -40,6 +42,18 @@ class TestPhase4TransactionModels:
         # Financial Operations
         assert TransactionType.DAILY_FINANCING == "DAILY_FINANCING"
         assert TransactionType.DIVIDEND_ADJUSTMENT == "DIVIDEND_ADJUSTMENT"
+
+    def test_accept_datetime_format_enum(self) -> None:
+        """Test AcceptDatetimeFormat enum values."""
+        assert AcceptDatetimeFormat.UNIX == "UNIX"
+        assert AcceptDatetimeFormat.RFC3339 == "RFC3339"
+
+    def test_transaction_filter_enum(self) -> None:
+        """Test official TransactionFilter enum values."""
+        assert TransactionFilter.ORDER == "ORDER"
+        assert TransactionFilter.FUNDING == "FUNDING"
+        assert TransactionFilter.ORDER_FILL == "ORDER_FILL"
+        assert TransactionFilter.ONE_CANCELS_ALL_ORDER == "ONE_CANCELS_ALL_ORDER"
 
     def test_transaction_reject_reason_enum(self) -> None:
         """Test TransactionRejectReason enum values."""
@@ -230,8 +244,8 @@ class TestPhase4TransactionModels:
         assert market_back_to_api["clientExtensions"]["id"] == "client-123"
         assert market_back_to_api["takeProfitOnFill"]["price"] == "1.2600"
 
-    def test_transaction_filter(self) -> None:
-        """Test TransactionFilter model."""
+    def test_transaction_query_filter(self) -> None:
+        """Test TransactionQueryFilter model."""
         filter_data = {
             "from": "12340",
             "to": "12350",
@@ -239,14 +253,14 @@ class TestPhase4TransactionModels:
             "type": ["ORDER_FILL", "ORDER_CANCEL"],
         }
 
-        filter_obj = TransactionFilter(**filter_data)
+        filter_obj = TransactionQueryFilter(**filter_data)
         assert filter_obj.from_ == "12340"
         assert filter_obj.to == "12350"
         assert filter_obj.page_size == 100
         assert filter_obj.type_filter == [TransactionType.ORDER_FILL, TransactionType.ORDER_CANCEL]
 
-    def test_transaction_filter_aliases(self) -> None:
-        """Test TransactionFilter camelCase aliases."""
+    def test_transaction_query_filter_aliases(self) -> None:
+        """Test TransactionQueryFilter camelCase aliases."""
         api_data = {
             "from": "12340",
             "to": "12350",
@@ -254,7 +268,7 @@ class TestPhase4TransactionModels:
             "type": ["MARKET_ORDER", "LIMIT_ORDER"],
         }
 
-        filter_obj = TransactionFilter(**api_data)
+        filter_obj = TransactionQueryFilter(**api_data)
         filter_back_to_api = filter_obj.model_dump(by_alias=True, exclude_none=True)
         assert filter_back_to_api["from"] == "12340"
         assert filter_back_to_api["pageSize"] == 100

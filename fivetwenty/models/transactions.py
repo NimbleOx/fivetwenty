@@ -707,7 +707,7 @@ class DelayedTradeCloseTransaction(Transaction):
     source_transaction_id: str = Field(alias="sourceTransactionID")
 
 
-class TransactionFilter(ApiModel):
+class TransactionQueryFilter(ApiModel):
     """Filter for transaction queries."""
 
     from_: str | None = Field(None, alias="from")
@@ -775,9 +775,9 @@ __all__ = [
     "TrailingStopLossOrderRejectTransaction",
     "TrailingStopLossOrderTransaction",
     "Transaction",
-    "TransactionFilter",
     "TransactionHeartbeat",
     "TransactionIDRange",
+    "TransactionQueryFilter",
     "TransferFundsRejectTransaction",
     "TransferFundsTransaction",
 ]

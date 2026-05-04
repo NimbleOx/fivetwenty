@@ -8,7 +8,7 @@ from typing import TYPE_CHECKING, TypedDict, cast
 from typing_extensions import Required
 
 from .._internal.response import ApiResponse
-from ..models import AccountID, Candlestick, CandlestickGranularity, ClientPrice, HomeConversions, InstrumentName, PricingHeartbeat
+from ..models import AccountID, Candlestick, CandlestickGranularity, ClientPrice, HomeConversions, InstrumentName, PricingComponent, PricingHeartbeat
 from ..models.streaming import StreamingConfiguration, StreamState
 
 if TYPE_CHECKING:
@@ -163,7 +163,7 @@ class PricingEndpoints:
         account_id: AccountID,
         instrument: str,
         *,
-        price: str = "M",
+        price: PricingComponent = "M",
         granularity: str = "S5",
         count: int | None = None,
         from_time: datetime | None = None,
