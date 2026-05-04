@@ -205,7 +205,7 @@ class MarkdownReporter:
                 validators.add(entry["validator"])
             kind_counts[str(entry["marker_kind"])] += 1
 
-        flagged_blocks = [record for record in unique_blocks.values() if self._fragment_marker_needs_review(str(record["reason"]))]
+        flagged_blocks = self.fragment_audit_flags(summary)
 
         content = [
             "## 🧩 Fragment Marker Usage",
@@ -286,6 +286,34 @@ class MarkdownReporter:
                 )
 
         return entries
+
+    def fragment_audit_flags(self, summary: ValidationSummary) -> list[dict[str, Any]]:
+        """Return unique fragment markers that look like validation debt."""
+        unique_blocks: dict[tuple[str, int, int, str], dict[str, Any]] = {}
+        for entry in self._collect_fragment_skips(summary):
+            key = (
+                str(entry["file"]),
+                int(entry["code_block_start_line"]),
+                int(entry["marker_line"]),
+                str(entry["marker"]),
+            )
+            record = unique_blocks.setdefault(
+                key,
+                {
+                    "file": entry["file"],
+                    "code_block_start_line": entry["code_block_start_line"],
+                    "marker_line": entry["marker_line"],
+                    "marker": entry["marker"],
+                    "marker_kind": entry["marker_kind"],
+                    "reason": entry["reason"],
+                    "validators": set(),
+                },
+            )
+            validators = record["validators"]
+            if isinstance(validators, set):
+                validators.add(entry["validator"])
+
+        return [record for record in unique_blocks.values() if self._fragment_marker_needs_review(str(record["reason"]))]
 
     def _fragment_marker_needs_review(self, reason: str) -> bool:
         """Return whether a marker reason looks like validation debt."""

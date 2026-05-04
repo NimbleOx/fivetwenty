@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from docs_validation.src import cli as cli_module
 from docs_validation.src.models import FileInfo, ValidationResult, ValidationSummary
 from docs_validation.src.reporters.markdown_reporter import MarkdownReporter
 from docs_validation.src.validators.code_execution import CodeExecutionValidator
@@ -144,3 +145,59 @@ def test_fragment_reporter_outputs_audit_flag_section(tmp_path: Path) -> None:
     assert "- **Validator skips:** 1" in report
     assert "- **Audit flags:** 1" in report
     assert "response indexing issues" in report
+
+
+def test_fragment_reporter_exposes_audit_flags() -> None:
+    reporter = MarkdownReporter(project_root=Path.cwd())
+    summary = ValidationSummary(
+        total_files=1,
+        total_validators=1,
+        passed_files=1,
+        failed_files=0,
+        total_issues=0,
+        error_count=0,
+        warning_count=0,
+        duration_ms=1.0,
+        results=[
+            ValidationResult(
+                validator_name="code_linting",
+                file_path=Path("docs/example.md"),
+                passed=True,
+                metadata={
+                    "skipped_blocks": [
+                        {
+                            "code_block_start_line": 10,
+                            "marker_line": 9,
+                            "marker": "<!-- fragment: undefined imports -->",
+                            "marker_kind": "all",
+                            "reason": "undefined imports",
+                        }
+                    ]
+                },
+            )
+        ],
+        validator_summaries=[],
+    )
+
+    flags = reporter.fragment_audit_flags(summary)
+
+    assert len(flags) == 1
+    assert flags[0]["reason"] == "undefined imports"
+
+
+def test_cli_display_results_fails_on_fragment_audit_flags(monkeypatch) -> None:
+    summary = ValidationSummary(
+        total_files=1,
+        total_validators=1,
+        passed_files=1,
+        failed_files=0,
+        total_issues=0,
+        error_count=0,
+        warning_count=0,
+        duration_ms=1.0,
+        results=[],
+        validator_summaries=[],
+    )
+    monkeypatch.setattr(cli_module, "_generate_markdown_report", lambda summary: [{"reason": "undefined imports"}])
+
+    assert cli_module._display_results(summary) == 1
