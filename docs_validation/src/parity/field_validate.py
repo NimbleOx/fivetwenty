@@ -475,6 +475,10 @@ def _validate_fields(definition: OfficialDefinition, lib_type: LibraryType, libr
 
     for extra_name in sorted(library_field_names - official_field_names):
         extra_field = lib_fields[extra_name]
+        if definition.name == "Transaction" and extra_name == "type":
+            # The official base Transaction omits `type`, but every concrete
+            # transaction includes a documented discriminator default.
+            continue
         if extra_field.inherited_from and extra_name in {"id", "time", "userID", "accountID", "batchID", "requestID", "type"}:
             continue
         issues.append(
@@ -509,20 +513,9 @@ def _validate_requiredness(definition: OfficialDefinition, official_field: Offic
                 library=_source_ref(library_field.source_file, library_field.source_line),
             ),
         )
-    elif not official_field.required and not library_field.optional:
-        issues.append(
-            ValidationIssue(
-                severity="P2",
-                code="requiredness_drift",
-                model=definition.name,
-                field=official_field.name,
-                expected="optional",
-                actual="required",
-                message=f"`{definition.name}.{official_field.name}` is optional/conditional in OANDA docs but required in the SDK.",
-                official=_source_ref(official_field.source_file, official_field.source_line, official_field.source_url),
-                library=_source_ref(library_field.source_file, library_field.source_line),
-            ),
-        )
+    # Most OANDA definition fields omit an explicit requiredness marker, even
+    # for stable response fields. Treat absence of `required` as unknown rather
+    # than optional so the report does not manufacture optionality drift.
     return issues
 
 
