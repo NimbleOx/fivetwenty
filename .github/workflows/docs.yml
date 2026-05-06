@@ -1,11 +1,14 @@
 name: Documentation
 
 on:
+  workflow_dispatch:
   push:
     branches: [main]
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - 'docs-tooling/validation/**'
       - '.github/workflows/docs.yml'
   pull_request:
@@ -13,6 +16,8 @@ on:
     paths:
       - 'docs/**'
       - 'mkdocs.yml'
+      - 'pyproject.toml'
+      - 'uv.lock'
       - 'docs-tooling/validation/**'
       - '.github/workflows/docs.yml'
 
@@ -72,7 +77,9 @@ jobs:
     name: Deploy to GitHub Pages
     needs: validate
     runs-on: ubuntu-latest
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+    env:
+      PAGES_ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
 
     environment:
       name: github-pages
@@ -122,8 +129,11 @@ jobs:
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v5
         with:
+          name: ${{ env.PAGES_ARTIFACT_NAME }}
           path: ./site
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
+        with:
+          artifact_name: ${{ env.PAGES_ARTIFACT_NAME }}
