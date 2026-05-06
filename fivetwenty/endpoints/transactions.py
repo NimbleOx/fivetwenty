@@ -169,8 +169,8 @@ class TransactionEndpoints:
             FiveTwentyError: On API errors
             ValueError: If page_size exceeds limits
         """
-        if page_size > 1000:
-            raise ValueError("Page size cannot exceed 1000")
+        if not 1 <= page_size <= 1000:
+            raise ValueError("Page size must be between 1 and 1000")
 
         params: dict[str, str] = {"pageSize": str(page_size)}
 

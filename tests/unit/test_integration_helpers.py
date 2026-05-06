@@ -1,7 +1,9 @@
 """Tests for live integration safety helpers."""
 
+from decimal import Decimal
+
 from tests.integration.conftest import CLIENT_REQUEST_ID_PREFIX, _client_request_id_factory
-from tests.integration.helpers import cleanup_error_message, is_tolerated_cleanup_error
+from tests.integration.helpers import cleanup_error_message, is_tolerated_cleanup_error, mid_price_from_pricing_response
 
 
 class _MissingResourceError(Exception):
@@ -26,3 +28,16 @@ def test_cleanup_error_classification_and_message() -> None:
 
     assert is_tolerated_cleanup_error(exc)
     assert cleanup_error_message("order", "123", exc) == "order 123: _MissingResourceError: missing"
+
+
+def test_mid_price_from_pricing_response_supports_oanda_bucket_shape() -> None:
+    pricing_response = {
+        "prices": [
+            {
+                "bids": [{"price": "1.2000"}],
+                "asks": [{"price": "1.2004"}],
+            }
+        ]
+    }
+
+    assert mid_price_from_pricing_response(pricing_response, Decimal("1.1000")) == Decimal("1.2002")

@@ -183,9 +183,12 @@ class TestTransactionEndpoints:
         )
 
     @pytest.mark.asyncio
-    async def test_list_page_size_too_large_raises_error(self, transactions, mock_client):
-        """Test that page_size > 1000 raises ValueError."""
-        with pytest.raises(ValueError, match="Page size cannot exceed 1000"):
+    async def test_list_page_size_out_of_range_raises_error(self, transactions, mock_client):
+        """Test that page_size outside OANDA's documented range raises ValueError."""
+        with pytest.raises(ValueError, match="Page size must be between 1 and 1000"):
+            await transactions.get_transactions("101-001-123456-001", page_size=0)
+
+        with pytest.raises(ValueError, match="Page size must be between 1 and 1000"):
             await transactions.get_transactions("101-001-123456-001", page_size=1001)
 
     @pytest.mark.asyncio

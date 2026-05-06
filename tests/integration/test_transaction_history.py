@@ -949,8 +949,9 @@ class TestTransactionHistory:
                 except Exception as since_error:
                     print(f"  ✓ Since ID functionality error: {type(since_error).__name__}")
 
-                # Test with invalid transaction IDs
-                invalid_since_ids = ["0", "999999999", "abc", ""]
+                # OANDA accepts future numeric IDs and returns an empty result
+                # set, so invalid coverage is limited to malformed IDs.
+                invalid_since_ids = ["0", "abc", ""]
                 for invalid_id in invalid_since_ids:
                     try:
                         await sandbox_client.transactions.get_transactions_since_id(account_id=test_account_id, transaction_id=invalid_id)

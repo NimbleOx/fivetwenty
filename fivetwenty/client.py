@@ -315,6 +315,21 @@ class AsyncClient:
                     continue
                 self._log("error", "Request timeout", extra={"attempts": attempt + 1})
                 raise
+            except httpx.TransportError:
+                if allow_retry and attempt < max_tries - 1:
+                    delay = backoff_with_jitter(attempt)
+                    self._log(
+                        "warning",
+                        f"Transport error, retrying after {delay:.2f}s",
+                        extra={
+                            "attempt": attempt + 1,
+                            "delay": delay,
+                        },
+                    )
+                    await asyncio.sleep(delay)
+                    continue
+                self._log("error", "Request transport error", extra={"attempts": attempt + 1})
+                raise
 
         # This should never be reached, but satisfies mypy
         raise RuntimeError("Request retries exhausted")

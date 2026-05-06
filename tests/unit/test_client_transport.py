@@ -60,6 +60,25 @@ async def test_get_request_retries_retryable_status_codes() -> None:
 
 
 @pytest.mark.asyncio
+async def test_get_request_retries_transient_transport_errors() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if len(requests) == 1:
+            raise httpx.ConnectError("temporary connection failure", request=request)
+        return httpx.Response(200, json={"ok": True})
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client, max_retries=2) as client:
+        response = await client._request("GET", "/v3/accounts/acct-1")
+
+    assert response.json() == {"ok": True}
+    assert len(requests) == 2
+
+
+@pytest.mark.asyncio
 async def test_write_requests_do_not_retry_retryable_status_codes() -> None:
     requests: list[httpx.Request] = []
 
@@ -103,3 +122,20 @@ async def test_request_maps_json_error_payload_to_fivetwenty_error() -> None:
     assert error.message == "Invalid authorization token"
     assert error.request_id == "req-123"
     assert error.is_authentication_error
+
+
+@pytest.mark.asyncio
+async def test_write_requests_do_not_retry_transport_errors() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        raise httpx.ConnectError("temporary connection failure", request=request)
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client, max_retries=3) as client:
+        with pytest.raises(httpx.ConnectError):
+            await client._request("POST", "/v3/accounts/acct-1/orders", json_data={"order": {"type": "MARKET"}})
+
+    assert len(requests) == 1
