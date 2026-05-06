@@ -4,8 +4,9 @@ from __future__ import annotations
 
 import builtins  # noqa: TC003
 import json
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 
+from .._internal.response import ApiResponse
 from ..models import (
     ClientConfigureRejectTransaction,
     ClientConfigureTransaction,
@@ -41,6 +42,7 @@ from ..models import (
     TradeClientExtensionsModifyTransaction,
     TrailingStopLossOrderRejectTransaction,
     TrailingStopLossOrderTransaction,
+    TransactionFilter,
     TransactionHeartbeat,
     TransferFundsRejectTransaction,
     TransferFundsTransaction,
@@ -98,6 +100,10 @@ TransactionUnion = (
 )
 
 
+def _format_transaction_filters(transaction_type: builtins.list[TransactionFilter | str]) -> str:
+    return ",".join(item.value if isinstance(item, TransactionFilter) else item for item in transaction_type)
+
+
 class TransactionsResponse(TypedDict, total=False):
     """Response from get_transactions endpoint."""
 
@@ -144,7 +150,7 @@ class TransactionEndpoints:
         from_time: datetime | None = None,
         to_time: datetime | None = None,
         page_size: int = 100,
-        transaction_type: builtins.list[str] | None = None,
+        transaction_type: builtins.list[TransactionFilter | str] | None = None,
     ) -> TransactionsResponse:
         """
         List transactions for an account within a time range.
@@ -163,8 +169,8 @@ class TransactionEndpoints:
             FiveTwentyError: On API errors
             ValueError: If page_size exceeds limits
         """
-        if page_size > 1000:
-            raise ValueError("Page size cannot exceed 1000")
+        if not 1 <= page_size <= 1000:
+            raise ValueError("Page size must be between 1 and 1000")
 
         params: dict[str, str] = {"pageSize": str(page_size)}
 
@@ -173,7 +179,7 @@ class TransactionEndpoints:
         if to_time:
             params["to"] = to_time.isoformat()
         if transaction_type:
-            params["type"] = ",".join(transaction_type)
+            params["type"] = _format_transaction_filters(transaction_type)
 
         response = await self._client._request(
             "GET",
@@ -181,7 +187,7 @@ class TransactionEndpoints:
             params=params,
         )
 
-        return response.json()  # type: ignore[no-any-return]
+        return cast("TransactionsResponse", ApiResponse(response.json()))
 
     async def get_transaction(
         self,
@@ -207,17 +213,22 @@ class TransactionEndpoints:
         )
 
         data = response.json()
-        return {
-            "transaction": self._parse_transaction(data["transaction"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TransactionResponse",
+            ApiResponse(
+                {
+                    "transaction": self._parse_transaction(data["transaction"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_transactions_since_id(
         self,
         account_id: AccountID,
         transaction_id: str,
         *,
-        transaction_type: builtins.list[str] | None = None,
+        transaction_type: builtins.list[TransactionFilter | str] | None = None,
     ) -> TransactionsSinceIdResponse:
         """
         Get transactions that occurred after a specific transaction ID.
@@ -239,7 +250,7 @@ class TransactionEndpoints:
         params = {"id": transaction_id}
 
         if transaction_type:
-            params["type"] = ",".join(transaction_type)
+            params["type"] = _format_transaction_filters(transaction_type)
 
         response = await self._client._request(
             "GET",
@@ -248,10 +259,15 @@ class TransactionEndpoints:
         )
 
         data = response.json()
-        return {
-            "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TransactionsSinceIdResponse",
+            ApiResponse(
+                {
+                    "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_transactions_stream(
         self,
@@ -308,7 +324,7 @@ class TransactionEndpoints:
         from_transaction_id: str,
         to_transaction_id: str,
         *,
-        transaction_type: builtins.list[str] | None = None,
+        transaction_type: builtins.list[TransactionFilter | str] | None = None,
     ) -> TransactionsRangeResponse:
         """
         Get transactions within a specific ID range.
@@ -346,7 +362,7 @@ class TransactionEndpoints:
         }
 
         if transaction_type:
-            params["type"] = ",".join(transaction_type)
+            params["type"] = _format_transaction_filters(transaction_type)
 
         response = await self._client._request(
             "GET",
@@ -355,17 +371,22 @@ class TransactionEndpoints:
         )
 
         data = response.json()
-        return {
-            "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TransactionsRangeResponse",
+            ApiResponse(
+                {
+                    "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_recent_transactions(
         self,
         account_id: AccountID,
         *,
         count: int = 50,
-        transaction_type: builtins.list[str] | None = None,
+        transaction_type: builtins.list[TransactionFilter | str] | None = None,
     ) -> TransactionsRangeResponse:
         """
         Get the most recent transactions for an account.
@@ -391,7 +412,7 @@ class TransactionEndpoints:
         params: dict[str, str] = {"count": str(count)}
 
         if transaction_type:
-            params["type"] = ",".join(transaction_type)
+            params["type"] = _format_transaction_filters(transaction_type)
 
         response = await self._client._request(
             "GET",
@@ -400,10 +421,15 @@ class TransactionEndpoints:
         )
 
         data = response.json()
-        return {
-            "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TransactionsRangeResponse",
+            ApiResponse(
+                {
+                    "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     def _parse_transaction(self, transaction_data: dict[str, Any]) -> TransactionUnion:  # noqa: PLR0911
         """

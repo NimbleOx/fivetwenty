@@ -3,6 +3,7 @@
 from decimal import Decimal
 
 from fivetwenty.models import (
+    AcceptDatetimeFormat,
     FundingReason,
     InstrumentName,
     MarketOrderTransaction,
@@ -13,6 +14,7 @@ from fivetwenty.models import (
     Transaction,
     TransactionFilter,
     TransactionIDRange,
+    TransactionQueryFilter,
     TransactionRejectReason,
     TransactionType,
 )
@@ -41,11 +43,22 @@ class TestPhase4TransactionModels:
         assert TransactionType.DAILY_FINANCING == "DAILY_FINANCING"
         assert TransactionType.DIVIDEND_ADJUSTMENT == "DIVIDEND_ADJUSTMENT"
 
+    def test_accept_datetime_format_enum(self) -> None:
+        """Test AcceptDatetimeFormat enum values."""
+        assert AcceptDatetimeFormat.UNIX == "UNIX"
+        assert AcceptDatetimeFormat.RFC3339 == "RFC3339"
+
+    def test_transaction_filter_enum(self) -> None:
+        """Test official TransactionFilter enum values."""
+        assert TransactionFilter.ORDER == "ORDER"
+        assert TransactionFilter.FUNDING == "FUNDING"
+        assert TransactionFilter.ORDER_FILL == "ORDER_FILL"
+        assert TransactionFilter.ONE_CANCELS_ALL_ORDER == "ONE_CANCELS_ALL_ORDER"
+
     def test_transaction_reject_reason_enum(self) -> None:
         """Test TransactionRejectReason enum values."""
         assert TransactionRejectReason.INTERNAL_SERVER_ERROR == "INTERNAL_SERVER_ERROR"
         assert TransactionRejectReason.INSUFFICIENT_MARGIN == "INSUFFICIENT_MARGIN"
-        assert TransactionRejectReason.MARKET_HALTED == "MARKET_HALTED"
         assert TransactionRejectReason.ACCOUNT_NOT_ACTIVE == "ACCOUNT_NOT_ACTIVE"
 
     def test_funding_reason_enum(self) -> None:
@@ -137,6 +150,9 @@ class TestPhase4TransactionModels:
             "units": "10000",
             "fullVWAP": "1.0950",
             "fullPrice": {
+                "instrument": "EUR_USD",
+                "time": "2024-01-15T12:00:01.000000000Z",
+                "tradeable": True,
                 "closeoutBid": "1.0945",
                 "closeoutAsk": "1.0955",
                 "liquidity": 10000000,
@@ -155,6 +171,35 @@ class TestPhase4TransactionModels:
         assert fill_back_to_api["fullPrice"]["closeoutBid"] == "1.0945"
         assert fill_back_to_api["fullPrice"]["closeoutAsk"] == "1.0955"
         assert fill_back_to_api["accountBalance"] == "10000.00"
+
+    def test_order_fill_transaction_partial_full_price(self) -> None:
+        """Test transaction-embedded fullPrice payloads without ClientPrice identity fields."""
+        api_data = {
+            "id": "12346",
+            "time": "2024-01-15T12:00:01.000000000Z",
+            "userID": 123456,
+            "accountID": "101-001-123456-001",
+            "batchID": "12346",
+            "type": "ORDER_FILL",
+            "orderID": "order-123",
+            "instrument": "EUR_USD",
+            "units": "10000",
+            "fullPrice": {
+                "closeoutBid": "1.0945",
+                "closeoutAsk": "1.0955",
+                "bids": [{"price": "1.0945", "liquidity": "10000000"}],
+                "asks": [{"price": "1.0955", "liquidity": "10000000"}],
+            },
+        }
+
+        fill = OrderFillTransaction(**api_data)
+
+        assert fill.full_price is not None
+        assert fill.full_price.instrument is None
+        assert fill.full_price.time is None
+        assert fill.full_price.tradeable is None
+        assert fill.full_price.closeout_bid == Decimal("1.0945")
+        assert fill.full_price.bids[0].liquidity == Decimal("10000000")
 
     def test_order_cancel_transaction(self) -> None:
         """Test OrderCancelTransaction model."""
@@ -230,8 +275,8 @@ class TestPhase4TransactionModels:
         assert market_back_to_api["clientExtensions"]["id"] == "client-123"
         assert market_back_to_api["takeProfitOnFill"]["price"] == "1.2600"
 
-    def test_transaction_filter(self) -> None:
-        """Test TransactionFilter model."""
+    def test_transaction_query_filter(self) -> None:
+        """Test TransactionQueryFilter model."""
         filter_data = {
             "from": "12340",
             "to": "12350",
@@ -239,14 +284,14 @@ class TestPhase4TransactionModels:
             "type": ["ORDER_FILL", "ORDER_CANCEL"],
         }
 
-        filter_obj = TransactionFilter(**filter_data)
+        filter_obj = TransactionQueryFilter(**filter_data)
         assert filter_obj.from_ == "12340"
         assert filter_obj.to == "12350"
         assert filter_obj.page_size == 100
         assert filter_obj.type_filter == [TransactionType.ORDER_FILL, TransactionType.ORDER_CANCEL]
 
-    def test_transaction_filter_aliases(self) -> None:
-        """Test TransactionFilter camelCase aliases."""
+    def test_transaction_query_filter_aliases(self) -> None:
+        """Test TransactionQueryFilter camelCase aliases."""
         api_data = {
             "from": "12340",
             "to": "12350",
@@ -254,7 +299,7 @@ class TestPhase4TransactionModels:
             "type": ["MARKET_ORDER", "LIMIT_ORDER"],
         }
 
-        filter_obj = TransactionFilter(**api_data)
+        filter_obj = TransactionQueryFilter(**api_data)
         filter_back_to_api = filter_obj.model_dump(by_alias=True, exclude_none=True)
         assert filter_back_to_api["from"] == "12340"
         assert filter_back_to_api["pageSize"] == 100
@@ -320,13 +365,15 @@ class TestPhase4AliasTests:
             "lossQuoteHomeConversionFactor": "1.0",
             "fullVWAP": "1.0950",
             "fullPrice": {
+                "instrument": "EUR_USD",
+                "time": "2024-01-15T12:00:01.000000000Z",
+                "tradeable": True,
                 "closeoutBid": "1.0945",
                 "closeoutAsk": "1.0955",
                 "liquidity": 10000000,
             },
             "accountBalance": "10000.00",
             "halfSpreadCost": "0.25",
-            "guaranteeExecutionFee": "0.10",
         }
 
         fill = OrderFillTransaction(**api_data)
@@ -338,7 +385,6 @@ class TestPhase4AliasTests:
         assert fill_roundtrip.client_order_id == fill.client_order_id
         assert fill_roundtrip.gain_quote_home_conversion_factor == fill.gain_quote_home_conversion_factor
         assert fill_roundtrip.full_vwap == fill.full_vwap
-        assert fill_roundtrip.guarantee_execution_fee == fill.guarantee_execution_fee
 
     def test_market_order_transaction_roundtrip_validation(self) -> None:
         """Test MarketOrderTransaction model roundtrip with API data."""

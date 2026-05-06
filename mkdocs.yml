@@ -140,7 +140,6 @@ nav:
           - Trades: api-reference/endpoints/trades.md
           - Positions: api-reference/endpoints/positions.md
           - Pricing: api-reference/endpoints/pricing.md
-          - Instruments: api-reference/endpoints/instruments.md
           - Transactions: api-reference/endpoints/transactions.md
       - OANDA API Specification:
           - OpenAPI Spec: api-reference/oanda-openapi-spec.md

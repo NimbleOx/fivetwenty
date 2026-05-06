@@ -1,8 +1,9 @@
 """Position management endpoints."""
 
 from decimal import Decimal
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 
+from .._internal.response import ApiResponse
 from ..models import (
     AccountID,
     ClientExtensions,
@@ -68,10 +69,15 @@ class PositionEndpoints:
         """
         response = await self._client._request("GET", f"/accounts/{account_id}/positions")
         data = response.json()
-        return {
-            "positions": [Position.model_validate(p) for p in data["positions"]],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "PositionsResponse",
+            ApiResponse(
+                {
+                    "positions": [Position.model_validate(p) for p in data["positions"]],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_open_positions(self, account_id: AccountID) -> PositionsResponse:
         """
@@ -90,10 +96,15 @@ class PositionEndpoints:
         """
         response = await self._client._request("GET", f"/accounts/{account_id}/openPositions")
         data = response.json()
-        return {
-            "positions": [Position.model_validate(p) for p in data["positions"]],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "PositionsResponse",
+            ApiResponse(
+                {
+                    "positions": [Position.model_validate(p) for p in data["positions"]],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_position(self, account_id: AccountID, instrument: InstrumentName) -> PositionResponse:
         """
@@ -112,10 +123,15 @@ class PositionEndpoints:
         instrument_str = instrument.value if hasattr(instrument, "value") else str(instrument)
         response = await self._client._request("GET", f"/accounts/{account_id}/positions/{instrument_str}")
         data = response.json()
-        return {
-            "position": Position.model_validate(data["position"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "PositionResponse",
+            ApiResponse(
+                {
+                    "position": Position.model_validate(data["position"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def close_position(
         self,
@@ -201,9 +217,11 @@ class PositionEndpoints:
         data = response.json()
 
         # Parse transaction fields if present
-        result: ClosePositionResponse = {
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        result = ApiResponse(
+            {
+                "lastTransactionID": data["lastTransactionID"],
+            }
+        )
 
         if "relatedTransactionIDs" in data:
             result["relatedTransactionIDs"] = data["relatedTransactionIDs"]
@@ -224,4 +242,4 @@ class PositionEndpoints:
         if "shortOrderCancelTransaction" in data:
             result["shortOrderCancelTransaction"] = OrderCancelTransaction.model_validate(data["shortOrderCancelTransaction"])
 
-        return result
+        return cast("ClosePositionResponse", result)

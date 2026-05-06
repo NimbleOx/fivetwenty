@@ -237,7 +237,7 @@ class TestTransactionHistory:
             for invalid_size in invalid_page_sizes:
                 try:
                     await sandbox_client.transactions.get_transactions(account_id=test_account_id, page_size=invalid_size)
-                    print(f"    ⚠ Invalid page size {invalid_size} was accepted")
+                    pytest.fail(f"Invalid page size {invalid_size} was accepted")
 
                 except Exception as expected_error:
                     print(f"    ✓ Invalid page size {invalid_size} rejected: {type(expected_error).__name__}")
@@ -445,7 +445,7 @@ class TestTransactionHistory:
                     count = invalid_result.get("count", 0)
                     type_filter = invalid_result.get("type", [])
 
-                    print(f"    ⚠ Invalid types {invalid_type_list} accepted: {count} transactions, filter: {type_filter}")
+                    pytest.fail(f"Invalid types {invalid_type_list} accepted: {count} transactions, filter: {type_filter}")
 
                 except Exception as expected_error:
                     print(f"    ✓ Invalid types {invalid_type_list} rejected: {type(expected_error).__name__}")
@@ -742,7 +742,7 @@ class TestTransactionHistory:
                 try:
                     invalid_detail = await sandbox_client.transactions.get_transaction(account_id=test_account_id, transaction_id=invalid_id)
 
-                    print(f"    ⚠ Invalid ID '{invalid_id}' was accepted: {invalid_detail}")
+                    pytest.fail(f"Invalid ID '{invalid_id}' was accepted: {invalid_detail}")
 
                 except Exception as expected_error:
                     print(f"    ✓ Invalid ID '{invalid_id}' rejected: {type(expected_error).__name__}")
@@ -949,12 +949,13 @@ class TestTransactionHistory:
                 except Exception as since_error:
                     print(f"  ✓ Since ID functionality error: {type(since_error).__name__}")
 
-                # Test with invalid transaction IDs
-                invalid_since_ids = ["0", "999999999", "abc", ""]
+                # OANDA accepts future numeric IDs and returns an empty result
+                # set, so invalid coverage is limited to malformed IDs.
+                invalid_since_ids = ["0", "abc", ""]
                 for invalid_id in invalid_since_ids:
                     try:
                         await sandbox_client.transactions.get_transactions_since_id(account_id=test_account_id, transaction_id=invalid_id)
-                        print(f"  ⚠ Invalid since ID '{invalid_id}' accepted")
+                        pytest.fail(f"Invalid since ID '{invalid_id}' accepted")
                     except Exception as expected_error:
                         print(f"  ✓ Invalid since ID '{invalid_id}' rejected: {type(expected_error).__name__}")
 
@@ -975,7 +976,7 @@ class TestTransactionHistory:
         for invalid_account in invalid_accounts:
             try:
                 await sandbox_client.transactions.get_transactions(account_id=invalid_account)
-                print(f"  ⚠ Invalid account '{invalid_account}' accepted")
+                pytest.fail(f"Invalid account '{invalid_account}' accepted")
             except Exception as expected_error:
                 print(f"  ✓ Invalid account '{invalid_account}' rejected: {type(expected_error).__name__}")
 

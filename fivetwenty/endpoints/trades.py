@@ -1,7 +1,8 @@
 """Trade management endpoints."""
 
-from typing import TYPE_CHECKING, Any, TypedDict
+from typing import TYPE_CHECKING, Any, TypedDict, cast
 
+from .._internal.response import ApiResponse
 from ..models import (
     AccountID,
     ClientExtensions,
@@ -130,10 +131,15 @@ class TradeEndpoints:
         )
 
         data = response.json()
-        return {
-            "trades": [Trade.model_validate(t) for t in data["trades"]],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TradesResponse",
+            ApiResponse(
+                {
+                    "trades": [Trade.model_validate(t) for t in data["trades"]],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_open_trades(
         self,
@@ -157,10 +163,15 @@ class TradeEndpoints:
         )
 
         data = response.json()
-        return {
-            "trades": [Trade.model_validate(t) for t in data["trades"]],
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TradesResponse",
+            ApiResponse(
+                {
+                    "trades": [Trade.model_validate(t) for t in data["trades"]],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_trade(
         self,
@@ -186,10 +197,15 @@ class TradeEndpoints:
         )
 
         data = response.json()
-        return {
-            "trade": Trade.model_validate(data["trade"]),
-            "lastTransactionID": data["lastTransactionID"],
-        }
+        return cast(
+            "TradeResponse",
+            ApiResponse(
+                {
+                    "trade": Trade.model_validate(data["trade"]),
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def close_trade(
         self,
@@ -223,9 +239,11 @@ class TradeEndpoints:
         )
 
         response_data = response.json()
-        result: CloseTradeResponse = {
-            "lastTransactionID": response_data["lastTransactionID"],
-        }
+        result = ApiResponse(
+            {
+                "lastTransactionID": response_data["lastTransactionID"],
+            }
+        )
 
         if "orderCreateTransaction" in response_data:
             result["orderCreateTransaction"] = MarketOrderTransaction.model_validate(response_data["orderCreateTransaction"])
@@ -236,7 +254,7 @@ class TradeEndpoints:
         if "relatedTransactionIDs" in response_data:
             result["relatedTransactionIDs"] = response_data["relatedTransactionIDs"]
 
-        return result
+        return cast("CloseTradeResponse", result)
 
     async def put_trade_client_extensions(
         self,
@@ -270,16 +288,18 @@ class TradeEndpoints:
         )
 
         response_data = response.json()
-        result: TradeClientExtensionsResponse = {
-            "lastTransactionID": response_data["lastTransactionID"],
-        }
+        result = ApiResponse(
+            {
+                "lastTransactionID": response_data["lastTransactionID"],
+            }
+        )
 
         if "tradeClientExtensionsModifyTransaction" in response_data:
             result["tradeClientExtensionsModifyTransaction"] = TradeClientExtensionsModifyTransaction.model_validate(response_data["tradeClientExtensionsModifyTransaction"])
         if "relatedTransactionIDs" in response_data:
             result["relatedTransactionIDs"] = response_data["relatedTransactionIDs"]
 
-        return result
+        return cast("TradeClientExtensionsResponse", result)
 
     async def put_trade_orders(
         self,
@@ -327,9 +347,11 @@ class TradeEndpoints:
         )
 
         response_data = response.json()
-        result: TradeOrdersResponse = {
-            "lastTransactionID": response_data["lastTransactionID"],
-        }
+        result = ApiResponse(
+            {
+                "lastTransactionID": response_data["lastTransactionID"],
+            }
+        )
 
         # Parse all possible transaction fields
         if "takeProfitOrderCancelTransaction" in response_data:
@@ -363,4 +385,4 @@ class TradeEndpoints:
         if "relatedTransactionIDs" in response_data:
             result["relatedTransactionIDs"] = response_data["relatedTransactionIDs"]
 
-        return result
+        return cast("TradeOrdersResponse", result)

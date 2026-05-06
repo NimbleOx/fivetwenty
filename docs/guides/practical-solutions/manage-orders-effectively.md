@@ -24,7 +24,7 @@ You need to create, monitor, and manage trading orders efficiently using FiveTwe
     OANDA supports different order workflows. Choose the pattern that matches your trading style:
 
     **OnFill Pattern (Recommended)**: Set TP/SL when creating orders
-    <!-- fragment: Demo OnFill pattern with multiple unused imports -->
+    <!-- fragment: partial OnFill pattern example -->
     ```python
 import asyncio
 import os
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     ```
 
     **Post-Trade Pattern**: Add TP/SL to existing trades
-    <!-- fragment: Demo post-trade pattern with unused imports -->
+    <!-- fragment: partial post-trade pattern example -->
     ```python
 import asyncio
 import os
@@ -139,8 +139,8 @@ async def post_trade_example() -> None:
 **Use Case:** You've opened a position and want to add or modify stop loss and take profit levels based on subsequent market analysis, or you need more sophisticated risk management than the OnFill pattern provides.
 
 #### Step-by-Step Post-Trade Risk Management
-<!-- fragment: Demo post-trade risk management with unused imports -->
-<!-- fragment: Demo comprehensive order management with type compatibility issues -->
+<!-- fragment: partial post-trade risk management example -->
+<!-- fragment: partial comprehensive order management example -->
 ```python
 import asyncio
 import os
@@ -227,7 +227,7 @@ async def implement_post_trade_risk_management() -> None:
 
 #### Distance-Based Stop Loss
 
-<!-- fragment: Demo stop loss order creation with string-to-Decimal type mismatches -->
+<!-- fragment: partial stop loss order creation example -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.models import StopLossOrderRequest
@@ -256,7 +256,7 @@ async def add_distance_based_stop_loss(client: AsyncClient, account_id: str, tra
 
 #### Trailing Stop Loss
 
-<!-- fragment: Demo trailing stop loss with timeInForce type incompatibility -->
+<!-- fragment: partial trailing stop loss example -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.models import TrailingStopLossOrderRequest
@@ -285,7 +285,7 @@ async def add_trailing_stop_loss(client: AsyncClient, account_id: str, trade_id:
 
 #### Guaranteed Stop Loss
 
-<!-- fragment: Demo guaranteed stop loss with response indexing issues -->
+<!-- fragment: partial guaranteed stop loss example -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.models import GuaranteedStopLossOrderRequest, StopLossOrderRequest
@@ -351,7 +351,7 @@ async def add_regular_stop_loss(client: AsyncClient, account_id: str, trade_id: 
 
 #### Error Handling for Post-Trade Orders
 
-<!-- fragment: Demo robust trade setup with union attribute access -->
+<!-- fragment: partial robust trade setup example -->
 ```python
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
@@ -410,7 +410,7 @@ async def robust_post_trade_setup(client: AsyncClient, account_id: str, trade_id
 
 The following example demonstrates how to create market orders using the FiveTwenty SDK. Market orders execute immediately at the best available price, making them ideal for quick entries and exits:
 
-<!-- fragment: Demo market order creation with index access and type assignment issues -->
+<!-- fragment: partial market order creation example -->
 ```python
 import os
 from decimal import Decimal
@@ -463,7 +463,7 @@ async def place_market_order() -> None:
 
 This example shows how to create limit orders that execute only when the market reaches your specified price. Limit orders give you price control but no guarantee of execution:
 
-<!-- fragment: Demo limit order with index access patterns -->
+<!-- fragment: partial limit order example -->
 ```python
 import os
 from decimal import Decimal
@@ -507,7 +507,7 @@ async def place_limit_order() -> None:
 
 Here's how to create stop orders for breakout trading strategies. Stop orders become market orders when the trigger price is reached, making them ideal for momentum trading:
 
-<!-- fragment: Demo stop order with index access patterns -->
+<!-- fragment: partial stop order example -->
 ```python
 import os
 from decimal import Decimal
@@ -554,7 +554,7 @@ async def place_stop_order() -> None:
 
 This example demonstrates Market-If-Touched (MIT) orders, which execute at market price when a specified trigger level is reached. These are perfect for entering positions at support or resistance levels:
 
-<!-- fragment: Demo MIT order with index access patterns -->
+<!-- fragment: partial MIT order example -->
 ```python
 import os
 from decimal import Decimal
@@ -616,7 +616,7 @@ from fivetwenty.models import (
 )
 
 
-<!-- fragment: Demo unified order interface with type assignment and argument type issues -->
+<!-- fragment: partial unified order interface example -->
 ```python
 async def create_order_by_type(order_type: str, price: Decimal | None = None) -> Any:
     """Create orders dynamically by type using the unified order interface for flexible strategy implementation."""
@@ -872,7 +872,7 @@ async def manage_pending_orders(account_id: AccountID) -> None:
 
 The following example shows how to create multiple related orders in a single operation. This technique is essential for complex trading strategies that require coordinated order placement:
 
-<!-- fragment: Demo bracket order creation with union attribute access and exception handling issues -->
+<!-- fragment: partial bracket order creation example -->
 ```python
 import asyncio
 import os
@@ -1173,7 +1173,7 @@ async def rate_limited_order(client: AsyncClient, order_params: Any) -> Any:
 ```
 
 **Error Recovery:**
-<!-- fragment: Demo error recovery with retry logic and naming violations -->
+<!-- fragment: partial error recovery example -->
 ```python
 import asyncio
 from typing import Any
@@ -1206,7 +1206,7 @@ async def robust_order_placement(client: AsyncClient, order_params: Any, max_ret
 ## Advanced Patterns
 
 ### Order State Machine
-<!-- fragment: Demo order state tracking with variable naming violations -->
+<!-- fragment: partial order state tracking example -->
 ```python
 import asyncio
 from datetime import datetime
@@ -1262,7 +1262,7 @@ class OrderManager:
 
 ### Risk Management Integration
 
-<!-- fragment: Demo risk management with FURB157 and unused argument violations -->
+<!-- fragment: partial risk management example -->
 ```python
 from decimal import Decimal
 from typing import Any

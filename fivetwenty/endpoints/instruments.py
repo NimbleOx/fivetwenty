@@ -2,13 +2,15 @@
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, TypedDict
+from typing import TYPE_CHECKING, TypedDict, cast
+
+from .._internal.response import ApiResponse
 
 if TYPE_CHECKING:
     from datetime import datetime
 
     from ..client import AsyncClient
-    from ..models import Candlestick, CandlestickGranularity, InstrumentName
+    from ..models import Candlestick, CandlestickGranularity, InstrumentName, PricingComponent
 
 
 class CandlesResponse(TypedDict):
@@ -29,7 +31,7 @@ class InstrumentEndpoints:
         self,
         instrument: InstrumentName | str,
         *,
-        price: str = "M",
+        price: PricingComponent = "M",
         granularity: CandlestickGranularity,
         count: int | None = None,
         from_time: datetime | None = None,
@@ -120,8 +122,13 @@ class InstrumentEndpoints:
 
         data = response.json()
 
-        return {
-            "instrument": InstrumentName(data["instrument"]),
-            "granularity": CandlestickGranularity(data["granularity"]),
-            "candles": [Candlestick.model_validate(c) for c in data["candles"]],
-        }
+        return cast(
+            "CandlesResponse",
+            ApiResponse(
+                {
+                    "instrument": InstrumentName(data["instrument"]),
+                    "granularity": CandlestickGranularity(data["granularity"]),
+                    "candles": [Candlestick.model_validate(c) for c in data["candles"]],
+                }
+            ),
+        )

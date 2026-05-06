@@ -77,20 +77,20 @@ Tests edge cases and error scenarios:
 
 ```bash
 # Run all order management integration tests
-pytest tests/integration/orders/
+pytest tests/integration/orders/ --run-integration-live
 
 # Test specific functionality
-pytest tests/integration/orders/test_basic_order_operations.py
-pytest tests/integration/orders/test_error_scenarios.py
+pytest tests/integration/orders/test_basic_order_operations.py --run-integration-live
+pytest tests/integration/orders/test_error_scenarios.py --run-integration-live
 
 # Run with verbose output for debugging
-pytest tests/integration/orders/test_order_modification.py -v
+pytest tests/integration/orders/test_order_modification.py -v --run-integration-live
 
 # Run specific test method
-pytest tests/integration/orders/test_advanced_features.py::TestAdvancedOrderFeatures::test_trigger_conditions
+pytest tests/integration/orders/test_advanced_features.py::TestAdvancedOrderFeatures::test_trigger_conditions --run-integration-live
 
 # Run tests matching a pattern
-pytest tests/integration/orders/ -k "market_order"
+pytest tests/integration/orders/ -k "market_order" --run-integration-live
 ```
 
 ## Test Execution Requirements

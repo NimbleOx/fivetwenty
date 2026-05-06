@@ -49,30 +49,45 @@ class QuoteHomeConversionFactors(ApiModel):
     negative_units: Decimal = Field(alias="negativeUnits")
 
 
-class UnitsAvailable(ApiModel):
-    """Available units for trading calculations."""
+class ConversionFactor(ApiModel):
+    """Factor used to convert an instrument amount to account home currency."""
 
-    default: dict[str, Decimal] = Field(default_factory=dict)
-    reduce_first: dict[str, Decimal] = Field(alias="reduceFirst", default_factory=dict)
-    reduce_only: dict[str, Decimal] = Field(alias="reduceOnly", default_factory=dict)
-    open_only: dict[str, Decimal] = Field(alias="openOnly", default_factory=dict)
+    factor: Decimal | None = None
+
+
+class HomeConversionFactors(ApiModel):
+    """Conversion factors for instrument base and quote currency amounts."""
+
+    gain_quote_home: ConversionFactor | None = Field(None, alias="gainQuoteHome")
+    loss_quote_home: ConversionFactor | None = Field(None, alias="lossQuoteHome")
+    gain_base_home: ConversionFactor | None = Field(None, alias="gainBaseHome")
+    loss_base_home: ConversionFactor | None = Field(None, alias="lossBaseHome")
 
 
 class UnitsAvailableDetails(ApiModel):
     """Units available for both long and short orders."""
 
-    long: UnitsAvailable  # Long units availability
-    short: UnitsAvailable  # Short units availability
+    long: Decimal  # Long units availability
+    short: Decimal  # Short units availability
+
+
+class UnitsAvailable(ApiModel):
+    """Available units for trading calculations."""
+
+    default: UnitsAvailableDetails
+    reduce_first: UnitsAvailableDetails = Field(alias="reduceFirst")
+    reduce_only: UnitsAvailableDetails = Field(alias="reduceOnly")
+    open_only: UnitsAvailableDetails = Field(alias="openOnly")
 
 
 class ClientPrice(ApiModel):
     """Real-time price data."""
 
     type: str = Field(default="PRICE")
-    instrument: InstrumentName
-    time: datetime
+    instrument: InstrumentName | None = None
+    time: datetime | None = None
     status: PriceStatus | None = None  # Deprecated but may still be present
-    tradeable: bool
+    tradeable: bool | None = None
     bids: list[PriceBucket] = Field(default_factory=list)
     asks: list[PriceBucket] = Field(default_factory=list)
     closeout_bid: PriceValue = Field(alias="closeoutBid")
@@ -120,6 +135,8 @@ __all__ = [
     "Candlestick",
     "CandlestickData",
     "ClientPrice",
+    "ConversionFactor",
+    "HomeConversionFactors",
     "HomeConversions",
     "OrderBook",
     "PriceBucket",

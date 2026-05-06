@@ -386,7 +386,7 @@ async def process_price_data(price_obj: dict[str, Any]) -> None:
 
 ### Minimize Function Calls
 
-<!-- fragment: Demo CPU optimization with Any type returns and attribute access patterns -->
+<!-- fragment: partial CPU optimization example -->
 ```python
 # Step 18: Demonstrate CPU optimization through function call reduction
 from typing import Any
@@ -566,7 +566,7 @@ def detect_price_movements(prices: Any, threshold: float = 0.0001) -> Any:
 
 ### Avoid Memory Leaks
 
-<!-- fragment: Demo memory management with deprecated typing imports and performance patterns -->
+<!-- fragment: partial memory management example -->
 ```python
 import weakref
 from typing import Any, Callable, Dict, Set
@@ -640,7 +640,7 @@ subscription_manager.subscribe(price_callback)
 
 ### Limit Buffer Growth
 
-<!-- fragment: Demo bounded storage with deprecated deque imports and unused Dict -->
+<!-- fragment: partial bounded storage example -->
 ```python
 import time
 from collections import deque

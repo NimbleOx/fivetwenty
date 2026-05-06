@@ -246,8 +246,8 @@ async def main() -> None:
         print("  ✅ Type hints throughout")
 
         print("\nExample - InstrumentName enum:")
-        print(f"  InstrumentName.EUR_USD = '{InstrumentName.EUR_USD}'")
-        print(f"  InstrumentName.GBP_USD = '{InstrumentName.GBP_USD}'")
+        print(f"  InstrumentName.EUR_USD.value = '{InstrumentName.EUR_USD.value}'")
+        print(f"  InstrumentName.GBP_USD.value = '{InstrumentName.GBP_USD.value}'")
         print("  # IDE autocomplete available!")
 
         print("\nPydantic validation benefits:")
@@ -351,7 +351,12 @@ async def main() -> None:
             print("   Risk/Reward: 2:1")
 
         # Clean up our demo position
-        await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
+        await client.positions.close_position(
+            account_id=client.account_id,
+            instrument=InstrumentName.EUR_USD,
+            long_units="ALL",
+            short_units="ALL",
+        )
 
     print("\n✅ Advanced features demo completed!")
     print("\n📚 Summary of Advanced Features:")

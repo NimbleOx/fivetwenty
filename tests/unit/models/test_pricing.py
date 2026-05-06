@@ -105,10 +105,10 @@ class TestPhase3PricingModels:
     def test_units_available(self) -> None:
         """Test UnitsAvailable model."""
         units = UnitsAvailable(default={"long": "100000", "short": "100000"}, reduce_first={"long": "50000", "short": "50000"}, reduce_only={"long": "25000", "short": "25000"}, open_only={"long": "75000", "short": "75000"})
-        assert units.default["long"] == Decimal("100000")  # dict values are Decimal
-        assert units.reduce_first["long"] == Decimal("50000")  # dict values are Decimal
-        assert units.reduce_only["short"] == Decimal("25000")  # dict values are Decimal
-        assert units.open_only["short"] == Decimal("75000")  # dict values are Decimal
+        assert units.default.long == Decimal("100000")
+        assert units.reduce_first.long == Decimal("50000")
+        assert units.reduce_only.short == Decimal("25000")
+        assert units.open_only.short == Decimal("75000")
 
     def test_candlestick_data(self) -> None:
         """Test CandlestickData model."""
@@ -203,9 +203,9 @@ class TestPhase3AliasTests:
         }
 
         units = UnitsAvailable(**api_data)
-        assert units.reduce_first["long"] == Decimal("50000")  # dict values are Decimal
-        assert units.reduce_only["short"] == Decimal("25000")  # dict values are Decimal
-        assert units.open_only["short"] == Decimal("75000")  # dict values are Decimal
+        assert units.reduce_first.long == Decimal("50000")
+        assert units.reduce_only.short == Decimal("25000")
+        assert units.open_only.short == Decimal("75000")
 
         # Test camelCase output
         api_output = units.model_dump(by_alias=True, exclude_none=True)
@@ -231,7 +231,12 @@ class TestPhase3AliasTests:
         assert conversions_roundtrip.position_value == conversions.position_value
 
         # Test UnitsAvailable round-trip
-        units_api = {"default": {"long": "100000"}, "reduceFirst": {"short": "50000"}, "reduceOnly": {"long": "25000"}, "openOnly": {"short": "75000"}}
+        units_api = {
+            "default": {"long": "100000", "short": "100000"},
+            "reduceFirst": {"long": "50000", "short": "50000"},
+            "reduceOnly": {"long": "25000", "short": "25000"},
+            "openOnly": {"long": "75000", "short": "75000"},
+        }
 
         units = UnitsAvailable(**units_api)
         units_back_to_api = units.model_dump(by_alias=True, exclude_none=True)

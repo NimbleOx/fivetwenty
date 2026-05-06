@@ -6,6 +6,7 @@ from decimal import Decimal
 import pytest
 
 from fivetwenty import AsyncClient
+from tests.integration.helpers import mid_price_from_pricing_response, skip_or_raise_environment_error
 
 
 @pytest.mark.asyncio
@@ -36,13 +37,18 @@ class TestBulkOperationsAndRisk:
         if hasattr(sandbox_client, "pricing") and hasattr(sandbox_client.pricing, "get_pricing"):
             try:
                 pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument_primary])
+                current_price = mid_price_from_pricing_response(pricing_response, current_price)
                 # Extract prices from the response
                 if isinstance(pricing_response, dict) and "prices" in pricing_response:
                     prices = pricing_response["prices"]
                     if prices and isinstance(prices[0], dict):
                         price_data = prices[0]
                         # Calculate mid price from bid/ask if available
-                        if "bid" in price_data and "ask" in price_data:
+                        if price_data.get("bids") and price_data.get("asks"):
+                            bid = Decimal(str(price_data["bids"][0]["price"]))
+                            ask = Decimal(str(price_data["asks"][0]["price"]))
+                            current_price = (bid + ask) / 2
+                        elif "bid" in price_data and "ask" in price_data:
                             bid = Decimal(price_data["bid"])
                             ask = Decimal(price_data["ask"])
                             current_price = (bid + ask) / 2
@@ -211,12 +217,7 @@ class TestBulkOperationsAndRisk:
             print("✓ Account remains stable after bulk operations")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "funds", "closed", "trading"]):
-                pytest.skip(f"Bulk operations test skipped: {e}")
-            else:
-                print(f"⚠️  Bulk operations test failed: {e}")
-                pytest.skip(f"Bulk operations failed: {e}")
+            skip_or_raise_environment_error(e, "Bulk operations test")
 
         print("✓ Bulk order operations test completed")
 
@@ -231,11 +232,16 @@ class TestBulkOperationsAndRisk:
         if hasattr(sandbox_client, "pricing") and hasattr(sandbox_client.pricing, "get_pricing"):
             try:
                 pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
+                current_price = mid_price_from_pricing_response(pricing_response, current_price)
                 if isinstance(pricing_response, dict) and "prices" in pricing_response:
                     prices = pricing_response["prices"]
                     if prices and isinstance(prices[0], dict):
                         price_data = prices[0]
-                        if "bid" in price_data and "ask" in price_data:
+                        if price_data.get("bids") and price_data.get("asks"):
+                            bid = Decimal(str(price_data["bids"][0]["price"]))
+                            ask = Decimal(str(price_data["asks"][0]["price"]))
+                            current_price = (bid + ask) / 2
+                        elif "bid" in price_data and "ask" in price_data:
                             bid = Decimal(price_data["bid"])
                             ask = Decimal(price_data["ask"])
                             current_price = (bid + ask) / 2
@@ -358,11 +364,16 @@ class TestBulkOperationsAndRisk:
         if hasattr(sandbox_client, "pricing") and hasattr(sandbox_client.pricing, "get_pricing"):
             try:
                 pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
+                current_price = mid_price_from_pricing_response(pricing_response, current_price)
                 if isinstance(pricing_response, dict) and "prices" in pricing_response:
                     prices = pricing_response["prices"]
                     if prices and isinstance(prices[0], dict):
                         price_data = prices[0]
-                        if "bid" in price_data and "ask" in price_data:
+                        if price_data.get("bids") and price_data.get("asks"):
+                            bid = Decimal(str(price_data["bids"][0]["price"]))
+                            ask = Decimal(str(price_data["asks"][0]["price"]))
+                            current_price = (bid + ask) / 2
+                        elif "bid" in price_data and "ask" in price_data:
                             bid = Decimal(price_data["bid"])
                             ask = Decimal(price_data["ask"])
                             current_price = (bid + ask) / 2
@@ -401,12 +412,13 @@ class TestBulkOperationsAndRisk:
                 client_request_id=f"risk-managed-{int(1000 * current_price)}",
             )
 
-            if risk_managed_response.order_fill_transaction:
+            order_fill_transaction = getattr(risk_managed_response, "order_fill_transaction", None)
+            if order_fill_transaction:
                 print("✓ Risk-managed order filled")
 
                 # Verify TP/SL orders were created
-                if hasattr(risk_managed_response.order_fill_transaction, "tradeOpened"):
-                    trade_info = risk_managed_response.order_fill_transaction["tradeOpened"]
+                if "tradeOpened" in order_fill_transaction:
+                    trade_info = order_fill_transaction["tradeOpened"]
                     trade_id = trade_info.get("tradeID")
 
                     if trade_id:
@@ -415,6 +427,8 @@ class TestBulkOperationsAndRisk:
                         tp_sl_orders = [order for order in orders if isinstance(order, dict) and order.get("tradeID") == trade_id and order.get("type") in ["TAKE_PROFIT", "STOP_LOSS"]]
 
                         print(f"✓ Found {len(tp_sl_orders)} TP/SL orders for trade {trade_id}")
+            else:
+                print("✓ Risk-managed order was not filled; continuing with account risk checks")
 
             # Test 2: Account risk monitoring
             print("✓ Test 2: Account risk monitoring")
@@ -470,11 +484,6 @@ class TestBulkOperationsAndRisk:
                 print(f"✓ Position cleanup error (non-critical): {position_error}")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "funds", "closed", "trading"]):
-                pytest.skip(f"Risk management test skipped: {e}")
-            else:
-                print(f"⚠️  Risk management test failed: {e}")
-                pytest.skip(f"Risk management test failed: {e}")
+            skip_or_raise_environment_error(e, "Risk management test")
 
         print("✓ Post-trade risk management test completed")

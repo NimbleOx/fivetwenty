@@ -24,8 +24,9 @@ class TestNetworkEdgeCases:
         # Create a client with very short timeout to simulate timeout scenarios
         timeout_client = AsyncClient(
             token=integration_config["token"],
+            account_id=integration_config["account_id"],
             environment=integration_config["environment"],
-            timeout=httpx.Timeout(0.01),  # 10ms timeout - will likely timeout
+            timeout=0.01,  # 10ms timeout - will likely timeout
         )
 
         try:
@@ -43,8 +44,9 @@ class TestNetworkEdgeCases:
         """
         moderate_timeout_client = AsyncClient(
             token=integration_config["token"],
+            account_id=test_account_id,
             environment=integration_config["environment"],
-            timeout=httpx.Timeout(0.1),  # 100ms timeout
+            timeout=0.1,  # 100ms timeout
         )
 
         try:
@@ -60,7 +62,7 @@ class TestNetworkEdgeCases:
         finally:
             await moderate_timeout_client.close()
 
-    async def test_authentication_failure_handling(self, integration_config: dict):
+    async def test_authentication_failure_handling(self, integration_config: dict, test_account_id: str):
         """Test authentication failure scenarios.
 
         Validates:
@@ -69,6 +71,7 @@ class TestNetworkEdgeCases:
         """
         auth_fail_client = AsyncClient(
             token="invalid-network-token-123456789",
+            account_id=test_account_id,
             environment=integration_config["environment"],
         )
 
@@ -180,6 +183,7 @@ class TestNetworkEdgeCases:
             for _ in range(3):
                 client = AsyncClient(
                     token=integration_config["token"],
+                    account_id=test_account_id,
                     environment=integration_config["environment"],
                     timeout=integration_config["timeout"],
                 )
@@ -214,6 +218,7 @@ class TestNetworkEdgeCases:
             tasks = []
             client = AsyncClient(
                 token=integration_config["token"],
+                account_id=integration_config["account_id"],
                 environment=integration_config["environment"],
                 timeout=5.0,
             )

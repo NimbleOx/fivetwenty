@@ -2317,7 +2317,7 @@ async def monitor_drawdown() -> None:
 
 Forex markets trade 24/5, but activity varies:
 
-<!-- fragment: Demo market session with magic numbers and control flow patterns -->
+<!-- fragment: partial market session example -->
 <!-- fragment: Demo market session analysis with optimal trading times -->
 ```python
 from datetime import datetime, timezone

@@ -136,10 +136,8 @@ def validate(
             progress.update(task, description="Validation complete")
 
     # Display results and always generate report
-    _display_results(summary)
-
-    # Always exit with success - this is informational validation
-    sys.exit(0)
+    exit_code = _display_results(summary)
+    sys.exit(exit_code)
 
 
 @cli.command()
@@ -182,15 +180,13 @@ def check(files: tuple[Path, ...], config: Path | None) -> None:
     summary = engine.validate_incremental(list(files))
 
     # Display results and always generate report
-    _display_results(summary)
-
-    # Always exit with success - this is informational validation
-    sys.exit(0)
+    exit_code = _display_results(summary)
+    sys.exit(exit_code)
 
 
 def _display_results(
     summary: ValidationSummary,
-) -> None:
+) -> int:
     """Display validation results and always generate report."""
 
     console.print()
@@ -207,7 +203,13 @@ def _display_results(
         _display_brief_issues_summary(summary)
 
     # Always generate markdown report
-    _generate_markdown_report(summary)
+    fragment_audit_flags = _generate_markdown_report(summary)
+    if fragment_audit_flags:
+        console.print(f"\n❌ Fragment marker audit failed: {len(fragment_audit_flags)} marker(s) need review", style="red")
+        console.print("   💡 See the 'Fragment Marker Usage' section in the generated validation report", style="yellow")
+        return 1
+
+    return 0
 
 
 def _display_brief_issues_summary(summary: ValidationSummary) -> None:
@@ -277,7 +279,7 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
 
 def _generate_markdown_report(
     summary: ValidationSummary,
-) -> None:
+) -> list[dict[str, object]]:
     """Generate markdown validation report."""
     # Always use the reports directory
     reports_dir = Path(__file__).parent.parent / "reports"
@@ -293,13 +295,16 @@ def _generate_markdown_report(
     try:
         # Create markdown reporter and generate report
         reporter = MarkdownReporter()
+        fragment_audit_flags = reporter.fragment_audit_flags(summary)
         reporter.generate_report(summary=summary, all_issues=all_issues, output_path=output_file, include_detailed_issues=True)
 
         # Display success message
         console.print(f"\n📄 Markdown report generated: {output_file}", style="green")
+        return fragment_audit_flags
 
     except Exception as e:
         console.print(f"\n❌ Failed to generate markdown report: {e}", style="red")
+        return []
 
 
 def main() -> None:

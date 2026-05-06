@@ -137,11 +137,13 @@ class TestCrossEndpointIntegration:
         updated_balance = Decimal(str(updated_account.balance))
         updated_margin = Decimal(str(updated_account.margin_used or 0))
 
-        # Get transactions since order
-        transactions = await sandbox_client.transactions.get_transactions(account_id=test_account_id, from_time=datetime.now(timezone.utc) - timedelta(minutes=5))
-
-        # Find our order transactions
-        order_transactions = [t for t in transactions.get("transactions", []) if hasattr(t, "instrument") and t.instrument == instrument]
+        # Fetch the exact transactions returned by the order response. The
+        # time-based transaction query returns page metadata, not inline data.
+        order_transactions = []
+        for transaction in (order_create_transaction, order_fill_transaction):
+            if transaction:
+                detail = await sandbox_client.transactions.get_transaction(test_account_id, transaction.id)
+                order_transactions.append(detail["transaction"])
 
         print(f"Found {len(order_transactions)} related transactions")
 

@@ -61,7 +61,7 @@ This design choice permeates the entire SDK - every price, balance, and monetary
 
 FiveTwenty automatically handles Decimal conversion for financial fields:
 
-<!-- fragment: Demo Decimal conversion with type compatibility and f-string exception issues -->
+<!-- fragment: partial Decimal conversion example -->
 ```python
 from decimal import Decimal
 
@@ -573,7 +573,7 @@ Exception
 
 The SDK provides complete type information:
 
-<!-- fragment: Demo type inference with attribute access on dict types -->
+<!-- fragment: partial type inference example -->
 ```python
 from decimal import Decimal
 from fivetwenty import AsyncClient
@@ -612,7 +612,7 @@ async def get_account_balance(client: AsyncClient, account_id: str) -> Decimal:
 
 Types are enforced at runtime via Pydantic:
 
-<!-- fragment: Demo runtime validation with intentional type incompatibility -->
+<!-- fragment: partial runtime validation example -->
 ```python
 from fivetwenty.models import MarketOrderRequest
 
@@ -895,7 +895,7 @@ class AsyncClient:
 
 Integration tests use recorded HTTP interactions:
 
-<!-- fragment: Demo VCR test integration with missing return type annotation -->
+<!-- fragment: partial VCR test integration example -->
 ```python
 import pytest
 
@@ -1045,7 +1045,7 @@ class ExtendedClient(AsyncClient):
 
         # Step 5: Add custom endpoint as an attribute
         self.analytics = CustomAnalyticsEndpoint(self)
-        # Now accessible as: client.analytics.get_performance_metrics()
+        # Now accessible through ExtendedClient.analytics
 
     # Additional custom methods could be added here:
     # async def execute_strategy(self, strategy_config: dict) -> Any:
@@ -1053,11 +1053,11 @@ class ExtendedClient(AsyncClient):
     #     pass
 
 # Step 6: Usage example demonstrating extension benefits
-# async with ExtendedClient(token="your-token") as client:
+# async with ExtendedClient(token="your-token") as extended_client:
 #     # Standard FiveTwenty functionality
-#     accounts = await client.accounts.get_accounts()
+#     accounts = await extended_client.accounts.get_accounts()
 #     # Custom analytics functionality
-#     metrics = await client.analytics.get_performance_metrics(account_id)
+#     metrics = await extended_client.analytics.get_performance_metrics(account_id)
 #     # Combined capabilities for sophisticated trading applications
 
 # Extension benefits:

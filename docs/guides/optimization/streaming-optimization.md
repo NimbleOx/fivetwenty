@@ -10,7 +10,7 @@
 
 Optimize streaming for minimal latency:
 
-<!-- fragment: Demo streaming imports with deprecated typing -->
+<!-- fragment: partial streaming imports example -->
 ```python
 import asyncio
 import time
@@ -309,7 +309,7 @@ async def optimize_streaming_example(client: AsyncClient, account_id: str):
 
 Execute callbacks without blocking the main stream:
 
-<!-- fragment: Demo non-blocking callback execution with undefined self patterns -->
+<!-- fragment: partial non-blocking callback execution example -->
 ```python
 # Good: Non-blocking callback execution
 
@@ -351,7 +351,7 @@ price_list = []  # Can grow without bounds
 
 Filter messages at the earliest point:
 
-<!-- fragment: Demo message filtering with undefined self and return type issues -->
+<!-- fragment: partial message filtering example -->
 ```python
 
 
@@ -402,7 +402,7 @@ Understand latency sources:
 
 ### Memory-Efficient Data Storage
 
-<!-- fragment: Demo NamedTuple memory efficiency with missing imports and type issues -->
+<!-- fragment: partial NamedTuple memory efficiency example -->
 ```python
 # Use NamedTuple for memory efficiency
 from typing import NamedTuple
@@ -429,7 +429,7 @@ price_data = FastPrice(Decimal("1.1234"), Decimal("1.1236"), time.perf_counter()
 
 Process multiple updates together when possible:
 
-<!-- fragment: Demo batch processing with undefined self and missing import patterns -->
+<!-- fragment: partial batch processing example -->
 ```python
 async def batch_process_prices(self, prices: List[ClientPrice]) -> Any:
     """Process multiple prices in a batch for efficiency."""

@@ -1,13 +1,21 @@
 """Integration test configuration and fixtures."""
 
+import asyncio
+import hashlib
 import os
+import re
 from decimal import Decimal
 from pathlib import Path
+from typing import Any
 
 import pytest
 from dotenv import load_dotenv
 
 from fivetwenty import AsyncClient, Client, Environment
+from tests.integration.helpers import cleanup_error_message, is_tolerated_cleanup_error
+
+CLIENT_REQUEST_ID_PREFIX = "fivetwenty-itest"
+SAFETY_SWEEP_ATTEMPTS = 3
 
 # Load .env file from project root if it exists
 env_path = Path(__file__).parent.parent.parent / ".env"
@@ -27,8 +35,122 @@ def integration_config():
     }
 
 
+def _resource_id(resource: Any) -> str | None:
+    """Extract an OANDA resource id from a dict or model."""
+    if isinstance(resource, dict):
+        value = resource.get("id")
+    else:
+        value = getattr(resource, "id", None)
+    return str(value) if value is not None else None
+
+
+async def _pending_order_ids(client: AsyncClient, account_id: str) -> set[str]:
+    """Return currently pending order ids for safety checks."""
+    response = await client.orders.get_pending_orders(account_id)
+    orders = response.get("orders", []) if isinstance(response, dict) else []
+    return {order_id for order in orders if (order_id := _resource_id(order))}
+
+
+async def _open_trade_ids(client: AsyncClient, account_id: str) -> set[str]:
+    """Return currently open trade ids for safety checks."""
+    response = await client.trades.get_open_trades(account_id)
+    trades = response.get("trades", []) if isinstance(response, dict) else []
+    return {trade_id for trade in trades if (trade_id := _resource_id(trade))}
+
+
+async def _read_account_ids(label: str, read_ids) -> set[str] | None:
+    """Read account resource ids with short retries for transient live API failures."""
+    last_error: Exception | None = None
+    for attempt in range(SAFETY_SWEEP_ATTEMPTS):
+        try:
+            return await read_ids()
+        except Exception as exc:
+            last_error = exc
+            if attempt < SAFETY_SWEEP_ATTEMPTS - 1:
+                await asyncio.sleep(0.5 * (attempt + 1))
+
+    print(f"⚠ Could not read {label} for integration safety sweep: {type(last_error).__name__}: {last_error}")
+    return None
+
+
+async def _safe_pending_order_ids(client: AsyncClient, account_id: str) -> set[str] | None:
+    """Return pending order ids, or None when live API state cannot be read."""
+    return await _read_account_ids("pending orders", lambda: _pending_order_ids(client, account_id))
+
+
+async def _safe_open_trade_ids(client: AsyncClient, account_id: str) -> set[str] | None:
+    """Return open trade ids, or None when live API state cannot be read."""
+    return await _read_account_ids("open trades", lambda: _open_trade_ids(client, account_id))
+
+
+async def _cleanup_pending_orders(client: AsyncClient, account_id: str, order_ids: set[str]) -> tuple[int, list[str]]:
+    """Cancel pending orders and return cleanup count plus non-tolerated errors."""
+    cleanup_count = 0
+    cleanup_errors: list[str] = []
+    for order_id in sorted(order_ids):
+        try:
+            order_response = await client.orders.get_order(account_id, order_id)
+            if order_response and "order" in order_response and order_response["order"].get("state") == "PENDING":
+                await client.orders.cancel_order(account_id, order_id)
+                cleanup_count += 1
+        except Exception as exc:
+            if not is_tolerated_cleanup_error(exc):
+                cleanup_errors.append(cleanup_error_message("order", order_id, exc))
+    return cleanup_count, cleanup_errors
+
+
+async def _cleanup_open_trades(client: AsyncClient, account_id: str, trade_ids: set[str]) -> tuple[int, list[str]]:
+    """Close open trades and return cleanup count plus non-tolerated errors."""
+    cleanup_count = 0
+    cleanup_errors: list[str] = []
+    for trade_id in sorted(trade_ids):
+        try:
+            close_response = await client.trades.close_trade(account_id=account_id, trade_specifier=trade_id)
+            if close_response:
+                cleanup_count += 1
+        except Exception as exc:
+            if not is_tolerated_cleanup_error(exc):
+                cleanup_errors.append(cleanup_error_message("trade", trade_id, exc))
+    return cleanup_count, cleanup_errors
+
+
+async def _cleanup_new_account_state(client: AsyncClient, account_id: str, preflight_pending_orders: set[str], preflight_open_trades: set[str]) -> tuple[int, int, list[str], bool]:
+    """Clean up account state created after preflight.
+
+    Returns order count, trade count, cleanup errors, and whether the postflight
+    sweep could be read. A failed sweep is treated as inconclusive instead of a
+    teardown failure because the live API can drop connections after long tests.
+    """
+    postflight_pending_orders = await _safe_pending_order_ids(client, account_id)
+    postflight_open_trades = await _safe_open_trade_ids(client, account_id)
+    if postflight_pending_orders is None or postflight_open_trades is None:
+        return 0, 0, [], False
+
+    leaked_orders = postflight_pending_orders - preflight_pending_orders
+    leaked_trades = postflight_open_trades - preflight_open_trades
+    order_cleanup_count, order_cleanup_errors = await _cleanup_pending_orders(client, account_id, leaked_orders)
+    trade_cleanup_count, trade_cleanup_errors = await _cleanup_open_trades(client, account_id, leaked_trades)
+    cleanup_errors = [*order_cleanup_errors, *trade_cleanup_errors]
+
+    return order_cleanup_count, trade_cleanup_count, cleanup_errors, True
+
+
+def _client_request_id_factory(nodeid: str):
+    """Create deterministic, short ClientRequestID values for a pytest node."""
+    node_hash = hashlib.sha1(nodeid.encode("utf-8")).hexdigest()[:10]
+    counter = 0
+
+    def make_client_request_id(existing: str | None = None) -> str:
+        nonlocal counter
+        counter += 1
+        suffix = re.sub(r"[^A-Za-z0-9_-]+", "-", existing or "request").strip("-")[:48]
+        return f"{CLIENT_REQUEST_ID_PREFIX}-{node_hash}-{counter}-{suffix}"[:128]
+
+    return make_client_request_id
+
+
 @pytest.fixture
-async def sandbox_client_no_cleanup(integration_config):
+async def sandbox_client_no_cleanup(integration_config, test_account_id):
     """Async client configured for sandbox testing WITHOUT automatic cleanup."""
     if not integration_config["token"]:
         pytest.skip("FIVETWENTY_OANDA_TOKEN environment variable not set")
@@ -36,11 +158,28 @@ async def sandbox_client_no_cleanup(integration_config):
         pytest.skip("FIVETWENTY_OANDA_ACCOUNT environment variable not set")
 
     async with AsyncClient(token=integration_config["token"], account_id=integration_config["account_id"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
+        preflight_pending_orders = await _safe_pending_order_ids(client, test_account_id)
+        preflight_open_trades = await _safe_open_trade_ids(client, test_account_id)
+        if preflight_pending_orders is None or preflight_open_trades is None:
+            pytest.skip("Could not capture live account preflight state")
         yield client
+
+        postflight_pending_orders = await _safe_pending_order_ids(client, test_account_id)
+        postflight_open_trades = await _safe_open_trade_ids(client, test_account_id)
+        if postflight_pending_orders is None or postflight_open_trades is None:
+            print("⚠ Could not verify postflight live account state")
+            return
+        new_orders = postflight_pending_orders - preflight_pending_orders
+        new_trades = postflight_open_trades - preflight_open_trades
+        if new_orders or new_trades:
+            pytest.fail(
+                f"Live integration test left account state behind: pending_orders={sorted(new_orders)}, open_trades={sorted(new_trades)}",
+                pytrace=False,
+            )
 
 
 @pytest.fixture
-async def sandbox_client(integration_config, test_account_id):
+async def sandbox_client(integration_config, test_account_id, request: pytest.FixtureRequest):
     """Async client with automatic order and trade cleanup enabled by default."""
     if not integration_config["token"]:
         pytest.skip("FIVETWENTY_OANDA_TOKEN environment variable not set")
@@ -48,8 +187,13 @@ async def sandbox_client(integration_config, test_account_id):
         pytest.skip("FIVETWENTY_OANDA_ACCOUNT environment variable not set")
 
     async with AsyncClient(token=integration_config["token"], account_id=integration_config["account_id"], environment=integration_config["environment"], timeout=integration_config["timeout"], max_retries=integration_config["max_retries"]) as client:
-        created_order_ids = []
-        created_trade_ids = []
+        created_order_ids: list[str] = []
+        created_trade_ids: list[str] = []
+        make_client_request_id = _client_request_id_factory(request.node.nodeid)
+        preflight_pending_orders = await _safe_pending_order_ids(client, test_account_id)
+        preflight_open_trades = await _safe_open_trade_ids(client, test_account_id)
+        if preflight_pending_orders is None or preflight_open_trades is None:
+            pytest.skip("Could not capture live account preflight state")
 
         # Store original methods
         original_post_limit_order = client.orders.post_limit_order
@@ -60,6 +204,7 @@ async def sandbox_client(integration_config, test_account_id):
 
         async def track_order_creation(original_method, *args, **kwargs):
             """Wrapper to track order creation."""
+            kwargs["client_request_id"] = make_client_request_id(kwargs.get("client_request_id"))
             response = await original_method(*args, **kwargs)
             if response and hasattr(response, "order_create_transaction") and response.order_create_transaction:
                 order_id = response.order_create_transaction.get("id")
@@ -92,30 +237,42 @@ async def sandbox_client(integration_config, test_account_id):
         # Cleanup
         order_cleanup_count = 0
         trade_cleanup_count = 0
+        cleanup_errors: list[str] = []
 
-        # Clean up orders
-        for order_id in created_order_ids:
-            try:
-                order_response = await client.orders.get_order(test_account_id, order_id)
-                if order_response and "order" in order_response:
-                    order = order_response["order"]
-                    if order.get("state") == "PENDING":
-                        await client.orders.cancel_order(test_account_id, order_id)
-                        order_cleanup_count += 1
-            except Exception:
-                pass  # Order may already be cancelled or filled
+        tracked_order_cleanup_count, tracked_order_errors = await _cleanup_pending_orders(client, test_account_id, set(created_order_ids))
+        tracked_trade_cleanup_count, tracked_trade_errors = await _cleanup_open_trades(client, test_account_id, set(created_trade_ids))
+        order_cleanup_count += tracked_order_cleanup_count
+        trade_cleanup_count += tracked_trade_cleanup_count
+        cleanup_errors.extend(tracked_order_errors)
+        cleanup_errors.extend(tracked_trade_errors)
 
-        # Clean up trades
-        for trade_id in created_trade_ids:
-            try:
-                close_response = await client.trades.close_trade(account_id=test_account_id, trade_specifier=trade_id)
-                if close_response:
-                    trade_cleanup_count += 1
-            except Exception:
-                pass  # Trade may already be closed
+        sweep_order_count, sweep_trade_count, sweep_errors, sweep_completed = await _cleanup_new_account_state(client, test_account_id, preflight_pending_orders, preflight_open_trades)
+        order_cleanup_count += sweep_order_count
+        trade_cleanup_count += sweep_trade_count
+        cleanup_errors.extend(sweep_errors)
 
         if order_cleanup_count > 0 or trade_cleanup_count > 0:
             print(f"✓ Auto-cleaned up {order_cleanup_count} orders and {trade_cleanup_count} trades")
+
+        if cleanup_errors:
+            pytest.fail("Automatic integration cleanup failed:\n" + "\n".join(cleanup_errors), pytrace=False)
+
+        if not sweep_completed:
+            print("⚠ Could not verify postflight live account state after cleanup")
+            return
+
+        final_pending_orders = await _safe_pending_order_ids(client, test_account_id)
+        final_open_trades = await _safe_open_trade_ids(client, test_account_id)
+        if final_pending_orders is None or final_open_trades is None:
+            print("⚠ Could not verify final live account state after cleanup")
+            return
+        leaked_orders = final_pending_orders - preflight_pending_orders
+        leaked_trades = final_open_trades - preflight_open_trades
+        if leaked_orders or leaked_trades:
+            pytest.fail(
+                f"Live integration test left account state behind after cleanup: pending_orders={sorted(leaked_orders)}, open_trades={sorted(leaked_trades)}",
+                pytrace=False,
+            )
 
 
 # Alias for backward compatibility
@@ -223,6 +380,7 @@ class CleanupTracker:
         self.account_id = account_id
         self.created_orders = []
         self.created_trades = []
+        self.cleanup_errors: list[str] = []
 
     def track_order(self, order_id):
         """Track an order for cleanup."""
@@ -247,8 +405,9 @@ class CleanupTracker:
                         await self.client.orders.cancel_order(self.account_id, order_id)
                         cleanup_count += 1
                 self.created_orders.remove(order_id)
-            except Exception:
-                # Order may already be filled, cancelled, or non-existent - remove from tracking
+            except Exception as exc:
+                if not is_tolerated_cleanup_error(exc):
+                    self.cleanup_errors.append(cleanup_error_message("order", order_id, exc))
                 self.created_orders.remove(order_id)
         return cleanup_count
 
@@ -262,8 +421,9 @@ class CleanupTracker:
                 if close_response:
                     cleanup_count += 1
                 self.created_trades.remove(trade_id)
-            except Exception:
-                # Trade may already be closed or non-existent - remove from tracking
+            except Exception as exc:
+                if not is_tolerated_cleanup_error(exc):
+                    self.cleanup_errors.append(cleanup_error_message("trade", trade_id, exc))
                 self.created_trades.remove(trade_id)
         return cleanup_count
 
@@ -271,7 +431,7 @@ class CleanupTracker:
         """Clean up all tracked orders and trades."""
         orders_cleaned = await self.cleanup_orders()
         trades_cleaned = await self.cleanup_trades()
-        return orders_cleaned, trades_cleaned
+        return orders_cleaned, trades_cleaned, self.cleanup_errors
 
 
 @pytest.fixture
@@ -282,12 +442,11 @@ async def cleanup_tracker(sandbox_client, test_account_id):
     yield tracker
 
     # Cleanup after test
-    try:
-        orders_cleaned, trades_cleaned = await tracker.cleanup_all()
-        if orders_cleaned > 0 or trades_cleaned > 0:
-            print(f"✓ Cleaned up {orders_cleaned} orders and {trades_cleaned} trades")
-    except Exception as e:
-        print(f"⚠ Cleanup failed: {type(e).__name__}")
+    orders_cleaned, trades_cleaned, cleanup_errors = await tracker.cleanup_all()
+    if orders_cleaned > 0 or trades_cleaned > 0:
+        print(f"✓ Cleaned up {orders_cleaned} orders and {trades_cleaned} trades")
+    if cleanup_errors:
+        pytest.fail("Tracked integration cleanup failed:\n" + "\n".join(cleanup_errors), pytrace=False)
 
 
 @pytest.fixture
@@ -329,6 +488,7 @@ async def auto_cleanup_orders(sandbox_client, test_account_id):
 
     # Cleanup
     cleanup_count = 0
+    cleanup_errors: list[str] = []
     for order_id in created_order_ids:
         try:
             order_response = await sandbox_client.orders.get_order(test_account_id, order_id)
@@ -337,8 +497,11 @@ async def auto_cleanup_orders(sandbox_client, test_account_id):
                 if order.get("state") == "PENDING":
                     await sandbox_client.orders.cancel_order(test_account_id, order_id)
                     cleanup_count += 1
-        except Exception:
-            pass  # Order may already be cancelled or filled
+        except Exception as exc:
+            if not is_tolerated_cleanup_error(exc):
+                cleanup_errors.append(cleanup_error_message("order", order_id, exc))
 
     if cleanup_count > 0:
         print(f"✓ Auto-cleaned up {cleanup_count} orders")
+    if cleanup_errors:
+        pytest.fail("Automatic order cleanup failed:\n" + "\n".join(cleanup_errors), pytrace=False)

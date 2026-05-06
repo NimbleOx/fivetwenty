@@ -1,5 +1,5 @@
 [build-system]
-requires = ["setuptools>=61.0"]
+requires = ["setuptools>=77.0.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -8,7 +8,8 @@ version = "0.3.1"
 description = "Simple, elegant Python client for OANDA's REST API v20"
 readme = "README.md"
 requires-python = ">=3.10"
-license = {text = "MIT"}
+license = "MIT"
+license-files = ["LICENSE"]
 authors = [
     {name = "FiveTwenty Contributors"}
 ]
@@ -17,7 +18,6 @@ classifiers = [
     "Development Status :: 4 - Beta",
     "Intended Audience :: Developers",
     "Intended Audience :: Financial and Insurance Industry",
-    "License :: OSI Approved :: MIT License",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
@@ -247,31 +247,34 @@ dev = [
 [tool.poe.tasks]
 # Testing tasks
 test = "python -m pytest tests/unit/"
-test-integration = "python -m pytest tests/integration/"
+test-integration = "python -m pytest tests/integration/ --run-integration-live"
+test-integration-live = "python -m pytest tests/integration/ --run-integration-live"
 
 # Code quality tasks
 lint = "ruff check ."
 lint-fix = "ruff check --fix ."
 format = "ruff format ."
-typecheck = "uv run mypy fivetwenty/ docs/examples/"
+typecheck = "uv run mypy --explicit-package-bases fivetwenty/ docs/examples/ docs_validation/src tests/"
 
 # Development tasks
 dev-install = "uv sync --group dev"
 sync = "uv sync"
 build = "python -m build"
+package-check = "uv run python scripts/check_package.py"
 
 # Documentation tasks
 docs-serve = "python -m mkdocs serve"
 docs-build = "python -m mkdocs build --clean"
 
 # Documentation validation tasks
-# `docs-validate-existing` runs the file-by-file validators (syntax, lint, types, links, etc.)
+# `docs-validate-files` runs file-level validators for markdown, code blocks, links, security, etc.
 # `docs-validate-parity` runs the parity pipeline (library ↔ live OANDA ↔ project docs)
+# `docs-validate-parity-refresh` refreshes the cached live OANDA docs before running parity.
 # `docs-validate` runs both in sequence so a single command catches everything.
-docs-validate-existing = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
+docs-validate-files = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
 docs-validate-parity = "uv run python -m docs_validation.src.parity.run_all --no-fetch"
 docs-validate-parity-refresh = "uv run python -m docs_validation.src.parity.run_all --refresh"
-docs-validate = ["docs-validate-existing", "docs-validate-parity"]
+docs-validate = ["docs-validate-files", "docs-validate-parity"]
 
 # YAML tasks
 yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/workflows/ docs/api-reference/openapi.yaml"
@@ -279,9 +282,11 @@ yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/workflows/ docs
 # Workflow tasks
 check-fast = ["format", "lint", "typecheck", "test"]
 check-full = ["format", "lint", "typecheck", "test", "docs-validate"]
+release-check = ["check-full", "yaml-lint", "docs-build", "package-check"]
 
 # Release tasks
 clean-dist = "rm -rf dist/ build/ *.egg-info"
+twine-check = "uv run python -m twine check dist/*"
 
 bump-version = "uv run python scripts/bump_version.py"
 
@@ -298,7 +303,7 @@ interpreter = "bash"
 
 [tool.poe.tasks.publish-pypi]
 help = "Clean, build, and upload the package to PyPI"
-sequence = ["clean-dist", "build", "_publish-pypi-upload"]
+sequence = ["clean-dist", "build", "twine-check", "_publish-pypi-upload"]
 
 [tool.poe.tasks.release-github]
 shell = """
@@ -313,6 +318,7 @@ sequence = [
     "bump-version",
     "clean-dist",
     "build",
+    "twine-check",
     "_publish-pypi-upload",
     "release-github"
 ]

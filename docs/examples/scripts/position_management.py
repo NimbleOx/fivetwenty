@@ -387,7 +387,7 @@ async def main() -> None:
         # - But you have BOTH a long and short position simultaneously
         #
         # To close EVERYTHING at once:
-        # Call close_position() with NO parameters (no long_units, no short_units)
+        # Call close_position() with both long_units="ALL" and short_units="ALL"
         # This closes BOTH sides in a single operation
         #
         # Why close both sides?
@@ -413,10 +413,15 @@ async def main() -> None:
 
         print("Closing entire EUR/USD position (both sides)...")
 
-        # close_position() with NO parameters closes EVERYTHING
+        # close_position() with both side parameters closes EVERYTHING
         # Behind the scenes: Places two market orders (one for long, one for short)
         # Both orders execute simultaneously at current market prices
-        close_all = await client.positions.close_position(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
+        close_all = await client.positions.close_position(
+            account_id=client.account_id,
+            instrument=InstrumentName.EUR_USD,
+            long_units="ALL",
+            short_units="ALL",
+        )
 
         # Calculate total P/L from both sides
         # Important: Use Decimal for financial calculations (never float)

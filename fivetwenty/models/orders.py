@@ -12,8 +12,8 @@ from pydantic import Field
 
 from .base import ApiModel
 from .enums import (
-    AccountUnits,
     InstrumentName,
+    MarketOrderMarginCloseoutReason,
     OrderID,
     OrderPositionFill,
     OrderState,
@@ -71,7 +71,6 @@ class GuaranteedStopLossDetails(ApiModel):
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(alias="gtdTime", default=None)
     client_extensions: ClientExtensions | None = Field(alias="clientExtensions", default=None)
-    guaranteed_execution_premium: AccountUnits | None = Field(None, alias="guaranteedExecutionPremium")
 
 
 class MarketOrderTradeClose(ApiModel):
@@ -79,20 +78,20 @@ class MarketOrderTradeClose(ApiModel):
 
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
-    units: Decimal
+    units: str
 
 
 class MarketOrderPositionCloseout(ApiModel):
     """Details for position closeout via market order."""
 
     instrument: InstrumentName
-    units: Decimal
+    units: str
 
 
 class MarketOrderMarginCloseout(ApiModel):
     """Details for margin closeout market order."""
 
-    reason: str
+    reason: MarketOrderMarginCloseoutReason
 
 
 class MarketOrderDelayedTradeClose(ApiModel):
@@ -101,6 +100,13 @@ class MarketOrderDelayedTradeClose(ApiModel):
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     source_transaction_id: TransactionID = Field(alias="sourceTransactionID")
+
+
+class OrderIdentifier(ApiModel):
+    """Reference to an order by OANDA ID and optional client order ID."""
+
+    order_id: OrderID | None = Field(None, alias="orderID")
+    client_order_id: str | None = Field(None, alias="clientOrderID")
 
 
 class MarketOrderRequest(ApiModel):
@@ -313,12 +319,12 @@ class MarketOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Market order specific fields
-    type: str = Field(default="MARKET", frozen=True)
+    type: OrderType = Field(default=OrderType.MARKET, frozen=True)
     instrument: InstrumentName
     units: Decimal
-    time_in_force: TimeInForce = Field(alias="timeInForce")
+    time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.FOK)
     price_bound: PriceValue | None = Field(None, alias="priceBound")
-    position_fill: OrderPositionFill = Field(alias="positionFill")
+    position_fill: OrderPositionFill = Field(alias="positionFill", default=OrderPositionFill.DEFAULT)
 
     # Trade close details (conditional)
     trade_close: MarketOrderTradeClose | None = Field(None, alias="tradeClose")
@@ -354,14 +360,14 @@ class LimitOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Limit order specific fields
-    type: str = Field(default="LIMIT", frozen=True)
+    type: OrderType = Field(default=OrderType.LIMIT, frozen=True)
     instrument: InstrumentName
     units: Decimal
     price: PriceValue
-    time_in_force: TimeInForce = Field(alias="timeInForce")
+    time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(None, alias="gtdTime")
-    position_fill: OrderPositionFill = Field(alias="positionFill")
-    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition")
+    position_fill: OrderPositionFill = Field(alias="positionFill", default=OrderPositionFill.DEFAULT)
+    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition", default=OrderTriggerCondition.DEFAULT)
 
     # On-fill order details
     take_profit_on_fill: TakeProfitDetails | None = Field(None, alias="takeProfitOnFill")
@@ -392,15 +398,15 @@ class StopOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Stop order specific fields
-    type: str = Field(default="STOP", frozen=True)
+    type: OrderType = Field(default=OrderType.STOP, frozen=True)
     instrument: InstrumentName
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(None, alias="priceBound")
-    time_in_force: TimeInForce = Field(alias="timeInForce")
+    time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(None, alias="gtdTime")
-    position_fill: OrderPositionFill = Field(alias="positionFill")
-    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition")
+    position_fill: OrderPositionFill = Field(alias="positionFill", default=OrderPositionFill.DEFAULT)
+    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition", default=OrderTriggerCondition.DEFAULT)
 
     # On-fill order details
     take_profit_on_fill: TakeProfitDetails | None = Field(None, alias="takeProfitOnFill")
@@ -431,15 +437,15 @@ class MarketIfTouchedOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Market-if-touched order specific fields
-    type: str = Field(default="MARKET_IF_TOUCHED", frozen=True)
+    type: OrderType = Field(default=OrderType.MARKET_IF_TOUCHED, frozen=True)
     instrument: InstrumentName
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(None, alias="priceBound")
-    time_in_force: TimeInForce = Field(alias="timeInForce")
+    time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(None, alias="gtdTime")
-    position_fill: OrderPositionFill = Field(alias="positionFill")
-    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition")
+    position_fill: OrderPositionFill = Field(alias="positionFill", default=OrderPositionFill.DEFAULT)
+    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition", default=OrderTriggerCondition.DEFAULT)
     initial_market_price: PriceValue | None = Field(None, alias="initialMarketPrice")
 
     # On-fill order details
@@ -471,13 +477,13 @@ class TakeProfitOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Take profit order specific fields
-    type: str = Field(default="TAKE_PROFIT", frozen=True)
+    type: OrderType = Field(default=OrderType.TAKE_PROFIT, frozen=True)
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     price: PriceValue
-    time_in_force: TimeInForce = Field(alias="timeInForce")
+    time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(None, alias="gtdTime")
-    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition")
+    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition", default=OrderTriggerCondition.DEFAULT)
 
     # Fill/cancel state fields (when FILLED or CANCELLED)
     filling_transaction_id: TransactionID | None = Field(None, alias="fillingTransactionID")
@@ -501,15 +507,15 @@ class StopLossOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Stop loss order specific fields
-    type: str = Field(default="STOP_LOSS", frozen=True)
+    type: OrderType = Field(default=OrderType.STOP_LOSS, frozen=True)
     guaranteed_execution_premium: Decimal | None = Field(None, alias="guaranteedExecutionPremium")
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     price: PriceValue | None = None
     distance: Decimal | None = None
-    time_in_force: TimeInForce = Field(alias="timeInForce")
+    time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(None, alias="gtdTime")
-    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition")
+    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition", default=OrderTriggerCondition.DEFAULT)
     guaranteed: bool = Field(default=False)
 
     # Fill/cancel state fields (when FILLED or CANCELLED)
@@ -534,14 +540,14 @@ class GuaranteedStopLossOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Guaranteed stop loss order specific fields
-    type: str = Field(default="GUARANTEED_STOP_LOSS", frozen=True)
+    type: OrderType = Field(default=OrderType.GUARANTEED_STOP_LOSS, frozen=True)
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     price: PriceValue
     distance: Decimal | None = None
-    time_in_force: TimeInForce = Field(alias="timeInForce")
+    time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(None, alias="gtdTime")
-    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition")
+    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition", default=OrderTriggerCondition.DEFAULT)
     guaranteed_execution_premium: Decimal | None = Field(None, alias="guaranteedExecutionPremium")
 
     # Fill/cancel state fields (when FILLED or CANCELLED)
@@ -566,13 +572,13 @@ class TrailingStopLossOrder(ApiModel):
     client_extensions: ClientExtensions | None = Field(None, alias="clientExtensions")
 
     # Trailing stop loss order specific fields
-    type: str = Field(default="TRAILING_STOP_LOSS", frozen=True)
+    type: OrderType = Field(default=OrderType.TRAILING_STOP_LOSS, frozen=True)
     trade_id: TradeID = Field(alias="tradeID")
     client_trade_id: str | None = Field(None, alias="clientTradeID")
     distance: Decimal
-    time_in_force: TimeInForce = Field(alias="timeInForce")
+    time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(None, alias="gtdTime")
-    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition")
+    trigger_condition: OrderTriggerCondition = Field(alias="triggerCondition", default=OrderTriggerCondition.DEFAULT)
     trailing_stop_value: PriceValue | None = Field(None, alias="trailingStopValue")
 
     # Fill/cancel state fields (when FILLED or CANCELLED)
@@ -608,6 +614,7 @@ __all__ = [
     # Order request models (for creating orders)
     "MarketOrderRequest",
     "MarketOrderTradeClose",
+    "OrderIdentifier",
     "StopLossDetails",
     "StopLossOrder",
     "StopLossOrderRequest",

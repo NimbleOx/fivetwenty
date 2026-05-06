@@ -19,21 +19,11 @@ import sys
 from pathlib import Path
 from typing import Any
 
+from .ast_utils import ann_to_str, base_name, value_to_str
+
 REPO_ROOT = Path(__file__).resolve().parents[3]
 MODELS_DIR = REPO_ROOT / "fivetwenty" / "models"
 CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "parity"
-
-
-def _ann_to_str(node: ast.AST | None) -> str:
-    if node is None:
-        return ""
-    return ast.unparse(node)
-
-
-def _value_to_str(node: ast.AST | None) -> str:
-    if node is None:
-        return ""
-    return ast.unparse(node)
 
 
 def _parse_field_default(default_node: ast.AST | None) -> tuple[str | None, str | None, bool]:
@@ -55,21 +45,21 @@ def _parse_field_default(default_node: ast.AST | None) -> tuple[str | None, str 
     if isinstance(default_node, ast.Call) and isinstance(default_node.func, ast.Name) and default_node.func.id == "Field":
         # First positional arg, if any, is the default
         if default_node.args:
-            default_repr = _value_to_str(default_node.args[0])
+            default_repr = value_to_str(default_node.args[0])
             if default_repr == "None":
                 is_optional = True
         for kw in default_node.keywords:
             if kw.arg == "alias":
-                alias = _value_to_str(kw.value).strip("\"'")
+                alias = value_to_str(kw.value).strip("\"'")
             elif kw.arg == "default":
-                default_repr = _value_to_str(kw.value)
+                default_repr = value_to_str(kw.value)
                 if default_repr == "None":
                     is_optional = True
             elif kw.arg == "default_factory":
-                default_repr = f"factory:{_value_to_str(kw.value)}"
+                default_repr = f"factory:{value_to_str(kw.value)}"
         return (alias, default_repr, is_optional)
 
-    default_repr = _value_to_str(default_node)
+    default_repr = value_to_str(default_node)
     if default_repr == "None":
         is_optional = True
     return (None, default_repr, is_optional)
@@ -92,7 +82,7 @@ def _is_pydantic_model(node: ast.ClassDef, *, known_models: set[str] | None = No
     """
     known_models = known_models or set()
     for base in node.bases:
-        base_str = _ann_to_str(base)
+        base_str = ann_to_str(base)
         if base_str in {"ApiModel", "BaseModel"}:
             return True
         if base_str.endswith("ApiModel") or base_str.endswith("BaseModel"):
@@ -104,19 +94,19 @@ def _is_pydantic_model(node: ast.ClassDef, *, known_models: set[str] | None = No
 
 def _is_enum(node: ast.ClassDef) -> bool:
     for base in node.bases:
-        base_str = _ann_to_str(base)
+        base_str = ann_to_str(base)
         if base_str in {"Enum", "str", "IntEnum", "StrEnum"}:
             continue
         if base_str.endswith("Enum"):
             return True
     # str+Enum pattern: class X(str, Enum)
-    base_strs = {_ann_to_str(b) for b in node.bases}
+    base_strs = {ann_to_str(b) for b in node.bases}
     return "Enum" in base_strs or "IntEnum" in base_strs or "StrEnum" in base_strs
 
 
 def _is_typeddict(node: ast.ClassDef) -> bool:
     for base in node.bases:
-        if _ann_to_str(base) == "TypedDict":
+        if ann_to_str(base) == "TypedDict":
             return True
     return False
 
@@ -127,8 +117,10 @@ def extract_module(path: Path) -> dict[str, Any]:
     out: dict[str, Any] = {
         "source_file": str(path.relative_to(REPO_ROOT)),
         "models": {},
+        "model_bases": {},
         "enums": {},
         "typeddicts": {},
+        "typeddict_bases": {},
         "type_aliases": {},
         "exports": [],
     }
@@ -149,26 +141,28 @@ def extract_module(path: Path) -> dict[str, Any]:
         if not added:
             break
 
-    for node in tree.body:
-        if isinstance(node, ast.ClassDef):
-            if _is_typeddict(node):
-                out["typeddicts"][node.name] = _extract_class_fields(node)
-            elif _is_enum(node):
-                out["enums"][node.name] = _extract_enum_values(node)
-            elif node.name in pydantic_classes:
-                out["models"][node.name] = _extract_class_fields(node)
-        elif isinstance(node, ast.Assign):
+    for item in tree.body:
+        if isinstance(item, ast.ClassDef):
+            if _is_typeddict(item):
+                out["typeddicts"][item.name] = _extract_class_fields(item)
+                out["typeddict_bases"][item.name] = [base_name(b) for b in item.bases]
+            elif _is_enum(item):
+                out["enums"][item.name] = _extract_enum_values(item)
+            elif item.name in pydantic_classes:
+                out["models"][item.name] = _extract_class_fields(item)
+                out["model_bases"][item.name] = [base_name(b) for b in item.bases]
+        elif isinstance(item, ast.Assign):
             # Module-level assignments: __all__ exports + simple type aliases
-            for target in node.targets:
+            for target in item.targets:
                 if isinstance(target, ast.Name):
-                    if target.id == "__all__" and isinstance(node.value, (ast.List, ast.Tuple)):
-                        out["exports"] = [elt.value for elt in node.value.elts if isinstance(elt, ast.Constant)]
+                    if target.id == "__all__" and isinstance(item.value, (ast.List, ast.Tuple)):
+                        out["exports"] = [elt.value for elt in item.value.elts if isinstance(elt, ast.Constant)]
                     else:
                         # Simple type alias e.g. `OrderID = str`
-                        out["type_aliases"][target.id] = _value_to_str(node.value)
-        elif isinstance(node, ast.AnnAssign) and isinstance(node.target, ast.Name):
+                        out["type_aliases"][target.id] = value_to_str(item.value)
+        elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
             # Module-level annotated alias e.g. `OrderID: TypeAlias = str`
-            out["type_aliases"][node.target.id] = _ann_to_str(node.annotation) or ""
+            out["type_aliases"][item.target.id] = ann_to_str(item.annotation) or ""
 
     return out
 
@@ -178,7 +172,7 @@ def _extract_class_fields(node: ast.ClassDef) -> dict[str, Any]:
     for item in node.body:
         if isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
             field_name = item.target.id
-            ann = _ann_to_str(item.annotation)
+            ann = ann_to_str(item.annotation)
             alias, default_repr, default_is_none = _parse_field_default(item.value)
             optional = _is_optional_annotation(ann) or default_is_none or default_repr is not None
             # If a default exists but isn't None, the field is "optional in construction"
@@ -200,9 +194,9 @@ def _extract_enum_values(node: ast.ClassDef) -> dict[str, Any]:
         if isinstance(item, ast.Assign):
             for target in item.targets:
                 if isinstance(target, ast.Name):
-                    values[target.id] = _value_to_str(item.value)
+                    values[target.id] = value_to_str(item.value)
         elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
-            values[item.target.id] = _value_to_str(item.value) if item.value else ""
+            values[item.target.id] = value_to_str(item.value) if item.value else ""
     return {"values": values, "line": node.lineno}
 
 

@@ -1,414 +1,384 @@
-# FiveTwenty Documentation Validation System
+# Documentation Validation
 
-A comprehensive validation framework for the FiveTwenty SDK documentation, ensuring high-quality, accurate, and maintainable documentation with automated quality checks.
+This directory contains the validation tools for FiveTwenty documentation. The
+system has two separate jobs:
 
-## 🚀 Quick Start
+1. Validate documentation files as authored: markdown structure, Python examples,
+   links, security checks, financial precision, SDK method usage, and selected
+   executable examples.
+2. Validate API parity: compare the SDK and project docs against the official
+   OANDA REST v20 documentation.
+
+The official OANDA REST v20 documentation is the source of truth for parity
+validation:
+
+```text
+https://developer.oanda.com/rest-live-v20/
+```
+
+## Quick Start
+
+Run the default documentation validation from the repository root:
 
 ```bash
-# Install dependencies
-uv sync
-
-# Run validation on all documentation
-uv run python -m docs_validation.src.cli validate
-
-# Use specific configuration
-uv run python -m docs_validation.src.cli validate --config config/validation-complete.yml
-
-# Validate specific files
-uv run python -m docs_validation.src.cli validate --files "docs/tutorials/getting-started/authentication.md"
-
-# Run validation in parallel for better performance
-uv run python -m docs_validation.src.cli validate --parallel --max-workers 8
+uv run poe docs-validate
 ```
 
-## 📋 Features
-
-### 🔍 Comprehensive Validation
-
-- **Python Syntax Validation** - Ensures all Python code blocks are syntactically correct
-- **Code Linting** - Enforces Python best practices using Ruff linter with comprehensive rule set
-- **Type Checking** - Validates type safety using MyPy in strict mode
-- **Cross-Reference Validation** - Checks internal documentation links and references
-- **Security Scanning** - Detects exposed credentials and security vulnerabilities
-- **Financial Precision** - Ensures proper Decimal usage for monetary values
-- **Markdown Syntax** - Validates markdown structure and formatting
-- **SDK Method Validation** - Verifies SDK usage patterns and method calls
-
-### 🎯 Smart Code Analysis
-
-- **Automatic Import Enhancement** - Adds common FiveTwenty imports to code examples
-- **Placeholder Detection** - Automatically skips validation for placeholder code
-- **Fragment Marking System** - HTML comment-based control over validation behavior
-- **Context-Aware Suggestions** - Provides specific fix recommendations for each issue
-
-### 📊 Rich Reporting
-
-- **Detailed Markdown Reports** - Comprehensive analysis with actionable insights
-- **Real-time Progress** - Visual progress indicators during validation
-- **Quality Metrics** - Success rates, error counts, and performance statistics
-- **Issue Classification** - Categorized by severity (errors, warnings, info)
-
-## 🛠 Installation & Setup
-
-### Prerequisites
-
-- Python 3.11+
-- uv package manager
-- FiveTwenty SDK development environment
-
-### Install Dependencies
+That runs both validation tracks:
 
 ```bash
-# From the docs_validation directory
-uv sync
-
-# Install additional development tools (optional)
-uv sync --extra dev
+uv run poe docs-validate-files
+uv run poe docs-validate-parity
 ```
 
-## 📚 Usage Guide
-
-### Basic Commands
+Use the refresh task when you want to pull a fresh copy of the live OANDA docs
+before running parity:
 
 ```bash
-# Run all validators on entire documentation
-uv run python -m docs_validation.src.cli validate
-
-# Use specific configuration
-uv run python -m docs_validation.src.cli validate --config config/validation-complete.yml
-
-# Validate specific files or directories
-uv run python -m docs_validation.src.cli validate --files "docs/tutorials/**/*.md"
-
-# Run in sequential mode (for debugging)
-uv run python -m docs_validation.src.cli validate --sequential
-
-# List available validators
-uv run python -m docs_validation.src.cli list-validators
+uv run poe docs-validate-parity-refresh
 ```
 
-### Configuration
+For a single documentation file, use the CLI directly:
 
-The validation system uses **`config/validation-complete.yml`** for comprehensive analysis with all validators enabled.
-
-### Fragment Marking System
-
-Control validation behavior with HTML comments:
-
-```markdown
-<!-- validation: skip -->
-```python
-# This code block will be skipped entirely
-placeholder_code = "your-api-token"
+```bash
+uv run python -m docs_validation.src.cli validate \
+  --config docs_validation/config/validation-complete.yml \
+  --files docs/tutorials/getting-started/authentication.md
 ```
 
-<!-- validation: skip-linting -->
-```python
-# Only skip linting, allow type checking
-from fivetwenty import AsyncClient  # Import in function (bad style but valid)
+## Validation Tracks
+
+### File-by-file docs validation
+
+Command:
+
+```bash
+uv run python -m docs_validation.src.cli validate \
+  --config docs_validation/config/validation-complete.yml
 ```
 
-See [FRAGMENT_MARKING.md](FRAGMENT_MARKING.md) for complete documentation.
+Configuration:
 
-## 🏗 Architecture
-
-### Core Components
-
+```text
+docs_validation/config/validation-complete.yml
 ```
+
+This track scans authored docs under `docs/**/*.md`. It runs the configured
+validators in `docs_validation/src/validators/`:
+
+- `python_syntax`: syntax-check Python code blocks.
+- `code_linting`: run Ruff against extracted Python examples.
+- `code_typing`: run MyPy-style checks against examples.
+- `code_execution`: execute selected standalone examples with mocked API calls.
+- `cross_references`: validate internal documentation references.
+- `external_links`: check external links.
+- `financial_precision`: catch unsafe numeric patterns in financial examples.
+- `markdown_syntax`: validate markdown structure.
+- `sdk_methods`: verify documented SDK method usage.
+- `security`: detect exposed secrets and unsafe placeholder patterns.
+
+Useful variants:
+
+```bash
+# Force sequential execution while debugging a validator.
+uv run python -m docs_validation.src.cli validate \
+  --config docs_validation/config/validation-complete.yml \
+  --sequential
+
+# Increase parallelism.
+uv run python -m docs_validation.src.cli validate \
+  --config docs_validation/config/validation-complete.yml \
+  --parallel \
+  --max-workers 8
+
+# Validate only changed or targeted files.
+uv run python -m docs_validation.src.cli validate \
+  --config docs_validation/config/validation-complete.yml \
+  --files docs/guides/understanding/best-practices.md
+```
+
+### OANDA parity validation
+
+Command:
+
+```bash
+uv run python -m docs_validation.src.parity.run_all --no-fetch
+```
+
+Refresh command:
+
+```bash
+uv run python -m docs_validation.src.parity.run_all --refresh
+```
+
+The parity pipeline compares three surfaces:
+
+- The SDK implementation in `fivetwenty/`.
+- The project documentation in `docs/api-reference/`, guides, examples, and
+  README content.
+- The cached official OANDA REST v20 pages in `docs_validation/.cache/oanda/`.
+
+`--no-fetch` uses the current local cache and fails if required cached pages are
+missing. `--refresh` fetches live OANDA pages first, converts them into
+parser-friendly markdown, and then runs the parity checks.
+
+Use the strict mode when you want parity drift to fail the command:
+
+```bash
+uv run python -m docs_validation.src.parity.run_all --no-fetch --strict
+```
+
+### Field-level OANDA validation
+
+The strictest parity check is the field validator:
+
+```bash
+uv run python -m docs_validation.src.parity.field_validate
+```
+
+It validates official OANDA definitions against SDK models and response
+TypedDicts. It checks:
+
+- missing official models or SDK equivalents;
+- missing fields;
+- enum value drift;
+- primitive aliases that are not represented in the SDK;
+- requiredness drift;
+- default drift;
+- type drift;
+- broad SDK types such as `dict[str, Any]` where OANDA documents a concrete
+  object type.
+
+Use `--refresh` to refresh only the official definition pages needed by the
+field validator:
+
+```bash
+uv run python -m docs_validation.src.parity.field_validate --refresh
+```
+
+Use `--fail-on` for CI-style thresholds:
+
+```bash
+uv run python -m docs_validation.src.parity.field_validate --fail-on P0
+```
+
+Severity levels:
+
+- `P0`: data-loss or deserialization risk, such as an official field missing
+  from the SDK.
+- `P1`: important enum or primitive representation drift.
+- `P2`: type, requiredness, or default drift that needs review.
+- `P3`: SDK extras or lower-risk drift.
+
+Known parity drift can be waived in:
+
+```text
+docs_validation/config/parity-waivers.yml
+```
+
+Each waiver must name the generated issue code, exact target, reason, source
+URL, expiry date, and optional severity. Active waivers are excluded from the
+field-validation severity summary but are shown in the report. Expired waivers
+do not suppress drift, and unused waivers are reported so stale exceptions get
+cleaned up.
+
+## Reports and Cache
+
+Generated files are intentionally kept out of git:
+
+```text
+docs_validation/reports/
+docs_validation/.cache/
+```
+
+The repository keeps `docs_validation/reports/.gitkeep` so the reports directory
+exists after checkout.
+
+Important generated reports:
+
+- `docs_validation/reports/validation-report.md`: file-by-file validation
+  output.
+- `docs_validation/reports/<domain>-parity.md`: per-domain parity report for
+  accounts, instruments, orders, positions, pricing, trades, and transactions.
+- `docs_validation/reports/enums-parity.md`: enum value-set parity.
+- `docs_validation/reports/tutorials-parity.md`,
+  `guides-parity.md`, `examples-parity.md`, and `readme-parity.md`: docs-surface
+  references against the SDK.
+- `docs_validation/reports/field-validation.md`: strict field-level OANDA
+  validation.
+
+Important cache directories:
+
+- `docs_validation/.cache/oanda/`: fetched official OANDA pages converted to
+  markdown.
+- `docs_validation/.cache/parity/`: extracted JSON surfaces and intermediate
+  diff output.
+
+Do not hand-edit generated reports or cache files. Fix the SDK, project docs, or
+validation tooling, then regenerate the reports.
+
+## Directory Layout
+
+```text
 docs_validation/
-├── src/
-│   ├── cli.py              # Command-line interface
-│   ├── engine.py           # Validation orchestration
-│   ├── config.py           # Configuration management
-│   ├── base.py             # Validator registry and base classes
-│   ├── models.py           # Data models and schemas
-│   ├── reporters/          # Report generation
-│   └── validators/         # Individual validator implementations
-├── config/                 # Validation configuration files
-├── reports/                # Generated validation reports
-└── tests/                  # Comprehensive test suite
+  README.md
+  config/
+    validation-complete.yml
+  reports/
+    .gitkeep
+  src/
+    cli.py
+    engine.py
+    config.py
+    base.py
+    models.py
+    reporters/
+    validators/
+    parity/
+  validation_plans/
 ```
 
-### Validator Architecture
+Key parity modules:
 
-Each validator inherits from `BaseValidator` and implements:
+- `live_oanda_fetch.py`: fetch live OANDA HTML and cache parser-friendly
+  markdown.
+- `extract_oanda_md.py`: extract OANDA definitions and endpoints from cached
+  markdown.
+- `extract_pydantic.py`: extract SDK model, enum, alias, and TypedDict surface.
+- `extract_endpoints.py`: extract SDK endpoint methods and request paths.
+- `extract_doc_tables.py`: extract API reference tables from project docs.
+- `diff.py`: compare extracted surfaces and render markdown/JSON diffs.
+- `run_domain.py`: run parity for one OANDA domain.
+- `run_all.py`: run the full parity pipeline.
+- `field_validate.py`: run strict field-by-field validation.
 
-- `supports_file()` - File type filtering
-- `validate_file()` - Core validation logic
-- `get_file_patterns()` - File discovery patterns
+## Fragment Markers
 
-### Parallel Processing
+Documentation examples can opt out of specific validators with HTML comments
+placed in the three lines before a code block. Fragment markers are an escape
+hatch for intentionally incomplete snippets, placeholder configuration, or
+examples that are built up across multiple blocks. They should not be used to
+hide stale SDK usage or code that should be corrected.
 
-The system supports parallel validation with:
+Example:
 
-- Configurable worker threads
-- Thread-safe validator implementations
-- Efficient resource utilization
-- Progress tracking across workers
-
-## 🔧 Configuration
-
-### Validation Configuration
-
-```yaml
-# config/validation.yml
-validators:
-  code_linting:
-    enabled: true
-    options:
-      severity_filter: 'warning'
-      ignore_rules: ['E501']  # Line length
-
-  code_typing:
-    enabled: true
-    options:
-      strict_mode: false
-      enhanced_imports: true
-
-discovery:
-  include_patterns:
-    - "docs/**/*.md"
-    - "docs/**/*.markdown"
-  exclude_patterns:
-    - "docs/archive/**"
-    - "**/.archive/**"
-
-execution:
-  parallel_execution: true
-  max_workers: 4
-  timeout_seconds: 300
-
-reporting:
-  output_format: "markdown"
-  include_context: true
-  detailed_suggestions: true
-```
-
-### Environment Variables
-
-```bash
-# Optional: Customize validation behavior
-export DOCS_VALIDATION_CONFIG="path/to/custom/config.yml"
-export DOCS_VALIDATION_PARALLEL="true"
-export DOCS_VALIDATION_MAX_WORKERS="8"
-```
-
-## 📊 Validation Reports
-
-### Report Structure
-
-Generated reports include:
-
-1. **Executive Summary** - Overall status and key metrics
-2. **Validator Performance** - Per-validator statistics and timing
-3. **File-Level Analysis** - Issues by file with rankings
-4. **Rule Violation Analysis** - Most common issues and patterns
-5. **Detailed Issue Analysis** - Line-by-line issue breakdown
-6. **Action Plan** - Prioritized recommendations for improvement
-
-### Sample Report Output
-
-```
-📊 Validation Results: ✅ PASSED | 66 files | 95.2% success rate | 23 issues
-
-┏━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━┳━━━━━━━━━┳━━━━━━━━┳━━━━━━━━┳━━━━━━━━━━┓
-┃ Validator           ┃ Files ┃ Success ┃ Issues ┃ Errors ┃ Duration ┃
-┡━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━╇━━━━━━━━━╇━━━━━━━━╇━━━━━━━━╇━━━━━━━━━━┩
-│ code_linting        │    66 │   92.4% │     18 │     18 │   3.2s   │
-│ code_typing         │    66 │   97.0% │      4 │      4 │  12.8s   │
-│ cross_references    │    66 │  100.0% │      0 │      0 │   0.2s   │
-│ security            │    66 │   98.5% │      1 │      1 │   0.8s   │
-└─────────────────────┴───────┴─────────┴────────┴────────┴──────────┘
-```
-
-## 🧪 Testing
-
-### Run Test Suite
-
-```bash
-# Run all tests
-uv run pytest
-
-# Run with coverage
-uv run pytest --cov=src
-
-# Run specific test categories
-uv run pytest tests/unit/
-uv run pytest tests/integration/
-
-# Run tests in parallel
-uv run pytest -n auto
-```
-
-### Test Structure
-
-```
-tests/
-├── unit/
-│   ├── test_validators/     # Individual validator tests
-│   ├── test_engine.py       # Validation engine tests
-│   └── test_config.py       # Configuration tests
-├── integration/
-│   ├── test_cli.py          # CLI integration tests
-│   └── test_full_validation.py  # End-to-end tests
-└── fixtures/
-    ├── sample_docs/         # Test documentation files
-    └── configs/             # Test configurations
-```
-
-## 🚀 Performance
-
-### Optimization Features
-
-- **Parallel Processing** - Multi-threaded validation with configurable workers
-- **Smart Caching** - Validator results caching for repeated runs
-- **File Filtering** - Pattern-based inclusion/exclusion for targeted validation
-- **Incremental Validation** - Validate only changed files in CI/CD pipelines
-- **Fast Mode** - Core validators only for rapid feedback
-
-### Performance Metrics
-
-Typical performance on FiveTwenty documentation (66 files):
-
-- **Full Validation** - ~25 seconds (all validators)
-- **Fast Validation** - ~8 seconds (core validators only)
-- **Parallel Speedup** - 3-4x improvement with 4-8 workers
-- **Memory Usage** - <200MB peak usage during validation
-
-## 🔌 Extensibility
-
-### Adding Custom Validators
-
+````markdown
+<!-- validation: skip-typing -->
 ```python
-from src.base import BaseValidator
-from src.models import ValidationResult, ValidationIssue
-
-class CustomValidator(BaseValidator):
-    def __init__(self):
-        super().__init__(
-            name="custom_validator",
-            description="Custom validation logic"
-        )
-
-    def supports_file(self, file_path: Path) -> bool:
-        return file_path.suffix.lower() in {".md", ".markdown"}
-
-    def validate_file(self, file_info: FileInfo, content: str, options: dict) -> ValidationResult:
-        # Implement validation logic
-        issues = []
-        # ... validation code ...
-        return ValidationResult(
-            validator_name=self.name,
-            file_path=file_info.path,
-            passed=len(issues) == 0,
-            issues=issues
-        )
-
-# Register the validator
-from src.base import registry
-registry.register(CustomValidator())
+client = make_client_from_context()
 ```
+````
 
-### Custom Reporter
+Supported markers:
 
-```python
-from src.reporters.base import BaseReporter
+- `<!-- validation: skip -->` and `<!-- validation: skip-all -->`: skip all
+  code-block validators for the next block.
+- `<!-- fragment: partial example -->`, `<!-- partial: configuration snippet -->`,
+  and `<!-- example: incomplete code -->`: skip all code-block validators and
+  record the human-readable reason in the validation report.
+- `<!-- validation: skip-linting -->`, `<!-- skip-linting -->`,
+  `<!-- no-linting -->`, `<!-- skip-lint -->`, and `<!-- no-lint -->`: skip
+  Ruff linting only.
+- `<!-- validation: skip-typing -->`, `<!-- skip-typing -->`,
+  `<!-- no-typing -->`, `<!-- skip-type -->`, and `<!-- no-type -->`: skip
+  type checking only.
+- `<!-- validation: skip-syntax -->`, `<!-- skip-syntax -->`, and
+  `<!-- no-syntax -->`: skip Python syntax validation only.
+- `<!-- validation: skip-execution -->`, `<!-- skip-execution -->`, and
+  `<!-- no-execution -->`: skip execution validation only.
 
-class CustomReporter(BaseReporter):
-    def generate_report(self, summary, all_issues, output_path, **kwargs):
-        # Implement custom report generation
-        pass
-```
+Marker matching is case-insensitive and only applies to HTML comments. Specific
+markers are not treated as broader skips, so `validation: skip-linting` does not
+also skip typing or execution.
 
-## 🐛 Troubleshooting
+The generated `docs_validation/reports/validation-report.md` includes a
+fragment-marker usage section with skipped-block counts, the validators skipped,
+and audit flags for marker reasons that look like validation debt rather than an
+intentionally incomplete or placeholder snippet. `docs-validate-files` fails
+when those audit flags are present.
 
-### Common Issues
+Good uses:
 
-**Validation timeouts:**
-```bash
-# Increase timeout or reduce workers
-uv run python -m docs_validation.src.cli validate --max-workers 2
-```
+- Tutorial steps that rely on state introduced in surrounding prose.
+- Configuration examples with placeholder credentials.
+- Intentionally failing examples that demonstrate validation or error handling.
+- Small fragments that illustrate one pattern rather than a complete runnable
+  program.
 
-**Import errors in code blocks:**
-```bash
-# Check if FiveTwenty SDK is properly installed
-pip show fivetwenty
-```
+Avoid using markers for:
 
-**Permission errors:**
-```bash
-# Ensure write permissions for reports directory
-chmod 755 reports/
-```
+- Stale SDK method names or response shapes.
+- Type errors caused by incorrect examples.
+- Lint violations that are easy to fix without hurting readability.
+- Complete examples that should be valid under the normal validators.
 
-### Debug Mode
+When in doubt, fix the snippet instead of marking it.
+
+## Development Workflow
+
+Before changing validators or parity tools, run focused checks first:
 
 ```bash
-# Run with verbose output
-uv run python -m docs_validation.src.cli validate --sequential --max-workers 1
-
-# Validate single file for debugging
-uv run python -m docs_validation.src.cli validate --files "problematic_file.md"
+uv run ruff check docs_validation/src
+uv run mypy docs_validation/src/parity/field_validate.py \
+  docs_validation/src/parity/extract_pydantic.py \
+  docs_validation/src/parity/extract_endpoints.py \
+  docs_validation/src/parity/extract_oanda_md.py \
+  docs_validation/src/parity/extract_doc_tables.py
+uv run pytest tests/unit/test_field_validation.py
 ```
 
-### Configuration Issues
+Then run broader checks:
 
 ```bash
-# Validate configuration file
-uv run python -c "from src.config import ValidationConfig; ValidationConfig.load_from_file('config/validation.yml')"
-
-# Use default configuration
-uv run python -m docs_validation.src.cli validate  # Uses built-in defaults
+uv run pytest tests/unit
+uv run python -m docs_validation.src.parity.run_all --no-fetch
 ```
 
-## 🤝 Contributing
-
-### Development Setup
+Run the refresh command before final parity review when the task depends on the
+current official OANDA docs:
 
 ```bash
-# Clone and setup
-git clone <repository>
-cd docs_validation
-uv sync --extra dev
-
-# Install pre-commit hooks
-pre-commit install
-
-# Run tests
-uv run pytest
-
-# Format code
-uv run ruff format .
-uv run ruff check --fix .
+uv run python -m docs_validation.src.parity.run_all --refresh
 ```
 
-### Adding New Validators
+## Adding or Changing Validators
 
-1. Create validator class in `src/validators/`
-2. Register in `src/validators/__init__.py`
-3. Add tests in `tests/unit/test_validators/`
-4. Update configuration schema if needed
-5. Add documentation
+File-by-file validators live in `docs_validation/src/validators/`.
 
-### Code Style
+When adding a validator:
 
-- Use Ruff for formatting and linting
-- Follow type hints with MyPy
-- Maintain comprehensive test coverage
-- Document public APIs with docstrings
+1. Implement the validator class using the existing validator interfaces.
+2. Register or expose it consistently with the existing validators.
+3. Add configuration in `docs_validation/config/validation-complete.yml`.
+4. Add focused tests.
+5. Run the CLI against at least one representative documentation file.
 
-## 📜 License
+When changing parity behavior:
 
-This validation system is part of the FiveTwenty SDK project. See the main project license for details.
+1. Prefer shared extractor helpers over one-off parsing.
+2. Keep cached official OANDA pages as inputs, not committed source.
+3. Preserve source references in reports whenever possible.
+4. Re-run `field_validate` and `run_all --no-fetch`.
+5. If the behavior depends on current OANDA docs, also run the refresh command.
 
-## 🆘 Support
+## Troubleshooting
 
-- **Documentation Issues**: Create GitHub issue with validation report
-- **Feature Requests**: Use GitHub discussions
-- **Bug Reports**: Include configuration file and error output
-- **Performance Issues**: Include timing information and system specs
+If the parity cache is missing:
 
----
+```bash
+uv run python -m docs_validation.src.parity.run_all --refresh
+```
 
-Built with ❤️ for the FiveTwenty SDK documentation team.
+If live OANDA fetches fail, retry with cached pages while working locally:
+
+```bash
+uv run python -m docs_validation.src.parity.run_all --no-fetch
+```
+
+If a documentation code block is intentionally incomplete, add a fragment marker
+instead of weakening the validator globally.
+
+If a parity report shows a field missing from the SDK, treat the official OANDA
+definition page as source of truth and either update the SDK model or document
+why a configured alias/exception is appropriate.

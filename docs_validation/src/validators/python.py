@@ -7,6 +7,7 @@ from typing import Any
 
 from ..base import BaseValidator
 from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
+from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, marker_skip_metadata
 
 
 class PythonSyntaxValidator(BaseValidator):
@@ -22,15 +23,17 @@ class PythonSyntaxValidator(BaseValidator):
     def validate_file(self, file_info: FileInfo, content: str, options: dict[str, Any]) -> ValidationResult:
         """Validate Python syntax in file content."""
         issues: list[ValidationIssue] = []
+        skipped_blocks: list[dict[str, Any]] = []
 
         if file_info.path.suffix.lower() == ".py":
             # Validate entire Python file
             issues.extend(self._validate_python_file(content, file_info.path))
         else:
             # Extract and validate Python code blocks from markdown
-            issues.extend(self._validate_python_code_blocks(content, file_info.path))
+            block_issues, skipped_blocks = self._validate_python_code_blocks(content, file_info.path)
+            issues.extend(block_issues)
 
-        return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues)
+        return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues, metadata=fragment_metadata(skipped_blocks))
 
     def _validate_python_file(self, content: str, file_path: Path) -> list[ValidationIssue]:
         """Validate syntax of a complete Python file."""
@@ -45,12 +48,12 @@ class PythonSyntaxValidator(BaseValidator):
 
         return issues
 
-    def _validate_python_code_blocks(self, content: str, file_path: Path) -> list[ValidationIssue]:
+    def _validate_python_code_blocks(self, content: str, file_path: Path) -> tuple[list[ValidationIssue], list[dict[str, Any]]]:
         """Extract and validate Python code blocks from markdown."""
         issues: list[ValidationIssue] = []
 
         # Find Python code blocks
-        code_blocks = self._extract_python_code_blocks(content)
+        code_blocks, skipped_blocks = self._extract_python_code_blocks(content)
 
         for block_start_line, code_block in code_blocks:
             # Try to parse the code block
@@ -74,41 +77,42 @@ class PythonSyntaxValidator(BaseValidator):
             except Exception as e:
                 issues.append(ValidationIssue(message=f"Failed to parse Python code block: {e}", file_path=file_path, line=block_start_line, severity=IssueSeverity.WARNING, rule_id="python_code_block_parse", suggestion="Check the Python code block for syntax issues"))
 
-        return issues
+        return issues, skipped_blocks
 
-    def _extract_python_code_blocks(self, content: str) -> list[tuple[int, str]]:
+    def _extract_python_code_blocks(self, content: str) -> tuple[list[tuple[int, str]], list[dict[str, Any]]]:
         """Extract Python code blocks from markdown content."""
         code_blocks: list[tuple[int, str]] = []
+        skipped_blocks: list[dict[str, Any]] = []
         lines = content.split("\n")
 
         in_python_block = False
         current_block_lines: list[str] = []
         block_start_line = 0
-        skip_next_block = False
+        skip_marker = None
 
         for line_num, line in enumerate(lines, 1):
-            # Check for fragment marker (skip validation of next code block)
-            if re.search(r"<!--\s*fragment", line, re.IGNORECASE):
-                skip_next_block = True
             # Check for start of Python code block
-            elif re.match(r"^\s*```\s*python\s*$", line, re.IGNORECASE):
+            if re.match(r"^\s*```\s*python\s*$", line, re.IGNORECASE):
                 in_python_block = True
                 current_block_lines = []
                 block_start_line = line_num + 1  # Code starts on next line
+                skip_marker = find_fragment_marker(lines, line_num, FragmentTarget.PYTHON_SYNTAX)
             # Check for end of code block
             elif line.strip() == "```" and in_python_block:
                 in_python_block = False
-                if current_block_lines and not skip_next_block:
+                if current_block_lines and skip_marker is not None:
+                    skipped_blocks.append(marker_skip_metadata(skip_marker, block_start_line - 1))
+                elif current_block_lines:
                     code_block = "\n".join(current_block_lines)
                     # Only validate non-empty blocks
                     if code_block.strip():
                         code_blocks.append((block_start_line, code_block))
-                skip_next_block = False  # Reset for next block
+                skip_marker = None  # Reset for next block
             # Collect lines within Python block
             elif in_python_block:
                 current_block_lines.append(line)
 
-        return code_blocks
+        return code_blocks, skipped_blocks
 
     def _get_line_context(self, content: str, line_num: int | None) -> str | None:
         """Get context around a specific line number."""

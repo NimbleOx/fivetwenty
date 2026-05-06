@@ -20,7 +20,6 @@ Complete reference for FiveTwenty client interfaces and configuration.
 | [trades](endpoints/trades.md) | Trade management | `get_open_trades()`, `get_trade()`, `close_trade()`, `put_trade_orders()`, `get_trades()` |
 | [positions](endpoints/positions.md) | Position tracking | `get_open_positions()`, `get_position()`, `close_position()`, `get_positions()` |
 | [pricing](endpoints/pricing.md) | Market data | `get_pricing()`, `get_pricing_stream()`, `get_instrument_candles()`, `get_latest_candles()` |
-| [instruments](endpoints/instruments.md) | Instrument data | `get_account_instruments()`, `get_instrument_candles()` |
 | [transactions](endpoints/transactions.md) | Transaction history | `get_transactions()`, `get_transaction()`, `get_transactions_range()`, `get_transactions_stream()`, `get_transactions_since_id()` |
 
 ---
@@ -142,7 +141,7 @@ When multiple configuration sources are provided:
 - `trades` - [TradeEndpoints](endpoints/trades.md)
 - `positions` - [PositionEndpoints](endpoints/positions.md)
 - `pricing` - [PricingEndpoints](endpoints/pricing.md)
-- `instruments` - [InstrumentEndpoints](endpoints/instruments.md)
+- `instruments` - Instrument-specific helper methods; current official account instrument data is documented under [AccountEndpoints](endpoints/accounts.md#get_account_instruments), and account-specific candles are documented under [PricingEndpoints](endpoints/pricing.md#get_account_instrument_candles)
 - `transactions` - [TransactionEndpoints](endpoints/transactions.md)
 
 ### Client
@@ -215,8 +214,7 @@ For detailed information about specific API endpoints and their methods, please 
 - **[Order Management](endpoints/orders.md)** - Creating, modifying, and canceling orders
 - **[Trade Management](endpoints/trades.md)** - Managing open trades and positions
 - **[Position Tracking](endpoints/positions.md)** - Position monitoring and closure
-- **[Market Data](endpoints/pricing.md)** - Real-time pricing and streaming data
-- **[Instrument Data](endpoints/instruments.md)** - Instrument specifications and historical data
+- **[Market Data](endpoints/pricing.md)** - Real-time pricing, streaming data, and account-specific candles
 - **[Transaction History](endpoints/transactions.md)** - Transaction records and streaming
 
 Each endpoint page contains complete method signatures, parameters, return types, and usage examples.

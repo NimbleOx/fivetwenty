@@ -150,7 +150,7 @@ class TestAdvancedFeatures:
 
             try:
                 await sandbox_client.orders.post_order(account_id=test_account_id, order_request=invalid_gtd_request, client_request_id=f"invalid-gtd-{int(asyncio.get_event_loop().time() * 1000)}")
-                print("⚠ Invalid GTD order unexpectedly accepted")
+                pytest.fail("Invalid GTD order was unexpectedly accepted")
             except Exception as e:
                 print(f"✓ Invalid GTD properly rejected: {type(e).__name__}")
 
@@ -189,20 +189,33 @@ class TestAdvancedFeatures:
         created_orders = []
 
         # Get current pricing to set appropriate trigger levels
+        current_price = Decimal("1.1000")  # Default fallback
+        bid_price = current_price - Decimal("0.0001")
+        ask_price = current_price + Decimal("0.0001")
+        price_quantum = Decimal("0.001") if test_instrument.endswith("_JPY") else Decimal("0.00001")
+
+        def price_text(price: Decimal) -> str:
+            return str(price.quantize(price_quantum))
+
         try:
             pricing_response = await sandbox_client.pricing.get_pricing(account_id=test_account_id, instruments=[test_instrument])
 
-            current_price = Decimal("1.1000")  # Default fallback
-            bid_price = current_price - Decimal("0.0001")
-            ask_price = current_price + Decimal("0.0001")
-
             if isinstance(pricing_response, dict) and "prices" in pricing_response:
                 prices = pricing_response["prices"]
-                if prices and isinstance(prices[0], dict):
+                if prices:
                     price_data = prices[0]
-                    if "bid" in price_data and "ask" in price_data:
-                        bid_price = Decimal(str(price_data["bid"]))
-                        ask_price = Decimal(str(price_data["ask"]))
+                    if isinstance(price_data, dict):
+                        bids = price_data.get("bids", [])
+                        asks = price_data.get("asks", [])
+                    else:
+                        bids = getattr(price_data, "bids", [])
+                        asks = getattr(price_data, "asks", [])
+
+                    if bids and asks:
+                        bid = bids[0].get("price") if isinstance(bids[0], dict) else bids[0].price
+                        ask = asks[0].get("price") if isinstance(asks[0], dict) else asks[0].price
+                        bid_price = Decimal(str(bid))
+                        ask_price = Decimal(str(ask))
                         current_price = (bid_price + ask_price) / 2
                         print(f"✓ Current pricing - Bid: {bid_price}, Ask: {ask_price}, Mid: {current_price}")
         except Exception as e:
@@ -218,7 +231,7 @@ class TestAdvancedFeatures:
             default_stop_order = StopOrderRequest(
                 instrument=test_instrument,
                 units="1000",  # Buy stop
-                price=str(ask_price + Decimal("0.0050")),  # Trigger above current ask
+                price=price_text(ask_price + Decimal("0.0050")),  # Trigger above current ask
                 timeInForce="GTC",
                 triggerCondition="DEFAULT",
             )
@@ -246,7 +259,7 @@ class TestAdvancedFeatures:
             bid_limit_order = LimitOrderRequest(
                 instrument=test_instrument,
                 units="-1000",  # Sell limit
-                price=str(bid_price + Decimal("0.0030")),  # Above current bid
+                price=price_text(bid_price + Decimal("0.0030")),  # Above current bid
                 timeInForce="GTC",
                 triggerCondition="BID",
             )
@@ -264,7 +277,7 @@ class TestAdvancedFeatures:
             ask_stop_order = StopOrderRequest(
                 instrument=test_instrument,
                 units="-800",  # Sell stop
-                price=str(ask_price - Decimal("0.0040")),  # Below current ask
+                price=price_text(ask_price - Decimal("0.0040")),  # Below current ask
                 timeInForce="GTC",
                 triggerCondition="ASK",
             )
@@ -284,7 +297,7 @@ class TestAdvancedFeatures:
             mid_mit_order = MarketIfTouchedOrderRequest(
                 instrument=test_instrument,
                 units="1200",  # Buy MIT
-                price=str(current_price - Decimal("0.0020")),  # Below current mid
+                price=price_text(current_price - Decimal("0.0020")),  # Below current mid
                 timeInForce="GTC",
                 triggerCondition="MID",
             )
@@ -302,7 +315,7 @@ class TestAdvancedFeatures:
             inverse_stop_order = StopOrderRequest(
                 instrument=test_instrument,
                 units="600",  # Buy stop
-                price=str(current_price + Decimal("0.0060")),  # Above current price
+                price=price_text(current_price + Decimal("0.0060")),  # Above current price
                 timeInForce="GTC",
                 triggerCondition="INVERSE",
             )
@@ -323,7 +336,7 @@ class TestAdvancedFeatures:
                 order_request = LimitOrderRequest(
                     instrument=test_instrument,
                     units="500",  # Small buy order
-                    price=str(current_price - Decimal("0.0100")),  # Well below market
+                    price=price_text(current_price - Decimal("0.0100")),  # Well below market
                     timeInForce="GTC",
                     triggerCondition=condition,
                 )
@@ -353,11 +366,10 @@ class TestAdvancedFeatures:
             print("✓ Test 7: Invalid trigger condition handling...")
 
             try:
-                invalid_trigger_order = LimitOrderRequest(instrument=test_instrument, units="100", price=str(current_price - Decimal("0.0050")), timeInForce="GTC", triggerCondition="INVALID_CONDITION")
+                invalid_trigger_order = LimitOrderRequest(instrument=test_instrument, units="100", price=price_text(current_price - Decimal("0.0050")), timeInForce="GTC", triggerCondition="INVALID_CONDITION")
 
-                response = await sandbox_client.orders.post_order(account_id=test_account_id, order_request=invalid_trigger_order)
-
-                print("⚠ Invalid trigger condition was unexpectedly accepted")
+                await sandbox_client.orders.post_order(account_id=test_account_id, order_request=invalid_trigger_order)
+                pytest.fail("Invalid trigger condition was unexpectedly accepted")
             except Exception as e:
                 print(f"✓ Invalid trigger condition properly rejected: {str(e)[:100]}...")
 

@@ -183,7 +183,7 @@ async def main() -> None:
         print("NEXT STEPS")
         print("=" * 60)
         print("\nTo implement these exit levels on your trade, use:")
-        print("  from fivetwenty.models import StopLossDetails, TakeProfitDetails")
+        print("  Import StopLossDetails and TakeProfitDetails from fivetwenty.models")
         print()
         print("  stop_loss_details = StopLossDetails(price=stop_loss)")
         print("  take_profit_details = TakeProfitDetails(price=take_profit)")

@@ -101,7 +101,7 @@ async def get_account():
 
 Use asyncio.gather() for concurrent API calls:
 
-<!-- fragment: Demo concurrent operations with undefined imports and missing type annotations -->
+<!-- fragment: partial concurrent operations example -->
 ```python
 import asyncio
 import os
@@ -203,7 +203,7 @@ def calculate_position_size(
 
 FiveTwenty automatically converts between Decimal and string fields:
 
-<!-- fragment: Demo order processing with union attribute issues and type mismatches -->
+<!-- fragment: partial order processing example -->
 ```python
 import os
 from decimal import Decimal
@@ -234,7 +234,7 @@ async def example_order() -> tuple[object, object]:
 
 Use specific exception types for targeted handling:
 
-<!-- fragment: Demo error handling with undefined exception imports and type issues -->
+<!-- fragment: partial error handling example -->
 ```python
 import asyncio
 import os
@@ -672,7 +672,7 @@ async def good_rate_limit_handling():
 
 Implement comprehensive validation to prevent costly trading errors:
 
-<!-- fragment: Demo validation framework with complex class hierarchies and attribute access -->
+<!-- fragment: partial validation framework example -->
 ```python
 from abc import ABC, abstractmethod
 from dataclasses import dataclass
@@ -801,7 +801,7 @@ class OrderValidationFramework:
 
 ### Risk-Based Validators
 
-<!-- fragment: validator class example with missing imports -->
+<!-- fragment: partial validator class example -->
 ```python
 class MaxPositionSizeValidator(OrderValidator):
     """Validate order doesn't exceed maximum position size limits."""
@@ -1092,7 +1092,7 @@ async def test_live_api():
 
 Test your validation rules thoroughly:
 
-<!-- fragment: test example with undefined imports and mock objects -->
+<!-- fragment: partial test example -->
 ```python
 @pytest.mark.asyncio
 async def test_position_size_validator():

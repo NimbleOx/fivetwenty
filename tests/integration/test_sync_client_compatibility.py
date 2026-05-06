@@ -42,7 +42,11 @@ class TestSyncClientIntegration:
         print("  - Basic API call successful")
 
         # Test 3: Client creation and cleanup
-        test_client = Client(token=sync_sandbox_client._async._token, environment="practice")
+        test_client = Client(
+            token=sync_sandbox_client._async._token,
+            account_id=sync_sandbox_client.account_id,
+            environment="practice",
+        )
         try:
             assert test_client.accounts.get_accounts() is not None
             assert test_client._thread.is_alive()
@@ -54,7 +58,11 @@ class TestSyncClientIntegration:
         print("  - Client cleanup verified")
 
         # Test 4: Context manager protocol
-        with Client(token=sync_sandbox_client._async._token, environment="practice") as client:
+        with Client(
+            token=sync_sandbox_client._async._token,
+            account_id=sync_sandbox_client.account_id,
+            environment="practice",
+        ) as client:
             assert client._thread.is_alive()
         time.sleep(0.5)
         assert not client._thread.is_alive()
@@ -121,7 +129,11 @@ class TestSyncClientIntegration:
         clients = []
         try:
             for _i in range(3):
-                client = Client(token=sync_sandbox_client._async._token, environment="practice")
+                client = Client(
+                    token=sync_sandbox_client._async._token,
+                    account_id=sync_sandbox_client.account_id,
+                    environment="practice",
+                )
                 clients.append(client)
                 assert client.accounts.get_accounts() is not None
 

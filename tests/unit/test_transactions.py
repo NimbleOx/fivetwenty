@@ -6,6 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from fivetwenty.endpoints.transactions import TransactionEndpoints
+from fivetwenty.models import TransactionFilter
 
 
 class TestTransactionEndpoints:
@@ -136,13 +137,16 @@ class TestTransactionEndpoints:
     @pytest.mark.asyncio
     async def test_list_basic(self, transactions, mock_client):
         """Test basic transaction listing."""
-        await transactions.get_transactions("101-001-123456-001")
+        result = await transactions.get_transactions("101-001-123456-001")
 
         mock_client._request.assert_called_once_with(
             "GET",
             "/accounts/101-001-123456-001/transactions",
             params={"pageSize": "100"},
         )
+        assert result["count"] == "150"
+        assert result["lastTransactionID"] == "5000"
+        assert result["from_"] == "2024-01-01T00:00:00.000000000Z"
 
     @pytest.mark.asyncio
     async def test_list_with_time_range(self, transactions, mock_client):
@@ -179,36 +183,45 @@ class TestTransactionEndpoints:
         )
 
     @pytest.mark.asyncio
-    async def test_list_page_size_too_large_raises_error(self, transactions, mock_client):
-        """Test that page_size > 1000 raises ValueError."""
-        with pytest.raises(ValueError, match="Page size cannot exceed 1000"):
+    async def test_list_page_size_out_of_range_raises_error(self, transactions, mock_client):
+        """Test that page_size outside OANDA's documented range raises ValueError."""
+        with pytest.raises(ValueError, match="Page size must be between 1 and 1000"):
+            await transactions.get_transactions("101-001-123456-001", page_size=0)
+
+        with pytest.raises(ValueError, match="Page size must be between 1 and 1000"):
             await transactions.get_transactions("101-001-123456-001", page_size=1001)
 
     @pytest.mark.asyncio
     async def test_get_transaction(self, transactions, mock_client):
         """Test getting a specific transaction."""
-        await transactions.get_transaction("101-001-123456-001", "12345")
+        result = await transactions.get_transaction("101-001-123456-001", "12345")
 
         mock_client._request.assert_called_once_with(
             "GET",
             "/accounts/101-001-123456-001/transactions/12345",
         )
+        assert result["transaction"].id == "12345"
+        assert result["transaction"].type == "CREATE"
+        assert result["lastTransactionID"] == "12345"
 
     @pytest.mark.asyncio
     async def test_get_since_id_basic(self, transactions, mock_client):
         """Test getting transactions since a specific ID."""
-        await transactions.get_transactions_since_id("101-001-123456-001", "1000")
+        result = await transactions.get_transactions_since_id("101-001-123456-001", "1000")
 
         mock_client._request.assert_called_once_with(
             "GET",
             "/accounts/101-001-123456-001/transactions/sinceid",
             params={"id": "1000"},
         )
+        assert result["transactions"][0].id == "1001"
+        assert result["transactions"][0].type == "ORDER_FILL"
+        assert result["lastTransactionID"] == "1001"
 
     @pytest.mark.asyncio
     async def test_get_since_id_with_type_filter(self, transactions, mock_client):
         """Test getting transactions since ID with type filtering."""
-        transaction_types = ["ORDER_FILL", "TRANSFER_FUNDS"]
+        transaction_types = [TransactionFilter.ORDER_FILL, TransactionFilter.TRANSFER_FUNDS]
 
         await transactions.get_transactions_since_id("101-001-123456-001", "2000", transaction_type=transaction_types)
 
@@ -224,7 +237,7 @@ class TestTransactionEndpoints:
     @pytest.mark.asyncio
     async def test_get_range_basic(self, transactions, mock_client):
         """Test getting transactions within an ID range."""
-        await transactions.get_transactions_range("101-001-123456-001", "1000", "2000")
+        result = await transactions.get_transactions_range("101-001-123456-001", "1000", "2000")
 
         mock_client._request.assert_called_once_with(
             "GET",
@@ -234,6 +247,9 @@ class TestTransactionEndpoints:
                 "to": "2000",
             },
         )
+        assert result["transactions"][0].id == "1500"
+        assert result["transactions"][0].type == "MARKET_ORDER"
+        assert result["lastTransactionID"] == "2000"
 
     @pytest.mark.asyncio
     async def test_get_range_with_type_filter(self, transactions, mock_client):
@@ -267,13 +283,16 @@ class TestTransactionEndpoints:
     @pytest.mark.asyncio
     async def test_get_recent_basic(self, transactions, mock_client):
         """Test getting recent transactions."""
-        await transactions.get_recent_transactions("101-001-123456-001")
+        result = await transactions.get_recent_transactions("101-001-123456-001")
 
         mock_client._request.assert_called_once_with(
             "GET",
             "/accounts/101-001-123456-001/transactions",
             params={"count": "50"},
         )
+        assert result["transactions"][0].id == "9001"
+        assert result["transactions"][0].type == "ORDER_FILL"
+        assert result["lastTransactionID"] == "9001"
 
     @pytest.mark.asyncio
     async def test_get_recent_with_count_and_type(self, transactions, mock_client):
@@ -424,3 +443,17 @@ class TestTransactionEndpoints:
                 "type": expected_types,
             },
         )
+
+    @pytest.mark.asyncio
+    async def test_transaction_responses_support_compatibility_access(self, transactions):
+        """Test transaction endpoint responses support attribute and nested model access."""
+        list_response = await transactions.get_transactions("101-001-123456-001")
+
+        assert list_response.from_ == "2024-01-01T00:00:00.000000000Z"
+        assert list_response.last_transaction_id == "5000"
+
+        detail_response = await transactions.get_transaction("101-001-123456-001", "12345")
+
+        assert detail_response.last_transaction_id == "12345"
+        assert detail_response.transaction.id == "12345"
+        assert detail_response["id"] == "12345"

@@ -311,8 +311,8 @@ async def main() -> None:
         latest_response = await client.pricing.get_latest_candles(
             account_id=client.account_id,
             candle_specifications=[
-                f"{InstrumentName.EUR_USD}:{CandlestickGranularity.H1}",
-                f"{InstrumentName.GBP_USD}:{CandlestickGranularity.H1}",
+                f"{InstrumentName.EUR_USD.value}:{CandlestickGranularity.H1.value}:M",
+                f"{InstrumentName.GBP_USD.value}:{CandlestickGranularity.H1.value}:M",
             ],
         )
 

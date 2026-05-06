@@ -6,6 +6,7 @@ from decimal import Decimal
 import pytest
 
 from fivetwenty import AsyncClient
+from tests.integration.helpers import skip_or_raise_environment_error
 
 
 @pytest.mark.asyncio
@@ -176,12 +177,7 @@ class TestOrderManagementOperations:
             print("✓ Order cancelled for cleanup")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "funds", "closed", "trading"]):
-                pytest.skip(f"Order modification test skipped: {e}")
-            else:
-                print(f"⚠️  Order modification test failed: {e}")
-                pytest.skip(f"Order modification failed: {e}")
+            skip_or_raise_environment_error(e, "Order modification test")
 
         print("✓ Order modification test completed")
 
@@ -287,12 +283,7 @@ class TestOrderManagementOperations:
             print("✓ Individual order cancellation test completed")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "funds", "closed", "trading"]):
-                pytest.skip(f"Order cancellation test skipped: {e}")
-            else:
-                print(f"⚠️  Order cancellation test failed: {e}")
-                pytest.skip(f"Order cancellation failed: {e}")
+            skip_or_raise_environment_error(e, "Order cancellation test")
 
         print("✓ Order cancellation test completed")
 
@@ -412,11 +403,6 @@ class TestOrderManagementOperations:
                     print(f"⚠️  Could not cancel order {order['id']}: {e}")
 
         except Exception as e:
-            error_msg = str(e).lower()
-            if any(term in error_msg for term in ["margin", "funds", "closed", "trading"]):
-                pytest.skip(f"Order listing test skipped: {e}")
-            else:
-                print(f"⚠️  Order listing test failed: {e}")
-                pytest.skip(f"Order listing failed: {e}")
+            skip_or_raise_environment_error(e, "Order listing test")
 
         print("✓ Order list and filter test completed")

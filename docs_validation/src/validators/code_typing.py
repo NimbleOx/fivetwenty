@@ -9,6 +9,7 @@ from typing import Any
 
 from ..base import BaseValidator
 from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
+from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, marker_skip_metadata
 
 
 class CodeTypingValidator(BaseValidator):
@@ -32,6 +33,7 @@ class CodeTypingValidator(BaseValidator):
         code_block_lines: list[str] = []
         code_block_start = 0
         code_block_language = ""
+        skipped_blocks: list[dict[str, Any]] = []
 
         for line_num, line in enumerate(lines, 1):
             stripped = line.strip()
@@ -50,9 +52,11 @@ class CodeTypingValidator(BaseValidator):
                     # Validate the code block if it's Python
                     if code_block_language in ["python", "py", ""] and code_block_lines:
                         # Check for validation skip comments before the code block
-                        should_skip = self._should_skip_validation(lines, code_block_start - 1)
+                        skip_marker = find_fragment_marker(lines, code_block_start, FragmentTarget.TYPING)
 
-                        if not should_skip:
+                        if skip_marker is not None:
+                            skipped_blocks.append(marker_skip_metadata(skip_marker, code_block_start))
+                        else:
                             issues.extend(self._type_check_python_code(code_block_lines, code_block_start + 1, file_info.path))
 
                     # Reset for next block
@@ -62,7 +66,7 @@ class CodeTypingValidator(BaseValidator):
                 # Collect code block content
                 code_block_lines.append(line)
 
-        return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues)
+        return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues, metadata=fragment_metadata(skipped_blocks))
 
     def _type_check_python_code(self, code_lines: list[str], start_line: int, file_path: Path) -> list[ValidationIssue]:
         """Type check Python code using mypy."""
@@ -253,28 +257,6 @@ class CodeTypingValidator(BaseValidator):
         ]
 
         return all(any(re.match(pattern, line) for pattern in simple_patterns) for line in lines)
-
-    def _should_skip_validation(self, lines: list[str], code_block_start_line: int) -> bool:
-        """Check if validation should be skipped based on HTML comments before code block."""
-        # Check the few lines before the code block for HTML comments
-        check_lines = 3  # Check up to 3 lines before code block
-        start_check = max(0, code_block_start_line - check_lines)
-
-        for i in range(start_check, code_block_start_line):
-            if i < len(lines):
-                line = lines[i].strip().lower()
-
-                # Check for validation skip patterns in HTML comments
-                if "<!--" in line:
-                    # Skip all validation
-                    if any(pattern in line for pattern in ["validation: skip", "validation: skip-all", "fragment:", "partial:", "example:", "skip-type", "no-type"]):
-                        return True
-
-                    # Skip only typing (but allow linting)
-                    if any(pattern in line for pattern in ["validation: skip-typing", "skip-typing", "no-typing"]):
-                        return True
-
-        return False
 
     def get_file_patterns(self) -> list[str]:
         """Get patterns for files this validator handles."""

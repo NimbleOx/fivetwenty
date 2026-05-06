@@ -4,6 +4,7 @@ Enumerations for OANDA API.
 Contains all enum types used throughout the OANDA API models.
 """
 
+from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 
@@ -282,6 +283,13 @@ class DailyAlignment(int, Enum):
     H23 = 23
 
 
+class AcceptDatetimeFormat(str, Enum):
+    """Format for DateTime fields in OANDA requests and responses."""
+
+    UNIX = "UNIX"
+    RFC3339 = "RFC3339"
+
+
 class TransactionType(str, Enum):
     """Types of transactions that can occur."""
 
@@ -337,6 +345,53 @@ class TransactionType(str, Enum):
     DIVIDEND_ADJUSTMENT = "DIVIDEND_ADJUSTMENT"
 
     # Miscellaneous
+    RESET_RESETTABLE_PL = "RESET_RESETTABLE_PL"
+
+
+class TransactionFilter(str, Enum):
+    """Transaction type filters accepted by OANDA transaction list endpoints."""
+
+    ORDER = "ORDER"
+    FUNDING = "FUNDING"
+    ADMIN = "ADMIN"
+    CREATE = "CREATE"
+    CLOSE = "CLOSE"
+    REOPEN = "REOPEN"
+    CLIENT_CONFIGURE = "CLIENT_CONFIGURE"
+    CLIENT_CONFIGURE_REJECT = "CLIENT_CONFIGURE_REJECT"
+    TRANSFER_FUNDS = "TRANSFER_FUNDS"
+    TRANSFER_FUNDS_REJECT = "TRANSFER_FUNDS_REJECT"
+    MARKET_ORDER = "MARKET_ORDER"
+    MARKET_ORDER_REJECT = "MARKET_ORDER_REJECT"
+    LIMIT_ORDER = "LIMIT_ORDER"
+    LIMIT_ORDER_REJECT = "LIMIT_ORDER_REJECT"
+    STOP_ORDER = "STOP_ORDER"
+    STOP_ORDER_REJECT = "STOP_ORDER_REJECT"
+    MARKET_IF_TOUCHED_ORDER = "MARKET_IF_TOUCHED_ORDER"
+    MARKET_IF_TOUCHED_ORDER_REJECT = "MARKET_IF_TOUCHED_ORDER_REJECT"
+    TAKE_PROFIT_ORDER = "TAKE_PROFIT_ORDER"
+    TAKE_PROFIT_ORDER_REJECT = "TAKE_PROFIT_ORDER_REJECT"
+    STOP_LOSS_ORDER = "STOP_LOSS_ORDER"
+    STOP_LOSS_ORDER_REJECT = "STOP_LOSS_ORDER_REJECT"
+    GUARANTEED_STOP_LOSS_ORDER = "GUARANTEED_STOP_LOSS_ORDER"
+    GUARANTEED_STOP_LOSS_ORDER_REJECT = "GUARANTEED_STOP_LOSS_ORDER_REJECT"
+    TRAILING_STOP_LOSS_ORDER = "TRAILING_STOP_LOSS_ORDER"
+    TRAILING_STOP_LOSS_ORDER_REJECT = "TRAILING_STOP_LOSS_ORDER_REJECT"
+    ONE_CANCELS_ALL_ORDER = "ONE_CANCELS_ALL_ORDER"
+    ONE_CANCELS_ALL_ORDER_REJECT = "ONE_CANCELS_ALL_ORDER_REJECT"
+    ONE_CANCELS_ALL_ORDER_TRIGGERED = "ONE_CANCELS_ALL_ORDER_TRIGGERED"
+    ORDER_FILL = "ORDER_FILL"
+    ORDER_CANCEL = "ORDER_CANCEL"
+    ORDER_CANCEL_REJECT = "ORDER_CANCEL_REJECT"
+    ORDER_CLIENT_EXTENSIONS_MODIFY = "ORDER_CLIENT_EXTENSIONS_MODIFY"
+    ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT = "ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT"
+    TRADE_CLIENT_EXTENSIONS_MODIFY = "TRADE_CLIENT_EXTENSIONS_MODIFY"
+    TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT = "TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT"
+    MARGIN_CALL_ENTER = "MARGIN_CALL_ENTER"
+    MARGIN_CALL_EXTEND = "MARGIN_CALL_EXTEND"
+    MARGIN_CALL_EXIT = "MARGIN_CALL_EXIT"
+    DELAYED_TRADE_CLOSURE = "DELAYED_TRADE_CLOSURE"
+    DAILY_FINANCING = "DAILY_FINANCING"
     RESET_RESETTABLE_PL = "RESET_RESETTABLE_PL"
 
 
@@ -544,10 +599,6 @@ class TransactionRejectReason(str, Enum):
     REPLACING_ORDER_INVALID = "REPLACING_ORDER_INVALID"
     REPLACING_TRADE_ID_INVALID = "REPLACING_TRADE_ID_INVALID"
     ORDER_CANCEL_WOULD_TRIGGER_CLOSEOUT = "ORDER_CANCEL_WOULD_TRIGGER_CLOSEOUT"
-    # Additional values not present on the OANDA transaction-df page but kept for
-    # backwards compatibility with older library users:
-    MARKET_HALTED = "MARKET_HALTED"
-    ORDER_ID_INVALID = "ORDER_ID_INVALID"
 
 
 class FundingReason(str, Enum):
@@ -676,11 +727,41 @@ TransactionID = str
 RequestID = str
 """Request identifier for correlation."""
 
+ClientRequestID = str
+"""Client-provided request identifier."""
+
+ClientID = str
+"""Client-provided identifier for orders or trades."""
+
+ClientTag = str
+"""Client-provided tag for orders or trades."""
+
+ClientComment = str
+"""Client-provided comment for orders or trades."""
+
+OrderSpecifier = str
+"""Order identifier accepted by order endpoints."""
+
+TradeSpecifier = str
+"""Trade identifier accepted by trade endpoints."""
+
 PriceValue = Decimal
 """Price value handled as Decimal internally, serialized as string for API precision."""
 
 AccountUnits = Decimal
 """Account currency units handled as Decimal internally, serialized as string for API precision."""
+
+DecimalNumber = Decimal
+"""Decimal number handled as Decimal internally, serialized as string for API precision."""
+
+DateTime = datetime
+"""Date/time value represented as a Python datetime."""
+
+CandleSpecification = str
+"""Candlestick request specification."""
+
+PricingComponent = str
+"""Price component selector for candlestick data, such as M, B, A, BA, BM, AM, or BAM."""
 
 
 class OrderCancelReason(str, Enum):

@@ -886,7 +886,7 @@ print(f"Education Next: Learn about retry logic and exponential backoff strategi
 
 ### Exponential Backoff Retry
 
-<!-- fragment: Demo retry logic with return type annotations and magic number patterns -->
+<!-- fragment: partial retry logic example -->
 ```python
 import asyncio
 import random
@@ -962,7 +962,7 @@ except Exception as e:
 
 ### Connection Healthcheck
 
-<!-- fragment: Demo connection healthcheck with return type and await outside function patterns -->
+<!-- fragment: partial connection healthcheck example -->
 ```python
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
@@ -1180,7 +1180,7 @@ async def resilient_example():
 
 ### Configuration Checker
 
-<!-- fragment: Demo configuration checking with return type annotations and f-string issues -->
+<!-- fragment: partial configuration checking example -->
 ```python
 import os
 from fivetwenty import AsyncClient
@@ -1221,7 +1221,7 @@ check_configuration()
 
 ### Connection Test
 
-<!-- fragment: Demo connection testing with asyncio.run and await outside function patterns -->
+<!-- fragment: partial connection testing example -->
 ```python
 import asyncio
 from fivetwenty import AsyncClient, Environment
@@ -1259,7 +1259,7 @@ asyncio.run(test_connection())
 
 ### Comprehensive Diagnostics
 
-<!-- fragment: Demo comprehensive diagnostics with await outside function and asyncio patterns -->
+<!-- fragment: partial connection diagnostics example -->
 ```python
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
