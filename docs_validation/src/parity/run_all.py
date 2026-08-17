@@ -40,6 +40,7 @@ REQUIRED_OANDA_PAGES = [
     "account-df.md",
     "account-ep.md",
     "instrument-df.md",
+    "instrument-ep.md",
     "order-df.md",
     "order-ep.md",
     "position-df.md",
@@ -86,6 +87,12 @@ def _count_critical_findings() -> tuple[int, list[str]]:
     findings: list[str] = []
     count = 0
 
+    # Per-domain reports: surface missing project-doc pages (P1) so they can't hide.
+    for path in sorted(REPORTS_DIR.glob("*-parity.md")):
+        content = path.read_text(encoding="utf-8")
+        for missing_match in re.finditer(r"\*\*P1 — documentation page missing:\*\* `([^`]+)`", content):
+            findings.append(f"{path.name}: P1 missing documentation page {missing_match.group(1)}")
+
     # Docs-surface reports: count stale imports/methods (excluding the known false positives)
     for name in ("tutorials-parity.md", "guides-parity.md", "examples-parity.md"):
         path = REPORTS_DIR / name
@@ -100,6 +107,21 @@ def _count_critical_findings() -> tuple[int, list[str]]:
             findings.append(f"{name}: {n_imp} stale imports, {n_meth} stale method calls")
             # Don't fail CI on these by default — they include known false positives
             # (sync proxy, hypothetical extension examples). User can opt-in via --strict.
+
+    fetch_status_json = OANDA_CACHE / "fetch-status.json"
+    if fetch_status_json.exists():
+        status = json.loads(fetch_status_json.read_text(encoding="utf-8"))
+        for slug, state in sorted(status.items()):
+            if state != "fresh":
+                findings.append(f"oanda cache: `{slug}` is {state} — live page could not be fetched; parity for it ran against a stale snapshot")
+
+    docs_meta_json = CACHE_DIR / "docs-meta.json"
+    if docs_meta_json.exists():
+        meta = json.loads(docs_meta_json.read_text(encoding="utf-8"))
+        if meta.get("P2_defaults"):
+            findings.append(f"docs-meta-parity.md: {meta['P2_defaults']} P2 default-value drift items")
+        if meta.get("P3_anchors"):
+            findings.append(f"docs-meta-parity.md: {meta['P3_anchors']} P3 stale source anchors")
 
     field_validation_json = CACHE_DIR / "field-validation.json"
     if field_validation_json.exists():
@@ -153,12 +175,16 @@ def main() -> int:
     print("\n=== Running per-domain parity reports ===")
     from .run_domain import DOMAINS, run_domain
 
+    blocked_domains: list[str] = []
     for d in DOMAINS:
         try:
             run_domain(d, inventory=inventory)
         except SystemExit as e:  # noqa: PERF203
+            blocked_domains.append(d)
             print(f"BLOCKED on {d}: {e}", file=sys.stderr)
             (REPORTS_DIR / f"BLOCKED-{d}.md").write_text(f"# Blocked: {d}\n\n{e}\n", encoding="utf-8")
+        else:
+            (REPORTS_DIR / f"BLOCKED-{d}.md").unlink(missing_ok=True)
 
     # Cross-cutting reports
     print("\n=== Running enums parity ===")
@@ -171,21 +197,35 @@ def main() -> int:
 
     run_docs_surface_main()
 
+    print("\n=== Running docs metadata checks (defaults, source anchors) ===")
+    from .check_docs_meta import main as check_docs_meta_main
+
+    check_docs_meta_main()
+
     print("\n=== Running field validation ===")
     _run_field_validation()
 
     # Summarize
     count, findings = _count_critical_findings()
     print("\n=== Parity pipeline summary ===")
+    if blocked_domains:
+        for d in blocked_domains:
+            print(f"  - BLOCKED: {d} lane failed to run (see reports/BLOCKED-{d}.md)")
     if findings:
         for line in findings:
             print(f"  - {line}")
-    else:
+    if not blocked_domains and not findings:
         print("  No drift detected.")
 
+    if blocked_domains:
+        print(f"\n❌ {len(blocked_domains)} parity lane(s) failed to run. The pipeline result is incomplete.", file=sys.stderr)
+        return 2
     if count > 0:
         print(f"\n⚠️  {count} P0-class drift items detected. See docs_validation/reports/ for details.")
-        return 1 if args.strict else 0
+        return 1
+    if findings and args.strict:
+        print(f"\n⚠️  {len(findings)} non-P0 finding(s) detected (strict mode). See docs_validation/reports/ for details.")
+        return 1
     print("\n✅ No P0-class drift.")
     return 0
 

@@ -42,9 +42,8 @@ DOMAINS: dict[str, dict[str, Any]] = {
     "instruments": {
         "library_module": "instruments",
         "oanda_stem": "instrument",
-        "doc_endpoint": None,
+        "doc_endpoint": "instruments",
         "doc_models": ["market-data-models"],
-        "has_oanda_endpoint": False,
     },
     "orders": {
         "library_module": "orders",
@@ -161,18 +160,33 @@ def run_domain(domain: str, *, inventory: dict[str, Any] | None = None) -> dict[
             ),
             encoding="utf-8",
         )
-    # 5. Extract project doc tables
-    doc_paths = [f"docs/api-reference/models/{m}.md" for m in doc_models]
+    # 5. Extract project doc tables. A missing page is a P1 finding, not a pipeline failure —
+    # the lane must still run so library-vs-OANDA drift stays visible.
+    missing_doc_pages: list[str] = []
+    doc_paths = []
+    for m in doc_models:
+        rel = f"docs/api-reference/models/{m}.md"
+        if (REPO_ROOT / rel).exists():
+            doc_paths.append(rel)
+        else:
+            missing_doc_pages.append(rel)
     if doc_endpoint is not None:
-        doc_paths.insert(0, f"docs/api-reference/endpoints/{doc_endpoint}.md")
-    _run(
-        "uv",
-        "run",
-        "python",
-        "-m",
-        "docs_validation.src.parity.extract_doc_tables",
-        *doc_paths,
-    )
+        rel = f"docs/api-reference/endpoints/{doc_endpoint}.md"
+        if (REPO_ROOT / rel).exists():
+            doc_paths.insert(0, rel)
+        else:
+            missing_doc_pages.append(rel)
+            doc_endpoint = None
+    doc_models = [m for m in doc_models if f"docs/api-reference/models/{m}.md" in doc_paths]
+    if doc_paths:
+        _run(
+            "uv",
+            "run",
+            "python",
+            "-m",
+            "docs_validation.src.parity.extract_doc_tables",
+            *doc_paths,
+        )
 
     # 6 / 7: Run diffs
     lib_models_json = CACHE_DIR / f"{lib_module}-library.json"
@@ -280,6 +294,7 @@ def run_domain(domain: str, *, inventory: dict[str, Any] | None = None) -> dict[
         lib_vs_docs_eps_md=lib_vs_docs_eps_md,
         inventory=inventory,
         has_oanda_endpoint=has_oanda_endpoint,
+        missing_doc_pages=missing_doc_pages,
     )
 
 
@@ -344,6 +359,7 @@ def assemble_domain_report(
     lib_vs_docs_eps_md: str | None,
     inventory: dict[str, Any],
     has_oanda_endpoint: bool,
+    missing_doc_pages: list[str] | None = None,
 ) -> dict[str, Any]:
     """Compose the per-domain parity report and write it to reports/<domain>-parity.md."""
     out_path = REPORTS_DIR / f"{domain}-parity.md"
@@ -382,6 +398,9 @@ def assemble_domain_report(
     parts.append("")
     if not has_oanda_endpoint:
         parts.append("This domain has official OANDA definitions but no official OANDA endpoint page.")
+        parts.append("")
+    for missing in missing_doc_pages or []:
+        parts.append(f"> **P1 — documentation page missing:** `{missing}` does not exist. Documentation parity cannot be checked against it for this domain.")
         parts.append("")
 
     # Endpoint coverage with normalized path matching.
@@ -455,6 +474,7 @@ def main() -> int:
     from .build_inventory import build as _build_inv
 
     inventory = _build_inv()
+    blocked: list[str] = []
     for d in domains:
         if d not in DOMAINS:
             print(f"unknown domain: {d}; known: {list(DOMAINS)}", file=sys.stderr)
@@ -462,9 +482,13 @@ def main() -> int:
         try:
             run_domain(d, inventory=inventory)
         except SystemExit as e:
+            blocked.append(d)
             print(f"BLOCKED on {d}: {e}", file=sys.stderr)
             (REPORTS_DIR / f"BLOCKED-{d}.md").write_text(f"# Blocked: {d}\n\n{e}\n", encoding="utf-8")
-    return 0
+        else:
+            # A successful run supersedes any stale blocker from a previous failure.
+            (REPORTS_DIR / f"BLOCKED-{d}.md").unlink(missing_ok=True)
+    return 2 if blocked else 0
 
 
 if __name__ == "__main__":

@@ -28,8 +28,10 @@ This gives us pages that extract_oanda_md.py can parse correctly.
 from __future__ import annotations
 
 import argparse
+import json
 import sys
 import time
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import cast
 
@@ -41,7 +43,7 @@ REPO_ROOT = Path(__file__).resolve().parents[3]
 CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "oanda"
 BASE_URL = "https://developer.oanda.com/rest-live-v20"
 
-ENDPOINT_DOMAINS = ["account", "order", "position", "pricing", "trade", "transaction"]
+ENDPOINT_DOMAINS = ["account", "instrument", "order", "position", "pricing", "trade", "transaction"]
 DEFINITION_DOMAINS = ["account", "instrument", "order", "position", "pricing", "trade", "transaction"]
 EXTRA_PAGES = ["introduction", "authentication", "troubleshooting-errors", "best-practices", "development-guide", "pricing-common-df", "primitives-df"]
 
@@ -147,14 +149,33 @@ def main() -> int:
     slugs = args.slugs or _all_slugs()
     CACHE_DIR.mkdir(parents=True, exist_ok=True)
 
+    # A failed fetch with a cached copy degrades to the stale copy (loudly);
+    # a failed fetch with no cached copy is fatal. Status is recorded so the
+    # pipeline summary can surface stale pages instead of silently trusting them.
+    status: dict[str, str] = {}
+    fatal = False
     for i, slug in enumerate(slugs):
+        cached = CACHE_DIR / f"{slug}.md"
         try:
             fetch_page(slug, force=args.force)
+            status[slug] = "fresh"
         except Exception as e:
-            print(f"FAILED {slug}: {e}", file=sys.stderr)
+            if cached.exists():
+                mtime = datetime.fromtimestamp(cached.stat().st_mtime, tz=timezone.utc).date().isoformat()
+                print(f"WARNING {slug}: fetch failed ({e}); using stale cache from {mtime}", file=sys.stderr)
+                status[slug] = f"stale ({mtime})"
+            else:
+                print(f"FAILED {slug}: {e} (no cached copy available)", file=sys.stderr)
+                status[slug] = "missing"
+                fatal = True
         if i + 1 < len(slugs):
             time.sleep(args.sleep)
-    return 0
+
+    (CACHE_DIR / "fetch-status.json").write_text(json.dumps(status, indent=2), encoding="utf-8")
+    stale = sorted(s for s, v in status.items() if v.startswith("stale"))
+    if stale:
+        print(f"NOTE: {len(stale)} page(s) served from stale cache: {', '.join(stale)}", file=sys.stderr)
+    return 1 if fatal else 0
 
 
 if __name__ == "__main__":
