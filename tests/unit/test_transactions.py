@@ -1,12 +1,13 @@
 """Unit tests for transaction endpoints."""
 
+import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from fivetwenty.endpoints.transactions import TransactionEndpoints
-from fivetwenty.models import TransactionFilter
+from fivetwenty.models import OrderFillTransaction, TransactionFilter, TransactionHeartbeat
 
 
 class TestTransactionEndpoints:
@@ -508,3 +509,89 @@ class TestTransactionTypeDispatch:
         endpoints = TransactionEndpoints(MagicMock())
         with pytest.raises(ValueError, match="Unknown transaction type"):
             endpoints._parse_transaction({"type": "NOT_A_REAL_TYPE"})
+
+
+class TestTransactionStreamParsing:
+    """Test the get_transactions_stream line-parsing loop."""
+
+    @staticmethod
+    def _stream_client(lines):
+        """Create a mock client whose _stream yields the given raw lines."""
+        client = MagicMock()
+
+        async def fake_stream(path, *, params, stall_timeout):
+            assert path == "/accounts/101-001-123456-001/transactions/stream"
+            assert params == {}
+            for line in lines:
+                yield line
+
+        client._stream = fake_stream
+        client._log = MagicMock()
+        return client
+
+    @pytest.mark.asyncio
+    async def test_stream_yields_heartbeats_and_transactions(self):
+        """Test that heartbeat and transaction lines are parsed into models."""
+        heartbeat_line = json.dumps({"type": "HEARTBEAT", "time": "2024-01-01T12:00:05.000000000Z", "lastTransactionID": "1001"})
+        order_fill_line = json.dumps(
+            {
+                "id": "1002",
+                "type": "ORDER_FILL",
+                "time": "2024-01-01T12:00:06.000000000Z",
+                "userID": 12345,
+                "accountID": "101-001-123456-001",
+                "batchID": "1002",
+                "orderID": "5001",
+                "instrument": "EUR_USD",
+                "units": "1000",
+            }
+        )
+        client = self._stream_client([heartbeat_line, order_fill_line])
+        transactions = TransactionEndpoints(client)
+
+        results = [item async for item in transactions.get_transactions_stream("101-001-123456-001")]
+
+        assert len(results) == 2
+        assert isinstance(results[0], TransactionHeartbeat)
+        assert str(results[0].last_transaction_id) == "1001"
+        assert isinstance(results[1], OrderFillTransaction)
+        assert results[1].order_id == "5001"
+        client._log.assert_not_called()
+
+    @pytest.mark.asyncio
+    async def test_stream_skips_and_logs_malformed_lines(self):
+        """Test that malformed JSON and unknown types are logged and skipped."""
+        heartbeat_line = json.dumps({"type": "HEARTBEAT", "time": "2024-01-01T12:00:05.000000000Z", "lastTransactionID": "1001"})
+        malformed_line = "{not valid json"
+        unknown_type_line = json.dumps({"id": "1003", "type": "NOT_A_REAL_TYPE"})
+        client = self._stream_client([malformed_line, heartbeat_line, unknown_type_line])
+        transactions = TransactionEndpoints(client)
+
+        results = [item async for item in transactions.get_transactions_stream("101-001-123456-001")]
+
+        # Only the heartbeat survives; both bad lines are logged and skipped
+        assert len(results) == 1
+        assert isinstance(results[0], TransactionHeartbeat)
+        assert client._log.call_count == 2
+        for call in client._log.call_args_list:
+            assert call.args[0] == "warning"
+            assert "Malformed transaction stream data" in call.args[1]
+
+
+class TestRecentTransactionsEmptyAccount:
+    """Test get_recent_transactions on an account with no transactions."""
+
+    @pytest.mark.asyncio
+    async def test_get_recent_returns_empty_when_no_transactions(self):
+        """Test the early return when lastTransactionID is below 1."""
+        client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"lastTransactionID": "0"}
+        client._request = AsyncMock(return_value=mock_response)
+        transactions = TransactionEndpoints(client)
+
+        result = await transactions.get_recent_transactions("101-001-123456-001")
+
+        assert result["transactions"] == []
+        assert result["lastTransactionID"] == "0"
+        client._request.assert_called_once()

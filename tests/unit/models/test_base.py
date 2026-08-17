@@ -1,7 +1,8 @@
 """Tests for base model functionality and aliases."""
 
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+from typing import Any
 
 import pytest
 
@@ -16,6 +17,7 @@ from fivetwenty.models import (
     TimeInForce,
     Trade,
 )
+from fivetwenty.models.base import ApiModel
 
 
 class TestApiModel:
@@ -265,3 +267,85 @@ class TestApiModel:
         assert trade_roundtrip.open_time == trade.open_time
         assert trade_roundtrip.initial_units == trade.initial_units
         assert trade_roundtrip.realized_pl == trade.realized_pl
+
+
+class _ContainerModel(ApiModel):
+    """Test-only model exercising nested serialization of dicts and lists."""
+
+    data: dict[str, Any] | None = None
+    items: list[Any] | None = None
+    when: datetime | None = None
+
+
+class TestApiModelSerializationAndDictCompat:
+    """Test ApiModel serializer recursion and dict-compat edge cases."""
+
+    def _trade(self) -> Trade:
+        return Trade(
+            id="123",
+            instrument="EUR_USD",
+            price="1.1000",
+            openTime="2024-01-01T12:00:00Z",
+            state="OPEN",
+            initialUnits="1000",
+            initialMarginRequired="50.00",
+            currentUnits="1000",
+            realizedPL="5.00",
+            marginUsed="50.00",
+        )
+
+    def test_contains_non_string_key_is_false(self) -> None:
+        """Test that __contains__ rejects non-string keys."""
+        trade = self._trade()
+        assert 123 not in trade
+        assert None not in trade
+        assert ("openTime",) not in trade
+
+    def test_getitem_unknown_key_raises_keyerror(self) -> None:
+        """Test that unknown keys raise KeyError from __getitem__."""
+        trade = self._trade()
+        with pytest.raises(KeyError):
+            trade["definitelyNotAField"]
+
+    def test_get_returns_default_for_none_unset_field(self) -> None:
+        """Test that get() falls back to the default for unset None fields."""
+        trade = self._trade()
+        assert trade.get("unrealizedPL") is None
+        assert trade.get("unrealizedPL", "fallback") == "fallback"
+        assert "unrealizedPL" not in trade
+
+    def test_serializer_recurses_into_dicts_and_lists(self) -> None:
+        """Test that Decimals and datetimes nested in containers are stringified."""
+        model = _ContainerModel(
+            data={"price": Decimal("1.25"), "nested": {"pl": Decimal("-0.50")}, "stamp": datetime(2024, 1, 1, 12, 0, tzinfo=timezone.utc)},
+            items=[Decimal("2.50"), [Decimal("3.00")], {"d": Decimal("4.00")}],
+        )
+
+        dumped = model.model_dump()
+        assert dumped["data"]["price"] == "1.25"
+        assert dumped["data"]["nested"]["pl"] == "-0.50"
+        assert dumped["data"]["stamp"] == "2024-01-01T12:00:00Z"
+        assert dumped["items"][0] == "2.50"
+        assert dumped["items"][1] == ["3.00"]
+        assert dumped["items"][2] == {"d": "4.00"}
+
+    def test_serializer_non_utc_datetime_keeps_offset(self) -> None:
+        """Test that non-UTC datetimes serialize with an explicit offset."""
+        tz = timezone(timedelta(hours=-5))
+        model = _ContainerModel(when=datetime(2024, 6, 1, 9, 30, tzinfo=tz))
+
+        dumped = model.model_dump()
+        assert dumped["when"] == "2024-06-01T09:30:00-05:00"
+
+    def test_is_decimal_string(self) -> None:
+        """Test the _is_decimal_string helper across formats."""
+        assert ApiModel._is_decimal_string("123") is True
+        assert ApiModel._is_decimal_string("-123") is True
+        assert ApiModel._is_decimal_string("1.25") is True
+        assert ApiModel._is_decimal_string("-1.25") is True
+        assert ApiModel._is_decimal_string("") is False
+        assert ApiModel._is_decimal_string("abc") is False
+        assert ApiModel._is_decimal_string("1.2.3") is False
+        assert ApiModel._is_decimal_string("1.a") is False
+        assert ApiModel._is_decimal_string(".") is False
+        assert ApiModel._is_decimal_string("-") is False

@@ -6,7 +6,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from fivetwenty.endpoints.accounts import AccountEndpoints
-from fivetwenty.models import Account, AccountProperties, AccountSummary
+from fivetwenty.models import Account, AccountProperties, AccountSummary, Instrument
 
 
 class TestAccountConfigurationEndpoints:
@@ -453,3 +453,66 @@ class TestAccountReadEndpoints:
         assert summary.last_transaction_id == "5678"
         assert result["lastTransactionID"] == "5678"
         assert result.last_transaction_id == "5678"
+
+
+INSTRUMENT_PAYLOAD = {
+    "name": "EUR_USD",
+    "type": "CURRENCY",
+    "displayName": "EUR/USD",
+    "pipLocation": -4,
+    "displayPrecision": 5,
+    "tradeUnitsPrecision": 0,
+    "minimumTradeSize": "1",
+    "maximumTrailingStopDistance": "1.00000",
+    "minimumTrailingStopDistance": "0.00050",
+    "maximumPositionSize": "0",
+    "maximumOrderUnits": "100000000",
+    "marginRate": "0.02",
+}
+
+
+class TestAccountInstrumentEndpoints:
+    """Test suite for get_account_instruments."""
+
+    @pytest.fixture
+    def mock_client(self):
+        """Create a mock async client returning an instrument payload."""
+        client = MagicMock()
+
+        async def mock_request(method, path, **kwargs):
+            mock_response = MagicMock()
+            mock_response.json.return_value = {
+                "instruments": [INSTRUMENT_PAYLOAD],
+                "lastTransactionID": "4321",
+            }
+            return mock_response
+
+        client._request = AsyncMock(side_effect=mock_request)
+        return client
+
+    @pytest.fixture
+    def accounts(self, mock_client):
+        """Create AccountEndpoints instance with mock client."""
+        return AccountEndpoints(mock_client)
+
+    @pytest.mark.asyncio
+    async def test_get_account_instruments_without_filter(self, accounts, mock_client):
+        """Test that get_account_instruments sends no params when unfiltered."""
+        result = await accounts.get_account_instruments("101-001-123456-001")
+
+        mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/instruments", params={})
+
+        instruments = result["instruments"]
+        assert len(instruments) == 1
+        assert isinstance(instruments[0], Instrument)
+        assert str(instruments[0].name) == "EUR_USD"
+        assert instruments[0].display_precision == 5
+        assert instruments[0].margin_rate == Decimal("0.02")
+        assert result["lastTransactionID"] == "4321"
+
+    @pytest.mark.asyncio
+    async def test_get_account_instruments_with_filter(self, accounts, mock_client):
+        """Test that the instruments filter is comma-joined into params."""
+        await accounts.get_account_instruments("101-001-123456-001", instruments=["EUR_USD", "GBP_USD"])
+
+        mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/instruments", params={"instruments": "EUR_USD,GBP_USD"})

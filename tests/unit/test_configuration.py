@@ -1,10 +1,11 @@
 """Tests for configuration management functionality."""
 
+import json
 import os
 from unittest.mock import patch
 
 import pytest
-from pydantic import ValidationError
+from pydantic import SecretStr, ValidationError
 
 from fivetwenty import AccountConfig, AccountConfigLoader, ConfigValidator, Environment
 
@@ -88,7 +89,6 @@ class TestConfigValidator:
         config = AccountConfig(token="valid-token", account_id="123-456-789", environment=Environment.PRACTICE, alias="test_account")
 
         # Test validator logic by creating a config with empty secret value
-        from pydantic import SecretStr
 
         config.token = SecretStr("")
 
@@ -101,7 +101,6 @@ class TestConfigValidator:
         config = AccountConfig(token="test-token", account_id="valid-account-id", environment=Environment.PRACTICE, alias="test_account")
 
         # Test validator logic by creating a config with empty secret value
-        from pydantic import SecretStr
 
         config.account_id = SecretStr("")
 
@@ -128,7 +127,6 @@ class TestConfigValidator:
         config = AccountConfig(token="valid-token", account_id="valid-account-id", environment=Environment.PRACTICE, alias="valid_alias")
 
         # Test validator logic by setting fields to empty
-        from pydantic import SecretStr
 
         config.token = SecretStr("")
         config.account_id = SecretStr("")
@@ -242,3 +240,219 @@ class TestAccountConfigLoader:
             config = AccountConfigLoader.load_from_env("TEST_")
             # Should return None since whitespace-only token is invalid
             assert config is None
+
+
+class _RaisingSecret:
+    """Truthy stand-in for SecretStr whose accessor always raises."""
+
+    def get_secret_value(self) -> str:
+        raise RuntimeError("secret unavailable")
+
+
+class TestConfigValidatorAccountConfigExceptionPaths:
+    """Test validate_account_config when secret accessors raise."""
+
+    def _valid_config(self):
+        return AccountConfig(token="valid-token", account_id="123-456-789", environment=Environment.PRACTICE, alias="valid_alias")
+
+    def test_token_accessor_exception_reports_token_required(self):
+        """Test that a raising token accessor is reported as a missing token."""
+        config = self._valid_config()
+        object.__setattr__(config, "token", _RaisingSecret())
+
+        errors = ConfigValidator.validate_account_config(config)
+        assert "Token is required" in errors
+        assert "Account ID is required" not in errors
+
+    def test_account_id_accessor_exception_reports_account_id_required(self):
+        """Test that a raising account_id accessor is reported as missing."""
+        config = self._valid_config()
+        object.__setattr__(config, "account_id", _RaisingSecret())
+
+        errors = ConfigValidator.validate_account_config(config)
+        assert "Account ID is required" in errors
+        assert "Token is required" not in errors
+
+
+class TestConfigValidatorFieldValidators:
+    """Test the static field-level validators on ConfigValidator."""
+
+    def test_validate_token_valid(self):
+        assert ConfigValidator.validate_token("a-token-of-reasonable-length") is True
+        assert ConfigValidator.validate_token("12345678") is True  # Minimum length
+
+    def test_validate_token_invalid(self):
+        assert ConfigValidator.validate_token(None) is False
+        assert ConfigValidator.validate_token("") is False
+        assert ConfigValidator.validate_token("   ") is False
+        assert ConfigValidator.validate_token("short") is False  # Below minimum length
+        assert ConfigValidator.validate_token(12345678) is False  # type: ignore[arg-type]
+
+    def test_validate_account_id_valid(self):
+        assert ConfigValidator.validate_account_id("101-001-1234567-001") is True
+        assert ConfigValidator.validate_account_id("  101-001-1234567-001  ") is True  # Whitespace stripped
+        # The user segment varies in length on real accounts (6-9 digits observed live).
+        assert ConfigValidator.validate_account_id("101-001-123456-001") is True
+        assert ConfigValidator.validate_account_id("101-001-27189766-001") is True
+
+    def test_validate_account_id_invalid(self):
+        assert ConfigValidator.validate_account_id(None) is False
+        assert ConfigValidator.validate_account_id("") is False
+        assert ConfigValidator.validate_account_id("   ") is False
+        assert ConfigValidator.validate_account_id("123-456-789") is False  # Wrong shape
+        assert ConfigValidator.validate_account_id("abc-def-ghijklm-nop") is False
+        assert ConfigValidator.validate_account_id(1010011234567001) is False  # type: ignore[arg-type]
+
+    def test_validate_environment_valid(self):
+        assert ConfigValidator.validate_environment("practice") is True
+        assert ConfigValidator.validate_environment("live") is True
+        assert ConfigValidator.validate_environment("LIVE") is True  # Case-insensitive
+        assert ConfigValidator.validate_environment("Practice") is True
+
+    def test_validate_environment_invalid(self):
+        assert ConfigValidator.validate_environment(None) is False
+        assert ConfigValidator.validate_environment("") is False
+        assert ConfigValidator.validate_environment("staging") is False
+        assert ConfigValidator.validate_environment(1) is False  # type: ignore[arg-type]
+
+    def test_validate_config_all_valid(self):
+        config_dict = {
+            "token": "a-token-of-reasonable-length",
+            "account_id": "101-001-1234567-001",
+            "environment": "practice",
+            "alias": "primary_account",
+        }
+        assert ConfigValidator.validate_config(config_dict) == {}
+
+    def test_validate_config_all_invalid(self):
+        errors = ConfigValidator.validate_config({})
+        assert errors["token"] == "Invalid token format"
+        assert errors["account_id"] == "Invalid account ID format"
+        assert errors["environment"] == "Invalid environment (must be 'practice' or 'live')"
+        assert errors["alias"] == "Alias is required"
+
+    def test_validate_config_invalid_alias_identifier(self):
+        config_dict = {
+            "token": "a-token-of-reasonable-length",
+            "account_id": "101-001-1234567-001",
+            "environment": "live",
+            "alias": "123-bad-alias",
+        }
+        errors = ConfigValidator.validate_config(config_dict)
+        assert errors == {"alias": "Alias must be a valid identifier"}
+
+
+class TestAccountConfigLoaderFile:
+    """Test AccountConfigLoader file-based loading."""
+
+    def _write_config(self, tmp_path, data):
+        config_file = tmp_path / "accounts.json"
+        config_file.write_text(json.dumps(data) if isinstance(data, dict) else data)
+        return str(config_file)
+
+    def _valid_data(self):
+        return {
+            "accounts": [
+                {"alias": "primary", "token": "token-one", "account_id": "101-001-1234567-001", "environment": "practice"},
+                {"alias": "live_acct", "token": "token-two", "account_id": "101-001-7654321-002", "environment": "live"},
+            ]
+        }
+
+    def test_load_from_file_valid(self, tmp_path):
+        """Test loading multiple accounts from a valid JSON file."""
+        config_file = self._write_config(tmp_path, self._valid_data())
+
+        accounts = AccountConfigLoader.load_from_file(config_file)
+
+        assert len(accounts) == 2
+        assert accounts[0].alias == "primary"
+        assert accounts[0].token.get_secret_value() == "token-one"
+        assert accounts[0].account_id.get_secret_value() == "101-001-1234567-001"
+        assert accounts[0].environment == Environment.PRACTICE
+        assert accounts[1].alias == "live_acct"
+        assert accounts[1].environment == Environment.LIVE
+
+    def test_load_from_file_missing_file(self, tmp_path):
+        """Test that a missing config file raises FileNotFoundError."""
+        missing = str(tmp_path / "does_not_exist.json")
+        with pytest.raises(FileNotFoundError, match="Configuration file not found"):
+            AccountConfigLoader.load_from_file(missing)
+
+    def test_load_from_file_malformed_json(self, tmp_path):
+        """Test that malformed JSON raises a decode error."""
+        config_file = self._write_config(tmp_path, "{not valid json")
+        with pytest.raises(json.JSONDecodeError):
+            AccountConfigLoader.load_from_file(config_file)
+
+    def test_load_from_file_missing_accounts_key(self, tmp_path):
+        """Test that a file without 'accounts' raises ValueError."""
+        config_file = self._write_config(tmp_path, {"users": []})
+        with pytest.raises(ValueError, match="must contain 'accounts' key"):
+            AccountConfigLoader.load_from_file(config_file)
+
+    def test_load_from_file_missing_required_account_field(self, tmp_path):
+        """Test that an account entry missing a required key raises KeyError."""
+        data = {"accounts": [{"alias": "primary", "account_id": "101-001-1234567-001", "environment": "practice"}]}
+        config_file = self._write_config(tmp_path, data)
+        with pytest.raises(KeyError):
+            AccountConfigLoader.load_from_file(config_file)
+
+    def test_load_from_file_invalid_environment_value(self, tmp_path):
+        """Test that an unknown environment value raises ValueError."""
+        data = {"accounts": [{"alias": "primary", "token": "token-one", "account_id": "101-001-1234567-001", "environment": "staging"}]}
+        config_file = self._write_config(tmp_path, data)
+        with pytest.raises(ValueError, match="is not a valid"):
+            AccountConfigLoader.load_from_file(config_file)
+
+    def test_load_by_alias_found(self, tmp_path):
+        """Test loading a specific account by alias."""
+        config_file = self._write_config(tmp_path, self._valid_data())
+
+        config = AccountConfigLoader.load_by_alias(config_file, "live_acct")
+
+        assert config is not None
+        assert config.alias == "live_acct"
+        assert config.environment == Environment.LIVE
+        assert config.token.get_secret_value() == "token-two"
+
+    def test_load_by_alias_missing(self, tmp_path):
+        """Test that a missing alias returns None."""
+        config_file = self._write_config(tmp_path, self._valid_data())
+        assert AccountConfigLoader.load_by_alias(config_file, "nonexistent") is None
+
+    def test_load_by_alias_missing_file(self, tmp_path):
+        """Test that load_by_alias propagates missing-file errors."""
+        with pytest.raises(FileNotFoundError):
+            AccountConfigLoader.load_by_alias(str(tmp_path / "nope.json"), "primary")
+
+
+class TestAccountConfigLoaderEnvPrefix:
+    """Additional from_env_prefix behavior."""
+
+    def test_from_env_prefix_missing_vars_returns_none(self):
+        """Test that from_env_prefix returns None when variables are absent."""
+        with patch.dict(os.environ, {}, clear=True):
+            assert AccountConfigLoader.from_env_prefix("MOMENTUM_") is None
+
+    def test_from_env_prefix_does_not_read_default_vars(self):
+        """Test that a prefixed lookup ignores the unprefixed default variables."""
+        with patch.dict(os.environ, {"FIVETWENTY_OANDA_TOKEN": "default-token", "FIVETWENTY_OANDA_ACCOUNT": "default-account"}, clear=True):
+            assert AccountConfigLoader.from_env_prefix("MOMENTUM_") is None
+
+
+class TestAccountConfigSecretHandling:
+    """Test that secrets never leak through string conversions."""
+
+    def test_secrets_masked_in_str_and_repr(self):
+        config = AccountConfig(token="super-secret-token", account_id="101-001-1234567-001", environment=Environment.PRACTICE, alias="masked")
+
+        for rendered in (str(config), repr(config)):
+            assert "super-secret-token" not in rendered
+            assert "101-001-1234567-001" not in rendered
+
+    def test_secret_values_stripped(self):
+        """Test that whitespace around secret values is stripped by the validator."""
+        config = AccountConfig(token=SecretStr("  padded-token  "), account_id=SecretStr("  padded-id  "), environment=Environment.LIVE, alias="stripped")
+
+        assert config.token.get_secret_value() == "padded-token"
+        assert config.account_id.get_secret_value() == "padded-id"

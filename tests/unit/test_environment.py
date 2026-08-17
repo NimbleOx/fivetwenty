@@ -113,3 +113,19 @@ class TestEnvironment:
         env_dict = {Environment.PRACTICE: "practice_data", Environment.LIVE: "live_data"}
         assert env_dict[Environment.PRACTICE] == "practice_data"
         assert env_dict[Environment.LIVE] == "live_data"
+
+    def test_environment_stream_url_practice(self):
+        """Test streaming URL for practice environment."""
+        assert Environment.PRACTICE.stream_url == "https://stream-fxpractice.oanda.com/v3"
+
+    def test_environment_stream_url_live(self):
+        """Test streaming URL for live environment."""
+        assert Environment.LIVE.stream_url == "https://stream-fxtrade.oanda.com/v3"
+
+    def test_environment_stream_url_format(self):
+        """Test that stream URLs follow the expected format."""
+        for env in Environment:
+            url = env.stream_url
+            assert url.startswith("https://stream-")
+            assert url.endswith("/v3")
+            assert "oanda.com" in url

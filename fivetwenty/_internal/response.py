@@ -6,16 +6,24 @@ from typing import Any
 
 from ..models.base import ApiModel
 
-_UPPERCASE_SUFFIXES = {"id", "ids", "url", "uri", "ip", "api", "pl", "nav"}
+_UPPERCASE_SUFFIXES = {"id", "url", "uri", "ip", "api", "pl", "nav", "vwap"}
+# OANDA pluralizes acronyms with a lowercase "s": tradeIDs, closingTransactionIDs.
+_SPECIAL_SUFFIXES = {"ids": "IDs"}
+
+
+def _convert_part(part: str) -> str:
+    if part in _SPECIAL_SUFFIXES:
+        return _SPECIAL_SUFFIXES[part]
+    if part in _UPPERCASE_SUFFIXES:
+        return part.upper()
+    return part.title()
 
 
 def _snake_to_oanda(name: str) -> str:
     parts = name.split("_")
     if not parts:
         return name
-    out = [parts[0]]
-    out.extend(part.upper() if part in _UPPERCASE_SUFFIXES else part.title() for part in parts[1:])
-    return "".join(out)
+    return parts[0] + "".join(_convert_part(part) for part in parts[1:])
 
 
 class ApiResponse(dict[str, Any]):
