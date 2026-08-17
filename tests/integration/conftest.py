@@ -353,17 +353,6 @@ def financial_assertions():
     return FinancialAssertions()
 
 
-@pytest.fixture
-def vcr_config():
-    """VCR configuration for response recording."""
-    return {
-        "filter_headers": ["authorization"],
-        "filter_query_parameters": ["access_token"],
-        "decode_compressed_response": True,
-        "record_mode": "once",
-    }
-
-
 # Skip markers for different test types
 integration_only = pytest.mark.skipif(os.getenv("SKIP_INTEGRATION") == "1", reason="Integration tests skipped (SKIP_INTEGRATION=1)")
 

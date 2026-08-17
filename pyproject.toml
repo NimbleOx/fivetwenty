@@ -200,10 +200,7 @@ markers = [
     "core: mark test as a core functionality test",
     "streaming: mark test as a streaming-related test",
     "trading: mark test as a trading operation test",
-    "edge_cases: mark test as an edge case test",
-    "unit: mark test as a unit test",
-    "slow: mark test as slow running",
-    "compliance: mark test as a compliance test"
+    "edge_cases: mark test as an edge case test"
 ]
 
 [dependency-groups]
@@ -212,7 +209,6 @@ dev = [
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
     "pytest-mock>=3.12.0",
-    "pytest-vcr>=1.0.2",
     "pytest-cov>=4.0.0",
     # Code quality tools (using higher version requirements)
     "mypy>=1.18.2",
@@ -248,12 +244,12 @@ dev = [
 # Testing tasks
 test = "python -m pytest tests/unit/"
 test-integration = "python -m pytest tests/integration/ --run-integration-live"
-test-integration-live = "python -m pytest tests/integration/ --run-integration-live"
 
 # Code quality tasks
 lint = "ruff check ."
 lint-fix = "ruff check --fix ."
 format = "ruff format ."
+format-check = "ruff format --check ."
 typecheck = "uv run mypy --explicit-package-bases fivetwenty/ docs/examples/ docs_validation/src tests/"
 
 # Development tasks
@@ -280,8 +276,8 @@ docs-validate = ["docs-validate-files", "docs-validate-parity"]
 yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/workflows/ docs/api-reference/openapi.yaml"
 
 # Workflow tasks
-check-fast = ["format", "lint", "typecheck", "test"]
-check-full = ["format", "lint", "typecheck", "test", "docs-validate"]
+check-fast = ["format-check", "lint", "typecheck", "test"]
+check-full = ["format-check", "lint", "typecheck", "test", "docs-validate"]
 release-check = ["check-full", "yaml-lint", "docs-build", "package-check"]
 
 # Release tasks
@@ -321,4 +317,17 @@ sequence = [
     "twine-check",
     "_publish-pypi-upload",
     "release-github"
+]
+
+[tool.coverage.run]
+source = ["fivetwenty"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 80
+show_missing = true
+exclude_lines = [
+    "pragma: no cover",
+    "if TYPE_CHECKING:",
+    "raise NotImplementedError",
 ]

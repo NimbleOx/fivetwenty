@@ -9,7 +9,7 @@ on:
       - 'mkdocs.yml'
       - 'pyproject.toml'
       - 'uv.lock'
-      - 'docs-tooling/validation/**'
+      - 'docs_validation/**'
       - '.github/workflows/docs.yml'
   pull_request:
     branches: [main]
@@ -18,7 +18,7 @@ on:
       - 'mkdocs.yml'
       - 'pyproject.toml'
       - 'uv.lock'
-      - 'docs-tooling/validation/**'
+      - 'docs_validation/**'
       - '.github/workflows/docs.yml'
 
 permissions:
@@ -61,6 +61,9 @@ jobs:
 
       - name: Install dependencies
         run: uv sync
+
+      - name: Validate documentation
+        run: uv run poe docs-validate-files
 
       - name: Test MkDocs build
         run: uv run mkdocs build --strict --clean
