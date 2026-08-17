@@ -272,6 +272,15 @@ docs-validate-parity = "uv run python -m docs_validation.src.parity.run_all --no
 docs-validate-parity-refresh = "uv run python -m docs_validation.src.parity.run_all --refresh"
 docs-validate = ["docs-validate-files", "docs-validate-parity"]
 
+# Local-only gate: executes docs/examples/notebooks/*.ipynb headlessly against a
+# mocked HTTP transport. Deliberately not wired into CI (a Jupyter kernel per
+# notebook exceeds the GitHub runner memory budget, same as the mypy and
+# code-execution doc validators). Uses `--with` (an ephemeral overlay) rather
+# than a dependency group: numpy's stubs use post-3.10 syntax mypy can't parse,
+# so these packages must never land in the shared dev .venv that `poe typecheck`
+# scans, or every subsequent typecheck run breaks until a clean `uv sync --group dev`.
+docs-validate-notebooks = "uv run --with nbclient>=0.10.0 --with nbformat>=5.10.0 --with ipykernel>=6.29.0 --with nest-asyncio>=1.6.0 --with matplotlib>=3.7.0 --with numpy>=1.24.0 --with pandas>=2.2.0 --with seaborn>=0.13.0 python scripts/run_notebooks.py"
+
 # YAML tasks
 yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/workflows/ docs/api-reference/openapi.yaml"
 
