@@ -1,59 +1,27 @@
 # FiveTwenty Documentation
 
-Welcome to **FiveTwenty** - the modern, secure Python SDK for OANDA's v20 REST API. Built for forex trading with first-class async support and robust security.
+FiveTwenty is a Python SDK for OANDA's v20 REST API, built async-first with a synchronous wrapper. It covers all seven v20 endpoint groups and keeps every monetary value in `Decimal`.
 
 ## What is FiveTwenty?
 
-**FiveTwenty** is a robust Python SDK that makes forex trading through the OANDA v20 REST API accessible and reliable. Whether you're building automated trading systems, creating analytical tools, or developing trading applications, FiveTwenty provides the foundation you need.
+OANDA's v20 API speaks JSON with string-encoded decimals, camelCase field names, and long-lived HTTP streams. FiveTwenty translates that into typed Python: Pydantic models for every request and response object, async iterators for price and transaction streams, and structured exceptions for every error the API can return. Your code works with `Decimal` prices and enum order types; the SDK handles serialization, connection management, and reconnection.
 
-FiveTwenty bridges the gap between OANDA's powerful v20 API and your Python applications. It handles the complexity of financial data types, connection management, and error handling so you can focus on your trading logic.
+Two runtime dependencies: httpx and pydantic.
 
-**Key benefits:**
+**What you get:**
 
-- **Financial precision** - All monetary values use `Decimal` types to prevent floating-point errors
-- **Type safety** - Complete type hints help catch errors before they reach production
-- **Async-first design** - Built for high-performance applications with sync wrapper available
-- **Robust design** - Comprehensive error handling, automatic retries, and rate limiting
+- Every monetary value is a `Decimal`. No floats, anywhere.
+- Full type hints under mypy strict, with a `py.typed` marker.
+- An async-first `AsyncClient` and a thread-backed synchronous `Client` with the same surface.
+- Price and transaction streaming with stall detection and configurable reconnection.
+- Retries with exponential backoff for safe requests only; writes are never retried, so a timed-out order can't be silently double-submitted.
+- 130+ Pydantic models and 41 enums matching the OANDA specification, verified by an automated parity pipeline against OANDA's published docs.
 
-## Key Features
+## What's covered
 
-### **Modern Python Design**
-- **Async & sync clients** - Choose the right tool for your application
-- **Type-safe APIs** - Complete type hints with modern Python syntax
-- **Pydantic models** - Reliable data validation and serialization
-- **Context managers** - Automatic resource cleanup
-- **Environment variable support** - Secure deployment patterns
-- **Real-time streaming** - Live price feeds with automatic reconnection
-- **Intelligent retries** - Exponential back-off with jitter
-- **Rate limit handling** - Automatic compliance with OANDA limits
-- **Comprehensive error handling** - Structured exception hierarchy
+All seven v20 endpoint groups: accounts, instruments (candles, order book, position book), orders, trades, positions, pricing and streaming, and transactions. Order support includes market, limit, stop, and market-if-touched orders with take-profit, stop-loss, trailing, and guaranteed-stop attachments.
 
-### **Complete OANDA v20 Coverage**
-- **All endpoints supported** - Accounts, orders, trades, positions, pricing
-- **Advanced order types** - Market, limit, stop with risk management
-- **Historical data** - Candlestick charts and order book snapshots
-- **Transaction streaming** - Real-time account activity
-
-## Architecture Overview
-
-FiveTwenty provides a robust architecture for trading applications:
-
-### **Configuration System**
-- **AccountConfig** - Secure credential management with automatic masking
-- **Environment variables** - Zero-config deployment with `FIVETWENTY_*` variables
-- **Multi-account support** - Custom prefixes for complex trading systems
-- **Configuration validation** - Runtime validation with helpful error messages
-
-### **Client Architecture**
-- **AsyncClient** - High-performance async client for concurrent operations
-- **Client** - Synchronous wrapper for scripts and legacy applications
-- **Automatic retry logic** - Intelligent handling of network issues and rate limits
-- **Configurable timeouts** - Fine-tune performance for your use case
-
-### **Data Models**
-- **130+ Pydantic models and 41 enums** - Complete coverage of OANDA API request and response objects
-- **Decimal precision** - Financial-grade decimal arithmetic throughout
-- **Type validation** - Catch errors at runtime with meaningful messages
+Configuration comes from constructor arguments, an `AccountConfig` object, or `FIVETWENTY_*` environment variables, with credentials held in `SecretStr` so they never appear in logs or reprs.
 
 ## Quick Start
 
@@ -147,23 +115,8 @@ asyncio.run(main())
 
 ## Next Steps
 
-Our documentation is organized to serve different user needs effectively:
+- [Tutorials](tutorials/index.md) teach the SDK step by step, starting with [installation](tutorials/getting-started/installation.md) and a first practice-account trade.
+- [Guides](guides/index.md) explain how the SDK works (architecture, environments, async vs sync) and solve specific problems (connection failures, stop-loss strategies, multi-account setups).
+- The [API Reference](api-reference/index.md) documents every method signature, parameter, and model field.
 
-### Learn (Tutorials)
-**When you want to build skills through guided practice**
-
-Start with [Tutorials](tutorials/index.md) for hands-on learning that builds your confidence with the FiveTwenty step by step.
-
-### Understand & Solve (Guides)
-**When you need comprehensive guidance - both understanding and solutions**
-
-Use [Guides](guides/index.md) for both conceptual understanding and practical solutions to trading challenges.
-
-### Reference (API Docs)
-**When you need to look up specific details**
-
-Check [API Reference](api-reference/index.md) for comprehensive method signatures, parameters, and return values.
-
----
-
-**Ready to start?** Let's [install FiveTwenty](tutorials/getting-started/installation.md) and get you trading!
+New here? Start with [installation](tutorials/getting-started/installation.md).

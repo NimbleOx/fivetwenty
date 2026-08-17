@@ -1,6 +1,6 @@
 # Order Strategies & Combinations
 
-Learn to combine FiveTwenty's order types effectively for common trading scenarios.
+Learn to combine FiveTwenty's order types for common trading scenarios.
 
 ## Learning Objectives
 
@@ -518,7 +518,7 @@ if __name__ == "__main__":
 
 ## Complete Strategy Example
 
-Combining FiveTwenty's order types into a complete trading strategy. This example demonstrates a comprehensive scaling strategy that places multiple entry orders at different price levels AND multiple exit orders at profit targets - all in one coordinated approach.
+This example combines FiveTwenty's order types into a complete scaling strategy: multiple entry orders at different price levels plus multiple exit orders at profit targets, placed as one coordinated set.
 
 The following example shows placing progressive entry orders (larger sizes at better prices), calculating weighted average entry, placing systematic profit-taking exits, and analyzing potential outcomes:
 
@@ -1059,7 +1059,6 @@ if __name__ == "__main__":
 
 ## Next Steps
 
-- Review [Best Practices](../../guides/understanding/best-practices.md) for robust order handling
-- Check [Best Practices](../../guides/understanding/best-practices.md) for production deployment
+- Review [Best Practices](../../guides/understanding/best-practices.md) for order handling and production deployment
 
-FiveTwenty provides powerful order combinations through OANDA's proven order types - use these building blocks rather than complex custom strategies.
+FiveTwenty builds its order combinations on OANDA's native order types. Use these building blocks rather than complex custom strategies.

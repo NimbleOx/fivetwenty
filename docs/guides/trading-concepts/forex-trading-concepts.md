@@ -3599,14 +3599,14 @@ print(f"\nSuccess Error handling demonstration complete")
 
 ## Conclusion
 
-Understanding these forex concepts in the context of the FiveTwenty helps you:
+These concepts map directly onto how you use FiveTwenty:
 
 1. **Structure Your Code**: Know when to use trades vs. positions
 2. **Manage Risk**: Implement proper position sizing and margin monitoring
 3. **Handle Market Realities**: Account for spreads, slippage, and market sessions
-4. **Build Robust Systems**: Proper error handling for trading scenarios
+4. **Handle Failures**: Write error handling that fits trading scenarios
 5. **Optimize Performance**: Use appropriate order types and timing
 
-The SDK abstracts away much complexity, but understanding the underlying forex mechanics helps you build more effective and safer trading applications.
+The SDK hides much of the mechanical complexity, but knowing the forex mechanics underneath makes your applications safer.
 
 Remember: Forex trading involves substantial risk. Always test thoroughly in the practice environment before using real money.

@@ -43,6 +43,6 @@ Complete reference for all FiveTwenty endpoint implementations.
 ## Need More Context?
 
 - **Learn with [Tutorials](../../tutorials/index.md)** for hands-on guidance
-- **Get comprehensive guidance with [Guides](../../guides/index.md)** for both solutions and understanding
+- **Get guidance with [Guides](../../guides/index.md)** for both solutions and understanding
 
 **Ready to explore?** Choose an endpoint above or browse the complete [Client API Reference](../client.md) for setup and configuration details.

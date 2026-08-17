@@ -524,11 +524,11 @@ if __name__ == "__main__":
 
 ## Enhanced Strategy with Advanced Features
 
-Professional trading strategies extend beyond simple technical indicators to incorporate sophisticated market analysis and adaptive risk management. Advanced features like volatility filters prevent trading during choppy, unpredictable market conditions, while dynamic position sizing adjusts your exposure based on current market volatility and account risk parameters. Implementing spread monitoring ensures you only trade when execution costs are reasonable, and daily trade limits prevent over-trading that can erode profits through transaction costs and emotional decision-making.
+Production trading strategies go beyond technical indicators. Volatility filters prevent trading during choppy, unpredictable market conditions, and dynamic position sizing adjusts your exposure based on current volatility and account risk parameters. Spread monitoring keeps you out of trades when execution costs are high, and daily trade limits prevent over-trading that erodes profits through transaction costs and emotional decisions.
 
-This enhanced strategy demonstrates how to build adaptive trading logic that responds intelligently to changing market conditions. You'll see how to use `client.pricing.get_pricing()` to monitor bid-ask spreads in real-time, implement volatility-based position sizing that protects capital during turbulent markets, and create market condition filters that keep your strategy out of unfavorable trading environments. These protective mechanisms are essential for long-term profitability, as they help your strategy avoid the losses that come from trading in unsuitable market conditions.
+This enhanced strategy demonstrates how to build trading logic that adapts to changing market conditions. You'll use `client.pricing.get_pricing()` to monitor bid-ask spreads in real time, implement volatility-based position sizing, and create market condition filters that keep the strategy out of unfavorable environments.
 
-The concepts shown here elevate your trading system from basic automation to professional-grade risk management. While the example provides a foundation, real-world implementations would expand these ideas with multi-timeframe analysis, correlation filters across instruments, economic calendar integration, and machine learning-based signal optimization:
+The example is a foundation; real-world implementations would expand it with multi-timeframe analysis, correlation filters across instruments, economic calendar integration, or machine learning-based signal optimization:
 
 <!-- fragment: Enhanced strategy with market condition filtering and dynamic position sizing -->
 ```python
@@ -800,11 +800,11 @@ if __name__ == "__main__":
 
 ## Performance Monitoring Dashboard
 
-Effective trading requires continuous performance monitoring to understand how your strategy behaves in live market conditions. Real-time metrics like win rate, profit per hour, and trades per hour help you identify when your strategy is performing as expected versus when market conditions have changed and adjustments are needed. A comprehensive monitoring dashboard provides immediate visibility into your strategy's health, allowing you to make informed decisions about when to let it run, when to pause for analysis, or when to shut it down to prevent further losses.
+You need continuous performance monitoring to understand how your strategy behaves in live market conditions. Real-time metrics like win rate, profit per hour, and trades per hour show when your strategy is performing as expected and when market conditions have changed. A monitoring dashboard gives you immediate visibility into your strategy's health, so you can decide when to let it run, when to pause for analysis, and when to shut it down to prevent further losses.
 
-This monitoring system demonstrates how to track and display key performance indicators that professional traders use to evaluate strategy effectiveness. The `StrategyMonitor` class calculates runtime statistics, win rates, profitability metrics, and efficiency measures that tell you not just whether you're making money, but how efficiently your capital is being deployed. These metrics are essential for comparing different strategies, optimizing parameters, and understanding the trade-off between trade frequency and profitability.
+This monitoring system demonstrates how to track and display the performance indicators professional traders use to evaluate a strategy. The `StrategyMonitor` class calculates runtime statistics, win rates, profitability metrics, and efficiency measures that show both whether you're making money and how hard your capital is working. Use these metrics to compare strategies, tune parameters, and weigh trade frequency against profitability.
 
-Building robust monitoring into your trading infrastructure is as important as the trading logic itself. Without proper visibility, you're flying blind - unable to distinguish between normal strategy drawdowns and fundamental strategy failures. The patterns shown here provide a foundation for more sophisticated monitoring that could include equity curve tracking, drawdown analysis, Sharpe ratio calculation, and real-time alerting for abnormal behavior:
+Monitoring matters as much as the trading logic itself. Without it, you can't distinguish normal strategy drawdowns from fundamental strategy failures. The patterns shown here can be extended with equity curve tracking, drawdown analysis, Sharpe ratio calculation, and real-time alerting for abnormal behavior:
 
 <!-- fragment: Complete performance monitoring with SDK integration and real account data -->
 ```python
@@ -1216,16 +1216,16 @@ Success **Performance Monitoring**: Real-time tracking with KPI dashboards, win 
 
 Success **SDK Integration Patterns**: Proper AsyncClient context manager usage, TypedDict response handling with dictionary access, Pydantic model field access with attributes, Decimal type for financial precision, InstrumentName enum for type-safe instruments, and FiveTwentyError exception handling
 
-!!! success "Trading System Mastery Complete!"
-    Incredible achievement! You've built a complete automated trading system from concept to production deployment. You understand the full development lifecycle, risk management, and operational requirements for successful algorithmic trading. You can now integrate real-time OANDA data, execute trades with proper risk management, and monitor performance with professional-grade dashboards.
+!!! success "Trading System Complete"
+    You've built a complete automated trading system, from concept to production deployment. You can now integrate real-time OANDA data, execute trades with risk management, and monitor performance with a dashboard.
 
 ---
 
-## Your Trading Journey Continues
+## Next Steps
 
 ### What You've Accomplished
 
-Congratulations! You've successfully completed the comprehensive FiveTwenty trading tutorial series. You now possess:
+You've completed the FiveTwenty trading tutorial series. You now have:
 
 Success **Level 1 - Foundation Knowledge**
 - Deep understanding of forex concepts, pips, spreads, and order types
@@ -1264,11 +1264,7 @@ Success **Level 4 - System Development**
 
 ---
 
-**Congratulations on completing your trading education foundation!**
-
-Remember: **Successful trading requires practice, discipline, and continuous learning.** You've built the technical skills - now focus on developing the psychological discipline and market knowledge needed for long-term success.
-
-**Happy Trading!**
+The technical skills are in place. Run your system on a practice account until its behavior holds no surprises, then follow the [live trading setup guide](../../guides/practical-solutions/setup-live-trading.md) when you're ready.
 
 ---
 

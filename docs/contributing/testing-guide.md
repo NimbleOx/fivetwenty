@@ -1,6 +1,6 @@
 # Testing Guide
 
-Comprehensive testing ensures FiveTwenty's reliability for production trading.
+How to run and write FiveTwenty's unit and integration tests.
 
 ---
 

@@ -122,7 +122,7 @@ FIVETWENTY_OANDA_ACCOUNT=your-practice-account
 
 ## Documentation
 
-All public methods need comprehensive docstrings:
+All public methods need docstrings covering arguments, return values, and raised exceptions:
 
 ```python
 from typing import Any
@@ -157,7 +157,7 @@ async def post_market_order(
 ### Documentation Types
 
 - **[Tutorials](../tutorials/)** - Step-by-step learning
-- **[Guides](../guides/)** - Comprehensive guidance
+- **[Guides](../guides/)** - Concept explanations and how-to solutions
 - **[API Reference](../api-reference/)** - Complete specifications
 - **[Examples](../examples/)** - Working code samples
 

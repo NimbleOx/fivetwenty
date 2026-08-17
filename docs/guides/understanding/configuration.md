@@ -1,6 +1,6 @@
 # Configuration
 
-The FiveTwenty library provides flexible configuration options to manage your OANDA API credentials and client settings securely. This guide covers all configuration patterns and advanced options.
+FiveTwenty gives you a few ways to supply OANDA API credentials and client settings. This guide covers each pattern, plus the advanced options.
 
 ## Overview
 
@@ -14,7 +14,7 @@ All approaches prioritize security by automatically masking sensitive informatio
 
 ## Environment Concepts
 
-OANDA provides two distinct environments for trading: **Practice** and **Live**. Understanding the differences is crucial for safe development and trading.
+OANDA has two trading environments, **Practice** and **Live**. Only one of them spends real money, so keep the differences straight.
 
 ### Environment Overview
 
@@ -29,7 +29,7 @@ OANDA provides two distinct environments for trading: **Practice** and **Live**.
 
 ### Practice Environment
 
-The practice environment is designed for safe development and learning:
+The practice environment is for development and learning:
 
 - **Virtual Funds**: Start with $100,000 in virtual money
 - **Real Market Data**: Access to live market prices for realistic testing

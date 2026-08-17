@@ -1,12 +1,12 @@
 # Performance Optimization
 
-Comprehensive optimization techniques for trading applications, covering connection optimization, latency reduction, and system performance tuning.
+Techniques for reducing latency and tuning connection, streaming, and resource usage in trading applications built on FiveTwenty.
 
 ---
 
 ## Series Overview
 
-This guide series provides specialized optimization techniques for trading applications using FiveTwenty:
+Each guide in the series takes on one performance problem:
 
 ### 1. [Connection Optimization](connection-optimization.md)
 **Problem**: Minimize connection latency and maximize throughput
@@ -21,8 +21,8 @@ This guide series provides specialized optimization techniques for trading appli
 **Solution**: Optimized data structures, memory pools, and CPU optimization techniques
 
 ### 4. [Latency Optimization](latency-optimization.md)
-**Problem**: Minimize order execution latency for competitive advantage
-**Solution**: Low-latency order management and ultra-fast execution techniques
+**Problem**: Minimize order execution latency
+**Solution**: Low-latency order management and fast execution paths
 
 ### 5. [System Resource Management](memory-cpu-optimization.md)
 **Problem**: Optimize system resources for maximum trading performance

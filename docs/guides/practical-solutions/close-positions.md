@@ -1,7 +1,7 @@
 # How to Close Positions
 
 !!! info "Config How-to Guide - Problem-solving content"
-    **Use this guide when:** You have existing positions and need to close them efficiently
+    **Use this guide when:** You have existing positions and need to close them
 
     **Expected outcome:** Successfully closed positions with proper confirmation
 
@@ -513,4 +513,4 @@ async def verify_position_closed(account_id: str, instrument: str) -> bool:
 is_closed = await verify_position_closed(account_id, "EUR_USD")
 ```
 
-**Task Complete**: Position closing operations are now available as dedicated, problem-focused how-to guides.
+**Task Complete**: You can now close a single position, close partial units, batch-close multiple instruments, and verify the results.

@@ -1,6 +1,6 @@
 # Real-time Streaming Data with FiveTwenty
 
-Learn to implement real-time market data streaming, automated trading systems, and live data processing using the FiveTwenty SDK.
+This tutorial covers streaming live prices and account transactions with the FiveTwenty SDK, and using those streams to drive automated trading.
 
 ## Learning Objectives
 
@@ -24,7 +24,7 @@ FiveTwenty supports three main types of streaming data:
 
 ### Price Streams
 
-Stream real-time bid/ask prices for currency pairs with live market data. Price streams provide tick-by-tick updates as the market moves, enabling real-time analysis and automated trading strategies.
+Price streams deliver tick-by-tick bid/ask updates for currency pairs as the market moves. They are the input for any strategy that reacts to prices in real time.
 
 <!-- filepath: example_basic_price_streaming.py -->
 ```python
@@ -206,7 +206,7 @@ if __name__ == "__main__":
 
 ### Account Streams
 
-Monitor account changes and trade updates in real-time using OANDA's transaction stream. This provides instant notification of all account activity including order placements, fills, position changes, and account modifications.
+OANDA's transaction stream notifies you the moment anything happens in your account: order placements, fills, position changes, and account modifications.
 
 <!-- filepath: example_transaction_streaming.py -->
 ```python
@@ -357,7 +357,7 @@ if __name__ == "__main__":
 
 ### Signal Generation from Price Streams
 
-Build automated trading systems that generate buy/sell signals from real-time price data. This example demonstrates calculating moving averages from streaming prices and executing market orders when signals trigger. The system uses a rolling window of prices to compute a 10-period moving average, then places orders with stop-loss protection when the current price crosses above the average by a threshold percentage. This pattern forms the foundation of many algorithmic trading strategies.
+This example generates buy signals from a stream: it computes a 10-period moving average over a rolling window of prices, and when the current price crosses above the average by a threshold percentage, it places a market order with stop-loss protection. Most algorithmic strategies are elaborations of this same loop: read a tick, update state, decide, act.
 
 <!-- filepath: example_price_analysis_trading.py -->
 ```python
@@ -571,7 +571,7 @@ if __name__ == "__main__":
 
 ## Complete Example
 
-Build a production-ready streaming trading system with automatic reconnection, error handling, and Python logging. This comprehensive example integrates all concepts from this tutorial into a robust, continuously-running system suitable for real-world deployment.
+This final example combines everything from the tutorial into a continuously running system with automatic reconnection, error handling, and Python logging: the shape a real deployment takes.
 
 <!-- filepath: example_production_streaming_system.py -->
 ```python
@@ -947,7 +947,7 @@ if __name__ == "__main__":
 ## Next Steps
 
 - Review [Best Practices](../guides/understanding/best-practices.md) for production deployment
-- Explore [Advanced Order Types](advanced-orders/index.md) for sophisticated strategies
-- Check [Performance Optimization](../guides/optimization/index.md) for performance tuning
+- Explore [Advanced Order Types](advanced-orders/index.md) for more order management options
+- Check [Performance Optimization](../guides/optimization/index.md) for latency and throughput tuning
 
-FiveTwenty provides robust streaming capabilities for real-time trading applications - focus on building reliable, maintainable systems that handle the inherent challenges of live market data.
+Streams disconnect, stall, and deliver surprises; most of the difference between a demo and a production system is in how it handles those moments. Get the reconnection loop right first, then worry about the strategy.

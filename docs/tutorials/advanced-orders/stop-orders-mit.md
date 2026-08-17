@@ -12,11 +12,11 @@ By the end of this guide, you will:
 
 ## Stop Orders for Breakout Strategies
 
-Stop orders are powerful tools for capturing breakout momentum when price decisively breaks through key support or resistance levels. Unlike limit orders that execute at or better than a specified price, stop orders become market orders when price reaches your trigger level, ensuring execution during momentum moves. This characteristic makes them ideal for trend-following and breakout strategies where you want to enter positions as price confirms directional movement rather than trying to predict the breakout in advance.
+Stop orders capture breakout momentum when price breaks through support or resistance levels. Unlike limit orders that execute at or better than a specified price, stop orders become market orders when price reaches your trigger level, so they execute during momentum moves. That makes them a fit for trend-following and breakout strategies, where you want to enter as price confirms directional movement rather than trying to predict the breakout in advance.
 
-Implementing stop order strategies with the FiveTwenty SDK involves using `client.orders.post_stop_order()` to place orders that trigger when price reaches your specified breakout levels. You'll learn how to identify key technical levels from chart analysis, calculate appropriate trigger prices with buffers to avoid false breakouts, and manage position sizing based on breakout significance. The SDK handles order placement, monitoring, and execution automatically, allowing you to focus on strategy logic while the system captures momentum moves as they develop.
+Implementing stop order strategies with the FiveTwenty SDK involves using `client.orders.post_stop_order()` to place orders that trigger when price reaches your specified breakout levels. You'll learn how to identify key technical levels from chart analysis, calculate appropriate trigger prices with buffers to avoid false breakouts, and manage position sizing based on breakout significance. The SDK handles order placement, monitoring, and execution automatically, so you can focus on strategy logic.
 
-Understanding stop order mechanics prepares you to build sophisticated breakout systems that respond to market dynamics. You'll see practical implementations ranging from simple resistance/support breakouts to multi-timeframe confirmation systems and volatility-adaptive strategies that adjust trigger levels based on current market conditions:
+The implementations below cover simple resistance/support breakouts, multi-timeframe confirmation systems, and volatility-adaptive strategies that adjust trigger levels based on current market conditions:
 
 ### Basic Breakout Implementation
 
@@ -405,7 +405,7 @@ if __name__ == "__main__":
 
 ### Multi-Timeframe Breakout System
 
-Combine multiple timeframe signals for robust breakouts. This example demonstrates class-based strategy organization with timeframe-weighted position sizing:
+Combine signals from multiple timeframes to filter out weak breakouts. This example demonstrates class-based strategy organization with timeframe-weighted position sizing:
 
 ```python
 import asyncio
@@ -719,9 +719,9 @@ if __name__ == "__main__":
 
 ## MIT Orders for Mean Reversion
 
-Market-If-Touched (MIT) orders provide an elegant solution for mean reversion trading strategies where you expect price to return toward its average after reaching extreme levels. Unlike stop orders that chase momentum, MIT orders become market orders when price touches your specified level from the opposite direction - perfect for fading extremes and capturing reversions. When price stretches too far from its mean (measured by moving averages, Bollinger Bands, or statistical indicators), MIT orders automatically enter counter-trend positions anticipating a return to equilibrium.
+Market-If-Touched (MIT) orders suit mean reversion strategies, where you expect price to return toward its average after reaching extreme levels. Unlike stop orders that chase momentum, MIT orders become market orders when price touches your specified level from the opposite direction, which lets you fade extremes. When price stretches too far from its mean (measured by moving averages, Bollinger Bands, or statistical indicators), MIT orders enter counter-trend positions automatically.
 
-The FiveTwenty SDK's `client.orders.post_market_if_touched_order()` method enables precise mean reversion implementations by placing orders at calculated extreme levels. You'll discover how to identify statistical overbought and oversold conditions using technical indicators, determine optimal entry points for maximum reversion potential, and size positions appropriately for counter-trend trading. The SDK manages order placement and execution, triggering your mean reversion entries automatically when price reaches your predefined extremes without requiring constant monitoring.
+The FiveTwenty SDK's `client.orders.post_market_if_touched_order()` method places orders at calculated extreme levels. You'll identify overbought and oversold conditions using technical indicators, determine entry points, and size positions for counter-trend trading. The SDK manages order placement and execution, so entries trigger at your predefined extremes without constant monitoring.
 
 Building effective mean reversion systems requires understanding when markets are likely to revert versus trend. The examples demonstrate practical implementations using Bollinger Bands for statistical extremes, RSI for momentum exhaustion signals, and intelligent filtering to avoid counter-trend trading during strong directional moves:
 
@@ -1184,9 +1184,9 @@ if __name__ == "__main__":
 
 ## Performance Optimization
 
-High-performance trading systems require efficient order placement and management to minimize latency between market signals and trade execution. When placing multiple stop or MIT orders across different levels or timeframes, the speed and efficiency of your order placement logic directly impacts strategy performance. Batch order calculations, optimized API calls, and pre-computed trigger levels ensure your system responds rapidly to market opportunities without delays that could result in missed trades or suboptimal entry prices.
+High-performance trading systems require efficient order placement and management to minimize latency between market signals and trade execution. When placing multiple stop or MIT orders across different levels or timeframes, the speed and efficiency of your order placement logic directly impacts strategy performance. Batch order calculations, optimized API calls, and pre-computed trigger levels keep the delay between decision and placement small; slow placement can mean missed trades or worse entry prices.
 
-The FiveTwenty SDK provides the foundation for efficient order management through its async architecture and streamlined API methods. By pre-calculating order parameters, batching order placements, and leveraging Python's async capabilities with `asyncio`, you can place multiple orders rapidly while maintaining clean, maintainable code. This approach is particularly valuable for strategies that manage numerous orders simultaneously, such as multi-timeframe breakout systems or layered mean reversion setups with orders at various price levels.
+The FiveTwenty SDK supports fast order management through its async architecture. By pre-calculating order parameters, batching order placements, and using Python's `asyncio`, you can place multiple orders rapidly with clean, maintainable code. This approach is particularly valuable for strategies that manage numerous orders simultaneously, such as multi-timeframe breakout systems or layered mean reversion setups with orders at various price levels.
 
 Optimizing order trigger efficiency involves both code-level improvements and strategic design decisions. The examples demonstrate practical techniques for batch order preparation, efficient parameter calculation, and rapid sequential placement that minimize the time between strategy decision and order activation:
 
@@ -1410,7 +1410,7 @@ if __name__ == "__main__":
 - Use smaller position sizes than breakout strategies
 
 ### System Design
-- Implement comprehensive error handling
+- Handle errors on every order operation
 - Use appropriate position sizing for strategy type
 
 ## Next Steps
@@ -1422,9 +1422,9 @@ Advance your order management capabilities:
 
 ## Key Takeaways
 
-1. **Stop orders** capture momentum and breakouts effectively
-2. **MIT orders** excel at mean reversion and profit-taking
+1. **Stop orders** capture momentum and breakouts
+2. **MIT orders** suit mean reversion and profit-taking
 3. **Momentum confirmation** reduces false breakout signals
-4. **Performance optimization** ensures efficient order placement
+4. **Batched placement** reduces the delay between signal and execution
 
-Master these trigger-based order strategies to build sophisticated trading systems that respond intelligently to market momentum and mean reversion opportunities.
+Next, continue to [Dynamic Order Management](dynamic-management.md) to add trailing stops and adaptive position sizing to these trigger-based strategies.

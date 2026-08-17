@@ -260,7 +260,9 @@ def main() -> None:
     fallback_version = re.search(r'__version__\s*=\s*"([^"]+)"', init_text)
     parts.append(f"- pyproject.toml version: `{pyproject_version.group(1) if pyproject_version else '?'}`")
     parts.append(f"- __init__.py fallback version: `{fallback_version.group(1) if fallback_version else '?'}`")
-    if pyproject_version and fallback_version and pyproject_version.group(1) != fallback_version.group(1):
+    # The dev sentinel is the intentional "metadata unavailable" fallback, not a
+    # pinned release number — only a concrete version can drift.
+    if pyproject_version and fallback_version and not fallback_version.group(1).endswith(".dev0") and pyproject_version.group(1) != fallback_version.group(1):
         parts.append(f"- ⚠️ **Version drift**: __init__.py fallback (`{fallback_version.group(1)}`) does not match pyproject.toml (`{pyproject_version.group(1)}`)")
     parts.append("")
     if issues:

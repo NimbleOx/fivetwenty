@@ -19,9 +19,9 @@ Learn essential risk management techniques using FiveTwenty's stop loss orders, 
 
 ### Stop Loss Orders
 
-Stop loss orders are the foundation of effective risk management in trading. Without stop losses, a single adverse market move can wipe out weeks or months of profitable trades. By automatically closing positions at predetermined price levels, stop losses protect your capital from catastrophic losses while allowing profitable trades to run. Every professional trading strategy includes stop loss protection as a non-negotiable risk control.
+Stop loss orders are the first risk control to put in place. Without them, a single adverse market move can wipe out weeks of profitable trades; with them, positions close automatically at a predetermined price and the worst case is known in advance.
 
-The FiveTwenty SDK provides a streamlined approach to stop loss management using the `stop_loss` parameter on market orders. This creates a "stopLossOnFill" order that automatically activates when your market order executes, ensuring immediate risk protection without the complexity of managing separate stop loss orders. This example demonstrates how to calculate appropriate stop levels based on position direction and attach them to trades in a single, atomic operation.
+The FiveTwenty SDK exposes this through the `stop_loss` parameter on market orders. It creates a "stopLossOnFill" order that activates the moment your market order executes, so the position is never unprotected and you never have to manage a separate stop loss order. This example calculates a stop level from the position direction and attaches it to the trade in a single atomic operation.
 
 <!-- filepath: docs/tutorials/risk-management/example_stop_loss.py -->
 ```python
@@ -374,8 +374,8 @@ async def trading_circuit_breaker(
 
 ## Next Steps
 
-- Learn [Advanced Orders](advanced-orders/index.md) for sophisticated risk management
+- Learn [Advanced Orders](advanced-orders/index.md) for trailing stops and other protective order types
 - Explore [Best Practices](../guides/understanding/best-practices.md) for production trading
 - See [Account Management](account-management.md) for multi-position risk
 
-For comprehensive risk management theory, consider specialized finance resources alongside FiveTwenty for implementation.
+This tutorial covers the mechanics; for the theory behind position sizing and drawdown limits, a dedicated finance text is the better source.

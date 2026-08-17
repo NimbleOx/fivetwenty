@@ -1,6 +1,6 @@
 # FiveTwenty SDK Best Practices
 
-Essential patterns and practices for building robust applications with the FiveTwenty SDK.
+Patterns for building reliable applications with the FiveTwenty SDK.
 
 ## Client Architecture Patterns
 
@@ -670,7 +670,7 @@ async def good_rate_limit_handling():
 
 ### Pre-Order Validation System
 
-Implement comprehensive validation to prevent costly trading errors:
+Validate orders before submission to catch costly errors early:
 
 <!-- fragment: partial validation framework example -->
 ```python
@@ -900,7 +900,7 @@ class RiskPerTradeValidator(OrderValidator):
 
 ### Production Error Recovery
 
-Implement comprehensive error recovery for production systems:
+Production systems need a recovery path for each failure mode:
 
 ```python
 from datetime import datetime
@@ -1130,8 +1130,8 @@ Key principles for FiveTwenty SDK usage:
 5. **Implement proper retry logic** with exponential backoff
 6. **Secure token management** - never hardcode or log tokens
 7. **Test thoroughly** in practice environment before live trading
-8. **Implement comprehensive validation** - prevent costly errors before they occur
-9. **Build robust error recovery** - handle failures gracefully with circuit breakers
+8. **Validate before submitting** - catch costly errors before they reach the API
+9. **Plan error recovery** - handle failures with retries and circuit breakers
 10. **Monitor and categorize errors** - track patterns for system improvement
 
-Following these patterns ensures robust, maintainable, and secure trading applications with comprehensive risk management and validation frameworks.
+Most of these cost little to adopt up front and are painful to retrofit later, so start with them rather than adding them after the first incident.

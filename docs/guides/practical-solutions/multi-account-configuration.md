@@ -1260,7 +1260,7 @@ SWING_FIVETWENTY_OANDA_ACCOUNT=swing-account-id
 SWING_FIVETWENTY_OANDA_ENVIRONMENT=live
 ```
 
-This multi-account configuration approach gives you the flexibility to:
+This multi-account configuration approach lets you:
 
 - Run different strategies on different accounts
 - Separate practice and live trading

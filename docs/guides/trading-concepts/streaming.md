@@ -9,7 +9,7 @@ FiveTwenty provides two primary streaming data types:
 - **Price Streaming**: Real-time market data (bid/ask prices, spreads, liquidity)
 - **Transaction Streaming**: Account state changes (order fills, position updates)
 
-Both streams are built on common architectural principles for reliability, performance, and fault tolerance.
+Both streams share the same connection and recovery machinery.
 
 ## Stream Architecture Design
 
@@ -24,9 +24,9 @@ FiveTwenty implements a persistent HTTP/HTTPS connection model with the OANDA se
 
 ### Data Flow Patterns
 
-**Producer-Consumer Pattern**: Streaming connections act as data producers while your application logic acts as consumers. This separation allows for better resource management and processing flexibility.
+**Producer-Consumer Pattern**: Streaming connections produce data; your application logic consumes it. The SDK manages the connection, and your code decides how fast to process.
 
-**Event-Driven Architecture**: Both async and sync clients emit events as data arrives, enabling reactive programming patterns.
+**Event-Driven Architecture**: Both async and sync clients deliver data as it arrives, so you can react message by message.
 
 **Backpressure Handling**: The sync client uses bounded queues to prevent memory issues when processing cannot keep up with incoming data rates.
 

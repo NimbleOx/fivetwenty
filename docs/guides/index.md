@@ -1,13 +1,11 @@
-# Guides - Comprehensive Practical Guidance
+# Guides
 
-The **Guides** section provides comprehensive practical guidance for working with the FiveTwenty SDK, combining both conceptual understanding and hands-on solutions.
+The Guides section collects two kinds of material for working with the FiveTwenty SDK: explanations of how things work and why, and how-to solutions for specific problems.
 
 ## What's in Guides?
 
-This unified section brings together both **understanding-oriented explanations** and **problem-solving how-to guides** to give you complete guidance on any topic.
-
 ### **Understanding & Architecture**
-Deep insights into FiveTwenty's design and architecture decisions.
+How FiveTwenty is designed, and why.
 
 - **[SDK Architecture](understanding/sdk-architecture.md)** - Overall design philosophy and component relationships
 - **[Async vs Sync Design](understanding/async-vs-sync.md)** - Why async-first and when to use each approach
@@ -15,7 +13,7 @@ Deep insights into FiveTwenty's design and architecture decisions.
 - **[Best Practices & Patterns](understanding/best-practices.md)** - Established patterns for successful trading systems
 
 ### **Trading Concepts**
-Essential domain knowledge for effective trading system development.
+Domain knowledge for building trading systems.
 
 - **[Forex Trading Concepts](trading-concepts/forex-trading-concepts.md)** - Currency trading fundamentals and OANDA specifics
 - **[Market Data & Streaming](trading-concepts/streaming.md)** - How market data works and why streaming matters
@@ -43,7 +41,7 @@ Advanced techniques for high-performance trading systems.
 ## How to Use This Section
 
 ### **For Beginners**
-Start with the **Understanding & Architecture** section to build a solid foundation, then move to **Trading Concepts** for domain knowledge.
+Start with the **Understanding & Architecture** section, then move to **Trading Concepts** for domain knowledge.
 
 ### **For Problem Solving**
 Jump directly to **Practical Solutions** when you have a specific task to accomplish.
@@ -66,4 +64,4 @@ Explore **Performance Optimization** for high-frequency trading and production d
 
 ---
 
-**Ready to dive in?** Start with [SDK Architecture](understanding/sdk-architecture.md) for a comprehensive overview, or jump to any specific topic that matches your current needs.
+Start with [SDK Architecture](understanding/sdk-architecture.md) if you want the big picture, or jump straight to the topic you need.

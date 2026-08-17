@@ -1,6 +1,6 @@
 # Code Style and Patterns
 
-FiveTwenty follows strict code quality standards to ensure maintainability, security, and performance.
+FiveTwenty follows strict code quality standards, starting with 100% mypy strict compliance.
 
 ---
 
@@ -136,7 +136,7 @@ timeout: float  # Ambiguous units
 
 ## Documentation
 
-All public methods require comprehensive docstrings:
+All public methods require full docstrings:
 
 ```python
 async def post_limit_order(
@@ -279,7 +279,7 @@ logger.info(f"Config: {config}")
 
 ## Conclusion
 
-These standards ensure FiveTwenty remains reliable and maintainable for production trading. Before submitting a pull request:
+These standards keep FiveTwenty reliable and maintainable. Before submitting a pull request:
 
 1. Run `poe quality` - All checks must pass
 2. Run `poe test` - 100% test success required

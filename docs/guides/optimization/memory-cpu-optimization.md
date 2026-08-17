@@ -1018,4 +1018,4 @@ Continue to [Latency Optimization](latency-optimization.md) for ultra-fast order
 
 - [Streaming Optimization](streaming-optimization.md) - High-performance streaming
 - [System Resource Management](memory-cpu-optimization.md) - Advanced resource control
-- [Performance Monitoring](latency-optimization.md) - Comprehensive monitoring
+- [Performance Monitoring](latency-optimization.md) - Latency measurement and analysis
