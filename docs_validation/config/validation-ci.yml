@@ -1,0 +1,186 @@
+# FiveTwenty Documentation Validation Configuration - CI Mode
+#
+# Complete validation including all validators for comprehensive quality assessment.
+# Includes slower validators like code_execution and external_links.
+
+# File discovery - docs directory plus the README
+file_patterns:
+  - "docs/**/*.md"
+  - "README.md"
+
+exclude_patterns:
+  # Version control and caches
+  - "**/.git/**"
+  - "**/__pycache__/**"
+  - "**/.mypy_cache/**"
+  - "**/.ruff_cache/**"
+  - "**/.pytest_cache/**"
+  - "**/.venv/**"
+
+  # Build artifacts
+  - "**/build/**"
+  - "**/dist/**"
+  - "**/*.egg-info/**"
+  - "**/node_modules/**"
+
+  # Validation outputs
+  - "**/validation_reports/**"
+  - "**/validation_old/**"
+
+  # Exclude everything outside docs/
+  - "fivetwenty/**"          # SDK source code
+  - "tests/**"              # Test files
+  - "examples/**"           # Example scripts
+  - "docs_validation/**"    # This validation framework
+  - "oanda-api-reference/**" # External API reference
+  - "*.py"                  # Python files outside docs
+  - "/CLAUDE.md"            # Agent instructions (not user-facing docs)
+  - "/SECURITY.md"          # Policy file (no validatable content)
+
+# Execution settings
+parallel_execution: true
+max_workers: 4
+timeout_seconds: 30.0
+
+# Validator configurations - Complete mode (all validators)
+validators:
+  # Code linting with ruff (strict mode - all rules)
+  code_linting:
+    enabled: true
+    options:
+      # Common documentation-specific rule exclusions
+      ignore_rules:
+        # Ignore temp file INP001 warnings (false positives)
+        - "INP001"  # Missing __init__.py
+        # Allow educational print statements in tutorials
+        - "T201"    # Print statements
+        # Allow direct imports in documentation examples
+        - "TC001"   # Move imports into TYPE_CHECKING block (not needed in docs)
+        # Relax some documentation-specific rules
+        - "D100"    # Missing module docstrings (for small examples)
+        - "ANN401"  # Allow Any in examples for simplicity
+        # Documentation formatting exceptions
+        - "W292"    # Missing newline at end of file
+        - "D202"    # No blank lines after docstring
+        - "COM812"  # Missing trailing commas
+        - "D107"    # Missing __init__ docstrings
+        - "I001"    # Import block formatting
+        # Additional docstring rules for simplified examples
+        - "D101"    # Missing class docstrings
+        - "D102"    # Missing method docstrings
+        - "D103"    # Missing function docstrings
+        - "D104"    # Missing package docstrings
+        - "D105"    # Missing magic method docstrings
+        - "D106"    # Missing nested class docstrings
+        - "D200"    # One-line docstring should fit on one line
+        - "D203"    # 1 blank line required before class docstring
+        - "D204"    # 1 blank line required after class docstring
+        - "D205"    # 1 blank line required between summary and description
+        - "D212"    # Multi-line docstring summary should start at the first line
+        - "D213"    # Multi-line docstring summary should start at the second line
+        - "D413"    # Missing blank line after last section
+        # Function and method annotation exceptions for examples
+        - "ANN201"  # Missing return type annotation for public function
+        - "ANN001"  # Missing type annotation for function argument
+        - "ANN204"  # Missing return type annotation for special method __init__
+        # Security and best practice exceptions for educational examples
+        - "S106"    # Possible hardcoded password (examples use placeholder tokens)
+        - "BLE001"  # Do not catch blind exception (educational examples)
+        - "PIE790"  # Unnecessary pass statement (placeholder examples)
+        # Boolean argument exceptions for configuration examples
+        - "FBT001"  # Boolean-typed positional argument
+        - "FBT002"  # Boolean default positional argument
+        # DateTime exceptions for educational examples
+        - "DTZ003"  # datetime.utcnow() used (older examples)
+        - "DTZ005"  # datetime.now() without tz argument
+        # Exception handling examples
+        - "B904"    # Exception handling chain examples
+        # Formatting preferences for documentation
+        - "Q000"    # Single vs double quotes consistency
+        - "G004"    # Logging f-string usage in examples
+        # Code comment examples
+        - "ERA001"  # Found commented-out code (intentional examples)
+        # Financial precision best practices
+        - "FURB157" # Decimal string literals are best practice for financial code
+        # Additional style preferences for documentation examples
+        - "PLR2004" # Magic values in comparisons (acceptable in demos)
+        - "RET508"  # Unnecessary else after break (style preference)
+        - "SIM117"  # Nested with statements (clearer in some examples)
+
+  # Type checking with mypy: DISABLED in CI. The validator spawns a cold mypy
+  # subprocess per code block; the cumulative memory spikes OOM-kill GitHub's
+  # 7GB runners (exit 137). Doc-example type checking still runs locally via
+  # `poe docs-validate-files` (validation-complete.yml), which is part of
+  # check-full and release-check.
+  code_typing:
+    enabled: false
+
+  # Internal link and cross-reference validation
+  cross_references:
+    enabled: true
+
+  # Critical financial safety validation
+  financial_precision:
+    enabled: true
+
+  # Markdown syntax and structure validation
+  markdown_syntax:
+    enabled: true
+
+  # Python code syntax in documentation
+  python_syntax:
+    enabled: true
+
+  # SDK API documentation completeness
+  sdk_methods:
+    enabled: true
+
+  # Security scanning for exposed secrets
+  security:
+    enabled: true
+
+  # Code execution - runtime validation (slower, catches runtime errors)
+  # Note: Runs sequentially even in parallel mode due to signal handlers and I/O redirection
+  code_execution:
+    enabled: true
+    options:
+      # Include list: Only these files will be executed
+      # Empty list = execute all files (use with caution!)
+      include_files:
+        - "docs/index.md"
+        - "docs/tutorials/getting-started/installation.md"
+        - "docs/tutorials/getting-started/authentication.md"
+        - "docs/tutorials/getting-started/first-trade.md"
+        - "docs/tutorials/basic-trading/index.md"
+        - "docs/tutorials/basic-trading/foundation.md"
+        - "docs/tutorials/basic-trading/market-data.md"
+        - "docs/tutorials/basic-trading/position-management.md"
+        - "docs/tutorials/basic-trading/strategy-building.md"
+        - "docs/tutorials/basic-trading/complete-system.md"
+        - "docs/tutorials/advanced-orders/index.md"
+        - "docs/tutorials/advanced-orders/dynamic-management.md"
+        - "docs/tutorials/advanced-orders/order-strategies.md"
+        - "docs/tutorials/advanced-orders/stop-orders-mit.md"
+        - "docs/tutorials/account-management.md"
+        - "docs/tutorials/index.md"
+        - "docs/tutorials/risk-management.md"
+        # streaming-data.md excluded: streaming examples exceed 5s timeout even with minimal limits
+        # All other 9 validators (linting, typing, syntax, security, etc.) validate streaming examples
+        # API Reference examples excluded: These demonstrate SDK interfaces with placeholder IDs
+        # and are not meant to be executed. All other 9 validators still validate them for
+        # syntax, types, linting, security, etc.
+        # Add more files as they become fully standalone/executable
+
+      # Mock API calls when executing code (prevents real API calls)
+      mock_api_calls: true
+
+  # External link validation (slower)
+  external_links:
+    enabled: true
+    options:
+      exclude_urls:
+        # GitHub blob pages 404 for non-browser clients (anti-bot behavior),
+        # so HTTP-checking them is flaky. Source links into this repo are
+        # instead verified structurally against the local tree by
+        # docs_validation.src.parity.check_docs_meta (symbol + line anchors).
+        - "https://github.com/NimbleOx/fivetwenty/blob/"

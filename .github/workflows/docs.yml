@@ -63,9 +63,10 @@ jobs:
         run: uv sync
 
       - name: Validate documentation
-        # Constrained workers: parallel mypy subprocesses exhaust the runner's
-        # memory (exit 137) at the default of 4.
-        run: uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml --max-workers 1
+        # CI config: skips the mypy validator, whose per-code-block subprocesses
+        # OOM-kill GitHub runners (exit 137). Full validation incl. mypy runs
+        # locally in check-full/release-check.
+        run: uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-ci.yml --max-workers 2
 
       - name: Test MkDocs build
         run: uv run mkdocs build --strict --clean
