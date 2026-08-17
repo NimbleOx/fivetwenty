@@ -6,6 +6,38 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 (pre-1.0: minor versions may contain breaking changes, called out explicitly below).
 
+## [0.4.1] — 2026-08-17
+
+Deep documentation execution-validation follow-up to 0.4.0: live tutorial
+execution against the practice API, real execution coverage for guides and
+example scripts, and headless notebook execution. Found and fixed three
+SDK bugs along the way.
+
+### Fixed
+- `pricing.get_account_instrument_candles()` didn't normalize enum
+  arguments: `granularity=CandlestickGranularity.M5` (the documented
+  idiom) could produce a broken request depending on Python version,
+  since `(str, Enum)` formatting behavior changed in 3.11. Confirmed
+  live pre/post fix.
+- Sync `Client` hung forever if called after `close()` (a stopped event
+  loop never resolves `run_coroutine_threadsafe`); it now raises
+  `RuntimeError` immediately, and `close()` is idempotent.
+- `AsyncClient`'s docstring said `account_id` was always optional; it's
+  required alongside `token`.
+
+### Added
+- Real (non-mocked) execution coverage extended from 17 to 35
+  documentation files (all guides now included); `tests/unit/test_example_scripts.py`
+  covers the 11 standalone example scripts; `poe docs-validate-notebooks`
+  headlessly executes the 6 example notebooks against a mocked transport.
+- Along the way: fixed 20 duplicated closing code fences in
+  `forex-trading-concepts.md` that had been rendering ~20 sections of
+  the live docs site as raw code, a missing fence in
+  `manage-orders-effectively.md` that hid 9 code blocks (14 bugs) from
+  every validator, 12 sites in tutorials that crashed instead of
+  handling a non-fill gracefully, and dead-on-first-cell bugs in all 6
+  example notebooks.
+
 ## [0.4.0] — 2026-08-17
 
 Accuracy and hardening release: the SDK was audited end-to-end against OANDA's live v20 API
