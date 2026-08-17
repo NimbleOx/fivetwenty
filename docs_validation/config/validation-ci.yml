@@ -141,8 +141,12 @@ validators:
 
   # Code execution - runtime validation (slower, catches runtime errors)
   # Note: Runs sequentially even in parallel mode due to signal handlers and I/O redirection
+  # DISABLED in CI alongside code_typing: this validator executes tutorial
+  # code blocks; on GitHub runners the run is SIGKILLed (exit 137) within
+  # seconds even sequentially. Execution and typing both remain in the local
+  # gates (poe docs-validate-files via check-full/release-check).
   code_execution:
-    enabled: true
+    enabled: false
     options:
       # Include list: Only these files will be executed
       # Empty list = execute all files (use with caution!)
