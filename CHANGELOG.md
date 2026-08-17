@@ -6,9 +6,9 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 (pre-1.0: minor versions may contain breaking changes, called out explicitly below).
 
-## [Unreleased] — 0.4.0
+## [0.4.0] — 2026-08-17
 
-Accuracy release: the SDK was audited end-to-end against OANDA's live v20 API
+Accuracy and hardening release: the SDK was audited end-to-end against OANDA's live v20 API
 and current developer documentation. Several fixes are breaking.
 
 ### Fixed
@@ -36,6 +36,24 @@ and current developer documentation. Several fixes are breaking.
   are yielded to the caller, as documented.
 - The version fallback in `fivetwenty.__version__` no longer hardcodes a
   stale release number.
+- Timed-out POST/PUT/PATCH requests are no longer retried: a timed-out write
+  may have reached the server, and re-sending a market order could
+  double-submit it. Timeout retries now apply to safe methods only.
+- `_stream_with_retries` yields the CONNECTING/RECONNECTING state with the
+  first line after a (re)connection, so consumers can detect recoveries as
+  documented; previously every event carried CONNECTED.
+- The sync `Client.pricing.stream_iter` no longer discards the newest event
+  when its queue overflows; it drops the oldest instead, so slow consumers
+  keep receiving current prices.
+- `ApiResponse` snake_case attribute access now resolves `*_ids` and
+  `*_vwap` fields (`tradeIDs`, `fullVWAP`); the camelCase converter produced
+  `IDS`/`Vwap` for these suffixes.
+- `ConfigValidator.validate_account_id` accepts real OANDA account IDs; the
+  user segment varies in length (6-9 digits observed), and the previous
+  pattern hardcoded exactly 7.
+- `CalculatedAccountState` and `AccumulatedAccountState` can be instantiated
+  again; type-checking-only imports had made their annotations unresolvable
+  at model build time.
 
 ### Changed
 - **Breaking** — `DelayedTradeCloseTransaction` renamed to
@@ -65,6 +83,10 @@ and current developer documentation. Several fixes are breaking.
   (`docs_validation/reviews/2026-08-findings.md`).
 - CI: quality gates (format, lint, mypy strict, unit tests) on push and PR;
   repaired documentation maintenance workflow.
+- Tests: unit suite grew from 567 to 834 with 98% coverage; every model
+  class now has named field/alias tests, and a systematic alias-consistency
+  test pins all hand-typed camelCase aliases against the converter.
+- Packaging: Development Status classifier moved to Production/Stable.
 
 ## [0.3.2] — 2026-05-06
 - Hardened client and live-integration safety checks.

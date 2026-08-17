@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "fivetwenty"
-version = "0.3.2"
+version = "0.4.0"
 description = "Simple, elegant Python client for OANDA's REST API v20"
 readme = "README.md"
 requires-python = ">=3.10"
@@ -15,7 +15,7 @@ authors = [
 ]
 keywords = ["oanda", "trading", "forex", "api", "finance"]
 classifiers = [
-    "Development Status :: 4 - Beta",
+    "Development Status :: 5 - Production/Stable",
     "Intended Audience :: Developers",
     "Intended Audience :: Financial and Insurance Industry",
     "Programming Language :: Python :: 3.10",
