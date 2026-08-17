@@ -74,7 +74,9 @@ class AsyncClient:
 
         Args:
             token: OANDA API token (if not using config)
-            account_id: OANDA account ID (optional, for client convenience)
+            account_id: OANDA account ID. Required when passing token directly;
+                optional (read from config/environment) with the other two
+                initialization patterns
             environment: API environment (practice or live)
             config: AccountConfig object with credentials
             timeout: Request timeout in seconds
@@ -535,6 +537,7 @@ class Client:
         self._loop = asyncio.new_event_loop()
         self._thread = threading.Thread(target=self._loop.run_forever, daemon=True)
         self._thread.start()
+        self._closed = False
 
         # Create sync endpoint proxies
         self.accounts = _SyncEndpointProxy(self, "accounts")
@@ -568,6 +571,10 @@ class Client:
 
     def close(self) -> None:
         """Close the client and clean up resources."""
+        if self._closed:
+            return
+        self._closed = True
+
         # Close async client
         fut = asyncio.run_coroutine_threadsafe(self._async.aclose(), self._loop)
         with contextlib.suppress(asyncio.TimeoutError):
@@ -582,6 +589,9 @@ class Client:
 
     def _run(self, coro: Any) -> Any:
         """Run async coroutine in background thread."""
+        if self._closed:
+            coro.close()  # avoid an "unawaited coroutine" warning
+            raise RuntimeError("Client is closed; cannot make further requests. Use a new Client or call within its context manager.")
         future = asyncio.run_coroutine_threadsafe(coro, self._loop)
         return future.result()
 
@@ -625,6 +635,9 @@ class _SyncPricingProxy(_SyncEndpointProxy):
             FiveTwentyError: On API errors
             StreamStall: On stream stall
         """
+        if self._client._closed:
+            raise RuntimeError("Client is closed; cannot start a stream. Use a new Client or call within its context manager.")
+
         q: queue.Queue[object] = queue.Queue(maxsize=1024)
 
         async def _pump() -> None:

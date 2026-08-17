@@ -86,6 +86,29 @@ class TestSyncClientLifecycle:
         client.close()
         assert not client._thread.is_alive()
 
+    def test_close_is_idempotent(self) -> None:
+        client = build_client()
+        client.close()
+        client.close()  # must not hang or raise
+        assert not client._thread.is_alive()
+
+    def test_endpoint_call_after_close_raises_instead_of_hanging(self) -> None:
+        """Regression: calling through a closed client used to hang forever
+        (run_coroutine_threadsafe against a stopped-but-not-closed loop never
+        resolves), instead of failing immediately as the fail-hard policy requires."""
+        client = build_client()
+        client.close()
+
+        with pytest.raises(RuntimeError, match="Client is closed"):
+            client.accounts.get_accounts()
+
+    def test_stream_iter_after_close_raises_instead_of_hanging(self) -> None:
+        client = build_client()
+        client.close()
+
+        with pytest.raises(RuntimeError, match="Client is closed"):
+            next(client.pricing.stream_iter("acct-1", ["EUR_USD"]))
+
 
 class TestStreamIter:
     """Tests for _SyncPricingProxy.stream_iter."""

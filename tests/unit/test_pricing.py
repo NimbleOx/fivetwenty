@@ -510,3 +510,32 @@ class TestStreamPricingWithRetries:
 
         assert isinstance(captured["config"], StreamingConfiguration)
         assert captured["config"].include_heartbeats is True
+
+
+class TestGetAccountInstrumentCandlesEnumNormalization:
+    """Regression: enum arguments must serialize to their plain value.
+
+    (str, Enum) members format inconsistently across Python versions in
+    f-strings and dict values (CPython's Enum.__format__ behavior changed in
+    3.11), so every existing test here passed plain strings and missed this.
+    """
+
+    @pytest.mark.asyncio
+    async def test_enum_instrument_and_granularity_serialize_to_plain_values(self):
+        from fivetwenty.models import CandlestickGranularity, InstrumentName
+
+        client = MagicMock()
+        mock_response = MagicMock()
+        mock_response.json.return_value = {"instrument": "EUR_USD", "granularity": "M5", "candles": []}
+        client._request = AsyncMock(return_value=mock_response)
+        pricing = PricingEndpoints(client)
+
+        await pricing.get_account_instrument_candles(
+            "101-001-123456-001",
+            InstrumentName.EUR_USD,
+            granularity=CandlestickGranularity.M5,
+        )
+
+        args, kwargs = client._request.call_args
+        assert args[1] == "/accounts/101-001-123456-001/instruments/EUR_USD/candles"
+        assert kwargs["params"]["granularity"] == "M5"

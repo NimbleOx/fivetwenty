@@ -172,10 +172,10 @@ class PricingEndpoints:
     async def get_account_instrument_candles(
         self,
         account_id: AccountID,
-        instrument: str,
+        instrument: InstrumentName | str,
         *,
         price: PricingComponent = "M",
-        granularity: str = "S5",
+        granularity: CandlestickGranularity | str = "S5",
         count: int | None = None,
         from_time: datetime | None = None,
         to_time: datetime | None = None,
@@ -235,9 +235,15 @@ class PricingEndpoints:
         if count is not None and (from_time is not None or to_time is not None):
             raise ValueError("Cannot specify both count and time range parameters")
 
+        # (str, Enum) members format inconsistently across Python versions in
+        # f-strings and dict values (CPython's Enum.__format__ behavior changed
+        # in 3.11); normalize to the plain string explicitly rather than rely on it.
+        instrument_str = instrument.value if hasattr(instrument, "value") else instrument
+        granularity_str = granularity.value if hasattr(granularity, "value") else granularity
+
         params: dict[str, str] = {
             "price": price,
-            "granularity": granularity,
+            "granularity": granularity_str,
             "smooth": str(smooth).lower(),
             "dailyAlignment": str(daily_alignment),
             "alignmentTimezone": alignment_timezone,
@@ -258,7 +264,7 @@ class PricingEndpoints:
 
         response = await self._client._request(
             "GET",
-            f"/accounts/{account_id}/instruments/{instrument}/candles",
+            f"/accounts/{account_id}/instruments/{instrument_str}/candles",
             params=params,
         )
 
