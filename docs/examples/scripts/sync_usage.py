@@ -180,12 +180,15 @@ def main() -> None:
     print("  - Just use regular try/except (no 'await')")
 
     print("\n💡 Demo: Catch validation error...")
-    try:
-        # This will fail - units cannot be zero
-        client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=0)
-    except FiveTwentyError as e:
-        print(f"✅ Caught error: {e.message}")
-        print(f"   Status code: {e.status}")
+    # A Client only works inside its own 'with' block - the background thread that
+    # runs the calls is shut down on exit, so every section opens a fresh client
+    with Client() as client:
+        try:
+            # This will fail - units cannot be zero
+            client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=0)
+        except FiveTwentyError as e:
+            print(f"✅ Caught error: {e.message}")
+            print(f"   Status code: {e.status}")
 
     # Section 6: Thread safety considerations
     # ========================================

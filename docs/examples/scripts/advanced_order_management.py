@@ -277,18 +277,19 @@ async def main() -> None:
 
         # Get ALL orders (pending, filled, cancelled)
         # This can be many orders if you trade frequently
+        # get_orders() returns a list of order models directly, not a response dict
         all_orders = await client.orders.get_orders(account_id=client.account_id)
-        print(f"\nTotal orders: {len(all_orders.get('orders', []))}")  # type: ignore[attr-defined]
+        print(f"\nTotal orders: {len(all_orders)}")
 
         # Filter by instrument: Only show EUR/USD orders
         # Useful for instrument-specific monitoring
         eur_orders = await client.orders.get_orders(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
-        print(f"EUR/USD orders: {len(eur_orders.get('orders', []))}")  # type: ignore[attr-defined]
+        print(f"EUR/USD orders: {len(eur_orders)}")
 
         # Filter by state: Only show PENDING (active) orders
         # Most useful filter - shows what's currently working
         pending_orders = await client.orders.get_orders(account_id=client.account_id, state="PENDING")
-        print(f"Pending orders: {len(pending_orders.get('orders', []))}")  # type: ignore[attr-defined]
+        print(f"Pending orders: {len(pending_orders)}")
 
         # Section 6: Get pending orders
         # =============================
