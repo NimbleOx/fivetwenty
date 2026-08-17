@@ -16,6 +16,9 @@ uv run poe test
 # Live integration tests (requires OANDA practice credentials)
 uv run poe test-integration
 
+# Documentation notebooks, executed against a mocked transport (local only)
+uv run poe docs-validate-notebooks
+
 # With coverage
 uv run pytest --cov=fivetwenty --cov-report=html
 

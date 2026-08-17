@@ -124,7 +124,6 @@ if __name__ == "__main__":
     asyncio.run(main())
 
 ```
-```
 
 **Trade Properties**:
 
@@ -512,7 +511,6 @@ if __name__ == "__main__":
     asyncio.run(place_market_order())
 
 ```
-```
 
 **Use Cases**:
 - When you want immediate execution
@@ -619,7 +617,6 @@ async def place_limit_order() -> None:
 if __name__ == "__main__":
     asyncio.run(place_limit_order())
 
-```
 ```
 
 **Market Scenarios**:
@@ -737,7 +734,6 @@ async def place_stop_order() -> None:
 if __name__ == "__main__":
     asyncio.run(place_stop_order())
 
-```
 ```
 
 
@@ -905,8 +901,6 @@ async def main() -> None:
 
 if __name__ == "__main__":
     asyncio.run(main())
-
-```
 
 ```
 
@@ -1084,7 +1078,6 @@ async def main() -> None:
 if __name__ == "__main__":
     asyncio.run(main())
 
-```
 ```
 
 ---
@@ -1264,7 +1257,6 @@ async def check_pnl() -> None:
     print(f"   Shield Next steps: Monitor closely, consider stop losses, review correlation")
 
 ```
-```
 
 ### P/L Calculation Example
 
@@ -1374,7 +1366,6 @@ async def main():
 if __name__ == "__main__":
     asyncio.run(main())
 
-```
 ```
 
 ### Currency Conversion in P/L
@@ -1494,7 +1485,6 @@ async def check_currency_conversion() -> None:
     print(f"   Map Geographic: Consider time zones for currency pair liquidity")
     print(f" Hedging: Advanced traders may hedge currency exposure separately")
 
-```
 ```
 
 ---
@@ -1632,7 +1622,6 @@ async def check_spread() -> None:
     print(f" Common issues: Market closed, connectivity, invalid instrument")
     print(f"️ Note: Spread analysis requires active market hours")
 
-```
 ```
 
 ### Market Depth (Order Book)
@@ -1785,7 +1774,6 @@ async def check_order_book() -> None:
     print(f"   Map Economic calendar: Major news affects market depth")
     print(f" Historical patterns: Learn typical depth for your trading times")
 
-```
 ```
 
 
@@ -1962,7 +1950,6 @@ async def calculate_position_size() -> None:
     print(f"   Shield Psychology: Size positions to sleep well at night")
 
 ```
-```
 
 ### Correlation Risk
 
@@ -2122,7 +2109,6 @@ print(f" Monitor for changing correlations")
     print(f" Note: Ensure you have positions in EUR_USD and GBP_USD")
     print(f"️ General rule: Monitor correlation between all USD pairs")
 
-```
 ```
 
 ### Drawdown Management
@@ -2307,7 +2293,6 @@ async def monitor_drawdown() -> None:
     print(f" Action: Continue with standard risk management")
 
 ```
-```
 
 ---
 
@@ -2454,7 +2439,6 @@ print(f"   🚫 Weekend closure: Friday 22:00 UTC - Sunday 22:00 UTC")
 print(f"   🎄 Holiday closures: Reduced activity during major holidays")
 print(f"   ⚠️ Thin liquidity: Avoid major trades during closures")
 
-```
 ```
 
 ### Economic Calendar Impact
@@ -2672,7 +2656,6 @@ adjusted_parameters = adjust_for_news()
 print(f"\nSuccess News risk assessment complete - parameters adjusted for current conditions")
 
 ```
-```
 
 ---
 
@@ -2873,7 +2856,6 @@ risk_assessment = "Success REASONABLE - Good carry opportunity"
 await check_carry_trade()
 
 ```
-```
 
 ### Currency Hedging
 
@@ -3062,7 +3044,6 @@ print(f"
 Success Currency hedging analysis complete")
 
 ```
-```
 
 ---
 
@@ -3191,7 +3172,6 @@ print(f"   Map Memory usage: Decimal uses more memory than float")
 print(f" Trade-off: Accuracy is essential for financial calculations")
 print(f" Conclusion: Always use Decimal for money and prices")
 
-```
 ```
 
 ### Streaming Data Usage
@@ -3353,7 +3333,6 @@ if __name__ == "__main__":
     print(f"\nError Streaming setup failed: {e}")
     print(f"️ Check your FiveTwenty configuration and try again")
 
-```
 ```
 
 ### Error Handling in Trading Context

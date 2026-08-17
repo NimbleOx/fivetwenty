@@ -599,6 +599,7 @@ async def place_market_if_touched_order() -> None:
 
 **Problem:** Need to create different order types programmatically based on strategy logic.
 
+<!-- fragment: partial unified order interface example -->
 ```python
 import os
 import time
@@ -616,8 +617,6 @@ from fivetwenty.models import (
 )
 
 
-<!-- fragment: partial unified order interface example -->
-```python
 async def create_order_by_type(order_type: str, price: Decimal | None = None) -> Any:
     """Create orders dynamically by type using the unified order interface for flexible strategy implementation."""
     # Step 1: Initialize AsyncClient for unified order interface demonstration
@@ -703,8 +702,8 @@ async def monitor_order_execution(account_id: AccountID, order_id: str) -> None:
         environment=Environment.PRACTICE
     ) as client:
         # Get current order status
-        order = await client.orders.get_order(account_id, order_id)
-        state = order["state"]
+        order_response = await client.orders.get_order(account_id, order_id)
+        state = order_response["order"].state
         print(f"Order state checked: {state}")
         print("Order fill information retrieved")
 
@@ -856,11 +855,12 @@ async def manage_pending_orders(account_id: AccountID) -> None:
                         account_id,
                         order_id,
                     )
-                    cancelled_order_id = cancel_response.order_cancel_transaction.id if cancel_response.order_cancel_transaction else order_id
+                    cancel_transaction = cancel_response.get("orderCancelTransaction")
+                    cancelled_order_id = cancel_transaction.id if cancel_transaction else order_id
                     print(f"Order cancelled successfully: {cancelled_order_id}")
 
                 except FiveTwentyError as e:
-                    if e.error_code == "ORDER_DOESNT_EXIST":
+                    if e.code == "ORDER_DOESNT_EXIST":
                         print("Order already processed")
                     else:
                         raise
@@ -968,7 +968,7 @@ import os
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID
 
-async def example_order_handling():
+async def example_order_handling() -> None:
     # Example setup for demonstration
     async with AsyncClient(
         token=os.environ.get("FIVETWENTY_OANDA_TOKEN", "demo-token"),
@@ -985,17 +985,16 @@ async def example_order_handling():
         )
 
         # Check order was created successfully
-        if response.order_create_transaction is None:
-            order_error_msg = "Order transaction is None"
+        create_transaction = response.get("orderCreateTransaction")
+        if create_transaction is None:
+            order_error_msg = "Order transaction is missing"
             raise ValueError(order_error_msg)
-        if response.order_create_transaction.id is None:
-            transaction_error_msg = "Order transaction ID is None"
-            raise ValueError(transaction_error_msg)
+        print(f"Order transaction ID: {create_transaction.id}")
 
         # For market orders, verify immediate fill
         if order_type == "market":
-            if response.order_fill_transaction is None:
-                fill_error_msg = "Market order fill transaction is None"
+            if response.get("orderFillTransaction") is None:
+                fill_error_msg = "Market order fill transaction is missing"
                 raise ValueError(fill_error_msg)
             print("Order filled successfully")
 ```
@@ -1046,7 +1045,7 @@ async def monitor_account_impact() -> None:
         account_id = AccountID("101-004-12345678")
 
         # Check account balance and positions after order
-        account = await client.accounts.get_account(account_id)
+        account = (await client.accounts.get_account(account_id))["account"]
         nav = account.nav
         print(f"Account NAV retrieved: {nav}")
         print("Unrealized P&L retrieved")
@@ -1075,8 +1074,8 @@ async def check_insufficient_margin() -> None:
         required_margin = Decimal("1000.00")  # Example required margin
 
         # Check available margin before placing order
-        account = await client.accounts.get_account(account_id)
-        available_margin = Decimal(account.margin_available)
+        account = (await client.accounts.get_account(account_id))["account"]
+        available_margin = account.margin_available
         if available_margin < required_margin:
             msg = f"Insufficient margin for order: {available_margin} < {required_margin}"
             print(msg)
@@ -1099,7 +1098,7 @@ async def check_instrument_tradeable() -> None:
         account_id = AccountID("101-004-12345678")
 
         # Verify instrument is currently tradeable
-        instruments = await client.accounts.get_account_instruments(account_id)
+        instruments = (await client.accounts.get_account_instruments(account_id))["instruments"]
         tradeable_instruments = [i for i in instruments if i.tradeable]
         print(f"Found {len(tradeable_instruments)} tradeable instruments out of {len(instruments)} total")
 ```
@@ -1112,7 +1111,7 @@ from decimal import Decimal
 
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.models import AccountID, InstrumentName
-from fivetwenty._internal.utils import quantize_price
+
 
 async def check_price_precision() -> None:
     """Handle price precision correctly."""
@@ -1129,11 +1128,11 @@ async def check_price_precision() -> None:
         instrument_info = await client.accounts.get_account_instruments(
             account_id, instruments=[instrument]
         )
-        precision = instrument_info[0].display_precision
+        precision = instrument_info["instruments"][0].display_precision
         print(f"Instrument precision: {precision}")
 
         # Quantize price correctly
-        quantized_price = quantize_price(precision, your_price)
+        quantized_price = your_price.quantize(Decimal(10) ** -precision)
         print(f"Price quantized from {your_price} to {quantized_price}")
 ```
 
@@ -1168,7 +1167,7 @@ async def rate_limited_order(client: AsyncClient, order_params: Any) -> Any:
     """Place orders with rate limited order placement."""
     async with semaphore:
         result = await client.orders.post_order(**order_params)
-        print(f"Rate-limited order placed: {result.order_create_transaction['id']}")
+        print(f"Rate-limited order placed: {result['orderCreateTransaction'].id}")
         return result
 ```
 
@@ -1312,8 +1311,6 @@ class RiskManagedOrderSystem:
         return potential_loss
 ```
 
-<!-- fragment: markdown structure bypass -->
-
 ---
 
 **Need more specific help?** Check these related guides:
@@ -1322,4 +1319,3 @@ class RiskManagedOrderSystem:
 - [Close Positions](close-positions.md) for position exit strategies
 - [Handle Connection Failures](handle-connection-failures.md) for error handling and retry patterns
 
-```

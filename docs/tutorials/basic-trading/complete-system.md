@@ -386,7 +386,7 @@ async def run_complete_trading_strategy(
                 # Each Trade model contains:
                 #   - trade.id: str - Unique trade identifier
                 #   - trade.instrument: str - Currency pair
-                #   - trade.current_units: str - Position size
+                #   - trade.current_units: Decimal - Position size
 
                 response = await client.trades.get_trades(client.account_id)
                 trades = response["trades"]
