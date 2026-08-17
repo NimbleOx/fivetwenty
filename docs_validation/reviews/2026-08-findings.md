@@ -3,7 +3,7 @@
 ## Methodology
 
 - **Spec sources**: live scrape of developer.oanda.com/rest-live-v20 (fetched 2026-08-16 via `poe docs-validate-parity-refresh`), cross-checked against the vendored `oanda-api-reference/` snapshot. OANDA's site no longer serves the instrument endpoints page (`instrument-ep` returns 404 and is absent from their nav); for that domain the April 2026 cached snapshot, OANDA's release notes, and live API probes serve as the source of truth. Where scraped docs and live behavior conflict, live behavior wins.
-- **Live verification**: read-only probes against the PRACTICE environment (2026-08-16, market closed) confirmed response shapes for the transactions list endpoint, `Accept-Datetime-Format` handling, candles defaults, orderBook/positionBook availability, and the account instrument list. The full live integration suite runs after market open (Sunday 17:00 ET); order-placement lanes are marked "pending market open" until then.
+- **Live verification**: read-only probes against the PRACTICE environment (2026-08-16, market closed) confirmed response shapes for the transactions list endpoint, `Accept-Datetime-Format` handling, candles defaults, orderBook/positionBook availability, and the account instrument list. The full live integration suite (120 tests) subsequently passed against the PRACTICE environment on 2026-08-16 despite closed markets — the suite's environment-tolerance helpers handle market-closed conditions.
 - **Harness note**: the repo's own parity pipeline reported "no drift" at baseline, but had blind spots that hid real findings (see F-TOOL-01…04). Those were fixed first (commit A) so every number below comes from a trustworthy pipeline.
 - **Severity scheme** (same as `field_validate.py`): P0 wrong behavior/data loss · P1 spec violation or materially wrong claim · P2 drift/inconsistency · P3 cosmetic.
 - **Categories**: SDK-ACC (SDK vs OANDA accuracy) · DOC-COMP (docs completeness) · DOC-ACC (docs accuracy) · TOOL (tooling/CI) · TEST (test coverage).
@@ -27,7 +27,7 @@
 | C | `d208f1b` | API reference docs brought in line with the SDK |
 | D | `8d3b881` | CI and test tooling repairs |
 | E | `d930a16` | Meta-docs (README, contributing, architecture) + CHANGELOG. CLAUDE.md is gitignored — its rewrite is a local, uncommitted fix |
-| F | _pending_ | Test-coverage additions |
+| F | `927d32d` | Test-coverage additions (567 → 693 unit tests; model gap 90 → 0) |
 
 ## Findings
 
@@ -91,4 +91,12 @@
 
 ## Verification results
 
-_To be filled in Phase 7 (final gates)._
+Final gates, run 2026-08-16/17 on `review/oanda-parity-2026-08` after commit F:
+
+1. **`poe docs-validate-parity-refresh`** (fresh scrape of developer.oanda.com): all lanes green, field validation **P0=0 P1=0 P2=0 P3=0**, docs-meta checks **0 default drift / 0 anchor drift**, `parity-waivers.yml` still empty. Sole remaining note: `instrument-ep` served from the April 2026 cache because OANDA's live page 404s (upstream regression, tracked honestly by the harness).
+2. **`poe check-full`**: green — format-check, ruff, mypy strict (164 files), 693 unit tests, full docs validation (66 files, 100% pass across all 10 validators).
+3. **`mkdocs build --strict --clean`**: passes; six example notebooks render via mkdocs-jupyter; no `__pycache__` shipped.
+4. **`poe test-integration`** (full live suite, PRACTICE): **120 passed in 10m07s**, zero failures, markets closed — including the new transaction-stream test.
+5. **`poe release-check`**: green end-to-end (adds yaml-lint, docs build, wheel/sdist package check).
+
+Unit suite grew 567 → 693 tests; every model class now has named test coverage. Release: the breaking changes ship as 0.4.0 via the maintainer's `poe release` flow (version left at 0.3.2 on the branch; CHANGELOG's Unreleased section is ready).
