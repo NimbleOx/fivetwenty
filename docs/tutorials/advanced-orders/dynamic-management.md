@@ -100,7 +100,7 @@ async def main() -> None:
         )
 
         # Extract trade ID from market order fill transaction
-        assert market_order.order_fill_transaction is not None
+        assert market_order.get("order_fill_transaction") is not None
         assert market_order.order_fill_transaction.trade_opened is not None
         trade_id = market_order.order_fill_transaction.trade_opened.trade_id
         fill_price = Decimal(str(market_order.order_fill_transaction.price))
@@ -413,7 +413,7 @@ async def main() -> None:
         )
 
         # Check if order filled successfully
-        if market_order.order_fill_transaction is None:
+        if market_order.get("order_fill_transaction") is None:
             print("\nOrder was not filled - market is likely closed")
             print("Forex market hours: Sunday 5 PM ET - Friday 5 PM ET")
             print("\nThis example demonstrates the calculation and would attach")
@@ -604,7 +604,7 @@ async def main() -> None:
         )
 
         # Check if order filled successfully
-        if market_order.order_fill_transaction is None:
+        if market_order.get("order_fill_transaction") is None:
             print("\nOrder was not filled - market is likely closed")
             print("Forex market hours: Sunday 5 PM ET - Friday 5 PM ET")
             print("\nThis example demonstrates the acceleration logic and would")
@@ -800,7 +800,7 @@ async def main() -> None:
         )
 
         # Check if order filled
-        if market_order.order_fill_transaction is None:
+        if market_order.get("order_fill_transaction") is None:
             print("\nOrder was not filled - market is likely closed")
             print("Forex market hours: Sunday 5 PM ET - Friday 5 PM ET")
             print("\nThis example demonstrates stop modification logic")
@@ -1257,7 +1257,7 @@ async def main() -> None:
         )
 
         # Check if order filled successfully
-        if market_order.order_fill_transaction is None:
+        if market_order.get("order_fill_transaction") is None:
             print("\nOrder was not filled - market is likely closed")
             print("Forex market hours: Sunday 5 PM ET - Friday 5 PM ET")
             print("\nThis example demonstrates the scale-out logic and would")
@@ -1653,7 +1653,7 @@ async def main() -> None:
         )
 
         # Check if order filled successfully
-        if market_order.order_fill_transaction is None:
+        if market_order.get("order_fill_transaction") is None:
             print("\nOrder was not filled - market is likely closed")
             print("Forex market hours: Sunday 5 PM ET - Friday 5 PM ET")
             print("\nThis example demonstrates the adaptive logic and would")
@@ -2028,7 +2028,7 @@ async def main() -> None:
         )
 
         # Check if order filled successfully
-        if market_order.order_fill_transaction is None:
+        if market_order.get("order_fill_transaction") is None:
             print("\nOrder was not filled - market is likely closed")
             print("Forex market hours: Sunday 5 PM ET - Friday 5 PM ET")
             print("\nThis example demonstrates the dynamic sizing logic and would")

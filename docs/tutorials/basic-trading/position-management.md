@@ -93,9 +93,9 @@ async def main() -> None:
         #   - trade.id: str - Unique trade identifier
         #   - trade.instrument: str - Currency pair (e.g., "EUR_USD")
         #   - trade.price: Decimal - Entry price
-        #   - trade.current_units: str - Position size (positive = long, negative = short)
-        #   - trade.unrealized_pl: str - Current profit/loss (as string from API)
-        #   - trade.initial_units: str - Original position size
+        #   - trade.current_units: Decimal - Position size (positive = long, negative = short)
+        #   - trade.unrealized_pl: Decimal | None - Current profit/loss
+        #   - trade.initial_units: Decimal - Original position size
         #   - trade.open_time: datetime - When position was opened
         trade = trades[0]
 
@@ -106,7 +106,7 @@ async def main() -> None:
         print(f"Trade ID: {trade.id}")
         print(f"Entry Price: {trade.price}")  # Already a Decimal from SDK
         print(f"Position Size: {trade.current_units} units")
-        print(f"Current P&L: ${trade.unrealized_pl}")  # String from API
+        print(f"Current P&L: ${trade.unrealized_pl}")  # Decimal from SDK
 
         # ==============================================================================
         # STEP 3: CALCULATE EXIT LEVELS BASED ON POSITION DIRECTION
@@ -191,8 +191,8 @@ async def main() -> None:
         print("  await client.trades.put_trade_orders(")
         print("      account_id=client.account_id,")
         print("      trade_specifier=trade.id,")
-        print("      stop_loss=stop_loss_details.model_dump(by_alias=True, exclude_none=True),")
-        print("      take_profit=take_profit_details.model_dump(by_alias=True, exclude_none=True)")
+        print("      stop_loss=stop_loss_details,")
+        print("      take_profit=take_profit_details,")
         print("  )")
 
 
@@ -270,7 +270,7 @@ async def main() -> None:
         # Each Trade model contains:
         #   - trade.id: str - Unique identifier for the trade
         #   - trade.price: Decimal - Entry price (SDK provides as Decimal)
-        #   - trade.current_units: str - Position size (positive=long, negative=short)
+        #   - trade.current_units: Decimal - Position size (positive=long, negative=short)
         #   - trade.instrument: str - Currency pair (e.g., "EUR_USD")
         response = await client.trades.get_trades(client.account_id)
         trades = response["trades"]
@@ -380,21 +380,18 @@ async def main() -> None:
             # Parameters:
             #   - account_id: Your OANDA account ID (available as client.account_id)
             #   - trade_specifier: Trade ID to update (from trade.id)
-            #   - stop_loss: Stop loss configuration as dict
-            #       * Must use model_dump(by_alias=True, exclude_none=True)
-            #       * by_alias=True: Converts Python snake_case to API camelCase
-            #       * exclude_none=True: Omits None values from the request
-            #   - take_profit: Optional take profit configuration (not used here)
+            #   - stop_loss: StopLossDetails model (pass the model itself, not a dict)
+            #   - take_profit: Optional TakeProfitDetails model (not used here)
             #
-            # The model_dump() method is crucial for Pydantic  API conversion:
+            # Pass the Pydantic model directly. The SDK serializes it for you:
             # - Converts Decimal to string (required by OANDA API)
-            # - Maps field aliases (price  price for stop loss)
+            # - Maps field aliases to the API's camelCase names
             # - Removes None values to avoid API errors
 
             await client.trades.put_trade_orders(
                 account_id=client.account_id,
                 trade_specifier=trade.id,
-                stop_loss=stop_loss_details.model_dump(by_alias=True, exclude_none=True),
+                stop_loss=stop_loss_details,
             )
 
             print(f" Stop loss set at {fixed_stop:.5f} (20 pips from entry)")
@@ -660,12 +657,11 @@ async def main() -> None:
         # Parameters:
         #   - account_id: Your OANDA account identifier
         #   - trade_specifier: Trade ID to attach the order to
-        #   - take_profit: Serialized TakeProfitDetails dictionary
+        #   - take_profit: TakeProfitDetails model (pass the model itself)
         #
-        # The TakeProfitDetails Pydantic model validates our price and converts
-        # it to the proper format for OANDA's API. We serialize it using
-        # model_dump(by_alias=True, exclude_none=True) to convert Python field
-        # names to API camelCase format and remove empty fields.
+        # The TakeProfitDetails Pydantic model validates our price. Pass the
+        # model straight through - the SDK converts it to OANDA's camelCase
+        # wire format and drops empty fields for you.
 
         take_profit_details = TakeProfitDetails(price=calculated_tp)
 
@@ -673,9 +669,7 @@ async def main() -> None:
             await client.trades.put_trade_orders(
                 account_id=client.account_id,
                 trade_specifier=trade.id,
-                take_profit=take_profit_details.model_dump(
-                    by_alias=True, exclude_none=True
-                ),
+                take_profit=take_profit_details,
             )
             print(f"\n Take profit successfully set at {calculated_tp:.5f}")
             print(
@@ -989,16 +983,15 @@ async def main() -> None:
 
         # Example order placement (commented out for safety):
         #
-        # stop_loss_details = StopLossDetails(price=planned_stop)
+        # post_market_order takes stop_loss as a plain price (Decimal), and
+        # attaches it to the trade as a stopLossOnFill order:
         #
         # try:
         #     order_response = await client.orders.post_market_order(
         #         account_id=client.account_id,
         #         instrument=instrument,
         #         units=calculated_units,  # Our calculated size!
-        #         stop_loss=stop_loss_details.model_dump(
-        #             by_alias=True, exclude_none=True
-        #         ),
+        #         stop_loss=planned_stop,
         #     )
         #
         #     print("\n Order placed successfully")
@@ -1060,7 +1053,7 @@ Throughout this tutorial, you've seen how to use FiveTwenty SDK methods for comp
 **Setting Stop Loss and Take Profit:**
 - `client.trades.put_trade_orders()` - Attach or modify protective orders on existing trades
 - Use `StopLossDetails` and `TakeProfitDetails` Pydantic models for type-safe order creation
-- Serialize with `.model_dump(by_alias=True, exclude_none=True)` for API compatibility
+- Pass those models directly to `put_trade_orders()` - the SDK handles serialization to OANDA's wire format
 
 **Account Information:**
 - `client.accounts.get_account_summary()` - Get balance, equity, and margin for position sizing calculations
@@ -1082,7 +1075,7 @@ All examples demonstrate proper error handling with `FiveTwentyError`, type safe
 
 -  **Position Sizing with `client.accounts.get_account_summary()`** - Calculate mathematically sound position sizes based on account balance, risk percentage, and stop loss distance to maintain consistent risk exposure
 
--  **Type-Safe SDK Patterns** - Use Pydantic models for requests (`StopLossDetails`, `TakeProfitDetails`), handle TypedDict responses correctly, serialize models with `.model_dump(by_alias=True, exclude_none=True)`, and use `Decimal` for all financial calculations
+-  **Type-Safe SDK Patterns** - Use Pydantic models for requests (`StopLossDetails`, `TakeProfitDetails`), pass them straight to the endpoint methods, handle TypedDict responses correctly, and use `Decimal` for all financial calculations
 
 !!! success "Position Management Complete"
     You can now monitor positions, set protective orders, and size positions programmatically with the FiveTwenty SDK. Next, you'll build complete trading strategies that combine these techniques.

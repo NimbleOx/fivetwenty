@@ -136,7 +136,7 @@ async def main() -> None:
                 )
 
                 # Check if order filled
-                if market_order.order_fill_transaction is None:
+                if market_order.get("order_fill_transaction") is None:
                     print("\nOrder was not filled - market is likely closed")
                     print("Forex market hours: Sunday 5 PM ET - Friday 5 PM ET")
                     print("\nThis example demonstrates conditional monitoring logic")
@@ -318,7 +318,7 @@ async def main() -> None:
                 units=10000,  # Create 10k long position
             )
 
-            if market_order.order_fill_transaction is None:
+            if market_order.get("order_fill_transaction") is None:
                 print("\nOrder was not filled - market is likely closed")
                 print("Forex market hours: Sunday 5 PM ET - Friday 5 PM ET")
                 print("\nThis example demonstrates position reversal logic")
@@ -403,7 +403,7 @@ async def main() -> None:
             units=-reversal_units,  # Negative for short
         )
 
-        if reversal_order.order_fill_transaction is None:
+        if reversal_order.get("order_fill_transaction") is None:
             print("\nReversal order was not filled - market may be closed")
             return
 
@@ -839,7 +839,7 @@ async def main() -> None:
             units=5000,
         )
 
-        if market_order.order_fill_transaction is not None:
+        if market_order.get("order_fill_transaction") is not None:
             fill_price_market = market_order.order_fill_transaction.price
             assert fill_price_market is not None
 
@@ -894,7 +894,7 @@ async def main() -> None:
             units=15000,  # 3x larger
         )
 
-        if market_order_large.order_fill_transaction is not None:
+        if market_order_large.get("order_fill_transaction") is not None:
             fill_price_large = market_order_large.order_fill_transaction.price
             assert fill_price_large is not None
 
