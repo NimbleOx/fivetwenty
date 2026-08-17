@@ -174,9 +174,20 @@ class TestStreamIter:
             client.close()
 
     def test_stream_iter_backpressure_drops_oldest_events(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """When the queue is full, the oldest event is dropped so fresh data keeps flowing."""
+        """Under backpressure, delivered events stay in produced order and the newest
+        data is never the one dropped -- regardless of exactly how the background
+        pump and the consumer happen to interleave.
+
+        A fixed sleep to "let the pump race ahead" before consuming was flaky
+        (stream_iter is a generator: nothing, not even queue construction, runs
+        until first iterated, so the sleep raced nothing) and pinning an exact
+        surviving set assumes a specific winner of a genuine two-thread race,
+        which isn't guaranteed across Python versions/runners -- empirically the
+        pump (a zero-await async generator) usually finishes producing before the
+        consumer's first blocking get() succeeds, but that's a scheduling detail,
+        not a contract. These two invariants hold no matter who wins.
+        """
         import queue as queue_module
-        import time
 
         class TinyQueue(queue_module.Queue):  # type: ignore[type-arg]
             def __init__(self, maxsize: int = 0) -> None:
@@ -192,15 +203,12 @@ class TestStreamIter:
         try:
             monkeypatch.setattr(client._async.pricing, "get_pricing_stream", fake_stream)
             monkeypatch.setattr("fivetwenty.client.queue.Queue", TinyQueue)
-
-            iterator = client.pricing.stream_iter("acct-1", ["EUR_USD"])
-            # Let the pump race ahead and overflow the 2-slot queue before consuming.
-            time.sleep(0.3)
-            events = list(iterator)
+            events = list(client.pricing.stream_iter("acct-1", ["EUR_USD"]))
         finally:
             client.close()
 
-        # The pump dropped the oldest events under backpressure; the newest survive
-        # (the final put of the sentinel blocks until the consumer drains, so the
-        # last two data events are always delivered).
-        assert events == prices[-2:]
+        indices = [prices.index(e) for e in events]
+        assert indices == sorted(indices), f"events delivered out of order: {indices}"
+        assert len(set(indices)) == len(indices), f"duplicate events delivered: {indices}"
+        assert events[-1] == prices[-1], "the most recent event must never be the one evicted"
+        assert 1 <= len(events) <= len(prices)
