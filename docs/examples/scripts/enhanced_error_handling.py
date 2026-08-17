@@ -80,7 +80,7 @@ async def main() -> None:
 
         try:
             # This will fail - invalid instrument
-            await client.orders.post_market_order(account_id=client.account_id, instrument="INVALID_INSTRUMENT", units=1000)  # type: ignore[arg-type]
+            await client.orders.post_market_order(account_id=client.account_id, instrument="INVALID_INSTRUMENT", units=1000)
         except FiveTwentyError as e:
             print("✅ Caught FiveTwentyError:")
             print(f"  Status Code: {e.status}")

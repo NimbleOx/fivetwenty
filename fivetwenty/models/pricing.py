@@ -84,7 +84,7 @@ class ClientPrice(ApiModel):
     """Real-time price data."""
 
     type: str = Field(default="PRICE")
-    instrument: InstrumentName | None = None
+    instrument: InstrumentName | str | None = None
     time: datetime | None = None
     status: PriceStatus | None = None  # Deprecated but may still be present
     tradeable: bool | None = None
@@ -116,18 +116,42 @@ class Candlestick(ApiModel):
     mid: CandlestickData | None = None
 
 
-class OrderBook(ApiModel):
-    """Represents an order book for an instrument."""
+class OrderBookBucket(ApiModel):
+    """Order book price partition with percentages of open orders on each side."""
 
-    instrument: InstrumentName
+    price: PriceValue
+    long_count_percent: Decimal = Field(alias="longCountPercent")
+    short_count_percent: Decimal = Field(alias="shortCountPercent")
+
+
+class OrderBook(ApiModel):
+    """Snapshot of open orders for an instrument, partitioned into price buckets."""
+
+    instrument: InstrumentName | str
     time: datetime
+    unix_time: datetime | None = Field(None, alias="unixTime")
     price: PriceValue | None = None
     bucket_width: PriceValue | None = Field(None, alias="bucketWidth")
-    buckets: list[PriceBucket] = Field(default_factory=list)
+    buckets: list[OrderBookBucket] = Field(default_factory=list)
 
 
-# Removed extra models that are not part of official OANDA v20 API:
-# - MarketDepth, PositionBook, PriceAlert, MarketHours, PriceMovement
+class PositionBookBucket(ApiModel):
+    """Position book price partition with percentages of open positions on each side."""
+
+    price: PriceValue
+    long_count_percent: Decimal = Field(alias="longCountPercent")
+    short_count_percent: Decimal = Field(alias="shortCountPercent")
+
+
+class PositionBook(ApiModel):
+    """Snapshot of open positions for an instrument, partitioned into price buckets."""
+
+    instrument: InstrumentName | str
+    time: datetime
+    unix_time: datetime | None = Field(None, alias="unixTime")
+    price: PriceValue | None = None
+    bucket_width: PriceValue | None = Field(None, alias="bucketWidth")
+    buckets: list[PositionBookBucket] = Field(default_factory=list)
 
 
 # Export all pricing-related models
@@ -139,6 +163,9 @@ __all__ = [
     "HomeConversionFactors",
     "HomeConversions",
     "OrderBook",
+    "OrderBookBucket",
+    "PositionBook",
+    "PositionBookBucket",
     "PriceBucket",
     "PricingHeartbeat",
     "QuoteHomeConversionFactors",

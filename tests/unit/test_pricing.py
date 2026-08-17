@@ -296,3 +296,45 @@ class TestEnhancedPricingEndpoints:
         latest_response = await pricing.get_latest_candles("101-001-123456-001", ["EUR_USD:H1:M"])
 
         assert latest_response.latest_candles[0].instrument == "EUR_USD"
+
+
+class TestPricingStreamParams:
+    """Stream request parameter contract."""
+
+    @pytest.mark.asyncio
+    async def test_snapshot_false_sent_explicitly(self):
+        """snapshot=False must be sent — omitting it would fall back to the server default (true)."""
+        captured: dict = {}
+
+        async def fake_stream(path, *, params=None, stall_timeout=30.0):
+            captured["path"] = path
+            captured["params"] = params
+            if False:  # pragma: no cover - makes this an async generator
+                yield ""
+
+        client = MagicMock()
+        client._stream = fake_stream
+        pricing = PricingEndpoints(client)
+
+        async for _ in pricing.get_pricing_stream("101-001-123456-001", ["EUR_USD"], snapshot=False):
+            pass
+
+        assert captured["params"]["snapshot"] == "false"
+        assert captured["params"]["instruments"] == "EUR_USD"
+
+    @pytest.mark.asyncio
+    async def test_unknown_instrument_in_candles_response_tolerated(self):
+        """Open InstrumentName: candle responses for instruments outside the enum must parse."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "instrument": "XPT_USD_EXOTIC",
+            "granularity": "S5",
+            "candles": [],
+        }
+        client = MagicMock()
+        client._request = AsyncMock(return_value=mock_response)
+        pricing = PricingEndpoints(client)
+
+        result = await pricing.get_account_instrument_candles("101-001-123456-001", "XPT_USD_EXOTIC")
+
+        assert result["instrument"] == "XPT_USD_EXOTIC"

@@ -87,39 +87,20 @@ class TestTransactionEndpoints:
                         "lastTransactionID": "12345",
                     }
             elif endpoint.endswith("/transactions"):
-                # Check if this is get_recent_transactions (has 'count' param)
+                # The transactions list endpoint always returns page URLs,
+                # never inline transaction data (matches real OANDA behavior).
                 params = kwargs.get("params", {})
-                if "count" in params:
-                    # get_recent_transactions response
-                    mock_response.json.return_value = {
-                        "transactions": [
-                            {
-                                "id": "9001",
-                                "type": "ORDER_FILL",
-                                "time": "2024-01-01T14:00:00.000000000Z",
-                                "userID": 12345,
-                                "accountID": "101-001-123456-001",
-                                "batchID": "9001",
-                                "orderID": "8001",
-                                "instrument": "GBP_USD",
-                                "units": "2000",
-                            }
-                        ],
-                        "lastTransactionID": "9001",
-                    }
-                else:
-                    # get_transactions response (time-based query)
-                    mock_response.json.return_value = {
-                        "from": "2024-01-01T00:00:00.000000000Z",
-                        "to": "2024-01-02T00:00:00.000000000Z",
-                        "pageSize": params.get("pageSize", "100"),
-                        "count": "150",
-                        "pages": [
-                            "https://api-fxpractice.oanda.com/v3/accounts/101-001-123456-001/transactions?from=2024-01-01T00:00:00.000000000Z&to=2024-01-02T00:00:00.000000000Z&pageSize=100&page=1",
-                            "https://api-fxpractice.oanda.com/v3/accounts/101-001-123456-001/transactions?from=2024-01-01T00:00:00.000000000Z&to=2024-01-02T00:00:00.000000000Z&pageSize=100&page=2",
-                        ],
-                        "lastTransactionID": "5000",
-                    }
+                mock_response.json.return_value = {
+                    "from": "2024-01-01T00:00:00.000000000Z",
+                    "to": "2024-01-02T00:00:00.000000000Z",
+                    "pageSize": params.get("pageSize", "100"),
+                    "count": "150",
+                    "pages": [
+                        "https://api-fxpractice.oanda.com/v3/accounts/101-001-123456-001/transactions?from=2024-01-01T00:00:00.000000000Z&to=2024-01-02T00:00:00.000000000Z&pageSize=100&page=1",
+                        "https://api-fxpractice.oanda.com/v3/accounts/101-001-123456-001/transactions?from=2024-01-01T00:00:00.000000000Z&to=2024-01-02T00:00:00.000000000Z&pageSize=100&page=2",
+                    ],
+                    "lastTransactionID": "5000",
+                }
             else:
                 # Default response
                 mock_response.json.return_value = {"mock": "data"}
@@ -282,39 +263,57 @@ class TestTransactionEndpoints:
 
     @pytest.mark.asyncio
     async def test_get_recent_basic(self, transactions, mock_client):
-        """Test getting recent transactions."""
+        """Recent transactions resolve the last ID, then fetch the trailing ID range."""
         result = await transactions.get_recent_transactions("101-001-123456-001")
 
-        mock_client._request.assert_called_once_with(
-            "GET",
-            "/accounts/101-001-123456-001/transactions",
-            params={"count": "50"},
-        )
-        assert result["transactions"][0].id == "9001"
-        assert result["transactions"][0].type == "ORDER_FILL"
-        assert result["lastTransactionID"] == "9001"
+        assert mock_client._request.call_args_list == [
+            (("GET", "/accounts/101-001-123456-001/transactions"), {"params": {"pageSize": "1"}}),
+            (("GET", "/accounts/101-001-123456-001/transactions/idrange"), {"params": {"from": "4951", "to": "5000"}}),
+        ]
+        assert result["transactions"][0].id == "1500"
+        assert result["transactions"][0].type == "MARKET_ORDER"
+        assert result["lastTransactionID"] == "2000"
 
     @pytest.mark.asyncio
     async def test_get_recent_with_count_and_type(self, transactions, mock_client):
-        """Test getting recent transactions with custom count and type filter."""
+        """Custom count and type filter are applied to the ID-range request."""
         transaction_types = ["ORDER_FILL", "STOP_LOSS_ORDER"]
 
         await transactions.get_recent_transactions("101-001-123456-001", count=100, transaction_type=transaction_types)
 
-        mock_client._request.assert_called_once_with(
-            "GET",
-            "/accounts/101-001-123456-001/transactions",
-            params={
-                "count": "100",
-                "type": "ORDER_FILL,STOP_LOSS_ORDER",
-            },
+        assert mock_client._request.call_args_list[-1] == (
+            ("GET", "/accounts/101-001-123456-001/transactions/idrange"),
+            {"params": {"from": "4901", "to": "5000", "type": "ORDER_FILL,STOP_LOSS_ORDER"}},
         )
 
     @pytest.mark.asyncio
-    async def test_get_recent_count_too_large_raises_error(self, transactions, mock_client):
-        """Test that count > 500 raises ValueError."""
-        with pytest.raises(ValueError, match="Count cannot exceed 500"):
+    async def test_get_recent_count_clamps_range_start_at_one(self, transactions, mock_client):
+        """A count larger than the transaction history starts the range at ID 1."""
+
+        def small_history(*args, **kwargs):
+            mock_response = MagicMock()
+            if args[1].endswith("/transactions"):
+                mock_response.json.return_value = {"pages": [], "lastTransactionID": "3"}
+            else:
+                mock_response.json.return_value = {"transactions": [], "lastTransactionID": "3"}
+            return mock_response
+
+        mock_client._request = AsyncMock(side_effect=small_history)
+
+        await transactions.get_recent_transactions("101-001-123456-001", count=500)
+
+        assert mock_client._request.call_args_list[-1] == (
+            ("GET", "/accounts/101-001-123456-001/transactions/idrange"),
+            {"params": {"from": "1", "to": "3"}},
+        )
+
+    @pytest.mark.asyncio
+    async def test_get_recent_count_out_of_bounds_raises_error(self, transactions, mock_client):
+        """Counts outside 1-500 raise ValueError."""
+        with pytest.raises(ValueError, match="Count must be between 1 and 500"):
             await transactions.get_recent_transactions("101-001-123456-001", count=501)
+        with pytest.raises(ValueError, match="Count must be between 1 and 500"):
+            await transactions.get_recent_transactions("101-001-123456-001", count=0)
 
     @pytest.mark.asyncio
     async def test_stream_basic(self, transactions, mock_client):
@@ -435,13 +434,9 @@ class TestTransactionEndpoints:
         await transactions.get_recent_transactions("101-001-123456-001", count=200, transaction_type=transaction_types)
 
         expected_types = ",".join(transaction_types)
-        mock_client._request.assert_called_once_with(
-            "GET",
-            "/accounts/101-001-123456-001/transactions",
-            params={
-                "count": "200",
-                "type": expected_types,
-            },
+        assert mock_client._request.call_args_list[-1] == (
+            ("GET", "/accounts/101-001-123456-001/transactions/idrange"),
+            {"params": {"from": "4801", "to": "5000", "type": expected_types}},
         )
 
     @pytest.mark.asyncio
@@ -457,3 +452,59 @@ class TestTransactionEndpoints:
         assert detail_response.last_transaction_id == "12345"
         assert detail_response.transaction.id == "12345"
         assert detail_response["id"] == "12345"
+
+
+class TestTransactionTypeDispatch:
+    """The type→model dispatch must stay exhaustive over OANDA's TransactionType set."""
+
+    def test_dispatch_map_covers_every_transaction_type(self):
+        from fivetwenty.endpoints.transactions import _TRANSACTION_TYPE_MAP
+        from fivetwenty.models import TransactionType
+
+        enum_values = {member.value for member in TransactionType}
+        assert set(_TRANSACTION_TYPE_MAP) == enum_values
+
+    def test_dispatch_map_matches_union_membership(self):
+        import typing
+
+        from fivetwenty.endpoints.transactions import _TRANSACTION_TYPE_MAP, TransactionUnion
+
+        union_members = set(typing.get_args(TransactionUnion))
+        assert set(_TRANSACTION_TYPE_MAP.values()) == union_members
+
+    @pytest.mark.asyncio
+    async def test_client_extensions_modify_reject_types_parse(self):
+        """Regression: these two types previously raised ValueError (unknown type)."""
+        from unittest.mock import MagicMock
+
+        from fivetwenty.models import (
+            OrderClientExtensionsModifyRejectTransaction,
+            TradeClientExtensionsModifyRejectTransaction,
+        )
+
+        endpoints = TransactionEndpoints(MagicMock())
+        base = {
+            "id": "77",
+            "time": "2024-01-01T00:00:00.000000000Z",
+            "userID": 12345,
+            "accountID": "101-001-123456-001",
+            "batchID": "77",
+            "rejectReason": "CLIENT_EXTENSIONS_DATA_MISSING",
+        }
+        order_reject = endpoints._parse_transaction({**base, "type": "ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT", "orderID": "5"})
+        assert isinstance(order_reject, OrderClientExtensionsModifyRejectTransaction)
+        trade_reject = endpoints._parse_transaction({**base, "type": "TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT", "tradeID": "6"})
+        assert isinstance(trade_reject, TradeClientExtensionsModifyRejectTransaction)
+
+    def test_delayed_trade_closure_transaction_name_matches_oanda(self):
+        """The model is named after OANDA's DelayedTradeClosureTransaction definition."""
+        from fivetwenty.models import DelayedTradeClosureTransaction
+
+        assert DelayedTradeClosureTransaction.__name__ == "DelayedTradeClosureTransaction"
+
+    def test_unknown_transaction_type_raises(self):
+        from unittest.mock import MagicMock
+
+        endpoints = TransactionEndpoints(MagicMock())
+        with pytest.raises(ValueError, match="Unknown transaction type"):
+            endpoints._parse_transaction({"type": "NOT_A_REAL_TYPE"})

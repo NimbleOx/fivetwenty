@@ -35,7 +35,7 @@ class Trade(ApiModel):
     """Complete trade representation with dependent orders."""
 
     id: TradeID
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     price: PriceValue
     open_time: datetime = Field(alias="openTime")
     state: TradeState
@@ -60,7 +60,7 @@ class TradeSummary(ApiModel):
     """Condensed trade representation without full dependent orders."""
 
     id: TradeID
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     price: PriceValue
     open_time: datetime = Field(alias="openTime")
     state: TradeState

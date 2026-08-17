@@ -12,7 +12,7 @@
 
 | | P0 | P1 | P2 | P3 |
 |---|---|---|---|---|
-| SDK-ACC | 1 | 3 | 3 | 4 |
+| SDK-ACC | 1 | 4 | 4 | 4 |
 | DOC-COMP | – | 1 | 2 | 1 |
 | DOC-ACC | – | 2 | 2 | 2 |
 | TOOL | – | 6 | 3 | 3 |
@@ -31,6 +31,8 @@
 - **F-SDK-07 · P2 · `InstrumentName` is a closed 68-member enum; OANDA defines an open string.** `primitives-df`: "A string containing the base currency and quote currency delimited by a '_'". The enum exactly covers this practice account's 68 instruments (**confirmed live**) but other account divisions (CFDs, metals-only, region-specific) can expose names outside it, which would fail model validation. *Resolution: commit B — parameters and model fields accept `InstrumentName | str`; enum kept for autocomplete.*
 - **F-SDK-08 · P3 · `stream_pricing_with_retries` sends `includeHeartbeats`, which is not a pricing-stream parameter.** Spec params are `instruments`/`snapshot`/`includeHomeConversions` only; heartbeats are always sent. *Resolution: commit B — parameter dropped from the request.*
 - **F-SDK-09 · P3 · `get_pricing` sends deprecated `includeUnitsAvailable`.** Spec: "Deprecated: Will be removed in a future API update." *Resolution: commit B — kept (still functional) but docstring and docs note the deprecation.*
+- **F-SDK-12 · P1 · `MarketOrderRejectTransaction` requires `instrument`/`units`, which OANDA omits on trade-close rejects.** **Found live during fix verification**: transaction 24046 (`rejectReason=TRADE_DOESNT_EXIST`, `reason=TRADE_CLOSE`) carries the request in `tradeClose` with no top-level instrument/units, so parsing any history containing such a reject raised `ValidationError`. Invisible to docs-based parity (OANDA's schema pages don't mark per-field optionality). *Resolution: commit B — fields made optional with the evidence documented in the model.*
+- **F-SDK-13 · P2 · `get_pricing_stream` silently ignored `snapshot=False`.** The parameter was only sent when true; omitting it falls back to the server default (true). *Resolution: commit B — always sent explicitly; `StreamingConfiguration.include_heartbeats` was also dead config (sent as a nonexistent request param) and now filters yielded heartbeats as documented.*
 - **F-SDK-10 · P3 · `models/__init__.py` `__all__` lists `AccountChanges` and `AccountChangesState` twice** (155 entries, 153 unique). *Resolution: commit B.*
 - **F-SDK-11 · P3 · `__init__.py` hardcodes version fallback `"0.3.0"`** while pyproject is 0.3.2 — guaranteed to drift. *Resolution: commit B — fallback removed/single-sourced.*
 

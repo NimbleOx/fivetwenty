@@ -26,6 +26,7 @@ from .endpoints.trades import TradeEndpoints
 from .endpoints.transactions import TransactionEndpoints
 from .exceptions import StreamStall, raise_for_fivetwenty
 from .models import ClientPrice, PricingHeartbeat
+from .models.enums import AcceptDatetimeFormat
 from .models.streaming import StreamingConfiguration, StreamState
 
 if TYPE_CHECKING:
@@ -54,6 +55,7 @@ class AsyncClient:
         verify: bool | str = True,
         cert: str | None = None,
         logger: Optional["Logger"] = None,
+        datetime_format: AcceptDatetimeFormat | str = AcceptDatetimeFormat.RFC3339,
     ):
         """
         Initialize the async client.
@@ -83,6 +85,8 @@ class AsyncClient:
             verify: SSL verification (True, False, or path to CA bundle)
             cert: Client certificate path (optional)
             logger: Logger instance (optional)
+            datetime_format: Format for DateTime fields in requests and responses,
+                sent as the Accept-Datetime-Format header ("RFC3339" or "UNIX")
 
         Raises:
             ValueError: If no valid configuration is provided
@@ -131,6 +135,7 @@ class AsyncClient:
         self._environment = final_config.environment
         self.timeout = timeout
         self.max_retries = max_retries
+        self._datetime_format = AcceptDatetimeFormat(datetime_format).value
 
         # Setup HTTP client
         if transport:
@@ -246,6 +251,7 @@ class AsyncClient:
 
         # Add standard headers (never log the token!)
         headers["Authorization"] = f"Bearer {self._token}"
+        headers["Accept-Datetime-Format"] = self._datetime_format
 
         # Convert Decimals to strings in JSON data
         if json_data:
@@ -361,6 +367,7 @@ class AsyncClient:
             "Authorization": f"Bearer {self._token}",
             "Accept": "application/json",
             "Accept-Encoding": "gzip",
+            "Accept-Datetime-Format": self._datetime_format,
         }
         stall_timer = MonotonicTimeout(stall_timeout)
 

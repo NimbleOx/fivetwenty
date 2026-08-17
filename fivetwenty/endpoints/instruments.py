@@ -10,15 +10,27 @@ if TYPE_CHECKING:
     from datetime import datetime
 
     from ..client import AsyncClient
-    from ..models import Candlestick, CandlestickGranularity, InstrumentName, PricingComponent
+    from ..models import Candlestick, CandlestickGranularity, InstrumentName, OrderBook, PositionBook, PricingComponent
 
 
 class CandlesResponse(TypedDict):
     """Response from get_instrument_candles endpoint."""
 
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     granularity: CandlestickGranularity
     candles: list[Candlestick]
+
+
+class OrderBookResponse(TypedDict):
+    """Response from get_instrument_order_book endpoint."""
+
+    orderBook: OrderBook
+
+
+class PositionBookResponse(TypedDict):
+    """Response from get_instrument_position_book endpoint."""
+
+    positionBook: PositionBook
 
 
 class InstrumentEndpoints:
@@ -32,7 +44,7 @@ class InstrumentEndpoints:
         instrument: InstrumentName | str,
         *,
         price: PricingComponent = "M",
-        granularity: CandlestickGranularity,
+        granularity: CandlestickGranularity | str = "S5",
         count: int | None = None,
         from_time: datetime | None = None,
         to_time: datetime | None = None,
@@ -51,7 +63,7 @@ class InstrumentEndpoints:
         Args:
             instrument: Instrument enum or string (e.g., InstrumentName.EUR_USD or "EUR_USD")
             price: Price component(s) - M, B, A, BA, BM, AM, or BAM (default: M)
-            granularity: Candlestick granularity enum (e.g., CandlestickGranularity.H1)
+            granularity: Candlestick granularity enum or string (default: S5, matching the API)
             count: Number of candlesticks to return (max 5000, conflicts with time range)
             from_time: Start of time range for candlesticks
             to_time: End of time range for candlesticks
@@ -122,13 +134,102 @@ class InstrumentEndpoints:
 
         data = response.json()
 
+        # OANDA defines InstrumentName as an open string; tolerate names
+        # outside the convenience enum (e.g. CFDs on other account divisions).
+        try:
+            instrument_name: InstrumentName | str = InstrumentName(data["instrument"])
+        except ValueError:
+            instrument_name = data["instrument"]
+
         return cast(
             "CandlesResponse",
             ApiResponse(
                 {
-                    "instrument": InstrumentName(data["instrument"]),
+                    "instrument": instrument_name,
                     "granularity": CandlestickGranularity(data["granularity"]),
                     "candles": [Candlestick.model_validate(c) for c in data["candles"]],
                 }
             ),
+        )
+
+    async def get_instrument_order_book(
+        self,
+        instrument: InstrumentName | str,
+        *,
+        time: datetime | None = None,
+    ) -> OrderBookResponse:
+        """
+        Get an order book snapshot for an instrument.
+
+        The order book partitions open orders into price buckets, each with the
+        percentage of long and short orders at that price.
+
+        Args:
+            instrument: Instrument enum or string (e.g., InstrumentName.EUR_USD or "EUR_USD")
+            time: Snapshot time; the most recent snapshot is returned when omitted
+
+        Returns:
+            Dictionary containing the orderBook snapshot
+
+        Raises:
+            FiveTwentyError: On API errors
+        """
+        instrument_str = instrument.value if hasattr(instrument, "value") else instrument
+        params: dict[str, str] = {}
+        if time is not None:
+            params["time"] = time.isoformat()
+
+        response = await self._client._request(
+            "GET",
+            f"/instruments/{instrument_str}/orderBook",
+            params=params,
+        )
+
+        from ..models import OrderBook
+
+        data = response.json()
+        return cast(
+            "OrderBookResponse",
+            ApiResponse({"orderBook": OrderBook.model_validate(data["orderBook"])}),
+        )
+
+    async def get_instrument_position_book(
+        self,
+        instrument: InstrumentName | str,
+        *,
+        time: datetime | None = None,
+    ) -> PositionBookResponse:
+        """
+        Get a position book snapshot for an instrument.
+
+        The position book partitions open positions into price buckets, each with
+        the percentage of long and short positions at that price.
+
+        Args:
+            instrument: Instrument enum or string (e.g., InstrumentName.EUR_USD or "EUR_USD")
+            time: Snapshot time; the most recent snapshot is returned when omitted
+
+        Returns:
+            Dictionary containing the positionBook snapshot
+
+        Raises:
+            FiveTwentyError: On API errors
+        """
+        instrument_str = instrument.value if hasattr(instrument, "value") else instrument
+        params: dict[str, str] = {}
+        if time is not None:
+            params["time"] = time.isoformat()
+
+        response = await self._client._request(
+            "GET",
+            f"/instruments/{instrument_str}/positionBook",
+            params=params,
+        )
+
+        from ..models import PositionBook
+
+        data = response.json()
+        return cast(
+            "PositionBookResponse",
+            ApiResponse({"positionBook": PositionBook.model_validate(data["positionBook"])}),
         )

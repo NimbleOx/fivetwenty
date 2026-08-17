@@ -24,7 +24,7 @@ from .enums import (
 class Position(ApiModel):
     """Net aggregation of trades for a specific instrument."""
 
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     pl: AccountUnits = Field(alias="pl")
     unrealized_pl: AccountUnits | None = Field(alias="unrealizedPL", default=None)
     margin_used: AccountUnits | None = Field(alias="marginUsed", default=None)
@@ -54,7 +54,7 @@ class PositionSide(ApiModel):
 class CalculatedPositionState(ApiModel):
     """Dynamic calculated state of a position."""
 
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     net_unrealized_pl: AccountUnits = Field(alias="netUnrealizedPL")
     long_unrealized_pl: AccountUnits = Field(alias="longUnrealizedPL")
     short_unrealized_pl: AccountUnits = Field(alias="shortUnrealizedPL")

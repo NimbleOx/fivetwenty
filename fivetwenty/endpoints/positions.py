@@ -106,7 +106,7 @@ class PositionEndpoints:
             ),
         )
 
-    async def get_position(self, account_id: AccountID, instrument: InstrumentName) -> PositionResponse:
+    async def get_position(self, account_id: AccountID, instrument: InstrumentName | str) -> PositionResponse:
         """
         Get the position for a specific instrument in an account.
 
@@ -136,7 +136,7 @@ class PositionEndpoints:
     async def close_position(
         self,
         account_id: AccountID,
-        instrument: InstrumentName,
+        instrument: InstrumentName | str,
         *,
         long_units: str | Decimal | None = None,
         short_units: str | Decimal | None = None,

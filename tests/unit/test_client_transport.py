@@ -139,3 +139,41 @@ async def test_write_requests_do_not_retry_transport_errors() -> None:
             await client._request("POST", "/v3/accounts/acct-1/orders", json_data={"order": {"type": "MARKET"}})
 
     assert len(requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_request_sends_accept_datetime_format_header_default_rfc3339() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json={"ok": True})
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client) as client:
+        await client._request("GET", "/v3/accounts/acct-1/summary")
+
+    assert requests[0].headers["Accept-Datetime-Format"] == "RFC3339"
+
+
+@pytest.mark.asyncio
+async def test_request_sends_unix_datetime_format_when_configured() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json={"ok": True})
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client, datetime_format="UNIX") as client:
+        await client._request("GET", "/v3/accounts/acct-1/summary")
+
+    assert requests[0].headers["Accept-Datetime-Format"] == "UNIX"
+
+
+@pytest.mark.asyncio
+async def test_invalid_datetime_format_raises() -> None:
+    with pytest.raises(ValueError):
+        AsyncClient(token="secret-token", account_id="acct-1", datetime_format="ISO9000")

@@ -151,7 +151,7 @@ class OpenTradeFinancing(ApiModel):
 class PositionFinancing(ApiModel):
     """Daily financing paid or collected for a position."""
 
-    instrument: InstrumentName | None = None
+    instrument: InstrumentName | str | None = None
     financing: AccountUnits | None = None
     base_financing: Decimal | None = Field(None, alias="baseFinancing")
     quote_financing: Decimal | None = Field(None, alias="quoteFinancing")
@@ -166,7 +166,7 @@ class OrderFillTransaction(Transaction):
     type: TransactionType = Field(default=TransactionType.ORDER_FILL, frozen=True)
     order_id: str = Field(alias="orderID")
     client_order_id: str | None = Field(None, alias="clientOrderID")
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     gain_quote_home_conversion_factor: Decimal | None = Field(None, alias="gainQuoteHomeConversionFactor")
     loss_quote_home_conversion_factor: Decimal | None = Field(None, alias="lossQuoteHomeConversionFactor")
@@ -204,7 +204,7 @@ class MarketOrderTransaction(Transaction):
     """Transaction representing the creation of a Market Order."""
 
     type: TransactionType = Field(default=TransactionType.MARKET_ORDER, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.FOK)
     price_bound: PriceValue | None = Field(None, alias="priceBound")
@@ -255,7 +255,7 @@ class LimitOrderTransaction(Transaction):
     """Limit order creation transaction."""
 
     type: TransactionType = Field(default=TransactionType.LIMIT_ORDER, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
@@ -277,7 +277,7 @@ class LimitOrderRejectTransaction(Transaction):
     """Limit order rejection transaction."""
 
     type: TransactionType = Field(default=TransactionType.LIMIT_ORDER_REJECT, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
@@ -299,8 +299,11 @@ class MarketOrderRejectTransaction(Transaction):
     """Market order rejection transaction."""
 
     type: TransactionType = Field(default=TransactionType.MARKET_ORDER_REJECT, frozen=True)
-    instrument: InstrumentName
-    units: Decimal
+    # Optional: rejects generated from a trade close / position closeout carry the
+    # request in tradeClose/longPositionCloseout etc. with no top-level instrument
+    # or units (observed live, e.g. rejectReason=TRADE_DOESNT_EXIST).
+    instrument: InstrumentName | str | None = None
+    units: Decimal | None = None
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.FOK)
     price_bound: PriceValue | None = Field(None, alias="priceBound")
     position_fill: OrderPositionFill = Field(alias="positionFill", default=OrderPositionFill.DEFAULT)
@@ -323,7 +326,7 @@ class StopOrderTransaction(Transaction):
     """Stop order creation transaction."""
 
     type: TransactionType = Field(default=TransactionType.STOP_ORDER, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(None, alias="priceBound")
@@ -346,7 +349,7 @@ class StopOrderRejectTransaction(Transaction):
     """Stop order rejection transaction."""
 
     type: TransactionType = Field(default=TransactionType.STOP_ORDER_REJECT, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(None, alias="priceBound")
@@ -513,7 +516,7 @@ class MarketIfTouchedOrderTransaction(Transaction):
     """Market if touched order creation transaction."""
 
     type: TransactionType = Field(default=TransactionType.MARKET_IF_TOUCHED_ORDER, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(None, alias="priceBound")
@@ -536,7 +539,7 @@ class MarketIfTouchedOrderRejectTransaction(Transaction):
     """Market if touched order rejection transaction."""
 
     type: TransactionType = Field(default=TransactionType.MARKET_IF_TOUCHED_ORDER_REJECT, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(None, alias="priceBound")
@@ -630,7 +633,7 @@ class DividendAdjustmentTransaction(Transaction):
     """Dividend adjustment transaction."""
 
     type: TransactionType = Field(default=TransactionType.DIVIDEND_ADJUSTMENT, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     dividend_adjustment: AccountUnits = Field(alias="dividendAdjustment")
     quote_dividend_adjustment: Decimal | None = Field(None, alias="quoteDividendAdjustment")
     home_conversion_factors: HomeConversionFactors | None = Field(None, alias="homeConversionFactors")
@@ -687,7 +690,7 @@ class FixedPriceOrderTransaction(Transaction):
     """Fixed price order transaction (for dividend adjustments, etc.)."""
 
     type: TransactionType = Field(default=TransactionType.FIXED_PRICE_ORDER, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     position_fill: OrderPositionFill = Field(alias="positionFill", default=OrderPositionFill.DEFAULT)
@@ -701,7 +704,7 @@ class FixedPriceOrderTransaction(Transaction):
     trade_client_extensions: ClientExtensions | None = Field(None, alias="tradeClientExtensions")
 
 
-class DelayedTradeCloseTransaction(Transaction):
+class DelayedTradeClosureTransaction(Transaction):
     """Delayed trade close transaction."""
 
     type: TransactionType = Field(default=TransactionType.DELAYED_TRADE_CLOSURE, frozen=True)
@@ -738,7 +741,7 @@ __all__ = [
     "CloseTransaction",
     "CreateTransaction",
     "DailyFinancingTransaction",
-    "DelayedTradeCloseTransaction",
+    "DelayedTradeClosureTransaction",
     "DividendAdjustmentTransaction",
     "FixedPriceOrderTransaction",
     "GuaranteedStopLossOrderRejectTransaction",

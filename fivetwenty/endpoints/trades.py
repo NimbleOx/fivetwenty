@@ -91,7 +91,7 @@ class TradeEndpoints:
         *,
         ids: list[TradeID] | None = None,
         state: TradeStateFilter = TradeStateFilter.OPEN,
-        instrument: InstrumentName | None = None,
+        instrument: InstrumentName | str | None = None,
         count: int = 50,
         before_id: TradeID | None = None,
     ) -> TradesResponse:
