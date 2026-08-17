@@ -12,11 +12,22 @@
 
 | | P0 | P1 | P2 | P3 |
 |---|---|---|---|---|
-| SDK-ACC | 1 | 4 | 4 | 4 |
+| SDK-ACC | 1 | 4 | 5 | 4 |
 | DOC-COMP | – | 1 | 2 | 1 |
 | DOC-ACC | – | 2 | 2 | 2 |
 | TOOL | – | 6 | 3 | 3 |
 | TEST | – | – | 2 | – |
+
+## Commit map
+
+| Commit | Hash | Scope |
+|---|---|---|
+| A | `1ad4f05` | Parity harness blind spots (trustworthy pipeline first) |
+| B | `53a07cb` | SDK accuracy fixes vs OANDA v20 (breaking, targets 0.4.0) |
+| C | `d208f1b` | API reference docs brought in line with the SDK |
+| D | `8d3b881` | CI and test tooling repairs |
+| E | `d930a16` | Meta-docs (README, contributing, architecture) + CHANGELOG. CLAUDE.md is gitignored — its rewrite is a local, uncommitted fix |
+| F | _pending_ | Test-coverage additions |
 
 ## Findings
 
@@ -33,6 +44,7 @@
 - **F-SDK-09 · P3 · `get_pricing` sends deprecated `includeUnitsAvailable`.** Spec: "Deprecated: Will be removed in a future API update." *Resolution: commit B — kept (still functional) but docstring and docs note the deprecation.*
 - **F-SDK-12 · P1 · `MarketOrderRejectTransaction` requires `instrument`/`units`, which OANDA omits on trade-close rejects.** **Found live during fix verification**: transaction 24046 (`rejectReason=TRADE_DOESNT_EXIST`, `reason=TRADE_CLOSE`) carries the request in `tradeClose` with no top-level instrument/units, so parsing any history containing such a reject raised `ValidationError`. Invisible to docs-based parity (OANDA's schema pages don't mark per-field optionality). *Resolution: commit B — fields made optional with the evidence documented in the model.*
 - **F-SDK-13 · P2 · `get_pricing_stream` silently ignored `snapshot=False`.** The parameter was only sent when true; omitting it falls back to the server default (true). *Resolution: commit B — always sent explicitly; `StreamingConfiguration.include_heartbeats` was also dead config (sent as a nonexistent request param) and now filters yielded heartbeats as documented.*
+- **F-SDK-14 · P2 · `CalculatedAccountState` and `AccumulatedAccountState` could not be instantiated at runtime.** Their `datetime`/`Decimal` annotations were TYPE_CHECKING-only imports (a ruff TC003 over-application), so pydantic could not resolve them at model-build time. **Found by the new named model tests** — the generic roundtrip contract had never instantiated them either. *Resolution: commit F — runtime imports restored with a guard comment; regression covered by named tests.*
 - **F-SDK-10 · P3 · `models/__init__.py` `__all__` lists `AccountChanges` and `AccountChangesState` twice** (155 entries, 153 unique). *Resolution: commit B.*
 - **F-SDK-11 · P3 · `__init__.py` hardcodes version fallback `"0.3.0"`** while pyproject is 0.3.2 — guaranteed to drift. *Resolution: commit B — fallback removed/single-sourced.*
 

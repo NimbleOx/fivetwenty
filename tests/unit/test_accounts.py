@@ -1,10 +1,12 @@
 """Unit tests for account configuration endpoints."""
 
+from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from fivetwenty.endpoints.accounts import AccountEndpoints
+from fivetwenty.models import Account, AccountProperties, AccountSummary
 
 
 class TestAccountConfigurationEndpoints:
@@ -299,3 +301,155 @@ class TestAccountConfigurationEndpoints:
 
         assert changes_response.last_transaction_id == "123"
         assert changes_response.state.get("marginUsed") == "0.0000"
+
+
+# Realistic OANDA-shaped account summary payload (camelCase keys, string decimals)
+ACCOUNT_SUMMARY_PAYLOAD = {
+    "id": "101-001-123456-001",
+    "alias": "Primary",
+    "currency": "USD",
+    "balance": "100000.0000",
+    "createdByUserID": 1234567,
+    "createdTime": "2023-06-01T12:00:00.000000000Z",
+    "guaranteedStopLossOrderMode": "DISABLED",
+    "marginRate": "0.02",
+    "openTradeCount": 1,
+    "openPositionCount": 1,
+    "pendingOrderCount": 0,
+    "hedgingEnabled": False,
+    "unrealizedPL": "12.3400",
+    "NAV": "100012.3400",
+    "marginUsed": "220.0000",
+    "marginAvailable": "99792.3400",
+    "positionValue": "11000.0000",
+    "marginCloseoutUnrealizedPL": "11.9800",
+    "marginCloseoutNAV": "100011.9800",
+    "marginCloseoutMarginUsed": "220.0000",
+    "marginCloseoutPercent": "0.00110",
+    "marginCloseoutPositionValue": "11000.0000",
+    "withdrawalLimit": "99792.3400",
+    "marginCallMarginUsed": "220.0000",
+    "marginCallPercent": "0.00110",
+    "pl": "150.2500",
+    "resettablePL": "150.2500",
+    "financing": "-3.5000",
+    "commission": "0.0000",
+    "dividendAdjustment": "0.0000",
+    "guaranteedExecutionFees": "0.0000",
+    "lastTransactionID": "5678",
+}
+
+# The full account payload extends the summary with open trades/positions/orders
+ACCOUNT_PAYLOAD = {
+    **ACCOUNT_SUMMARY_PAYLOAD,
+    "trades": [],
+    "positions": [],
+    "orders": [],
+}
+
+
+class TestAccountReadEndpoints:
+    """Test suite for get_accounts, get_account, and get_account_summary."""
+
+    @pytest.fixture
+    def mock_client(self):
+        """Create a mock async client returning realistic OANDA account payloads."""
+        client = MagicMock()
+
+        async def mock_request(method, path, **kwargs):
+            mock_response = MagicMock()
+
+            if path.endswith("/summary"):
+                mock_response.json.return_value = {
+                    "account": ACCOUNT_SUMMARY_PAYLOAD,
+                    "lastTransactionID": "5678",
+                }
+            elif path == "/accounts":
+                mock_response.json.return_value = {
+                    "accounts": [
+                        {"id": "101-001-123456-001", "tags": ["demo"]},
+                        {"id": "101-001-123456-002", "mt4AccountID": 7654321, "tags": []},
+                    ],
+                    "lastTransactionID": "5678",
+                }
+            else:
+                mock_response.json.return_value = {
+                    "account": ACCOUNT_PAYLOAD,
+                    "lastTransactionID": "5678",
+                }
+
+            return mock_response
+
+        client._request = AsyncMock(side_effect=mock_request)
+        return client
+
+    @pytest.fixture
+    def accounts(self, mock_client):
+        """Create AccountEndpoints instance with mock client."""
+        return AccountEndpoints(mock_client)
+
+    @pytest.mark.asyncio
+    async def test_get_accounts(self, accounts, mock_client):
+        """Test that get_accounts hits /accounts and parses AccountProperties."""
+        result = await accounts.get_accounts()
+
+        mock_client._request.assert_called_once_with("GET", "/accounts")
+
+        assert isinstance(result, list)
+        assert len(result) == 2
+        assert all(isinstance(item, AccountProperties) for item in result)
+        assert result[0].id == "101-001-123456-001"
+        assert result[0].tags == ["demo"]
+        assert result[0].mt4_account_id is None
+        assert result[1].id == "101-001-123456-002"
+        assert result[1].mt4_account_id == 7654321
+
+    @pytest.mark.asyncio
+    async def test_get_accounts_drops_last_transaction_id(self, accounts, mock_client):
+        """Test that get_accounts returns a bare list without the lastTransactionID wrapper."""
+        result = await accounts.get_accounts()
+
+        assert isinstance(result, list)
+        assert not isinstance(result, dict)
+
+    @pytest.mark.asyncio
+    async def test_get_account(self, accounts, mock_client):
+        """Test that get_account hits the account URL and parses the Account model."""
+        result = await accounts.get_account("101-001-123456-001")
+
+        mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001")
+
+        account = result["account"]
+        assert isinstance(account, Account)
+        assert account.id == "101-001-123456-001"
+        assert account.alias == "Primary"
+        assert account.currency == "USD"
+        assert account.balance == Decimal("100000.0000")
+        assert account.margin_rate == Decimal("0.02")
+        assert account.nav == Decimal("100012.3400")
+        assert account.hedging_enabled is False
+        assert account.open_trade_count == 1
+        assert account.trades == []
+        assert account.positions == []
+        assert account.orders == []
+        assert result["lastTransactionID"] == "5678"
+        assert result.last_transaction_id == "5678"
+
+    @pytest.mark.asyncio
+    async def test_get_account_summary(self, accounts, mock_client):
+        """Test that get_account_summary hits the summary URL and parses AccountSummary."""
+        result = await accounts.get_account_summary("101-001-123456-001")
+
+        mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/summary")
+
+        summary = result["account"]
+        assert isinstance(summary, AccountSummary)
+        assert summary.id == "101-001-123456-001"
+        assert summary.currency == "USD"
+        assert summary.balance == Decimal("100000.0000")
+        assert summary.unrealized_pl == Decimal("12.3400")
+        assert summary.margin_available == Decimal("99792.3400")
+        assert summary.pl == Decimal("150.2500")
+        assert summary.last_transaction_id == "5678"
+        assert result["lastTransactionID"] == "5678"
+        assert result.last_transaction_id == "5678"

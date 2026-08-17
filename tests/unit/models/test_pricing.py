@@ -9,14 +9,21 @@ from fivetwenty.models import (
     CandlestickData,
     CandlestickGranularity,
     ClientPrice,
+    ConversionFactor,
     Currency,
     DailyAlignment,
+    HomeConversionFactors,
     HomeConversions,
     InstrumentName,
+    OrderBook,
+    OrderBookBucket,
+    PositionBook,
+    PositionBookBucket,
     PriceBucket,
     PricingHeartbeat,
     QuoteHomeConversionFactors,
     UnitsAvailable,
+    UnitsAvailableDetails,
     WeeklyAlignment,
 )
 
@@ -249,3 +256,121 @@ class TestPhase3AliasTests:
         assert units_roundtrip.reduce_first == units.reduce_first
         assert units_roundtrip.reduce_only == units.reduce_only
         assert units_roundtrip.open_only == units.open_only
+
+
+class TestConversionFactorModels:
+    """Named coverage for home conversion factor models."""
+
+    def test_conversion_factor(self) -> None:
+        """Test ConversionFactor Decimal typing."""
+        factor = ConversionFactor(factor="1.09250")
+        assert factor.factor == Decimal("1.09250")
+        assert isinstance(factor.factor, Decimal)
+        assert ConversionFactor(**factor.model_dump(by_alias=True, exclude_none=True)) == factor
+
+    def test_home_conversion_factors(self) -> None:
+        """Test HomeConversionFactors aliases and nested ConversionFactor values."""
+        payload = {
+            "gainQuoteHome": {"factor": "1.0000"},
+            "lossQuoteHome": {"factor": "1.0000"},
+            "gainBaseHome": {"factor": "1.0920"},
+            "lossBaseHome": {"factor": "1.0930"},
+        }
+
+        factors = HomeConversionFactors(**payload)
+        assert factors.gain_quote_home is not None
+        assert factors.gain_quote_home.factor == Decimal("1.0000")
+        assert factors.gain_base_home is not None
+        assert factors.gain_base_home.factor == Decimal("1.0920")
+        assert factors.loss_base_home is not None
+        assert factors.loss_base_home.factor == Decimal("1.0930")
+        assert isinstance(factors.loss_base_home.factor, Decimal)
+
+        dumped = factors.model_dump(by_alias=True, exclude_none=True)
+        assert dumped["gainQuoteHome"]["factor"] == "1.0000"
+        assert dumped["lossBaseHome"]["factor"] == "1.0930"
+        assert HomeConversionFactors(**dumped) == factors
+
+    def test_units_available_details(self) -> None:
+        """Test UnitsAvailableDetails Decimal typing."""
+        details = UnitsAvailableDetails(long="100000", short="99000")
+        assert details.long == Decimal("100000")
+        assert details.short == Decimal("99000")
+        assert isinstance(details.long, Decimal)
+        assert UnitsAvailableDetails(**details.model_dump(by_alias=True, exclude_none=True)) == details
+
+
+class TestBookModels:
+    """Named coverage for order book and position book models with live payload shapes."""
+
+    def test_order_book_bucket(self) -> None:
+        """Test OrderBookBucket with the live bucket shape."""
+        payload = {"price": "1.15850", "longCountPercent": "0.6708", "shortCountPercent": "0.5361"}
+
+        bucket = OrderBookBucket(**payload)
+        assert bucket.price == Decimal("1.15850")
+        assert bucket.long_count_percent == Decimal("0.6708")
+        assert bucket.short_count_percent == Decimal("0.5361")
+        assert isinstance(bucket.long_count_percent, Decimal)
+        assert OrderBookBucket(**bucket.model_dump(by_alias=True, exclude_none=True)) == bucket
+
+    def test_order_book(self) -> None:
+        """Test OrderBook with a live-shaped payload."""
+        payload = {
+            "instrument": "EUR_USD",
+            "time": "2026-05-05T05:00:00Z",
+            "unixTime": "1777960800",
+            "price": "1.15850",
+            "bucketWidth": "0.00050",
+            "buckets": [
+                {"price": "1.15800", "longCountPercent": "0.6708", "shortCountPercent": "0.5361"},
+                {"price": "1.15850", "longCountPercent": "0.1230", "shortCountPercent": "0.4521"},
+            ],
+        }
+
+        book = OrderBook(**payload)
+        assert book.instrument == InstrumentName.EUR_USD
+        assert book.price == Decimal("1.15850")
+        assert book.bucket_width == Decimal("0.00050")
+        assert isinstance(book.bucket_width, Decimal)
+        assert book.unix_time is not None
+        assert len(book.buckets) == 2
+        assert book.buckets[0].long_count_percent == Decimal("0.6708")
+
+        dumped = book.model_dump(by_alias=True, exclude_none=True)
+        assert dumped["bucketWidth"] == "0.00050"
+        assert dumped["buckets"][1]["shortCountPercent"] == "0.4521"
+        assert OrderBook(**dumped) == book
+
+    def test_position_book_bucket(self) -> None:
+        """Test PositionBookBucket with the live bucket shape."""
+        payload = {"price": "1.15850", "longCountPercent": "0.6708", "shortCountPercent": "0.5361"}
+
+        bucket = PositionBookBucket(**payload)
+        assert bucket.price == Decimal("1.15850")
+        assert bucket.long_count_percent == Decimal("0.6708")
+        assert bucket.short_count_percent == Decimal("0.5361")
+        assert isinstance(bucket.short_count_percent, Decimal)
+        assert PositionBookBucket(**bucket.model_dump(by_alias=True, exclude_none=True)) == bucket
+
+    def test_position_book(self) -> None:
+        """Test PositionBook with a live-shaped payload."""
+        payload = {
+            "instrument": "EUR_USD",
+            "time": "2026-05-05T05:00:00Z",
+            "unixTime": "1777960800",
+            "price": "1.15850",
+            "bucketWidth": "0.00050",
+            "buckets": [
+                {"price": "1.15800", "longCountPercent": "0.6708", "shortCountPercent": "0.5361"},
+            ],
+        }
+
+        book = PositionBook(**payload)
+        assert book.instrument == InstrumentName.EUR_USD
+        assert book.price == Decimal("1.15850")
+        assert book.bucket_width == Decimal("0.00050")
+        assert book.unix_time is not None
+        assert isinstance(book.buckets[0], PositionBookBucket)
+        assert book.buckets[0].short_count_percent == Decimal("0.5361")
+        assert PositionBook(**book.model_dump(by_alias=True, exclude_none=True)) == book
