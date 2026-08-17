@@ -426,6 +426,12 @@ class CodeExecutionValidator(BaseValidator):
             "isinstance": isinstance,
             "repr": repr,
             "type": type,
+            # Object-model builtins used by class-based and annotated examples
+            "object": object,
+            "property": property,
+            "classmethod": classmethod,
+            "staticmethod": staticmethod,
+            "super": super,
             # Exceptions
             "Exception": Exception,
             "ValueError": ValueError,

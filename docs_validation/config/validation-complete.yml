@@ -160,6 +160,26 @@ validators:
         - "docs/tutorials/account-management.md"
         - "docs/tutorials/index.md"
         - "docs/tutorials/risk-management.md"
+        - "docs/guides/optimization/connection-optimization.md"
+        - "docs/guides/optimization/latency-optimization.md"
+        - "docs/guides/optimization/memory-cpu-optimization.md"
+        - "docs/guides/optimization/streaming-optimization.md"
+        - "docs/guides/practical-solutions/close-positions.md"
+        - "docs/guides/practical-solutions/handle-connection-failures.md"
+        - "docs/guides/practical-solutions/implement-stop-loss-strategies.md"
+        - "docs/guides/practical-solutions/manage-orders-effectively.md"
+        - "docs/guides/practical-solutions/multi-account-configuration.md"
+        - "docs/guides/practical-solutions/setup-live-trading.md"
+        - "docs/guides/trading-concepts/forex-trading-concepts.md"
+        - "docs/guides/trading-concepts/order-types.md"
+        - "docs/guides/trading-concepts/streaming.md"
+        - "docs/guides/understanding/async-vs-sync.md"
+        - "docs/guides/understanding/best-practices.md"
+        - "docs/guides/understanding/configuration.md"
+        - "docs/guides/understanding/environments.md"
+        - "docs/guides/understanding/sdk-architecture.md"
+        # docs/guides/index.md and docs/guides/optimization/index.md excluded: nav pages
+        # with no Python code blocks to execute.
         # streaming-data.md excluded: streaming examples exceed 5s timeout even with minimal limits
         # All other 9 validators (linting, typing, syntax, security, etc.) validate streaming examples
         # API Reference examples excluded: These demonstrate SDK interfaces with placeholder IDs
