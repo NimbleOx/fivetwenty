@@ -52,6 +52,7 @@ def AsyncClient(
     verify: bool | str = True,
     cert: str | None = None,
     logger: Logger | None = None,
+    datetime_format: AcceptDatetimeFormat | str = AcceptDatetimeFormat.RFC3339,
 ) -> AsyncClient:
     ...
 ```
@@ -88,6 +89,7 @@ For deployment.
 - `verify` (bool | str) - SSL verification (default: True)
 - `cert` (str, optional) - Client certificate path
 - `logger` (Logger, optional) - Logger instance for request logging
+- `datetime_format` (AcceptDatetimeFormat | str) - Format for DateTime fields, sent as the `Accept-Datetime-Format` header on every request and stream: `"RFC3339"` (default) or `"UNIX"`
 
 **Usage Examples:**
 

@@ -6,7 +6,7 @@ Complete API reference for FiveTwenty's comprehensive data model system, coverin
 
 ## Model Categories
 
-FiveTwenty provides 80+ comprehensive data models organized into logical categories:
+FiveTwenty provides 130+ Pydantic models and 41 enums organized into logical categories:
 
 ### Enum Models
 [**Enumerations & Constants →**](enum-models.md)

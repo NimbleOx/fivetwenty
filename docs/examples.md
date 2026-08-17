@@ -54,11 +54,10 @@ Before running any examples, make sure you have:
    uv add fivetwenty
    ```
 
-2. **Locate examples directory**:
+2. **Get the examples** (they live in the repository, not the installed package):
    ```bash
-   # Examples are included in your FiveTwenty installation
-   # Find your site-packages directory:
-   python -c "import fivetwenty; print(fivetwenty.__file__.replace('__init__.py', '../examples'))"
+   git clone https://github.com/NimbleOx/fivetwenty.git
+   cd fivetwenty/docs/examples/scripts
    ```
 
 3. **Set up your environment**:

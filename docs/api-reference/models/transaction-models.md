@@ -11,6 +11,10 @@ Models for transaction history, order fills, and account activity tracking.
 ### Transaction
 Base transaction information (all transactions inherit these fields).
 
+🔗 **OANDA Definition**: [Transaction](https://developer.oanda.com/rest-live-v20/transaction-df/#Transaction)
+
+🔗 **Source**: [Transaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
+
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [TransactionID](system-models.md#type-aliases) |✅ | Transaction's identifier (positive integer assigned sequentially by OANDA) |
@@ -22,7 +26,9 @@ Base transaction information (all transactions inherit these fields).
 | `type` | [TransactionType](enum-models.md#transactiontype) | ✅ | Type of transaction (CREATE, MARKET_ORDER, STOP_LOSS_ORDER, etc.) |
 
 ### TransactionFilter
-Filter criteria for transaction queries.
+Filter criteria for transaction queries (implemented as the `TransactionQueryFilter` class).
+
+🔗 **Source**: [TransactionQueryFilter](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -35,6 +41,8 @@ Filter criteria for transaction queries.
 Range of transaction IDs for querying transaction history.
 
 🔗 **OANDA Definition**: [TransactionIDRange](https://developer.oanda.com/rest-live-v20/transaction-df/#TransactionIDRange)
+
+🔗 **Source**: [TransactionIDRange](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -49,6 +57,8 @@ Range of transaction IDs for querying transaction history.
 Details of a new trade created as part of an OrderFill.
 
 🔗 **OANDA Definition**: [TradeOpen](https://developer.oanda.com/rest-live-v20/transaction-df/#TradeOpen)
+
+🔗 **Source**: [TradeOpen](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -65,6 +75,8 @@ Details of a new trade created as part of an OrderFill.
 Details of a trade that was reduced or fully closed as part of an OrderFill.
 
 🔗 **OANDA Definition**: [TradeReduce](https://developer.oanda.com/rest-live-v20/transaction-df/#TradeReduce)
+
+🔗 **Source**: [TradeReduce](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
@@ -86,6 +98,10 @@ Details of a trade that was reduced or fully closed as part of an OrderFill.
 
 ### OrderFillTransaction
 Transaction created when an order is filled.
+
+🔗 **OANDA Definition**: [OrderFillTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#OrderFillTransaction)
+
+🔗 **Source**: [OrderFillTransaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 **Inherits:** All Transaction fields
 
@@ -116,6 +132,8 @@ Transaction created when an order is cancelled.
 
 🔗 **OANDA Definition**: [OrderCancelTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#OrderCancelTransaction)
 
+🔗 **Source**: [OrderCancelTransaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
+
 **Inherits:** All Transaction fields
 
 | Field | Type | Required | Description |
@@ -131,6 +149,8 @@ Transaction created when an order is cancelled.
 Transaction created when a Market Order is submitted.
 
 🔗 **OANDA Definition**: [MarketOrderTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#MarketOrderTransaction)
+
+🔗 **Source**: [MarketOrderTransaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 **Inherits:** All Transaction fields
 
@@ -158,6 +178,8 @@ Transaction created when a Limit Order is submitted.
 
 🔗 **OANDA Definition**: [LimitOrderTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#LimitOrderTransaction)
 
+🔗 **Source**: [LimitOrderTransaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
+
 **Inherits:** All Transaction fields
 
 | Field | Type | Required | Description |
@@ -180,6 +202,8 @@ Transaction created when a Limit Order is submitted.
 Transaction created when a Stop Order is submitted.
 
 🔗 **OANDA Definition**: [StopOrderTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#StopOrderTransaction)
+
+🔗 **Source**: [StopOrderTransaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 **Inherits:** All Transaction fields
 
@@ -207,6 +231,8 @@ Transaction created when a Take Profit Order is submitted.
 
 🔗 **OANDA Definition**: [TakeProfitOrderTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#TakeProfitOrderTransaction)
 
+🔗 **Source**: [TakeProfitOrderTransaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
+
 **Inherits:** All Transaction fields
 
 | Field | Type | Required | Description |
@@ -224,6 +250,8 @@ Transaction created when a Take Profit Order is submitted.
 Transaction created when a Stop Loss Order is submitted.
 
 🔗 **OANDA Definition**: [StopLossOrderTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#StopLossOrderTransaction)
+
+🔗 **Source**: [StopLossOrderTransaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 **Inherits:** All Transaction fields
 
@@ -244,6 +272,8 @@ Transaction created when a Stop Loss Order is submitted.
 Transaction created when a Trailing Stop Loss Order is submitted.
 
 🔗 **OANDA Definition**: [TrailingStopLossOrderTransaction](https://developer.oanda.com/rest-live-v20/transaction-df/#TrailingStopLossOrderTransaction)
+
+🔗 **Source**: [TrailingStopLossOrderTransaction](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/transactions.py)
 
 **Inherits:** All Transaction fields
 

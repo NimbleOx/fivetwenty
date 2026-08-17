@@ -51,7 +51,7 @@ FiveTwenty provides a robust architecture for trading applications:
 - **Configurable timeouts** - Fine-tune performance for your use case
 
 ### **Data Models**
-- **75+ Pydantic models** - Complete coverage of OANDA API request and response objects
+- **130+ Pydantic models and 41 enums** - Complete coverage of OANDA API request and response objects
 - **Decimal precision** - Financial-grade decimal arithmetic throughout
 - **Type validation** - Catch errors at runtime with meaningful messages
 
