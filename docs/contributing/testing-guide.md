@@ -169,5 +169,5 @@ open htmlcov/index.html
 
 ```bash
 uv run poe test              # All tests pass
-uv run poe check             # Quality checks pass
+uv run poe check-fast             # Quality checks pass
 ```

@@ -274,7 +274,7 @@ Days of the week for weekly candlestick alignment.
 
 Hour of day (in the candlestick request's timezone) used for daily candlestick alignment. Integer-valued enum covering hours 0-23.
 
-🔗 **OANDA Definition**: [dailyAlignment parameter](https://developer.oanda.com/rest-live-v20/instrument-ep/)
+🔗 **OANDA Definition**: [dailyAlignment parameter](https://developer.oanda.com/rest-live-v20/pricing-ep/)
 
 🔗 **Source**: [DailyAlignment](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
 

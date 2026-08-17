@@ -882,7 +882,6 @@ class AsyncClient:
         # - Mock network timeouts to test reconnection policies
         # - Mock malformed JSON to test error parsing
         # - Mock authentication failures to test token validation
-        # - Record and replay real API interactions with VCR
 
         # Architecture advantage:
         # Single mock point controls entire HTTP layer - comprehensive test coverage
@@ -891,55 +890,34 @@ class AsyncClient:
 
 **Testing Benefit**: Mock one method to control all network behavior
 
-### VCR Integration
+### Live Integration Testing
 
-Integration tests use recorded HTTP interactions:
+Integration tests run against a real OANDA PRACTICE account — there is no
+recording/replay layer. They are opt-in and guarded:
 
-<!-- fragment: partial VCR test integration example -->
-```python
-import pytest
+<!-- validation: skip-execution reason="illustrative shell commands, not Python" -->
+```text
+# Integration tests are skipped unless explicitly enabled:
+uv run pytest tests/integration/ --run-integration-live
 
-@pytest.mark.vcr
-async def test_account_retrieval() -> None:
-    """Demonstrate VCR integration for reliable integration testing."""
-    # Step 1: VCR (Video Cassette Recorder) captures real API interactions
-    # First test run: Makes real HTTP requests to OANDA API
-    # Subsequent runs: Replays recorded responses for fast, reliable tests
-
-    # Step 2: Test benefits of VCR integration
-    # Success Real API compatibility: Tests use actual OANDA API responses
-    # Success Fast execution: No network calls after initial recording
-    # Success Reliable results: Same responses every test run
-    # Success Offline testing: Tests work without internet connection
-    # Success Deterministic: No dependency on live market conditions
-
-    # Step 3: Example test would look like:
-    # async with AsyncClient(token="test-token") as client:
-    #     accounts = await client.accounts.get_accounts()
-    #     assert len(accounts) > 0
-    #     assert accounts[0].currency in ["USD", "EUR", "GBP"]
-
-    # VCR records:
-    # - Complete HTTP request (method, URL, headers, body)
-    # - Complete HTTP response (status, headers, body)
-    # - Timing information for performance validation
-
-    # Step 4: Testing workflow with VCR
-    # 1. Write test using real client code
-    # 2. Run test with valid token - VCR records interactions
-    # 3. Subsequent runs use recordings - no token needed
-    # 4. Update recordings when API changes or new endpoints added
-    # 5. CI/CD runs tests without OANDA credentials
-
-    pass  # Actual test implementation would go here
-
-    # Testing strategy benefits:
-    # - Integration tests verify real API compatibility
-    # - Fast test execution enables frequent testing
-    # - No credentials needed for CI/CD pipelines
-    # - Deterministic results improve debugging
-    # - Safe testing without impacting live accounts
+# Credentials come from .env:
+#   FIVETWENTY_OANDA_TOKEN     - practice API token
+#   FIVETWENTY_OANDA_ACCOUNT   - practice account id
 ```
+
+Safety architecture:
+
+- Fixtures snapshot the set of pending orders and open trades before each
+  test, diff it afterward, and automatically cancel/close anything the test
+  leaked — a leak fails the test.
+- Order-placing fixtures inject a `ClientRequestID` per test for
+  traceability in OANDA's logs.
+- Tests tolerate environment conditions (market closed, insufficient
+  liquidity) via explicit helpers rather than hiding real failures.
+
+Trade-offs versus recorded tests: live tests verify actual, current API
+behavior (which caught real drift recorded fixtures would have missed), at
+the cost of needing credentials and being subject to market hours.
 
 ---
 
@@ -1238,14 +1216,12 @@ uv run python -m validation.cli.main run --parallel --report
 #### 5. Integration Testing
 
 ```bash
-# Set up test environment
-export TEST_OANDA_TOKEN="your-practice-token"
+# Set up test environment (.env or exported)
+export FIVETWENTY_OANDA_TOKEN="your-practice-token"
+export FIVETWENTY_OANDA_ACCOUNT="your-practice-account-id"
 
-# Run integration tests with VCR
+# Run live integration tests against the PRACTICE environment
 poe test-integration
-
-# Record new API interactions (when needed)
-poe test-integration --record-mode=new_episodes
 ```
 
 ### Common Development Patterns
@@ -1268,22 +1244,22 @@ poe test-integration --record-mode=new_episodes
 
 3. **Add models if needed**:
    ```python
-   # Check existing 75+ models first
-   # Add to fivetwenty/models.py if not found
+   # Check the existing 130+ models first
+   # Add to the fivetwenty/models/ package if not found
    # Use Field(alias="camelCase") for API compatibility
    ```
 
 4. **Write comprehensive tests**:
    ```python
    # Unit tests with mock responses
-   # Integration tests with VCR recordings
+   # Live integration tests against the practice account
    # Cover error conditions and edge cases
    ```
 
 5. **Update documentation**:
    ```bash
    # Run validation to ensure accuracy
-   uv run python docs-tooling/validation/cli.py run endpoint-accuracy
+   uv run poe docs-validate
    ```
 
 #### Working with Financial Data

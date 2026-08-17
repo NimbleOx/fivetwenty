@@ -24,7 +24,7 @@ uv run poe setup
 uv run poe dev              # Format, typecheck, test (~15s)
 
 # Pre-commit checks
-uv run poe check            # Format, lint-core, typecheck, test (~30s)
+uv run poe check-fast            # Format check, lint, typecheck, unit tests (~30s)
 
 # Run tests
 uv run poe test             # Unit tests only
@@ -36,13 +36,13 @@ uv run pytest               # Unit tests plus skipped live integration tests
 - Follow existing patterns in the codebase
 - Add tests for new functionality
 - Update documentation
-- Run `uv run poe check` before committing
+- Run `uv run poe check-fast` before committing
 
 ### 4. Submit
 
 ```bash
 # Final checks
-uv run poe check
+uv run poe check-fast
 
 # Commit and push
 git add .
@@ -59,7 +59,7 @@ Then create a pull request on GitHub.
 All development commands are defined in `pyproject.toml` under `[tool.poe.tasks]`. Key commands:
 
 - `uv run poe dev` - Fast development checks
-- `uv run poe check` - Pre-commit checks
+- `uv run poe check-fast` - Pre-commit checks
 - `uv run poe test` - Run all tests
 
 See `pyproject.toml` for the complete list of available tasks.
@@ -168,7 +168,7 @@ async def post_market_order(
 ### Before Submitting
 
 1. ✓ All tests pass (`uv run poe test`)
-2. ✓ Quality checks pass (`uv run poe check`)
+2. ✓ Quality checks pass (`uv run poe check-fast`)
 3. ✓ Documentation updated
 4. ✓ Tests added for new features
 

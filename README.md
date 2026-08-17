@@ -104,6 +104,7 @@ if __name__ == "__main__":
 - **Trade Management**: Complete trade operations - list, get, close, modify, and dependent orders
 - **Position Management**: Full position operations - list, get, close by instrument
 - **Pricing & Streaming**: Real-time pricing, reliable streaming, and historical candles
+- **Instruments & Market Depth**: Instrument candles plus order book and position book snapshots
 - **Transaction History**: Complete audit trail, streaming, and incremental updates
 
 ## License
