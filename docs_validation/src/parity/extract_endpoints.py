@@ -28,15 +28,16 @@ CACHE_DIR = REPO_ROOT / "docs_validation" / ".cache" / "parity"
 
 
 def _extract_request_calls(body: list[ast.stmt]) -> list[dict[str, str]]:
-    """Find `self._client._request(METHOD, PATH, ...)` calls and extract verb/path."""
+    """Find `self._client._request(METHOD, PATH, ...)` and `_stream*(PATH, ...)` calls and extract verb/path."""
     calls: list[dict[str, str]] = []
     for node in ast.walk(ast.Module(body=body, type_ignores=[])):
         if not isinstance(node, ast.Call):
             continue
         # await self._client._request(...) appears as Call directly
         func = node.func
-        # Match self._client._request or self._client.streaming, etc.
-        if isinstance(func, ast.Attribute) and func.attr in {"_request", "_stream"}:
+        if not isinstance(func, ast.Attribute):
+            continue
+        if func.attr == "_request":
             verb = ""
             path = ""
             if node.args:
@@ -45,8 +46,18 @@ def _extract_request_calls(body: list[ast.stmt]) -> list[dict[str, str]]:
                 else:
                     verb = value_to_str(node.args[0])
             if len(node.args) > 1:
-                path = value_to_str(node.args[1]).strip("\"'")
+                path = value_to_str(node.args[1]).strip().strip("\"'")
             calls.append({"verb": verb, "path_template": path, "via": func.attr})
+        elif func.attr in {"_stream", "_stream_with_retries"}:
+            # Streaming helpers take the path as the first argument; the HTTP verb is implicitly GET.
+            path = ""
+            if node.args:
+                path = value_to_str(node.args[0]).strip().strip("\"'")
+            else:
+                path_kw = next((kw.value for kw in node.keywords if kw.arg == "path"), None)
+                if path_kw is not None:
+                    path = value_to_str(path_kw).strip().strip("\"'")
+            calls.append({"verb": "GET", "path_template": path, "via": func.attr})
     return calls
 
 

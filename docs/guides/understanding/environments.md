@@ -1,6 +1,6 @@
 # Practice vs Live Trading Environments
 
-**Problem**: Understanding when and how to use OANDA's practice and live trading environments safely and effectively.
+**Problem**: Understanding when and how to use OANDA's practice and live trading environments safely.
 
 **Solution**: Learn the differences between environments, when to use each, and how to transition from development to production trading.
 
@@ -16,11 +16,11 @@
 
 ## Environment Overview
 
-OANDA provides two distinct trading environments that serve different purposes in your trading development workflow.
+OANDA runs two separate trading environments. Each has a different job in your development workflow.
 
 ### Practice Environment
 
-The practice environment provides a risk-free trading experience with virtual funds:
+The practice environment trades virtual funds against real market data:
 
 **Key Features:**
 - $100,000 virtual starting balance
@@ -2114,16 +2114,9 @@ print(f"Remember: Proper access verification prevents operational surprises")
 
 ## Next Steps
 
-Now that you understand environments:
-
-- **Practice Development**: Start building strategies in practice environment
-- **Configuration Management**: Set up proper environment configuration
-- **Risk Management**: Implement appropriate risk controls for each environment
-- **Monitoring Setup**: Create monitoring for both environments
-
 **Related Guides:**
 - [Configuration Patterns](configuration.md) - Advanced environment configuration
 - [Best Practices](best-practices.md) - Production trading considerations
 - [Security Guidelines](best-practices.md#token-security) - Protecting your credentials
 
-**Task Complete**: Environment management provides the foundation for safe trading development and secure production deployment.
+**Task Complete**: You can now keep practice and live credentials separate, validate which environment a token targets, and move a strategy from practice to live in stages.

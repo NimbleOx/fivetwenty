@@ -19,7 +19,7 @@ class StreamState(str, Enum):
 class ReconnectionPolicy(ApiModel):
     """Policy for handling stream reconnections."""
 
-    max_attempts: int = Field(default=3, description="Maximum reconnection attempts")
+    max_attempts: int = Field(default=3, description="Maximum reconnection attempts after the initial connection (max_attempts=3 allows up to 4 connections in total)")
     delay_seconds: float = Field(default=1.0, description="Delay between reconnection attempts")
 
 

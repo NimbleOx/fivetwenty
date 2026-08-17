@@ -1,17 +1,17 @@
 # Advanced Order Types Tutorial Series
 
-Learn sophisticated order management techniques for professional trading with OANDA's comprehensive order system.
+This series covers OANDA's order types beyond the plain market order, and how to manage them programmatically.
 
 ## Series Overview
 
-This tutorial series explores advanced order types and management strategies that go beyond basic market orders. You'll learn to implement sophisticated trading logic using OANDA's full range of order capabilities.
+Market orders get you into a position; everything else about order management is more interesting. This series works through the rest of OANDA's order system and the trading logic it makes possible.
 
 ### What You'll Learn
 
-- **Order Types Mastery**: Market, limit, stop, and market-if-touched orders
-- **Dynamic Management**: Trailing stops, scaling, and adaptive position sizing
-- **Automated Systems**: Rule-based order management and monitoring
-- **Professional Strategies**: Bracket orders, combinations, and advanced techniques
+- Market, limit, stop, and market-if-touched orders
+- Trailing stops, scaling, and adaptive position sizing
+- Rule-based order management and monitoring
+- Bracket orders and order combinations
 
 ### Tutorial Structure
 
@@ -22,7 +22,7 @@ Each guide builds upon previous concepts while remaining focused on specific tec
 3. **[Dynamic Order Management](dynamic-management.md)** - Trailing stops and adaptive sizing
 4. **[Order Strategies & Combinations](order-strategies.md)** - Bracket orders and advanced techniques
 
-For comprehensive validation frameworks and error handling patterns, see the [Best Practices Guide](../../guides/understanding/best-practices.md#order-validation-framework).
+For order validation and error handling patterns, see the [Best Practices Guide](../../guides/understanding/best-practices.md#order-validation-framework).
 
 ### Prerequisites
 
@@ -65,4 +65,4 @@ graph TD
 
 Review the [Order Types Reference](../../guides/trading-concepts/order-types.md) to understand all available order types, then progress through the tutorials based on your specific needs and trading style.
 
-Each tutorial includes practical examples, code implementations, and real-world scenarios to ensure you can apply these concepts effectively in your trading systems.
+Each tutorial includes runnable examples you can adapt to your own trading systems.

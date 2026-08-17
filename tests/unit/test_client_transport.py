@@ -139,3 +139,98 @@ async def test_write_requests_do_not_retry_transport_errors() -> None:
             await client._request("POST", "/v3/accounts/acct-1/orders", json_data={"order": {"type": "MARKET"}})
 
     assert len(requests) == 1
+
+
+@pytest.mark.asyncio
+async def test_get_request_retries_timeout_then_succeeds(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("fivetwenty.client.backoff_with_jitter", lambda attempt: 0.0)
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if len(requests) == 1:
+            raise httpx.ReadTimeout("timed out", request=request)
+        return httpx.Response(200, json={"ok": True})
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client, max_retries=2) as client:
+        response = await client._request("GET", "/v3/accounts/acct-1")
+
+    assert response.json() == {"ok": True}
+    assert len(requests) == 2
+
+
+@pytest.mark.asyncio
+async def test_get_request_timeout_exhausts_retries_and_raises(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setattr("fivetwenty.client.backoff_with_jitter", lambda attempt: 0.0)
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        raise httpx.ReadTimeout("timed out", request=request)
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client, max_retries=2) as client:
+        with pytest.raises(httpx.ReadTimeout):
+            await client._request("GET", "/v3/accounts/acct-1")
+
+    assert len(requests) == 2
+
+
+@pytest.mark.asyncio
+async def test_request_sends_accept_datetime_format_header_default_rfc3339() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json={"ok": True})
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client) as client:
+        await client._request("GET", "/v3/accounts/acct-1/summary")
+
+    assert requests[0].headers["Accept-Datetime-Format"] == "RFC3339"
+
+
+@pytest.mark.asyncio
+async def test_request_sends_unix_datetime_format_when_configured() -> None:
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        return httpx.Response(200, json={"ok": True})
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client, datetime_format="UNIX") as client:
+        await client._request("GET", "/v3/accounts/acct-1/summary")
+
+    assert requests[0].headers["Accept-Datetime-Format"] == "UNIX"
+
+
+@pytest.mark.asyncio
+async def test_invalid_datetime_format_raises() -> None:
+    with pytest.raises(ValueError):
+        AsyncClient(token="secret-token", account_id="acct-1", datetime_format="ISO9000")
+
+
+@pytest.mark.asyncio
+async def test_write_request_not_retried_on_timeout() -> None:
+    """A timed-out POST may have reached the server; retrying could double-submit."""
+    attempts = 0
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        nonlocal attempts
+        attempts += 1
+        raise httpx.ReadTimeout("timed out", request=request)
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+
+    async with AsyncClient(token="secret-token", account_id="acct-1", transport=transport_client, max_retries=3) as client:
+        with pytest.raises(httpx.TimeoutException):
+            await client._request("POST", "/v3/accounts/acct-1/orders", json_data={"order": {}})
+
+    assert attempts == 1

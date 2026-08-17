@@ -2,17 +2,11 @@
 
 ## What are Tutorials?
 
-Tutorials are **learning-oriented** content designed to teach you how to use the FiveTwenty through guided, hands-on experience. Think of them as lessons that take you by the hand and guide you through a series of steps to build your skills progressively.
+Tutorials are lessons: each one walks you through a series of steps against a practice account, and each builds on the last. They are the right place to start if you are new to FiveTwenty or to trading APIs in general.
 
 ## When to Use Tutorials
 
-**Use tutorials when you want to:**
-
-- **Learn new skills** with the FiveTwenty
-- **Build confidence** through successful completion
-- **Get hands-on experience** with trading concepts
-- **Follow a guided path** from beginner to advanced
-- **Practice** in a safe, educational environment
+Use tutorials when you want guided, hands-on practice rather than answers to a specific question.
 
 **Don't use tutorials when you:**
 
@@ -21,7 +15,7 @@ Tutorials are **learning-oriented** content designed to teach you how to use the
 
 ## Learning Path
 
-Our tutorials are designed to build on each other progressively:
+The tutorials build on each other in this order:
 
 ### **Getting Started** (New to FiveTwenty)
 Start here if you're new to the FiveTwenty or trading APIs.
@@ -35,8 +29,8 @@ Start here if you're new to the FiveTwenty or trading APIs.
 Continue here once you've completed the getting started section.
 
 1. **[Basic Trading Concepts](basic-trading/index.md)** - Learn fundamental trading operations
-2. **[Advanced Order Types](advanced-orders/index.md)** - Learn sophisticated order management
-3. **[Risk Management Fundamentals](risk-management.md)** - Protect your capital effectively
+2. **[Advanced Order Types](advanced-orders/index.md)** - Work with OANDA's full range of order types
+3. **[Risk Management Fundamentals](risk-management.md)** - Protect your capital
 4. **[Account Management Basics](account-management.md)** - Monitor and analyze your trading
 5. **[Working with Streaming Data](streaming-data.md)** - Handle real-time market data
 
@@ -60,31 +54,7 @@ Apply your knowledge with Jupyter notebooks that combine code, explanation, and 
 
 ## Tutorial Principles
 
-Our tutorials follow these principles to ensure effective learning:
-
-### **Learning-Oriented**
-- Focus on teaching concepts and building skills
-- Provide guided practice with clear steps
-- Build confidence through successful completion
-- Progress from basic to complex topics
-
-### **Safe Learning Environment**
-- Use practice accounts by default
-- Include safety warnings for live trading
-- Provide rollback instructions when needed
-- Explain what could go wrong and how to recover
-
-### **Progressive Skill Building**
-- Each tutorial builds on previous knowledge
-- Skills are developed incrementally
-- Complex topics are broken into manageable steps
-- Prerequisites are explicitly stated
-
-### **Success-Oriented**
-- Every tutorial has a clear, achievable outcome
-- Steps are designed for reliable completion
-- Common pitfalls are anticipated and addressed
-- Success criteria are explicitly stated
+A few conventions hold across all tutorials. Every example uses a practice account by default, with explicit warnings anywhere live trading comes up. Each tutorial states its prerequisites, has a clear outcome, and points out common pitfalls along the way. Where something can go wrong with real consequences, we explain how to recover.
 
 ## Getting Help
 
@@ -104,12 +74,12 @@ After completing our tutorials, you will be able to:
 ### Getting Started Skills
 - Install and configure the FiveTwenty SDK in any Python environment
 - Authenticate securely with OANDA using practice and live environments
-- Execute your first trade with confidence and safety checks
+- Execute your first trade with safety checks in place
 - Understand the differences between practice and live trading
 
 ### Core Trading Skills
 - Learn all major order types: market, limit, stop, and MIT orders
-- Implement comprehensive risk management with stop losses and take profits
+- Implement risk management with stop losses and take profits
 - Calculate position sizes based on account risk and market conditions
 - Monitor and manage positions in real-time
 
@@ -117,14 +87,14 @@ After completing our tutorials, you will be able to:
 - Use Decimal precision for all financial calculations to avoid rounding errors
 - Build complete automated trading strategies with signal generation
 - Handle real-time streaming data for live market analysis
-- Create comprehensive portfolio analysis and performance tracking
+- Build portfolio analysis and performance tracking
 
 ### Production-Ready Skills
-- Implement robust error handling and recovery mechanisms
-- Design safe live trading systems with proper safeguards
-- Apply professional risk management across all trading operations
+- Implement error handling and recovery
+- Design live trading systems with proper safeguards
+- Apply risk management across all trading operations
 - Monitor and alert on trading system performance
 
 ---
 
-**Ready to start learning?** Begin with [Installation & Setup](getting-started/installation.md) or jump to any section that matches your current skill level.
+Start with [Installation & Setup](getting-started/installation.md), or jump to whichever section matches your current skill level.

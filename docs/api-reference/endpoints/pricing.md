@@ -52,7 +52,7 @@ asyncio.run(main())
 | `instruments` | list[str] | ✅ | List of instruments to get prices for |
 | `*` | | | **Keyword-only parameters below** |
 | `since` | str \| None | ➖ | Only get prices changed since this time |
-| `include_units_available` | bool | ➖ | Include units available info (default: True) |
+| `include_units_available` | bool | ➖ | Include units available info (default: True). Deprecated by OANDA; will be removed in a future API update |
 | `include_home_conversions` | bool | ➖ | Include home currency conversions (default: False) |
 
 **Returns:** `GetPricingResponse` - Dictionary containing prices (`list[ClientPrice]`), time (`str`), and optionally homeConversions (`list[HomeConversions]`)

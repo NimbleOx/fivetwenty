@@ -19,9 +19,9 @@ Learn how to monitor account health, manage multiple accounts, and track account
 
 ### Account Health Monitoring
 
-The foundation of good account management is understanding your account's current financial health. Monitoring metrics like margin utilization, unrealized P&L, and active positions helps you identify risk before it becomes critical. This example demonstrates how to retrieve comprehensive account information and calculate key health indicators that warn you when your account approaches dangerous margin levels.
+Good account management starts with knowing your account's current financial state. Metrics like margin utilization, unrealized P&L, and active positions surface risk before it becomes critical. This example retrieves account details and calculates health indicators that warn you when the account approaches dangerous margin levels.
 
-Margin calls occur when your margin utilization exceeds broker thresholds (typically 50% for OANDA). By continuously monitoring your margin ratio and exposure across all positions, you can proactively reduce risk before forced liquidation. The health status system provides quick visual indicators: HEALTHY (<30%), CAUTION (30-50%), and RISK (>50%), making it easy to understand your account's safety at a glance.
+Margin calls occur when your margin utilization exceeds broker thresholds (typically 50% for OANDA). If you monitor your margin ratio and exposure continuously, you can reduce risk before a forced liquidation rather than after. The example buckets margin usage into three statuses: HEALTHY (<30%), CAUTION (30-50%), and RISK (>50%).
 
 <!-- filepath: docs/tutorials/account-management/example_account_health.py -->
 ```python
@@ -350,9 +350,9 @@ if __name__ == "__main__":
 
 ### Account Performance Tracking
 
-Understanding your trading performance is essential for continuous improvement and strategy refinement. This example shows how to analyze your transaction history to calculate key performance metrics including win rate, average profit per trade, and total realized P&L. By tracking these metrics over time, you can identify which strategies are working, spot deteriorating performance before it impacts your account significantly, and make data-driven decisions about position sizing and risk management.
+This example analyzes your transaction history to calculate win rate, average profit per trade, and total realized P&L. Tracked over time, these numbers tell you which strategies are working and flag deteriorating performance before it does much damage to your account.
 
-The transaction history API provides access to all ORDER_FILL transactions, which represent completed trades with realized profit or loss. By filtering transactions and aggregating the P&L data, you can calculate metrics that reveal the true performance of your trading approach. This is particularly valuable for systematic traders who need objective performance data to validate their strategies and for discretionary traders who want to understand their decision-making patterns.
+The transaction history API exposes all ORDER_FILL transactions, which represent completed trades with realized profit or loss. Filter for those and aggregate the P&L, and you have an objective record of how your trading approach actually performs, whether the trades came from a systematic strategy or discretionary decisions.
 
 <!-- filepath: docs/tutorials/account-management/example_performance_tracking.py -->
 ```python
@@ -519,7 +519,7 @@ if __name__ == "__main__":
 ## Next Steps
 
 - Learn [Risk Management](risk-management.md) for account-level risk controls
-- Explore [Advanced Orders](advanced-orders/index.md) for sophisticated account management
+- Explore [Advanced Orders](advanced-orders/index.md) for more order types and management techniques
 - See [Best Practices](../guides/understanding/best-practices.md) for production account management
 
-For comprehensive account analytics and reporting, consider integrating with business intelligence tools or building custom dashboards using the account data retrieved through FiveTwenty.
+If you need dashboards or reporting beyond this, the account data retrieved through FiveTwenty is a reasonable base to build on, whether in a BI tool or a custom dashboard.

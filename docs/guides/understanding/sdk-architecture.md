@@ -7,7 +7,7 @@
 
     **Provides:** Context for why the SDK works the way it does and trade-offs involved
 
-This guide explains the design philosophy and architectural decisions behind the FiveTwenty, helping you understand why the SDK works the way it does and how its components fit together.
+This guide explains the design decisions behind FiveTwenty: why the SDK works the way it does and how its components fit together.
 
 ---
 
@@ -15,12 +15,12 @@ This guide explains the design philosophy and architectural decisions behind the
 
 ### Async-First Architecture
 
-The FiveTwenty was designed with **async-first principles** to handle the inherently concurrent nature of financial trading:
+FiveTwenty is **async-first** because trading work is concurrent by nature:
 
 **Why Async-First?**
 - **Market Reality**: Financial markets generate continuous streams of data (prices, trades, news)
 - **Concurrent Operations**: Real trading requires simultaneous monitoring and execution
-- **Performance**: Network I/O dominates trading applications - async provides massive performance benefits
+- **Performance**: Network I/O dominates trading applications, and async keeps requests from blocking each other
 - **Scalability**: Production trading systems need to handle multiple accounts, instruments, and strategies concurrently
 
 **Design Decision**: AsyncClient is the primary interface, with Client as a convenience wrapper
@@ -55,7 +55,7 @@ print(decimal_sum)  # Output: 0.3 (perfectly exact!)
 # - Regulatory compliance requirements met
 ```
 
-This design choice permeates the entire SDK - every price, balance, and monetary calculation uses `Decimal` to ensure accuracy.
+Every price, balance, and monetary calculation in the SDK uses `Decimal`.
 
 #### Automatic Type Conversion
 
@@ -124,14 +124,14 @@ if not isinstance(order3.units, Decimal):
 - Market prices: `price`, `closeout_bid`, `closeout_ask`
 - Order prices: All price thresholds and levels
 
-This mixed approach ensures exact calculations where needed while preserving OANDA's original precision formats.
+The mix gives you exact arithmetic where you calculate and keeps OANDA's original precision everywhere else.
 
 ### Pydantic-Based Models
 
 **Why Pydantic?**
 - **Runtime Validation**: Catches data errors immediately rather than failing silently
-- **Type Safety**: Provides comprehensive IDE support and static analysis
-- **Automatic Serialization**: Handles JSON conversion and API communication seamlessly
+- **Type Safety**: IDE autocompletion and static analysis
+- **Automatic Serialization**: Handles JSON conversion to and from the API
 - **Documentation**: Self-documenting models with field descriptions
 
 ```python
@@ -182,7 +182,7 @@ class Account(BaseModel):
 
 ### Dual Client Design
 
-The SDK provides two client types addressing different use cases:
+The SDK has two client types:
 
 #### AsyncClient (Primary)
 - **Target Users**: Production applications, web services, algorithmic trading
@@ -392,13 +392,13 @@ class Account(BaseModel):
 
 ## Streaming Architecture
 
-### Robust Streaming
+### Stream reliability
 
-Trading applications require robust, always-on data streams:
+Trading applications need always-on data streams:
 
 **Challenge**: Network connections fail, markets close, servers restart
 
-**Solution**: Comprehensive reconnection and health monitoring
+**Solution**: Automatic reconnection and health monitoring
 ```python
 class StreamingConfiguration:
     """Configuration for robust streaming in volatile trading environments."""
@@ -882,7 +882,6 @@ class AsyncClient:
         # - Mock network timeouts to test reconnection policies
         # - Mock malformed JSON to test error parsing
         # - Mock authentication failures to test token validation
-        # - Record and replay real API interactions with VCR
 
         # Architecture advantage:
         # Single mock point controls entire HTTP layer - comprehensive test coverage
@@ -891,55 +890,34 @@ class AsyncClient:
 
 **Testing Benefit**: Mock one method to control all network behavior
 
-### VCR Integration
+### Live Integration Testing
 
-Integration tests use recorded HTTP interactions:
+Integration tests run against a real OANDA PRACTICE account; there is no
+recording/replay layer. They are opt-in and guarded:
 
-<!-- fragment: partial VCR test integration example -->
-```python
-import pytest
+<!-- validation: skip-execution reason="illustrative shell commands, not Python" -->
+```text
+# Integration tests are skipped unless explicitly enabled:
+uv run pytest tests/integration/ --run-integration-live
 
-@pytest.mark.vcr
-async def test_account_retrieval() -> None:
-    """Demonstrate VCR integration for reliable integration testing."""
-    # Step 1: VCR (Video Cassette Recorder) captures real API interactions
-    # First test run: Makes real HTTP requests to OANDA API
-    # Subsequent runs: Replays recorded responses for fast, reliable tests
-
-    # Step 2: Test benefits of VCR integration
-    # Success Real API compatibility: Tests use actual OANDA API responses
-    # Success Fast execution: No network calls after initial recording
-    # Success Reliable results: Same responses every test run
-    # Success Offline testing: Tests work without internet connection
-    # Success Deterministic: No dependency on live market conditions
-
-    # Step 3: Example test would look like:
-    # async with AsyncClient(token="test-token") as client:
-    #     accounts = await client.accounts.get_accounts()
-    #     assert len(accounts) > 0
-    #     assert accounts[0].currency in ["USD", "EUR", "GBP"]
-
-    # VCR records:
-    # - Complete HTTP request (method, URL, headers, body)
-    # - Complete HTTP response (status, headers, body)
-    # - Timing information for performance validation
-
-    # Step 4: Testing workflow with VCR
-    # 1. Write test using real client code
-    # 2. Run test with valid token - VCR records interactions
-    # 3. Subsequent runs use recordings - no token needed
-    # 4. Update recordings when API changes or new endpoints added
-    # 5. CI/CD runs tests without OANDA credentials
-
-    pass  # Actual test implementation would go here
-
-    # Testing strategy benefits:
-    # - Integration tests verify real API compatibility
-    # - Fast test execution enables frequent testing
-    # - No credentials needed for CI/CD pipelines
-    # - Deterministic results improve debugging
-    # - Safe testing without impacting live accounts
+# Credentials come from .env:
+#   FIVETWENTY_OANDA_TOKEN     - practice API token
+#   FIVETWENTY_OANDA_ACCOUNT   - practice account id
 ```
+
+Safety architecture:
+
+- Fixtures snapshot the set of pending orders and open trades before each
+  test, diff it afterward, and automatically cancel/close anything the test
+  leaked. A leak fails the test.
+- Order-placing fixtures inject a `ClientRequestID` per test for
+  traceability in OANDA's logs.
+- Tests tolerate environment conditions (market closed, insufficient
+  liquidity) via explicit helpers rather than hiding real failures.
+
+Trade-offs versus recorded tests: live tests verify actual, current API
+behavior (which caught real drift recorded fixtures would have missed), at
+the cost of needing credentials and being subject to market hours.
 
 ---
 
@@ -1160,7 +1138,7 @@ asyncio.run(main())
 
 ### Recommended Development Process
 
-When working with the FiveTwenty SDK, follow this proven workflow:
+When working with the FiveTwenty SDK, follow this workflow:
 
 ```mermaid
 graph LR
@@ -1215,7 +1193,7 @@ poe test-integration  # Integration tests only
 The project enforces strict quality standards:
 
 - **100% mypy strict compliance** - All code must be properly typed
-- **Comprehensive test coverage** - Both unit and integration tests required
+- **Test coverage** - Both unit and integration tests required
 - **Consistent formatting** - Automated with ruff
 - **Documentation accuracy** - Validated with our custom framework
 
@@ -1238,14 +1216,12 @@ uv run python -m validation.cli.main run --parallel --report
 #### 5. Integration Testing
 
 ```bash
-# Set up test environment
-export TEST_OANDA_TOKEN="your-practice-token"
+# Set up test environment (.env or exported)
+export FIVETWENTY_OANDA_TOKEN="your-practice-token"
+export FIVETWENTY_OANDA_ACCOUNT="your-practice-account-id"
 
-# Run integration tests with VCR
+# Run live integration tests against the PRACTICE environment
 poe test-integration
-
-# Record new API interactions (when needed)
-poe test-integration --record-mode=new_episodes
 ```
 
 ### Common Development Patterns
@@ -1268,22 +1244,22 @@ poe test-integration --record-mode=new_episodes
 
 3. **Add models if needed**:
    ```python
-   # Check existing 75+ models first
-   # Add to fivetwenty/models.py if not found
+   # Check the existing 130+ models first
+   # Add to the fivetwenty/models/ package if not found
    # Use Field(alias="camelCase") for API compatibility
    ```
 
-4. **Write comprehensive tests**:
+4. **Write tests**:
    ```python
    # Unit tests with mock responses
-   # Integration tests with VCR recordings
+   # Live integration tests against the practice account
    # Cover error conditions and edge cases
    ```
 
 5. **Update documentation**:
    ```bash
    # Run validation to ensure accuracy
-   uv run python docs-tooling/validation/cli.py run endpoint-accuracy
+   uv run poe docs-validate
    ```
 
 #### Working with Financial Data
@@ -1627,28 +1603,16 @@ The FiveTwenty architecture prioritizes:
 2. **Performance**: Async-first design for concurrent operations
 3. **Type Safety**: Pydantic models with runtime validation
 4. **Usability**: Intuitive domain organization and consistent patterns
-5. **Reliability**: Robust error handling and connection management
+5. **Reliability**: Structured error handling and connection management
 6. **Security**: Explicit credential management and environment separation
 
-These architectural decisions create a SDK that's both powerful for production use and accessible for learning, while maintaining the precision and reliability required for financial applications.
-
-Understanding this architecture helps you:
-
-- Choose the right client type for your use case
-- Structure your applications for optimal performance
-- Handle errors appropriately
-- Extend the SDK when needed
-- Write maintainable trading applications
-
-The architecture reflects the realities of financial trading: precision matters, performance is critical, and reliability is non-negotiable.
+Every item on that list traces back to the same fact: this SDK moves real money, so precision and reliability are not optional. The rest follows from there.
 
 ## Next Steps
 
-Now that you understand the SDK architecture:
-
 - **Learn the async patterns**: Read [Async vs Sync Design](async-vs-sync.md) to choose the right approach
 - **Understand financial concepts**: Explore [Forex Trading Concepts](../trading-concepts/forex-trading-concepts.md) for domain knowledge
-- **Build robust systems**: Study [Error Handling](../../api-reference/error-handling.md) for production-ready error management
+- **Handle failures**: Study [Error Handling](../../api-reference/error-handling.md) for production error management
 - **Apply best practices**: Review [Best Practices](best-practices.md) for production deployment
 - **Implement real-time data**: See [Streaming Data](../trading-concepts/streaming.md) for market data integration
 - **Configure properly**: Check [Configuration](configuration.md) for secure credential management

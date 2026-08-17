@@ -1,10 +1,10 @@
 # Examples & Code Samples
 
-This page provides access to comprehensive examples and code samples for FiveTwenty. All examples are included with your FiveTwenty installation in the `docs/examples/` directory and are maintained to stay up-to-date with the latest SDK features.
+This page indexes the example code for FiveTwenty. All examples live in the repository under `docs/examples/` and are kept current with the SDK.
 
 ## Browse Examples Locally
 
-All examples are organized into two categories in your FiveTwenty installation:
+The examples come in two forms:
 
 ### Python Scripts
 
@@ -21,8 +21,8 @@ Complete, runnable Python scripts demonstrating specific functionality:
 - **[`position_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/position_management.py)** - Position tracking and management
 - **[`trade_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/trade_management.py)** - Trade lifecycle management
 - **[`transaction_analysis.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/transaction_analysis.py)** - Transaction history and analysis
-- **[`enhanced_error_handling.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/enhanced_error_handling.py)** - Robust error handling patterns
-- **[`advanced_features_demo.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/advanced_features_demo.py)** - Advanced SDK features showcase
+- **[`enhanced_error_handling.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/enhanced_error_handling.py)** - Error handling patterns
+- **[`advanced_features_demo.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/advanced_features_demo.py)** - Tour of advanced SDK features
 
 ### Jupyter Notebooks
 
@@ -54,11 +54,10 @@ Before running any examples, make sure you have:
    uv add fivetwenty
    ```
 
-2. **Locate examples directory**:
+2. **Get the examples** (they live in the repository, not the installed package):
    ```bash
-   # Examples are included in your FiveTwenty installation
-   # Find your site-packages directory:
-   python -c "import fivetwenty; print(fivetwenty.__file__.replace('__init__.py', '../examples'))"
+   git clone https://github.com/NimbleOx/fivetwenty.git
+   cd fivetwenty/docs/examples/scripts
    ```
 
 3. **Set up your environment**:
@@ -98,7 +97,7 @@ Before running any examples, make sure you have:
 Examples complement our structured documentation:
 
 - **[Tutorials](tutorials/index.md)** - Step-by-step learning paths
-- **[Guides](guides/index.md)** - Comprehensive guidance and solutions
+- **[Guides](guides/index.md)** - Concept explanations and how-to solutions
 - **[API Reference](api-reference/index.md)** - Complete API documentation
 
 ## Contributing Examples
@@ -127,4 +126,4 @@ Found a bug or want to add an example?
 
 ---
 
-**Remember**: All examples use the practice environment by default for safe learning and testing!
+All examples use the practice environment by default, so nothing here risks real money.

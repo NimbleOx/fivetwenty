@@ -1,6 +1,6 @@
 # Testing Guide
 
-Comprehensive testing ensures FiveTwenty's reliability for production trading.
+How to run and write FiveTwenty's unit and integration tests.
 
 ---
 
@@ -169,5 +169,5 @@ open htmlcov/index.html
 
 ```bash
 uv run poe test              # All tests pass
-uv run poe check             # Quality checks pass
+uv run poe check-fast             # Quality checks pass
 ```

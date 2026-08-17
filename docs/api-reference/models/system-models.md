@@ -15,7 +15,7 @@ Configuration for streaming connections.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `include_heartbeats` | bool | ➖ | Include heartbeat messages in stream (default: True) |
+| `include_heartbeats` | bool | ➖ | Yield heartbeat messages to the caller (default: True). OANDA always sends heartbeats; when False they are filtered out client-side |
 | `stall_timeout` | float | ➖ | Seconds before considering stream stalled (default: 30.0) |
 | `reconnection_policy` | [ReconnectionPolicy](#reconnectionpolicy) | ➖ | Reconnection settings (default: ReconnectionPolicy()) |
 

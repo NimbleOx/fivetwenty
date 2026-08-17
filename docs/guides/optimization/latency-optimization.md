@@ -1091,5 +1091,5 @@ Continue to [System Resource Management](memory-cpu-optimization.md) for advance
 ## Related Guides
 
 - [Connection Optimization](connection-optimization.md) - Connection pooling strategies
-- [Performance Monitoring](latency-optimization.md) - Comprehensive monitoring
+- [Performance Monitoring](latency-optimization.md) - Latency measurement and analysis
 - [Streaming Optimization](streaming-optimization.md) - Real-time data processing

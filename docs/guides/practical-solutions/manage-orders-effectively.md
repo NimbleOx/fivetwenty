@@ -2,7 +2,7 @@
 
 ## Problem Statement
 
-You need to create, monitor, and manage trading orders efficiently using FiveTwenty. This guide provides practical solutions for common order management scenarios including creating different order types, handling order lifecycle, and implementing robust order management strategies.
+You need to create, monitor, and manage trading orders with FiveTwenty. This guide covers common order management scenarios: creating different order types, handling the order lifecycle, and validating orders before placement.
 
 **When you need this guide:**
 
@@ -136,7 +136,7 @@ async def post_trade_example() -> None:
 
 **Problem:** Add risk management orders to existing trades after they've been created and analyzed.
 
-**Use Case:** You've opened a position and want to add or modify stop loss and take profit levels based on subsequent market analysis, or you need more sophisticated risk management than the OnFill pattern provides.
+**Use Case:** You've opened a position and want to add or modify stop loss and take profit levels based on subsequent market analysis, or you need more control than the OnFill pattern provides.
 
 #### Step-by-Step Post-Trade Risk Management
 <!-- fragment: partial post-trade risk management example -->
@@ -408,7 +408,7 @@ async def robust_post_trade_setup(client: AsyncClient, account_id: str, trade_id
 
 **Problem:** Execute trades immediately at current market price.
 
-The following example demonstrates how to create market orders using the FiveTwenty SDK. Market orders execute immediately at the best available price, making them ideal for quick entries and exits:
+The following example demonstrates how to create market orders using the FiveTwenty SDK. Market orders execute immediately at the best available price, so use them when speed of entry or exit matters more than the exact fill price:
 
 <!-- fragment: partial market order creation example -->
 ```python
@@ -505,7 +505,7 @@ async def place_limit_order() -> None:
 
 **Problem:** Enter positions when price breaks above/below key levels.
 
-Here's how to create stop orders for breakout trading strategies. Stop orders become market orders when the trigger price is reached, making them ideal for momentum trading:
+Here's how to create stop orders for breakout trading strategies. A stop order becomes a market order when the trigger price is reached, so it enters the position as momentum confirms the move:
 
 <!-- fragment: partial stop order example -->
 ```python
@@ -552,7 +552,7 @@ async def place_stop_order() -> None:
 
 **Problem:** Enter positions when price touches support/resistance levels.
 
-This example demonstrates Market-If-Touched (MIT) orders, which execute at market price when a specified trigger level is reached. These are perfect for entering positions at support or resistance levels:
+This example demonstrates Market-If-Touched (MIT) orders, which execute at market price when a specified trigger level is reached. Use them to enter positions at support or resistance levels:
 
 <!-- fragment: partial MIT order example -->
 ```python
@@ -726,7 +726,7 @@ async def monitor_order_execution(account_id: AccountID, order_id: str) -> None:
 
 ### Implement Order Validation and Error Handling
 
-**Problem:** Robust order validation to prevent common errors.
+**Problem:** Validate orders before placement to prevent common errors.
 
 ```python
 import os
@@ -868,9 +868,9 @@ async def manage_pending_orders(account_id: AccountID) -> None:
 
 ### Implement Batch Order Operations
 
-**Problem:** Create multiple related orders efficiently.
+**Problem:** Create multiple related orders in one operation.
 
-The following example shows how to create multiple related orders in a single operation. This technique is essential for complex trading strategies that require coordinated order placement:
+The following example shows how to create multiple related orders in a single operation, which strategies with coordinated entries and exits depend on:
 
 <!-- fragment: partial bracket order creation example -->
 ```python
@@ -1320,6 +1320,6 @@ class RiskManagedOrderSystem:
 
 - [Implement Stop-Loss Strategies](implement-stop-loss-strategies.md) for protective order patterns
 - [Close Positions](close-positions.md) for position exit strategies
-- [Handle Connection Failures](handle-connection-failures.md) for robust error handling
+- [Handle Connection Failures](handle-connection-failures.md) for error handling and retry patterns
 
 ```

@@ -3,15 +3,15 @@
 !!! tip "Target Learning Goal"
     Develop your first complete trading strategy with systematic signal generation and risk management.
 
-Trading strategies transform market observations into actionable trading decisions through systematic rules and logic. Rather than relying on intuition or emotion, algorithmic strategies use quantifiable signals - like price movements, technical indicators, or statistical patterns - to determine when to enter and exit positions. The key to successful algorithmic trading lies not just in having a strategy, but in rigorously testing it on historical data (backtesting), optimizing its parameters, and validating its performance before risking real capital.
+Trading strategies turn market observations into trading decisions through systematic rules. Rather than relying on intuition, algorithmic strategies use quantifiable signals, like price movements or technical indicators, to determine when to enter and exit positions. Having a strategy is only the start: you also need to test it on historical data (backtesting), optimize its parameters, and validate its performance before risking real capital.
 
-In this tutorial, you'll build a complete trading system from the ground up using the FiveTwenty SDK. You'll start by implementing a moving average crossover strategy that generates buy and sell signals from market data. Then you'll build a backtesting framework to evaluate strategy performance on historical OANDA data, calculating critical metrics like win rate, total return, and average profit/loss. Finally, you'll create a parameter optimizer that systematically tests hundreds of configurations to find the best-performing settings. Each example is fully executable, type-safe, and demonstrates real SDK integration with OANDA's live market data - giving you production-ready code you can run and learn from immediately.
+In this tutorial, you'll build a complete trading system from the ground up using the FiveTwenty SDK. You'll start by implementing a moving average crossover strategy that generates buy and sell signals from market data. Then you'll build a backtesting framework to evaluate strategy performance on historical OANDA data, calculating critical metrics like win rate, total return, and average profit/loss. Finally, you'll create a parameter optimizer that systematically tests hundreds of configurations to find the best-performing settings. Each example is executable, type-safe, and runs against OANDA's live market data.
 
 ---
 
 ## Designing Your First Strategy
 
-A moving average crossover strategy is one of the most popular algorithmic trading approaches, generating signals when a faster-moving average crosses a slower-moving average. This strategy captures trend changes - when the fast MA crosses above the slow MA, it signals potential upward momentum (buy signal), and when it crosses below, it signals potential downward momentum (sell signal). The strategy is reliable enough for beginners yet powerful enough that professional traders use variations of it with proper risk management and parameter optimization.
+A moving average crossover strategy is one of the most popular algorithmic trading approaches. It generates signals when a faster-moving average crosses a slower-moving average, capturing trend changes: when the fast MA crosses above the slow MA, it signals potential upward momentum (buy signal), and when it crosses below, it signals potential downward momentum (sell signal). The strategy is simple enough for beginners, and professional traders use variations of it with risk management and parameter optimization.
 
 This complete implementation demonstrates how to structure a trading strategy class with FiveTwenty SDK integration. The strategy fetches real market data using `client.instruments.get_instrument_candles()`, calculates moving averages from closing prices, and detects crossover events to generate trading signals. You'll see how to maintain strategy state, implement signal generation methods (`should_buy()` and `should_sell()`), and integrate with OANDA's live market data for real-time analysis:
 
@@ -368,9 +368,9 @@ if __name__ == "__main__":
 
 ## Strategy Backtesting Framework
 
-Backtesting is the process of testing a trading strategy on historical market data to evaluate its performance before risking real capital. By simulating trades using past price data, you can measure key metrics like win rate, average profit/loss, maximum drawdown, and total return to understand whether your strategy has edge in the market. A robust backtesting framework is essential - it helps you identify profitable strategies, optimize parameters, and build confidence before deploying capital in live trading.
+Backtesting is the process of testing a trading strategy on historical market data to evaluate its performance before risking real capital. By simulating trades using past price data, you can measure metrics like win rate, average profit/loss, maximum drawdown, and total return to understand whether your strategy has edge in the market. A backtesting framework lets you identify profitable strategies and optimize parameters before deploying capital in live trading.
 
-This complete backtesting implementation demonstrates how to test a moving average crossover strategy using FiveTwenty's historical data API. The backtester fetches candlestick data via `client.instruments.get_instrument_candles()`, processes each candle sequentially to simulate real-time trading, executes virtual trades based on MA crossover signals, and tracks all positions with proper stop loss and take profit management. You'll see how to calculate comprehensive performance statistics including win rate, profit factor, and return on investment, providing you with the metrics needed to evaluate strategy viability:
+This complete backtesting implementation demonstrates how to test a moving average crossover strategy using FiveTwenty's historical data API. The backtester fetches candlestick data via `client.instruments.get_instrument_candles()`, processes each candle sequentially to simulate real-time trading, executes virtual trades based on MA crossover signals, and tracks all positions with proper stop loss and take profit management. You'll see how to calculate performance statistics including win rate, profit factor, and return on investment, the metrics you need to evaluate strategy viability:
 
 ```python
 import asyncio
@@ -1387,14 +1387,14 @@ if __name__ == "__main__":
 
 - **Type-Safe Development**: Working with `Decimal` for financial precision, using TypedDict vs Pydantic models appropriately, and achieving full mypy strict compliance with proper type hints
 
-- **Backtesting Framework**: Creating a complete backtesting engine that simulates trading on historical data, tracks positions with stop loss/take profit, and calculates comprehensive performance metrics
+- **Backtesting Framework**: Creating a complete backtesting engine that simulates trading on historical data, tracks positions with stop loss/take profit, and calculates performance metrics
 
 - **Parameter Optimization**: Implementing grid search algorithms with `itertools.product()` to systematically test parameter combinations, understanding the computational complexity of search spaces, and recognizing overfitting risks
 
 - **Production-Ready Patterns**: Using AsyncClient context managers, loading environment variables with python-dotenv, handling datetime objects correctly with timezone awareness, and structuring executable standalone scripts
 
 !!! success "Strategy Building Complete!"
-    Outstanding! You've built three complete, production-ready trading system components using the FiveTwenty SDK. You can now design strategies, backtest them on real OANDA data, and optimize parameters - all with full type safety and comprehensive SDK integration. Next, you'll learn to build production-ready automated systems that put these skills together.
+    You've built three complete trading system components using the FiveTwenty SDK. You can now design strategies, backtest them on real OANDA data, and optimize parameters. Next, you'll build an automated system that puts these skills together.
 
 ---
 
@@ -1407,5 +1407,5 @@ Continue to [Complete Trading System](complete-system.md) to build a production-
 ## Related Resources
 
 - [Advanced Orders](../advanced-orders/index.md) - Complex order strategies
-- [Risk Management](../risk-management.md) - Comprehensive risk frameworks
+- [Risk Management](../risk-management.md) - Risk control frameworks
 - [Performance Optimization](../../guides/optimization/index.md) - Performance optimization

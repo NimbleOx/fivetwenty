@@ -218,20 +218,63 @@ Units available for both long and short orders on an instrument.
 | `long` | [UnitsAvailable](#unitsavailable) | ✅ | Long position units availability |
 | `short` | [UnitsAvailable](#unitsavailable) | ✅ | Short position units availability |
 
-### OrderBook
-Order book depth data for an instrument showing bid/ask levels.
+### OrderBookBucket
+Order book price partition with percentages of open orders on each side.
 
-🔗 **OANDA Definition**: [OrderBook](https://developer.oanda.com/rest-live-v20/pricing-df/#OrderBook)
+🔗 **OANDA Definition**: [OrderBookBucket](https://developer.oanda.com/rest-live-v20/instrument-df/#OrderBookBucket)
+
+🔗 **Source**: [OrderBookBucket](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Lowest price (inclusive) covered by this bucket |
+| `long_count_percent` | Decimal | ✅ | Percentage of total open orders in the bucket that are long |
+| `short_count_percent` | Decimal | ✅ | Percentage of total open orders in the bucket that are short |
+
+### OrderBook
+Snapshot of open orders for an instrument, partitioned into price buckets.
+
+🔗 **OANDA Definition**: [OrderBook](https://developer.oanda.com/rest-live-v20/instrument-df/#OrderBook)
 
 🔗 **Source**: [OrderBook](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Instrument identifier |
-| `time` | [DateTime](system-models.md#type-aliases) |✅ | Time when order book data was captured |
-| `price` | [PriceValue](system-models.md#type-aliases) |➖ | Reference price for the order book |
+| `time` | [DateTime](system-models.md#type-aliases) |✅ | Time when order book snapshot was created |
+| `unix_time` | [DateTime](system-models.md#type-aliases) |➖ | Snapshot time as a Unix timestamp |
+| `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price (midpoint) at the time of the snapshot |
 | `bucket_width` | [PriceValue](system-models.md#type-aliases) |➖ | Width of each price bucket |
-| `buckets` | list[[PriceBucket](#pricebucket)] | ✅ | Price buckets with bid/ask volume |
+| `buckets` | list[[OrderBookBucket](#orderbookbucket)] | ➖ | Partitioned order book buckets; only buckets with a non-zero count are returned |
+
+### PositionBookBucket
+Position book price partition with percentages of open positions on each side.
+
+🔗 **OANDA Definition**: [PositionBookBucket](https://developer.oanda.com/rest-live-v20/instrument-df/#PositionBookBucket)
+
+🔗 **Source**: [PositionBookBucket](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Lowest price (inclusive) covered by this bucket |
+| `long_count_percent` | Decimal | ✅ | Percentage of total open positions in the bucket that are long |
+| `short_count_percent` | Decimal | ✅ | Percentage of total open positions in the bucket that are short |
+
+### PositionBook
+Snapshot of open positions for an instrument, partitioned into price buckets.
+
+🔗 **OANDA Definition**: [PositionBook](https://developer.oanda.com/rest-live-v20/instrument-df/#PositionBook)
+
+🔗 **Source**: [PositionBook](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/pricing.py)
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Instrument identifier |
+| `time` | [DateTime](system-models.md#type-aliases) |✅ | Time when position book snapshot was created |
+| `unix_time` | [DateTime](system-models.md#type-aliases) |➖ | Snapshot time as a Unix timestamp |
+| `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price (midpoint) at the time of the snapshot |
+| `bucket_width` | [PriceValue](system-models.md#type-aliases) |➖ | Width of each price bucket |
+| `buckets` | list[[PositionBookBucket](#positionbookbucket)] | ➖ | Partitioned position book buckets; only buckets with a non-zero count are returned |
 
 ### GuaranteedStopLossOrderEntryData
 Details required by clients to add a Guaranteed Stop Loss Order for a specific instrument.

@@ -6,7 +6,7 @@ Complete API reference for FiveTwenty's secure configuration system.
 
 ## Overview
 
-FiveTwenty provides a secure, flexible configuration system with three main components:
+FiveTwenty's configuration system has three main components:
 
 | Component | Purpose | Key Features |
 |-----------|---------|--------------|

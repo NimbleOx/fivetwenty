@@ -1,6 +1,6 @@
 # Your First Trade
 
-This guide walks you through placing your first trade using FiveTwenty. We'll cover the complete process from authentication to order execution using modern configuration patterns.
+This guide walks you through placing your first trade with FiveTwenty: connecting a client, checking your account and prices, then executing and closing a market order.
 
 ## Prerequisites
 
@@ -13,7 +13,7 @@ Before starting, ensure you have:
 
 ## Configuration Setup
 
-FiveTwenty uses a zero-configuration approach that automatically reads your credentials from environment variables. This example demonstrates the simplest way to connect to OANDA - just load your `.env` file and create an `AsyncClient`. The client automatically discovers your API token, account ID, and environment (practice or live) from the `FIVETWENTY_OANDA_*` variables you configured during authentication setup.
+The simplest way to connect is to load your `.env` file and create an `AsyncClient` with no arguments. The client reads your API token, account ID, and environment (practice or live) from the `FIVETWENTY_OANDA_*` variables you configured during authentication setup.
 
 ```python
 import asyncio
@@ -44,7 +44,7 @@ if __name__ == "__main__":
 
 ## Check Account Balance
 
-Before placing any trades, it's essential to understand your account's financial position. This function retrieves comprehensive account information including your balance, unrealized profit/loss from open positions, margin usage, and available trading capacity. Checking these metrics helps you make informed decisions about position sizing and ensures you have sufficient margin to support new trades without risking a margin call.
+Before placing any trades, look at where your account stands. This function retrieves your balance, unrealized profit/loss from open positions, margin usage, and available trading capacity. These numbers determine how large a position you can safely open; margin available in particular tells you whether a new trade risks a margin call.
 
 ```python
 import asyncio
@@ -103,7 +103,7 @@ if __name__ == "__main__":
 
 ## Get Current Prices
 
-Successful trading requires understanding current market conditions before executing orders. This function retrieves real-time pricing data from OANDA's streaming price engine, showing you the bid price (what you receive when selling), the ask price (what you pay when buying), and the spread between them. The spread represents your immediate trading cost - the difference between where you can buy and sell. Always check prices before trading to ensure you're getting fair execution and to understand your transaction costs.
+Check prices before you trade. This function retrieves real-time pricing from OANDA: the bid price (what you receive when selling), the ask price (what you pay when buying), and the spread between them. The spread is your immediate trading cost, since a position bought at the ask can only be sold at the bid.
 
 ```python
 import asyncio
@@ -162,7 +162,7 @@ if __name__ == "__main__":
 
 ## Place a Market Order
 
-Market orders are the simplest way to enter the market - they execute immediately at the best available price. Unlike limit orders that wait for a specific price, market orders guarantee execution but not price. This function demonstrates placing a market order by specifying the instrument (currency pair) and units (position size). Positive units create a long position (buying), while negative units create a short position (selling). The function provides detailed reporting of the execution, including the fill price, trade ID for future reference, and immediate profit/loss.
+Market orders are the simplest way to enter the market: they execute immediately at the best available price. Unlike limit orders that wait for a specific price, market orders guarantee execution but not price. You specify the instrument (currency pair) and units (position size). Positive units create a long position, negative units a short one. The function then reports the fill price, the trade ID you'll need to manage the position later, and the immediate profit/loss.
 
 ```python
 import asyncio
@@ -262,7 +262,7 @@ if __name__ == "__main__":
 
 ## Complete First Trade Example
 
-This comprehensive example brings together all the pieces - authentication, account validation, price checking, and order execution - into a complete trading workflow. It demonstrates real-world patterns including margin validation (ensuring you have enough capital), risk assessment (checking if your position size is appropriate), and error handling (gracefully managing API errors or market conditions). The example uses a conservative 1000-unit position on EUR/USD, a highly liquid major currency pair with tight spreads, making it ideal for learning. Follow this pattern as a template for your own trading strategies.
+This example puts the pieces together: authentication, account validation, price checking, and order execution in one workflow. It checks margin before trading, handles API errors, and reports the results. The position is a deliberately small 1000 units of EUR/USD, a liquid pair with tight spreads that is cheap to practice on. The structure works as a template for your own strategies.
 
 ```python
 import asyncio
@@ -370,7 +370,7 @@ if __name__ == "__main__":
 
 ## Close a Position
 
-Closing positions is just as important as opening them - it's how you realize profits or limit losses. This example demonstrates the complete trade closure workflow using FiveTwenty's `close_trade` method. The function retrieves your open trades, selects one to close (here we use the first trade, but in practice you'd select based on strategy or risk criteria), and executes an immediate market closure. Closing a trade converts unrealized P&L (floating profit/loss) into realized P&L (locked in), which directly impacts your account balance. The example shows comprehensive reporting including the close price, realized profit/loss, and updated account metrics.
+Closing a position is how you actually realize a profit or cut a loss. This example uses FiveTwenty's `close_trade` method: it retrieves your open trades, selects one to close (here simply the first trade; in practice you'd select based on strategy or risk criteria), and executes an immediate market closure. Closing converts unrealized P&L (floating) into realized P&L (locked in), which changes your account balance. The example reports the close price, realized profit/loss, and updated account metrics.
 
 ```python
 import asyncio
@@ -503,7 +503,7 @@ If you encounter issues while making your first trade:
 - **Network issues** - Ensure stable internet connection
 
 !!! warning "Troubleshooting Resources"
-    For comprehensive error handling and troubleshooting guidance:
+    For more troubleshooting help:
 
     - **Configuration issues**: See [Configuration Guide](../../guides/understanding/configuration.md#troubleshooting)
     - **Trading errors**: See [Error Handling Guide](../../api-reference/error-handling.md#common-trading-errors)
@@ -511,15 +511,14 @@ If you encounter issues while making your first trade:
 
 ## Next Steps
 
-Complete **Congratulations!** You've successfully executed your first trade with FiveTwenty!
-
+You've now opened, monitored, and closed a trade. That's the core loop every strategy in the rest of these tutorials builds on.
 
 ### Important Reminders
 
-**Practice First**: Always test strategies in practice environment
-**Risk Management**: Never risk more than you can afford to lose
-**Security**: Keep your API tokens secure and rotate them regularly
-**Monitoring**: Track your trading performance and learn from results
+- Always test strategies in the practice environment first
+- Never risk more than you can afford to lose
+- Keep your API tokens secure and rotate them regularly
+- Track your trading performance and learn from the results
 
 ### Getting Help
 
@@ -529,4 +528,4 @@ If you encounter issues:
 - Review the [error handling guide](../../api-reference/error-handling.md)
 - Consult the [API documentation](../../api-reference/index.md) for detailed references
 
-Happy trading with FiveTwenty!
+From here, continue with the [Basic Trading tutorial series](../basic-trading/index.md).

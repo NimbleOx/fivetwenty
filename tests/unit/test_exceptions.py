@@ -1,7 +1,9 @@
 """Test enhanced exception handling."""
 
+from typing import ClassVar
 from unittest.mock import Mock
 
+import httpx
 import pytest
 
 from fivetwenty.exceptions import FiveTwentyError, raise_for_fivetwenty
@@ -340,3 +342,71 @@ class TestRaiseForOandaEnhanced:
         assert error.details is not None
         assert error.details.additional_fields["marginRequired"] == "1000.00"
         assert error.details.additional_fields["marginAvailable"] == "500.00"
+
+
+class _UnreadStreamingResponse:
+    """Response stand-in for a streaming body that has not been read."""
+
+    status_code = 400
+    headers: ClassVar[dict[str, str]] = {"content-type": "application/json"}
+
+    def json(self):
+        raise httpx.ResponseNotRead
+
+    @property
+    def text(self):
+        raise httpx.ResponseNotRead
+
+
+class _BrokenTextResponse:
+    """Response stand-in whose text accessor fails unexpectedly."""
+
+    status_code = 500
+    headers: ClassVar[dict[str, str]] = {"content-type": "text/plain"}
+
+    def json(self):
+        return {}
+
+    @property
+    def text(self):
+        raise RuntimeError("boom")
+
+
+class TestRaiseForFivetwentyStreamingAndTextEdgeCases:
+    """Test raise_for_fivetwenty fallbacks for unreadable response bodies."""
+
+    def test_streaming_response_not_read(self):
+        """Test that an unread streaming response falls back to status text."""
+        with pytest.raises(FiveTwentyError) as exc_info:
+            raise_for_fivetwenty(_UnreadStreamingResponse())
+
+        error = exc_info.value
+        assert error.status == 400
+        assert error.code is None
+        assert error.message == "HTTP 400 error"
+        assert error.retryable is False
+        assert error.details is None
+
+    def test_text_accessor_generic_exception(self):
+        """Test that a failing text accessor falls back to status text."""
+        with pytest.raises(FiveTwentyError) as exc_info:
+            raise_for_fivetwenty(_BrokenTextResponse())
+
+        error = exc_info.value
+        assert error.status == 500
+        assert error.message == "HTTP 500 error"
+        assert error.retryable is False
+
+    def test_retry_after_non_numeric_returns_none(self):
+        """Test that a non-numeric Retry-After header yields None."""
+        response = Mock()
+        response.headers = {"Retry-After": "soon"}
+        error = FiveTwentyError(status=429, message="Rate limited", response=response)
+        assert error.retry_after is None
+
+    def test_retry_after_missing_header_returns_none(self):
+        """Test that a missing Retry-After header yields None."""
+        response = Mock()
+        response.headers = {}
+        error = FiveTwentyError(status=429, message="Rate limited", response=response)
+        assert error.retry_after is None

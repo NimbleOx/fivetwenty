@@ -1,12 +1,12 @@
 # Data Models Reference
 
-Complete API reference for FiveTwenty's comprehensive data model system, covering all OANDA v20 API data structures.
+Complete API reference for FiveTwenty's data models, covering all OANDA v20 API data structures.
 
 ---
 
 ## Model Categories
 
-FiveTwenty provides 80+ comprehensive data models organized into logical categories:
+FiveTwenty provides 130+ Pydantic models and 41 enums organized into logical categories:
 
 ### Enum Models
 [**Enumerations & Constants →**](enum-models.md)
@@ -75,7 +75,7 @@ Models for trade lifecycle, position management, and P&L tracking.
 ### Order Models
 [**Order Management →**](order-models.md)
 
-Comprehensive order creation, management, and execution models.
+Order creation, management, and execution models.
 
 | Model | Purpose |
 |-------|---------|

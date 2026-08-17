@@ -3,9 +3,10 @@
 # Complete validation including all validators for comprehensive quality assessment.
 # Includes slower validators like code_execution and external_links.
 
-# File discovery - docs directory only
+# File discovery - docs directory plus the README
 file_patterns:
   - "docs/**/*.md"
+  - "README.md"
 
 exclude_patterns:
   # Version control and caches
@@ -33,7 +34,8 @@ exclude_patterns:
   - "docs_validation/**"    # This validation framework
   - "oanda-api-reference/**" # External API reference
   - "*.py"                  # Python files outside docs
-  - "/*.md"                 # Root-level markdown files only
+  - "/CLAUDE.md"            # Agent instructions (not user-facing docs)
+  - "/SECURITY.md"          # Policy file (no validatable content)
 
 # Execution settings
 parallel_execution: true
@@ -171,3 +173,10 @@ validators:
   # External link validation (slower)
   external_links:
     enabled: true
+    options:
+      exclude_urls:
+        # GitHub blob pages 404 for non-browser clients (anti-bot behavior),
+        # so HTTP-checking them is flaky. Source links into this repo are
+        # instead verified structurally against the local tree by
+        # docs_validation.src.parity.check_docs_meta (symbol + line anchors).
+        - "https://github.com/NimbleOx/fivetwenty/blob/"

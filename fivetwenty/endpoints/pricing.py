@@ -11,6 +11,15 @@ from .._internal.response import ApiResponse
 from ..models import AccountID, Candlestick, CandlestickGranularity, ClientPrice, HomeConversions, InstrumentName, PricingComponent, PricingHeartbeat
 from ..models.streaming import StreamingConfiguration, StreamState
 
+
+def _instrument_name(value: str) -> InstrumentName | str:
+    """OANDA defines InstrumentName as an open string; fall back to the raw name when outside the convenience enum."""
+    try:
+        return InstrumentName(value)
+    except ValueError:
+        return value
+
+
 if TYPE_CHECKING:
     from ..client import AsyncClient
 
@@ -26,7 +35,7 @@ class GetPricingResponse(TypedDict, total=False):
 class CandlesResponse(TypedDict):
     """Response from candles endpoints."""
 
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     granularity: CandlestickGranularity
     candles: list[Candlestick]
 
@@ -59,7 +68,8 @@ class PricingEndpoints:
             account_id: Account ID
             instruments: List of instruments to get prices for
             since: Only get prices changed since this time
-            include_units_available: Include units available info
+            include_units_available: Include units available info (deprecated by
+                OANDA; will be removed in a future API update)
             include_home_conversions: Include home currency conversions
 
         Returns:
@@ -127,10 +137,11 @@ class PricingEndpoints:
         """
         params = {
             "instruments": ",".join(instruments),
+            # Always sent explicitly: the server default is true, so omitting
+            # the parameter would silently ignore snapshot=False.
+            "snapshot": str(snapshot).lower(),
         }
 
-        if snapshot:
-            params["snapshot"] = "true"
         if include_home_conversions:
             params["includeHomeConversions"] = "true"
 
@@ -257,7 +268,7 @@ class PricingEndpoints:
             "CandlesResponse",
             ApiResponse(
                 {
-                    "instrument": InstrumentName(data["instrument"]),
+                    "instrument": _instrument_name(data["instrument"]),
                     "granularity": CandlestickGranularity(data["granularity"]),
                     "candles": [Candlestick.model_validate(c) for c in data["candles"]],
                 }
@@ -323,7 +334,7 @@ class PricingEndpoints:
                     "latestCandles": [
                         ApiResponse(
                             {
-                                "instrument": InstrumentName(c["instrument"]),
+                                "instrument": _instrument_name(c["instrument"]),
                                 "granularity": CandlestickGranularity(c["granularity"]),
                                 "candles": [Candlestick.model_validate(candle) for candle in c["candles"]],
                             }
@@ -389,8 +400,9 @@ class PricingEndpoints:
             "instruments": ",".join(instruments),
         }
 
-        if config.include_heartbeats:
-            params["includeHeartbeats"] = "true"
+        # Note: the pricing stream has no includeHeartbeats parameter — OANDA
+        # always sends heartbeats; config.include_heartbeats only controls
+        # whether they are yielded to the caller.
         if include_home_conversions:
             params["includeHomeConversions"] = "true"
 
@@ -413,6 +425,8 @@ class PricingEndpoints:
 
             # Parse the data based on type
             if data.get("type") == "HEARTBEAT":
+                if not config.include_heartbeats:
+                    continue
                 heartbeat = PricingHeartbeat.model_validate(data)
                 yield heartbeat, state
             elif data.get("type") == "PRICE":

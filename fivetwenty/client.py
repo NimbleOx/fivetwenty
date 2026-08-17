@@ -26,6 +26,7 @@ from .endpoints.trades import TradeEndpoints
 from .endpoints.transactions import TransactionEndpoints
 from .exceptions import StreamStall, raise_for_fivetwenty
 from .models import ClientPrice, PricingHeartbeat
+from .models.enums import AcceptDatetimeFormat
 from .models.streaming import StreamingConfiguration, StreamState
 
 if TYPE_CHECKING:
@@ -54,6 +55,7 @@ class AsyncClient:
         verify: bool | str = True,
         cert: str | None = None,
         logger: Optional["Logger"] = None,
+        datetime_format: AcceptDatetimeFormat | str = AcceptDatetimeFormat.RFC3339,
     ):
         """
         Initialize the async client.
@@ -83,6 +85,8 @@ class AsyncClient:
             verify: SSL verification (True, False, or path to CA bundle)
             cert: Client certificate path (optional)
             logger: Logger instance (optional)
+            datetime_format: Format for DateTime fields in requests and responses,
+                sent as the Accept-Datetime-Format header ("RFC3339" or "UNIX")
 
         Raises:
             ValueError: If no valid configuration is provided
@@ -131,6 +135,7 @@ class AsyncClient:
         self._environment = final_config.environment
         self.timeout = timeout
         self.max_retries = max_retries
+        self._datetime_format = AcceptDatetimeFormat(datetime_format).value
 
         # Setup HTTP client
         if transport:
@@ -246,6 +251,7 @@ class AsyncClient:
 
         # Add standard headers (never log the token!)
         headers["Authorization"] = f"Bearer {self._token}"
+        headers["Accept-Datetime-Format"] = self._datetime_format
 
         # Convert Decimals to strings in JSON data
         if json_data:
@@ -301,7 +307,10 @@ class AsyncClient:
                 return response
 
             except httpx.TimeoutException:
-                if attempt < max_tries - 1:
+                # A timed-out write may still have reached the server, so only
+                # safe (idempotent) requests are retried — same policy as HTTP
+                # status retries. Retrying a timed-out order POST could double-submit.
+                if allow_retry and attempt < max_tries - 1:
                     delay = backoff_with_jitter(attempt)
                     self._log(
                         "warning",
@@ -349,7 +358,10 @@ class AsyncClient:
             path: Stream endpoint path
             params: Query parameters
             timeout: Request timeout
-            stall_timeout: Maximum time without data before raising StreamStall
+            stall_timeout: Maximum time without data before raising StreamStall.
+                The stall timer is evaluated when keep-alive (blank) lines
+                arrive; a connection that hangs mid-read without delivering
+                anything is bounded by the HTTP read timeout instead.
 
         Yields:
             Raw lines from the stream
@@ -361,6 +373,7 @@ class AsyncClient:
             "Authorization": f"Bearer {self._token}",
             "Accept": "application/json",
             "Accept-Encoding": "gzip",
+            "Accept-Datetime-Format": self._datetime_format,
         }
         stall_timer = MonotonicTimeout(stall_timeout)
 
@@ -450,11 +463,12 @@ class AsyncClient:
                     timeout=timeout,
                     stall_timeout=config.stall_timeout,
                 ):
-                    # First successful line means we're connected
+                    # The first line after a (re)connection is yielded with the
+                    # CONNECTING/RECONNECTING state so consumers can observe
+                    # recoveries; subsequent lines carry CONNECTED.
+                    yield line, current_state
                     if current_state in (StreamState.CONNECTING, StreamState.RECONNECTING):
                         current_state = StreamState.CONNECTED
-
-                    yield line, current_state
 
                 # If we get here, stream ended normally
                 current_state = StreamState.DISCONNECTED
@@ -619,8 +633,12 @@ class _SyncPricingProxy(_SyncEndpointProxy):
                     try:
                         q.put_nowait(event)
                     except queue.Full:
-                        # Backpressure: drop old events or wait briefly
-                        await asyncio.sleep(0.001)
+                        # Backpressure: drop the oldest queued event so the
+                        # freshest data keeps flowing to a slow consumer.
+                        with contextlib.suppress(queue.Empty):
+                            q.get_nowait()
+                        with contextlib.suppress(queue.Full):
+                            q.put_nowait(event)
             except Exception as e:
                 q.put(e)  # Pass exceptions to consumer
             finally:

@@ -104,8 +104,10 @@ class ConfigValidator:
         if not account_id:
             return False
 
-        # OANDA account IDs follow format: XXX-XXX-XXXXXXX-XXX
-        pattern = r"^\d{3}-\d{3}-\d{7}-\d{3}$"
+        # OANDA account IDs follow the shape site-division-user-account; the
+        # user segment varies in length (6-9 digits observed on live accounts),
+        # so only the shape is enforced.
+        pattern = r"^\d{3}-\d{3}-\d+-\d{3}$"
         return re.match(pattern, account_id) is not None
 
     @staticmethod

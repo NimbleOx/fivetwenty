@@ -38,7 +38,7 @@ for pair in major_pairs:
 
 Floating-point arithmetic is fundamentally unsuitable for financial calculations. The classic example `0.1 + 0.2 = 0.30000000000000004` demonstrates how binary floating-point representation introduces rounding errors that can compound across thousands of trades, leading to incorrect account balances, position sizing errors, and regulatory compliance issues.
 
-FiveTwenty enforces the use of Python's `Decimal` type for all monetary values. `Decimal` uses base-10 arithmetic with exact precision, ensuring that calculations involving money, prices, and quantities remain accurate. This is not just a best practice - it's essential for production trading systems.
+FiveTwenty enforces the use of Python's `Decimal` type for all monetary values. `Decimal` uses base-10 arithmetic with exact precision, so calculations involving money, prices, and quantities stay accurate. Production trading systems depend on this.
 
 The example below demonstrates the difference between float and Decimal arithmetic, then shows practical applications in position sizing, currency conversion, and profit/loss calculations:
 
@@ -170,7 +170,7 @@ print(
 
 ## Order Types in FiveTwenty
 
-Different trading situations require different order types. Market orders execute immediately at the current price, useful when you need to enter or exit quickly. Limit orders only execute at your specified price or better, giving you price control at the cost of execution certainty. Stop loss and take profit orders automatically close positions when price targets are reached, essential for risk management and capital preservation.
+Different trading situations require different order types. Market orders execute immediately at the current price, useful when you need to enter or exit quickly. Limit orders only execute at your specified price or better, giving you price control at the cost of execution certainty. Stop loss and take profit orders automatically close positions when price targets are reached, which is how you cap losses and lock in gains.
 
 FiveTwenty provides strongly-typed request models for each order type. These Pydantic models ensure you provide all required fields, validate your parameters, and serialize correctly for the OANDA API. The example below demonstrates how to construct different order types and understand their trade-offs:
 
@@ -346,6 +346,6 @@ Ready to start trading? Continue to [Market Data & Analysis](market-data.md) to 
 
 ## Related Resources
 
-- [SDK Architecture](../../guides/understanding/sdk-architecture.md) - Deep dive into FiveTwenty design
+- [SDK Architecture](../../guides/understanding/sdk-architecture.md) - How FiveTwenty is designed
 - [API Reference](../../api-reference/index.md) - Complete model documentation
 - [Configuration Guide](../../guides/understanding/configuration.md) - Environment setup patterns

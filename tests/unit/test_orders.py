@@ -6,7 +6,39 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from fivetwenty.endpoints.orders import OrderEndpoints
-from fivetwenty.models import ClientExtensions, LimitOrderRequest, MarketIfTouchedOrderRequest, StopOrderRequest
+from fivetwenty.models import (
+    ClientExtensions,
+    FixedPriceOrder,
+    GuaranteedStopLossOrder,
+    GuaranteedStopLossOrderRejectTransaction,
+    GuaranteedStopLossOrderTransaction,
+    LimitOrder,
+    LimitOrderRejectTransaction,
+    LimitOrderRequest,
+    LimitOrderTransaction,
+    MarketIfTouchedOrder,
+    MarketIfTouchedOrderRejectTransaction,
+    MarketIfTouchedOrderRequest,
+    MarketIfTouchedOrderTransaction,
+    MarketOrder,
+    MarketOrderRejectTransaction,
+    MarketOrderTransaction,
+    OrderCancelTransaction,
+    OrderFillTransaction,
+    StopLossOrder,
+    StopLossOrderRejectTransaction,
+    StopLossOrderTransaction,
+    StopOrder,
+    StopOrderRejectTransaction,
+    StopOrderRequest,
+    StopOrderTransaction,
+    TakeProfitOrder,
+    TakeProfitOrderRejectTransaction,
+    TakeProfitOrderTransaction,
+    TrailingStopLossOrder,
+    TrailingStopLossOrderRejectTransaction,
+    TrailingStopLossOrderTransaction,
+)
 
 
 class TestEnhancedOrderEndpoints:
@@ -709,3 +741,214 @@ class TestOrderConvenienceMethods:
             timeout=None,
             headers={},
         )
+
+
+def _response_client(payload):
+    """Create a mock client whose _request returns the given JSON payload."""
+    client = MagicMock()
+    mock_response = MagicMock()
+    mock_response.json.return_value = payload
+    client._request = AsyncMock(return_value=mock_response)
+    return client
+
+
+_BASE_ORDER = {"id": "42", "createTime": "2024-01-01T00:00:00.000000000Z", "state": "PENDING"}
+_BASE_TXN = {"id": "77", "time": "2024-01-01T00:00:00.000000000Z", "userID": 1, "accountID": "101-001-123456-001", "batchID": "77", "requestID": "77"}
+
+_ORDER_PAYLOADS = [
+    ({**_BASE_ORDER, "type": "MARKET", "instrument": "EUR_USD", "units": "1000", "timeInForce": "FOK", "positionFill": "DEFAULT"}, MarketOrder),
+    ({**_BASE_ORDER, "type": "LIMIT", "instrument": "EUR_USD", "units": "1000", "price": "1.10000", "timeInForce": "GTC"}, LimitOrder),
+    ({**_BASE_ORDER, "type": "STOP", "instrument": "EUR_USD", "units": "-500", "price": "1.09000", "timeInForce": "GTC"}, StopOrder),
+    ({**_BASE_ORDER, "type": "MARKET_IF_TOUCHED", "instrument": "GBP_USD", "units": "750", "price": "1.24000", "timeInForce": "GTC"}, MarketIfTouchedOrder),
+    ({**_BASE_ORDER, "type": "TAKE_PROFIT", "tradeID": "10", "price": "1.12000", "timeInForce": "GTC"}, TakeProfitOrder),
+    ({**_BASE_ORDER, "type": "STOP_LOSS", "tradeID": "10", "price": "1.08000", "timeInForce": "GTC"}, StopLossOrder),
+    ({**_BASE_ORDER, "type": "GUARANTEED_STOP_LOSS", "tradeID": "10", "price": "1.07000", "timeInForce": "GTC"}, GuaranteedStopLossOrder),
+    ({**_BASE_ORDER, "type": "TRAILING_STOP_LOSS", "tradeID": "10", "distance": "0.00100", "timeInForce": "GTC"}, TrailingStopLossOrder),
+    ({**_BASE_ORDER, "type": "FIXED_PRICE", "instrument": "EUR_USD", "units": "1000", "price": "1.10000", "tradeState": "OPEN"}, FixedPriceOrder),
+]
+
+_ORDER_TXN_PAYLOADS = [
+    ({**_BASE_TXN, "type": "MARKET_ORDER", "instrument": "EUR_USD", "units": "1000", "timeInForce": "FOK", "positionFill": "DEFAULT"}, MarketOrderTransaction),
+    ({**_BASE_TXN, "type": "LIMIT_ORDER", "instrument": "EUR_USD", "units": "1000", "price": "1.10000"}, LimitOrderTransaction),
+    ({**_BASE_TXN, "type": "STOP_ORDER", "instrument": "EUR_USD", "units": "-500", "price": "1.09000"}, StopOrderTransaction),
+    ({**_BASE_TXN, "type": "MARKET_IF_TOUCHED_ORDER", "instrument": "GBP_USD", "units": "750", "price": "1.24000"}, MarketIfTouchedOrderTransaction),
+    ({**_BASE_TXN, "type": "TAKE_PROFIT_ORDER", "tradeID": "10", "price": "1.12000"}, TakeProfitOrderTransaction),
+    ({**_BASE_TXN, "type": "STOP_LOSS_ORDER", "tradeID": "10", "price": "1.08000"}, StopLossOrderTransaction),
+    ({**_BASE_TXN, "type": "GUARANTEED_STOP_LOSS_ORDER", "tradeID": "10", "price": "1.07000", "guaranteedExecutionPremium": "0.50"}, GuaranteedStopLossOrderTransaction),
+    ({**_BASE_TXN, "type": "TRAILING_STOP_LOSS_ORDER", "tradeID": "10", "distance": "0.00100"}, TrailingStopLossOrderTransaction),
+]
+
+_ORDER_REJECT_TXN_PAYLOADS = [
+    ({**_BASE_TXN, "type": "MARKET_ORDER_REJECT", "instrument": "EUR_USD", "units": "1000", "rejectReason": "INSUFFICIENT_MARGIN"}, MarketOrderRejectTransaction),
+    ({**_BASE_TXN, "type": "LIMIT_ORDER_REJECT", "instrument": "EUR_USD", "units": "1000", "price": "1.10000", "rejectReason": "INSUFFICIENT_MARGIN"}, LimitOrderRejectTransaction),
+    ({**_BASE_TXN, "type": "STOP_ORDER_REJECT", "instrument": "EUR_USD", "units": "-500", "price": "1.09000", "rejectReason": "INSUFFICIENT_MARGIN"}, StopOrderRejectTransaction),
+    ({**_BASE_TXN, "type": "MARKET_IF_TOUCHED_ORDER_REJECT", "instrument": "GBP_USD", "units": "750", "price": "1.24000", "rejectReason": "INSUFFICIENT_MARGIN"}, MarketIfTouchedOrderRejectTransaction),
+    ({**_BASE_TXN, "type": "TAKE_PROFIT_ORDER_REJECT", "tradeID": "10", "price": "1.12000", "rejectReason": "TRADE_DOESNT_EXIST"}, TakeProfitOrderRejectTransaction),
+    ({**_BASE_TXN, "type": "STOP_LOSS_ORDER_REJECT", "tradeID": "10", "price": "1.08000", "rejectReason": "TRADE_DOESNT_EXIST"}, StopLossOrderRejectTransaction),
+    ({**_BASE_TXN, "type": "GUARANTEED_STOP_LOSS_ORDER_REJECT", "tradeID": "10", "price": "1.07000", "rejectReason": "TRADE_DOESNT_EXIST"}, GuaranteedStopLossOrderRejectTransaction),
+    ({**_BASE_TXN, "type": "TRAILING_STOP_LOSS_ORDER_REJECT", "tradeID": "10", "distance": "0.00100", "rejectReason": "TRADE_DOESNT_EXIST"}, TrailingStopLossOrderRejectTransaction),
+]
+
+
+class TestOrderParsers:
+    """Test the private discriminator-based parsers."""
+
+    @pytest.fixture
+    def orders(self):
+        """Create OrderEndpoints with an inert client (parsers are pure)."""
+        return OrderEndpoints(MagicMock())
+
+    @pytest.mark.parametrize(("payload", "expected_cls"), _ORDER_PAYLOADS, ids=[p[0]["type"] for p in _ORDER_PAYLOADS])
+    def test_parse_order_types(self, orders, payload, expected_cls):
+        """Test that _parse_order dispatches to the correct Order model."""
+        result = orders._parse_order(payload)
+        assert isinstance(result, expected_cls)
+        assert result.id == "42"
+
+    def test_parse_order_unknown_type_raises(self, orders):
+        """Test that an unknown order type raises ValueError."""
+        with pytest.raises(ValueError, match="Unknown order type: MYSTERY"):
+            orders._parse_order({**_BASE_ORDER, "type": "MYSTERY"})
+
+    def test_parse_order_missing_type_raises(self, orders):
+        """Test that a payload without a type discriminator raises ValueError."""
+        with pytest.raises(ValueError, match="Unknown order type: None"):
+            orders._parse_order(dict(_BASE_ORDER))
+
+    @pytest.mark.parametrize(("payload", "expected_cls"), _ORDER_TXN_PAYLOADS, ids=[p[0]["type"] for p in _ORDER_TXN_PAYLOADS])
+    def test_parse_order_transaction_types(self, orders, payload, expected_cls):
+        """Test that _parse_order_transaction dispatches to the correct model."""
+        result = orders._parse_order_transaction(payload)
+        assert isinstance(result, expected_cls)
+        assert result.id == "77"
+
+    def test_parse_order_transaction_unknown_type_raises(self, orders):
+        """Test that an unknown transaction type raises ValueError."""
+        with pytest.raises(ValueError, match="Unknown order transaction type: ORDER_FILL"):
+            orders._parse_order_transaction({**_BASE_TXN, "type": "ORDER_FILL"})
+
+    @pytest.mark.parametrize(("payload", "expected_cls"), _ORDER_REJECT_TXN_PAYLOADS, ids=[p[0]["type"] for p in _ORDER_REJECT_TXN_PAYLOADS])
+    def test_parse_order_reject_transaction_types(self, orders, payload, expected_cls):
+        """Test that _parse_order_reject_transaction dispatches to the correct model."""
+        result = orders._parse_order_reject_transaction(payload)
+        assert isinstance(result, expected_cls)
+        assert result.reject_reason is not None
+
+    def test_parse_order_reject_transaction_unknown_type_raises(self, orders):
+        """Test that an unknown reject transaction type raises ValueError."""
+        with pytest.raises(ValueError, match="Unknown order reject transaction type: LIMIT_ORDER"):
+            orders._parse_order_reject_transaction({**_BASE_TXN, "type": "LIMIT_ORDER"})
+
+
+class TestOrderResponseBranches:
+    """Test optional response-transaction parsing branches."""
+
+    @pytest.mark.asyncio
+    async def test_post_order_parses_cancel_and_reissue_transactions(self):
+        """Test post_order handling of cancel, reissue, and reissue-reject payloads."""
+        payload = {
+            "orderCreateTransaction": _ORDER_TXN_PAYLOADS[1][0],  # LIMIT_ORDER
+            "orderCancelTransaction": {**_BASE_TXN, "type": "ORDER_CANCEL", "orderID": "42", "reason": "CLIENT_REQUEST"},
+            "orderReissueTransaction": _ORDER_TXN_PAYLOADS[0][0],  # MARKET_ORDER
+            "orderReissueRejectTransaction": _ORDER_REJECT_TXN_PAYLOADS[0][0],  # MARKET_ORDER_REJECT
+            "lastTransactionID": "80",
+        }
+        client = _response_client(payload)
+        orders = OrderEndpoints(client)
+
+        # Pass a raw dict to exercise the dict passthrough branch
+        result = await orders.post_order("101-001-123456-001", {"type": "LIMIT", "instrument": "EUR_USD", "units": "1000", "price": "1.10000"})
+
+        client._request.assert_called_once_with(
+            "POST",
+            "/accounts/101-001-123456-001/orders",
+            json_data={"order": {"type": "LIMIT", "instrument": "EUR_USD", "units": "1000", "price": "1.10000"}},
+            timeout=None,
+            headers={},
+        )
+        assert isinstance(result["orderCreateTransaction"], LimitOrderTransaction)
+        assert isinstance(result["orderCancelTransaction"], OrderCancelTransaction)
+        assert isinstance(result["orderReissueTransaction"], MarketOrderTransaction)
+        assert isinstance(result["orderReissueRejectTransaction"], MarketOrderRejectTransaction)
+        assert "relatedTransactionIDs" not in result
+        assert result["lastTransactionID"] == "80"
+
+    @pytest.mark.asyncio
+    async def test_put_order_parses_fill_reissue_and_replacing_cancel(self):
+        """Test put_order handling of fill, reissue, reject, and replacing-cancel payloads."""
+        fill_txn = {**_BASE_TXN, "type": "ORDER_FILL", "orderID": "42", "instrument": "EUR_USD", "units": "1000", "price": "1.10000"}
+        payload = {
+            "orderFillTransaction": fill_txn,
+            "orderReissueTransaction": _ORDER_TXN_PAYLOADS[2][0],  # STOP_ORDER
+            "orderReissueRejectTransaction": _ORDER_REJECT_TXN_PAYLOADS[1][0],  # LIMIT_ORDER_REJECT
+            "replacingOrderCancelTransaction": {**_BASE_TXN, "type": "ORDER_CANCEL", "orderID": "42", "reason": "CLIENT_REQUEST_REPLACED"},
+            "relatedTransactionIDs": ["77", "78"],
+            "lastTransactionID": "78",
+        }
+        client = _response_client(payload)
+        orders = OrderEndpoints(client)
+
+        result = await orders.put_order("101-001-123456-001", "42", {"type": "LIMIT", "instrument": "EUR_USD", "units": "1000", "price": "1.11000"})
+
+        assert isinstance(result["orderFillTransaction"], OrderFillTransaction)
+        assert isinstance(result["orderReissueTransaction"], StopOrderTransaction)
+        assert isinstance(result["orderReissueRejectTransaction"], LimitOrderRejectTransaction)
+        assert isinstance(result["replacingOrderCancelTransaction"], OrderCancelTransaction)
+        assert result["relatedTransactionIDs"] == ["77", "78"]
+        assert "orderCreateTransaction" not in result
+
+    @pytest.mark.asyncio
+    async def test_cancel_order_minimal_response(self):
+        """Test cancel_order when the response has only lastTransactionID."""
+        client = _response_client({"lastTransactionID": "90"})
+        orders = OrderEndpoints(client)
+
+        result = await orders.cancel_order("101-001-123456-001", "42")
+
+        assert result["lastTransactionID"] == "90"
+        assert "orderCancelTransaction" not in result
+        assert "relatedTransactionIDs" not in result
+
+    @pytest.mark.asyncio
+    async def test_put_order_client_extensions_minimal_response(self):
+        """Test put_order_client_extensions when the response has only lastTransactionID."""
+        client = _response_client({"lastTransactionID": "91"})
+        orders = OrderEndpoints(client)
+
+        result = await orders.put_order_client_extensions("101-001-123456-001", "42", client_extensions=ClientExtensions(id="x"))
+
+        assert result["lastTransactionID"] == "91"
+        assert "orderClientExtensionsModifyTransaction" not in result
+
+    @pytest.mark.asyncio
+    async def test_get_orders_with_ids_filter(self):
+        """Test get_orders joins explicit order IDs into the ids param."""
+        client = _response_client({"orders": [], "lastTransactionID": "92"})
+        orders = OrderEndpoints(client)
+
+        result = await orders.get_orders("101-001-123456-001", ids=["12345", "12346"])
+
+        client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/orders", params={"state": "PENDING", "count": 50, "ids": "12345,12346"})
+        assert result == []
+
+    @pytest.mark.asyncio
+    async def test_post_order_minimal_response(self):
+        """Test post_order when the response has only lastTransactionID."""
+        client = _response_client({"lastTransactionID": "93"})
+        orders = OrderEndpoints(client)
+
+        result = await orders.post_order("101-001-123456-001", {"type": "MARKET", "instrument": "EUR_USD", "units": "1"})
+
+        assert result["lastTransactionID"] == "93"
+        assert "orderCreateTransaction" not in result
+
+    @pytest.mark.asyncio
+    async def test_put_order_minimal_response(self):
+        """Test put_order when the response has only lastTransactionID."""
+        client = _response_client({"lastTransactionID": "94"})
+        orders = OrderEndpoints(client)
+
+        result = await orders.put_order("101-001-123456-001", "42", {"type": "MARKET", "instrument": "EUR_USD", "units": "1"})
+
+        assert result["lastTransactionID"] == "94"
+        assert "relatedTransactionIDs" not in result

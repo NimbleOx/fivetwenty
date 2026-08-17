@@ -13,7 +13,7 @@ from ..models import (
     CloseTransaction,
     CreateTransaction,
     DailyFinancingTransaction,
-    DelayedTradeCloseTransaction,
+    DelayedTradeClosureTransaction,
     DividendAdjustmentTransaction,
     FixedPriceOrderTransaction,
     GuaranteedStopLossOrderRejectTransaction,
@@ -29,6 +29,7 @@ from ..models import (
     MarketOrderTransaction,
     OrderCancelRejectTransaction,
     OrderCancelTransaction,
+    OrderClientExtensionsModifyRejectTransaction,
     OrderClientExtensionsModifyTransaction,
     OrderFillTransaction,
     ReopenTransaction,
@@ -39,6 +40,7 @@ from ..models import (
     StopOrderTransaction,
     TakeProfitOrderRejectTransaction,
     TakeProfitOrderTransaction,
+    TradeClientExtensionsModifyRejectTransaction,
     TradeClientExtensionsModifyTransaction,
     TrailingStopLossOrderRejectTransaction,
     TrailingStopLossOrderTransaction,
@@ -84,7 +86,9 @@ TransactionUnion = (
     | MarketIfTouchedOrderRejectTransaction
     | OrderCancelRejectTransaction
     | OrderClientExtensionsModifyTransaction
+    | OrderClientExtensionsModifyRejectTransaction
     | TradeClientExtensionsModifyTransaction
+    | TradeClientExtensionsModifyRejectTransaction
     | MarginCallEnterTransaction
     | MarginCallExitTransaction
     | DailyFinancingTransaction
@@ -96,12 +100,56 @@ TransactionUnion = (
     | TransferFundsRejectTransaction
     | MarginCallExtendTransaction
     | FixedPriceOrderTransaction
-    | DelayedTradeCloseTransaction
+    | DelayedTradeClosureTransaction
 )
 
 
 def _format_transaction_filters(transaction_type: builtins.list[TransactionFilter | str]) -> str:
     return ",".join(item.value if isinstance(item, TransactionFilter) else item for item in transaction_type)
+
+
+# Maps every OANDA transaction type discriminator to its model. Must stay
+# exhaustive over the official TransactionType set — verified by unit test.
+_TRANSACTION_TYPE_MAP: dict[str, type[TransactionUnion]] = {
+    "CREATE": CreateTransaction,
+    "CLOSE": CloseTransaction,
+    "REOPEN": ReopenTransaction,
+    "CLIENT_CONFIGURE": ClientConfigureTransaction,
+    "CLIENT_CONFIGURE_REJECT": ClientConfigureRejectTransaction,
+    "TRANSFER_FUNDS": TransferFundsTransaction,
+    "TRANSFER_FUNDS_REJECT": TransferFundsRejectTransaction,
+    "MARKET_ORDER": MarketOrderTransaction,
+    "MARKET_ORDER_REJECT": MarketOrderRejectTransaction,
+    "FIXED_PRICE_ORDER": FixedPriceOrderTransaction,
+    "LIMIT_ORDER": LimitOrderTransaction,
+    "LIMIT_ORDER_REJECT": LimitOrderRejectTransaction,
+    "STOP_ORDER": StopOrderTransaction,
+    "STOP_ORDER_REJECT": StopOrderRejectTransaction,
+    "MARKET_IF_TOUCHED_ORDER": MarketIfTouchedOrderTransaction,
+    "MARKET_IF_TOUCHED_ORDER_REJECT": MarketIfTouchedOrderRejectTransaction,
+    "TAKE_PROFIT_ORDER": TakeProfitOrderTransaction,
+    "TAKE_PROFIT_ORDER_REJECT": TakeProfitOrderRejectTransaction,
+    "STOP_LOSS_ORDER": StopLossOrderTransaction,
+    "STOP_LOSS_ORDER_REJECT": StopLossOrderRejectTransaction,
+    "GUARANTEED_STOP_LOSS_ORDER": GuaranteedStopLossOrderTransaction,
+    "GUARANTEED_STOP_LOSS_ORDER_REJECT": GuaranteedStopLossOrderRejectTransaction,
+    "TRAILING_STOP_LOSS_ORDER": TrailingStopLossOrderTransaction,
+    "TRAILING_STOP_LOSS_ORDER_REJECT": TrailingStopLossOrderRejectTransaction,
+    "ORDER_FILL": OrderFillTransaction,
+    "ORDER_CANCEL": OrderCancelTransaction,
+    "ORDER_CANCEL_REJECT": OrderCancelRejectTransaction,
+    "ORDER_CLIENT_EXTENSIONS_MODIFY": OrderClientExtensionsModifyTransaction,
+    "ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT": OrderClientExtensionsModifyRejectTransaction,
+    "TRADE_CLIENT_EXTENSIONS_MODIFY": TradeClientExtensionsModifyTransaction,
+    "TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT": TradeClientExtensionsModifyRejectTransaction,
+    "MARGIN_CALL_ENTER": MarginCallEnterTransaction,
+    "MARGIN_CALL_EXTEND": MarginCallExtendTransaction,
+    "MARGIN_CALL_EXIT": MarginCallExitTransaction,
+    "DELAYED_TRADE_CLOSURE": DelayedTradeClosureTransaction,
+    "DAILY_FINANCING": DailyFinancingTransaction,
+    "DIVIDEND_ADJUSTMENT": DividendAdjustmentTransaction,
+    "RESET_RESETTABLE_PL": ResetResettablePLTransaction,
+}
 
 
 class TransactionsResponse(TypedDict, total=False):
@@ -392,11 +440,16 @@ class TransactionEndpoints:
         Get the most recent transactions for an account.
 
         This is a convenience method for getting recent transaction history
-        without specifying time ranges or transaction IDs.
+        without specifying time ranges or transaction IDs. It resolves the
+        account's last transaction ID and fetches the trailing ID range, since
+        the transactions list endpoint itself returns page URLs rather than
+        transaction data.
 
         Args:
             account_id: Account identifier
-            count: Number of recent transactions to retrieve (max 500)
+            count: Number of most recent transaction IDs to cover (1-500).
+                When transaction_type is set, fewer than count transactions
+                may be returned: the filter applies within the ID range.
             transaction_type: Filter by transaction types
 
         Returns:
@@ -404,34 +457,31 @@ class TransactionEndpoints:
 
         Raises:
             FiveTwentyError: On API errors
-            ValueError: If count exceeds limits
+            ValueError: If count is outside 1-500
         """
-        if count > 500:
-            raise ValueError("Count cannot exceed 500")
-
-        params: dict[str, str] = {"count": str(count)}
-
-        if transaction_type:
-            params["type"] = _format_transaction_filters(transaction_type)
+        if not 1 <= count <= 500:
+            raise ValueError("Count must be between 1 and 500")
 
         response = await self._client._request(
             "GET",
             f"/accounts/{account_id}/transactions",
-            params=params,
+            params={"pageSize": "1"},
+        )
+        last_id = int(response.json()["lastTransactionID"])
+        if last_id < 1:
+            return cast(
+                "TransactionsRangeResponse",
+                ApiResponse({"transactions": [], "lastTransactionID": str(last_id)}),
+            )
+
+        return await self.get_transactions_range(
+            account_id,
+            str(max(1, last_id - count + 1)),
+            str(last_id),
+            transaction_type=transaction_type,
         )
 
-        data = response.json()
-        return cast(
-            "TransactionsRangeResponse",
-            ApiResponse(
-                {
-                    "transactions": [self._parse_transaction(t) for t in data.get("transactions", [])],
-                    "lastTransactionID": data["lastTransactionID"],
-                }
-            ),
-        )
-
-    def _parse_transaction(self, transaction_data: dict[str, Any]) -> TransactionUnion:  # noqa: PLR0911
+    def _parse_transaction(self, transaction_data: dict[str, Any]) -> TransactionUnion:
         """
         Parse transaction data into the appropriate Transaction model based on type discriminator.
 
@@ -445,78 +495,7 @@ class TransactionEndpoints:
             ValueError: If transaction type is unknown
         """
         transaction_type = transaction_data.get("type")
-
-        if transaction_type == "ORDER_FILL":
-            return OrderFillTransaction.model_validate(transaction_data)
-        if transaction_type == "ORDER_CANCEL":
-            return OrderCancelTransaction.model_validate(transaction_data)
-        if transaction_type == "MARKET_ORDER":
-            return MarketOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "CREATE":
-            return CreateTransaction.model_validate(transaction_data)
-        if transaction_type == "CLIENT_CONFIGURE":
-            return ClientConfigureTransaction.model_validate(transaction_data)
-        if transaction_type == "CLIENT_CONFIGURE_REJECT":
-            return ClientConfigureRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "LIMIT_ORDER":
-            return LimitOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "LIMIT_ORDER_REJECT":
-            return LimitOrderRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "MARKET_ORDER_REJECT":
-            return MarketOrderRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "STOP_ORDER":
-            return StopOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "STOP_ORDER_REJECT":
-            return StopOrderRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "TAKE_PROFIT_ORDER":
-            return TakeProfitOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "TAKE_PROFIT_ORDER_REJECT":
-            return TakeProfitOrderRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "STOP_LOSS_ORDER":
-            return StopLossOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "STOP_LOSS_ORDER_REJECT":
-            return StopLossOrderRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "TRAILING_STOP_LOSS_ORDER":
-            return TrailingStopLossOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "TRAILING_STOP_LOSS_ORDER_REJECT":
-            return TrailingStopLossOrderRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "GUARANTEED_STOP_LOSS_ORDER":
-            return GuaranteedStopLossOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "GUARANTEED_STOP_LOSS_ORDER_REJECT":
-            return GuaranteedStopLossOrderRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "MARKET_IF_TOUCHED_ORDER":
-            return MarketIfTouchedOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "MARKET_IF_TOUCHED_ORDER_REJECT":
-            return MarketIfTouchedOrderRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "ORDER_CANCEL_REJECT":
-            return OrderCancelRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "ORDER_CLIENT_EXTENSIONS_MODIFY":
-            return OrderClientExtensionsModifyTransaction.model_validate(transaction_data)
-        if transaction_type == "TRADE_CLIENT_EXTENSIONS_MODIFY":
-            return TradeClientExtensionsModifyTransaction.model_validate(transaction_data)
-        if transaction_type == "MARGIN_CALL_ENTER":
-            return MarginCallEnterTransaction.model_validate(transaction_data)
-        if transaction_type == "MARGIN_CALL_EXIT":
-            return MarginCallExitTransaction.model_validate(transaction_data)
-        if transaction_type == "DAILY_FINANCING":
-            return DailyFinancingTransaction.model_validate(transaction_data)
-        if transaction_type == "DIVIDEND_ADJUSTMENT":
-            return DividendAdjustmentTransaction.model_validate(transaction_data)
-        if transaction_type == "RESET_RESETTABLE_PL":
-            return ResetResettablePLTransaction.model_validate(transaction_data)
-        if transaction_type == "CLOSE":
-            return CloseTransaction.model_validate(transaction_data)
-        if transaction_type == "REOPEN":
-            return ReopenTransaction.model_validate(transaction_data)
-        if transaction_type == "TRANSFER_FUNDS":
-            return TransferFundsTransaction.model_validate(transaction_data)
-        if transaction_type == "TRANSFER_FUNDS_REJECT":
-            return TransferFundsRejectTransaction.model_validate(transaction_data)
-        if transaction_type == "MARGIN_CALL_EXTEND":
-            return MarginCallExtendTransaction.model_validate(transaction_data)
-        if transaction_type == "FIXED_PRICE_ORDER":
-            return FixedPriceOrderTransaction.model_validate(transaction_data)
-        if transaction_type == "DELAYED_TRADE_CLOSURE":
-            return DelayedTradeCloseTransaction.model_validate(transaction_data)
-
-        raise ValueError(f"Unknown transaction type: {transaction_type}")
+        model = _TRANSACTION_TYPE_MAP.get(transaction_type or "")
+        if model is None:
+            raise ValueError(f"Unknown transaction type: {transaction_type}")
+        return model.model_validate(transaction_data)

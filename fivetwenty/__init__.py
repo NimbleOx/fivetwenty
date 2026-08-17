@@ -41,13 +41,15 @@ Usage:
         accounts = client.accounts.get_accounts()
 """
 
-try:
-    from importlib.metadata import version
+from importlib.metadata import PackageNotFoundError as _PackageNotFoundError
+from importlib.metadata import version
 
+try:
     __version__ = version("fivetwenty")
-except ImportError:
-    # Fallback for development installs
-    __version__ = "0.3.0"
+except _PackageNotFoundError:
+    # Package metadata unavailable (e.g. running from a source checkout
+    # without an install); there is no meaningful version to report.
+    __version__ = "0.0.0.dev0"
 
 from ._internal.environment import Environment
 from .client import AsyncClient, Client

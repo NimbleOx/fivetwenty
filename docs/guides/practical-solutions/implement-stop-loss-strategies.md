@@ -1068,4 +1068,4 @@ async def emergency_stop_all_positions(account_id: str, reason: str = "Emergency
 # results = await emergency_stop_all_positions("101-001-1234567-001", "Market crash detected")
 ```
 
-**Task Complete**: Stop-loss strategies implementation guide provides comprehensive risk management tools for all trading scenarios with FiveTwenty.
+**Task Complete**: You can now place fixed, percentage-based, and dynamic stop losses, monitor them, and run emergency close procedures.

@@ -7,11 +7,12 @@ information, account summaries, account change tracking, and streaming updates.
 
 from __future__ import annotations
 
-# Forward references for type checking
+# Runtime imports (not TYPE_CHECKING): pydantic resolves these annotations when
+# building the models, so moving them into a type-checking block makes every
+# model in this module fail to instantiate.
+from datetime import datetime  # noqa: TC003
+from decimal import Decimal  # noqa: TC003
 from typing import TYPE_CHECKING
-
-if TYPE_CHECKING:
-    from datetime import datetime
 
 from pydantic import Field
 
@@ -37,8 +38,6 @@ from .orders import (
 )
 
 if TYPE_CHECKING:
-    from decimal import Decimal
-
     from .positions import CalculatedPositionState, Position
     from .trades import CalculatedTradeState, TradeSummary
     from .transactions import Transaction

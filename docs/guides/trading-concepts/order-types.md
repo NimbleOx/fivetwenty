@@ -4,7 +4,7 @@ Complete reference for OANDA order types available through the FiveTwenty SDK.
 
 ## OANDA Order Types
 
-OANDA supports four primary order types, each designed for specific trading scenarios:
+OANDA supports four primary order types:
 
 ### Market Orders
 
@@ -472,9 +472,9 @@ async def place_mit_order() -> Any:
 
 ## Order Parameters
 
-### Essential Parameters
+### Required parameters
 
-All orders require these fundamental parameters:
+All orders need these parameters:
 
 <!-- fragment: Demo order parameters with comprehensive configuration options -->
 ```python
@@ -640,7 +640,7 @@ async def order_with_time_controls() -> Any:
 Orders progress through predictable states:
 
 1. **PENDING** - Waiting for trigger conditions
-2. **FILLED** - Successfully executed
+2. **FILLED** - Executed
 3. **CANCELLED** - Manually cancelled or expired
 4. **REJECTED** - Failed validation or execution
 
@@ -1321,7 +1321,7 @@ async def calculate_position_size(risk_amount: Decimal, stop_distance: Decimal, 
 
 ## Next Steps
 
-Now that you understand the fundamental order types, you're ready to explore:
+The advanced-order tutorials build on these types:
 
 - **[Stop Orders & Market-If-Touched](../../tutorials/advanced-orders/stop-orders-mit.md)** - Breakout and mean reversion strategies
 - **[Dynamic Order Management](../../tutorials/advanced-orders/dynamic-management.md)** - Trailing stops and adaptive sizing
@@ -1335,5 +1335,3 @@ Now that you understand the fundamental order types, you're ready to explore:
 4. Always validate order parameters before submission
 5. Monitor order states and handle errors gracefully
 6. Select order types based on market conditions and strategy goals
-
-Understanding these fundamentals enables you to build sophisticated trading systems with proper order management and risk controls.

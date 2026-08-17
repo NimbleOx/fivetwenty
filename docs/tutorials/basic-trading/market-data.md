@@ -139,7 +139,7 @@ if __name__ == "__main__":
 
 ## Hands-on Exercise: Market Analysis Before Trading
 
-Before risking capital on any trade, professional traders perform comprehensive market analysis combining real-time pricing, historical context, and current conditions assessment. This pre-trade checklist helps you avoid entering during unfavorable conditions - like wide spreads during news events, or buying at resistance levels that historically reject price.
+Before risking capital on any trade, check current pricing, recent price history, and market conditions. This pre-trade checklist helps you avoid entering during unfavorable conditions, like wide spreads during news events or buying at resistance levels that historically reject price.
 
 This example demonstrates a complete market analysis workflow: checking current spreads to assess trading costs, analyzing recent price highs and lows to identify support and resistance zones, and determining short-term trend direction. By combining these elements into a single analysis function, you create a systematic approach to evaluating whether market conditions favor your trading strategy:
 
@@ -466,8 +466,8 @@ Success **Market Conditions**: Assessing when markets are suitable for trading
 
 Success **Price Movement Patterns**: Understanding volatility and range analysis
 
-!!! success "Complete Market Analysis Mastery Complete!"
-    Excellent! You can now analyze market conditions effectively before trading. Next, you'll place your first actual trade with proper analysis and risk management.
+!!! success "Market Analysis Complete"
+    You can now analyze market conditions before trading. Next, you'll place your first trade with proper analysis and risk management.
 
 ---
 

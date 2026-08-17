@@ -84,7 +84,7 @@ class MarketOrderTradeClose(ApiModel):
 class MarketOrderPositionCloseout(ApiModel):
     """Details for position closeout via market order."""
 
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: str
 
 
@@ -113,7 +113,7 @@ class MarketOrderRequest(ApiModel):
     """Market order request."""
 
     type: OrderType = OrderType.MARKET
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.FOK)
     price_bound: PriceValue | None = Field(alias="priceBound", default=None)
@@ -130,7 +130,7 @@ class LimitOrderRequest(ApiModel):
     """Limit order request."""
 
     type: OrderType = OrderType.LIMIT
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
@@ -149,7 +149,7 @@ class StopOrderRequest(ApiModel):
     """Stop order request."""
 
     type: OrderType = OrderType.STOP
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(alias="priceBound", default=None)
@@ -207,7 +207,7 @@ class MarketIfTouchedOrderRequest(ApiModel):
     """Market If Touched order request."""
 
     type: OrderType = OrderType.MARKET_IF_TOUCHED
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(alias="priceBound", default=None)
@@ -273,7 +273,7 @@ class FixedPriceOrder(ApiModel):
 
     # Fixed price order specific fields
     type: OrderType = Field(default=OrderType.FIXED_PRICE)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal  # Required: +ve = long, -ve = short
     price: PriceValue  # Required: exact fill price
     position_fill: OrderPositionFill = Field(default=OrderPositionFill.DEFAULT, alias="positionFill")
@@ -320,7 +320,7 @@ class MarketOrder(ApiModel):
 
     # Market order specific fields
     type: OrderType = Field(default=OrderType.MARKET, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.FOK)
     price_bound: PriceValue | None = Field(None, alias="priceBound")
@@ -361,7 +361,7 @@ class LimitOrder(ApiModel):
 
     # Limit order specific fields
     type: OrderType = Field(default=OrderType.LIMIT, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
@@ -399,7 +399,7 @@ class StopOrder(ApiModel):
 
     # Stop order specific fields
     type: OrderType = Field(default=OrderType.STOP, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(None, alias="priceBound")
@@ -438,7 +438,7 @@ class MarketIfTouchedOrder(ApiModel):
 
     # Market-if-touched order specific fields
     type: OrderType = Field(default=OrderType.MARKET_IF_TOUCHED, frozen=True)
-    instrument: InstrumentName
+    instrument: InstrumentName | str
     units: Decimal
     price: PriceValue
     price_bound: PriceValue | None = Field(None, alias="priceBound")

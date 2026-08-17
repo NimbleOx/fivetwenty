@@ -322,9 +322,9 @@ asyncio.run(main())
 
 ## get_recent_transactions
 
-Get recent transactions for account.
+Get the most recent transactions for an account. This convenience method resolves the account's last transaction ID and then fetches the trailing ID range — the transactions list endpoint itself only returns page URLs.
 
-**OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions`
+**OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions/idrange`
 
 <!-- code-block: transactions__get_recent_transactions -->
 ```python
@@ -366,7 +366,7 @@ asyncio.run(main())
 |-----------|------|----------|-------------|
 | `account_id` | AccountID | ✅ | Account identifier |
 | `*` | | | **Keyword-only parameters below** |
-| `count` | int | ➖ | Number of recent transactions (default: 50, max: 500) |
+| `count` | int | ➖ | Number of most recent transaction IDs to cover (default: 50, max: 500). With a type filter, fewer transactions may be returned |
 | `transaction_type` | list[str] \| None | ➖ | Filter by transaction types |
 
 **Returns:** `TransactionsRangeResponse` - TypedDict containing recent transactions (transactions: list[TransactionUnion], lastTransactionID: str)
@@ -380,4 +380,4 @@ asyncio.run(main())
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`)
 
-`ValueError` - If count exceeds 500
+`ValueError` - If count is outside 1-500

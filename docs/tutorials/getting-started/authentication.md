@@ -1,6 +1,6 @@
 # Authentication
 
-The FiveTwenty library provides secure, flexible authentication for OANDA's API. This guide covers obtaining API tokens and configuring authentication securely.
+This guide covers getting an OANDA API token and configuring the FiveTwenty client to use it without exposing your credentials.
 
 ## Getting Your API Token
 
@@ -21,7 +21,7 @@ To use the FiveTwenty library, you need an OANDA API access token:
 
 ## Authentication Methods
 
-The FiveTwenty library supports three secure authentication approaches:
+The FiveTwenty library accepts credentials in three ways:
 
 ### 1. Direct Parameters
 
@@ -81,7 +81,7 @@ if __name__ == "__main__":
 
 ### 2. Configuration Objects
 
-For reusable configurations and multi-account scenarios, use configuration objects. This approach is ideal when running multiple clients connected to different accounts:
+For reusable configurations and multi-account scenarios, use configuration objects. This approach works well when running multiple clients connected to different accounts:
 
 <!-- fragment: configuration with placeholder values -->
 ```python
@@ -113,7 +113,7 @@ async with AsyncClient(config=config) as client:
 
 ### 3. Environment Variables
 
-The most secure and convenient approach uses environment variables for zero-config authentication. First, set up your environment:
+The approach we recommend uses environment variables, so no credentials appear in your code at all. First, set up your environment:
 
 <!-- fragment: shell commands with placeholder tokens -->
 ```bash
@@ -124,7 +124,7 @@ export FIVETWENTY_OANDA_ENVIRONMENT="practice"
 # Configuration is loaded automatically when these are set
 ```
 
-Then create clients without explicitly passing credentials - the library automatically loads configuration from environment variables:
+Then create clients without passing credentials at all. The library loads its configuration from the environment variables:
 
 <!-- fragment: zero-config client example -->
 ```python
@@ -268,7 +268,7 @@ For production deployments, you can use AWS Secrets Manager, HashiCorp Vault, Ku
 
 ## Multiple Account Configuration
 
-FiveTwenty supports managing multiple OANDA accounts simultaneously - essential for hedging strategies, US broker compliance, or isolating different trading approaches.
+FiveTwenty can manage multiple OANDA accounts at once. The usual reasons are US broker hedging compliance and keeping separate strategies in separate accounts.
 
 !!! tip "Multi-Account Management"
     For detailed examples of multi-account setups including US broker hedging compliance, separate strategy accounts, and aggregate account monitoring, see [Account Management Tutorial](../account-management.md#multi-account-management).
@@ -359,11 +359,11 @@ except ValidationError as e:
 
 ## Testing Authentication
 
-Before deploying your application, it's important to verify that your authentication setup works correctly. You can test your configuration in two ways: validate the configuration structure without making API calls, or verify authentication by connecting to OANDA's servers.
+Before deploying your application, verify that your authentication setup works. You can test in two ways: validate the configuration structure without making API calls, or actually connect to OANDA's servers.
 
 ### Test Your Authentication Setup
 
-This example demonstrates a complete authentication test that connects to OANDA's servers and retrieves your account information. The test verifies both your API credentials and network connectivity, displaying detailed account metrics including balance, open trades, and margin usage. Use this script to confirm your authentication setup before building trading applications.
+This script does the real thing: it connects to OANDA, retrieves your account information, and prints balance, open trades, and margin usage for each account. If it runs cleanly, both your credentials and your network path to OANDA are good.
 
 <!-- fragment: authentication test example with placeholder tokens -->
 ```python
@@ -426,17 +426,17 @@ if __name__ == "__main__":
 
 ## Security Considerations
 
-Always follow these critical security guidelines:
+Three rules are worth repeating:
 
-- **Never commit tokens to version control** - Use environment variables
-- **Use separate tokens for different environments** - Practice vs live
-- **Validate configurations before deployment** - Catch issues early
+- Never commit tokens to version control; use environment variables
+- Use separate tokens for practice and live environments
+- Validate configurations before deployment to catch issues early
 
-!!! tip "Comprehensive Security Guide"
-    For complete security best practices, token rotation strategies, and production deployment patterns, see [Best Practices Guide](../../guides/understanding/best-practices.md).
+!!! tip "Security Guide"
+    For token rotation strategies and production deployment patterns, see the [Best Practices Guide](../../guides/understanding/best-practices.md).
 
 !!! info "Advanced Configuration"
-    For environment-specific settings, organizational patterns, and performance optimization, see [Configuration Guide](../../guides/understanding/configuration.md).
+    For environment-specific settings and other configuration options, see the [Configuration Guide](../../guides/understanding/configuration.md).
 
 ## Troubleshooting
 
@@ -541,12 +541,12 @@ print("   • Live tokens  Environment.LIVE")
 
 ```
 
-!!! info "Comprehensive Troubleshooting"
-    For detailed authentication troubleshooting, debugging tools, network issues, SSL problems, and complete error diagnostics, see [Connection Failure Handling Guide](../../guides/practical-solutions/handle-connection-failures.md#authentication-troubleshooting).
+!!! info "More Troubleshooting"
+    For network issues, SSL problems, and deeper authentication debugging, see the [Connection Failure Handling Guide](../../guides/practical-solutions/handle-connection-failures.md#authentication-troubleshooting).
 
 ## Summary
 
-You now have a secure, flexible authentication setup for FiveTwenty. The SDK supports multiple authentication methods from direct parameters to environment variables, with automatic secret masking and comprehensive validation. Whether you're using a single account for development or multiple accounts for complex trading strategies, the configuration system scales to meet your needs while maintaining security best practices.
+The SDK accepts credentials as direct parameters, configuration objects, or environment variables, and masks secrets in logs and reprs in every case. Environment variables are the right default; reach for `AccountConfig` once you manage more than one account.
 
 ## Next Steps
 

@@ -1,11 +1,14 @@
 """Unit tests for enhanced pricing endpoints."""
 
+import json
 from datetime import datetime, timezone
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
 from fivetwenty.endpoints.pricing import PricingEndpoints
+from fivetwenty.models import ClientPrice, PricingHeartbeat
+from fivetwenty.models.streaming import StreamingConfiguration, StreamState
 
 
 class TestEnhancedPricingEndpoints:
@@ -296,3 +299,214 @@ class TestEnhancedPricingEndpoints:
         latest_response = await pricing.get_latest_candles("101-001-123456-001", ["EUR_USD:H1:M"])
 
         assert latest_response.latest_candles[0].instrument == "EUR_USD"
+
+
+class TestPricingStreamParams:
+    """Stream request parameter contract."""
+
+    @pytest.mark.asyncio
+    async def test_snapshot_false_sent_explicitly(self):
+        """snapshot=False must be sent — omitting it would fall back to the server default (true)."""
+        captured: dict = {}
+
+        async def fake_stream(path, *, params=None, stall_timeout=30.0):
+            captured["path"] = path
+            captured["params"] = params
+            if False:  # pragma: no cover - makes this an async generator
+                yield ""
+
+        client = MagicMock()
+        client._stream = fake_stream
+        pricing = PricingEndpoints(client)
+
+        async for _ in pricing.get_pricing_stream("101-001-123456-001", ["EUR_USD"], snapshot=False):
+            pass
+
+        assert captured["params"]["snapshot"] == "false"
+        assert captured["params"]["instruments"] == "EUR_USD"
+
+    @pytest.mark.asyncio
+    async def test_unknown_instrument_in_candles_response_tolerated(self):
+        """Open InstrumentName: candle responses for instruments outside the enum must parse."""
+        mock_response = MagicMock()
+        mock_response.json.return_value = {
+            "instrument": "XPT_USD_EXOTIC",
+            "granularity": "S5",
+            "candles": [],
+        }
+        client = MagicMock()
+        client._request = AsyncMock(return_value=mock_response)
+        pricing = PricingEndpoints(client)
+
+        result = await pricing.get_account_instrument_candles("101-001-123456-001", "XPT_USD_EXOTIC")
+
+        assert result["instrument"] == "XPT_USD_EXOTIC"
+
+
+PRICE_LINE = json.dumps(
+    {
+        "type": "PRICE",
+        "instrument": "EUR_USD",
+        "time": "2024-01-15T14:30:00.000000000Z",
+        "tradeable": True,
+        "bids": [{"price": "1.10000", "liquidity": "1000000"}],
+        "asks": [{"price": "1.10002", "liquidity": "1000000"}],
+        "closeoutBid": "1.09998",
+        "closeoutAsk": "1.10004",
+    }
+)
+
+HEARTBEAT_LINE = json.dumps({"type": "HEARTBEAT", "time": "2024-01-15T14:30:05.000000000Z"})
+
+
+class TestStreamPricingWithRetries:
+    """Test suite for stream_pricing_with_retries parsing, filtering, and request contract."""
+
+    def _make_pricing(self, lines_with_states, captured=None):
+        """Build a PricingEndpoints backed by a fake _stream_with_retries generator."""
+        captured = captured if captured is not None else {}
+
+        async def fake_stream_with_retries(path, *, params=None, config=None):
+            captured["path"] = path
+            captured["params"] = params
+            captured["config"] = config
+            for item in lines_with_states:
+                yield item
+
+        client = MagicMock()
+        client._stream_with_retries = fake_stream_with_retries
+        client._log = MagicMock()
+        return PricingEndpoints(client), client, captured
+
+    @pytest.mark.asyncio
+    async def test_price_lines_parsed_to_client_price_with_state(self):
+        """PRICE lines are parsed into ClientPrice and yielded alongside the stream state."""
+        pricing, _client, _captured = self._make_pricing(
+            [
+                (PRICE_LINE, StreamState.CONNECTING),
+                (PRICE_LINE, StreamState.CONNECTED),
+            ]
+        )
+
+        results = [item async for item in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD"])]
+
+        assert len(results) == 2
+        price, state = results[0]
+        assert isinstance(price, ClientPrice)
+        assert price.instrument == "EUR_USD"
+        assert state == StreamState.CONNECTING
+        assert results[1][1] == StreamState.CONNECTED
+
+    @pytest.mark.asyncio
+    async def test_heartbeats_yielded_by_default(self):
+        """HEARTBEAT lines are yielded as PricingHeartbeat with the default configuration."""
+        pricing, _client, _captured = self._make_pricing([(HEARTBEAT_LINE, StreamState.CONNECTED)])
+
+        results = [item async for item in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD"])]
+
+        assert len(results) == 1
+        heartbeat, state = results[0]
+        assert isinstance(heartbeat, PricingHeartbeat)
+        assert heartbeat.type == "HEARTBEAT"
+        assert state == StreamState.CONNECTED
+
+    @pytest.mark.asyncio
+    async def test_heartbeats_filtered_when_disabled(self):
+        """HEARTBEAT lines are dropped when config.include_heartbeats is False; prices still flow."""
+        pricing, _client, _captured = self._make_pricing(
+            [
+                (HEARTBEAT_LINE, StreamState.CONNECTED),
+                (PRICE_LINE, StreamState.CONNECTED),
+                (HEARTBEAT_LINE, StreamState.CONNECTED),
+            ]
+        )
+        config = StreamingConfiguration(include_heartbeats=False)
+
+        results = [item async for item in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD"], config=config)]
+
+        assert len(results) == 1
+        assert isinstance(results[0][0], ClientPrice)
+
+    @pytest.mark.asyncio
+    async def test_malformed_json_lines_skipped(self):
+        """Malformed JSON is logged via client._log and iteration continues."""
+        pricing, client, _captured = self._make_pricing(
+            [
+                ("{not valid json", StreamState.CONNECTED),
+                (PRICE_LINE, StreamState.CONNECTED),
+            ]
+        )
+
+        results = [item async for item in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD"])]
+
+        assert len(results) == 1
+        assert isinstance(results[0][0], ClientPrice)
+        client._log.assert_called_once()
+        assert client._log.call_args.args[0] == "warning"
+        assert "Malformed stream data" in client._log.call_args.args[1]
+
+    @pytest.mark.asyncio
+    async def test_unknown_message_types_skipped(self):
+        """Unknown message types are logged and skipped without ending the stream."""
+        pricing, client, _captured = self._make_pricing(
+            [
+                (json.dumps({"type": "MYSTERY", "time": "2024-01-15T14:30:00.000000000Z"}), StreamState.CONNECTED),
+                (PRICE_LINE, StreamState.CONNECTED),
+            ]
+        )
+
+        results = [item async for item in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD"])]
+
+        assert len(results) == 1
+        assert isinstance(results[0][0], ClientPrice)
+        client._log.assert_called_once()
+        assert client._log.call_args.args[0] == "warning"
+        assert "Unknown pricing stream message type" in client._log.call_args.args[1]
+
+    @pytest.mark.asyncio
+    async def test_request_params_defaults(self):
+        """Instruments are comma-joined, snapshot always sent, and no includeHeartbeats param exists."""
+        pricing, _client, captured = self._make_pricing([])
+
+        async for _ in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD", "GBP_USD"]):
+            pass
+
+        assert captured["path"] == "/accounts/101-001-123456-001/pricing/stream"
+        assert captured["params"]["instruments"] == "EUR_USD,GBP_USD"
+        assert captured["params"]["snapshot"] == "true"
+        assert "includeHomeConversions" not in captured["params"]
+        assert "includeHeartbeats" not in captured["params"]
+
+    @pytest.mark.asyncio
+    async def test_request_params_snapshot_false_and_home_conversions(self):
+        """snapshot=False is sent explicitly and includeHomeConversions only appears when requested."""
+        pricing, _client, captured = self._make_pricing([])
+
+        async for _ in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD"], snapshot=False, include_home_conversions=True):
+            pass
+
+        assert captured["params"]["snapshot"] == "false"
+        assert captured["params"]["includeHomeConversions"] == "true"
+        assert "includeHeartbeats" not in captured["params"]
+
+    @pytest.mark.asyncio
+    async def test_config_forwarded_to_stream_with_retries(self):
+        """A provided StreamingConfiguration is forwarded verbatim to _stream_with_retries."""
+        pricing, _client, captured = self._make_pricing([])
+        config = StreamingConfiguration(include_heartbeats=False, stall_timeout=7.5)
+
+        async for _ in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD"], config=config):
+            pass
+
+        assert captured["config"] is config
+
+    @pytest.mark.asyncio
+    async def test_default_config_created_when_none(self):
+        """When config is None a default StreamingConfiguration is created and used."""
+        pricing, _client, captured = self._make_pricing([])
+
+        async for _ in pricing.stream_pricing_with_retries("101-001-123456-001", ["EUR_USD"]):
+            pass
+
+        assert isinstance(captured["config"], StreamingConfiguration)
+        assert captured["config"].include_heartbeats is True

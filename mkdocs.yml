@@ -1,4 +1,6 @@
 site_name: FiveTwenty Documentation
+exclude_docs: |
+  */__pycache__/*
 site_description: Comprehensive Python client for OANDA v20 REST API
 site_author: FiveTwenty Team
 site_url: https://nimbleox.github.io/fivetwenty
@@ -120,7 +122,6 @@ nav:
       - Overview: api-reference/index.md
       - Core Components:
           - Client API: api-reference/client.md
-          - Models & Data Types: api-reference/models/index.md
           - Configuration: api-reference/configuration.md
           - Error Handling: api-reference/error-handling.md
           - Exceptions: api-reference/exceptions.md
@@ -136,6 +137,7 @@ nav:
       - API Endpoints:
           - Overview: api-reference/endpoints/index.md
           - Accounts: api-reference/endpoints/accounts.md
+          - Instruments: api-reference/endpoints/instruments.md
           - Orders: api-reference/endpoints/orders.md
           - Trades: api-reference/endpoints/trades.md
           - Positions: api-reference/endpoints/positions.md
@@ -145,7 +147,15 @@ nav:
           - OpenAPI Spec: api-reference/oanda-openapi-spec.md
 
   # EXAMPLES - Practical demonstrations
-  - Examples: examples.md
+  - Examples:
+      - Overview: examples.md
+      - Notebooks:
+          - Quick Start: examples/notebooks/quick-start.ipynb
+          - Data Analysis: examples/notebooks/data-analysis.ipynb
+          - Streaming Data: examples/notebooks/streaming-data.ipynb
+          - Risk Management: examples/notebooks/risk-management.ipynb
+          - Trading Strategies: examples/notebooks/trading-strategies.ipynb
+          - Backtesting: examples/notebooks/backtesting.ipynb
 
   # CONTRIBUTING - Contributor guidance
   - Contributing:
@@ -200,6 +210,9 @@ markdown_extensions:
 plugins:
   - search:
       separator: '[\s\-,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+  - mkdocs-jupyter:
+      include: ["*.ipynb"]
+      execute: false
   - mkdocstrings:
       handlers:
         python:

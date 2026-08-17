@@ -5,13 +5,13 @@
 - Python 3.10 or higher
 - An OANDA account (practice or live)
 - API access token from OANDA
-- **uv** - Modern Python package manager ([installation guide](https://docs.astral.sh/uv/getting-started/installation/))
+- **uv** - Python package manager ([installation guide](https://docs.astral.sh/uv/getting-started/installation/))
 
 ## Environment Setup
 
 ### Using uv (Recommended)
 
-For optimal package management with automatic virtual environment handling:
+uv creates and manages the virtual environment for you:
 
 ```bash
 # Create project with virtual environment
@@ -72,9 +72,9 @@ Expected output:
 
 ## Dependencies
 
-The SDK automatically installs these minimal core dependencies:
+Installing the SDK pulls in just two runtime dependencies:
 
-- **httpx** - Modern async HTTP client with connection pooling
+- **httpx** - Async HTTP client with connection pooling
 - **pydantic** - Data validation and serialization (v2+)
 
 ## Next Steps

@@ -1,7 +1,7 @@
 # Position Management
 
 !!! tip "Target Learning Goal"
-    Master advanced position management techniques including stop losses, take profits, and risk-to-reward optimization.
+    Manage open positions with stop losses, take profits, and risk-to-reward ratios.
 
 ---
 
@@ -9,7 +9,7 @@
 
 Position management is the art of maximizing profits while controlling risk after entering a trade. Once you've entered a position, your success depends on how well you manage it through to exit - setting protective stop losses to limit downside risk, placing take profit targets to lock in gains, and monitoring your trades to make informed decisions about when to exit or adjust. Effective position management involves understanding your position's current profit and loss, calculating appropriate exit levels based on your risk tolerance, and implementing a risk-to-reward ratio that ensures your winning trades outweigh your losses.
 
-In this comprehensive tutorial, you'll master position management using the FiveTwenty SDK with complete, executable examples. You'll learn to monitor open positions using `client.trades.get_trades()`, implement multiple stop loss strategies with `client.trades.put_trade_orders()`, calculate risk-to-reward ratios programmatically, and determine optimal position sizes based on account balance and volatility. Each code example demonstrates real SDK integration with OANDA, complete with proper error handling, type safety, and production-ready patterns you can use immediately in your trading systems.
+In this tutorial, you'll learn position management using the FiveTwenty SDK with complete, executable examples. You'll monitor open positions using `client.trades.get_trades()`, implement multiple stop loss strategies with `client.trades.put_trade_orders()`, calculate risk-to-reward ratios programmatically, and determine position sizes based on account balance and volatility. Each code example runs against the OANDA API and includes error handling and type safety.
 
 This example demonstrates the fundamentals of position monitoring and exit planning. You'll learn to retrieve open trades, analyze their current state, calculate appropriate stop loss and take profit levels, and understand how to implement these protective orders using FiveTwenty's order management features:
 
@@ -207,9 +207,9 @@ if __name__ == "__main__":
 
 Stop losses are your primary defense against catastrophic losses in trading. A well-placed stop loss exits your position automatically when the market moves against you, protecting your capital from excessive drawdowns. However, not all stop loss strategies work equally well in all market conditions - volatile markets require wider stops to avoid premature exits, while ranging markets benefit from tighter stops placed just beyond recent support or resistance levels.
 
-Professional traders use multiple stop loss methodologies depending on their strategy and market conditions. Fixed pip stops provide consistency and predictability, making them ideal for systematic strategies. Percentage-based stops scale with price levels, working well across different instruments and price ranges. ATR (Average True Range) based stops adapt to current market volatility, widening during volatile periods and tightening during quiet markets. Support and resistance stops leverage technical analysis, placing exits just beyond key price levels where the market has historically reversed.
+Professional traders use multiple stop loss methodologies depending on their strategy and market conditions. Fixed pip stops are consistent and predictable, which suits systematic strategies. Percentage-based stops scale with price levels and work across different instruments and price ranges. ATR (Average True Range) based stops adapt to current market volatility, widening during volatile periods and tightening during quiet markets. Support and resistance stops use technical analysis to place exits just beyond price levels where the market has historically reversed.
 
-The following example demonstrates four essential stop loss calculation methods. Each strategy has specific use cases: fixed pip stops for consistency, percentage stops for cross-instrument trading, ATR stops for volatility adaptation, and technical level stops for chart-based strategies. Understanding when to apply each method is crucial for effective risk management:
+The following example demonstrates four stop loss calculation methods, each with a specific use case: fixed pip stops for consistency, percentage stops for cross-instrument trading, ATR stops for volatility adaptation, and technical level stops for chart-based strategies:
 
 ```python
 import asyncio
@@ -437,7 +437,7 @@ if __name__ == "__main__":
 
 Take profit orders are equally important as stop losses for successful trading. While stop losses protect you from losses, take profits ensure you actually realize gains instead of watching profitable trades reverse against you. The challenge lies in balancing greed and prudence - exit too early and you leave money on the table, exit too late and you risk giving back hard-earned profits. Professional traders solve this dilemma through systematic take profit strategies rather than emotional decisions.
 
-The most fundamental approach is the fixed target, where you exit at a predetermined pip level based on typical market moves for the instrument you're trading. More sophisticated traders use risk-reward ratios, ensuring their take profit target is at least 1.5 to 2 times their stop loss distance. This mathematical edge ensures that even with a 50% win rate, you remain profitable over time. Advanced traders often employ multiple take profit levels, scaling out of positions by taking partial profits at successive targets while letting a portion of the position run for larger gains.
+The most basic approach is the fixed target, where you exit at a predetermined pip level based on typical market moves for the instrument you're trading. Risk-reward ratios go further: set your take profit target at 1.5 to 2 times your stop loss distance, and even a 50% win rate remains profitable over time. Traders also use multiple take profit levels, scaling out of positions by taking partial profits at successive targets while letting a portion of the position run for larger gains.
 
 This example demonstrates three key take profit methodologies. You'll see fixed pip targets for straightforward exit planning, risk-reward ratio calculations that maintain mathematical edge, and multiple target strategies for scaling out of positions. Understanding these approaches helps you exit trades strategically rather than emotionally:
 
@@ -1084,8 +1084,8 @@ All examples demonstrate proper error handling with `FiveTwentyError`, type safe
 
 -  **Type-Safe SDK Patterns** - Use Pydantic models for requests (`StopLossDetails`, `TakeProfitDetails`), handle TypedDict responses correctly, serialize models with `.model_dump(by_alias=True, exclude_none=True)`, and use `Decimal` for all financial calculations
 
-!!! success "Position Management Mastery Complete!"
-    Excellent! You now have production-ready skills for managing trading positions with FiveTwenty SDK. You understand how to balance risk and reward programmatically while leveraging proper type safety and error handling. Next, you'll learn to build complete trading strategies that combine these position management techniques.
+!!! success "Position Management Complete"
+    You can now monitor positions, set protective orders, and size positions programmatically with the FiveTwenty SDK. Next, you'll build complete trading strategies that combine these techniques.
 
 ---
 
@@ -1097,6 +1097,6 @@ Continue to [Strategy Building](strategy-building.md) to learn how to combine yo
 
 ## Related Resources
 
-- [Risk Management Fundamentals](../risk-management.md) - Comprehensive risk control
+- [Risk Management Fundamentals](../risk-management.md) - Risk control principles
 - [Advanced Stop-Loss Strategies](../../guides/practical-solutions/implement-stop-loss-strategies.md) - Detailed stop loss techniques
 - [Trading Models](../../api-reference/models/trading-models.md) - Technical API documentation

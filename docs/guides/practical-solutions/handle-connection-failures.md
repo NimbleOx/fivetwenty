@@ -2,7 +2,7 @@
 
 **Problem**: Your FiveTwenty connection fails with authentication, network, or API errors.
 
-**Solution**: Implement proper error handling, retry logic, and connection validation for robust trading applications.
+**Solution**: Add error handling, retry logic, and connection validation so failures are caught and recovered instead of crashing your application.
 
 ---
 
@@ -1257,7 +1257,7 @@ async def test_connection():
 asyncio.run(test_connection())
 ```
 
-### Comprehensive Diagnostics
+### Full Diagnostics
 
 <!-- fragment: partial connection diagnostics example -->
 ```python
@@ -1338,4 +1338,4 @@ await connection_diagnostics("your-token", Environment.PRACTICE)
 - **429 errors**: Implement delays between requests (100ms minimum)
 - **Burst limits**: Use connection pooling and request queuing
 
-**Task Complete**: Connection failure handling guide provides comprehensive troubleshooting and recovery patterns for robust FiveTwenty applications.
+**Task Complete**: Your application can now diagnose authentication, network, SSL, and rate-limit failures and recover from them with retry logic.

@@ -12,14 +12,12 @@ on:
         type: choice
         options:
           - 'full'
-          - 'links-only'
-          - 'dependencies-only'
+          - 'files-only'
         default: 'full'
 
 permissions:
   contents: read
   issues: write
-  pull-requests: write
 
 jobs:
   maintenance:
@@ -46,111 +44,72 @@ jobs:
           path: |
             ~/.cache/uv
             .venv
-          key: ${{ runner.os }}-maintenance-${{ hashFiles('**/pyproject.toml', '**/docs/requirements.txt') }}
+          key: ${{ runner.os }}-maintenance-${{ hashFiles('**/pyproject.toml') }}
           restore-keys: |
             ${{ runner.os }}-maintenance-
 
       - name: Install dependencies
-        run: |
-          uv sync
-          uv pip install -r docs/requirements.txt
+        run: uv sync --group dev
 
-      - name: Run full documentation validation
-        if: github.event.inputs.check_type == 'full' || github.event.inputs.check_type == ''
+      - name: Run documentation file validation
         id: validation
         run: |
-          echo "Running comprehensive documentation validation..."
-          uv run python scripts/validate-docs.py > validation_results.txt 2>&1
-          echo "validation_exit_code=$?" >> $GITHUB_OUTPUT
-        continue-on-error: true
+          set +e
+          uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-ci.yml --max-workers 2 > validation_results.txt 2>&1
+          echo "validation_exit_code=$?" >> "$GITHUB_OUTPUT"
+          tail -30 validation_results.txt
 
-      - name: Check for broken links
-        if: >
-          github.event.inputs.check_type == 'links-only' ||
-          github.event.inputs.check_type == 'full' ||
-          github.event.inputs.check_type == ''
-        id: link_check
+      - name: Run OANDA parity validation (live refresh)
+        id: parity
+        if: github.event.inputs.check_type != 'files-only'
         run: |
-          echo "Checking for broken internal links..."
-          # Use our validator's link checking functionality
-          uv run python scripts/validate-docs.py | \
-            grep "Broken internal link" > broken_links.txt || \
-            echo "No broken links found"
-          if [ -s broken_links.txt ]; then
-            echo "broken_links_found=true" >> $GITHUB_OUTPUT
-            echo "Found broken links:"
-            cat broken_links.txt
-          else
-            echo "broken_links_found=false" >> $GITHUB_OUTPUT
-          fi
-
-      - name: Check dependency freshness
-        if: >
-          github.event.inputs.check_type == 'dependencies-only' ||
-          github.event.inputs.check_type == 'full' ||
-          github.event.inputs.check_type == ''
-        id: deps_check
-        run: |
-          echo "Checking documentation dependencies..."
-
-          # Check if docs/requirements.txt packages have updates available
-          echo "Current documentation dependencies:"
-          cat docs/requirements.txt
-
-          # Check for outdated packages (this would normally use pip-audit or similar)
-          echo "deps_check_completed=true" >> $GITHUB_OUTPUT
+          set +e
+          uv run poe docs-validate-parity-refresh > parity_results.txt 2>&1
+          echo "parity_exit_code=$?" >> "$GITHUB_OUTPUT"
+          tail -30 parity_results.txt
 
       - name: Test documentation build
-        if: steps.validation.outputs.validation_exit_code == '0' || github.event.inputs.check_type == 'full'
+        id: build
         run: |
-          echo "Testing documentation build..."
-          uv run mkdocs build --strict --clean
+          set +e
+          uv run mkdocs build --strict --clean > build_results.txt 2>&1
+          echo "build_exit_code=$?" >> "$GITHUB_OUTPUT"
+          tail -10 build_results.txt
 
       - name: Generate maintenance report
         id: report
         run: |
-          echo "# 📋 Documentation Maintenance Report" > maintenance_report.md
-          echo "" >> maintenance_report.md
-          echo "**Date:** $(date)" >> maintenance_report.md
-          echo "**Trigger:** ${{ github.event_name }}" >> maintenance_report.md
-          echo "" >> maintenance_report.md
-
-          # Add validation results
-          if [ -f validation_results.txt ]; then
-            echo "## 🔍 Validation Results" >> maintenance_report.md
-            echo "" >> maintenance_report.md
-            echo '```' >> maintenance_report.md
-            tail -20 validation_results.txt >> maintenance_report.md
-            echo '```' >> maintenance_report.md
-            echo "" >> maintenance_report.md
-          fi
-
-          # Add broken links if found
-          if [ "${{ steps.link_check.outputs.broken_links_found }}" = "true" ]; then
-            echo "## 🔗 Broken Links Found" >> maintenance_report.md
-            echo "" >> maintenance_report.md
-            echo '```' >> maintenance_report.md
-            cat broken_links.txt >> maintenance_report.md
-            echo '```' >> maintenance_report.md
-            echo "" >> maintenance_report.md
-            echo "**Action Required:** Please fix these broken internal links." >> maintenance_report.md
-            echo "" >> maintenance_report.md
-          fi
-
-          # Add recommendations
-          echo "## 📝 Recommendations" >> maintenance_report.md
-          echo "" >> maintenance_report.md
-          echo "- ✅ Documentation structure is healthy" >> maintenance_report.md
-          echo "- 🔄 Consider updating examples with latest SDK patterns" >> maintenance_report.md
-          echo "- 📚 Review user feedback for content improvements" >> maintenance_report.md
-          echo "" >> maintenance_report.md
-
-          # Set output for issue creation
-          if [ "${{ steps.link_check.outputs.broken_links_found }}" = "true" ] || \
-             [ "${{ steps.validation.outputs.validation_exit_code }}" != "0" ]; then
-            echo "issues_found=true" >> $GITHUB_OUTPUT
+          {
+            echo "# 📋 Documentation Maintenance Report"
+            echo ""
+            echo "**Date:** $(date)"
+            echo "**Trigger:** ${{ github.event_name }}"
+            echo ""
+            echo "| Check | Exit code |"
+            echo "|---|---|"
+            echo "| File validation | ${{ steps.validation.outputs.validation_exit_code }} |"
+            echo "| OANDA parity (refresh) | ${{ steps.parity.outputs.parity_exit_code || 'skipped' }} |"
+            echo "| Strict docs build | ${{ steps.build.outputs.build_exit_code }} |"
+            echo ""
+          } > maintenance_report.md
+          for f in validation_results.txt parity_results.txt build_results.txt; do
+            if [ -f "$f" ]; then
+              {
+                echo "## $f (tail)"
+                echo '```'
+                tail -25 "$f"
+                echo '```'
+                echo ""
+              } >> maintenance_report.md
+            fi
+          done
+          if [ "${{ steps.validation.outputs.validation_exit_code }}" != "0" ] || \
+             [ "${{ steps.build.outputs.build_exit_code }}" != "0" ] || \
+             { [ -n "${{ steps.parity.outputs.parity_exit_code }}" ] && \
+               [ "${{ steps.parity.outputs.parity_exit_code }}" != "0" ]; }; then
+            echo "issues_found=true" >> "$GITHUB_OUTPUT"
           else
-            echo "issues_found=false" >> $GITHUB_OUTPUT
+            echo "issues_found=false" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Create maintenance issue
@@ -177,21 +136,12 @@ jobs:
           path: |
             maintenance_report.md
             validation_results.txt
-            broken_links.txt
+            parity_results.txt
+            build_results.txt
           retention-days: 30
 
-      - name: Summary
-        if: always()
+      - name: Fail on issues
+        if: steps.report.outputs.issues_found == 'true'
         run: |
-          echo "## 📋 Maintenance Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ "${{ steps.report.outputs.issues_found }}" = "true" ]; then
-            echo "❌ **Issues found** - Review the maintenance report" \
-              "and fix identified problems." >> $GITHUB_STEP_SUMMARY
-          else
-            echo "✅ **All checks passed**" \
-              "- Documentation is in good health!" >> $GITHUB_STEP_SUMMARY
-          fi
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "**Next scheduled run:** Next Sunday at 2 AM UTC" \
-            >> $GITHUB_STEP_SUMMARY
+          echo "Maintenance checks found issues — see the report artifact." >&2
+          exit 1

@@ -1,6 +1,6 @@
 # Basic Trading Tutorial Series
 
-A comprehensive, hands-on tutorial series that walks you through forex trading fundamentals using FiveTwenty, from basic concepts to building complete automated trading strategies.
+A hands-on tutorial series on forex trading fundamentals with FiveTwenty. It starts with concepts like pips and spreads and ends with a working automated strategy.
 
 ---
 
@@ -13,7 +13,7 @@ A comprehensive, hands-on tutorial series that walks you through forex trading f
 
     **Time commitment:** 30-45 minutes per tutorial, 2-3 hours total
 
-This progressive tutorial series builds on the getting-started tutorials to advance your trading skills from market analysis to building automated trading strategies. Each tutorial explores advanced concepts with hands-on examples.
+The series picks up where the getting-started tutorials leave off. Each lesson has runnable examples, and each builds on the one before it.
 
 ---
 
@@ -25,7 +25,7 @@ This progressive tutorial series builds on the getting-started tutorials to adva
 - OANDA practice account with API token configured
 - Familiarity with placing your first trade
 
-### Analysis Your Progressive Journey
+### Skill Progression
 
 !!! info "Target Skill Progression Framework"
     **Foundation**  Understand forex concepts and fundamentals
@@ -68,7 +68,7 @@ Understand market data before trading:
 ### [Position Management](position-management.md)
 **Position Management**
 
-Learn the art of managing open positions:
+Learn to manage open positions:
 
 - Advanced position monitoring techniques
 - Stop loss and take profit strategies
@@ -103,20 +103,13 @@ Build a production-ready automated trading system:
 - Performance tracking and analysis
 - Enhancement opportunities and next steps
 
-**Skills gained:** Complete system development, automation mastery, and production readiness
+**Skills gained:** Complete system development and production readiness
 
 ---
 
-## Learning Support Features
+## How the Lessons Work
 
-###  Concept Explanations
-Each lesson includes detailed explanations of theory before practice
-
-###  Hands-on Exercises
-Interactive code examples you can run and modify
-
-### Progress Celebrations
-Acknowledgment of achievements at each milestone
+Each lesson explains the theory first, then puts it into practice with code examples you can run and modify.
 
 ---
 
@@ -138,7 +131,7 @@ Skip to [Market Data & Analysis](market-data.md) and focus on API usage patterns
 !!! warning "⚠️ Essential Safety Guidelines"
     - **Always start with PRACTICE environment** - Never test with live money while learning
     - **Use small position sizes** when you do move to live trading
-    - **Always implement stop losses** - Risk management is crucial
+    - **Always implement stop losses** - every position needs a known worst case
     - **Never risk more than you can afford to lose**
     - **Practice extensively** before live trading
 

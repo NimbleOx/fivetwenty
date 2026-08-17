@@ -2,7 +2,7 @@
 
 ## What is API Reference?
 
-API Reference documentation is **information-oriented** content that provides comprehensive, accurate, and quickly scannable information about the FiveTwenty's classes, methods, parameters, and return values. It's designed for quick lookup during development.
+API Reference documentation is **information-oriented** content: accurate, quickly scannable detail about FiveTwenty's classes, methods, parameters, and return values. It's designed for quick lookup during development.
 
 ## When to Use API Reference
 
@@ -25,7 +25,7 @@ API Reference documentation is **information-oriented** content that provides co
 If you need more than just the technical specifications:
 
 - **Learn with [Tutorials](../tutorials/index.md)** for hands-on guidance
-- **Get comprehensive guidance with [Guides](../guides/index.md)** for both solutions and understanding
+- **Get guidance with [Guides](../guides/index.md)** for both solutions and understanding
 
 ---
 

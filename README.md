@@ -5,15 +5,16 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-A comprehensive, production-ready Python client for the OANDA v20 REST API.
+A Python client for the OANDA v20 REST API. Async-first with a synchronous wrapper, every monetary value in `Decimal`, and all seven v20 endpoint groups implemented.
 
 ## Features
 
-- **Async-first** with sync wrapper
-- **Type-safe** with mypy strict compliance and comprehensive TypedDict responses
-- **Minimal dependencies** (only httpx + pydantic)
-- **Robust client** with retries, rate limiting, and comprehensive error handling
-- **Complete API coverage** with 100% endpoint implementation (all 7 endpoint groups)
+- Async-first `AsyncClient`, plus a thread-backed sync `Client` with the same surface
+- mypy strict throughout, with typed models and TypedDict responses
+- Two runtime dependencies: httpx and pydantic
+- Retries with backoff for safe requests only; writes are never re-sent, so a timed-out order can't be double-submitted
+- Price and transaction streaming with stall detection and configurable reconnection
+- 130+ Pydantic models and 41 enums, checked against OANDA's published spec by an automated parity pipeline
 
 ## Quick Start
 
@@ -95,16 +96,17 @@ if __name__ == "__main__":
 - httpx >= 0.25.0
 - pydantic >= 2.5.0
 
-## API Coverage
+## API coverage
 
-### OANDA v20 API Implementation
+All seven OANDA v20 endpoint groups:
 
-- **Account Management**: Complete account operations, configuration updates, and change polling
-- **Order Operations**: Full order lifecycle - create, list, get, cancel, replace, and client extensions
-- **Trade Management**: Complete trade operations - list, get, close, modify, and dependent orders
-- **Position Management**: Full position operations - list, get, close by instrument
-- **Pricing & Streaming**: Real-time pricing, reliable streaming, and historical candles
-- **Transaction History**: Complete audit trail, streaming, and incremental updates
+- **Accounts**: account details, summary, instruments, configuration, change polling
+- **Instruments**: candles, order book and position book snapshots
+- **Orders**: create (market, limit, stop, market-if-touched), list, get, cancel, replace, client extensions
+- **Trades**: list, get, close, client extensions, dependent take-profit/stop-loss orders
+- **Positions**: list, get, close by instrument
+- **Pricing**: current prices, streaming, account-scoped candles, latest candles
+- **Transactions**: history by time or ID range, single lookup, streaming
 
 ## License
 
@@ -114,12 +116,6 @@ MIT License - see LICENSE file for details.
 
 **This library is provided for educational and demonstration purposes only.**
 
-Trading financial instruments involves substantial risk of loss. The examples and code provided in this library are for demonstration purposes only and should not be used for actual trading without thorough testing and understanding of the risks involved.
-
-- Past performance is not indicative of future results
-- You are solely responsible for any trading decisions and their consequences
-- The authors and contributors accept no liability for any financial losses incurred through use of this software
-- Always test thoroughly with paper trading accounts before risking real capital
-- Consult with qualified financial advisors before making investment decisions
+Trading financial instruments involves substantial risk of loss. Test against a practice account before risking real capital; you are solely responsible for your trading decisions, and the authors accept no liability for losses incurred through use of this software. Past performance is not indicative of future results.
 
 **USE AT YOUR OWN RISK.**

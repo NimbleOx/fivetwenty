@@ -223,7 +223,7 @@ class OrderEndpoints:
     async def post_market_order(
         self,
         account_id: AccountID,
-        instrument: InstrumentName,
+        instrument: InstrumentName | str,
         units: int | Decimal | str,
         *,
         take_profit: Decimal | None = None,
@@ -283,7 +283,7 @@ class OrderEndpoints:
     async def post_limit_order(
         self,
         account_id: AccountID,
-        instrument: InstrumentName,
+        instrument: InstrumentName | str,
         units: int | Decimal | str,
         price: Decimal,
         *,
@@ -351,7 +351,7 @@ class OrderEndpoints:
     async def post_stop_order(
         self,
         account_id: AccountID,
-        instrument: InstrumentName,
+        instrument: InstrumentName | str,
         units: int | Decimal | str,
         price: Decimal,
         *,
@@ -422,7 +422,7 @@ class OrderEndpoints:
     async def post_market_if_touched_order(
         self,
         account_id: AccountID,
-        instrument: InstrumentName,
+        instrument: InstrumentName | str,
         units: int | Decimal | str,
         price: Decimal,
         *,

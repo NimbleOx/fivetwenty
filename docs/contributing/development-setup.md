@@ -69,7 +69,7 @@ uv run poe dev
 uv run poe dev              # Format, typecheck, test (~15s)
 
 # Pre-commit checks
-uv run poe check            # Format, lint-core, typecheck, test (~30s)
+uv run poe check-fast            # Format check, lint, typecheck, unit tests (~30s)
 
 # Code quality only (no tests)
 uv run poe quality          # Format, lint, typecheck (~10s)
@@ -167,10 +167,10 @@ Project includes `.vscode/` configuration:
 
 1. Create endpoint method in `fivetwenty/endpoints/`
 2. Import and attach to AsyncClient/Client in `client.py`
-3. Add Pydantic models if needed (check existing 75+ models first)
+3. Add Pydantic models if needed (check the existing 130+ models first)
 4. Write unit and integration tests
 5. Add API reference documentation
-6. Run `uv run poe check`
+6. Run `uv run poe check-fast`
 
 ### Adding New Models
 

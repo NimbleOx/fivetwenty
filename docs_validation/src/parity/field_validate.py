@@ -331,11 +331,18 @@ def _strip_optional(type_text: str) -> str:
     return t
 
 
+# Official OANDA primitives that are definitionally open strings; the SDK types
+# them as `<Name> | str` (enum for autocomplete, string per spec) — not drift.
+STRING_PRIMITIVE_ALIASES = {"InstrumentName"}
+
+
 def _normalize_type(type_text: str) -> str:
     t = _strip_optional(type_text)
     if t.strip().lower() == "integer or decimal if available":
         return "Decimal"
     t = t.replace(" ", "")
+    for name in STRING_PRIMITIVE_ALIASES:
+        t = t.replace(f"{name}|str", name).replace(f"str|{name}", name)
     t = t.replace("typing.", "")
     if t in PY_PRIMITIVE_MAP:
         return PY_PRIMITIVE_MAP[t]

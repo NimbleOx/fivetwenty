@@ -68,7 +68,7 @@ class InstrumentCommission(ApiModel):
 class Instrument(ApiModel):
     """Trading instrument information."""
 
-    name: InstrumentName
+    name: InstrumentName | str
     type: InstrumentType
     display_name: str = Field(alias="displayName")
     pip_location: int = Field(alias="pipLocation")

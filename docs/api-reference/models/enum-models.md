@@ -191,6 +191,19 @@ Types of transactions that can occur in an account.
 | `DIVIDEND_ADJUSTMENT` | Dividend adjustment applied |
 | `RESET_RESETTABLE_PL` | Resettable PL reset |
 
+### AcceptDatetimeFormat
+
+Format for DateTime fields in OANDA requests and responses.
+
+🔗 **OANDA Definition**: [AcceptDatetimeFormat](https://developer.oanda.com/rest-live-v20/primitives-df/#AcceptDatetimeFormat)
+
+🔗 **Source**: [AcceptDatetimeFormat](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `UNIX` | DateTime fields are formatted as Unix timestamps |
+| `RFC3339` | DateTime fields are formatted according to RFC 3339 |
+
 ## Price and Market Data Enums
 
 ### CandlestickGranularity
@@ -256,6 +269,41 @@ Days of the week for weekly candlestick alignment.
 | `Friday` | Week starts on Friday |
 | `Saturday` | Week starts on Saturday |
 | `Sunday` | Week starts on Sunday |
+
+### DailyAlignment
+
+Hour of day (in the candlestick request's timezone) used for daily candlestick alignment. Integer-valued enum covering hours 0-23.
+
+🔗 **OANDA Definition**: [dailyAlignment parameter](https://developer.oanda.com/rest-live-v20/pricing-ep/)
+
+🔗 **Source**: [DailyAlignment](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `0` | Align to midnight (00:00) |
+| `1` | Align to 01:00 |
+| `2` | Align to 02:00 |
+| `3` | Align to 03:00 |
+| `4` | Align to 04:00 |
+| `5` | Align to 05:00 |
+| `6` | Align to 06:00 |
+| `7` | Align to 07:00 |
+| `8` | Align to 08:00 |
+| `9` | Align to 09:00 |
+| `10` | Align to 10:00 |
+| `11` | Align to 11:00 |
+| `12` | Align to noon (12:00) |
+| `13` | Align to 13:00 |
+| `14` | Align to 14:00 |
+| `15` | Align to 15:00 |
+| `16` | Align to 16:00 |
+| `17` | Align to 17:00 |
+| `18` | Align to 18:00 |
+| `19` | Align to 19:00 |
+| `20` | Align to 20:00 |
+| `21` | Align to 21:00 |
+| `22` | Align to 22:00 |
+| `23` | Align to 23:00 |
 
 ### DayOfWeek
 
@@ -392,6 +440,194 @@ Types of orders that can be cancelled.
 | `TRAILING_STOP_LOSS` | Trailing stop loss orders can be cancelled |
 | `GUARANTEED_STOP_LOSS` | Guaranteed stop loss orders can be cancelled |
 
+## Order Reason Enums
+
+### MarketOrderReason
+
+The reason that a Market Order was created.
+
+🔗 **OANDA Definition**: [MarketOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#MarketOrderReason)
+
+🔗 **Source**: [MarketOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_ORDER` | Order created at the request of a client |
+| `TRADE_CLOSE` | Order created to close a trade at the request of a client |
+| `POSITION_CLOSEOUT` | Order created to close a position at the request of a client |
+| `MARGIN_CLOSEOUT` | Order created as part of a margin closeout |
+| `DELAYED_TRADE_CLOSE` | Order created to close a trade that was not tradeable at the original close time |
+
+### MarketOrderMarginCloseoutReason
+
+The reason that a Market Order was created to perform a margin closeout.
+
+🔗 **OANDA Definition**: [MarketOrderMarginCloseoutReason](https://developer.oanda.com/rest-live-v20/transaction-df/#MarketOrderMarginCloseoutReason)
+
+🔗 **Source**: [MarketOrderMarginCloseoutReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `MARGIN_CHECK_VIOLATION` | Trade closures resulted from violating OANDA's margin policy |
+| `REGULATORY_MARGIN_CALL_VIOLATION` | Trade closures came from a margin closeout event resulting from regulatory conditions |
+| `REGULATORY_MARGIN_CHECK_VIOLATION` | Trade closures resulted from violating the margin policy imposed by regulatory requirements |
+
+### FixedPriceOrderReason
+
+The reason that a Fixed Price Order was created.
+
+🔗 **OANDA Definition**: [FixedPriceOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#FixedPriceOrderReason)
+
+🔗 **Source**: [FixedPriceOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `PLATFORM_ACCOUNT_MIGRATION` | Order created as part of a platform account migration |
+| `TRADE_CLOSE_DIVISION_ACCOUNT_MIGRATION` | Order created to close a trade as part of a division account migration |
+| `TRADE_CLOSE_ADMINISTRATIVE_ACTION` | Order created to close a trade by an administrative action |
+
+### LimitOrderReason
+
+The reason that a Limit Order was initiated.
+
+🔗 **OANDA Definition**: [LimitOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#LimitOrderReason)
+
+🔗 **Source**: [LimitOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_ORDER` | Order initiated at the request of a client |
+| `REPLACEMENT` | Order initiated as a replacement for an existing order |
+
+### StopOrderReason
+
+The reason that a Stop Order was initiated.
+
+🔗 **OANDA Definition**: [StopOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#StopOrderReason)
+
+🔗 **Source**: [StopOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_ORDER` | Order initiated at the request of a client |
+| `REPLACEMENT` | Order initiated as a replacement for an existing order |
+
+### MarketIfTouchedOrderReason
+
+The reason that a Market-if-touched Order was initiated.
+
+🔗 **OANDA Definition**: [MarketIfTouchedOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#MarketIfTouchedOrderReason)
+
+🔗 **Source**: [MarketIfTouchedOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_ORDER` | Order initiated at the request of a client |
+| `REPLACEMENT` | Order initiated as a replacement for an existing order |
+
+### TakeProfitOrderReason
+
+The reason that a Take Profit Order was initiated.
+
+🔗 **OANDA Definition**: [TakeProfitOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#TakeProfitOrderReason)
+
+🔗 **Source**: [TakeProfitOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_ORDER` | Order initiated at the request of a client |
+| `REPLACEMENT` | Order initiated as a replacement for an existing order |
+| `ON_FILL` | Order initiated automatically when an order was filled that opened a new trade requiring a take profit order |
+
+### StopLossOrderReason
+
+The reason that a Stop Loss Order was initiated.
+
+🔗 **OANDA Definition**: [StopLossOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#StopLossOrderReason)
+
+🔗 **Source**: [StopLossOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_ORDER` | Order initiated at the request of a client |
+| `REPLACEMENT` | Order initiated as a replacement for an existing order |
+| `ON_FILL` | Order initiated automatically when an order was filled that opened a new trade requiring a stop loss order |
+
+### GuaranteedStopLossOrderReason
+
+The reason that a Guaranteed Stop Loss Order was initiated.
+
+🔗 **OANDA Definition**: [GuaranteedStopLossOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#GuaranteedStopLossOrderReason)
+
+🔗 **Source**: [GuaranteedStopLossOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_ORDER` | Order initiated at the request of a client |
+| `REPLACEMENT` | Order initiated as a replacement for an existing order |
+| `ON_FILL` | Order initiated automatically when an order was filled that opened a new trade requiring a guaranteed stop loss order |
+
+### TrailingStopLossOrderReason
+
+The reason that a Trailing Stop Loss Order was initiated.
+
+🔗 **OANDA Definition**: [TrailingStopLossOrderReason](https://developer.oanda.com/rest-live-v20/transaction-df/#TrailingStopLossOrderReason)
+
+🔗 **Source**: [TrailingStopLossOrderReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_ORDER` | Order initiated at the request of a client |
+| `REPLACEMENT` | Order initiated as a replacement for an existing order |
+| `ON_FILL` | Order initiated automatically when an order was filled that opened a new trade requiring a trailing stop loss order |
+
+### OrderFillReason
+
+The reason that an Order was filled.
+
+🔗 **OANDA Definition**: [OrderFillReason](https://developer.oanda.com/rest-live-v20/transaction-df/#OrderFillReason)
+
+🔗 **Source**: [OrderFillReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `LIMIT_ORDER` | Order filled was a Limit Order |
+| `STOP_ORDER` | Order filled was a Stop Order |
+| `MARKET_IF_TOUCHED_ORDER` | Order filled was a Market-if-touched Order |
+| `TAKE_PROFIT_ORDER` | Order filled was a Take Profit Order |
+| `STOP_LOSS_ORDER` | Order filled was a Stop Loss Order |
+| `GUARANTEED_STOP_LOSS_ORDER` | Order filled was a Guaranteed Stop Loss Order |
+| `TRAILING_STOP_LOSS_ORDER` | Order filled was a Trailing Stop Loss Order |
+| `MARKET_ORDER` | Order filled was a Market Order |
+| `MARKET_ORDER_TRADE_CLOSE` | Order filled was a Market Order used to explicitly close a trade |
+| `MARKET_ORDER_POSITION_CLOSEOUT` | Order filled was a Market Order used to explicitly close a position |
+| `MARKET_ORDER_MARGIN_CLOSEOUT` | Order filled was a Market Order used for a margin closeout |
+| `MARKET_ORDER_DELAYED_TRADE_CLOSE` | Order filled was a Market Order used for a delayed trade close |
+| `FIXED_PRICE_ORDER` | Order filled was a Fixed Price Order |
+| `FIXED_PRICE_ORDER_PLATFORM_ACCOUNT_MIGRATION` | Order filled was a Fixed Price Order created as part of a platform account migration |
+| `FIXED_PRICE_ORDER_DIVISION_ACCOUNT_MIGRATION` | Order filled was a Fixed Price Order created to close a trade as part of a division account migration |
+| `FIXED_PRICE_ORDER_ADMINISTRATIVE_ACTION` | Order filled was a Fixed Price Order created to close a trade by an administrative action |
+
+### OrderCancelReason
+
+The reason that an Order was cancelled. This enum defines 65 values; the table below shows representative examples - see the source for the complete value set.
+
+🔗 **OANDA Definition**: [OrderCancelReason](https://developer.oanda.com/rest-live-v20/transaction-df/#OrderCancelReason)
+
+🔗 **Source**: [OrderCancelReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `INTERNAL_SERVER_ERROR` | Order cancelled because of an internal server error |
+| `CLIENT_REQUEST` | Order cancelled at the request of the client |
+| `CLIENT_REQUEST_REPLACED` | Order cancelled because it was replaced at the request of the client |
+| `TIME_IN_FORCE_EXPIRED` | Order cancelled because its time in force expired |
+| `INSUFFICIENT_MARGIN` | Order cancelled because the account had insufficient margin |
+| `LINKED_TRADE_CLOSED` | Order cancelled because its linked trade was closed |
+| `MARKET_HALTED` | Order cancelled because the market it would trade in was halted |
+| `FIFO_VIOLATION` | Order cancelled because filling it would have violated FIFO rules |
+| `INSUFFICIENT_LIQUIDITY` | Order cancelled because there was insufficient liquidity to fill it |
+
 ## Account and Position Enums
 
 ### AccountFinancingMode
@@ -436,6 +672,21 @@ Guaranteed stop loss order modes for instruments.
 | `ALLOWED` | Guaranteed stop loss orders are allowed |
 | `REQUIRED` | Guaranteed stop loss orders are required |
 
+### GuaranteedStopLossOrderMutability
+
+Actions that can be performed on guaranteed Stop Loss Orders.
+
+🔗 **OANDA Definition**: [GuaranteedStopLossOrderMutability](https://developer.oanda.com/rest-live-v20/account-df/#GuaranteedStopLossOrderMutability)
+
+🔗 **Source**: [GuaranteedStopLossOrderMutability](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `FIXED` | Once created, guaranteed stop loss orders cannot be replaced or cancelled |
+| `REPLACEABLE` | An existing guaranteed stop loss order can only be replaced, not cancelled |
+| `CANCELABLE` | Once trading is disabled, guaranteed stop loss orders can be cancelled but not replaced |
+| `PRICE_WIDEN_ONLY` | An existing guaranteed stop loss order can only be replaced to widen the gap from the current price, not cancelled |
+
 ### GuaranteedStopLossOrderModeForInstrument
 
 Guaranteed stop loss order modes specific to instruments.
@@ -449,6 +700,64 @@ Guaranteed stop loss order modes specific to instruments.
 | `DISABLED` | GSL orders disabled for this instrument |
 | `ALLOWED` | GSL orders allowed for this instrument |
 | `REQUIRED` | GSL orders required for this instrument |
+
+## Transaction Enums
+
+### TransactionFilter
+
+Transaction type filters accepted by OANDA transaction list endpoints. This enum defines 42 values covering every transaction type plus aggregate filters; the table below shows representative examples - see the source for the complete value set.
+
+🔗 **OANDA Definition**: [TransactionFilter](https://developer.oanda.com/rest-live-v20/transaction-df/#TransactionFilter)
+
+🔗 **Source**: [TransactionFilter](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `ORDER` | Order-related transactions (aggregate filter) |
+| `FUNDING` | Funding-related transactions (aggregate filter) |
+| `ADMIN` | Administrative transactions (aggregate filter) |
+| `MARKET_ORDER` | Market order transactions |
+| `ORDER_FILL` | Order fill transactions |
+| `ORDER_CANCEL` | Order cancel transactions |
+| `MARGIN_CALL_ENTER` | Margin call entered transactions |
+| `DAILY_FINANCING` | Daily financing transactions |
+| `TRANSFER_FUNDS` | Fund transfer transactions |
+
+### TransactionRejectReason
+
+Reasons why a transaction may be rejected. This enum defines 198 values; the table below shows representative examples - see the source for the complete value set.
+
+🔗 **OANDA Definition**: [TransactionRejectReason](https://developer.oanda.com/rest-live-v20/transaction-df/#TransactionRejectReason)
+
+🔗 **Source**: [TransactionRejectReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `INTERNAL_SERVER_ERROR` | An internal server error prevented the transaction from being processed |
+| `INSTRUMENT_MISSING` | The instrument specified is missing |
+| `INSTRUMENT_NOT_TRADEABLE` | The instrument specified is not tradeable by the account |
+| `UNITS_MISSING` | Order units have not been specified |
+| `PRICE_INVALID` | The price specified is invalid |
+| `INSUFFICIENT_MARGIN` | The account had insufficient margin for the transaction |
+| `TIME_IN_FORCE_MISSING` | The time in force has not been specified |
+| `CLIENT_ORDER_ID_ALREADY_EXISTS` | The client order ID specified is already assigned to another pending order |
+| `MARKET_HALTED` | The market for the specified instrument is halted |
+
+### FundingReason
+
+Reasons for funding transactions.
+
+🔗 **OANDA Definition**: [FundingReason](https://developer.oanda.com/rest-live-v20/transaction-df/#FundingReason)
+
+🔗 **Source**: [FundingReason](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `CLIENT_FUNDING` | Funds visible in the account were pushed or pulled by the client |
+| `ACCOUNT_TRANSFER` | Funds transferred between two accounts belonging to the same client |
+| `DIVISION_MIGRATION` | Funds transferred as part of a division migration |
+| `SITE_MIGRATION` | Funds transferred as part of a site migration |
+| `ADJUSTMENT` | Funds transferred as part of an account adjustment |
 
 ## Filtering and Querying Enums
 
@@ -480,5 +789,19 @@ Filter for trade queries by state.
 | `CLOSED` | Closed trades only |
 | `CLOSE_WHEN_TRADEABLE` | Trades set to close when tradeable |
 | `ALL` | All trades regardless of state |
+
+### TradePL
+
+The classification of a trade's profit/loss, used when filtering trade queries.
+
+🔗 **OANDA Definition**: [TradePL](https://developer.oanda.com/rest-live-v20/trade-df/#TradePL)
+
+🔗 **Source**: [TradePL](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/models/enums.py)
+
+| Value | Description |
+|-------|-------------|
+| `POSITIVE` | An open trade currently in a positive (profitable) state |
+| `NEGATIVE` | An open trade currently in a negative (losing) state |
+| `ZERO` | An open trade currently at break-even |
 
 All enums are string-based and can be used directly with OANDA API endpoints or for type validation in your trading applications.
