@@ -66,6 +66,14 @@ ignore_errors = true
 [tool.ruff]
 target-version = "py310"
 line-length = 320  # Effectively no line length limit (ruff's maximum)
+# Markdown-embedded Python is deliberately left to docs_validation's own
+# per-block extraction (code_linting/code_execution/code_typing), which
+# lints/type-checks/executes each example independently. Letting the
+# top-level `ruff format` also reflow .md code fences is redundant with
+# that and collapses intentionally-multi-line illustrative examples (e.g.
+# a 4-argument constructor call) into a single long line -- a real
+# readability regression, not a style preference.
+extend-exclude = ["*.md"]
 
 [tool.ruff.lint]
 select = [
@@ -105,6 +113,7 @@ ignore = [
     # API design necessities - keep these
     "PLR0912", # Too many branches (complex financial API logic)
     "PLR0913", # Too many arguments (OANDA API has many optional parameters)
+    "PLR0917", # Too many positional arguments (same rationale as PLR0913)
     "PLR0915", # Too many statements (comprehensive validation/processing)
     "PLC0415", # Import should be at top of file (conditional imports needed)
     "SLF001",  # Private member access (needed for internal client APIs)

@@ -52,7 +52,7 @@ class PrecisionValidator:
                 expected_precision = 5
 
         if "." in price:
-            actual_precision = len(price.split(".")[-1])
+            actual_precision = len(price.rsplit(".", maxsplit=1)[-1])
             return actual_precision <= expected_precision
         return True
 

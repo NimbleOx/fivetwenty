@@ -55,7 +55,9 @@ jobs:
         id: validation
         run: |
           set +e
-          uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-ci.yml --max-workers 2 > validation_results.txt 2>&1
+          uv run python -m docs_validation.src.cli validate \
+            --config docs_validation/config/validation-ci.yml \
+            --max-workers 2 > validation_results.txt 2>&1
           echo "validation_exit_code=$?" >> "$GITHUB_OUTPUT"
           tail -30 validation_results.txt
 

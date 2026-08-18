@@ -76,6 +76,9 @@ docs_validation/reports/
 # Parity pipeline cache (extractor JSON + cached OANDA pages)
 docs_validation/.cache/
 
+# mkdocs-jupyter's own build cache
+/.cache/
+
 # OANDA API reference (local development only)
 oanda-api-reference/
 

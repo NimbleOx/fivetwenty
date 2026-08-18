@@ -385,7 +385,7 @@ class CodeExecutionValidator(BaseValidator):
             """Allow safe imports, block dangerous ones."""
             dangerous_modules = {"subprocess", "socket", "urllib", "urllib3", "requests", "httpx"}
 
-            if name.split(".")[0] in dangerous_modules:
+            if name.split(".", maxsplit=1)[0] in dangerous_modules:
                 raise ImportError(f"Importing {name} is not allowed in documentation code examples")
 
             # Use the real __import__ for safe modules
