@@ -19,7 +19,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ['3.10', '3.12']
+        # Every version the package advertises support for in its classifiers.
+        # Not just the endpoints: an enum-formatting behavior change in 3.11
+        # shipped a real bug that a 3.10/3.12-only matrix would not have caught.
+        python-version: ['3.10', '3.11', '3.12', '3.13']
 
     steps:
       - name: Checkout repository

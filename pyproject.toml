@@ -291,7 +291,7 @@ docs-validate = ["docs-validate-files", "docs-validate-parity"]
 docs-validate-notebooks = "uv run --with nbclient>=0.10.0 --with nbformat>=5.10.0 --with ipykernel>=6.29.0 --with nest-asyncio>=1.6.0 --with matplotlib>=3.7.0 --with numpy>=1.24.0 --with pandas>=2.2.0 --with seaborn>=0.13.0 python scripts/run_notebooks.py"
 
 # YAML tasks
-yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/workflows/ docs/api-reference/openapi.yaml"
+yaml-lint = "yamllint mkdocs.yml docs_validation/config/ .github/ docs/api-reference/openapi.yaml"
 
 # Workflow tasks
 check-fast = ["format-check", "lint", "typecheck", "test"]
