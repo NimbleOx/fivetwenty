@@ -768,7 +768,7 @@ class MarkdownReporter:
             return "code_typing"
         if rule_id.startswith("code_"):
             return "code_execution"
-        return rule_id.split("_")[0] if "_" in rule_id else "unknown"
+        return rule_id.split("_", maxsplit=1)[0] if "_" in rule_id else "unknown"
 
     def _format_issue_details(self, issue: ValidationIssue, include_code_snippets: bool) -> list[str]:
         """Format detailed issue information."""

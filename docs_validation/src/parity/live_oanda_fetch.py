@@ -33,7 +33,6 @@ import sys
 import time
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import cast
 
 import httpx
 from bs4 import BeautifulSoup, Tag
@@ -98,11 +97,9 @@ def _table_to_md(table: Tag) -> str:
     """Convert an HTML table to a markdown pipe table."""
     rows: list[list[str]] = []
     for tr in table.find_all("tr"):
-        tr_tag = cast("Tag", tr)
         cells = []
-        for cell in tr_tag.find_all(["th", "td"]):
-            cell_tag = cast("Tag", cell)
-            text = cell_tag.get_text(" ", strip=True).replace("|", r"\|").replace("\n", " ")
+        for cell in tr.find_all(["th", "td"]):
+            text = cell.get_text(" ", strip=True).replace("|", r"\|").replace("\n", " ")
             cells.append(text)
         if cells:
             rows.append(cells)
@@ -133,7 +130,7 @@ def fetch_page(slug: str, *, force: bool = False) -> Path:
     container = soup.find("div", id="content") or soup.find("main") or soup.body
     if container is None:
         container = soup
-    md = _walk_to_md(cast("Tag", container))
+    md = _walk_to_md(container)
     out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(f"# Source: {url}\n\n{md.strip()}\n", encoding="utf-8")
     return out_path

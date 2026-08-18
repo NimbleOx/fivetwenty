@@ -52,6 +52,8 @@ validators:
       ignore_rules:
         # Ignore temp file INP001 warnings (false positives)
         - "INP001"  # Missing __init__.py
+        # Illustrative snippets, not standalone project files
+        - "CPY001"  # Missing copyright notice at top of file
         # Allow educational print statements in tutorials
         - "T201"    # Print statements
         # Allow direct imports in documentation examples
