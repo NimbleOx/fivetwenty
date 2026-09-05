@@ -137,33 +137,33 @@ async def main() -> None:
     # - Multiple clients or sub-accounts
     #
     # FiveTwenty supports this via custom environment prefixes
-    # Instead of FIVETWENTY_OANDA_*, you can use YOUR_PREFIX_OANDA_*
+    # Instead of FIVETWENTY_OANDA_*, you can use YOUR_PREFIX_FIVETWENTY_OANDA_*
     print("\n=== 4. Multi-Account Configuration ===")
 
     print("\nManage multiple accounts using custom prefixes:")
     print("  - Each account gets its own prefix")
     print("  - Set different environment variables for each")
-    print("  - Create separate clients with env_prefix parameter")
+    print("  - Load each prefix with AccountConfigLoader.from_env_prefix")
 
     print("\nExample environment variables:")
     print("  # Account A configuration")
-    print("  ACCOUNT_A_OANDA_TOKEN=token-1")
-    print("  ACCOUNT_A_OANDA_ACCOUNT=account-1")
-    print("  ACCOUNT_A_OANDA_ENVIRONMENT=practice")
+    print("  ACCOUNT_A_FIVETWENTY_OANDA_TOKEN=token-1")
+    print("  ACCOUNT_A_FIVETWENTY_OANDA_ACCOUNT=account-1")
+    print("  ACCOUNT_A_FIVETWENTY_OANDA_ENVIRONMENT=practice")
     print()
     print("  # Account B configuration")
-    print("  ACCOUNT_B_OANDA_TOKEN=token-2")
-    print("  ACCOUNT_B_OANDA_ACCOUNT=account-2")
-    print("  ACCOUNT_B_OANDA_ENVIRONMENT=practice")
+    print("  ACCOUNT_B_FIVETWENTY_OANDA_TOKEN=token-2")
+    print("  ACCOUNT_B_FIVETWENTY_OANDA_ACCOUNT=account-2")
+    print("  ACCOUNT_B_FIVETWENTY_OANDA_ENVIRONMENT=practice")
 
     print("\n💡 Usage:")
-    print("  Use env_prefix parameter with AsyncClient:")
-    print("  - AsyncClient(env_prefix='ACCOUNT_A_') for Account A")
-    print("  - AsyncClient(env_prefix='ACCOUNT_B_') for Account B")
+    print("  Load a config, require a non-None result, then pass it to AsyncClient:")
+    print("  - AccountConfigLoader.from_env_prefix('ACCOUNT_A_') for Account A")
+    print("  - AccountConfigLoader.from_env_prefix('ACCOUNT_B_') for Account B")
     print("  - Both can be active simultaneously")
 
     print("\n⚠️  Important:")
-    print("  - Each prefix requires all three variables")
+    print("  - Token and account are required; environment defaults to practice")
     print("  - Prefix must include trailing underscore")
     print("  - You can have clients for multiple accounts open at once")
 
@@ -177,13 +177,13 @@ async def main() -> None:
 
     print("\nUse custom prefixes for different strategies:")
     print("  # Strategy-based configuration")
-    print("  STRATEGY_1_OANDA_TOKEN")
-    print("  STRATEGY_1_OANDA_ACCOUNT")
-    print("  STRATEGY_1_OANDA_ENVIRONMENT")
+    print("  STRATEGY_1_FIVETWENTY_OANDA_TOKEN")
+    print("  STRATEGY_1_FIVETWENTY_OANDA_ACCOUNT")
+    print("  STRATEGY_1_FIVETWENTY_OANDA_ENVIRONMENT")
 
-    print("\n  STRATEGY_2_OANDA_TOKEN")
-    print("  STRATEGY_2_OANDA_ACCOUNT")
-    print("  STRATEGY_2_OANDA_ENVIRONMENT")
+    print("\n  STRATEGY_2_FIVETWENTY_OANDA_TOKEN")
+    print("  STRATEGY_2_FIVETWENTY_OANDA_ACCOUNT")
+    print("  STRATEGY_2_FIVETWENTY_OANDA_ENVIRONMENT")
 
     print("\n💡 This allows:")
     print("  - Multiple strategies on same account")
@@ -194,9 +194,9 @@ async def main() -> None:
     print("    (PROD_*, DEV_*, TEST_* prefixes)")
 
     print("\n  # Environment-based prefixes")
-    print("  PROD_OANDA_TOKEN     → Production trading")
-    print("  STAGING_OANDA_TOKEN  → Staging/testing")
-    print("  DEV_OANDA_TOKEN      → Development")
+    print("  PROD_FIVETWENTY_OANDA_TOKEN     → Production trading")
+    print("  STAGING_FIVETWENTY_OANDA_TOKEN  → Staging/testing")
+    print("  DEV_FIVETWENTY_OANDA_TOKEN      → Development")
 
     # Section 6: Configuration from files
     # ===================================
@@ -261,7 +261,7 @@ async def main() -> None:
     print("  - Use separate tokens for practice/live")
     print("    (Different tokens = can't accidentally use wrong environment)")
     print("  - Double-check environment before trading")
-    print("    (Add assertions: assert client._environment == Environment.PRACTICE)")
+    print("    (Add assertions: check client.config.environment == Environment.PRACTICE)")
     print("  - Start with small positions in live")
     print("    (Even after thorough testing, start with minimal risk)")
     print("  - Monitor closely when switching to live")
@@ -269,8 +269,8 @@ async def main() -> None:
 
     print("\n💡 Pro Tip:")
     print("  Set a different env prefix for live:")
-    print("    LIVE_OANDA_* for production")
-    print("    DEV_OANDA_* for development")
+    print("    LIVE_FIVETWENTY_OANDA_* for production")
+    print("    DEV_FIVETWENTY_OANDA_* for development")
     print("  This makes it harder to accidentally trade live")
 
     # Section 8: Configuration validation

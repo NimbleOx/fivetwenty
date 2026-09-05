@@ -300,7 +300,7 @@ async def main() -> None:
         print("\n=== 11. Custom Timeouts ===")
 
         print("\nConfigure timeouts for different scenarios:")
-        print("  - Low-latency trading: AsyncClient(timeout=5.0)")
+        print("  - Shorter read deadline: AsyncClient(timeout=5.0)")
         print("  - Historical data: AsyncClient(timeout=30.0) for large datasets")
         print("  - Default timeout: 60 seconds")
         print("  - Catch httpx.TimeoutException for timeout errors")
@@ -393,7 +393,7 @@ async def main() -> None:
     print("   - Type safety catches bugs early")
     print("   - Resource cleanup guaranteed")
     print("\n   These features combined create a robust,")
-    print("   production-ready trading system foundation.")
+    print("   examples of SDK requests and response handling.")
 
 
 if __name__ == "__main__":

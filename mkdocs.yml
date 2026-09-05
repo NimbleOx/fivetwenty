@@ -78,11 +78,11 @@ nav:
           - Your First Trade: tutorials/getting-started/first-trade.md
       - Trading Basics:
           - tutorials/basic-trading/index.md
-          - Foundation: tutorials/basic-trading/foundation.md
+          - Model & Numeric Basics: tutorials/basic-trading/foundation.md
           - Market Data & Analysis: tutorials/basic-trading/market-data.md
           - Position Management: tutorials/basic-trading/position-management.md
           - Strategy Building: tutorials/basic-trading/strategy-building.md
-          - Complete System: tutorials/basic-trading/complete-system.md
+          - Decision Workflow: tutorials/basic-trading/complete-system.md
       - More Trading:
           - tutorials/advanced-orders/index.md
           - Stop Orders & Market-If-Touched: tutorials/advanced-orders/stop-orders-mit.md

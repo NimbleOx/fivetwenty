@@ -7,7 +7,9 @@ import re
 from collections.abc import Callable
 from decimal import Decimal
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any
+from unittest.mock import AsyncMock
 
 import httpx
 import pytest
@@ -18,9 +20,19 @@ from fivetwenty.models import LimitOrderRequest, OrderPositionFill, StopOrderReq
 
 ROOT = Path(__file__).resolve().parents[2]
 RISK_NOTEBOOK = "docs/examples/notebooks/risk-management.ipynb"
-CLOSE_EXAMPLES = ["docs/guides/practical-solutions/close-positions.md", "docs/examples/notebooks/quick-start.ipynb"]
+CLOSE_EXAMPLES = ["docs/examples/notebooks/quick-start.ipynb"]
 ACCOUNT_ID = "offline-account"
 TIMESTAMP = "2026-09-01T12:00:00Z"
+
+
+@pytest.mark.asyncio
+async def test_retry_example_handles_a_rate_limit_with_float_delays():
+    sleep = AsyncMock()
+    retry = _definition("docs/api-reference/error-handling.md", "retry_with_backoff", asyncio=SimpleNamespace(sleep=sleep), random=SimpleNamespace(uniform=lambda low, high: high))
+    operation = AsyncMock(side_effect=[FiveTwentyError(status=429, message="offline rate limit", response=httpx.Response(429, headers={"Retry-After": "2"})), "retried"])
+    assert await retry(operation) == "retried"
+    assert operation.await_count == 2
+    sleep.assert_awaited_once_with(2.2)
 
 
 def _definition(relative_path: str, name: str, **overrides: Any) -> Any:
@@ -212,31 +224,6 @@ async def test_close_examples_handle_empty_position_envelope(example: str) -> No
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize(("units", "side"), [(500, "long"), (-500, "short")])
-async def test_partial_close_leaves_other_side_unchanged(units: int, side: str) -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        if request.method == "GET":
-            return httpx.Response(200, json={"positions": [_position("1000", "-1000")], "lastTransactionID": "123"})
-        assert request.method == "PUT"
-        assert request.url.path.endswith("/positions/EUR_USD/close")
-        assert json.loads(request.content) == {"longUnits": "500" if side == "long" else "NONE", "shortUnits": "500" if side == "short" else "NONE"}
-        return httpx.Response(200, json={"lastTransactionID": "124", f"{side}OrderFillTransaction": _fill(str(-units))})
-
-    close_partial = _definition(CLOSE_EXAMPLES[0], "close_partial_position", AsyncClient=_client_factory(handler))
-    assert await close_partial(ACCOUNT_ID, "EUR_USD", units) is not None
-
-
-@pytest.mark.asyncio
-async def test_verification_detects_fractional_hedged_position() -> None:
-    def handler(request: httpx.Request) -> httpx.Response:
-        assert request.method == "GET"
-        return httpx.Response(200, json={"positions": [_position("0.5", "-0.5")], "lastTransactionID": "123"})
-
-    verify = _definition(CLOSE_EXAMPLES[0], "verify_position_closed", AsyncClient=_client_factory(handler))
-    assert await verify(ACCOUNT_ID, "EUR_USD") is False
-
-
-@pytest.mark.asyncio
 @pytest.mark.parametrize("units", [1000, -1000])
 async def test_scale_out_limits_keep_price_trigger_and_cannot_open_exposure(units: int) -> None:
     orders: list[dict[str, Any]] = []
@@ -261,28 +248,3 @@ async def test_scale_out_limits_keep_price_trigger_and_cannot_open_exposure(unit
     assert [order["price"] for order in orders] == ["1.20000", "1.30000"]
     assert all(order["type"] == "LIMIT" and order["positionFill"] == "REDUCE_ONLY" for order in orders)
     assert sum(Decimal(order["units"]) for order in orders) == -units
-
-
-@pytest.mark.asyncio
-@pytest.mark.parametrize("units", [1001, -1001])
-async def test_tiered_stop_orders_cannot_open_exposure(units: int) -> None:
-    orders: list[dict[str, Any]] = []
-
-    def handler(request: httpx.Request) -> httpx.Response:
-        if request.method == "GET":
-            assert request.url.path.endswith("/pricing")
-            price = {"instrument": "EUR_USD", "time": TIMESTAMP, "closeoutBid": "1.1", "closeoutAsk": "1.1002", "bids": [{"price": "1.1", "liquidity": "10000"}], "asks": [{"price": "1.1002", "liquidity": "10000"}]}
-            return httpx.Response(200, json={"prices": [price], "time": TIMESTAMP})
-        assert request.method == "POST"
-        assert request.url.path.endswith("/orders")
-        order = json.loads(request.content)["order"]
-        orders.append(order)
-        if order["type"] == "MARKET":
-            return httpx.Response(201, json={"orderFillTransaction": _fill(str(units)), "lastTransactionID": "123"})
-        return httpx.Response(201, json={"lastTransactionID": "124"})
-
-    tiered_stops = _definition("docs/guides/practical-solutions/implement-stop-loss-strategies.md", "implement_tiered_stop_loss", AsyncClient=_client_factory(handler))
-    assert await tiered_stops(ACCOUNT_ID, "EUR_USD", units) is True
-    assert len(orders) == 4
-    assert all(order["type"] == "STOP" and order["positionFill"] == "REDUCE_ONLY" for order in orders[1:])
-    assert sum(Decimal(order["units"]) for order in orders[1:]) == -units

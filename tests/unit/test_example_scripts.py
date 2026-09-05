@@ -378,6 +378,8 @@ class MockOandaApi:
 
     def __init__(self) -> None:
         self.unmocked: list[str] = []
+        self.empty_account = False
+        self.closed_trades: set[str] = set()
 
     def handle(self, request: httpx.Request) -> httpx.Response:  # noqa: PLR0911
         path = request.url.path.removeprefix("/v3")
@@ -440,10 +442,11 @@ class MockOandaApi:
                 return httpx.Response(201, json={"orderCancelTransaction": _order_cancel_transaction("6797")} | _order_response(body))
             if len(tail) == 2 and tail[0] == "orders":
                 return httpx.Response(200, json={"order": _order(tail[1]), "lastTransactionID": "5678"})
-            return httpx.Response(200, json={"orders": [_order("6788")], "lastTransactionID": "5678"})
+            return httpx.Response(200, json={"orders": [] if self.empty_account else [_order("6788")], "lastTransactionID": "5678"})
 
         if tail[:1] in (["trades"], ["openTrades"]):
             if tail[-1:] == ["close"]:
+                self.closed_trades.add(tail[1])
                 return httpx.Response(
                     200,
                     json={
@@ -457,8 +460,11 @@ class MockOandaApi:
             if tail[-1:] == ["orders"]:
                 return httpx.Response(200, json={"lastTransactionID": "6813"})
             if len(tail) == 2 and tail[0] == "trades":
-                return httpx.Response(200, json={"trade": _trade(tail[1]), "lastTransactionID": "5678"})
-            return httpx.Response(200, json={"trades": [_trade("6791")], "lastTransactionID": "5678"})
+                trade = _trade(tail[1])
+                if tail[1] in self.closed_trades:
+                    trade.update(state="CLOSED", currentUnits="0")
+                return httpx.Response(200, json={"trade": trade, "lastTransactionID": "5678"})
+            return httpx.Response(200, json={"trades": [] if self.empty_account else [_trade("6791")], "lastTransactionID": "5678"})
 
         if tail[:1] == ["transactions"]:
             transactions = [_order_fill_transaction(str(index), "EUR_USD", "1000", _format("EUR_USD", _base("EUR_USD"))) for index in range(1, 6)]
@@ -522,6 +528,7 @@ def test_every_example_script_is_covered() -> None:
 
 @pytest.mark.parametrize("script_path", SCRIPT_PATHS, ids=lambda path: path.stem)
 def test_example_script_runs_against_mocked_api(script_path: Path, mock_oanda: MockOandaApi) -> None:
+    mock_oanda.empty_account = script_path.stem == "basic_usage"
     module = _load_script(script_path)
     main = module.main
 

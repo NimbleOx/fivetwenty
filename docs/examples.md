@@ -1,129 +1,82 @@
-# Examples & Code Samples
+# Scripts and notebooks
 
-This page indexes the example code for FiveTwenty. All examples live in the repository under `docs/examples/` and are kept current with the SDK.
+Examples live in the repository under `docs/examples/`; they are not installed with
+the SDK package. Read each example's configuration and account-changing operations
+before running it. A practice default can be overridden by environment configuration,
+and practice requests still change account state.
 
-## Browse Examples Locally
+For a first read-only script, start with [authentication](tutorials/getting-started/authentication.md).
+For one explicit create-and-close sequence, use the
+[practice trade lifecycle](tutorials/getting-started/first-trade.md).
 
-The examples come in two forms:
+## Python scripts
 
-### Python Scripts
+The scripts cover the following topics. “Contains writes” means the file includes
+account-changing calls; inspect the selected entry point and conditions before use.
+These are demonstrations, not unattended trading services.
 
-**[`docs/examples/scripts/`](https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/scripts)**
+| Script | Topic | Contains writes |
+| --- | --- | --- |
+| [basic_usage.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/basic_usage.py) | Getting started with FiveTwenty | Yes |
+| [account_management.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/account_management.py) | Account operations and configuration | No |
+| [configuration_patterns.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/configuration_patterns.py) | Different ways to configure the client | No |
+| [sync_usage.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/sync_usage.py) | Using the synchronous client wrapper | Yes |
+| [pricing_and_candles.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/pricing_and_candles.py) | Market data and candlestick analysis | No |
+| [advanced_order_management.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/advanced_order_management.py) | Complex order types and management | Yes |
+| [position_management.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/position_management.py) | Position tracking and management | Yes |
+| [trade_management.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/trade_management.py) | Trade lifecycle management | Yes |
+| [transaction_analysis.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/transaction_analysis.py) | Transaction history and analysis | No |
+| [enhanced_error_handling.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/enhanced_error_handling.py) | Error handling patterns | Yes |
+| [advanced_features_demo.py](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/advanced_features_demo.py) | Tour of advanced SDK features | Yes |
 
-Complete, runnable Python scripts demonstrating specific functionality:
+## Jupyter notebooks
 
-- **[`basic_usage.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/basic_usage.py)** - Getting started with FiveTwenty
-- **[`account_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/account_management.py)** - Account operations and configuration
-- **[`configuration_patterns.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/configuration_patterns.py)** - Different ways to configure the client
-- **[`sync_usage.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/sync_usage.py)** - Using the synchronous client wrapper
-- **[`pricing_and_candles.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/pricing_and_candles.py)** - Market data and candlestick analysis
-- **[`advanced_order_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/advanced_order_management.py)** - Complex order types and management
-- **[`position_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/position_management.py)** - Position tracking and management
-- **[`trade_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/trade_management.py)** - Trade lifecycle management
-- **[`transaction_analysis.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/transaction_analysis.py)** - Transaction history and analysis
-- **[`enhanced_error_handling.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/enhanced_error_handling.py)** - Error handling patterns
-- **[`advanced_features_demo.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/advanced_features_demo.py)** - Tour of advanced SDK features
+Run cells in order with the configured Python kernel. Notebook Markdown explains
+which operations change account state and which results use local simulations.
+The quick-start notebook places an order, and its position-close cell can affect
+trades that predate the notebook.
 
-### Jupyter Notebooks
+| Notebook | Exercise |
+| --- | --- |
+| [quick-start.ipynb](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/quick-start.ipynb) | Quick start guide and basic operations |
+| [trading-strategies.ipynb](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/trading-strategies.ipynb) | Strategy development and implementation |
+| [streaming-data.ipynb](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/streaming-data.ipynb) | Real-time data processing and streaming |
+| [risk-management.ipynb](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/risk-management.ipynb) | Risk management techniques and tools |
+| [data-analysis.ipynb](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/data-analysis.ipynb) | Market data analysis and visualization |
+| [backtesting.ipynb](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/backtesting.ipynb) | Simplified historical simulation and parameter comparisons |
 
-**[`docs/examples/notebooks/`](https://github.com/NimbleOx/fivetwenty/tree/main/docs/examples/notebooks)**
+## Run from a checkout
 
-Interactive Jupyter notebooks for learning and experimentation:
+```bash
+git clone https://github.com/NimbleOx/fivetwenty.git
+cd fivetwenty
+uv sync --group dev
+uv run python docs/examples/scripts/pricing_and_candles.py
+```
 
-- **[`quick-start.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/quick-start.ipynb)** - Quick start guide and basic operations
-- **[`trading-strategies.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/trading-strategies.ipynb)** - Strategy development and implementation
-- **[`streaming-data.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/streaming-data.ipynb)** - Real-time data processing and streaming
-- **[`risk-management.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/risk-management.ipynb)** - Risk management techniques and tools
-- **[`data-analysis.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/data-analysis.ipynb)** - Market data analysis and visualization
-- **[`backtesting.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/backtesting.ipynb)** - Strategy backtesting framework
+Set `FIVETWENTY_OANDA_TOKEN` and `FIVETWENTY_OANDA_ACCOUNT` for a practice account,
+and `FIVETWENTY_OANDA_ENVIRONMENT=practice`. Check whether the selected script loads
+`.env` itself; the SDK does not. Scripts that stream may run until interrupted.
 
-## Getting Started
+For notebooks, install the packages imported by the setup cell, including any
+analysis or plotting dependencies, and select that environment as the kernel.
+From this checkout, a Jupyter installation can be started with:
 
-### Prerequisites
+```bash
+uv run --with jupyter jupyter notebook docs/examples/notebooks
+```
 
-Before running any examples, make sure you have:
+The repository's offline notebook check installs its analysis dependencies in an
+ephemeral environment and executes temporary copies using mocked HTTP:
 
-1. **FiveTwenty installed**: `uv add fivetwenty`
-2. **OANDA API credentials**: [Get your API token](tutorials/getting-started/authentication.md)
-3. **Environment configured**: Set your `FIVETWENTY_OANDA_TOKEN` and account details
+```bash
+uv run poe docs-validate-notebooks
+```
 
-### Running Python Scripts
+A successful mocked run checks SDK usage against synthetic responses. It does not
+establish live fills, strategy performance or eligibility for account-specific
+features. Backtests and paper simulations need their timing, costs, currency and
+execution assumptions reviewed before their metrics are meaningful.
 
-1. **Install FiveTwenty** (if not already installed):
-   ```bash
-   uv add fivetwenty
-   ```
-
-2. **Get the examples** (they live in the repository, not the installed package):
-   ```bash
-   git clone https://github.com/NimbleOx/fivetwenty.git
-   cd fivetwenty/docs/examples/scripts
-   ```
-
-3. **Set up your environment**:
-   ```bash
-   export FIVETWENTY_OANDA_TOKEN="your-practice-token"
-   export FIVETWENTY_OANDA_ACCOUNT="your-account-id"
-   export FIVETWENTY_OANDA_ENVIRONMENT="practice"
-   ```
-
-4. **Run any script**:
-   ```bash
-   python path/to/examples/scripts/basic_usage.py
-   ```
-
-### Running Jupyter Notebooks
-
-1. **Install Jupyter**:
-   ```bash
-   uv add jupyter
-   ```
-
-2. **Navigate to notebooks directory**:
-   ```bash
-   # Find and navigate to the notebooks directory
-   cd path/to/docs/examples/notebooks/
-   ```
-
-3. **Start Jupyter**:
-   ```bash
-   jupyter notebook
-   ```
-
-4. **Open any notebook** and follow the interactive instructions
-
-## Documentation Integration
-
-Examples complement our structured documentation:
-
-- **[Tutorials](tutorials/index.md)** - Step-by-step learning paths
-- **[Guides](guides/index.md)** - Concept explanations and how-to solutions
-- **[API Reference](api-reference/index.md)** - Complete API documentation
-
-## Contributing Examples
-
-Found a bug or want to add an example?
-
-1. **Report issues**: See [Contributing Guide](contributing/index.md) for reporting guidelines
-2. **Contribute examples**: [Contributing Guide](contributing/index.md)
-3. **Suggest improvements**: [Contributing Guide](contributing/index.md)
-
-## Example Categories
-
-### By Skill Level
-
-- **Beginner**: [`basic_usage.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/basic_usage.py), [`quick-start.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/quick-start.ipynb)
-- **Intermediate**: [`account_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/account_management.py), [`pricing_and_candles.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/pricing_and_candles.py), [`trading-strategies.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/trading-strategies.ipynb)
-- **Advanced**: [`advanced_features_demo.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/advanced_features_demo.py), [`enhanced_error_handling.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/enhanced_error_handling.py), [`backtesting.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/backtesting.ipynb)
-
-### By Use Case
-
-- **Account Management**: [`account_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/account_management.py), [`configuration_patterns.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/configuration_patterns.py)
-- **Market Data**: [`pricing_and_candles.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/pricing_and_candles.py), [`data-analysis.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/data-analysis.ipynb), [`streaming-data.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/streaming-data.ipynb)
-- **Trading**: [`advanced_order_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/advanced_order_management.py), [`position_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/position_management.py), [`trade_management.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/trade_management.py)
-- **Analysis**: [`transaction_analysis.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/transaction_analysis.py), [`backtesting.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/backtesting.ipynb), [`risk-management.ipynb`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/notebooks/risk-management.ipynb)
-- **Integration**: [`sync_usage.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/sync_usage.py), [`enhanced_error_handling.py`](https://github.com/NimbleOx/fivetwenty/blob/main/docs/examples/scripts/enhanced_error_handling.py)
-
----
-
-All examples use the practice environment by default, so nothing here risks real money.
+See [contributing](contributing/index.md) to report a stale example with its SDK
+version, sanitized inputs and observed result.

@@ -233,7 +233,7 @@ def main() -> None:
     print("  AsyncClient:")
     print("    ⚡ More efficient for concurrent operations")
     print("       - Can await multiple requests simultaneously")
-    print("    ⚡ Better for high-frequency trading")
+    print("    ⚡ Supports concurrent reads and asynchronous processing")
     print("       - No thread/queue overhead")
     print("    ⚡ Scales well with multiple requests")
     print("       - asyncio.gather() for parallel execution")
@@ -324,7 +324,7 @@ def main() -> None:
     print("   Use AsyncClient for production systems")
     print("     - Better performance at scale")
     print("     - Proper async/await patterns")
-    print("     - Essential for high-frequency trading")
+    print("     - Useful for asynchronous applications")
 
     print("\n✅ Synchronous client usage example completed!")
 

@@ -5,131 +5,100 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-A Python client for the OANDA v20 REST API. Async-first with a synchronous wrapper, every monetary value in `Decimal`, and the live v20 endpoint groups implemented.
+FiveTwenty is a typed Python client for OANDA's v20 REST API. It provides an
+`AsyncClient` for asyncio applications and a synchronous `Client` for blocking
+request code.
 
-## Features
+## What the SDK handles
 
-- Async-first `AsyncClient`, plus a thread-backed sync `Client` with the same surface
-- mypy strict throughout, with typed models and TypedDict responses
-- Two runtime dependencies: httpx and pydantic
-- Retries with backoff for safe requests only; writes are never re-sent, so a timed-out order can't be double-submitted
-- Price and transaction streaming with stall detection and configurable reconnection
-- 130+ Pydantic models and 41 enums, checked against OANDA's live developer documentation by an automated parity pipeline
+- Seven endpoint groups: accounts, instruments, orders, trades, positions, pricing and transactions.
+- Pydantic models with Python field names, `Decimal` financial values and native `datetime` attributes.
+- Response dictionaries that retain OANDA's envelope keys, such as `account` and `lastTransactionID`.
+- Connection reuse, structured API errors and retries for eligible read requests.
+- Pricing and transaction streams, plus a pricing helper with configurable reconnection.
 
-## Beta Compatibility Note
+The SDK does not automatically retry writes. If an order request times out, its
+outcome may be unknown; check account or transaction state before submitting again.
+The [API reference](https://nimbleox.github.io/fivetwenty/api-reference/) describes
+method signatures, return types and account-specific restrictions.
 
-FiveTwenty is still beta software, and the public API may change where doing so
-brings the SDK closer to OANDA's v20 API.
+## Quick start
 
-The current `get_orders()` API returns OANDA's response envelope instead of a
-bare order list:
-
-```text
-orders_response = await client.orders.get_orders(account_id)
-orders = orders_response["orders"]
-last_transaction_id = orders_response["lastTransactionID"]
-```
-
-Older beta examples may have treated the return value as the list itself:
-
-```text
-orders = await client.orders.get_orders(account_id)
-```
-
-Update those call sites to read `response["orders"]`. The same shape is used by
-the synchronous `Client`.
-
-## Quick Start
-
-### Installation
+Install Python 3.10 or later, then install the SDK. `python-dotenv` is optional; this
+example uses it to load a local `.env` file.
 
 ```bash
 pip install fivetwenty python-dotenv
 ```
 
-Or with uv:
-```bash
-uv add fivetwenty python-dotenv
-```
+With uv, use `uv add fivetwenty python-dotenv` instead.
 
-### Configuration
-
-Create a `.env` file with your OANDA credentials:
+Create `.env` with credentials for your OANDA v20 practice account, and keep it out
+of version control:
 
 ```bash
-FIVETWENTY_OANDA_TOKEN=your-api-token
+FIVETWENTY_OANDA_TOKEN=your-practice-token
 FIVETWENTY_OANDA_ACCOUNT=your-account-id
 FIVETWENTY_OANDA_ENVIRONMENT=practice
 ```
 
-### Usage
+This example reads the configured account and current pricing. It does not place
+an order. Printed prices are a snapshot, not a promised execution price.
 
 ```python
 import asyncio
-import time
-from decimal import Decimal
 
 from dotenv import load_dotenv
+from fivetwenty import AsyncClient, Environment
 
-from fivetwenty import AsyncClient
-from fivetwenty.models import ClientPrice, InstrumentName
-
-# Load environment variables from .env file
 load_dotenv()
 
 
 async def main() -> None:
-    # Zero-config client - automatically reads from environment variables
     async with AsyncClient() as client:
-        # Get accounts
-        accounts = await client.accounts.get_accounts()
-        account_id = accounts[0].id
+        if client.config.environment != Environment.PRACTICE:
+            message = "Use a practice account for this example"
+            raise ValueError(message)
+        response = await client.accounts.get_account_summary(client.account_id)
+        account = response["account"]
+        print(f"Balance: {account.balance} {account.currency}")
 
-        # Create market order (use Decimal for financial values)
-        order = await client.orders.post_market_order(
-            account_id=account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000,
-            stop_loss=Decimal("1.0900"),
-            take_profit=Decimal("1.1100"),
+        response_prices = await client.pricing.get_pricing(
+            client.account_id, instruments=["EUR_USD"]
         )
-        print(f"Order created: {order['lastTransactionID']}")
-
-        # Stream real-time prices for 30 seconds
-        end_time = time.time() + 30
-
-        async for price in client.pricing.get_pricing_stream(
-            account_id, [InstrumentName.EUR_USD]
-        ):
-            if isinstance(price, ClientPrice):  # Filter out heartbeats
-                spread = price.closeout_ask - price.closeout_bid
-                print(f"{price.instrument}: {price.closeout_bid}/{price.closeout_ask} (spread: {spread})")
-
-            if time.time() > end_time:
-                break
+        for price in response_prices["prices"]:
+            print(f"{price.instrument}: {price.closeout_bid} / {price.closeout_ask}")
 
 
 if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-## Requirements
 
-- Python 3.10+
-- httpx >= 0.25.0
-- pydantic >= 2.5.0
+The SDK reads process environment variables; it does not load `.env` files itself.
+For an order lifecycle, continue with
+[Your first trade](https://nimbleox.github.io/fivetwenty/tutorials/getting-started/first-trade/).
 
-## API coverage
+## Beta compatibility
 
-All seven OANDA v20 endpoint groups:
+The public API may change as this beta library is aligned with OANDA v20. Review
+changes before upgrading.
 
-- **Accounts**: account details, summary, instruments, configuration, change polling
-- **Instruments**: candles, order book and position book snapshots
-- **Orders**: create (market, limit, stop, market-if-touched), list, get, cancel, replace, client extensions
-- **Trades**: list, get, close, client extensions, dependent take-profit/stop-loss orders
-- **Positions**: list, get, close by instrument
-- **Pricing**: current prices, streaming, account-scoped candles, latest candles
-- **Transactions**: history by time or ID range, single lookup, streaming
+- Collection methods generally return an envelope. For example, read
+  `response["orders"]` after `get_orders()` and retain `response["lastTransactionID"]`
+  when tracking account state. `get_accounts()` returns its account list directly.
+- Omit a dependent-order update argument to leave that order unchanged; pass
+  `None` to cancel it. Partial dictionaries use OANDA's camelCase field names.
+- `max_retries=3` allows the initial request plus three retries for eligible reads.
+  `max_retries=0` still sends the initial request. Writes are sent once.
+- `datetime_format` controls the wire format. Parsed model attributes remain Python
+  datetimes; Python represents microseconds, not OANDA's full nanosecond precision.
+
+## Requirements and development
+
+The direct runtime dependencies are HTTPX >= 0.26.0 and Pydantic >= 2.7.0.
+See the [testing guide](https://nimbleox.github.io/fivetwenty/contributing/testing-guide/)
+for supported Python versions, coverage checks and opt-in practice-account tests.
 
 ## License
 

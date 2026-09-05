@@ -1,41 +1,22 @@
-# FiveTwenty Documentation
+# FiveTwenty
 
-FiveTwenty is a Python SDK for OANDA's v20 REST API, built async-first with a synchronous wrapper. It covers all seven v20 endpoint groups and keeps every monetary value in `Decimal`.
+FiveTwenty wraps OANDA's v20 REST API for Python. Use `AsyncClient` in an asyncio
+application or `Client` for synchronous requests. Financial model attributes use
+`Decimal`; timestamps use Python `datetime` objects.
 
-## What is FiveTwenty?
+The SDK handles request serialization, response parsing, HTTP connections and
+structured API errors. Your application decides when to trade, how to reconcile
+uncertain outcomes and how to manage account state.
 
-OANDA's v20 API speaks JSON with string-encoded decimals, camelCase field names, and long-lived HTTP streams. FiveTwenty translates that into typed Python: Pydantic models for every request and response object, async iterators for price and transaction streams, and structured exceptions for every error the API can return. Your code works with `Decimal` prices and enum order types; the SDK handles serialization, connection management, and reconnection.
+## Start with a read-only request
 
-Two runtime dependencies: httpx and pydantic.
-
-**What you get:**
-
-- Every monetary value is a `Decimal`. No floats, anywhere.
-- Full type hints under mypy strict, with a `py.typed` marker.
-- An async-first `AsyncClient` and a thread-backed synchronous `Client` with the same surface.
-- Price and transaction streaming with stall detection and configurable reconnection.
-- Retries with exponential backoff for safe requests only; writes are never retried, so a timed-out order can't be silently double-submitted.
-- 130+ Pydantic models and 41 enums matching the OANDA specification, verified by an automated parity pipeline against OANDA's published docs.
-
-## What's covered
-
-All seven v20 endpoint groups: accounts, instruments (candles, order book, position book), orders, trades, positions, pricing and streaming, and transactions. Order support includes market, limit, stop, and market-if-touched orders with take-profit, stop-loss, trailing, and guaranteed-stop attachments.
-
-Configuration comes from constructor arguments, an `AccountConfig` object, or `FIVETWENTY_*` environment variables, with credentials held in `SecretStr` so they never appear in logs or reprs.
-
-## Quick Start
-
-Get trading in minutes with a minimal example.
-
-### Installation
+Install the SDK and the optional `.env` loader:
 
 ```bash
 uv add fivetwenty python-dotenv
 ```
 
-### Configuration
-
-Create a `.env` file in your project root:
+Create a `.env` file with practice-account credentials:
 
 ```bash
 FIVETWENTY_OANDA_TOKEN=your-practice-token
@@ -43,80 +24,66 @@ FIVETWENTY_OANDA_ACCOUNT=your-account-id
 FIVETWENTY_OANDA_ENVIRONMENT=practice
 ```
 
-### Your First Trade
+Keep the file out of version control. Run the following script to read an account
+summary and price snapshot:
 
 ```python
 import asyncio
 
 from dotenv import load_dotenv
-from fivetwenty import AsyncClient
-from fivetwenty.endpoints.orders import OrderResponse
-from fivetwenty.models import AccountSummary, ClientPrice, InstrumentName
+from fivetwenty import AsyncClient, Environment
 
-# Load environment variables from .env file
 load_dotenv()
 
 
 async def main() -> None:
-    # Step 1: Initialize the client
-    # The AsyncClient automatically reads FIVETWENTY_* environment variables
-    # Using 'async with' ensures proper cleanup of connections
     async with AsyncClient() as client:
-        # Step 2: Check account balance before trading
-        # Always verify you have sufficient funds before placing orders
-        result = await client.accounts.get_account_summary(client.account_id)
-        account: AccountSummary = result["account"]
+        if client.config.environment != Environment.PRACTICE:
+            message = "Use a practice account for this example"
+            raise ValueError(message)
+        response = await client.accounts.get_account_summary(client.account_id)
+        account = response["account"]
         print(f"Balance: {account.balance} {account.currency}")
 
-        # Step 3: Get current market prices
-        # This shows the bid (sell) and ask (buy) prices
-        # The difference between them is the spread (your transaction cost)
-        pricing = await client.pricing.get_pricing(
-            account_id=client.account_id,
-            instruments=[InstrumentName.EUR_USD],
+        response_prices = await client.pricing.get_pricing(
+            client.account_id, instruments=["EUR_USD"]
         )
-        price: ClientPrice = pricing["prices"][0]
-        print(
-            f"Current EUR/USD - Bid: {price.bids[0].price}, Ask: {price.asks[0].price}"
-        )
-
-        # Step 4: Place a market order to open a position
-        # Market orders execute immediately at the current market price
-        # Positive units = BUY (go long), Negative units = SELL (go short)
-        order: OrderResponse = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=1000,  # Buy 1000 units
-        )
-
-        # Step 5: Verify the order was filled
-        # The order_fill_transaction contains execution details
-        if order.get("orderFillTransaction"):
-            print(f"Trade executed at {order['orderFillTransaction'].price}")
-
-        # Step 6: Close the position
-        # To close, place an order with the opposite sign (-1000 sells what we bought)
-        # This demonstrates a complete trade cycle: open → close
-        close_order: OrderResponse = await client.orders.post_market_order(
-            account_id=client.account_id,
-            instrument=InstrumentName.EUR_USD,
-            units=-1000,  # Negative units = sell to close
-        )
-
-        # Step 7: Confirm the position was closed
-        # Check the closing price to calculate profit/loss manually if needed
-        if close_order.get("orderFillTransaction"):
-            print(f"Position closed at {close_order['orderFillTransaction'].price}")
+        for price in response_prices["prices"]:
+            print(f"{price.instrument}: {price.closeout_bid} / {price.closeout_ask}")
 
 
-# Run the async function
-asyncio.run(main())
+if __name__ == "__main__":
+    asyncio.run(main())
 ```
 
-## Next Steps
 
-- [Tutorials](tutorials/index.md) teach the SDK step by step, starting with [installation](tutorials/getting-started/installation.md) and a first practice-account trade.
-- [Guides](guides/index.md) explain how the SDK works (architecture, environments, async vs sync) and solve specific problems (connection failures, stop-loss strategies, multi-account setups).
-- The [API Reference](api-reference/index.md) documents every method signature, parameter, and model field.
+`response["account"]` is an `AccountSummary` model. Its `balance` attribute is a
+`Decimal`, while the enclosing response retains OANDA's dictionary keys. See
+[models and response shapes](api-reference/models/index.md) for this distinction.
 
-New here? Start with [installation](tutorials/getting-started/installation.md).
+## Choose your next step
+
+| You want to… | Start here |
+|---|---|
+| Connect and learn the basic workflow | [Installation](tutorials/getting-started/installation.md), then [authentication](tutorials/getting-started/authentication.md) |
+| Create and close a practice trade | [Your first trade](tutorials/getting-started/first-trade.md) |
+| Solve a specific integration problem | [Guides](guides/index.md) |
+| Look up a method, parameter or field | [API reference](api-reference/index.md) |
+| Run a script or notebook | [Examples](examples.md) |
+| Change the library | [Contributing](contributing/index.md) |
+
+## API scope and compatibility
+
+The library exposes accounts, instruments, orders, trades, positions, pricing and
+transactions. Availability of instruments and order features depends on the OANDA
+account. A model accepting a request does not establish that OANDA will accept it.
+
+Read requests can retry after selected failures. Writes are not automatically
+resubmitted. Basic streams end on failure; the pricing reconnection helper is a
+separate method. See [client behavior](api-reference/client.md) and
+[connection failures](guides/practical-solutions/handle-connection-failures.md).
+
+This is beta software. The repository's tests and cached specification comparisons
+help detect regressions; they do not prove complete equivalence with every live API
+behavior. Check the [compatibility notes](https://github.com/NimbleOx/fivetwenty#beta-compatibility)
+before upgrading.

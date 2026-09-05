@@ -1,90 +1,44 @@
-# Installation
+# Install FiveTwenty
 
-## Requirements
+You need Python 3.10 or later and access to an OANDA v20 account. This page installs
+the library and verifies that Python can import it; it makes no API requests.
 
-- Python 3.10 or higher
-- An OANDA account (practice or live)
-- API access token from OANDA
-- **uv** - Python package manager ([installation guide](https://docs.astral.sh/uv/getting-started/installation/))
+## Create an environment and install
 
-## Environment Setup
-
-### Using uv (Recommended)
-
-uv creates and manages the virtual environment for you:
+With uv:
 
 ```bash
-# Create project with virtual environment
-uv venv
-
-# Add FiveTwenty to your project
-uv add fivetwenty
+uv init my-oanda-app
+cd my-oanda-app
+uv add fivetwenty python-dotenv
+uv run python -c "from importlib.metadata import version; print(version('fivetwenty'))"
 ```
 
-## Install from PyPI
-
-The recommended way to install FiveTwenty is via uv:
+Or use a virtual environment and pip:
 
 ```bash
-uv add fivetwenty
+python -m venv .venv
+source .venv/bin/activate
+python -m pip install fivetwenty python-dotenv
+python -c "from importlib.metadata import version; print(version('fivetwenty'))"
 ```
 
-## Install from Source
+On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1`.
+`python-dotenv` is optional; the tutorials use it to load configuration from `.env`.
+The SDK's direct runtime dependencies are HTTPX and Pydantic.
 
-For the latest development version:
+## Verify the interpreter
 
-```bash
-git clone https://github.com/NimbleOx/fivetwenty.git
-cd fivetwenty
-uv sync --dev
-```
+If importing fails after installation, check that the script uses the interpreter
+from the environment where the package was installed. Use `uv run` consistently in
+a uv project, or `python -m pip` with the activated interpreter.
 
-## Verify Installation
+An import check does not validate OANDA credentials. Continue with
+[authentication](authentication.md) to configure and test a read-only request.
 
-Test your installation:
+## Upgrades
 
-<!-- fragment: Demo version check with comprehensive installation validation -->
-```python
-# Step 1: Import FiveTwenty SDK to verify successful installation
-# This confirms the package was installed correctly and is accessible
-import fivetwenty
-
-# Step 2: Display installed version for verification and troubleshooting
-# Version information helps confirm you have the expected release installed
-print(f"FiveTwenty SDK version: {fivetwenty.__version__}")
-
-# Step 3: Optional - Verify core dependencies are available
-# This additional check ensures all required components are properly installed
-try:
-    import httpx
-    import pydantic
-    print("Core dependencies verified: httpx and pydantic available")
-    print("FiveTwenty SDK installation complete and ready for use")
-except ImportError as e:
-    print(f"⚠️ Dependency issue detected: {e}")
-    print("   Run 'uv add fivetwenty' to reinstall with dependencies")
-```
-
-Expected output:
-```text
-0.1.1 # or current version number
-```
-
-## Dependencies
-
-Installing the SDK pulls in just two runtime dependencies:
-
-- **httpx** - Async HTTP client with connection pooling
-- **pydantic** - Data validation and serialization (v2+)
-
-## Next Steps
-
-Now that you have the SDK installed:
-
-1. [Set up authentication](authentication.md) with your OANDA API token
-2. [Make your first trade](first-trade.md)
-
-For a complete understanding of practice vs live trading, see the [Environment Management Guide](../../guides/understanding/environments.md).
-
-!!! tip "Development Setup"
-    If you're contributing to the SDK, see the project's GitHub repository for development setup instructions.
+This is beta software. Pin the version in your application's dependency file, keep
+its lockfile, and review compatibility notes before upgrading. The repository
+[testing guide](../../contributing/testing-guide.md) describes the Python versions
+and minimum dependencies exercised by CI.
