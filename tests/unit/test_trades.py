@@ -11,6 +11,7 @@ from fivetwenty.models import (
     GuaranteedStopLossDetails,
     StopLossDetails,
     TakeProfitDetails,
+    TimeInForce,
     TradeStateFilter,
     TrailingStopLossDetails,
 )
@@ -570,3 +571,61 @@ class TestTradeEndpoints:
             "/accounts/101-001-123456-001/trades/12345/orders",
             json_data={"guaranteedStopLoss": ANY},
         )
+
+
+class TestDependentOrderSerialization:
+    """Dependent order updates must preserve OANDA's omitted-field inheritance."""
+
+    @pytest.fixture(
+        params=[
+            pytest.param(("take_profit", "takeProfit", TakeProfitDetails, {"price": Decimal("1.1000")}, {"price": "1.1000"}), id="take-profit"),
+            pytest.param(("stop_loss", "stopLoss", StopLossDetails, {"price": Decimal("1.1000")}, {"price": "1.1000"}), id="stop-loss"),
+            pytest.param(("trailing_stop_loss", "trailingStopLoss", TrailingStopLossDetails, {"distance": Decimal("0.0050")}, {"distance": "0.0050"}), id="trailing-stop-loss"),
+            pytest.param(("guaranteed_stop_loss", "guaranteedStopLoss", GuaranteedStopLossDetails, {"price": Decimal("1.1000")}, {"price": "1.1000"}), id="guaranteed-stop-loss"),
+        ]
+    )
+    def dependent_order(self, request):
+        return request.param
+
+    @pytest.fixture
+    def mock_client(self):
+        client = MagicMock()
+        response = MagicMock()
+        response.json.return_value = {"lastTransactionID": "12347"}
+        client._request = AsyncMock(return_value=response)
+        return client
+
+    @pytest.mark.asyncio
+    async def test_update_sends_only_supplied_price_or_distance(self, mock_client, dependent_order):
+        """Changing a price or distance must not reset expiry or guarantee settings."""
+        parameter, wire_name, details_type, fields, expected = dependent_order
+
+        await TradeEndpoints(mock_client).put_trade_orders("101-001-123456-001", "12345", **{parameter: details_type(**fields)})
+
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/trades/12345/orders", json_data={wire_name: expected})
+
+    @pytest.mark.asyncio
+    async def test_explicit_default_values_are_sent(self, mock_client, dependent_order):
+        """An explicit GTC or false guarantee remains a requested change."""
+        parameter, wire_name, details_type, fields, expected = dependent_order
+        fields = {**fields, "timeInForce": TimeInForce.GTC}
+        expected = {**expected, "timeInForce": "GTC"}
+        if parameter == "stop_loss":
+            fields["guaranteed"] = False
+            expected["guaranteed"] = False
+
+        await TradeEndpoints(mock_client).put_trade_orders("101-001-123456-001", "12345", **{parameter: details_type(**fields)})
+
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/trades/12345/orders", json_data={wire_name: expected})
+
+    @pytest.mark.asyncio
+    async def test_assigned_nested_extensions_preserve_supplied_fields(self, mock_client, dependent_order):
+        """Assignments are explicit, and nested metadata does not introduce omitted fields."""
+        parameter, wire_name, details_type, fields, expected = dependent_order
+        details = details_type(**fields)
+        details.client_extensions = ClientExtensions(tag="revised-risk")
+
+        await TradeEndpoints(mock_client).put_trade_orders("101-001-123456-001", "12345", **{parameter: details})
+
+        expected = {**expected, "clientExtensions": {"tag": "revised-risk"}}
+        mock_client._request.assert_called_once_with("PUT", "/accounts/101-001-123456-001/trades/12345/orders", json_data={wire_name: expected})

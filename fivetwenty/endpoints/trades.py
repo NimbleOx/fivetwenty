@@ -314,6 +314,9 @@ class TradeEndpoints:
         """
         Create, replace, or cancel dependent orders (TP/SL) for a trade.
 
+        Only explicitly supplied detail fields are sent. OANDA inherits omitted
+        fields from an existing order, or applies defaults when creating one.
+
         Args:
             account_id: Account identifier
             trade_specifier: Trade ID or @clientID
@@ -330,15 +333,15 @@ class TradeEndpoints:
         """
         data: dict[str, Any] = {}
 
-        # Handle order parameters - convert Pydantic models to dicts
+        # Omitted subfields inherit existing order settings on replacement.
         if take_profit is not None:
-            data["takeProfit"] = take_profit.model_dump(by_alias=True, exclude_none=True, mode="json")
+            data["takeProfit"] = take_profit.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode="json")
         if stop_loss is not None:
-            data["stopLoss"] = stop_loss.model_dump(by_alias=True, exclude_none=True, mode="json")
+            data["stopLoss"] = stop_loss.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode="json")
         if trailing_stop_loss is not None:
-            data["trailingStopLoss"] = trailing_stop_loss.model_dump(by_alias=True, exclude_none=True, mode="json")
+            data["trailingStopLoss"] = trailing_stop_loss.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode="json")
         if guaranteed_stop_loss is not None:
-            data["guaranteedStopLoss"] = guaranteed_stop_loss.model_dump(by_alias=True, exclude_none=True, mode="json")
+            data["guaranteedStopLoss"] = guaranteed_stop_loss.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode="json")
 
         response = await self._client._request(
             "PUT",
