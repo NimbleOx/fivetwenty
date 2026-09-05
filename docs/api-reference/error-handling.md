@@ -62,8 +62,8 @@ async def safe_trade(client: AsyncClient, account_id: str) -> None:
 
     except FiveTwentyError as e:
         print(f"OANDA error: {e}")
-        print(f"Error code: {e.code}")
-        print(f"Error message: {e.message}")
+        print(f"Error: code: {e.code}")
+        print(f"Error: message: {e.message}")
 
     except Exception as e:
         print(f"Unexpected error: {e}")

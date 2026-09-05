@@ -1,10 +1,14 @@
 openapi: 3.1.0
 info:
-  title: OANDA v20 API
+  title: FiveTwenty OANDA v20 Compatibility API
   description: |
-    The OANDA v20 API provides access to market data, account management, trading, and transaction history.
+    This project-maintained OpenAPI document describes the OANDA v20
+    endpoints exposed by the FiveTwenty SDK.
 
-    This OpenAPI specification covers all endpoints documented in the official OANDA v20 API reference.
+    It is not OANDA's official OpenAPI specification and should not be
+    treated as complete coverage of every OANDA v20 endpoint. OANDA publishes
+    an official Swagger 2.0 specification separately, and OANDA's live
+    developer documentation can differ from that file.
 
     ## Base URLs
     - **Practice Environment**: https://api-fxpractice.oanda.com
@@ -21,15 +25,15 @@ info:
 
     ## Data Formats
     - All monetary values use decimal strings for precision
-    - Timestamps are in RFC3339 format with nanosecond precision
+    - Timestamps follow the client's Accept-Datetime-Format setting
     - Instrument names use underscore format (e.g., EUR_USD)
-  version: "20"
+  version: "0.4.1"
   contact:
-    name: OANDA API Support
-    url: https://developer.oanda.com
+    name: FiveTwenty Contributors
+    url: https://github.com/NimbleOx/fivetwenty
   license:
-    name: OANDA Terms of Service
-    url: https://www.oanda.com/legal/
+    name: MIT
+    url: https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE
 
 servers:
   - url: https://api-fxpractice.oanda.com
@@ -1786,6 +1790,8 @@ components:
       description: The maximum number of Orders to return
       schema:
         type: integer
+        minimum: 1
+        maximum: 500
 
     OrderBeforeID:
       name: beforeID
@@ -1883,8 +1889,9 @@ components:
 
     DateTime:
       type: string
-      format: date-time
-      description: RFC3339 DateTime format with nanosecond precision
+      description: >-
+        DateTime formatted according to Accept-Datetime-Format; RFC3339 by
+        default or UNIX seconds with nanosecond precision
       example: "2016-06-21T15:00:00.000000000Z"
 
     DecimalNumber:

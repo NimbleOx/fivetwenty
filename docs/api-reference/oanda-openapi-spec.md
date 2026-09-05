@@ -1,14 +1,19 @@
-# OANDA v20 API OpenAPI Specification
+# FiveTwenty OpenAPI Compatibility Specification
 
-This page provides access to the complete OpenAPI 3.1.0 specification for the OANDA v20 REST API.
+This page provides access to the project-maintained OpenAPI 3.1.0 compatibility specification for the FiveTwenty SDK surface.
+
+It is not OANDA's official OpenAPI specification and should not be treated as complete coverage of every OANDA v20 endpoint. OANDA publishes an official Swagger 2.0 specification separately, and the live developer documentation can differ from that file.
 
 ## OpenAPI Specification File
 
-📁 **Download**: [openapi.yaml](openapi.yaml) - Complete OANDA v20 API specification
+📁 **Download**: [openapi.yaml](openapi.yaml) - FiveTwenty SDK compatibility specification
 
-This OAS spec is AI-generated. It has been breifly reviewed for accuracy, but is almost guaranteed to be wrong. Because it is ised internally for this project, we have included it here in case it can be useful to you. Pull requests for innaccuracies are appreciated.
+## Known Source Difference
+
+The current OANDA REST-v20 navigation publishes Instrument definitions but no longer publishes a live `instrument-ep` page. FiveTwenty keeps the instrument candle, order book, and position book methods because those endpoints remain part of OANDA's official v20 OpenAPI repository and are still represented in the cached parity source.
 
 ## Related Documentation
 
 - [FiveTwenty API Reference](index.md) - Python SDK documentation
 - [OANDA Developer Portal](https://developer.oanda.com/rest-live-v20/introduction/) - Official API documentation
+- [OANDA v20 OpenAPI Repository](https://github.com/oanda/v20-openapi) - Official OANDA Swagger 2.0 specification

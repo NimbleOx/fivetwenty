@@ -235,8 +235,8 @@ For configuration errors (`ValueError`, `ValidationError`), see **[Configuration
 
 All endpoint methods raise `FiveTwentyError` for API errors. The exception contains:
 
-- `status_code` (int) - HTTP status code
-- `error_code` (str) - OANDA error code
+- `status` (int) - HTTP status code
+- `code` (str | None) - OANDA error code
 - `message` (str) - Error description
 - `details` (dict) - Additional error information
 
@@ -254,9 +254,9 @@ async def main() -> None:
             trade = await client.trades.get_trade(client.account_id, "invalid_id")
             print(f"Trade: {trade}")
         except FiveTwentyError as e:
-            print(f"Error {e.status}: {e.message}")
+            print(f"Error: {e.status}: {e.message}")
             if e.code:
-                print(f"Error code: {e.code}")
+                print(f"Error: code: {e.code}")
             # Handle specific errors
             if e.status == 404:
                 print("Trade not found")
