@@ -27,7 +27,7 @@ info:
     - All monetary values use decimal strings for precision
     - Timestamps follow the client's Accept-Datetime-Format setting
     - Instrument names use underscore format (e.g., EUR_USD)
-  version: "0.4.1"
+  version: "0.5.0"
   contact:
     name: FiveTwenty Contributors
     url: https://github.com/NimbleOx/fivetwenty

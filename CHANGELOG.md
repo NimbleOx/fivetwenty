@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] — 2026-09-05
+
 ### Changed
 
 - **Breaking — order-list response:** `orders.get_orders()` now returns a
