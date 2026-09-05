@@ -277,18 +277,21 @@ async def main() -> None:
 
         # Get ALL orders (pending, filled, cancelled)
         # This can be many orders if you trade frequently
-        # get_orders() returns a list of order models directly, not a response dict
-        all_orders = await client.orders.get_orders(account_id=client.account_id)
+        # get_orders() returns OANDA's response envelope with orders plus lastTransactionID
+        all_orders_response = await client.orders.get_orders(account_id=client.account_id)
+        all_orders = all_orders_response["orders"]
         print(f"\nTotal orders: {len(all_orders)}")
 
         # Filter by instrument: Only show EUR/USD orders
         # Useful for instrument-specific monitoring
-        eur_orders = await client.orders.get_orders(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
+        eur_orders_response = await client.orders.get_orders(account_id=client.account_id, instrument=InstrumentName.EUR_USD)
+        eur_orders = eur_orders_response["orders"]
         print(f"EUR/USD orders: {len(eur_orders)}")
 
         # Filter by state: Only show PENDING (active) orders
         # Most useful filter - shows what's currently working
-        pending_orders = await client.orders.get_orders(account_id=client.account_id, state="PENDING")
+        pending_orders_response = await client.orders.get_orders(account_id=client.account_id, state="PENDING")
+        pending_orders = pending_orders_response["orders"]
         print(f"Pending orders: {len(pending_orders)}")
 
         # Section 6: Get pending orders
@@ -423,12 +426,16 @@ async def main() -> None:
         print("  - Implemented via trade management API")
         print("  → See trade_management.py for examples")
 
-        # Close our test position
-        print("\n\nCleaning up: Closing EUR/USD position...")
-        close_response = await client.orders.post_market_order(account_id=client.account_id, instrument=InstrumentName.EUR_USD, units=-1000)
-
-        if close_response.get("orderFillTransaction"):
-            print("✅ Position closed")
+        # Close only the trade opened by the first market order.
+        # An opposite market order can open a hedge; closing the whole instrument
+        # could also affect trades that existed before this example ran.
+        opening_fill = order_response.get("orderFillTransaction")
+        if opening_fill and opening_fill.trade_opened:
+            trade_id = opening_fill.trade_opened.trade_id
+            print(f"\n\nCleaning up: Closing test trade {trade_id}...")
+            close_response = await client.trades.close_trade(account_id=client.account_id, trade_specifier=trade_id, units="ALL")
+            if close_response.get("orderFillTransaction"):
+                print("✅ Test trade closed")
 
     print("\n✅ Advanced order management example completed!")
     print("\n📚 Summary:")

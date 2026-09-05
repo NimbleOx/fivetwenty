@@ -690,77 +690,53 @@ from decimal import Decimal
 from typing import Any
 
 from fivetwenty import AsyncClient
+from fivetwenty.models import OrderPositionFill, StopOrderRequest
 
 
 async def implement_tiered_stop_loss(account_id: str, instrument: str, units: int) -> Any:
-    """Implement tiered stop-loss with multiple exit levels."""
+    """Create an entry and three reduce-only stop orders for instrument exposure."""
+    # Every tier needs at least one whole unit. Check before placing the entry.
+    position_size = abs(units)
+    if position_size < 4:
+        raise ValueError("Tiered stops require at least four units")
 
-    # Zero-config - automatically uses environment variables
-    async with AsyncClient() as client:
+    async with AsyncClient(account_id=account_id) as client:
         try:
-            # Get current price
-            prices = await client.pricing.get_pricing(account_id, [instrument])
-            entry_price = prices[0].asks[0].price if units > 0 else prices[0].bids[0].price
-
-            # Calculate multiple stop levels
+            pricing = await client.pricing.get_pricing(account_id, [instrument])
+            price = pricing["prices"][0]
+            entry_price = price.asks[0].price if units > 0 else price.bids[0].price
             pip_size = Decimal("0.01") if "JPY" in instrument else Decimal("0.0001")
+            direction = -1 if units > 0 else 1
+            stop_prices = [entry_price + direction * distance * pip_size for distance in (20, 40, 80)]
+            first_size = position_size // 4
+            second_size = position_size // 2
+            tier_sizes = [first_size, second_size, position_size - first_size - second_size]
 
-            if units > 0:  # Long position stops
-                stop1 = entry_price - (20 * pip_size)  # Tight stop - 25% of position
-                stop2 = entry_price - (40 * pip_size)  # Medium stop - 50% of position
-                stop3 = entry_price - (80 * pip_size)  # Wide stop - remaining 25%
-            else:  # Short position stops
-                stop1 = entry_price + (20 * pip_size)
-                stop2 = entry_price + (40 * pip_size)
-                stop3 = entry_price + (80 * pip_size)
-
-            print(f"Tiered stops: {stop1} | {stop2} | {stop3}")
-
-            # Place main position
             main_response = await client.orders.post_market_order(
-                account_id=client.account_id,
+                account_id=account_id,
                 instrument=instrument,
-                units=units
+                units=units,
             )
-
-            if main_response.order_fill_transaction:
-                print(f"Main position filled at {main_response.order_fill_transaction.price}")
-
-                # Place tiered stop-loss orders as separate stop orders
-                position_size = abs(units)
-
-                # First tier stop (25% of position)
-                await client.orders.post_stop_order(
-                    account_id=client.account_id,
-                    instrument=instrument,
-                    units=int(-0.25 * position_size) if units > 0 else int(0.25 * position_size),
-                    price=stop1
-                )
-
-                # Second tier stop (50% of position)
-                await client.orders.post_stop_order(
-                    account_id=client.account_id,
-                    instrument=instrument,
-                    units=int(-0.50 * position_size) if units > 0 else int(0.50 * position_size),
-                    price=stop2
-                )
-
-                # Third tier stop (remaining 25%)
-                await client.orders.post_stop_order(
-                    account_id=client.account_id,
-                    instrument=instrument,
-                    units=int(-0.25 * position_size) if units > 0 else int(0.25 * position_size),
-                    price=stop3
-                )
-
-                print("Tiered stop-loss orders placed")
-                return True
-            else:
-                print("Error: Main position not filled")
+            if not main_response.get("orderFillTransaction"):
+                print("Entry did not fill; no tiered stops were submitted")
                 return False
 
+            # These are independent instrument-wide orders. REDUCE_ONLY prevents
+            # opening a hedge when a stop triggers. Cancel outstanding stops if
+            # the position is closed another way; monitor setup failures too.
+            for quantity, stop_price in zip(tier_sizes, stop_prices):
+                request = StopOrderRequest(
+                    instrument=instrument,
+                    units=Decimal(direction * quantity),
+                    price=stop_price,
+                    position_fill=OrderPositionFill.REDUCE_ONLY,
+                )
+                await client.orders.post_order(account_id=account_id, order_request=request)
+
+            print("Three reduce-only stop orders placed")
+            return True
         except Exception as e:
-            print(f"Error: implementing tiered stops: {e}")
+            print(f"Tiered stop setup failed; check the entry and remaining protection: {e}")
             return False
 
 # Implement 3-tier stop strategy

@@ -9,7 +9,7 @@
 
 **Problem**: You need to close existing trading positions to realize profits/losses or reduce risk.
 
-**Solution**: Use the FiveTwenty to close positions via market orders with proper error handling.
+**Solution**: Use `client.positions.close_position()` to close the long and short sides explicitly, with proper error handling.
 
 ---
 
@@ -23,97 +23,59 @@
 
 ## Quick Close: Single Instrument
 
-Close all positions for one specific instrument:
+Close all positions for one specific instrument. The position-close endpoint works for hedging accounts too: an opposite market order with `positionFill=DEFAULT` can open a new hedge instead of closing a trade.
 
 <!-- fragment: partial position closing example -->
 ```python
+from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
 
 async def close_position(account_id: str, instrument: str) -> Any:
-    """Close all positions for a specific instrument with comprehensive error handling."""
-
-    # Step 1: Initialize AsyncClient with proper environment configuration
-    # Environment.PRACTICE ensures safe testing without real money impact
+    """Close every open side of an instrument and confirm each requested fill."""
     async with AsyncClient(
-        token="your-token",           # Your OANDA API token for authentication
-        environment=Environment.PRACTICE  # Practice environment for safe testing
+        token="your-token",
+        account_id=account_id,
+        environment=Environment.PRACTICE,
     ) as client:
         try:
-            # Step 2: Retrieve current positions to analyze what needs closing
-            # get_open_positions() returns only positions with non-zero units
-            positions = await client.positions.get_open_positions(account_id)
-
-            # Step 3: Find the specific position for the target instrument
-            # Using next() with generator expression for efficient position lookup
-            position = next((p for p in positions if p.instrument == instrument), None)
-
-            if not position:
-                # Step 4: Handle case where no position exists for this instrument
-                print(f"Error: No open position for {instrument}")
-                print(f"Note: Check if position was already closed or instrument symbol is correct")
+            positions_response = await client.positions.get_open_positions(account_id)
+            position = next((p for p in positions_response["positions"] if p.instrument == instrument), None)
+            if position is None:
+                print(f"No open position for {instrument}")
                 return None
 
-            # Step 5: Extract position details for both long and short sides
-            # OANDA represents long/short as separate unit counts
-            # long.units: positive for long positions, "0" for no long position
-            # short.units: negative for short positions, "0" for no short position
-            long_units = int(position.long.units) if position.long.units != "0" else 0
-            short_units = int(position.short.units) if position.short.units != "0" else 0
-
-            if long_units == 0 and short_units == 0:
-                # Step 6: Double-check for edge case of zero net position
-                print(f"Error: No net position for {instrument}")
-                print(f"Note: Position may have been closed between retrieval and processing")
+            # Both sides can be open on a hedging account, even when net units are zero.
+            has_long = position.long.units != 0
+            has_short = position.short.units != 0
+            if not has_long and not has_short:
+                print(f"No units to close for {instrument}")
                 return None
 
-            # Step 7: Calculate closing order parameters
-            # Net position = long_units + short_units (short_units already negative)
-            # To close: submit order in opposite direction with equal magnitude
-            net_units = long_units + short_units  # Total net position (positive = long, negative = short)
-            close_units = -net_units              # Opposite direction to close position
-
-            print(f"Closing position for {instrument}:")
-            print(f"   Long units: {long_units}")
-            print(f"   Short units: {short_units}")
-            print(f"   Net position: {net_units} units")
-            print(f"   Closing with: {close_units} units")
-
-            # Step 8: Submit market order to close position
-            # Market orders execute immediately at current market price
-            # Using opposite units ensures position closure
-            response = await client.orders.post_market_order(
-                account_id=account_id,    # Target trading account
-                instrument=instrument,    # Currency pair to trade
-                units=close_units        # Units to trade (negative of current position)
+            response = await client.positions.close_position(
+                account_id=account_id,
+                instrument=instrument,
+                long_units="ALL" if has_long else "NONE",
+                short_units="ALL" if has_short else "NONE",
             )
 
-            # Step 9: Process successful closure and extract transaction details
-            if response.order_fill_transaction:
-                # order_fill_transaction contains execution details when order fills
-                fill = response.order_fill_transaction
+            # Each requested side has its own fill or cancellation transaction.
+            for side, requested in (("long", has_long), ("short", has_short)):
+                if not requested:
+                    continue
+                fill = response.get(f"{side}OrderFillTransaction")
+                if fill is None:
+                    print(f"Closure incomplete for {instrument}: {side} side did not fill; check remaining positions")
+                    return None
+                print(f"Closed {side} side: {fill.units} units at {fill.price}, realized P/L {fill.pl}")
 
-                print(f"Position closed successfully!")
-                print(f"   Close Price: {fill.price}")
-                print(f"   Realized P/L: {fill.pl} {fill.account_currency}")
-                print(f"   Transaction ID: {fill.id}")
-                print(f"   Execution Time: {fill.time}")
-                print(f"   Units Filled: {fill.units}")
-
-                return fill
-            else:
-                # Step 10: Handle case where order was created but not filled
-                print("Error: Order created but not filled immediately")
-                print("Note: Check order status - may be pending or partially filled")
-                return None
-
+            return response
         except FiveTwentyError as e:
-            # Step 11: Handle API-specific errors with detailed logging
-            print(f"Error: OANDA API error closing position: {e.message}")
-            print(f"   Error: code: {e.code}")
-            print(f"Note: Common causes: insufficient margin, market closed, invalid instrument")
+            print(f"OANDA error closing {instrument}: {e.message}")
             return None
+
 
 # Usage
 account_id = "your-account-id"
@@ -129,101 +91,50 @@ Close only part of a position:
 <!-- fragment: partial position closing example -->
 ```python
 from typing import Any
+
 from fivetwenty import AsyncClient, Environment
 from fivetwenty.exceptions import FiveTwentyError
 
 
 async def close_partial_position(account_id: str, instrument: str, units_to_close: int) -> Any:
-    """Close specific units of a position with comprehensive validation and error handling."""
-
-    # Step 1: Initialize client connection for partial position management
+    """Positive units close the long side; negative units close the short side."""
     async with AsyncClient(
-        token="your-token",           # OANDA API authentication token
-        environment=Environment.PRACTICE  # Practice environment for safe testing
+        token="your-token",
+        account_id=account_id,
+        environment=Environment.PRACTICE,
     ) as client:
         try:
-            # Step 2: Retrieve and validate position existence
-            # Critical to verify position exists before attempting partial closure
-            positions = await client.positions.get_open_positions(account_id)
-            position = next((p for p in positions if p.instrument == instrument), None)
+            if units_to_close == 0:
+                raise ValueError("units_to_close must be nonzero")
 
-            if not position:
-                # Step 3: Handle non-existent position with descriptive error
+            positions_response = await client.positions.get_open_positions(account_id)
+            position = next((p for p in positions_response["positions"] if p.instrument == instrument), None)
+            if position is None:
                 raise ValueError(f"No position found for {instrument}")
-                # ValueError appropriate here as this indicates invalid input parameters
 
-            # Step 4: Extract position details for validation logic
-            # Need to handle both long and short positions separately
-            # long.units: positive integer for long positions
-            # short.units: negative integer for short positions (need abs() for comparison)
-            long_units = int(position.long.units) if position.long.units != "0" else 0
-            short_units = abs(int(position.short.units)) if position.short.units != "0" else 0
+            side = "long" if units_to_close > 0 else "short"
+            available = abs(position.long.units if units_to_close > 0 else position.short.units)
+            quantity = abs(units_to_close)
+            if quantity > available:
+                raise ValueError(f"Cannot close {quantity} {side} units; only {available} are open")
 
-            print(f"Current position analysis for {instrument}:")
-            print(f"   Long units: {long_units}")
-            print(f"   Short units: {short_units}")
-            print(f"   Requested closure: {units_to_close} units")
-
-            # Step 5: Determine closure direction and validate sufficient units
-            # Positive units_to_close = closing long position
-            # Negative units_to_close = closing short position
-            if units_to_close > 0:
-                # Step 6: Closing long position - validate sufficient long units exist
-                if units_to_close > long_units:
-                    raise ValueError(
-                        f"Cannot close {units_to_close} long units - only {long_units} long units available. "
-                        f"Reduce units_to_close to maximum of {long_units}."
-                    )
-                close_units = -units_to_close  # Negative units to close long position
-                print(f"   Operation: Closing {units_to_close} long units")
-
-            else:
-                # Step 7: Closing short position - validate sufficient short units exist
-                units_to_close = abs(units_to_close)  # Convert to positive for comparison
-                if units_to_close > short_units:
-                    raise ValueError(
-                        f"Cannot close {units_to_close} short units - only {short_units} short units available. "
-                        f"Reduce units_to_close to maximum of {short_units}."
-                    )
-                close_units = units_to_close   # Positive units to close short position
-                print(f"   Operation: Closing {units_to_close} short units")
-
-            # Step 8: Execute partial closure with market order
-            print(f"Executing partial closure: {abs(close_units)} units of {instrument}")
-            print(f"   Market order units: {close_units}")
-
-            response = await client.orders.post_market_order(
-                account_id=account_id,    # Target trading account
-                instrument=instrument,    # Currency pair to trade
-                units=close_units        # Calculated units for partial closure
+            # Explicit NONE leaves the other side unchanged; close quantities are positive.
+            response = await client.positions.close_position(
+                account_id=account_id,
+                instrument=instrument,
+                long_units=str(quantity) if side == "long" else "NONE",
+                short_units=str(quantity) if side == "short" else "NONE",
             )
-
-            # Step 9: Process successful partial closure and provide detailed feedback
-            if response.order_fill_transaction:
-                fill = response.order_fill_transaction
-
-                print(f"Partial position closed successfully!")
-                print(f"   Units closed: {abs(close_units)}")
-                print(f"   Close price: {fill.price}")
-                print(f"   Realized P/L: {fill.pl} {fill.account_currency}")
-                print(f"   Transaction ID: {fill.id}")
-                print(f"   Remaining position: Check current positions for updated units")
-
-                return fill
-            else:
-                # Step 10: Handle unfilled order scenario
-                print(f"Error: Partial close order created but not filled")
-                print(f"Note: Check order status and market conditions")
+            fill = response.get(f"{side}OrderFillTransaction")
+            if fill is None:
+                print(f"Partial closure did not fill for {instrument}; check remaining positions")
                 return None
-
+            print(f"Closed {quantity} {side} units at {fill.price}, realized P/L {fill.pl}")
+            return response
         except (FiveTwentyError, ValueError) as e:
-            # Step 11: Comprehensive error handling for both API and validation errors
-            print(f"Error: Partial close error: {e}")
-            if isinstance(e, ValueError):
-                print(f"Note: Validation error - check position size and units_to_close parameter")
-            else:
-                print(f"Note: API error - check network connection and account status")
+            print(f"Partial close error: {e}")
             return None
+
 
 # Usage - close 500 units of long EUR_USD
 result = await close_partial_position(account_id, "EUR_USD", 500)
@@ -248,6 +159,7 @@ async def close_multiple_positions(account_id: str, instruments: list[str]) -> d
     # Step 1: Initialize client for batch position closing operations
     async with AsyncClient(
         token="your-token",           # OANDA API authentication token
+        account_id=account_id,
         environment=Environment.PRACTICE  # Practice environment for safe batch operations
     ) as client:
 
@@ -331,6 +243,7 @@ async def emergency_close_all(account_id: str) -> list[Any]:
     # Emergency situations require immediate action with all available speed
     async with AsyncClient(
         token="your-token",           # OANDA API authentication token
+        account_id=account_id,
         environment=Environment.PRACTICE  # Use PRACTICE for testing emergency procedures
     ) as client:
         try:
@@ -341,7 +254,7 @@ async def emergency_close_all(account_id: str) -> list[Any]:
 
             # Step 3: Retrieve all open positions for emergency closure
             # get_open_positions() only returns positions with non-zero units
-            positions = await client.positions.get_open_positions(account_id)
+            positions = (await client.positions.get_open_positions(account_id))["positions"]
 
             if not positions:
                 # Step 4: Handle scenario where no positions exist
@@ -357,7 +270,7 @@ async def emergency_close_all(account_id: str) -> list[Any]:
             for position in positions:
                 # Step 6: Validate position has actual units before creating close task
                 # Both long.units and short.units must be checked
-                if (int(position.long.units) != 0 or int(position.short.units) != 0):
+                if (position.long.units != 0 or position.short.units != 0):
                     print(f"   Targeting {position.instrument}: "
                           f"Long={position.long.units}, Short={position.short.units}")
 
@@ -469,25 +382,26 @@ async def verify_position_closed(account_id: str, instrument: str) -> bool:
     # Step 1: Initialize client connection for position verification
     async with AsyncClient(
         token="your-token",           # OANDA API authentication token
+        account_id=account_id,
         environment=Environment.PRACTICE  # Practice environment for testing verification
     ) as client:
 
         # Step 2: Retrieve current positions to verify closure
         # get_open_positions() only returns positions with non-zero units
         # If instrument not in results, position is definitely closed
-        positions = await client.positions.get_open_positions(account_id)
+        positions = (await client.positions.get_open_positions(account_id))["positions"]
 
         # Step 3: Search for the target instrument in open positions
         # Using next() with generator for efficient single-match lookup
         position = next((p for p in positions if p.instrument == instrument), None)
 
         # Step 4: Comprehensive position closure verification
-        if position and (int(position.long.units) != 0 or int(position.short.units) != 0):
+        if position and (position.long.units != 0 or position.short.units != 0):
             # Step 5: Position still exists with non-zero units - closure failed
             print(f"⚠️ VERIFICATION FAILED: Position still open for {instrument}")
             print(f"   Current long units: {position.long.units}")
             print(f"   Current short units: {position.short.units}")
-            print(f"   Net position: {int(position.long.units) + int(position.short.units)}")
+            print(f"   Net position: {position.long.units + position.short.units}")
             print(f"Note: Possible causes:")
             print(f"   - Partial fill on close order")
             print(f"   - Market order rejected due to insufficient margin")
