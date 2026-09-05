@@ -67,6 +67,3 @@ class CodeExecutionValidator(BaseValidator):
             if issue.line and 0 < issue.line <= len(lines):
                 issue.context = lines[issue.line - 1]
         return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=not issues, issues=issues, metadata=metadata)
-
-    def get_file_patterns(self) -> list[str]:
-        return ["**/*.md", "**/*.markdown"]

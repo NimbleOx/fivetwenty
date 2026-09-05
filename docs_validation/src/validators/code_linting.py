@@ -166,7 +166,3 @@ class CodeLintingValidator(BaseValidator):
     def _is_placeholder_code(self, code: str) -> bool:
         """Recognize explicit Python stub statements without matching string contents."""
         return is_placeholder_code(code)
-
-    def get_file_patterns(self) -> list[str]:
-        """Get patterns for files this validator handles."""
-        return ["**/*.md", "**/*.markdown"]

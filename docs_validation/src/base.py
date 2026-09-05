@@ -28,10 +28,6 @@ class BaseValidator(ABC):
     def validate_file(self, file_info: FileInfo, content: str, options: dict[str, Any]) -> ValidationResult:
         """Validate a single file and return the result."""
 
-    def get_file_patterns(self) -> list[str]:
-        """Get glob patterns for files this validator can handle."""
-        return ["**/*"]
-
 
 class ValidatorRegistry:
     """Registry for managing and running validators."""
@@ -42,14 +38,6 @@ class ValidatorRegistry:
     def register(self, validator: BaseValidator) -> None:
         """Register a validator."""
         self._validators[validator.name] = validator
-
-    def get_validator(self, name: str) -> BaseValidator | None:
-        """Get a validator by name."""
-        return self._validators.get(name)
-
-    def list_validators(self) -> list[str]:
-        """List all registered validator names."""
-        return list(self._validators.keys())
 
     def validate_file(
         self,
@@ -120,13 +108,11 @@ class ValidatorRegistry:
         duration_ms = (time.perf_counter() - start_time) * 1000
 
         # Calculate summary statistics
-        files_with_results = set()
         total_issues = 0
         error_count = 0
         warning_count = 0
 
         for result in all_results:
-            files_with_results.add(result.file_path)
             total_issues += len(result.issues)
             error_count += result.error_count
             warning_count += result.warning_count

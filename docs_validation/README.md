@@ -286,7 +286,6 @@ docs_validation/
     reporters/
     validators/
     parity/
-  validation_plans/
 ```
 
 Key parity modules:

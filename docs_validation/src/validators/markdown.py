@@ -188,7 +188,3 @@ class MarkdownSyntaxValidator(BaseValidator):
         issues.extend([ValidationIssue(message="Unclosed code block", file_path=file_path, line=line_num, severity=IssueSeverity.ERROR, rule_id="markdown_unclosed_code_block", context=f"Code block opened at line {line_num}", suggestion="Add closing ``` to end the code block") for line_num in fence_stack])
 
         return issues
-
-    def get_file_patterns(self) -> list[str]:
-        """Get patterns for files this validator handles."""
-        return ["**/*.md", "**/*.markdown"]

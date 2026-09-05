@@ -40,7 +40,6 @@ exclude_patterns:
 # Execution settings
 parallel_execution: true
 max_workers: 4
-timeout_seconds: 30.0
 
 # Validator configurations - Complete mode (all validators)
 validators:

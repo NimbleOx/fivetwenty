@@ -37,13 +37,6 @@ def _camel_to_snake(name: str) -> str:
     return re.sub(r"([a-z0-9])([A-Z])", r"\1_\2", s1).lower()
 
 
-def _snake_to_camel(name: str) -> str:
-    parts = name.split("_")
-    if not parts:
-        return name
-    return parts[0] + "".join(p.title() for p in parts[1:])
-
-
 # OANDA convention preserves these as uppercase suffix in camelCase identifiers.
 _UPPERCASE_SUFFIXES = {"id", "ids", "url", "uri", "ip", "api"}
 

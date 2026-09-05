@@ -134,7 +134,3 @@ class SecurityValidator(BaseValidator):
         masked_length = min(end - start, 20)  # Limit mask length
         mask = "***" + "*" * (masked_length - 6) + "***" if masked_length > 6 else "***"
         return before + mask + after
-
-    def get_file_patterns(self) -> list[str]:
-        """Get patterns for files this validator handles."""
-        return ["**/*"]

@@ -146,12 +146,6 @@ ignore = [
     "PERF401", # Use list comprehension (explicit loops can be clearer in tests)
     "DTZ",     # Datetime timezone issues (test fixtures can use naive datetime)
 ]
-"examples/**/*" = [
-    "T201",    # Print statements in examples
-    "PLC0415", # Import not at top
-    "PLR0915", # Too many statements (examples can be long)
-    "PERF203", # Try-except in loop is fine for examples
-]
 "docs/examples/**/*" = [
     "T201",    # Print statements in examples
     "PLC0415", # Import not at top
@@ -194,11 +188,6 @@ indent-style = "space"
 skip-magic-trailing-comma = false
 line-ending = "auto"
 
-[tool.mdformat]
-# MDFormat configuration for markdown linting
-wrap = "no"
-end_of_line = "lf"
-
 [tool.pytest.ini_options]
 minversion = "7.0"
 addopts = "-ra -q --strict-markers --strict-config"
@@ -217,7 +206,6 @@ dev = [
     # Testing dependencies
     "pytest>=7.4.0",
     "pytest-asyncio>=0.21.0",
-    "pytest-mock>=3.12.0",
     "pytest-cov>=4.0.0",
     "jsonschema>=4.0.0",
     # Code quality tools (using higher version requirements)
@@ -233,8 +221,6 @@ dev = [
     "mkdocstrings[python]>=0.24.0",
     "mkdocs-jupyter>=0.24.0",
     "pymdown-extensions>=10.0",
-    "mdformat>=0.7.22",
-    "pymarkdownlnt>=0.9.32",
     # Type stubs
     "types-requests>=2.32.4.20250913",
     # Build and publish tools
@@ -246,7 +232,6 @@ dev = [
     "requests>=2.25.0",
     "pathspec>=0.9.0",
     "pyyaml>=6.0.2",
-    "psutil>=7.1.0",
     "types-pyyaml>=6.0.12.20250915",
 ]
 

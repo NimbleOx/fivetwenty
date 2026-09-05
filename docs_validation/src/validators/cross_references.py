@@ -168,7 +168,3 @@ class CrossReferenceValidator(BaseValidator):
 
         # Fallback to current working directory
         return Path.cwd()
-
-    def get_file_patterns(self) -> list[str]:
-        """Get patterns for files this validator handles."""
-        return ["**/*.md", "**/*.markdown"]

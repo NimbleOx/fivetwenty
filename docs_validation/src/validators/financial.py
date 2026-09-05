@@ -92,7 +92,3 @@ class FinancialPrecisionValidator(BaseValidator):
                 )
 
         return issues
-
-    def get_file_patterns(self) -> list[str]:
-        """Get patterns for files this validator handles."""
-        return ["**/*.md", "**/*.py"]

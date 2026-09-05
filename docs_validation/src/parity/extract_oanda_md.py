@@ -141,34 +141,6 @@ def _extract_schema_blocks(content: str) -> dict[str, list[dict[str, Any]]]:
     return {name: [_public_field(field) for field in body["fields"]] for name, body in _extract_schema_blocks_with_source(content).items()}
 
 
-def _extract_enums(content: str) -> dict[str, list[str]]:
-    """Heuristically extract enum value lists from sections that have a TypeName followed
-    by a bullet list of UPPERCASE names.
-
-    Looks for: "TypeName ... <bullet list of UPPER_CASE values>"
-    """
-    out: dict[str, list[str]] = {}
-    # Sections introduced as "TypeName is..." but with no schema block — likely enum.
-    # Live OANDA enum sections look like:
-    #   TypeName  Description
-    #   - VALUE_A: desc
-    #   - VALUE_B: desc
-    # So look for an isolated TypeName paragraph followed by a bullet list of uppercase tokens.
-    for m in re.finditer(r"^([A-Z][A-Za-z0-9]+)\b", content, re.MULTILINE):
-        name = m.group(1)
-        # If this name already has a schema, skip.
-        rest = content[m.end() : m.end() + 800]
-        if "application/json" in rest[:300]:
-            continue
-        bullets = ENUM_BULLET_RE.findall(rest)
-        if len(bullets) >= 2:
-            # Filter to bullets that are likely enum values (all-uppercase, no spaces in pattern).
-            uniq = list(dict.fromkeys(bullets))
-            if uniq and name not in out:
-                out[name] = uniq[:50]  # cap to avoid runaway
-    return out
-
-
 _TYPE_INTRO_RE = re.compile(r"^([A-Z][A-Za-z0-9]+)\s+[A-Z]")
 
 

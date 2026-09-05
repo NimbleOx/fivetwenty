@@ -33,7 +33,6 @@ class ValidationConfig(BaseModel):
     # Execution settings
     parallel_execution: bool = True
     max_workers: int = 4
-    timeout_seconds: float = 30.0
 
     # Validator configurations
     validators: dict[str, ValidatorConfig] = Field(default_factory=dict)
@@ -87,16 +86,6 @@ class ValidationConfig(BaseModel):
                 "markdown_syntax": ValidatorConfig(enabled=True),
                 "python_syntax": ValidatorConfig(enabled=True),
                 "cross_references": ValidatorConfig(enabled=True),
-                "sdk_methods": ValidatorConfig(enabled=False),  # Disabled due to many missing docs (334 issues)
+                "sdk_methods": ValidatorConfig(enabled=False),
             },
         )
-
-    def is_validator_enabled(self, validator_name: str) -> bool:
-        """Check if a validator is enabled."""
-        config = self.validators.get(validator_name)
-        return config.enabled if config else False
-
-    def get_validator_options(self, validator_name: str) -> dict[str, Any]:
-        """Get options for a specific validator."""
-        config = self.validators.get(validator_name)
-        return config.options if config else {}

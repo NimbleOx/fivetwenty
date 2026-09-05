@@ -212,7 +212,3 @@ class ExternalLinkValidator(BaseValidator):
                 error_type = "request_error" if isinstance(e, httpx.RequestError) else "error"
                 error_prefix = "Request failed" if isinstance(e, httpx.RequestError) else "Unexpected error"
                 return error_type, f"{error_prefix}: {type(e).__name__}: {e}"
-
-    def get_file_patterns(self) -> list[str]:
-        """Get patterns for files this validator handles."""
-        return ["**/*.md", "**/*.markdown"]

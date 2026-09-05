@@ -98,7 +98,3 @@ class PythonSyntaxValidator(BaseValidator):
         if 1 <= line_num <= len(lines):
             return lines[line_num - 1].strip()
         return None
-
-    def get_file_patterns(self) -> list[str]:
-        """Get patterns for files this validator handles."""
-        return ["**/*.py", "**/*.md", "**/*.markdown"]
