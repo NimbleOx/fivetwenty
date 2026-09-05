@@ -63,7 +63,7 @@ Configuration:
 docs_validation/config/validation-complete.yml
 ```
 
-This track scans authored docs under `docs/**/*.md`. It runs the configured
+This track scans authored docs under `docs/**/*.md` plus the project `README.md`. It runs the configured
 validators in `docs_validation/src/validators/`:
 
 - `python_syntax`: syntax-check Python code blocks.

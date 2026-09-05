@@ -112,6 +112,8 @@ validators:
   # Type checking with mypy (strict mode - all type issues)
   code_typing:
     enabled: true
+    options:
+      timeout_seconds: 30.0
 
   # Internal link and cross-reference validation
   cross_references:
@@ -145,6 +147,8 @@ validators:
       # Include list: Only these files will be executed
       # Empty list = execute all files (use with caution!)
       include_files:
+        - "README.md"
+        - "docs/api-reference/"
         - "docs/index.md"
         - "docs/tutorials/getting-started/installation.md"
         - "docs/tutorials/getting-started/authentication.md"
@@ -162,6 +166,7 @@ validators:
         - "docs/tutorials/account-management.md"
         - "docs/tutorials/index.md"
         - "docs/tutorials/risk-management.md"
+        - "docs/tutorials/streaming-data.md"
         - "docs/guides/optimization/connection-optimization.md"
         - "docs/guides/optimization/latency-optimization.md"
         - "docs/guides/optimization/memory-cpu-optimization.md"
@@ -182,11 +187,6 @@ validators:
         - "docs/guides/understanding/sdk-architecture.md"
         # docs/guides/index.md and docs/guides/optimization/index.md excluded: nav pages
         # with no Python code blocks to execute.
-        # streaming-data.md excluded: streaming examples exceed 5s timeout even with minimal limits
-        # All other 9 validators (linting, typing, syntax, security, etc.) validate streaming examples
-        # API Reference examples excluded: These demonstrate SDK interfaces with placeholder IDs
-        # and are not meant to be executed. All other 9 validators still validate them for
-        # syntax, types, linting, security, etc.
         # Add more files as they become fully standalone/executable
 
       # Mock API calls when executing code (prevents real API calls)

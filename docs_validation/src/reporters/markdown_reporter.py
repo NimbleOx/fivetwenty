@@ -97,13 +97,21 @@ class MarkdownReporter:
         success_rate = (summary.passed_files / max(summary.total_files, 1)) * 100
         total_issues = summary.total_issues
 
-        status_emoji = "✅" if summary.total_issues == 0 else "❌"
+        if summary.has_errors:
+            status = "FAILED"
+            status_emoji = "❌"
+        elif summary.has_warnings:
+            status = "PASSED WITH WARNINGS"
+            status_emoji = "⚠️"
+        else:
+            status = "PASSED"
+            status_emoji = "✅"
         urgency_level = self._get_urgency_level(issues_by_severity)
 
         return [
             "## 📊 Executive Summary",
             "",
-            f"**Overall Status:** {status_emoji} {'PASSED' if summary.total_issues == 0 else 'FAILED'}",
+            f"**Overall Status:** {status_emoji} {status}",
             f"**Success Rate:** {success_rate:.1f}%",
             f"**Urgency Level:** {urgency_level}",
             "",

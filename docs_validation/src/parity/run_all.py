@@ -55,6 +55,15 @@ REQUIRED_OANDA_PAGES = [
     "primitives-df.md",
 ]
 
+# OANDA no longer exposes this live page in the REST-v20 documentation
+# navigation, and https://developer.oanda.com/rest-live-v20/instrument-ep/
+# returns 404 as of 2026-08-28. The endpoint definitions are still present in
+# OANDA's official v20 OpenAPI repository and in our cached snapshot, so treat
+# this as an explicit source note instead of unexpected parity drift.
+KNOWN_STALE_OANDA_PAGES = {
+    "instrument-ep": "OANDA live page returns 404; official v20 OpenAPI still lists the instrument endpoints",
+}
+
 
 def _has_cache() -> bool:
     return all((OANDA_CACHE / name).exists() for name in REQUIRED_OANDA_PAGES)
@@ -82,9 +91,10 @@ def _maybe_fetch(refresh: bool, no_fetch: bool) -> bool:
     return _has_cache()
 
 
-def _count_critical_findings() -> tuple[int, list[str]]:
-    """Scan reports for P0-class signals. Returns (count, summary_lines)."""
+def _count_critical_findings() -> tuple[int, list[str], list[str]]:
+    """Scan reports for P0-class signals. Returns (count, summary_lines, notes)."""
     findings: list[str] = []
+    notes: list[str] = []
     count = 0
 
     # Per-domain reports: surface missing project-doc pages (P1) so they can't hide.
@@ -113,6 +123,9 @@ def _count_critical_findings() -> tuple[int, list[str]]:
         status = json.loads(fetch_status_json.read_text(encoding="utf-8"))
         for slug, state in sorted(status.items()):
             if state != "fresh":
+                if slug in KNOWN_STALE_OANDA_PAGES:
+                    notes.append(f"oanda cache: `{slug}` is {state} — {KNOWN_STALE_OANDA_PAGES[slug]}")
+                    continue
                 findings.append(f"oanda cache: `{slug}` is {state} — live page could not be fetched; parity for it ran against a stale snapshot")
 
     docs_meta_json = CACHE_DIR / "docs-meta.json"
@@ -135,7 +148,7 @@ def _count_critical_findings() -> tuple[int, list[str]]:
         if p1_count:
             findings.append(f"field-validation.md: {p1_count} P1 enum/primitive drift items")
 
-    return count, findings
+    return count, findings, notes
 
 
 def _run_field_validation() -> None:
@@ -206,7 +219,7 @@ def main() -> int:
     _run_field_validation()
 
     # Summarize
-    count, findings = _count_critical_findings()
+    count, findings, notes = _count_critical_findings()
     print("\n=== Parity pipeline summary ===")
     if blocked_domains:
         for d in blocked_domains:
@@ -214,7 +227,10 @@ def main() -> int:
     if findings:
         for line in findings:
             print(f"  - {line}")
-    if not blocked_domains and not findings:
+    if notes:
+        for line in notes:
+            print(f"  - NOTE: {line}")
+    if not blocked_domains and not findings and not notes:
         print("  No drift detected.")
 
     if blocked_domains:

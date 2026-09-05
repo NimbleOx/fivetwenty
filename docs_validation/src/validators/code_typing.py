@@ -57,7 +57,7 @@ class CodeTypingValidator(BaseValidator):
                         if skip_marker is not None:
                             skipped_blocks.append(marker_skip_metadata(skip_marker, code_block_start))
                         else:
-                            issues.extend(self._type_check_python_code(code_block_lines, code_block_start + 1, file_info.path))
+                            issues.extend(self._type_check_python_code(code_block_lines, code_block_start + 1, file_info.path, options))
 
                     # Reset for next block
                     code_block_lines = []
@@ -68,7 +68,7 @@ class CodeTypingValidator(BaseValidator):
 
         return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues, metadata=fragment_metadata(skipped_blocks))
 
-    def _type_check_python_code(self, code_lines: list[str], start_line: int, file_path: Path) -> list[ValidationIssue]:
+    def _type_check_python_code(self, code_lines: list[str], start_line: int, file_path: Path, options: dict[str, Any]) -> list[ValidationIssue]:
         """Type check Python code using mypy."""
         issues: list[ValidationIssue] = []
 
@@ -114,7 +114,8 @@ class CodeTypingValidator(BaseValidator):
             mypy_args.append(temp_path)
 
             # Run mypy
-            result = subprocess.run(mypy_args, check=False, capture_output=True, text=True, timeout=8)
+            timeout_seconds = float(options.get("timeout_seconds", 8.0))
+            result = subprocess.run(mypy_args, check=False, capture_output=True, text=True, timeout=timeout_seconds)
 
             if result.returncode == 0:
                 # No type issues
@@ -124,7 +125,9 @@ class CodeTypingValidator(BaseValidator):
             issues.extend(self._parse_mypy_output(result.stdout, code_lines, start_line, file_path, enhanced_code))
 
         except subprocess.TimeoutExpired:
-            issues.append(ValidationIssue(message="Type checking timeout - code block too complex", file_path=file_path, line=start_line, severity=IssueSeverity.WARNING, rule_id="code_typing_timeout", context="", suggestion="Simplify code example or add type: ignore comments"))
+            issues.append(
+                ValidationIssue(message=f"Type checking timeout after {timeout_seconds:g}s - code block too complex", file_path=file_path, line=start_line, severity=IssueSeverity.WARNING, rule_id="code_typing_timeout", context="", suggestion="Simplify code example or increase the code_typing timeout_seconds option")
+            )
         except (subprocess.SubprocessError, FileNotFoundError):
             # mypy not available or other subprocess error
             pass

@@ -93,6 +93,11 @@ class ValidationSummary(BaseModel):
         """True if any validation errors were found."""
         return self.error_count > 0
 
+    @property
+    def has_warnings(self) -> bool:
+        """True if any warning-level issues were found."""
+        return self.warning_count > 0
+
 
 class FileInfo(BaseModel):
     """Information about a file to be validated."""

@@ -230,8 +230,15 @@ def _display_validator_summaries(summary: ValidationSummary) -> None:
         return
 
     # Display overall status
-    overall_status = "✅ PASSED" if summary.passed_files == summary.total_files else "❌ FAILED"
-    status_style = "green" if summary.passed_files == summary.total_files else "red"
+    if summary.has_errors:
+        overall_status = "❌ FAILED"
+        status_style = "red"
+    elif summary.has_warnings:
+        overall_status = "⚠️ PASSED WITH WARNINGS"
+        status_style = "yellow"
+    else:
+        overall_status = "✅ PASSED"
+        status_style = "green"
 
     console.print(f"📊 Validation Results: {Text(overall_status, style=status_style)} | {summary.total_files} files | {summary.success_rate:.1f}% success rate | {summary.total_issues} issues")
 

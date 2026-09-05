@@ -17,6 +17,7 @@ import re
 import resource
 import signal
 import sys
+from collections.abc import AsyncIterator
 from decimal import Decimal
 from pathlib import Path
 from typing import Any
@@ -365,6 +366,10 @@ class CodeExecutionValidator(BaseValidator):
             # Add FiveTwentyError to exceptions submodule
             if submodule_name == "exceptions":
                 mock_submodule.FiveTwentyError = MockFiveTwentyError
+            if submodule_name == "models" and "ClientPrice" in base_namespace:
+                mock_submodule.ClientPrice = base_namespace["ClientPrice"]
+            if submodule_name == "models" and "TransactionHeartbeat" in base_namespace:
+                mock_submodule.TransactionHeartbeat = base_namespace["TransactionHeartbeat"]
 
             sys.modules[full_name] = mock_submodule
 
@@ -525,16 +530,28 @@ class CodeExecutionValidator(BaseValidator):
         mock_ask.price = Decimal("1.12350")
         mock_ask.liquidity = 1000000
 
-        # Create ClientPrice object
-        mock_price = MagicMock()
-        mock_price.instrument = "EUR_USD"
-        mock_price.bids = [mock_bid]
-        mock_price.asks = [mock_ask]
-        mock_price.closeoutBid = Decimal("1.12340")
-        mock_price.closeoutAsk = Decimal("1.12355")
-        mock_price.time = "2024-01-01T00:00:00.000000000Z"
-        # Support indexing for prices[0]
-        mock_price.__getitem__ = lambda _self, key: mock_price if key == 0 else None
+        class MockClientPrice:
+            def __init__(self) -> None:
+                self.instrument = "EUR_USD"
+                self.bids = [mock_bid]
+                self.asks = [mock_ask]
+                self.closeoutBid = Decimal("1.12340")
+                self.closeoutAsk = Decimal("1.12355")
+                self.closeout_bid = Decimal("1.12340")
+                self.closeout_ask = Decimal("1.12355")
+                self.time = "2024-01-01T00:00:00.000000000Z"
+
+            def __getitem__(self, key: int) -> "MockClientPrice | None":
+                return self if key == 0 else None
+
+        mock_price = MockClientPrice()
+
+        class MockTransactionHeartbeat:
+            type = "HEARTBEAT"
+            time = "2024-01-01T00:00:00.000000000Z"
+            last_transaction_id = "12345"
+
+        mock_transaction_heartbeat = MockTransactionHeartbeat()
 
         # Create realistic mock order response
         mock_order_response = MagicMock()
@@ -544,6 +561,21 @@ class CodeExecutionValidator(BaseValidator):
         mock_order_response.order_fill_transaction.units = "1000"
         mock_order_response.order_fill_transaction.price = Decimal("1.12345")
         mock_order_response.order_fill_transaction.account_balance = Decimal("100000.00")
+
+        mock_transaction = MagicMock()
+        mock_transaction.id = "12345"
+
+        mock_changes = MagicMock()
+        mock_changes.orders_created = []
+
+        async def mock_pricing_stream(*_args: Any, **_kwargs: Any) -> AsyncIterator[Any]:
+            yield mock_price
+
+        async def mock_pricing_stream_with_retries(*_args: Any, **_kwargs: Any) -> AsyncIterator[tuple[Any, Any]]:
+            yield mock_price, MagicMock()
+
+        async def mock_transaction_stream(*_args: Any, **_kwargs: Any) -> AsyncIterator[Any]:
+            yield mock_transaction_heartbeat
 
         # Mock AsyncClient
         mock_async_client = MagicMock()
@@ -563,8 +595,9 @@ class CodeExecutionValidator(BaseValidator):
         # get_account and get_account_summary return TypedDict with "account" key
         mock_async_client.accounts.get_account = AsyncMock(return_value={"account": mock_account, "lastTransactionID": "12345"})
         mock_async_client.accounts.get_account_summary = AsyncMock(return_value={"account": mock_account, "lastTransactionID": "12345"})
-        mock_async_client.accounts.get_account_instruments = AsyncMock(return_value={"instruments": []})
-        mock_async_client.accounts.patch_account_configuration = AsyncMock(return_value={})
+        mock_async_client.accounts.get_account_instruments = AsyncMock(return_value={"instruments": [], "lastTransactionID": "12345"})
+        mock_async_client.accounts.patch_account_configuration = AsyncMock(return_value={"clientConfigureTransaction": mock_transaction, "lastTransactionID": "12345"})
+        mock_async_client.accounts.get_account_changes = AsyncMock(return_value={"changes": mock_changes, "state": MagicMock(), "lastTransactionID": "12345"})
 
         mock_async_client.orders = MagicMock()
         mock_async_client.orders.post_market_order = AsyncMock(return_value=mock_order_response)
@@ -580,33 +613,43 @@ class CodeExecutionValidator(BaseValidator):
         mock_async_client.orders.cancel_order = AsyncMock(return_value={"lastTransactionID": "12345"})
 
         mock_async_client.trades = MagicMock()
-        mock_async_client.trades.get_trades = AsyncMock(return_value={"trades": []})
-        mock_async_client.trades.get_open_trades = AsyncMock(return_value={"trades": []})
-        mock_async_client.trades.get_trade = AsyncMock(return_value={"trade": MagicMock()})
-        mock_async_client.trades.close_trade = AsyncMock(return_value={})
-        mock_async_client.trades.put_trade_client_extensions = AsyncMock(return_value={})
-        mock_async_client.trades.put_trade_orders = AsyncMock(return_value={})
+        mock_async_client.trades.get_trades = AsyncMock(return_value={"trades": [], "lastTransactionID": "12345"})
+        mock_async_client.trades.get_open_trades = AsyncMock(return_value={"trades": [], "lastTransactionID": "12345"})
+        mock_async_client.trades.get_trade = AsyncMock(return_value={"trade": MagicMock(), "lastTransactionID": "12345"})
+        mock_async_client.trades.close_trade = AsyncMock(return_value={"lastTransactionID": "12345"})
+        mock_async_client.trades.put_trade_client_extensions = AsyncMock(return_value={"lastTransactionID": "12345"})
+        mock_async_client.trades.put_trade_orders = AsyncMock(return_value={"lastTransactionID": "12345"})
 
         mock_async_client.pricing = MagicMock()
         mock_async_client.pricing.get_pricing = AsyncMock(return_value={"prices": [mock_price], "time": "2024-01-01T00:00:00Z"})
-        mock_async_client.pricing.get_pricing_stream = AsyncMock(return_value=AsyncMock())
+        mock_async_client.pricing.get_pricing_stream = mock_pricing_stream
         mock_async_client.pricing.get_account_instrument_candles = AsyncMock(return_value={"candles": [], "instrument": "EUR_USD", "granularity": "H1"})
         mock_async_client.pricing.get_latest_candles = AsyncMock(return_value={"latestCandles": []})
-        mock_async_client.pricing.stream_pricing_with_retries = AsyncMock(return_value=AsyncMock())
+        mock_async_client.pricing.stream_pricing_with_retries = mock_pricing_stream_with_retries
         mock_async_client.pricing.get_candles = AsyncMock(return_value={"candles": []})
 
         mock_async_client.positions = MagicMock()
-        mock_async_client.positions.get_positions = AsyncMock(return_value={"positions": []})
-        mock_async_client.positions.get_open_positions = AsyncMock(return_value={"positions": []})
-        mock_async_client.positions.get_position = AsyncMock(return_value={"position": MagicMock()})
-        mock_async_client.positions.close_position = AsyncMock(return_value={})
+        mock_async_client.positions.get_positions = AsyncMock(return_value={"positions": [], "lastTransactionID": "12345"})
+        mock_async_client.positions.get_open_positions = AsyncMock(return_value={"positions": [], "lastTransactionID": "12345"})
+        mock_async_client.positions.get_position = AsyncMock(return_value={"position": MagicMock(), "lastTransactionID": "12345"})
+        mock_async_client.positions.close_position = AsyncMock(return_value={"lastTransactionID": "12345"})
 
         mock_async_client.instruments = MagicMock()
-        mock_async_client.instruments.get_instrument_candles = AsyncMock(return_value={"candles": []})
+        mock_book = MagicMock()
+        mock_book.instrument = "EUR_USD"
+        mock_book.time = "2024-01-01T00:00:00.000000000Z"
+        mock_book.bucket_width = Decimal("0.00050")
+        mock_book.buckets = []
+        mock_async_client.instruments.get_instrument_candles = AsyncMock(return_value={"candles": [], "instrument": "EUR_USD", "granularity": "S5"})
+        mock_async_client.instruments.get_instrument_order_book = AsyncMock(return_value={"orderBook": mock_book})
+        mock_async_client.instruments.get_instrument_position_book = AsyncMock(return_value={"positionBook": mock_book})
 
         mock_async_client.transactions = MagicMock()
         mock_async_client.transactions.get_transactions = AsyncMock(return_value={"transactions": [], "lastTransactionID": "12345"})
         mock_async_client.transactions.get_transaction = AsyncMock(return_value={"transaction": MagicMock(), "lastTransactionID": "12345"})
+        mock_async_client.transactions.get_transactions_since_id = AsyncMock(return_value={"transactions": [], "lastTransactionID": "12345"})
+        mock_async_client.transactions.get_transactions_stream = mock_transaction_stream
+        mock_async_client.transactions.get_transactions_range = AsyncMock(return_value={"transactions": [], "lastTransactionID": "12345"})
         mock_async_client.transactions.get_recent_transactions = AsyncMock(return_value={"transactions": [], "lastTransactionID": "12345"})
 
         # Mock Client (sync version)
@@ -620,8 +663,8 @@ class CodeExecutionValidator(BaseValidator):
 
         # Mock AccountConfig
         mock_config = MagicMock()
-        mock_config.token = "***"
-        mock_config.account_id = "***"
+        mock_config.token = MagicMock()
+        mock_config.account_id = MagicMock()
         mock_config.environment = "practice"
         mock_config.alias = "demo_trading"
         mock_config.summary = MagicMock(return_value="demo_trading (practice)")
@@ -636,6 +679,9 @@ class CodeExecutionValidator(BaseValidator):
         mock_env.PRACTICE.base_url = "https://api-fxpractice.oanda.com/v3"
         mock_env.LIVE = MagicMock()
         mock_env.LIVE.base_url = "https://api-fxtrade.oanda.com/v3"
+        mock_config.token.get_secret_value = MagicMock(return_value="***")
+        mock_config.account_id.get_secret_value = MagicMock(return_value="001-001-0000000-001")
+        mock_config.environment = mock_env.PRACTICE
 
         return {
             "AsyncClient": MagicMock(return_value=mock_async_client),
@@ -643,6 +689,8 @@ class CodeExecutionValidator(BaseValidator):
             "AccountConfig": MagicMock(return_value=mock_config),
             "AccountConfigLoader": mock_loader,
             "Environment": mock_env,
+            "ClientPrice": MockClientPrice,
+            "TransactionHeartbeat": MockTransactionHeartbeat,
             "asyncio": asyncio,  # Provide real asyncio module
             "Decimal": Decimal,  # Provide real Decimal class
         }

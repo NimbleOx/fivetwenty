@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from docs_validation.src import cli as cli_module
-from docs_validation.src.models import FileInfo, ValidationResult, ValidationSummary
+from docs_validation.src.models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult, ValidationSummary
 from docs_validation.src.reporters.markdown_reporter import MarkdownReporter
 from docs_validation.src.validators.code_execution import CodeExecutionValidator
 from docs_validation.src.validators.fragments import (
@@ -145,6 +145,42 @@ def test_fragment_reporter_outputs_audit_flag_section(tmp_path: Path) -> None:
     assert "- **Validator skips:** 1" in report
     assert "- **Audit flags:** 1" in report
     assert "response indexing issues" in report
+
+
+def test_markdown_reporter_marks_warning_only_runs_as_passed_with_warnings(tmp_path: Path) -> None:
+    reporter = MarkdownReporter(project_root=Path.cwd())
+    output_path = tmp_path / "validation-report.md"
+    issue = ValidationIssue(
+        message="Type checking timeout - code block too complex",
+        file_path=Path("docs/example.md"),
+        line=12,
+        severity=IssueSeverity.WARNING,
+        rule_id="code_typing_timeout",
+    )
+    summary = ValidationSummary(
+        total_files=1,
+        total_validators=1,
+        passed_files=0,
+        failed_files=1,
+        total_issues=1,
+        error_count=0,
+        warning_count=1,
+        duration_ms=1.0,
+        results=[
+            ValidationResult(
+                validator_name="code_typing",
+                file_path=Path("docs/example.md"),
+                passed=False,
+                issues=[issue],
+            )
+        ],
+        validator_summaries=[],
+    )
+
+    reporter.generate_report(summary, [issue], output_path)
+
+    report = output_path.read_text(encoding="utf-8")
+    assert "**Overall Status:** ⚠️ PASSED WITH WARNINGS" in report
 
 
 def test_fragment_reporter_exposes_audit_flags() -> None:

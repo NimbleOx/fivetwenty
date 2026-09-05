@@ -373,9 +373,10 @@ def test_count_critical_findings_scans_all_summary_sources(tmp_path: Path, monke
     (oanda / "fetch-status.json").write_text(json.dumps({"order-ep": "fresh", "trade-df": "stale (2026-08-01)"}), encoding="utf-8")
     (cache / "field-validation.json").write_text(json.dumps({"summary": {"P0": 3, "P1": 1}}), encoding="utf-8")
 
-    count, findings = _count_critical_findings()
+    count, findings, notes = _count_critical_findings()
 
     assert count == 3
+    assert notes == []
     joined = "\n".join(findings)
     assert "instruments-parity.md: P1 missing documentation page docs/api-reference/endpoints/instruments.md" in joined
     assert "oanda cache: `trade-df` is stale (2026-08-01)" in joined
@@ -400,4 +401,22 @@ def test_count_critical_findings_clean_environment_returns_nothing(tmp_path: Pat
     (cache / "docs-meta.json").write_text(json.dumps({"P2_defaults": 0, "P3_anchors": 0}), encoding="utf-8")
     (cache / "field-validation.json").write_text(json.dumps({"summary": {"P0": 0, "P1": 0}}), encoding="utf-8")
 
-    assert _count_critical_findings() == (0, [])
+    assert _count_critical_findings() == (0, [], [])
+
+
+def test_count_critical_findings_reports_known_stale_oanda_pages_as_notes(tmp_path: Path, monkeypatch) -> None:
+    reports = tmp_path / "reports"
+    cache = tmp_path / "parity"
+    oanda = tmp_path / "oanda"
+    for d in (reports, cache, oanda):
+        d.mkdir()
+    monkeypatch.setattr(run_all, "REPORTS_DIR", reports)
+    monkeypatch.setattr(run_all, "CACHE_DIR", cache)
+    monkeypatch.setattr(run_all, "OANDA_CACHE", oanda)
+    (oanda / "fetch-status.json").write_text(json.dumps({"instrument-ep": "stale (2026-04-20)"}), encoding="utf-8")
+
+    count, findings, notes = _count_critical_findings()
+
+    assert count == 0
+    assert findings == []
+    assert notes == ["oanda cache: `instrument-ep` is stale (2026-04-20) — OANDA live page returns 404; official v20 OpenAPI still lists the instrument endpoints"]
