@@ -21,9 +21,12 @@ from typing import Any
 import nbformat
 from nbclient import NotebookClient
 from nbclient.exceptions import CellExecutionError
-from notebook_mocks import AUDIT_ENV
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
+# Documentation tooling is loaded from the checkout, outside the installed SDK.
+sys.path.insert(0, str(REPO_ROOT))
+from notebook_mocks import AUDIT_ENV  # noqa: E402
+
 NOTEBOOK_DIR = REPO_ROOT / "docs" / "examples" / "notebooks"
 SCRIPTS_DIR = REPO_ROOT / "scripts"
 KERNEL_NAME = "fivetwenty-notebooks"
@@ -38,8 +41,7 @@ SWALLOWED_FAILURE_MARKERS = ("Unexpected error", "unmocked path", "Traceback (mo
 # AsyncClient. The notebooks talk to the real SDK and some of them place orders,
 # so execution has to be redirected at the HTTP boundary: notebook_mocks.install()
 # swaps an httpx.MockTransport into every httpx client constructed afterwards,
-# which covers both the SDK's pooled REST client and the throwaway clients
-# AsyncClient._stream builds per streaming connection. Everything above the
+# which covers the SDK's shared REST and streaming client. Everything above the
 # transport -- endpoint methods, Pydantic parsing, streaming reconnection -- is
 # the real code path, which is the point: stale SDK usage still fails the cell.
 SETUP_CELL = """\
@@ -124,7 +126,7 @@ def main() -> int:
         print(f"No notebooks found in {NOTEBOOK_DIR}")
         return 1
 
-    os.environ["PYTHONPATH"] = os.pathsep.join(filter(None, [str(SCRIPTS_DIR), os.environ.get("PYTHONPATH", "")]))
+    os.environ["PYTHONPATH"] = os.pathsep.join(filter(None, [str(SCRIPTS_DIR), str(REPO_ROOT), os.environ.get("PYTHONPATH", "")]))
     os.environ["MPLBACKEND"] = "Agg"
 
     failures: list[tuple[Path, str]] = []
