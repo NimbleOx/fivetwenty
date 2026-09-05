@@ -2,8 +2,9 @@
 
 **OANDA Reference**: [OANDA v20 REST API](https://developer.oanda.com/rest-live-v20/introduction/)
 
-Methods grouped by the resource available on the client. Convenience methods can
-perform more than one HTTP request; they are not additional OANDA API routes.
+Endpoint methods are grouped by resource. Access each group through a client
+attribute, such as `client.accounts` or `client.orders`. Some convenience methods
+combine multiple HTTP requests; each method's page explains what it does.
 
 ---
 
@@ -25,9 +26,12 @@ perform more than one HTTP request; they are not additional OANDA API routes.
 ## Read the return type
 
 Collection methods usually return dictionaries with lists of parsed models and
-metadata such as `lastTransactionID`. `get_accounts()` returns the account-property
-list directly. Order outcomes contain conditional transaction fields, so inspect
-what was returned before assuming an order filled.
+metadata. For example, `get_orders()` returns models in `response["orders"]` and a
+transaction cursor in `response["lastTransactionID"]`. `get_accounts()` returns its
+list directly.
 
-Use the [client reference](../client.md) for setup and resource ownership, or the
+Order responses vary with the outcome. Check the returned transaction fields to
+determine whether an order was created, filled or cancelled.
+
+Use the [client reference](../client.md) for setup and connection management, or the
 [tutorials](../../tutorials/index.md) for complete workflows.

@@ -1,20 +1,24 @@
 # Data Models Reference
 
-Reference for FiveTwenty's request models, parsed API objects and supporting enums.
-These models represent the SDK surface; their presence does not establish support
-for every OANDA route or account-specific feature.
+FiveTwenty uses Pydantic models to validate request data and parse API responses.
+Use this reference to find a model, inspect its fields and look up related enums.
+The features available to a request still depend on the endpoint and OANDA account.
 
 ## Reading model tables
 
-Field names are Python attribute names; serialization uses OANDA aliases. Financial
-attributes use `Decimal`, and datetime attributes use Python `datetime`. Enum-typed
-fields can store wire strings because the shared model configuration uses enum
-values. Models are mutable with assignment validation; local edits do not update
-the account.
+Tables list Python attribute names, such as `closeout_bid`. When the SDK sends data
+to OANDA, it uses API field names such as `closeoutBid`. Financial attributes use
+`Decimal`, and timestamps use Python `datetime` objects. Fields declared with enum
+types can hold the enum's string value, such as `"MARKET"`.
 
-The Required column describes construction requirements for the SDK model. Defaults
-and optional response fields do not prove the server will supply a value in every
-context. Use the linked source for the full model definition and validators.
+You can edit model attributes, and assignments are validated. To apply a change to
+your account, send it through the appropriate endpoint method; editing a Python
+object only changes local data.
+
+The **Required** column tells you which fields you must supply when constructing
+the model. Defaults and optional fields describe the Python model; a particular
+API response may omit those fields. Follow the source links for full definitions
+and validation rules.
 
 ---
 
@@ -25,13 +29,13 @@ Models and enums are organized by resource below.
 ### Enum Models
 [**Enumerations & Constants →**](enum-models.md)
 
-Convenience enums for known API values. Instrument and currency availability must
-be checked against the account; an enum member is not an availability guarantee.
+Enums provide names for known API values. Check your account's instrument list and
+the endpoint requirements before choosing values for a request.
 
 | Enum | Purpose |
 |------|---------|
 | **Core Trading** | |
-| [InstrumentName](enum-models.md#instrumentname) | Available trading instrument pairs (EUR_USD, GBP_JPY, etc.) |
+| [InstrumentName](enum-models.md#instrumentname) | Named trading instruments (EUR_USD, GBP_JPY, etc.) |
 | [Direction](enum-models.md#direction) | Trade direction (LONG, SHORT) |
 | [Currency](enum-models.md#currency) | ISO 4217 currency codes (USD, EUR, GBP, etc.) |
 | [InstrumentType](enum-models.md#instrumenttype) | Instrument classification (CURRENCY, CFD, METAL) |

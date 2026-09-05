@@ -5,27 +5,24 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-FiveTwenty is a typed Python client for OANDA's v20 REST API. It provides an
-`AsyncClient` for asyncio applications and a synchronous `Client` for blocking
-request code.
+FiveTwenty is a Python client for OANDA's v20 REST API. Use it to read market data,
+manage orders and trades, and follow account activity. Choose `AsyncClient` for
+asyncio applications or `Client` for synchronous code.
 
-## What the SDK handles
+## Features
 
-- Seven endpoint groups: accounts, instruments, orders, trades, positions, pricing and transactions.
-- Pydantic models with Python field names, `Decimal` financial values and native `datetime` attributes.
-- Response dictionaries that retain OANDA's envelope keys, such as `account` and `lastTransactionID`.
-- Connection reuse, structured API errors and retries for eligible read requests.
-- Pricing and transaction streams, plus a pricing helper with configurable reconnection.
+- Access accounts, instruments, orders, trades, positions, pricing and transactions.
+- Work with typed Pydantic models, `Decimal` financial values and Python `datetime` objects.
+- Reuse HTTP connections and handle failures with structured exceptions and retries for eligible read requests.
+- Stream prices and transactions, with an optional reconnection helper for pricing.
 
-The SDK does not automatically retry writes. If an order request times out, its
-outcome may be unknown; check account or transaction state before submitting again.
-The [API reference](https://nimbleox.github.io/fivetwenty/api-reference/) describes
-method signatures, return types and account-specific restrictions.
+The [documentation](https://nimbleox.github.io/fivetwenty/) includes tutorials,
+integration guides and a full API reference.
 
 ## Quick start
 
-Install Python 3.10 or later, then install the SDK. `python-dotenv` is optional; this
-example uses it to load a local `.env` file.
+You need Python 3.10 or later and an OANDA v20 practice account. Install FiveTwenty
+and `python-dotenv`, the optional helper used here to load credentials from a file:
 
 ```bash
 pip install fivetwenty python-dotenv
@@ -33,8 +30,9 @@ pip install fivetwenty python-dotenv
 
 With uv, use `uv add fivetwenty python-dotenv` instead.
 
-Create `.env` with credentials for your OANDA v20 practice account, and keep it out
-of version control:
+Create a `.env` file in your project directory and replace the placeholders with
+your [practice token and account ID](https://nimbleox.github.io/fivetwenty/tutorials/getting-started/authentication/).
+Add `.env` to `.gitignore` to keep credentials out of version control:
 
 ```bash
 FIVETWENTY_OANDA_TOKEN=your-practice-token
@@ -42,8 +40,9 @@ FIVETWENTY_OANDA_ACCOUNT=your-account-id
 FIVETWENTY_OANDA_ENVIRONMENT=practice
 ```
 
-This example reads the configured account and current pricing. It does not place
-an order. Printed prices are a snapshot, not a promised execution price.
+Save the following as `quickstart.py` in the same directory. It reads your account
+balance and a price snapshot for EUR/USD without placing an order. The
+`load_dotenv()` call loads `.env`; FiveTwenty then reads the environment variables.
 
 ```python
 import asyncio
@@ -74,35 +73,43 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
+Run it with `python quickstart.py`, or `uv run quickstart.py` in a uv project.
 
-The SDK reads process environment variables; it does not load `.env` files itself.
-For an order lifecycle, continue with
-[Your first trade](https://nimbleox.github.io/fivetwenty/tutorials/getting-started/first-trade/).
+Responses combine dictionaries and typed models: `response["account"]` selects the
+account model, and `account.balance` reads its `Decimal` balance. Other dictionary
+keys, such as `lastTransactionID`, preserve OANDA's response metadata. See
+[models and response shapes](https://nimbleox.github.io/fivetwenty/api-reference/models/)
+for details.
 
-## Beta compatibility
+## Next steps
 
-The public API may change as this beta library is aligned with OANDA v20. Review
-changes before upgrading.
+- [Create and close a practice trade](https://nimbleox.github.io/fivetwenty/tutorials/getting-started/first-trade/).
+- [Choose between async and sync clients](https://nimbleox.github.io/fivetwenty/guides/understanding/async-vs-sync/).
+- [Browse runnable scripts and notebooks](https://nimbleox.github.io/fivetwenty/examples/).
+- [Look up methods, parameters and return types](https://nimbleox.github.io/fivetwenty/api-reference/).
 
-- Collection methods generally return an envelope. For example, read
-  `response["orders"]` after `get_orders()` and retain `response["lastTransactionID"]`
-  when tracking account state. `get_accounts()` returns its account list directly.
-- Omit a dependent-order update argument to leave that order unchanged; pass
-  `None` to cancel it. Partial dictionaries use OANDA's camelCase field names.
-- `max_retries=3` allows the initial request plus three retries for eligible reads.
-  `max_retries=0` still sends the initial request. Writes are sent once.
-- `datetime_format` controls the wire format. Parsed model attributes remain Python
-  datetimes; Python represents microseconds, not OANDA's full nanosecond precision.
+Before submitting orders, read the [error-handling guide](https://nimbleox.github.io/fivetwenty/api-reference/error-handling/).
+The SDK sends write requests once. If a request times out, check account or
+transaction state before submitting it again: OANDA may already have processed it.
+
+<a id="beta-compatibility"></a>
+
+## Compatibility and upgrades
+
+While FiveTwenty is below version 1.0, minor releases may include breaking changes.
+Read the [changelog](https://github.com/NimbleOx/fivetwenty/blob/main/CHANGELOG.md)
+before upgrading. It includes migration examples for changes to response types and
+dependent-order cancellation.
 
 ## Requirements and development
 
-The direct runtime dependencies are HTTPX >= 0.26.0 and Pydantic >= 2.7.0.
+FiveTwenty requires HTTPX >= 0.26.0 and Pydantic >= 2.7.0; the installer supplies both.
 See the [testing guide](https://nimbleox.github.io/fivetwenty/contributing/testing-guide/)
 for supported Python versions, coverage checks and opt-in practice-account tests.
 
 ## License
 
-MIT License - see LICENSE file for details.
+FiveTwenty is released under the [MIT License](https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE).
 
 ## Disclaimer
 

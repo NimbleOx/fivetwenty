@@ -1,8 +1,8 @@
 # SDK architecture
 
 FiveTwenty translates between OANDA's JSON API and Python objects. The design has
-three main layers: clients manage HTTP, endpoint groups build requests and parse
-response envelopes, and Pydantic models validate individual data objects.
+three main layers: clients manage HTTP connections, endpoint groups build requests
+and parse responses, and Pydantic models validate individual data objects.
 
 ```mermaid
 flowchart LR
@@ -26,17 +26,19 @@ endpoint calls block until the corresponding coroutine finishes and return the
 same response shape. Synchronous pricing uses `client.pricing.stream_iter()`;
 other async-generator methods are not converted into blocking iterators.
 
-The wrapper adds a thread and queue, not a trading scheduler. See
-[async and sync clients](async-vs-sync.md) for examples and lifetime rules.
+See [async and sync clients](async-vs-sync.md) for examples of creating clients,
+closing connections and consuming streams.
 
 ## Requests and response envelopes
 
-Endpoint names follow the public API, for example `get_account_summary()`,
-`post_order()`, `put_trade_orders()` and `cancel_order()`. Most account-scoped
-methods take `account_id` first. Consult the endpoint reference for exact names;
-there is no generic `list()` or `modify()` convention.
+Endpoint methods include `get_account_summary()`, `post_order()`,
+`put_trade_orders()` and `cancel_order()`. Most methods that operate on an account
+take `account_id` first. Use the [endpoint reference](../../api-reference/endpoints/index.md)
+to find a method's name, parameters and return type.
 
-Most methods return a dictionary with OANDA keys and typed model values:
+Most methods return a dictionary with OANDA's field names as keys and typed models
+as values. This outer dictionary is called a response envelope: it holds the data
+you requested along with metadata such as `lastTransactionID`.
 
 ```python
 from fivetwenty import AsyncClient
@@ -56,14 +58,17 @@ returned keys rather than assuming every accepted request produced a fill.
 
 ## Model values and wire values
 
-Model attributes use Python names such as `closeout_bid`; aliases such as
-`closeoutBid` are used on the wire. Financial attributes declared as `Decimal`
-remain decimals in Python. The public `PriceValue`, `AccountUnits` and
-`DecimalNumber` aliases also represent `Decimal` values.
+Model attributes use Python names such as `closeout_bid`. When the SDK serializes
+a model for an API request, it maps these names to OANDA aliases such as
+`closeoutBid` and converts values to the API format. These serialized values are
+often called wire values.
 
-Timestamps become Python datetimes. `datetime_format="UNIX"` changes request and
-response encoding, not the Python attribute type. Python datetimes retain
-microseconds; a wire timestamp with finer precision cannot be represented exactly.
+Financial attributes declared as `Decimal` remain decimals in Python. The public
+`PriceValue`, `AccountUnits` and `DecimalNumber` aliases also represent `Decimal` values.
+
+Timestamps become Python datetimes. `datetime_format="UNIX"` controls how timestamps
+are sent and received; model attributes remain Python `datetime` objects. Python
+retains microsecond precision, so finer precision in an API timestamp is lost.
 
 ```python
 from decimal import Decimal
@@ -116,10 +121,11 @@ only `_request()` does not cover streaming. See the
 [testing guide](../../contributing/testing-guide.md).
 
 Custom transports must supply the appropriate base URL and transport settings.
-Closing the SDK also closes an injected HTTPX client, so give each SDK instance a
-clear transport owner. The direct runtime dependencies are HTTPX and Pydantic;
-plotting, strategy execution and account-state persistence belong to application
-code.
+Closing the SDK also closes an injected HTTPX client, so avoid sharing that HTTP
+client with code that needs it to stay open. The direct runtime dependencies are
+HTTPX and Pydantic. Your application handles plotting, strategy execution and
+storing account state.
 
-The library is beta software. Compatibility changes are documented as they are
-made; this documentation does not promise a particular deprecation schedule.
+While FiveTwenty is below version 1.0, minor releases may include breaking changes.
+The [changelog](https://github.com/NimbleOx/fivetwenty/blob/main/CHANGELOG.md) records
+these changes and explains how to update affected code.

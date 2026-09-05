@@ -1,7 +1,9 @@
 # Tutorials
 
-These tutorials introduce FiveTwenty through concrete API tasks. Start with a
-practice account and run each example only after reading what it changes.
+Learn FiveTwenty by connecting to an account, reading data and managing a practice
+trade. Follow the getting-started sequence below, then choose a topic to explore.
+Use a practice account and check which operations each example performs before
+running it.
 
 ## Start here
 
@@ -19,9 +21,9 @@ practice account and run each example only after reading what it changes.
 | [Account management](account-management.md) | Read balances, margin and account changes |
 | [Streaming data](streaming-data.md) | Consume typed pricing and transaction records and close streams |
 
-Strategy examples illustrate application code. Their parameters and results are
-not recommendations or evidence that a strategy will be profitable. Practice
-execution is useful for API testing but does not predict live fills or returns.
+Strategy examples demonstrate how to write application code; their parameters are
+for illustration. Use a practice account to test API behavior, keeping in mind
+that practice results do not predict live fills or returns.
 
 ## Other ways to learn
 
@@ -29,6 +31,6 @@ The [examples](../examples.md) page lists runnable scripts and six notebooks.
 Use [guides](../guides/index.md) for a particular integration problem and the
 [API reference](../api-reference/index.md) for exact signatures and response fields.
 
-If an example fails, record the failing method, exception type and sanitized error
-code. Check [connection and authentication troubleshooting](../guides/practical-solutions/handle-connection-failures.md)
-before reporting an issue. Never include an API token in a report.
+If an example fails, note the method, exception type and error code, then follow
+[connection and authentication troubleshooting](../guides/practical-solutions/handle-connection-failures.md).
+Remove credentials and private account details before sharing a report.

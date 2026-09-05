@@ -1,7 +1,7 @@
 # Configure authentication
 
-By the end of this tutorial, you will have loaded practice-account credentials and
-verified that the token can access the configured account. No orders are submitted.
+Load your practice-account credentials, then read an account summary to verify
+access. This tutorial makes a read-only request.
 
 ## Obtain a token and account ID
 
@@ -11,7 +11,7 @@ token. Copy the account ID from the account you intend to use.
 
 OANDA's [authentication documentation](https://developer.oanda.com/rest-live-v20/authentication/)
 describes token access and revocation. A token can authorize access to multiple
-accounts; access to one account does not prove access to another.
+accounts; verify access to each account you plan to use.
 
 ## Store local configuration
 
@@ -24,11 +24,13 @@ FIVETWENTY_OANDA_ACCOUNT=your-account-id
 FIVETWENTY_OANDA_ENVIRONMENT=practice
 ```
 
-These are placeholders. Do not paste a real token into source code, an issue or a
-shared notebook. FiveTwenty reads process variables; `load_dotenv()` loads the file
-into that environment for this example.
+Replace the placeholders with your practice credentials. Keep real tokens out of
+source code, issues and shared notebooks. FiveTwenty reads environment variables;
+the `load_dotenv()` call below loads your `.env` file into that environment.
 
 ## Verify account access
+
+Save this as `verify_access.py` in the same directory as `.env`:
 
 ```python
 import asyncio
@@ -55,29 +57,32 @@ if __name__ == "__main__":
     asyncio.run(main())
 ```
 
-A successful response establishes access at the time of the request. It does not
-place a trade or verify every account-specific feature. The environment check uses
-the resolved configuration, which may differ from the `.env` file if the process
-already had variables set.
+Run `uv run verify_access.py`, or `python verify_access.py` in an activated virtual
+environment. A successful run prints a configuration summary, the account currency
+and the last transaction ID. That confirms the token can read this account's summary.
+
+The practice check uses the client's resolved configuration. By default,
+`load_dotenv()` keeps environment variables that are already set. If the client
+uses different values from your `.env` file, check your shell or process settings.
 
 ## Other configuration sources
 
-Pass direct credentials when you want explicit constructor arguments. Use
+You can also pass credentials directly to the client constructor or use
 `AccountConfig` for a named, reusable configuration. The [configuration guide](../../guides/understanding/configuration.md)
-explains source precedence, required aliases and custom prefixes.
+explains which source takes priority and how to use custom environment-variable
+prefixes and configuration aliases.
 
-`SecretStr` masks configuration display and SDK request logs redact Authorization
-headers. Those features do not encrypt `.env` files or protect a token you extract
-and print yourself.
+Tokens use Pydantic's `SecretStr` to mask them when you display configuration, and
+SDK request logs redact Authorization headers. Keep the `.env` file private and
+avoid extracting or printing the token in your own logs.
 
 ## If the check fails
 
-- A construction error usually means required values are missing or malformed.
-- A 401/403 response requires checking the token, resolved environment and account access.
-- A transport error points to the network, proxy, TLS settings or request timeout.
+- If client creation fails, check for missing or malformed configuration values.
+- For a 401 or 403 response, check the token, resolved environment and account access.
+- For a transport error, check the network, proxy, TLS settings and request timeout.
 
-Do not infer authentication from token length alone. See
-[authentication troubleshooting](../../guides/practical-solutions/handle-connection-failures.md#authentication-troubleshooting)
-for a diagnostic sequence that keeps credentials out of logs.
+The [authentication troubleshooting guide](../../guides/practical-solutions/handle-connection-failures.md#authentication-troubleshooting)
+walks through these checks without exposing credentials in logs.
 
 Next, [create and close a practice trade](first-trade.md).

@@ -1,19 +1,22 @@
 # Scripts and notebooks
 
-Examples live in the repository under `docs/examples/`; they are not installed with
-the SDK package. Read each example's configuration and account-changing operations
-before running it. A practice default can be overridden by environment configuration,
-and practice requests still change account state.
+Explore runnable scripts and notebooks in the repository's `docs/examples/`
+directory. To use them, [run from a checkout](#run-from-a-checkout); they are provided
+separately from the installed SDK.
 
 For a first read-only script, start with [authentication](tutorials/getting-started/authentication.md).
-For one explicit create-and-close sequence, use the
-[practice trade lifecycle](tutorials/getting-started/first-trade.md).
+To place and close a single practice trade, follow
+[Your first trade](tutorials/getting-started/first-trade.md).
+
+Use practice credentials and check the client's resolved environment before
+running an example. Environment variables can override a practice default, and
+write requests change account state even on a practice account.
 
 ## Python scripts
 
-The scripts cover the following topics. “Contains writes” means the file includes
-account-changing calls; inspect the selected entry point and conditions before use.
-These are demonstrations, not unattended trading services.
+Choose a script by topic. **Contains writes** identifies files with calls that
+change account state. Read the script to see which calls run and under what
+conditions before executing it.
 
 | Script | Topic | Contains writes |
 | --- | --- | --- |
@@ -31,8 +34,9 @@ These are demonstrations, not unattended trading services.
 
 ## Jupyter notebooks
 
-Run cells in order with the configured Python kernel. Notebook Markdown explains
-which operations change account state and which results use local simulations.
+Run cells in order using the Python environment where you installed the notebook's
+dependencies. Each notebook explains which operations change account state and
+which results use local simulations.
 The quick-start notebook places an order, and its position-close cell can affect
 trades that predate the notebook.
 
@@ -47,6 +51,13 @@ trades that predate the notebook.
 
 ## Run from a checkout
 
+Set `FIVETWENTY_OANDA_TOKEN` and `FIVETWENTY_OANDA_ACCOUNT` for a practice account,
+and `FIVETWENTY_OANDA_ENVIRONMENT=practice`, as described in
+[authentication](tutorials/getting-started/authentication.md). Check whether your
+chosen script loads `.env` itself; the SDK reads environment variables directly.
+
+Clone the repository, install development dependencies and run a script:
+
 ```bash
 git clone https://github.com/NimbleOx/fivetwenty.git
 cd fivetwenty
@@ -54,9 +65,7 @@ uv sync --group dev
 uv run python docs/examples/scripts/pricing_and_candles.py
 ```
 
-Set `FIVETWENTY_OANDA_TOKEN` and `FIVETWENTY_OANDA_ACCOUNT` for a practice account,
-and `FIVETWENTY_OANDA_ENVIRONMENT=practice`. Check whether the selected script loads
-`.env` itself; the SDK does not. Scripts that stream may run until interrupted.
+Scripts that stream may run until interrupted.
 
 For notebooks, install the packages imported by the setup cell, including any
 analysis or plotting dependencies, and select that environment as the kernel.
@@ -66,17 +75,18 @@ From this checkout, a Jupyter installation can be started with:
 uv run --with jupyter jupyter notebook docs/examples/notebooks
 ```
 
-The repository's offline notebook check installs its analysis dependencies in an
-ephemeral environment and executes temporary copies using mocked HTTP:
+To check the notebooks offline, run the repository's validation command. It
+installs analysis dependencies in a temporary environment and executes copies of
+the notebooks with simulated API responses:
 
 ```bash
 uv run poe docs-validate-notebooks
 ```
 
-A successful mocked run checks SDK usage against synthetic responses. It does not
-establish live fills, strategy performance or eligibility for account-specific
-features. Backtests and paper simulations need their timing, costs, currency and
-execution assumptions reviewed before their metrics are meaningful.
+This check verifies that the examples work with the SDK and its test data. Use a
+practice account to check behavior with OANDA. When interpreting backtest or
+simulation results, review the assumptions about timing, costs, currency conversion
+and execution.
 
-See [contributing](contributing/index.md) to report a stale example with its SDK
-version, sanitized inputs and observed result.
+To report an example that needs updating, see [contributing](contributing/index.md).
+Include the SDK version, inputs with private details removed, and what happened.

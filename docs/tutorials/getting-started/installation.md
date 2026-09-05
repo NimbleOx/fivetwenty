@@ -1,11 +1,12 @@
 # Install FiveTwenty
 
-You need Python 3.10 or later and access to an OANDA v20 account. This page installs
-the library and verifies that Python can import it; it makes no API requests.
+Install FiveTwenty in a Python 3.10 or later environment. You will need an OANDA
+v20 account for the next tutorial, where you configure and test API access.
 
 ## Create an environment and install
 
-With uv:
+Choose uv or pip. With uv, create a project, install the packages and print the
+installed FiveTwenty version:
 
 ```bash
 uv init my-oanda-app
@@ -14,7 +15,8 @@ uv add fivetwenty python-dotenv
 uv run python -c "from importlib.metadata import version; print(version('fivetwenty'))"
 ```
 
-Or use a virtual environment and pip:
+With pip, create and activate a virtual environment, then install the packages and
+print the version:
 
 ```bash
 python -m venv .venv
@@ -25,20 +27,22 @@ python -c "from importlib.metadata import version; print(version('fivetwenty'))"
 
 On Windows PowerShell, activate the environment with `.venv\Scripts\Activate.ps1`.
 `python-dotenv` is optional; the tutorials use it to load configuration from `.env`.
-The SDK's direct runtime dependencies are HTTPX and Pydantic.
+Both commands install HTTPX and Pydantic automatically as FiveTwenty dependencies.
 
-## Verify the interpreter
+## Check your installation
 
-If importing fails after installation, check that the script uses the interpreter
-from the environment where the package was installed. Use `uv run` consistently in
-a uv project, or `python -m pip` with the activated interpreter.
+The final command in either sequence should print a version number. If it reports
+that the package cannot be found, check that you are using the environment where
+you installed it. Use `uv run` in a uv project, or activate your virtual environment
+before running Python.
 
-An import check does not validate OANDA credentials. Continue with
-[authentication](authentication.md) to configure and test a read-only request.
+Once the package is installed, continue with [authentication](authentication.md)
+to load your credentials and make a read-only request.
 
 ## Upgrades
 
-This is beta software. Pin the version in your application's dependency file, keep
-its lockfile, and review compatibility notes before upgrading. The repository
-[testing guide](../../contributing/testing-guide.md) describes the Python versions
-and minimum dependencies exercised by CI.
+While FiveTwenty is below version 1.0, minor releases may include breaking changes.
+Pin the version in your application's dependency file, keep its lockfile, and read
+the [changelog](https://github.com/NimbleOx/fivetwenty/blob/main/CHANGELOG.md) before
+upgrading. The [testing guide](../../contributing/testing-guide.md) lists the Python
+versions and minimum dependencies tested in CI.
