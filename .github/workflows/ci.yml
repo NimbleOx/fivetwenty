@@ -59,7 +59,7 @@ jobs:
         run: uv run poe typecheck
 
       - name: Unit tests
-        run: uv run poe test
+        run: uv run poe test-cov
 
   minimum-dependencies:
     name: Minimum Runtime Dependencies

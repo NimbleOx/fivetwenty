@@ -1,26 +1,59 @@
 """Tests for live integration safety helpers."""
 
-from decimal import Decimal
+from unittest.mock import AsyncMock, Mock
 
-from tests.integration.conftest import CLIENT_REQUEST_ID_PREFIX, _client_request_id_factory
-from tests.integration.helpers import cleanup_error_message, is_tolerated_cleanup_error, mid_price_from_pricing_response
+import pytest
+
+from fivetwenty import FiveTwentyError
+from tests.integration import conftest as fixtures
+from tests.integration.helpers import cleanup_error_message, is_tolerated_cleanup_error
 
 
 class _MissingResourceError(Exception):
     status = 404
 
 
-def test_client_request_id_factory_prefixes_and_bounds_values() -> None:
-    make_client_request_id = _client_request_id_factory("tests/integration/test_file.py::test_name")
+async def test_cleanup_preserves_preexisting_resources_and_removes_only_new_state():
+    client = Mock()
+    client.orders.get_pending_orders = AsyncMock(return_value={"orders": [{"id": "old-order"}, {"id": "new-order"}]})
+    client.trades.get_open_trades = AsyncMock(return_value={"trades": [{"id": "old-trade"}, {"id": "new-trade"}]})
+    client.orders.get_order = AsyncMock(return_value={"order": {"id": "new-order", "state": "PENDING"}})
+    client.orders.cancel_order = AsyncMock()
+    client.trades.close_trade = AsyncMock(return_value={"lastTransactionID": "42"})
+    result = await fixtures._cleanup_new_account_state(client, "offline", {"old-order"}, {"old-trade"})
+    assert result == (1, 1, [], True)
+    client.orders.cancel_order.assert_awaited_once_with("offline", "new-order")
+    client.trades.close_trade.assert_awaited_once_with(account_id="offline", trade_specifier="new-trade")
 
-    first_id = make_client_request_id("custom request with spaces")
-    second_id = make_client_request_id()
 
-    assert first_id.startswith(f"{CLIENT_REQUEST_ID_PREFIX}-")
-    assert second_id.startswith(f"{CLIENT_REQUEST_ID_PREFIX}-")
-    assert first_id != second_id
-    assert len(first_id) <= 128
-    assert " " not in first_id
+async def test_cleanup_failure_is_reported_and_other_resources_are_still_attempted():
+    client = Mock()
+    client.trades.close_trade = AsyncMock(side_effect=[FiveTwentyError(status=500, message="unavailable"), {"lastTransactionID": "42"}])
+    count, errors = await fixtures._cleanup_open_trades(client, "offline", {"a", "b"})
+    assert count == 1
+    assert len(errors) == 1
+    assert "trade a" in errors[0]
+    assert client.trades.close_trade.await_count == 2
+
+
+async def test_trading_fixture_refuses_preexisting_exposure():
+    client = Mock()
+    client.orders.get_pending_orders = AsyncMock(return_value={"orders": []})
+    client.trades.get_open_trades = AsyncMock(return_value={"trades": [{"id": "existing"}]})
+    fixture = fixtures.trading_client.__wrapped__(client, "offline")
+    with pytest.raises(pytest.skip.Exception, match="dedicated practice account"):
+        await anext(fixture)
+
+
+async def test_trading_fixture_fails_when_postflight_state_cannot_be_verified(monkeypatch):
+    client = Mock()
+    client.orders.get_pending_orders = AsyncMock(return_value={"orders": []})
+    client.trades.get_open_trades = AsyncMock(return_value={"trades": []})
+    monkeypatch.setattr(fixtures, "_cleanup_new_account_state", AsyncMock(return_value=(0, 0, [], False)))
+    fixture = fixtures.trading_client.__wrapped__(client, "offline")
+    assert await anext(fixture) is client
+    with pytest.raises(pytest.fail.Exception, match="Could not verify"):
+        await anext(fixture)
 
 
 def test_cleanup_error_classification_and_message() -> None:
@@ -28,16 +61,3 @@ def test_cleanup_error_classification_and_message() -> None:
 
     assert is_tolerated_cleanup_error(exc)
     assert cleanup_error_message("order", "123", exc) == "order 123: _MissingResourceError: missing"
-
-
-def test_mid_price_from_pricing_response_supports_oanda_bucket_shape() -> None:
-    pricing_response = {
-        "prices": [
-            {
-                "bids": [{"price": "1.2000"}],
-                "asks": [{"price": "1.2004"}],
-            }
-        ]
-    }
-
-    assert mid_price_from_pricing_response(pricing_response, Decimal("1.1000")) == Decimal("1.2002")

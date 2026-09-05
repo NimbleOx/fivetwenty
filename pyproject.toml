@@ -252,6 +252,7 @@ dev = [
 [tool.poe.tasks]
 # Testing tasks
 test = "python -m pytest tests/unit/"
+test-cov = "python -m pytest tests/unit/ --cov=fivetwenty --cov-branch --cov-report=term-missing --cov-report=xml"
 test-integration = "python -m pytest tests/integration/ --run-integration-live"
 
 # Code quality tasks
@@ -342,7 +343,7 @@ source = ["fivetwenty"]
 branch = true
 
 [tool.coverage.report]
-fail_under = 80
+fail_under = 99
 show_missing = true
 exclude_lines = [
     "pragma: no cover",
