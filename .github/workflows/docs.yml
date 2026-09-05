@@ -35,6 +35,8 @@ jobs:
   validate:
     name: Validate Documentation
     runs-on: ubuntu-latest
+    outputs:
+      pages_artifact: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -63,16 +65,17 @@ jobs:
         run: uv sync
 
       - name: Validate documentation
-        # CI config: skips the mypy and code-execution validators, whose
-        # per-code-block subprocesses OOM-kill GitHub runners (exit 137).
-        # Full validation runs locally in check-full/release-check.
+        # The main CI workflow runs offline Markdown execution separately.
+        # Full validation, including mypy, runs in check-full/release-check.
         run: |
           uv run python -m docs_validation.src.cli validate \
             --config docs_validation/config/validation-ci.yml \
             --max-workers 2
 
       - name: Test MkDocs build
-        run: uv run mkdocs build --strict --clean
+        run: |
+          uv run mkdocs build --strict --clean
+          touch site/.nojekyll
 
       - name: Upload build artifacts
         if: github.event_name == 'pull_request'
@@ -82,67 +85,30 @@ jobs:
           path: site/
           retention-days: 7
 
+      - name: Upload Pages artifact
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
+        uses: actions/upload-pages-artifact@v5
+        with:
+          name: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
+          path: ./site
+          include-hidden-files: true
+
   deploy:
     name: Deploy to GitHub Pages
     needs: validate
     runs-on: ubuntu-latest
     if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-    env:
-      PAGES_ARTIFACT_NAME: github-pages-${{ github.run_id }}-${{ github.run_attempt }}
 
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-
-      - name: Set up Python
-        uses: actions/setup-python@v6
-        with:
-          python-version: '3.11'
-
-      - name: Install uv
-        uses: astral-sh/setup-uv@v7
-
-      - name: Cache dependencies
-        uses: actions/cache@v5
-        with:
-          path: |
-            ~/.cache/uv
-            .venv
-          key: ${{ runner.os }}-docs-${{ hashFiles('**/pyproject.toml') }}
-          restore-keys: |
-            ${{ runner.os }}-docs-
-
-      - name: Install dependencies
-        run: uv sync
-
-      - name: Configure Git
-        run: |
-          git config --global user.name 'github-actions[bot]'
-          git config --global user.email 'github-actions[bot]@users.noreply.github.com'
-
-      - name: Build documentation
-        run: uv run mkdocs build --strict --clean
-
-      - name: Add .nojekyll to site
-        run: touch site/.nojekyll
-
       - name: Setup Pages
         uses: actions/configure-pages@v6
-
-      - name: Upload artifact
-        uses: actions/upload-pages-artifact@v5
-        with:
-          name: ${{ env.PAGES_ARTIFACT_NAME }}
-          path: ./site
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v5
         with:
-          artifact_name: ${{ env.PAGES_ARTIFACT_NAME }}
+          artifact_name: ${{ needs.validate.outputs.pages_artifact }}
