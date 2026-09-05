@@ -24,8 +24,8 @@ class ValidationEngine:
         files: list[FileInfo] = []
 
         # Create pathspecs for inclusion and exclusion
-        include_spec = pathspec.PathSpec.from_lines("gitwildmatch", self.config.file_patterns)
-        exclude_spec = pathspec.PathSpec.from_lines("gitwildmatch", self.config.exclude_patterns)
+        include_spec = pathspec.PathSpec.from_lines("gitignore", self.config.file_patterns)
+        exclude_spec = pathspec.PathSpec.from_lines("gitignore", self.config.exclude_patterns)
 
         # Walk through project directory
         for file_path in self._walk_files():

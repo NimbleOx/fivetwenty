@@ -68,7 +68,7 @@ validators in `docs_validation/src/validators/`:
 
 - `python_syntax`: syntax-check Python code blocks.
 - `code_linting`: run Ruff against extracted Python examples.
-- `code_typing`: run MyPy-style checks against examples.
+- `code_typing`: run mypy checks against examples.
 - `code_execution`: execute selected standalone examples with mocked API calls.
 - `cross_references`: validate internal documentation references.
 - `external_links`: check external links.
@@ -130,7 +130,7 @@ uv run python -m docs_validation.src.parity.run_all --no-fetch --strict
 
 ### Field-level OANDA validation
 
-The strictest parity check is the field validator:
+The field validator checks model and response fields:
 
 ```bash
 uv run python -m docs_validation.src.parity.field_validate
@@ -382,3 +382,31 @@ instead of weakening the validator globally.
 If a parity report shows a field missing from the SDK, treat the official OANDA
 definition page as source of truth and either update the SDK model or document
 why a configured alias/exception is appropriate.
+
+### Code-check outcomes
+
+Missing mypy or Ruff executables, tool failures, and timeouts fail validation.
+The command exits with status 1 when validation errors or fragment-audit failures are reported.
+Install the development dependencies and include their executable directory in
+PATH. All Python blocks are checked, including single-line examples and strings
+containing `...`. A standalone ellipsis statement indicates an incomplete example
+and is reported as a skip. HTML fragment markers remain the explicit way to mark
+context-dependent snippets. Reports count both marker skips and implicit skips,
+including files outside the execution include list.
+
+## Interpreting validation evidence
+
+A passing build checks site generation, not every Python example or API behavior.
+Parity checks cover what their extractors recognize in the selected source cache;
+review waivers, cache age and source differences alongside the result. Passing a
+mocked example does not establish account eligibility or live execution behavior.
+
+The file execution validator uses a restricted namespace and SDK test doubles.
+Defining a helper does not execute its body, and a failure can come from an
+incomplete double rather than the real SDK. Use HTTP-boundary example tests and the
+mocked notebook runner to exercise actual serialization, parsing and lifecycle
+behavior. Report those checks separately from file-validator diagnostics.
+
+Generated reports are diagnostics, not independent reviews of prose or financial
+claims. Inspect the rule and affected content before treating a lint issue, a broken
+public link and a runtime failure as the same kind of problem.

@@ -7,6 +7,7 @@ from typing import Any
 
 from ..base import BaseValidator
 from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
+from ..parity.run_docs_surface import sync_endpoint_methods
 
 
 class SDKMethodsValidator(BaseValidator):
@@ -77,6 +78,12 @@ class SDKMethodsValidator(BaseValidator):
                 except Exception:
                     # Skip files that can't be parsed
                     continue
+
+        # Dedicated synchronous adapters also expose public methods. Discover
+        # their actual definitions so valid blocking stream examples are accepted.
+        for endpoint, methods in sync_endpoint_methods(sdk_root / "client.py").items():
+            if endpoint in self._sdk_methods:
+                self._sdk_methods[endpoint].update(methods)
 
         self._discovered_methods = True
 

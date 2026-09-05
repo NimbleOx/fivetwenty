@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import re
 from dataclasses import dataclass
 from enum import Enum
@@ -159,6 +160,24 @@ def fragment_metadata(skipped_blocks: list[dict[str, Any]]) -> dict[str, Any]:
         "skipped_block_count": len(skipped_blocks),
         "skipped_blocks": skipped_blocks,
     }
+
+
+def is_placeholder_code(code: str) -> bool:
+    """Recognize a standalone ellipsis statement, including a stub body.
+
+    Dots inside strings, comments, type annotations and array slices are valid
+    Python and do not make the surrounding example a placeholder.
+    """
+    try:
+        tree = ast.parse(code)
+    except SyntaxError:
+        return False
+    return any(isinstance(node, ast.Expr) and isinstance(node.value, ast.Constant) and node.value.value is Ellipsis for node in ast.walk(tree))
+
+
+def implicit_skip_metadata(code_block_start_line: int, reason: str) -> dict[str, Any]:
+    """Account for a skipped block even when it has no HTML marker."""
+    return {"code_block_start_line": code_block_start_line, "code_start_line": code_block_start_line + 1, "marker_line": code_block_start_line, "marker": "", "marker_kind": "implicit", "reason": reason}
 
 
 def _extract_marker_reason(body: str, kind: str) -> str:

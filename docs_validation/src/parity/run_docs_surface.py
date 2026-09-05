@@ -29,6 +29,17 @@ REPORTS = REPO_ROOT / "docs_validation" / "reports"
 CACHE = REPO_ROOT / "docs_validation" / ".cache" / "parity"
 
 
+def sync_endpoint_methods(client_file: Path) -> dict[str, set[str]]:
+    """Discover public methods on the dedicated synchronous endpoint adapters."""
+    methods: dict[str, set[str]] = {}
+    if client_file.exists():
+        for node in ast.walk(ast.parse(client_file.read_text())):
+            if isinstance(node, ast.ClassDef) and node.name.startswith("_Sync") and node.name.endswith("Proxy"):
+                endpoint = node.name.removeprefix("_Sync").removesuffix("Proxy").lower()
+                methods[endpoint] = {item.name for item in node.body if isinstance(item, ast.FunctionDef) and not item.name.startswith("_")}
+    return methods
+
+
 def _build_library_surface() -> dict[str, set[str]]:
     """Walk fivetwenty/ and collect public names per module + endpoint methods.
 
@@ -107,6 +118,9 @@ def _build_library_surface() -> dict[str, set[str]]:
                     if isinstance(item, (ast.FunctionDef, ast.AsyncFunctionDef)) and not item.name.startswith("_"):
                         methods.add(item.name)
         endpoint_methods[attr_name] = methods
+    for endpoint, methods in sync_endpoint_methods(REPO_ROOT / "fivetwenty" / "client.py").items():
+        if endpoint in endpoint_methods:
+            endpoint_methods[endpoint].update(methods)
     surface["__client_endpoints__"] = endpoint_methods  # type: ignore[assignment]
     return surface
 
@@ -129,7 +143,7 @@ def _check_imports(content: str, surface: dict[str, set[str]]) -> list[str]:
             mod_names = surface.get(mod, set())
             if base not in mod_names:
                 # Maybe it's re-exported through fivetwenty
-                if mod == "fivetwenty" or base in surface.get("fivetwenty", set()):
+                if base in surface.get("fivetwenty", set()):
                     continue
                 issues.append(f"`from {mod} import {base}` — `{base}` not found in {mod}")
     return issues

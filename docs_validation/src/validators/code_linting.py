@@ -9,7 +9,7 @@ from typing import Any
 
 from ..base import BaseValidator
 from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
-from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, marker_skip_metadata
+from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, implicit_skip_metadata, is_placeholder_code, marker_skip_metadata
 
 
 class CodeLintingValidator(BaseValidator):
@@ -56,6 +56,8 @@ class CodeLintingValidator(BaseValidator):
 
                         if skip_marker is not None:
                             skipped_blocks.append(marker_skip_metadata(skip_marker, code_block_start))
+                        elif self._is_placeholder_code("\n".join(code_block_lines)):
+                            skipped_blocks.append(implicit_skip_metadata(code_block_start, "Standalone ellipsis marks an incomplete example"))
                         else:
                             issues.extend(
                                 self._lint_python_code(
@@ -84,16 +86,11 @@ class CodeLintingValidator(BaseValidator):
 
         code = "\n".join(code_lines)
 
-        # Skip code blocks that are clearly examples/placeholders
-        if self._is_placeholder_code(code):
-            return issues
-
         # Check if code is syntactically valid first
         try:
             ast.parse(code)
-        except SyntaxError:
-            # Don't lint syntactically invalid code
-            return issues
+        except SyntaxError as exc:
+            return [ValidationIssue(message=f"Cannot check invalid Python: {exc.msg}", file_path=file_path, line=start_line + (exc.lineno or 1) - 1, severity=IssueSeverity.ERROR, rule_id="code_linting_syntax")]
 
         # Create temporary file for ruff
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as temp_file:
@@ -124,7 +121,11 @@ class CodeLintingValidator(BaseValidator):
                 ruff_issues = json.loads(result.stdout)
             except (json.JSONDecodeError, ValueError):
                 # Fallback to text parsing if JSON fails
-                return self._parse_ruff_text_output(result.stdout, code_lines, start_line, file_path)
+                parsed = self._parse_ruff_text_output(result.stdout, code_lines, start_line, file_path)
+                return parsed or [ValidationIssue(message=f"ruff exited with status {result.returncode}: {result.stderr.strip() or result.stdout.strip()}", file_path=file_path, line=start_line, severity=IssueSeverity.ERROR, rule_id="code_linting_failed")]
+
+            if not isinstance(ruff_issues, list) or not ruff_issues or not all(isinstance(item, dict) for item in ruff_issues):
+                return [ValidationIssue(message=f"ruff exited with status {result.returncode} without valid diagnostics", file_path=file_path, line=start_line, severity=IssueSeverity.ERROR, rule_id="code_linting_failed")]
 
             # Convert ruff issues to validation issues
             for ruff_issue in ruff_issues:
@@ -147,11 +148,13 @@ class CodeLintingValidator(BaseValidator):
                         )
                     )
 
+            if not issues:
+                issues.append(ValidationIssue(message=f"ruff exited with status {result.returncode} without diagnostics for the checked block", file_path=file_path, line=start_line, severity=IssueSeverity.ERROR, rule_id="code_linting_failed"))
+
         except subprocess.TimeoutExpired:
-            issues.append(ValidationIssue(message="Linting timeout - code block too complex", file_path=file_path, line=start_line, severity=IssueSeverity.WARNING, rule_id="code_lint_timeout", context="", suggestion="Simplify code example or split into smaller blocks"))
-        except (subprocess.SubprocessError, FileNotFoundError):
-            # ruff not available or other subprocess error
-            pass
+            issues.append(ValidationIssue(message="Linting timeout - code block too complex", file_path=file_path, line=start_line, severity=IssueSeverity.ERROR, rule_id="code_lint_timeout", context="", suggestion="Simplify code example or split into smaller blocks"))
+        except (subprocess.SubprocessError, OSError) as exc:
+            issues.append(ValidationIssue(message=f"ruff could not run: {exc}", file_path=file_path, line=start_line, severity=IssueSeverity.ERROR, rule_id="code_linting_unavailable", suggestion="Install the development dependencies and put their executables on PATH"))
         finally:
             # Clean up temporary file
             try:
@@ -191,27 +194,8 @@ class CodeLintingValidator(BaseValidator):
         return f"Fix linting issue: {message}"
 
     def _is_placeholder_code(self, code: str) -> bool:
-        """Check if code is clearly a placeholder/example that shouldn't be linted."""
-        placeholder_patterns = [
-            r"your[-_]token[-_]here",
-            r"your[-_]api[-_]key",
-            r"your[-_]account[-_]id",
-            r"your[-_]practice[-_]token",
-            r"your[-_]api[-_]token",
-            r"replace[-_]with[-_]your",
-            r"<[^>]+>",  # HTML-like placeholders
-            r"\.\.\.",  # Ellipsis indicating continuation
-            r"# TODO",
-            r"# FIXME",
-            r"# Your code here",
-            r"pass\s*#.*example",
-            r"# File: \.env",  # .env file examples
-            r"FIVETWENTY_OANDA_TOKEN=your-",  # Environment variable examples
-            r"export\s+\w+=",  # Shell export commands
-        ]
-
-        code_lower = code.lower()
-        return any(re.search(pattern, code_lower) for pattern in placeholder_patterns)
+        """Recognize explicit Python stub statements without matching string contents."""
+        return is_placeholder_code(code)
 
     def get_file_patterns(self) -> list[str]:
         """Get patterns for files this validator handles."""

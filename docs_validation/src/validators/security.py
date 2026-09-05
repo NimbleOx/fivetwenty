@@ -119,7 +119,7 @@ class SecurityValidator(BaseValidator):
             r"eyJ[A-Za-z0-9_-]*\.eyJ[A-Za-z0-9_-]*\.[A-Za-z0-9_-]*",  # JWT
         ]
 
-        is_high_severity = any(re.match(hp, pattern) for hp in high_severity_patterns)
+        is_high_severity = pattern in high_severity_patterns
 
         # Always use high severity filtering - only report high severity issues
         if not is_high_severity:

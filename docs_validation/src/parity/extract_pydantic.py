@@ -162,7 +162,7 @@ def extract_module(path: Path) -> dict[str, Any]:
                         out["type_aliases"][target.id] = value_to_str(item.value)
         elif isinstance(item, ast.AnnAssign) and isinstance(item.target, ast.Name):
             # Module-level annotated alias e.g. `OrderID: TypeAlias = str`
-            out["type_aliases"][item.target.id] = ann_to_str(item.annotation) or ""
+            out["type_aliases"][item.target.id] = value_to_str(item.value) if item.value is not None else ann_to_str(item.annotation) or ""
 
     return out
 

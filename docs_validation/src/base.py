@@ -10,7 +10,7 @@ from typing import TYPE_CHECKING, Any
 if TYPE_CHECKING:
     from pathlib import Path
 
-from .models import FileInfo, ValidationResult, ValidationSummary, ValidatorSummary
+from .models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult, ValidationSummary, ValidatorSummary
 
 
 class BaseValidator(ABC):
@@ -77,7 +77,14 @@ class ValidatorRegistry:
                 results.append(result)
             except Exception as e:
                 # Create error result for failed validation
-                error_result = ValidationResult(validator_name=validator_name, file_path=file_info.path, passed=False, duration_ms=(time.perf_counter() - start_time) * 1000, metadata={"error": str(e)})
+                error_result = ValidationResult(
+                    validator_name=validator_name,
+                    file_path=file_info.path,
+                    passed=False,
+                    duration_ms=(time.perf_counter() - start_time) * 1000,
+                    metadata={"error": str(e)},
+                    issues=[ValidationIssue(file_path=file_info.path, severity=IssueSeverity.ERROR, rule_id="validator_failure", message=f"{validator_name} failed: {e}")],
+                )
                 results.append(error_result)
 
         return results
@@ -184,7 +191,9 @@ class ValidatorRegistry:
                 except Exception as e:  # noqa: PERF203
                     file_info = future_to_file[future]
                     # Create error result for completely failed file
-                    error_result = ValidationResult(validator_name="system", file_path=file_info.path, passed=False, metadata={"error": f"Failed to validate file: {e}"})
+                    error_result = ValidationResult(
+                        validator_name="system", file_path=file_info.path, passed=False, metadata={"error": f"Failed to validate file: {e}"}, issues=[ValidationIssue(file_path=file_info.path, severity=IssueSeverity.ERROR, rule_id="validator_failure", message=f"Failed to validate file: {e}")]
+                    )
                     results.append(error_result)
 
         return results

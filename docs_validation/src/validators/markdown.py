@@ -126,6 +126,8 @@ class MarkdownSyntaxValidator(BaseValidator):
     def _check_lists(self, line: str, line_num: int, file_path: Path, lines: list[str], in_code_block: bool) -> list[ValidationIssue]:
         """Check for malformed lists."""
         issues: list[ValidationIssue] = []
+        if in_code_block:
+            return issues
 
         # Check unordered lists
         if re.match(r"^\s*[-*+]\s*$", line):

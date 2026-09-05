@@ -13,7 +13,7 @@ sequential-only groups during execution.
 
 import asyncio
 import io
-import re
+import math
 import resource
 import signal
 import sys
@@ -25,7 +25,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 from ..base import BaseValidator
 from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
-from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, marker_skip_metadata
+from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, implicit_skip_metadata, is_placeholder_code, marker_skip_metadata
 
 
 class CodeExecutionValidator(BaseValidator):
@@ -72,10 +72,6 @@ class CodeExecutionValidator(BaseValidator):
         include_list = options.get("include_files", [])
         is_included = self._is_file_included(file_info.path, include_list)
 
-        # If include list exists and file is not included, skip execution
-        if include_list and not is_included:
-            return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=True, issues=[], metadata={"skipped": True})
-
         lines = content.split("\n")
 
         # Track code block state
@@ -111,8 +107,12 @@ class CodeExecutionValidator(BaseValidator):
                     # Execute the code block if it's Python
                     if code_block_language in ["python", "py", ""] and code_block_lines:
                         skip_marker = find_fragment_marker(lines, code_block_start, FragmentTarget.EXECUTION)
-                        if skip_marker is not None:
+                        if not is_included:
+                            skipped_blocks.append(implicit_skip_metadata(code_block_start, "File is outside code_execution include_files"))
+                        elif skip_marker is not None:
                             skipped_blocks.append(marker_skip_metadata(skip_marker, code_block_start))
+                        elif self._is_placeholder_code("\n".join(code_block_lines)):
+                            skipped_blocks.append(implicit_skip_metadata(code_block_start, "Standalone ellipsis marks an incomplete example"))
                         else:
                             block_issues = self._execute_python_code(
                                 code_block_lines,
@@ -129,29 +129,11 @@ class CodeExecutionValidator(BaseValidator):
                 # Collect code block content
                 code_block_lines.append(line)
 
-        return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues, metadata=fragment_metadata(skipped_blocks))
+        return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues, metadata={**fragment_metadata(skipped_blocks), "skipped": not is_included})
 
     def _is_placeholder_code(self, code: str) -> bool:
-        """Check if code is clearly a placeholder/example that shouldn't be executed."""
-        placeholder_patterns = [
-            r"your[-_]token[-_]here",
-            r"your[-_]api[-_]key",
-            r"your[-_]account[-_]id",
-            r"your[-_]practice[-_]token",
-            r"your[-_]api[-_]token",
-            r"replace[-_]with[-_]your",
-            r"<[^>]+>",  # HTML-like placeholders
-            r"\.\.\.",  # Ellipsis indicating continuation
-            r"# TODO",
-            r"# FIXME",
-            r"# Your code here",
-            r"pass\s*#.*example",
-            r"# File: \.env",  # .env file examples
-            r"FIVETWENTY_OANDA_TOKEN=your-",  # Environment variable examples
-        ]
-
-        code_lower = code.lower()
-        return any(re.search(pattern, code_lower) for pattern in placeholder_patterns)
+        """Recognize explicit Python stub statements without matching string contents."""
+        return is_placeholder_code(code)
 
     def _execute_python_code(
         self,
@@ -167,10 +149,6 @@ class CodeExecutionValidator(BaseValidator):
             return issues
 
         code = "\n".join(code_lines)
-
-        # Skip code blocks that are clearly examples/placeholders
-        if self._is_placeholder_code(code):
-            return issues
 
         # Set resource limits (256MB memory, 5 seconds CPU time)
         old_limits = self._set_resource_limits()
@@ -188,8 +166,8 @@ class CodeExecutionValidator(BaseValidator):
         old_alarm_handler = signal.signal(signal.SIGALRM, timeout_handler)
         signal.alarm(5)  # 5 second timeout
 
-        # Store original sys.modules state for fivetwenty (to restore later)
-        original_fivetwenty = sys.modules.get("fivetwenty")
+        # Preserve the real SDK and every loaded submodule across execution.
+        original_fivetwenty = {name: module for name, module in sys.modules.items() if name == "fivetwenty" or name.startswith("fivetwenty.")}
 
         try:
             # Add security restrictions to namespace
@@ -227,7 +205,7 @@ class CodeExecutionValidator(BaseValidator):
                     suggestion="Reduce memory usage in code example",
                 )
             )
-        except Exception as e:
+        except (Exception, SystemExit) as e:
             # Extract line number from traceback if possible
             import traceback
 
@@ -270,15 +248,10 @@ class CodeExecutionValidator(BaseValidator):
             self._restore_resource_limits(old_limits)
 
             # Restore sys.modules state for fivetwenty and its submodules
-            if original_fivetwenty is not None:
-                sys.modules["fivetwenty"] = original_fivetwenty
-            elif "fivetwenty" in sys.modules:
-                del sys.modules["fivetwenty"]
-
-            # Clean up all fivetwenty submodules
-            submodules_to_remove = [key for key in sys.modules if key.startswith("fivetwenty.")]
+            submodules_to_remove = [key for key in sys.modules if key == "fivetwenty" or key.startswith("fivetwenty.")]
             for submodule in submodules_to_remove:
                 del sys.modules[submodule]
+            sys.modules.update(original_fivetwenty)
 
         return issues
 
@@ -288,30 +261,30 @@ class CodeExecutionValidator(BaseValidator):
         Returns:
             Tuple of (old_memory_limit, old_cpu_limit) for restoration
         """
-        try:
-            # Get current limits
-            old_memory = resource.getrlimit(resource.RLIMIT_AS)
-            old_cpu = resource.getrlimit(resource.RLIMIT_CPU)
-
-            # Set memory limit to 256MB
-            resource.setrlimit(resource.RLIMIT_AS, (256 * 1024 * 1024, 256 * 1024 * 1024))
-
-            # Set CPU time limit to 5 seconds
-            resource.setrlimit(resource.RLIMIT_CPU, (5, 5))
-
-            return (old_memory, old_cpu)
-        except (OSError, ValueError):
-            # Resource limits not supported on this platform (e.g., Windows)
-            return ((0, 0), (0, 0))
+        old_memory = resource.getrlimit(resource.RLIMIT_AS)
+        old_cpu = resource.getrlimit(resource.RLIMIT_CPU)
+        usage = resource.getrusage(resource.RUSAGE_SELF)
+        cpu_limit = math.ceil(usage.ru_utime + usage.ru_stime) + 5
+        for kind, requested_limit, previous in ((resource.RLIMIT_AS, 256 * 1024 * 1024, old_memory), (resource.RLIMIT_CPU, cpu_limit, old_cpu)):
+            soft, hard = previous
+            limit = requested_limit
+            if soft != resource.RLIM_INFINITY:
+                limit = min(limit, soft)
+            if hard != resource.RLIM_INFINITY:
+                limit = min(limit, hard)
+            try:
+                # A lowered hard limit cannot be restored without privilege.
+                resource.setrlimit(kind, (limit, hard))
+            except (OSError, ValueError):
+                pass
+        return old_memory, old_cpu
 
     def _restore_resource_limits(self, old_limits: tuple[tuple[int, int], tuple[int, int]]) -> None:
         """Restore previous resource limits."""
-        old_memory, old_cpu = old_limits
-        if old_memory != (0, 0):
+        for kind, previous in zip((resource.RLIMIT_AS, resource.RLIMIT_CPU), old_limits, strict=True):
             try:
-                resource.setrlimit(resource.RLIMIT_AS, old_memory)
-                resource.setrlimit(resource.RLIMIT_CPU, old_cpu)
-            except (OSError, ValueError):
+                resource.setrlimit(kind, previous)
+            except (OSError, ValueError):  # noqa: PERF203 - restore each limit independently
                 pass
 
     def _create_restricted_namespace(self, base_namespace: dict[str, Any]) -> dict[str, Any]:
@@ -439,6 +412,7 @@ class CodeExecutionValidator(BaseValidator):
             "super": super,
             # Exceptions
             "Exception": Exception,
+            "RuntimeError": RuntimeError,
             "ValueError": ValueError,
             "TypeError": TypeError,
             "KeyError": KeyError,

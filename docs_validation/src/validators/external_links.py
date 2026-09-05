@@ -82,9 +82,12 @@ class ExternalLinkValidator(BaseValidator):
             if in_code_block:
                 continue
 
+            # Inline code contains literal endpoints/values, not navigable links.
+            prose_line = re.sub(r"(`+).*?\1", "", line)
+
             # Find markdown links: [text](url)
             link_pattern = r"\[([^\]]*)\]\(([^)]+)\)"
-            matches = re.finditer(link_pattern, line)
+            matches = re.finditer(link_pattern, prose_line)
 
             for match in matches:
                 text, url = match.groups()
@@ -97,12 +100,12 @@ class ExternalLinkValidator(BaseValidator):
 
             # Also check for bare URLs in text (not in links)
             url_pattern = r"https?://[^\s<>\"']+"
-            url_matches = re.finditer(url_pattern, line)
+            url_matches = re.finditer(url_pattern, prose_line)
 
             for match in url_matches:
                 url = match.group(0)
                 # Skip if it's already part of a markdown link
-                if f"]({url})" not in line and f"]({url[:-1]})" not in line:  # Handle trailing punctuation
+                if f"]({url})" not in prose_line and f"]({url[:-1]})" not in prose_line:  # Handle trailing punctuation
                     clean_url = self._clean_url(url)
                     external_links.append({"url": clean_url, "text": "bare URL", "line_num": line_num, "context": match.group(0), "file_path": file_info.path})
 

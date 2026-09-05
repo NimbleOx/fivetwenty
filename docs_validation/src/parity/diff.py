@@ -429,8 +429,8 @@ def main() -> int:
         r_enums = right.get("enums", {})
         out_lines = [f"# {args.title}", ""]
         for ename in sorted(set(l_enums) | set(r_enums)):
-            lvals = set(l_enums.get(ename, {}).get("values", {}).keys())
-            rvals = set(r_enums.get(ename, {}).get("values", {}).keys())
+            lvals = {value.strip("\"'") for value in l_enums.get(ename, {}).get("values", {}).values()}
+            rvals = {value.strip("\"'") for value in r_enums.get(ename, {}).get("values", {}).values()}
             only_left = sorted(lvals - rvals)
             only_right = sorted(rvals - lvals)
             if only_left or only_right or ename not in r_enums or ename not in l_enums:

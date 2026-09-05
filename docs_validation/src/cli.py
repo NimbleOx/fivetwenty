@@ -209,12 +209,12 @@ def _display_results(
         console.print("   💡 See the 'Fragment Marker Usage' section in the generated validation report", style="yellow")
         return 1
 
-    return 0
+    return 1 if summary.has_errors else 0
 
 
 def _display_brief_issues_summary(summary: ValidationSummary) -> None:
     """Display a brief summary of issues without details."""
-    console.print(f"\n📋 Found {summary.total_issues} issues across {len([r for r in summary.results if r.issues])} files")
+    console.print(f"\n📋 Found {summary.total_issues} issues across {len({r.file_path for r in summary.results if r.issues})} files")
 
     if summary.error_count > 0:
         console.print(f"   ❌ {summary.error_count} errors", style="red")

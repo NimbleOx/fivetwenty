@@ -9,7 +9,7 @@ from typing import Any
 
 from ..base import BaseValidator
 from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
-from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, marker_skip_metadata
+from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, implicit_skip_metadata, is_placeholder_code, marker_skip_metadata
 
 
 class CodeTypingValidator(BaseValidator):
@@ -56,6 +56,8 @@ class CodeTypingValidator(BaseValidator):
 
                         if skip_marker is not None:
                             skipped_blocks.append(marker_skip_metadata(skip_marker, code_block_start))
+                        elif self._is_placeholder_code("\n".join(code_block_lines)):
+                            skipped_blocks.append(implicit_skip_metadata(code_block_start, "Standalone ellipsis marks an incomplete example"))
                         else:
                             issues.extend(self._type_check_python_code(code_block_lines, code_block_start + 1, file_info.path, options))
 
@@ -77,20 +79,11 @@ class CodeTypingValidator(BaseValidator):
 
         code = "\n".join(code_lines)
 
-        # Skip code blocks that are clearly examples/placeholders
-        if self._is_placeholder_code(code):
-            return issues
-
         # Check if code is syntactically valid first
         try:
             ast.parse(code)
-        except SyntaxError:
-            # Don't type check syntactically invalid code
-            return issues
-
-        # Skip very simple code that doesn't benefit from type checking
-        if self._is_simple_code(code):
-            return issues
+        except SyntaxError as exc:
+            return [ValidationIssue(message=f"Cannot check invalid Python: {exc.msg}", file_path=file_path, line=start_line + (exc.lineno or 1) - 1, severity=IssueSeverity.ERROR, rule_id="code_typing_syntax")]
 
         # Create temporary file for mypy
         with tempfile.NamedTemporaryFile(mode="w", suffix=".py", delete=False) as temp_file:
@@ -123,14 +116,15 @@ class CodeTypingValidator(BaseValidator):
 
             # Parse mypy output
             issues.extend(self._parse_mypy_output(result.stdout, code_lines, start_line, file_path, enhanced_code))
+            if not issues:
+                issues.append(ValidationIssue(message=f"mypy exited with status {result.returncode}: {result.stderr.strip() or result.stdout.strip()}", file_path=file_path, line=start_line, severity=IssueSeverity.ERROR, rule_id="code_typing_failed"))
 
         except subprocess.TimeoutExpired:
             issues.append(
-                ValidationIssue(message=f"Type checking timeout after {timeout_seconds:g}s - code block too complex", file_path=file_path, line=start_line, severity=IssueSeverity.WARNING, rule_id="code_typing_timeout", context="", suggestion="Simplify code example or increase the code_typing timeout_seconds option")
+                ValidationIssue(message=f"Type checking timeout after {timeout_seconds:g}s - code block too complex", file_path=file_path, line=start_line, severity=IssueSeverity.ERROR, rule_id="code_typing_timeout", context="", suggestion="Simplify code example or increase the code_typing timeout_seconds option")
             )
-        except (subprocess.SubprocessError, FileNotFoundError):
-            # mypy not available or other subprocess error
-            pass
+        except (subprocess.SubprocessError, OSError) as exc:
+            issues.append(ValidationIssue(message=f"mypy could not run: {exc}", file_path=file_path, line=start_line, severity=IssueSeverity.ERROR, rule_id="code_typing_unavailable", suggestion="Install the development dependencies and put their executables on PATH"))
         finally:
             # Clean up temporary file
             try:
@@ -217,49 +211,8 @@ class CodeTypingValidator(BaseValidator):
         return f"Fix type issue: {message}"
 
     def _is_placeholder_code(self, code: str) -> bool:
-        """Check if code is clearly a placeholder/example that shouldn't be type checked."""
-        placeholder_patterns = [
-            r"your[-_]token[-_]here",
-            r"your[-_]api[-_]key",
-            r"your[-_]account[-_]id",
-            r"your[-_]practice[-_]token",
-            r"your[-_]api[-_]token",
-            r"replace[-_]with[-_]your",
-            r"<[^>]+>",  # HTML-like placeholders
-            r"\.\.\.",  # Ellipsis indicating continuation
-            r"# TODO",
-            r"# FIXME",
-            r"# Your code here",
-            r"pass\s*#.*example",
-            r"# File: \.env",  # .env file examples
-            r"FIVETWENTY_OANDA_TOKEN=your-",  # Environment variable examples
-            r"export\s+\w+=",  # Shell export commands
-        ]
-
-        code_lower = code.lower()
-        return any(re.search(pattern, code_lower) for pattern in placeholder_patterns)
-
-    def _is_simple_code(self, code: str) -> bool:
-        """Check if code is too simple to benefit from type checking."""
-        # Skip very simple examples
-        lines = [line.strip() for line in code.split("\n") if line.strip()]
-
-        # Skip single-line examples
-        if len(lines) <= 1:
-            return True
-
-        # Skip print-only examples
-        if all(line.startswith(("print(", "#")) for line in lines):
-            return True
-
-        # Skip variable assignment examples
-        simple_patterns = [
-            r"^\w+\s*=\s*.+$",  # Simple assignments
-            r"^print\(",  # Print statements
-            r"^#",  # Comments
-        ]
-
-        return all(any(re.match(pattern, line) for pattern in simple_patterns) for line in lines)
+        """Recognize explicit Python stub statements without matching string contents."""
+        return is_placeholder_code(code)
 
     def get_file_patterns(self) -> list[str]:
         """Get patterns for files this validator handles."""

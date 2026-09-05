@@ -143,7 +143,7 @@ def extract_module(path: Path) -> dict[str, Any]:
                         "fields": fields,
                         "line": node.lineno,
                         "total": next(
-                            (value_to_str(kw.value) for b in node.bases if isinstance(b, ast.Call) for kw in b.keywords if kw.arg == "total"),
+                            (value_to_str(kw.value) for kw in node.keywords if kw.arg == "total"),
                             "True",
                         ),
                     }
