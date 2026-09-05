@@ -2,6 +2,7 @@
 
 import json
 from datetime import datetime, timezone
+from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
@@ -142,15 +143,10 @@ class TestEnhancedPricingEndpoints:
             await pricing.get_latest_candles("101-001-123456-001", [])
 
     @pytest.mark.asyncio
-    async def test_get_latest_candles_units_out_of_range_raises_error(self, pricing, mock_client):
-        """Test that units out of valid range raises ValueError."""
-        candle_specs = ["EUR_USD:H1:M"]
-
-        with pytest.raises(ValueError, match="Units must be between 1 and 5000"):
-            await pricing.get_latest_candles("101-001-123456-001", candle_specs, units=0)
-
-        with pytest.raises(ValueError, match="Units must be between 1 and 5000"):
-            await pricing.get_latest_candles("101-001-123456-001", candle_specs, units=5001)
+    @pytest.mark.parametrize("units", [10000, Decimal("0.5")])
+    async def test_get_latest_candles_accepts_decimal_position_sizes(self, pricing, mock_client, units):
+        await pricing.get_latest_candles("101-001-123456-001", ["EUR_USD:H1:M"], units=units)
+        assert mock_client._request.call_args.kwargs["params"]["units"] == str(units)
 
     @pytest.mark.asyncio
     async def test_get_pricing_with_datetime_since(self, pricing, mock_client):
@@ -218,6 +214,7 @@ class TestEnhancedPricingEndpoints:
             "/accounts/101-001-123456-001/instruments/EUR_USD/candles",
             params={
                 "price": "M",
+                "units": "1",
                 "granularity": "S5",
                 "smooth": "false",
                 "dailyAlignment": "17",
@@ -236,6 +233,7 @@ class TestEnhancedPricingEndpoints:
             "/accounts/101-001-123456-001/instruments/GBP_USD/candles",
             params={
                 "price": "BA",
+                "units": "1",
                 "granularity": "H1",
                 "count": "200",
                 "smooth": "false",
@@ -258,6 +256,7 @@ class TestEnhancedPricingEndpoints:
             "/accounts/101-001-123456-001/instruments/USD_JPY/candles",
             params={
                 "price": "M",
+                "units": "1",
                 "granularity": "M30",
                 "from": from_time.isoformat(),
                 "to": to_time.isoformat(),
@@ -283,6 +282,7 @@ class TestEnhancedPricingEndpoints:
             "/accounts/101-001-123456-001/instruments/USD_JPY/candles",
             params={
                 "price": "M",
+                "units": "1",
                 "granularity": "S5",
                 "from": "1704110400.123456000",
                 "to": "1704110700.654321000",
@@ -304,8 +304,8 @@ class TestEnhancedPricingEndpoints:
     async def test_get_account_candles_count_and_time_raises_error(self, pricing, mock_client):
         """Test that specifying both count and time range raises ValueError for account candles."""
         from_time = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-        with pytest.raises(ValueError, match="Cannot specify both count and time range"):
-            await pricing.get_account_instrument_candles("101-001-123456-001", "EUR_USD", count=100, from_time=from_time)
+        with pytest.raises(ValueError, match="Cannot specify count with both from_time and to_time"):
+            await pricing.get_account_instrument_candles("101-001-123456-001", "EUR_USD", count=100, from_time=from_time, to_time=from_time)
 
     @pytest.mark.asyncio
     async def test_pricing_responses_support_compatibility_access(self, pricing):

@@ -532,7 +532,7 @@ class TestTradeEndpoints:
         mock_client._request.assert_called_once_with(
             "PUT",
             "/accounts/101-001-123456-001/trades/12345/orders",
-            json_data={},
+            json_data={"takeProfit": None},
         )
 
     @pytest.mark.asyncio

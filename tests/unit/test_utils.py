@@ -5,6 +5,8 @@ from datetime import datetime, timezone
 from decimal import Decimal
 from unittest.mock import patch
 
+import pytest
+
 from fivetwenty._internal.utils import (
     MonotonicTimeout,
     backoff_with_jitter,
@@ -15,21 +17,30 @@ from fivetwenty._internal.utils import (
 )
 
 
-def test_backoff_with_jitter() -> None:
-    """Test exponential backoff calculation."""
-    # First attempt should be small
-    delay0 = backoff_with_jitter(0)
-    assert 0.25 <= delay0 <= 0.75  # 0.5 * (0.5 to 1.0)
+@pytest.mark.parametrize(("attempt", "base", "cap", "random_value", "expected"), [(0, 0.5, 8, 0, 0.25), (0, 0.5, 8, 1, 0.5), (2, 0.5, 8, 0.5, 1.5), (10, 0.5, 8, 1, 8), (4, 3, 5, 0, 2.5)])
+def test_backoff_exponential_growth_jitter_and_cap(monkeypatch, attempt, base, cap, random_value, expected):
+    monkeypatch.setattr("fivetwenty._internal.utils.random.random", lambda: random_value)
+    assert backoff_with_jitter(attempt, base, cap) == expected
 
-    # Should increase exponentially
-    delay1 = backoff_with_jitter(1)
-    delay2 = backoff_with_jitter(2)
-    assert delay1 > delay0
-    assert delay2 > delay1
 
-    # Should be capped
-    delay_big = backoff_with_jitter(10)
-    assert delay_big <= 8.0
+@pytest.mark.parametrize(("elapsed", "remaining", "expired", "sleep"), [(0, 10, False, 1), (9.75, 0.25, False, 0.25), (10, 0, True, 0), (11, -1, True, 0)])
+def test_timeout_boundaries_use_a_monotonic_clock(monkeypatch, elapsed, remaining, expired, sleep):
+    now = 100.0
+    monkeypatch.setattr("fivetwenty._internal.utils.monotonic", lambda: now)
+    timeout = MonotonicTimeout(10)
+    now += elapsed
+    assert timeout.elapsed == elapsed
+    assert timeout.remaining == remaining
+    assert timeout.expired is expired
+    assert timeout.sleep_remaining() == sleep
+
+
+def test_recursive_wire_conversion_does_not_mutate_input():
+    when = datetime(2024, 1, 1, tzinfo=timezone.utc)
+    original = {"items": [{"units": Decimal("1E-8"), "gtdTime": when}], "optional": None, "flag": False}
+    assert stringify_decimals(original, datetime_format="UNIX") == {"items": [{"units": "0.00000001", "gtdTime": "1704067200.000000000"}], "optional": None, "flag": False}
+    assert original["items"][0]["gtdTime"] is when
+    assert original["items"][0]["units"] == Decimal("1E-8")
 
 
 def test_stringify_decimals() -> None:
@@ -89,26 +100,9 @@ def test_format_datetime_for_oanda_unix_treats_naive_datetimes_as_utc() -> None:
     assert format_datetime_for_oanda(value, "UNIX") == "1704110400.123456000"
 
 
-def test_monotonic_timeout() -> None:
-    """Test monotonic timeout helper."""
-    import time
-
-    timeout = MonotonicTimeout(0.1)  # 100ms
-
-    # Should not be expired initially
-    assert not timeout.expired
-    assert timeout.remaining > 0
-
-    # Sleep and check
-    time.sleep(0.05)
-    assert not timeout.expired
-    assert 0 < timeout.remaining < 0.1
-
-    # Sleep more and should expire
-    time.sleep(0.1)
-    assert timeout.expired
-    # When expired, sleep_remaining should return 0
-    assert timeout.sleep_remaining() == 0  # type: ignore[unreachable]
+@pytest.mark.parametrize(("value", "expected"), [(datetime(1969, 12, 31, 23, 59, 59, 750000, tzinfo=timezone.utc), "-0.250000000"), (datetime(9999, 1, 1, 0, 0, 0, 999999, tzinfo=timezone.utc), "253370764800.999999000")])
+def test_unix_datetime_conversion_avoids_float_rounding(value, expected):
+    assert format_datetime_for_oanda(value, "UNIX") == expected
 
 
 def test_build_user_agent_basic() -> None:
@@ -171,26 +165,6 @@ def test_stringify_decimals_edge_cases() -> None:
     assert stringify_decimals(small_decimal) == "0.000000001"
 
 
-def test_backoff_with_jitter_edge_cases() -> None:
-    """Test backoff with jitter edge cases."""
-    # Test with attempt 0
-    delay = backoff_with_jitter(0)
-    assert delay > 0
-
-    # Test with custom base and cap
-    delay = backoff_with_jitter(1, base=1.0, cap=2.0)
-    assert delay <= 2.0
-
-    # Test jitter range
-    delays = [backoff_with_jitter(1) for _ in range(100)]
-    # All delays should be different due to jitter
-    assert len(set(delays)) > 1  # Should have variety
-
-    # All delays should be within expected range for attempt 1
-    for delay in delays:
-        assert 0.5 <= delay <= 1.5  # base=0.5, attempt 1: 0.5 * 2^1 = 1.0, jitter 0.5-1.0
-
-
 def test_quantize_price_edge_cases() -> None:
     """Test price quantization edge cases."""
     # Test with zero precision
@@ -208,25 +182,3 @@ def test_quantize_price_edge_cases() -> None:
     # Test with large precision
     price = quantize_price(10, Decimal("1.123456789012345"))
     assert price == Decimal("1.1234567890")
-
-
-def test_monotonic_timeout_edge_cases() -> None:
-    """Test MonotonicTimeout edge cases."""
-    # Test with very small timeout
-    timeout = MonotonicTimeout(0.001)  # 1ms
-    assert not timeout.expired
-
-    # Test sleep_remaining with max_sleep
-    timeout = MonotonicTimeout(10.0)  # 10 seconds
-    sleep_time = timeout.sleep_remaining(max_sleep=0.5)
-    assert sleep_time == 0.5  # Should be capped
-
-    # Test sleep_remaining when expired
-    timeout = MonotonicTimeout(0.0)  # Immediately expired
-    assert timeout.expired
-    assert timeout.sleep_remaining() == 0.0
-
-    # Test elapsed property
-    timeout = MonotonicTimeout(1.0)
-    assert timeout.elapsed >= 0
-    assert timeout.elapsed < 0.1  # Should be very small initially

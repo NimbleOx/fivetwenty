@@ -65,7 +65,7 @@ class InstrumentEndpoints:
             instrument: Instrument enum or string (e.g., InstrumentName.EUR_USD or "EUR_USD")
             price: Price component(s) - M, B, A, BA, BM, AM, or BAM (default: M)
             granularity: Candlestick granularity enum or string (default: S5, matching the API)
-            count: Number of candlesticks to return (max 5000, conflicts with time range)
+            count: Number of candlesticks to return (max 5000, omit when both time boundaries are set)
             from_time: Start of time range for candlesticks
             to_time: End of time range for candlesticks
             smooth: Use previous candle's close as open price (default: False)
@@ -79,7 +79,7 @@ class InstrumentEndpoints:
 
         Raises:
             FiveTwentyError: On API errors
-            ValueError: If both count and time range are specified
+            ValueError: If count and both time boundaries are specified
 
         Examples:
             Get 500 M1 midpoint candles using enums:
@@ -98,8 +98,8 @@ class InstrumentEndpoints:
                     to_time=datetime(2024, 1, 2)
                 )
         """
-        if count is not None and (from_time is not None or to_time is not None):
-            raise ValueError("Cannot specify both count and time range parameters")
+        if count is not None and from_time is not None and to_time is not None:
+            raise ValueError("Cannot specify count with both from_time and to_time")
 
         # Convert enums to strings if needed
         instrument_str = instrument.value if hasattr(instrument, "value") else instrument

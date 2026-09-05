@@ -133,8 +133,8 @@ class TestInstrumentEndpoints:
         from fivetwenty.models import CandlestickGranularity
 
         from_time = datetime(2024, 1, 1, 12, 0, 0, tzinfo=timezone.utc)
-        with pytest.raises(ValueError, match="Cannot specify both count and time range"):
-            await instruments.get_instrument_candles("EUR_USD", granularity=CandlestickGranularity.H1, count=100, from_time=from_time)
+        with pytest.raises(ValueError, match="Cannot specify count with both from_time and to_time"):
+            await instruments.get_instrument_candles("EUR_USD", granularity=CandlestickGranularity.H1, count=100, from_time=from_time, to_time=from_time)
 
     @pytest.mark.asyncio
     async def test_get_candles_all_price_types(self, instruments, mock_client):

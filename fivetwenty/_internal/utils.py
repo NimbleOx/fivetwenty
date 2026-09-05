@@ -2,10 +2,12 @@
 
 import random
 import sys
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 from time import monotonic
 from typing import Any
+
+from .datetime import format_datetime_for_oanda as format_datetime_for_oanda  # noqa: PLC0414 - keep the existing import path
 
 try:
     import httpx
@@ -51,46 +53,28 @@ def build_user_agent() -> str:
     return f"{base} {extra}" if extra else base
 
 
-def stringify_decimals(obj: Any) -> Any:
+def stringify_decimals(obj: Any, *, datetime_format: object | None = None) -> Any:
     """
-    Recursively convert all Decimals to strings in a data structure.
+    Recursively convert Decimals, and optionally datetimes, to wire strings.
 
     This prevents future misses when new Decimal fields appear in the API.
 
     Args:
         obj: The object to process
+        datetime_format: When supplied, also format Python datetime values.
 
     Returns:
         The object with all Decimals converted to strings
     """
     if isinstance(obj, Decimal):
         return format(obj, "f")
+    if isinstance(obj, datetime) and datetime_format is not None:
+        return format_datetime_for_oanda(obj, datetime_format)
     if isinstance(obj, list):
-        return [stringify_decimals(item) for item in obj]
+        return [stringify_decimals(item, datetime_format=datetime_format) for item in obj]
     if isinstance(obj, dict):
-        return {key: stringify_decimals(value) for key, value in obj.items()}
+        return {key: stringify_decimals(value, datetime_format=datetime_format) for key, value in obj.items()}
     return obj
-
-
-def format_datetime_for_oanda(value: datetime, datetime_format: object = "RFC3339") -> str:
-    """
-    Format DateTime query parameters according to Accept-Datetime-Format.
-
-    OANDA applies Accept-Datetime-Format to DateTime fields in both requests and
-    responses. Naive datetimes are treated as UTC for UNIX conversion.
-    """
-    if datetime_format != "UNIX":
-        return value.isoformat()
-
-    utc_value = value
-    if utc_value.tzinfo is None:
-        utc_value = utc_value.replace(tzinfo=timezone.utc)
-    else:
-        utc_value = utc_value.astimezone(timezone.utc)
-
-    seconds = int(utc_value.timestamp())
-    nanoseconds = utc_value.microsecond * 1000
-    return f"{seconds}.{nanoseconds:09d}"
 
 
 def quantize_price(precision: int, value: Decimal) -> Decimal:

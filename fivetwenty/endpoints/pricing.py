@@ -3,6 +3,7 @@
 import json
 from collections.abc import AsyncIterator
 from datetime import datetime
+from decimal import Decimal
 from typing import TYPE_CHECKING, TypedDict, cast
 
 from typing_extensions import Required
@@ -185,6 +186,7 @@ class PricingEndpoints:
         daily_alignment: int = 17,
         alignment_timezone: str = "America/New_York",
         weekly_alignment: str = "Friday",
+        units: Decimal | int | str = 1,
     ) -> CandlesResponse:
         """
         Get account-specific candlestick data for a specified instrument.
@@ -198,7 +200,7 @@ class PricingEndpoints:
             instrument: The instrument to get candlestick data for
             price: Price component(s) - M, B, A, BA, BM, AM, or BAM (default: M)
             granularity: Candlestick granularity (default: S5)
-            count: Number of candlesticks to return (max 5000, conflicts with time range)
+            count: Number of candlesticks to return (max 5000, omit when both time boundaries are set)
             from_time: Start of time range for candlesticks
             to_time: End of time range for candlesticks
             smooth: Use previous candle's close as open price (default: False)
@@ -206,13 +208,14 @@ class PricingEndpoints:
             daily_alignment: Hour of day for daily-aligned granularities (0-23, default: 17)
             alignment_timezone: Timezone for daily alignment (default: America/New_York)
             weekly_alignment: Day of week for weekly alignment (default: Friday)
+            units: Position size for volume-weighted bid/ask prices (default: 1)
 
         Returns:
             Dictionary containing instrument, granularity, and list of candlesticks
 
         Raises:
             FiveTwentyError: On API errors
-            ValueError: If both count and time range are specified
+            ValueError: If count and both time boundaries are specified
 
         Examples:
             Get account-specific M1 candles:
@@ -233,8 +236,8 @@ class PricingEndpoints:
                     to_time=datetime(2024, 1, 2)
                 )
         """
-        if count is not None and (from_time is not None or to_time is not None):
-            raise ValueError("Cannot specify both count and time range parameters")
+        if count is not None and from_time is not None and to_time is not None:
+            raise ValueError("Cannot specify count with both from_time and to_time")
 
         # (str, Enum) members format inconsistently across Python versions in
         # f-strings and dict values (CPython's Enum.__format__ behavior changed
@@ -244,6 +247,7 @@ class PricingEndpoints:
 
         params: dict[str, str] = {
             "price": price,
+            "units": format(Decimal(str(units)), "f"),
             "granularity": granularity_str,
             "smooth": str(smooth).lower(),
             "dailyAlignment": str(daily_alignment),
@@ -287,7 +291,7 @@ class PricingEndpoints:
         account_id: AccountID,
         candle_specifications: list[str],
         *,
-        units: int = 1,
+        units: Decimal | int | str = 1,
         smooth: bool = False,
         daily_alignment: int = 17,
         alignment_timezone: str = "America/New_York",
@@ -299,7 +303,7 @@ class PricingEndpoints:
         Args:
             account_id: Account identifier
             candle_specifications: List of "INSTRUMENT:GRANULARITY:PRICE" specs
-            units: Number of units for each candle spec (1-5000)
+            units: Position size for volume-weighted bid/ask prices (default: 1)
             smooth: Apply smoothing to candles
             daily_alignment: Hour for daily candle alignment (0-23)
             alignment_timezone: Timezone for alignment
@@ -315,12 +319,9 @@ class PricingEndpoints:
         if not candle_specifications:
             raise ValueError("Must specify at least one candle specification")
 
-        if not (1 <= units <= 5000):
-            raise ValueError("Units must be between 1 and 5000")
-
         params = {
             "candleSpecifications": ",".join(candle_specifications),
-            "units": str(units),
+            "units": format(Decimal(str(units)), "f"),
             "smooth": str(smooth).lower(),
             "dailyAlignment": str(daily_alignment),
             "alignmentTimezone": alignment_timezone,

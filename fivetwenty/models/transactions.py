@@ -574,7 +574,7 @@ class OrderClientExtensionsModifyTransaction(Transaction):
     type: TransactionType = Field(default=TransactionType.ORDER_CLIENT_EXTENSIONS_MODIFY, frozen=True)
     order_id: str = Field(alias="orderID")
     client_order_id: str | None = Field(None, alias="clientOrderID")
-    client_extensions_modify: ClientExtensions = Field(alias="clientExtensionsModify")
+    client_extensions_modify: ClientExtensions | None = Field(None, alias="clientExtensionsModify")
     trade_client_extensions_modify: ClientExtensions | None = Field(None, alias="tradeClientExtensionsModify")
 
 

@@ -255,7 +255,7 @@ class AsyncClient:
 
         # Convert Decimals to strings in JSON data
         if json_data:
-            json_data = stringify_decimals(json_data)
+            json_data = stringify_decimals(json_data, datetime_format=self._datetime_format)
 
         # Only retry safe operations (GET requests only)
         is_write = method in {"POST", "PUT", "PATCH", "DELETE"}

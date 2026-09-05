@@ -3,6 +3,7 @@
 from typing import TYPE_CHECKING, Any, TypedDict, cast
 
 from .._internal.response import ApiResponse
+from .._internal.sentinel import UNSET, UnsetType
 from ..models import (
     AccountID,
     ClientExtensions,
@@ -306,16 +307,19 @@ class TradeEndpoints:
         account_id: AccountID,
         trade_specifier: str,
         *,
-        take_profit: TakeProfitDetails | None = None,
-        stop_loss: StopLossDetails | None = None,
-        trailing_stop_loss: TrailingStopLossDetails | None = None,
-        guaranteed_stop_loss: GuaranteedStopLossDetails | None = None,
+        take_profit: TakeProfitDetails | dict[str, Any] | UnsetType | None = UNSET,
+        stop_loss: StopLossDetails | dict[str, Any] | UnsetType | None = UNSET,
+        trailing_stop_loss: TrailingStopLossDetails | dict[str, Any] | UnsetType | None = UNSET,
+        guaranteed_stop_loss: GuaranteedStopLossDetails | dict[str, Any] | UnsetType | None = UNSET,
     ) -> TradeOrdersResponse:
         """
         Create, replace, or cancel dependent orders (TP/SL) for a trade.
 
         Only explicitly supplied detail fields are sent. OANDA inherits omitted
         fields from an existing order, or applies defaults when creating one.
+        Omit an argument to leave that order unchanged; pass None to cancel it.
+        Partial updates may use a dictionary with OANDA field names, such as
+        take_profit={"clientExtensions": {"tag": "exit"}}.
 
         Args:
             account_id: Account identifier
@@ -333,15 +337,10 @@ class TradeEndpoints:
         """
         data: dict[str, Any] = {}
 
-        # Omitted subfields inherit existing order settings on replacement.
-        if take_profit is not None:
-            data["takeProfit"] = take_profit.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode="json")
-        if stop_loss is not None:
-            data["stopLoss"] = stop_loss.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode="json")
-        if trailing_stop_loss is not None:
-            data["trailingStopLoss"] = trailing_stop_loss.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode="json")
-        if guaranteed_stop_loss is not None:
-            data["guaranteedStopLoss"] = guaranteed_stop_loss.model_dump(by_alias=True, exclude_none=True, exclude_unset=True, mode="json")
+        for name, details in (("takeProfit", take_profit), ("stopLoss", stop_loss), ("trailingStopLoss", trailing_stop_loss), ("guaranteedStopLoss", guaranteed_stop_loss)):
+            if isinstance(details, UnsetType):
+                continue
+            data[name] = details if details is None or isinstance(details, dict) else details.model_dump(by_alias=True, exclude_unset=True, mode="json", context={"datetime_format": getattr(self._client, "_datetime_format", "RFC3339")})
 
         response = await self._client._request(
             "PUT",

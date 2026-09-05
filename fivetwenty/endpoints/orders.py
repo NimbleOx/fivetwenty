@@ -180,7 +180,7 @@ class OrderEndpoints:
             ValueError: On invalid parameters
         """
         # Convert to dict and wrap in "order" parameter as required by OANDA API
-        order_data = order_request if isinstance(order_request, dict) else order_request.model_dump(by_alias=True, exclude_none=True, mode="json")
+        order_data = order_request if isinstance(order_request, dict) else order_request.model_dump(by_alias=True, exclude_none=True, mode="json", context={"datetime_format": getattr(self._client, "_datetime_format", "RFC3339")})
         body = {"order": order_data}
 
         # Add ClientRequestID header for request correlation and debugging
@@ -695,7 +695,7 @@ class OrderEndpoints:
             headers["ClientRequestID"] = client_request_id
 
         # Convert Pydantic model to dict with proper formatting
-        order_data = order_request if isinstance(order_request, dict) else order_request.model_dump(by_alias=True, exclude_none=True, mode="json")
+        order_data = order_request if isinstance(order_request, dict) else order_request.model_dump(by_alias=True, exclude_none=True, mode="json", context={"datetime_format": getattr(self._client, "_datetime_format", "RFC3339")})
 
         response = await self._client._request(
             "PUT",
