@@ -11,6 +11,41 @@ from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
 
 
+@pytest.mark.parametrize("read_timeout", [30.0, 7.5])
+async def test_rest_requests_preserve_sdk_phase_timeouts(monkeypatch, read_timeout):
+    observed = []
+    original = httpx.AsyncClient
+
+    def handle(request):
+        observed.append(request.extensions["timeout"])
+        return httpx.Response(200, json={"accounts": []})
+
+    def offline_client(**kwargs):
+        return original(**kwargs, transport=httpx.MockTransport(handle))
+
+    monkeypatch.setattr("fivetwenty.client.httpx.AsyncClient", offline_client)
+    async with AsyncClient(token="offline-token", account_id="offline", timeout=read_timeout) as client:
+        await client.accounts.get_accounts()
+    assert observed == [{"connect": 5.0, "read": read_timeout, "write": 10.0, "pool": read_timeout}]
+
+
+@pytest.mark.parametrize("request_timeout", [None, 2.5, 0.0])
+async def test_rest_timeout_override_preserves_or_replaces_injected_settings(request_timeout):
+    observed = []
+    defaults = {"connect": 1.0, "read": 2.0, "write": 3.0, "pool": 4.0}
+
+    def handle(request):
+        observed.append(request.extensions["timeout"])
+        return httpx.Response(201, json={"lastTransactionID": "42"})
+
+    transport = httpx.AsyncClient(base_url="https://offline.test/v3", transport=httpx.MockTransport(handle), timeout=httpx.Timeout(**defaults))
+    async with AsyncClient(token="offline-token", account_id="offline", transport=transport, timeout=99.0) as client:
+        await client.orders.post_order("offline", {"type": "MARKET", "instrument": "EUR_USD", "units": "1"}, timeout=request_timeout)
+        await client.orders.post_order("offline", {"type": "MARKET", "instrument": "EUR_USD", "units": "1"})
+    expected = defaults if request_timeout is None else dict.fromkeys(defaults, request_timeout)
+    assert observed == [expected, defaults]
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize("retry_count", [0, 1, 3])
 @pytest.mark.parametrize("failure", ["status", "timeout", "connection"])

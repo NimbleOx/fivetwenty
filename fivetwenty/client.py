@@ -265,6 +265,11 @@ class AsyncClient:
         # Only retry safe methods; writes must not be resubmitted automatically.
         allow_retry = method.upper() in {"GET", "HEAD", "OPTIONS"}
 
+        # Omission preserves the HTTP client's per-phase defaults, including
+        # those on an injected client. An explicit override applies to all phases.
+        if timeout is not None:
+            kwargs["timeout"] = timeout
+
         for attempt in range(max_tries):
             try:
                 self._log(
@@ -282,7 +287,6 @@ class AsyncClient:
                 response = await self._http.request(
                     method,
                     path,
-                    timeout=timeout or self.timeout,
                     headers=headers,
                     params=params,
                     json=json_data,

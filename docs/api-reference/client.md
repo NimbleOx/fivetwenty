@@ -58,12 +58,16 @@ async def list_account_ids() -> list[str]:
 REST and streaming use the same HTTP client. Streaming selects the streaming host
 and supplies a separate timeout. For an SDK-created HTTP client, connect timeout is
 5 seconds, write timeout is 10 seconds, and `timeout` supplies the default
-read and pool timeouts. An endpoint's explicit timeout override applies to that request.
+read and pool timeouts. An endpoint's explicit timeout override applies to all four
+phases for that request; omitting it or passing `None` retains the HTTP client's
+defaults. The override does not change subsequent requests.
 
 Despite its name, `transport` expects an `httpx.AsyncClient`, not an HTTPX transport
 object. Configure its base URL, headers, TLS, proxy and connection limits yourself;
-SDK constructor options do not rebuild it. Closing the SDK also closes the injected
-HTTP client, so give it a compatible ownership lifetime.
+SDK constructor options do not rebuild it. REST calls retain its timeout settings,
+including disabled timeouts, unless an endpoint supplies an explicit override.
+Closing the SDK also closes the injected HTTP client, so give it a compatible
+ownership lifetime.
 
 ### Datetime serialization
 
