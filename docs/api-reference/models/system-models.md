@@ -63,7 +63,8 @@ Specific field validation error.
 - `TradeID` - str: Trade identifier (OANDA-assigned positive integer as string)
 - `OrderID` - str: Order identifier (unique within account)
 - `TransactionID` - str: Transaction identifier (positive integer assigned sequentially by OANDA)
-- `RequestID` - str: Client-provided request identifier for correlating API requests with transactions
+- `RequestID` - str: OANDA-generated request identifier returned in response headers and transaction payloads
+- `ClientRequestID` - str: Client-provided request identifier sent with write requests for support correlation
 - `PriceValue` - str: Price value encoded as string for precision
 - `AccountUnits` - str: Account currency amounts encoded as strings
 - `DateTime` - str: RFC3339 format ("YYYY-MM-DDTHH:MM:SS.nnnnnnnnnZ") or UNIX timestamp with nanosecond precision

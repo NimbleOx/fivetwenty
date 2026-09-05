@@ -66,7 +66,7 @@ def test_raise_for_fivetwenty_json_error() -> None:
     """Test JSON error response parsing."""
     response = Mock()
     response.status_code = 400
-    response.headers = {"content-type": "application/json", "X-Request-Id": "req-456"}
+    response.headers = {"content-type": "application/json", "RequestID": "req-456"}
     response.json.return_value = {
         "errorCode": "INSUFFICIENT_MARGIN",
         "errorMessage": "Insufficient margin for trade",
@@ -82,6 +82,23 @@ def test_raise_for_fivetwenty_json_error() -> None:
     assert error.message == "Insufficient margin for trade"
     assert error.request_id == "req-456"
     assert error.retryable is False  # 400 is not retryable
+
+
+def test_raise_for_fivetwenty_falls_back_to_x_request_id() -> None:
+    """Test non-OANDA request ID header fallback."""
+    response = Mock()
+    response.status_code = 400
+    response.headers = {"content-type": "application/json", "X-Request-Id": "req-fallback"}
+    response.json.return_value = {
+        "errorCode": "INVALID_REQUEST",
+        "errorMessage": "Invalid request",
+    }
+    response.text = ""
+
+    with pytest.raises(FiveTwentyError) as exc_info:
+        raise_for_fivetwenty(response)
+
+    assert exc_info.value.request_id == "req-fallback"
 
 
 def test_raise_for_fivetwenty_html_error() -> None:

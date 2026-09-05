@@ -197,7 +197,7 @@ def raise_for_fivetwenty(response: "httpx.Response") -> None:
         status=response.status_code,
         code=payload.get("errorCode"),
         message=payload.get("errorMessage") or error_text,
-        request_id=response.headers.get("X-Request-Id"),
+        request_id=response.headers.get("RequestID") or response.headers.get("X-Request-Id"),
         retryable=retryable,
         response=response,
         details=details,

@@ -22,7 +22,7 @@ Base transaction information (all transactions inherit these fields).
 | `user_id` | int | ✅ | User ID of the user that initiated the transaction |
 | `account_id` | [AccountID](system-models.md#type-aliases) |✅ | Account identifier for the account the transaction affects |
 | `batch_id` | [TransactionID](system-models.md#type-aliases) |✅ | Transaction batch identifier for grouping related transactions |
-| `request_id` | [RequestID](system-models.md#type-aliases) | ➖ | Client-provided request identifier for correlating API requests with transactions |
+| `request_id` | [RequestID](system-models.md#type-aliases) | ➖ | OANDA request identifier associated with the transaction |
 | `type` | [TransactionType](enum-models.md#transactiontype) | ✅ | Type of transaction (CREATE, MARKET_ORDER, STOP_LOSS_ORDER, etc.) |
 
 ### TransactionFilter
