@@ -353,23 +353,27 @@ class TestOrderManagementOperations:
 
             # Test 1: Get all orders
             print("✓ Test 1: Getting all orders")
-            all_orders = await sandbox_client.orders.get_orders(test_account_id)
+            all_orders_response = await sandbox_client.orders.get_orders(test_account_id)
+            all_orders = all_orders_response["orders"]
             print(f"✓ Found {len(all_orders)} total orders")
 
             # Test 2: Get pending orders only
             print("✓ Test 2: Getting pending orders")
-            pending_orders = await sandbox_client.orders.get_orders(test_account_id, state="PENDING")
+            pending_orders_response = await sandbox_client.orders.get_orders(test_account_id, state="PENDING")
+            pending_orders = pending_orders_response["orders"]
             print(f"✓ Found {len(pending_orders)} pending orders")
 
             # Test 3: Get orders with count limit
             print("✓ Test 3: Getting orders with count limit")
-            limited_orders = await sandbox_client.orders.get_orders(test_account_id, count=5)
+            limited_orders_response = await sandbox_client.orders.get_orders(test_account_id, count=5)
+            limited_orders = limited_orders_response["orders"]
             print(f"✓ Found {len(limited_orders)} orders (limited to 5)")
             assert len(limited_orders) <= 5
 
             # Test 4: Get orders by instrument
             print("✓ Test 4: Getting orders by instrument")
-            instrument_orders = await sandbox_client.orders.get_orders(test_account_id, instrument=test_instrument)
+            instrument_orders_response = await sandbox_client.orders.get_orders(test_account_id, instrument=test_instrument)
+            instrument_orders = instrument_orders_response["orders"]
             print(f"✓ Found {len(instrument_orders)} orders for {test_instrument}")
 
             # Verify our test orders are in the results
@@ -377,7 +381,7 @@ class TestOrderManagementOperations:
             found_our_orders = 0
 
             for order in all_orders:
-                if isinstance(order, dict) and order.get("id") in our_order_ids:
+                if getattr(order, "id", None) in our_order_ids:
                     found_our_orders += 1
 
             print(f"✓ Found {found_our_orders}/{len(created_orders)} of our test orders in results")
@@ -386,7 +390,8 @@ class TestOrderManagementOperations:
             print("✓ Test 5: Testing state filtering")
 
             # Get all states
-            all_state_orders = await sandbox_client.orders.get_orders(test_account_id, state="ALL")
+            all_state_orders_response = await sandbox_client.orders.get_orders(test_account_id, state="ALL")
+            all_state_orders = all_state_orders_response["orders"]
             print(f"✓ Found {len(all_state_orders)} orders with state=ALL")
 
             # Clean up test orders

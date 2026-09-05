@@ -5,7 +5,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE)
 [![Code style: ruff](https://img.shields.io/badge/code%20style-ruff-000000.svg)](https://github.com/astral-sh/ruff)
 
-A Python client for the OANDA v20 REST API. Async-first with a synchronous wrapper, every monetary value in `Decimal`, and all seven v20 endpoint groups implemented.
+A Python client for the OANDA v20 REST API. Async-first with a synchronous wrapper, every monetary value in `Decimal`, and the live v20 endpoint groups implemented.
 
 ## Features
 
@@ -14,7 +14,30 @@ A Python client for the OANDA v20 REST API. Async-first with a synchronous wrapp
 - Two runtime dependencies: httpx and pydantic
 - Retries with backoff for safe requests only; writes are never re-sent, so a timed-out order can't be double-submitted
 - Price and transaction streaming with stall detection and configurable reconnection
-- 130+ Pydantic models and 41 enums, checked against OANDA's published spec by an automated parity pipeline
+- 130+ Pydantic models and 41 enums, checked against OANDA's live developer documentation by an automated parity pipeline
+
+## Beta Compatibility Note
+
+FiveTwenty is still beta software, and the public API may change where doing so
+brings the SDK closer to OANDA's v20 API.
+
+The current `get_orders()` API returns OANDA's response envelope instead of a
+bare order list:
+
+```text
+orders_response = await client.orders.get_orders(account_id)
+orders = orders_response["orders"]
+last_transaction_id = orders_response["lastTransactionID"]
+```
+
+Older beta examples may have treated the return value as the list itself:
+
+```text
+orders = await client.orders.get_orders(account_id)
+```
+
+Update those call sites to read `response["orders"]`. The same shape is used by
+the synchronous `Client`.
 
 ## Quick Start
 

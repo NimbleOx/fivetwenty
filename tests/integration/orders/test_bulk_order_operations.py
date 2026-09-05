@@ -423,8 +423,9 @@ class TestBulkOperationsAndRisk:
 
                     if trade_id:
                         # Check for associated TP/SL orders
-                        orders = await sandbox_client.orders.get_orders(test_account_id)
-                        tp_sl_orders = [order for order in orders if isinstance(order, dict) and order.get("tradeID") == trade_id and order.get("type") in ["TAKE_PROFIT", "STOP_LOSS"]]
+                        orders_response = await sandbox_client.orders.get_orders(test_account_id)
+                        orders = orders_response["orders"]
+                        tp_sl_orders = [order for order in orders if getattr(order, "trade_id", None) == trade_id and getattr(order, "type", None) in ["TAKE_PROFIT", "STOP_LOSS"]]
 
                         print(f"✓ Found {len(tp_sl_orders)} TP/SL orders for trade {trade_id}")
             else:

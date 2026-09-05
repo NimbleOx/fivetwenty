@@ -99,26 +99,26 @@ class TestConsolidatedOrderOperations:
         print("\n✓ Test 3: Order listing and validation")
 
         orders_response = await sandbox_client.orders.get_orders(test_account_id)
-        orders = orders_response.get("orders", []) if isinstance(orders_response, dict) else orders_response
+        orders = orders_response["orders"]
 
         print(f"✓ Retrieved {len(orders)} orders from API")
         if len(orders) > 0:
-            print(f"✓ Sample order IDs: {[order.get('id') for order in orders[:3]]}")
+            print(f"✓ Sample order IDs: {[order.id for order in orders[:3]]}")
             print(f"✓ Looking for order ID: {limit_order_id} (type: {type(limit_order_id)})")
 
         # Should find our limit order in the list
         found_limit_order = False
         for order in orders:
-            order_id = order.get("id")
+            order_id = order.id
             # Handle both string and integer comparisons
             if str(order_id) == str(limit_order_id):
                 found_limit_order = True
-                order_state = order.get("state")
+                order_state = order.state
                 print(f"✓ Found limit order in orders list: {order_id} (state: {order_state})")
 
                 # Order might be filled, cancelled, or pending - just validate it exists
                 if order_state == "PENDING":
-                    assert order.get("instrument") == test_instrument, "Order should be for correct instrument"
+                    assert getattr(order, "instrument", None) == test_instrument, "Order should be for correct instrument"
                     print("✓ Order is pending as expected")
                 else:
                     print(f"✓ Order found but in state: {order_state} (not pending)")

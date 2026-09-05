@@ -46,7 +46,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **Source**: [orders.post_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L142)
+🔗 **Source**: [orders.post_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L150)
 
 **Parameters:**
 
@@ -117,7 +117,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **Source**: [orders.post_market_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L223)
+🔗 **Source**: [orders.post_market_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L231)
 
 **Parameters:**
 
@@ -188,7 +188,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **Source**: [orders.post_limit_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L283)
+🔗 **Source**: [orders.post_limit_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L291)
 
 **Parameters:**
 
@@ -260,7 +260,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **Source**: [orders.post_stop_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L351)
+🔗 **Source**: [orders.post_stop_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L359)
 
 **Parameters:**
 
@@ -333,7 +333,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Create Order](https://developer.oanda.com/rest-live-v20/order-ep/#create-order)
 
-🔗 **Source**: [orders.post_market_if_touched_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L422)
+🔗 **Source**: [orders.post_market_if_touched_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L430)
 
 **Parameters:**
 
@@ -374,6 +374,17 @@ Get a list of orders for an account with optional filtering.
 
 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/orders`
 
+!!! note "Beta Compatibility"
+    `get_orders()` returns OANDA's response envelope, not a bare list. Code written against older beta versions should change from `orders = await client.orders.get_orders(account_id)` to:
+
+    ```text
+    result = await client.orders.get_orders(account_id)
+    orders = result["orders"]
+    last_transaction_id = result["lastTransactionID"]
+    ```
+
+    The synchronous `Client` uses the same response shape.
+
 <!-- code-block: orders__get_orders -->
 ```python
 import asyncio
@@ -388,12 +399,14 @@ load_dotenv()
 async def main() -> None:
     async with AsyncClient() as client:
         # Get pending orders for the account
-        orders = await client.orders.get_orders(
+        result = await client.orders.get_orders(
             account_id=client.account_id,
             state="PENDING",
             count=50,
         )
+        orders = result["orders"]
         print(f"Found {len(orders)} orders")
+        print(f"Last Transaction ID: {result['lastTransactionID']}")
 
 
 if __name__ == "__main__":
@@ -402,7 +415,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Get Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-orders)
 
-🔗 **Source**: [orders.get_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L493)
+🔗 **Source**: [orders.get_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L501)
 
 **Parameters:**
 
@@ -411,12 +424,15 @@ if __name__ == "__main__":
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `*` | | | **Keyword-only parameters below** |
 | `ids` | list[str] \| None | ➖ | List of specific order IDs to retrieve |
-| `state` | str | ➖ | Filter by order state - default: "PENDING" |
+| `state` | OrderStateFilter \| str | ➖ | Filter by order state - default: "PENDING" |
 | `instrument` | str \| None | ➖ | Filter by instrument |
-| `count` | int | ➖ | Maximum number of orders to return - default: 50 |
+| `count` | int | ➖ | Maximum number of orders to return - default: 50, max: 500 |
 | `before_id` | str \| None | ➖ | Maximum order ID to return |
 
-**Returns:** `list[Order]` - List of Order models
+**Returns:** `GetOrdersResponse` TypedDict containing:
+
+- `orders`: List of Order models
+- `lastTransactionID`: Transaction ID string
 
 **Raises:**
 
@@ -426,6 +442,8 @@ if __name__ == "__main__":
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
   - 400: Invalid filter parameters (check `e.is_validation_error`)
+
+`ValueError` - If count is outside 1-500
 
 ---
 
@@ -466,7 +484,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Get Order](https://developer.oanda.com/rest-live-v20/order-ep/#get-order)
 
-🔗 **Source**: [orders.get_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L542)
+🔗 **Source**: [orders.get_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L561)
 
 **Parameters:**
 
@@ -525,7 +543,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Cancel Order](https://developer.oanda.com/rest-live-v20/order-ep/#cancel-order)
 
-🔗 **Source**: [orders.cancel_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L572)
+🔗 **Source**: [orders.cancel_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L591)
 
 **Parameters:**
 
@@ -589,7 +607,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Get Pending Orders](https://developer.oanda.com/rest-live-v20/order-ep/#get-pending-orders)
 
-🔗 **Source**: [orders.get_pending_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L620)
+🔗 **Source**: [orders.get_pending_orders](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L639)
 
 **Parameters:**
 
@@ -654,7 +672,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Replace Order](https://developer.oanda.com/rest-live-v20/order-ep/#replace-order)
 
-🔗 **Source**: [orders.put_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L656)
+🔗 **Source**: [orders.put_order](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L675)
 
 **Parameters:**
 
@@ -724,7 +742,7 @@ if __name__ == "__main__":
 
 🔗 **OANDA Documentation**: [Update Order Client Extensions](https://developer.oanda.com/rest-live-v20/order-ep/#update-order-client-extensions)
 
-🔗 **Source**: [orders.put_order_client_extensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L722)
+🔗 **Source**: [orders.put_order_client_extensions](https://github.com/NimbleOx/fivetwenty/blob/main/fivetwenty/endpoints/orders.py#L741)
 
 **Parameters:**
 

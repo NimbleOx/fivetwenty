@@ -137,7 +137,8 @@ class TestEnhancedOrderEndpoints:
                             "positionFill": "DEFAULT",
                             "triggerCondition": "DEFAULT",
                         },
-                    ]
+                    ],
+                    "lastTransactionID": "12346",
                 }
             # For GET /accounts/{id}/pendingOrders
             elif method == "GET" and "/pendingOrders" in path:
@@ -235,8 +236,9 @@ class TestEnhancedOrderEndpoints:
         result = await orders.get_orders("101-001-123456-001")
 
         mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/orders", params={"state": "PENDING", "count": 50})
-        assert len(result) == 2
-        assert result[0].id == "12345"
+        assert len(result["orders"]) == 2
+        assert result["orders"][0].id == "12345"
+        assert result["lastTransactionID"] == "12346"
 
     @pytest.mark.asyncio
     async def test_get_orders_with_filters(self, orders, mock_client):
@@ -929,7 +931,19 @@ class TestOrderResponseBranches:
         result = await orders.get_orders("101-001-123456-001", ids=["12345", "12346"])
 
         client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/orders", params={"state": "PENDING", "count": 50, "ids": "12345,12346"})
-        assert result == []
+        assert result["orders"] == []
+        assert result["lastTransactionID"] == "92"
+
+    @pytest.mark.asyncio
+    async def test_get_orders_count_outside_oanda_range_raises(self):
+        """Test get_orders enforces OANDA's count range."""
+        client = _response_client({"orders": [], "lastTransactionID": "92"})
+        orders = OrderEndpoints(client)
+
+        with pytest.raises(ValueError, match="Count must be between 1 and 500"):
+            await orders.get_orders("101-001-123456-001", count=501)
+
+        client._request.assert_not_called()
 
     @pytest.mark.asyncio
     async def test_post_order_minimal_response(self):

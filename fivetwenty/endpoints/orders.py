@@ -40,6 +40,7 @@ from ..models import (
     OrderCancelTransaction,
     OrderClientExtensionsModifyTransaction,
     OrderFillTransaction,
+    OrderStateFilter,
     StopLossDetails,
     StopLossOrder,
     StopLossOrderRejectTransaction,
@@ -93,6 +94,13 @@ class GetOrderResponse(TypedDict):
     """Response from get_order endpoint."""
 
     order: Order
+    lastTransactionID: str
+
+
+class GetOrdersResponse(TypedDict):
+    """Response from get_orders endpoint."""
+
+    orders: list[Order]
     lastTransactionID: str
 
 
@@ -495,11 +503,11 @@ class OrderEndpoints:
         account_id: AccountID,
         *,
         ids: list[str] | None = None,
-        state: str = "PENDING",
+        state: OrderStateFilter | str = OrderStateFilter.PENDING,
         instrument: str | None = None,
         count: int = 50,
         before_id: str | None = None,
-    ) -> list[Order]:
+    ) -> GetOrdersResponse:
         """
         List orders for an account.
 
@@ -508,17 +516,21 @@ class OrderEndpoints:
             ids: List of specific order IDs to fetch (optional)
             state: Order state filter
             instrument: Instrument filter (optional)
-            count: Maximum number of orders
+            count: Maximum number of orders (1-500)
             before_id: Get orders before this ID
 
         Returns:
-            List of order models
+            Dictionary containing orders and lastTransactionID
 
         Raises:
             FiveTwentyError: On API errors
+            ValueError: If count is outside 1-500
         """
+        if not 1 <= count <= 500:
+            raise ValueError("Count must be between 1 and 500")
+
         params = {
-            "state": state,
+            "state": state.value if isinstance(state, OrderStateFilter) else state,
             "count": count,
         }
 
@@ -536,8 +548,15 @@ class OrderEndpoints:
         )
         data = response.json()
 
-        # Parse each order based on its type field
-        return [self._parse_order(order_data) for order_data in data.get("orders", [])]
+        return cast(
+            "GetOrdersResponse",
+            ApiResponse(
+                {
+                    "orders": [self._parse_order(order_data) for order_data in data.get("orders", [])],
+                    "lastTransactionID": data["lastTransactionID"],
+                }
+            ),
+        )
 
     async def get_order(self, account_id: AccountID, order_specifier: str) -> GetOrderResponse:
         """
