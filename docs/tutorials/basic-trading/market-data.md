@@ -1,6 +1,6 @@
 # Market Data & Analysis
 
-!!! tip "Target Learning Goal"
+!!! tip "Learning Goal"
     Understand how to retrieve and analyze market data to make informed trading decisions.
 
 ---
@@ -38,7 +38,7 @@ async def get_current_prices(instruments: list[str]) -> list[ClientPrice] | None
                 instruments=instruments,  # List of currency pairs to get prices for
             )
 
-            print("Analysis Current Market Prices:")
+            print("Current Market Prices:")
             # Step 3: Process each price response with financial precision
             for price in pricing_response["prices"]:
                 if price.bids and price.asks:
@@ -62,7 +62,7 @@ async def get_current_prices(instruments: list[str]) -> list[ClientPrice] | None
             return pricing_response["prices"]
 
         except FiveTwentyError as e:
-            print(f"Error Error getting prices: {e.message}")
+            print(f"Error: getting prices: {e.message}")
             return None
 
 
@@ -108,7 +108,7 @@ async def get_historical_data(instrument: InstrumentName | str, count: int = 100
                 granularity=CandlestickGranularity.H1,  # 1-hour time periods (other options: M1, M5, D, etc.)
             )
 
-            print(f"Data Historical Data for {instrument}:")
+            print(f"Historical Data for {instrument}:")
             candles: list[Any] = candles_response["candles"]
             print(f"   Retrieved {len(candles)} candles")
 
@@ -124,7 +124,7 @@ async def get_historical_data(instrument: InstrumentName | str, count: int = 100
                     # Volume shows trading activity during the period
 
         except FiveTwentyError as e:
-            print(f"Error Error getting historical data: {e.message}")
+            print(f"Error: getting historical data: {e.message}")
             return None
         else:
             return candles_response
@@ -162,7 +162,7 @@ async def analyze_market_before_trading(instrument: str = "EUR_USD") -> None:
     # Step 1: Initialize client for comprehensive market analysis
     # This function demonstrates pre-trade analysis workflow
     async with AsyncClient() as client:
-        print("Search MARKET ANALYSIS")
+        print("MARKET ANALYSIS")
         print("=" * 30)
 
         # Step 2: Get current pricing to assess trading costs
@@ -180,7 +180,7 @@ async def analyze_market_before_trading(instrument: str = "EUR_USD") -> None:
             spread = ask - bid  # Trading cost (broker's profit)
             mid_price = (bid + ask) / 2  # Fair value estimate
 
-            print(f"Data Current {instrument} Pricing:")
+            print(f"Current {instrument} Pricing:")
             print(f"   Bid: {bid:.5f}")  # Immediate sell price
             print(f"   Ask: {ask:.5f}")  # Immediate buy price
             print(f"   Mid: {mid_price:.5f}")  # Market consensus price
@@ -195,7 +195,7 @@ async def analyze_market_before_trading(instrument: str = "EUR_USD") -> None:
                     "   ⚠️ Wide spread detected - consider waiting for better conditions"
                 )
             else:
-                print("   Success Normal spread - good for trading")
+                print("   Normal spread - good for trading")
 
         # Step 4: Get recent historical data for market context
         # Historical analysis helps identify support/resistance and trend direction
@@ -222,7 +222,7 @@ async def analyze_market_before_trading(instrument: str = "EUR_USD") -> None:
                     )  # Lowest price in last 12 hours (support level)
                     current_price = prices[-1]  # Most recent closing price
 
-                    print("\nAnalysis Recent Price Action (12H):")
+                    print("\nRecent Price Action (12H):")
                     print(f"   High: {recent_high:.5f}")  # Potential resistance level
                     print(f"   Low:  {recent_low:.5f}")  # Potential support level
                     print(f"   Current: {current_price:.5f}")  # Current market position
@@ -231,7 +231,7 @@ async def analyze_market_before_trading(instrument: str = "EUR_USD") -> None:
                     # Compare current price to previous period for direction
                     if current_price > prices[-2]:
                         print(
-                            "   Analysis Short-term trend: UP"
+                            "   Short-term trend: UP"
                         )  # Price rising (bullish)
                     elif current_price < prices[-2]:
                         print("    Short-term trend: DOWN")  # Price falling (bearish)
@@ -406,7 +406,7 @@ async def analyze_price_movements(instrument: str, periods: int = 20):
                 else Decimal("0.5")
             )
 
-            print(f"Data Price Movement Analysis for {instrument}:")
+            print(f"Price Movement Analysis for {instrument}:")
             print(f"   Recent High: {recent_high:.5f}")  # Potential resistance level
             print(f"   Recent Low:  {recent_low:.5f}")  # Potential support level
             print(f"   Current:     {current_price:.5f}")  # Current market price
@@ -423,7 +423,7 @@ async def analyze_price_movements(instrument: str, periods: int = 20):
             # Step 7: Provide tactical trading interpretation
             # Position in range suggests potential support/resistance reactions
             if range_position > Decimal("0.8"):
-                print("   Analysis Near recent highs - potential resistance")
+                print("   Near recent highs - potential resistance")
             elif range_position < Decimal("0.2"):
                 print("    Near recent lows - potential support")
             else:
@@ -438,7 +438,7 @@ async def analyze_price_movements(instrument: str, periods: int = 20):
             }
 
         except Exception as e:
-            print(f"Error Error analyzing price movements: {e}")
+            print(f"Error: analyzing price movements: {e}")
             return None
 
 
@@ -458,13 +458,13 @@ Use FiveTwenty's pricing API to check current spreads and recent price action be
 
 ## What You've Learned
 
-Success **Real-time Pricing**: How to retrieve and interpret current market prices
+- **Real-time Pricing**: How to retrieve and interpret current market prices
 
-Success **Historical Analysis**: Using past data to understand market context
+- **Historical Analysis**: Using past data to understand market context
 
-Success **Market Conditions**: Assessing when markets are suitable for trading
+- **Market Conditions**: Assessing when markets are suitable for trading
 
-Success **Price Movement Patterns**: Understanding volatility and range analysis
+- **Price Movement Patterns**: Understanding volatility and range analysis
 
 !!! success "Market Analysis Complete"
     You can now analyze market conditions before trading. Next, you'll place your first trade with proper analysis and risk management.

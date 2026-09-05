@@ -92,15 +92,15 @@ class LowLatencyOrderManager:
                 self.execution_stats['orders_filled'] += 1
                 fill_price = response.order_fill_transaction.price
 
-                print(f"Lightning Order filled: {instrument} @ {fill_price} ({latency_ms:.1f}ms)")
-                # Success metrics enable:
+                print(f"Order filled: {instrument} @ {fill_price} ({latency_ms:.1f}ms)")
+                # Good: metrics enable:
                 # - Fill rate analysis for strategy optimization
                 # - Price execution quality measurement
                 # - Latency performance monitoring
                 return True
             else:
                 # Order rejected - analyze rejection for strategy improvement
-                print(f"Error Order rejected: {instrument} ({latency_ms:.1f}ms)")
+                print(f"Error: Order rejected: {instrument} ({latency_ms:.1f}ms)")
                 # Rejection analysis helps identify:
                 # - Market conditions causing rejections
                 # - Timing issues in strategy execution
@@ -109,7 +109,7 @@ class LowLatencyOrderManager:
 
         except asyncio.TimeoutError:
             # Step 10: Handle timeout errors - critical for HFT system reliability
-            print(f"Time Order timeout: {instrument} (>{max_latency_ms}ms)")
+            print(f"Order timeout: {instrument} (>{max_latency_ms}ms)")
             # Timeout handling prevents:
             # - System hanging during network issues
             # - Missing subsequent trading opportunities
@@ -119,7 +119,7 @@ class LowLatencyOrderManager:
 
         except Exception as e:
             # Step 11: Handle unexpected errors with comprehensive logging
-            print(f"Error Order error: {e}")
+            print(f"Error: Order error: {e}")
             # Exception types that might occur:
             # - Network connectivity issues
             # - OANDA API errors (insufficient funds, market closed)
@@ -166,7 +166,7 @@ class LowLatencyOrderManager:
 
             # Step 16: Analyze batch execution success rate
             successful = sum(results)  # Count successful executions
-            print(f"Lightning Batch complete: {successful}/{len(orders)} filled ({batch_time:.1f}ms)")
+            print(f"Batch complete: {successful}/{len(orders)} filled ({batch_time:.1f}ms)")
             # Batch metrics enable:
             # - Strategy performance evaluation
             # - Market impact analysis
@@ -177,7 +177,7 @@ class LowLatencyOrderManager:
 
         except asyncio.TimeoutError:
             # Step 17: Handle batch timeout with graceful degradation
-            print(f"Time Batch timeout: {max_batch_time_ms}ms exceeded")
+            print(f"Batch timeout: {max_batch_time_ms}ms exceeded")
             # Batch timeout scenarios:
             # - Network congestion affecting multiple requests
             # - OANDA API slowdown during high volatility
@@ -209,7 +209,7 @@ class LowLatencyOrderManager:
             'orders_submitted': self.execution_stats['orders_submitted'],
             'orders_filled': self.execution_stats['orders_filled'],
 
-            # Success rate analysis - critical for strategy evaluation
+            # Good: rate analysis - critical for strategy evaluation
             'fill_rate': (
                 self.execution_stats['orders_filled'] /
                 max(self.execution_stats['orders_submitted'], 1)  # Avoid division by zero
@@ -259,7 +259,7 @@ async def hft_execution_example(client: AsyncClient, account_id: str):
 
     # Step 24: Analyze comprehensive execution performance
     stats = order_manager.get_execution_stats()
-    print(f"Data Execution Stats: {stats}")
+    print(f"Execution Stats: {stats}")
     # Performance analysis enables:
     # - Strategy optimization decisions
     # - System performance monitoring
@@ -585,7 +585,7 @@ async def fast_order_execution_example(client: AsyncClient, account_id: str):
         end_time = time.perf_counter()
         total_time = (end_time - start_time) * 1000
 
-        print(f"Lightning Total execution time: {total_time:.1f}ms")
+        print(f"Total execution time: {total_time:.1f}ms")
         print(f"   Validation: {valid}, Order: {success}")
         # Total time includes:
         # - Validation processing (with caching benefits)
@@ -594,7 +594,7 @@ async def fast_order_execution_example(client: AsyncClient, account_id: str):
 
     else:
         # Step 22: Handle validation failure with detailed feedback
-        print(f"Error Validation failed: {message}")
+        print(f"Error: Validation failed: {message}")
         # Early validation failure prevents:
         # - Wasted API calls for invalid orders
         # - API rate limit consumption

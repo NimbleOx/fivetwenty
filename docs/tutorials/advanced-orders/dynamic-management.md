@@ -14,7 +14,7 @@ By the end of this guide, you will:
 
 ## Trailing Stop Implementation
 
-Trailing stops dynamically adjust stop-loss levels as price moves in your favor, protecting accumulated profits while giving positions room to grow. Unlike fixed stop losses that remain static, trailing stops "follow" price at a specified distance, automatically tightening protection as profits increase. This creates an asymmetric risk profile where losses are limited but profits can run indefinitely - the holy grail of position management.
+Trailing stops dynamically adjust stop-loss levels as price moves in your favor, protecting accumulated profits while giving positions room to grow. Unlike fixed stop losses that remain static, trailing stops "follow" price at a specified distance, automatically tightening protection as profits increase. This creates an asymmetric risk profile where losses are limited while profitable positions can keep running.
 
 OANDA provides native trailing stop functionality that automatically adjusts stop levels server-side as price moves favorably. The FiveTwenty SDK exposes this through `TrailingStopLossOrderRequest`, which attaches trailing stops to existing trades at a specified distance. OANDA's platform handles all trailing logic automatically - no client-side monitoring required. The examples demonstrate both native trailing stops and advanced custom implementations for volatility-adjusted strategies.
 
@@ -194,7 +194,7 @@ async def main() -> None:
         print("\n" + "=" * 60)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 60)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Calculate trailing distance based on ATR (volatility-adjusted)")
         print(
             "  • Use trailing_stop_loss_on_fill parameter for one-step order+protection"
@@ -380,7 +380,7 @@ async def main() -> None:
 
         print(f"  Volatility Ratio: {volatility_multiplier:.2f}x")
         print(
-            f"  Raw Adjusted Trail: {adjusted_trail:.5f} ({adjusted_trail * 10000:.1f} pips)"
+            f"  Adjusted Trail: {adjusted_trail:.5f} ({adjusted_trail * 10000:.1f} pips)"
         )
 
         # Apply reasonable bounds to prevent extreme distances
@@ -491,7 +491,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Recalculate ATR periodically to adapt to changing volatility")
         print("  • Use multiple timeframes (H1, H4, D1) for ATR validation")
         print("  • Implement different bounds for different instruments")
@@ -697,7 +697,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Monitor trade unrealized P/L and replace trailing stop when thresholds hit")
         print("  • Use webhooks or streaming pricing for real-time profit monitoring")
         print("  • Implement smooth acceleration (gradual tightening vs stepped changes)")
@@ -933,7 +933,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Automated trailing based on price movement detection")
         print("  • ATR-based trailing distance (volatility-adjusted)")
         print("  • Different trailing rules for different profit levels")
@@ -1170,7 +1170,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Monitor filled orders and adjust remaining levels dynamically")
         print("  • Place protective stop for accumulated position after each fill")
         print("  • Implement dynamic level spacing based on ATR or volatility")
@@ -1440,7 +1440,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Monitor filled take-profit orders in real-time")
         print("  • Move stop-loss to breakeven after first target hits")
         print("  • Implement trailing stop on remaining position after partial exits")
@@ -1691,7 +1691,7 @@ async def main() -> None:
         print(f"  Stop Distance: {stop_distance * 10000:.0f} pips (adapted for {strategy_params['regime']} regime)")
         print(f"  Stop Price: {stop_price:.5f}")
         print(f"  Take Profit Distance: {tp_distance * 10000:.0f} pips")
-        print(f"  Target Price: {target_price:.5f}")
+        print(f"  Price: {target_price:.5f}")
 
         # Calculate risk/reward ratio
         risk_reward = tp_distance / stop_distance
@@ -1728,7 +1728,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Monitor market conditions continuously and adjust active positions")
         print("  • Use multiple indicators (ATR, volatility, volume) for regime detection")
         print("  • Implement regime change alerts and position adjustment logic")
@@ -2054,7 +2054,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Track actual trade history for real performance metrics")
         print("  • Implement rolling window for win rate calculation (e.g., last 20 trades)")
         print("  • Add maximum daily drawdown limits that pause trading")

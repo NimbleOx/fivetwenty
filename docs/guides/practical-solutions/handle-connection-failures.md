@@ -43,9 +43,9 @@ ValueError: Invalid token format: token must be a non-empty string
 import os
 token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "").strip()
 if not token:
-    print("Error Token is empty or missing")
+    print("Error: Token is empty or missing")
 else:
-    print(f"Success Token loaded: {token[:8]}...")
+    print(f"Token loaded: {token[:8]}...")
 ```
 
 **Account ID Mismatch**
@@ -126,15 +126,15 @@ from fivetwenty.exceptions import FiveTwentyError
 
 async def demonstrate_intelligent_rate_limiting(token: str) -> None:
     """Demonstrate intelligent rate limiting management with comprehensive request pacing."""
-    print(f"Lightning Intelligent Rate Limiting Management Demonstration")
+    print(f"Intelligent Rate Limiting Management Demonstration")
 
     # Step 1: Initialize rate limiting parameters
     # OANDA allows 20 requests per second, so we use conservative limits
-    print(f"\nTarget Rate Limiting Configuration:")
-    print(f"   Data OANDA limit: 20 requests/second")
+    print(f"\nRate Limiting Configuration:")
+    print(f"   OANDA limit: 20 requests/second")
     print(f"   Controls Our limit: 10 requests/second (50% buffer for safety)")
-    print(f"   Time Min delay: 100ms between requests")
-    print(f"   Secure Max burst: 5 requests before enforced delay")
+    print(f"   Min delay: 100ms between requests")
+    print(f"   Max burst: 5 requests before enforced delay")
 
     # Step 2: Rate limiting tracking and statistics
     rate_stats = {
@@ -146,11 +146,11 @@ async def demonstrate_intelligent_rate_limiting(token: str) -> None:
         "avg_response_time": 0.0
     }
 
-    print(f"\nStarting Starting Rate-Limited Request Demonstration...")
+    print(f"\nStarting Rate-Limited Request Demonstration...")
 
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
-        print(f"   Link Client initialized with practice environment")
-        print(f"   Target Target: 8 sequential account requests with intelligent pacing")
+        print(f"   Client initialized with practice environment")
+        print(f"   Target: 8 sequential account requests with intelligent pacing")
 
         # Step 3: Execute rate-limited requests with comprehensive monitoring
         for request_number in range(1, 9):  # 8 requests for demonstration
@@ -171,9 +171,9 @@ async def demonstrate_intelligent_rate_limiting(token: str) -> None:
                 rate_stats["successful_requests"] += 1
                 rate_stats["request_times"].append(response_time)
 
-                print(f"      Success Success: Retrieved {len(accounts)} accounts")
-                print(f"      Time Response time: {response_time:.3f} seconds")
-                print(f"      Data Success rate: {rate_stats['successful_requests']}/{rate_stats['total_requests']}")
+                print(f"      Success: Retrieved {len(accounts)} accounts")
+                print(f"      Response time: {response_time:.3f} seconds")
+                print(f"      Success: rate: {rate_stats['successful_requests']}/{rate_stats['total_requests']}")
 
                 # Step 7: Intelligent delay calculation based on request patterns
                 # Base delay of 100ms + adaptive delay based on response times
@@ -182,67 +182,67 @@ async def demonstrate_intelligent_rate_limiting(token: str) -> None:
                 total_delay = base_delay + adaptive_delay
 
                 if request_number < 8:  # Don't delay after last request
-                    print(f"      Wait Intelligent delay: {total_delay:.3f}s (base: {base_delay:.3f}s + adaptive: {adaptive_delay:.3f}s)")
+                    print(f"      Intelligent delay: {total_delay:.3f}s (base: {base_delay:.3f}s + adaptive: {adaptive_delay:.3f}s)")
                     rate_stats["total_delay_time"] += total_delay
                     await asyncio.sleep(total_delay)
 
             except FiveTwentyError as api_error:
                 # Step 8: Handle rate limiting errors with exponential backoff
-                if api_error.status_code == 429:  # Too Many Requests
+                if api_error.status == 429:  # Too Many Requests
                     rate_stats["rate_limited_requests"] += 1
 
                     print(f"      ⚠️ Rate limited (HTTP 429) - implementing recovery")
-                    print(f"      Data Rate limit events: {rate_stats['rate_limited_requests']}")
+                    print(f"      Rate limit events: {rate_stats['rate_limited_requests']}")
 
                     # Exponential backoff for rate limit recovery
                     backoff_delay = 2.0 * (2 ** rate_stats["rate_limited_requests"])  # 2s, 4s, 8s...
                     backoff_delay = min(backoff_delay, 30.0)  # Cap at 30 seconds
 
-                    print(f"      Wait Recovery delay: {backoff_delay:.1f} seconds")
-                    print(f"      Note Strategy: Exponential backoff to allow server recovery")
+                    print(f"      Recovery delay: {backoff_delay:.1f} seconds")
+                    print(f"      Note: Strategy: Exponential backoff to allow server recovery")
 
                     rate_stats["total_delay_time"] += backoff_delay
                     await asyncio.sleep(backoff_delay)
 
                     # Retry the request after backoff
-                    print(f"      Processing Retrying request #{request_number}...")
+                    print(f"      Retrying request #{request_number}...")
                     try:
                         accounts = await client.accounts.get_accounts()
                         rate_stats["successful_requests"] += 1
-                        print(f"      Success Retry successful: {len(accounts)} accounts")
+                        print(f"      Retry successful: {len(accounts)} accounts")
                     except Exception as retry_error:
-                        print(f"      Error Retry failed: {retry_error}")
+                        print(f"      Error: Retry failed: {retry_error}")
                 else:
-                    print(f"      Error API Error: {api_error.message}")
+                    print(f"      Error: API Error: {api_error.message}")
 
             except Exception as unexpected_error:
-                print(f"      Error Unexpected error: {unexpected_error}")
-                print(f"      Note This may indicate network issues or client problems")
+                print(f"      Error: Unexpected error: {unexpected_error}")
+                print(f"      Note: This may indicate network issues or client problems")
 
         # Step 9: Calculate and display comprehensive rate limiting statistics
         total_time = rate_stats["total_delay_time"] + sum(rate_stats["request_times"])
         effective_rate = rate_stats["successful_requests"] / total_time if total_time > 0 else 0
         avg_response_time = sum(rate_stats["request_times"]) / len(rate_stats["request_times"]) if rate_stats["request_times"] else 0
 
-        print(f"\nData Rate Limiting Performance Analysis:")
-        print(f"   Analysis Total requests attempted: {rate_stats['total_requests']}")
-        print(f"   Success Successful requests: {rate_stats['successful_requests']}")
+        print(f"\nRate Limiting Performance Analysis:")
+        print(f"   Total requests attempted: {rate_stats['total_requests']}")
+        print(f"   Successful requests: {rate_stats['successful_requests']}")
         print(f"   ⚠️ Rate limited events: {rate_stats['rate_limited_requests']}")
-        print(f"   Time Total delay time: {rate_stats['total_delay_time']:.2f} seconds")
-        print(f"   Data Average response time: {avg_response_time:.3f} seconds")
-        print(f"   Target Effective request rate: {effective_rate:.2f} requests/second")
-        print(f"   Achievement Success rate: {rate_stats['successful_requests']/rate_stats['total_requests']*100:.1f}%")
+        print(f"   Total delay time: {rate_stats['total_delay_time']:.2f} seconds")
+        print(f"   Average response time: {avg_response_time:.3f} seconds")
+        print(f"   Effective request rate: {effective_rate:.2f} requests/second")
+        print(f"   Success: rate: {rate_stats['successful_requests']/rate_stats['total_requests']*100:.1f}%")
 
-        print(f"\nTarget Rate Limiting Best Practices Demonstrated:")
-        print(f"   Success Conservative limits (50% below OANDA's 20 req/sec)")
-        print(f"   Time Intelligent delays based on response times")
-        print(f"   Processing Exponential backoff for rate limit recovery")
-        print(f"   Data Comprehensive monitoring and statistics")
-        print(f"   Note Adaptive strategy based on server performance")
+        print(f"\nRate Limiting Best Practices Demonstrated:")
+        print(f"   Conservative limits (50% below OANDA's 20 req/sec)")
+        print(f"   Intelligent delays based on response times")
+        print(f"   Exponential backoff for rate limit recovery")
+        print(f"   Comprehensive monitoring and statistics")
+        print(f"   Note: Adaptive strategy based on server performance")
 
 
 # Educational demonstration execution
-print(f"Lightning Starting Intelligent Rate Limiting Management Tutorial")
+print(f"Starting Intelligent Rate Limiting Management Tutorial")
 try:
     import asyncio
     # Replace with your actual token for testing
@@ -291,7 +291,7 @@ from fivetwenty.exceptions import FiveTwentyError
 
 async def demonstrate_comprehensive_authentication_validation(token: str, environment: Environment) -> Dict[str, Any]:
     """Demonstrate comprehensive authentication validation with detailed security analysis."""
-    print(f"Auth Comprehensive Authentication Validation Demonstration")
+    print(f"Comprehensive Authentication Validation Demonstration")
 
     # Step 1: Initialize validation tracking and security analysis
     validation_start_time = time.time()
@@ -306,21 +306,21 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
         "error_details": None
     }
 
-    print(f"\nTarget Authentication Validation Scope:")
-    print(f"   Search Token format validation")
-    print(f"   Auth OANDA API authentication test")
-    print(f"   Account Account access verification")
-    print(f"   Environment Environment compatibility check")
-    print(f"   Lightning Permission level assessment")
-    print(f"   Security Security analysis and warnings")
+    print(f"\nAuthentication Validation Scope:")
+    print(f"   Token format validation")
+    print(f"   OANDA API authentication test")
+    print(f"   Account access verification")
+    print(f"   Environment compatibility check")
+    print(f"   Permission level assessment")
+    print(f"   Security analysis and warnings")
 
     # Step 2: Token format validation with security analysis
-    print(f"\nSearch Phase 1: Token Format Validation")
+    print(f"\nPhase 1: Token Format Validation")
 
     # Basic token format checks
     if not token or not isinstance(token, str):
         validation_results["security_warnings"].append("Token is empty or not a string")
-        print(f"   Error Token format: Invalid (empty or not string)")
+        print(f"   Error: Token format: Invalid (empty or not string)")
     elif len(token.strip()) != len(token):
         validation_results["security_warnings"].append("Token has leading/trailing whitespace")
         print(f"   ⚠️ Token format: Contains whitespace (will be stripped)")
@@ -338,26 +338,26 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
         print(f"   ⚠️ Length warning: Token unusually long (>200 chars)")
     else:
         validation_results["token_format_valid"] = True
-        print(f"   Success Token length: Acceptable range")
+        print(f"   Token length: Acceptable range")
 
     # Token character composition analysis
     has_alphanumeric = bool(re.search(r'[a-zA-Z0-9]', token))
     has_special_chars = bool(re.search(r'[-_]', token))
     has_dangerous_chars = bool(re.search(r'[\s<>"\']', token))
 
-    print(f"   Characters Character analysis:")
-    print(f"      Notes Alphanumeric: {'Success Present' if has_alphanumeric else 'Error Missing'}")
-    print(f"      Link Valid special chars: {'Success Present' if has_special_chars else '⚠️ None found'}")
-    print(f"      ⚠️ Dangerous characters: {'Error Found' if has_dangerous_chars else 'Success Clean'}")
+    print(f"   Character analysis:")
+    print(f"      Note: Alphanumeric: {'Present' if has_alphanumeric else 'Missing'}")
+    print(f"      Valid special chars: {'Present' if has_special_chars else '⚠️ None found'}")
+    print(f"      ⚠️ Dangerous characters: {'Found' if has_dangerous_chars else 'Clean'}")
 
     if has_dangerous_chars:
         validation_results["security_warnings"].append("Token contains potentially dangerous characters")
 
     # Environment context analysis
-    print(f"\nEnvironment Phase 2: Environment Context Analysis")
-    print(f"   Target Target environment: {environment.value.upper()}")
-    print(f"   Link API endpoint: {'api-fxtrade.oanda.com' if environment == Environment.LIVE else 'api-fxpractice.oanda.com'}")
-    print(f"   Balance Financial risk: {'REAL MONEY' if environment == Environment.LIVE else 'VIRTUAL MONEY'}")
+    print(f"\nPhase 2: Environment Context Analysis")
+    print(f"   Target environment: {environment.value.upper()}")
+    print(f"   API endpoint: {'api-fxtrade.oanda.com' if environment == Environment.LIVE else 'api-fxpractice.oanda.com'}")
+    print(f"   Financial risk: {'REAL MONEY' if environment == Environment.LIVE else 'VIRTUAL MONEY'}")
 
     # Token-environment compatibility heuristics
     token_lower = token.lower()
@@ -375,20 +375,20 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
         print(f"   ⚠️ Environment mismatch warning: Token may be for practice environment")
     else:
         validation_results["environment_match"] = True
-        print(f"   Success Environment compatibility: No obvious mismatches detected")
+        print(f"   compatibility: No obvious mismatches detected")
 
     # Step 3: Live API authentication test with comprehensive error analysis
-    print(f"\nAuth Phase 3: Live API Authentication Test")
-    print(f"   Starting Attempting OANDA API connection...")
-    print(f"   Time Timeout: 15 seconds for authentication test")
-    print(f"   Target Test method: Account list retrieval")
+    print(f"\nPhase 3: Live API Authentication Test")
+    print(f"   Attempting OANDA API connection...")
+    print(f"   Timeout: 15 seconds for authentication test")
+    print(f"   Test method: Account list retrieval")
 
     authentication_start = time.perf_counter()
 
     try:
         async with AsyncClient(token=token, environment=environment, timeout=15.0) as client:
             print(f"   Signal Client initialized successfully")
-            print(f"   Link Connection established to OANDA servers")
+            print(f"   Connection established to OANDA servers")
 
             # Step 4: Execute authentication test with detailed analysis
             accounts = await client.accounts.get_accounts()
@@ -397,9 +397,9 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
             validation_results["authentication_successful"] = True
             validation_results["performance_metrics"]["authentication_time"] = authentication_time
 
-            print(f"   Success Authentication: SUCCESSFUL")
-            print(f"   Time Authentication time: {authentication_time:.3f} seconds")
-            print(f"   Account Accounts discovered: {len(accounts)}")
+            print(f"   Authentication: SUCCESSFUL")
+            print(f"   Authentication time: {authentication_time:.3f} seconds")
+            print(f"   Accounts discovered: {len(accounts)}")
 
             if accounts:
                 # Step 5: Account access and permission analysis
@@ -411,28 +411,28 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
                 for i, account in enumerate(accounts, 1):
                     print(f"   Institution Account #{i}:")
                     print(f"      ID ID: {account.id}")
-                    print(f"      Notes Alias: {account.alias or 'No alias set'}")
-                    print(f"      Balance Balance: {account.balance} {account.currency}")
-                    print(f"      Data Margin available: {account.margin_available}")
-                    print(f"      Processing Open trades: {account.open_trade_count}")
-                    print(f"      Analysis Open positions: {account.open_position_count}")
+                    print(f"      Note: Alias: {account.alias or 'No alias set'}")
+                    print(f"      Balance: {account.balance} {account.currency}")
+                    print(f"      Margin available: {account.margin_available}")
+                    print(f"      Open trades: {account.open_trade_count}")
+                    print(f"      Open positions: {account.open_position_count}")
 
                 # Step 6: Permission level assessment through API capability testing
-                print(f"\nLightning Phase 5: Permission Level Assessment")
+                print(f"\nPhase 5: Permission Level Assessment")
                 primary_account = accounts[0]
 
                 # Test account detail access (basic permission)
                 try:
                     account_details = await client.accounts.get_account(primary_account.id)
-                    print(f"   Success Account details: Access granted")
+                    print(f"   Account details: Access granted")
                     validation_results["permission_level"] = "basic"
                 except Exception as detail_error:
-                    print(f"   Error Account details: Access denied ({detail_error})")
+                    print(f"   Error: Account details: Access denied ({detail_error})")
 
                 # Test order access (intermediate permission)
                 try:
-                    orders = await client.orders.get_orders(primary_account.id)
-                    print(f"   Success Order access: Granted ({len(orders)} orders visible)")
+                    orders_response = await client.orders.get_orders(primary_account.id)
+                    print(f"   Order access: Granted ({len(orders_response['orders'])} orders visible)")
                     if validation_results["permission_level"] == "basic":
                         validation_results["permission_level"] = "intermediate"
                 except Exception as order_error:
@@ -441,7 +441,7 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
                 # Test position access (full permission indicator)
                 try:
                     positions = await client.positions.get_positions(primary_account.id)
-                    print(f"   Success Position access: Granted ({len(positions)} positions visible)")
+                    print(f"   Position access: Granted ({len(positions)} positions visible)")
                     validation_results["permission_level"] = "full"
                 except Exception as position_error:
                     print(f"   ⚠️ Position access: Limited ({position_error})")
@@ -454,43 +454,43 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
         # Step 7: Comprehensive API error analysis
         authentication_time = time.perf_counter() - authentication_start
         validation_results["performance_metrics"]["authentication_time"] = authentication_time
-        validation_results["error_details"] = {"type": "FiveTwentyError", "code": api_error.status_code, "message": api_error.message}
+        validation_results["error_details"] = {"type": "FiveTwentyError", "code": api_error.status, "message": api_error.message}
 
-        print(f"   Error Authentication failed after {authentication_time:.3f} seconds")
-        print(f"   Search Error analysis:")
+        print(f"   Error: Authentication failed after {authentication_time:.3f} seconds")
+        print(f"   Error: analysis:")
 
-        if api_error.status_code == 401:
+        if api_error.status == 401:
             print(f"      Blocked HTTP 401 Unauthorized")
-            print(f"      Note Diagnosis: Invalid or expired token")
-            print(f"      Config Solutions:")
+            print(f"      Note: Diagnosis: Invalid or expired token")
+            print(f"      Solutions:")
             print(f"         • Verify token is copied correctly from OANDA")
             print(f"         • Check token hasn't been revoked")
             print(f"         • Ensure token is for correct environment")
             print(f"         • Generate new token if needed")
             validation_results["security_warnings"].append("Authentication failed - invalid token")
 
-        elif api_error.status_code == 403:
+        elif api_error.status == 403:
             print(f"      Blocked HTTP 403 Forbidden")
-            print(f"      Note Diagnosis: Token valid but insufficient permissions")
-            print(f"      Config Solutions:")
+            print(f"      Note: Diagnosis: Token valid but insufficient permissions")
+            print(f"      Solutions:")
             print(f"         • Check account ID matches token's authorized accounts")
             print(f"         • Verify account is active and not suspended")
             print(f"         • Ensure correct environment (practice/live)")
             validation_results["security_warnings"].append("Access forbidden - insufficient permissions")
 
-        elif api_error.status_code == 429:
+        elif api_error.status == 429:
             print(f"      ⚠️ HTTP 429 Too Many Requests")
-            print(f"      Note Diagnosis: Rate limit exceeded")
-            print(f"      Config Solutions:")
+            print(f"      Note: Diagnosis: Rate limit exceeded")
+            print(f"      Solutions:")
             print(f"         • Implement request delays (100ms minimum)")
             print(f"         • Use exponential backoff")
             print(f"         • Reduce request frequency")
             validation_results["security_warnings"].append("Rate limit exceeded during validation")
 
         else:
-            print(f"      Question HTTP {api_error.status_code} {api_error.message}")
-            print(f"      Note Check OANDA API documentation for specific error")
-            validation_results["security_warnings"].append(f"Unexpected API error: {api_error.status_code}")
+            print(f"      HTTP {api_error.status} {api_error.message}")
+            print(f"      Note: Check OANDA API documentation for specific error")
+            validation_results["security_warnings"].append(f"Unexpected API error: {api_error.status}")
 
     except Exception as unexpected_error:
         # Step 8: Handle network and system errors
@@ -498,24 +498,24 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
         validation_results["performance_metrics"]["authentication_time"] = authentication_time
         validation_results["error_details"] = {"type": type(unexpected_error).__name__, "message": str(unexpected_error)}
 
-        print(f"   Error Connection failed after {authentication_time:.3f} seconds")
-        print(f"   Search Error analysis:")
-        print(f"      Question Error type: {type(unexpected_error).__name__}")
-        print(f"      Notes Details: {str(unexpected_error)}")
+        print(f"   Error: Connection failed after {authentication_time:.3f} seconds")
+        print(f"   Error: analysis:")
+        print(f"      Error: type: {type(unexpected_error).__name__}")
+        print(f"      Details: {str(unexpected_error)}")
 
         error_msg = str(unexpected_error).lower()
         if "timeout" in error_msg:
-            print(f"      Note Diagnosis: Network timeout")
-            print(f"      Config Solutions: Check internet connectivity, increase timeout")
+            print(f"      Note: Diagnosis: Network timeout")
+            print(f"      Solutions: Check internet connectivity, increase timeout")
         elif "ssl" in error_msg or "certificate" in error_msg:
-            print(f"      Note Diagnosis: SSL/TLS certificate issue")
-            print(f"      Config Solutions: Update certificates, check system time")
+            print(f"      Note: Diagnosis: SSL/TLS certificate issue")
+            print(f"      Solutions: Update certificates, check system time")
         elif "dns" in error_msg or "resolve" in error_msg:
-            print(f"      Note Diagnosis: DNS resolution failure")
-            print(f"      Config Solutions: Check DNS settings, try alternate DNS")
+            print(f"      Note: Diagnosis: DNS resolution failure")
+            print(f"      Solutions: Check DNS settings, try alternate DNS")
         else:
-            print(f"      Note Diagnosis: Network connectivity issue")
-            print(f"      Config Solutions: Check firewall, proxy, internet connection")
+            print(f"      Note: Diagnosis: Network connectivity issue")
+            print(f"      Solutions: Check firewall, proxy, internet connection")
 
         validation_results["security_warnings"].append(f"Network error: {type(unexpected_error).__name__}")
 
@@ -523,18 +523,18 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
     validation_duration = time.time() - validation_start_time
     validation_results["performance_metrics"]["total_validation_time"] = validation_duration
 
-    print(f"\nList Comprehensive Authentication Validation Summary:")
-    print(f"   Time Total validation time: {validation_duration:.2f} seconds")
-    print(f"   Search Token format valid: {'Success' if validation_results['token_format_valid'] else 'Error'}")
-    print(f"   Auth Authentication successful: {'Success' if validation_results['authentication_successful'] else 'Error'}")
-    print(f"   Account Account access granted: {'Success' if validation_results['account_access_granted'] else 'Error'}")
-    print(f"   Environment Environment match: {'Success' if validation_results['environment_match'] else '⚠️'}")
-    print(f"   Lightning Permission level: {validation_results['permission_level'].upper()}")
-    print(f"   Security Security warnings: {len(validation_results['security_warnings'])}")
+    print(f"\nComprehensive Authentication Validation Summary:")
+    print(f"   Total validation time: {validation_duration:.2f} seconds")
+    print(f"   Token format valid: {'Success' if validation_results['token_format_valid'] else 'Error'}")
+    print(f"   Authentication successful: {'Success' if validation_results['authentication_successful'] else 'Error'}")
+    print(f"   Account access granted: {'Success' if validation_results['account_access_granted'] else 'Error'}")
+    print(f"   Environment match: {'Success' if validation_results['environment_match'] else '⚠️'}")
+    print(f"   Permission level: {validation_results['permission_level'].upper()}")
+    print(f"   Security warnings: {len(validation_results['security_warnings'])}")
 
     # Display security warnings if any
     if validation_results["security_warnings"]:
-        print(f"\nSecurity Security Warnings and Recommendations:")
+        print(f"\nSecurity Warnings and Recommendations:")
         for i, warning in enumerate(validation_results["security_warnings"], 1):
             print(f"   {i}. ⚠️ {warning}")
 
@@ -543,17 +543,17 @@ async def demonstrate_comprehensive_authentication_validation(token: str, enviro
         if len(validation_results["security_warnings"]) == 0:
             print(f"\nComplete VALIDATION RESULT: EXCELLENT - Ready for production use")
         elif len(validation_results["security_warnings"]) <= 2:
-            print(f"\nSuccess VALIDATION RESULT: GOOD - Minor warnings to address")
+            print(f"\nVALIDATION RESULT: GOOD - Minor warnings to address")
         else:
             print(f"\n⚠️ VALIDATION RESULT: ACCEPTABLE - Review security warnings")
     else:
-        print(f"\nError VALIDATION RESULT: FAILED - Authentication or access issues")
+        print(f"\nError: VALIDATION RESULT: FAILED - Authentication or access issues")
 
     return validation_results
 
 
 # Educational demonstration execution
-print(f"Auth Starting Comprehensive Authentication Validation Tutorial")
+print(f"Starting Comprehensive Authentication Validation Tutorial")
 try:
     import asyncio
     # Replace with your actual credentials for testing
@@ -562,15 +562,15 @@ try:
 
     results = asyncio.run(demonstrate_comprehensive_authentication_validation(demo_token, demo_environment))
 
-    print(f"\nData Final Validation Metrics:")
-    print(f"   Lightning Permission level achieved: {results['permission_level']}")
-    print(f"   Security Security warnings: {len(results['security_warnings'])}")
-    print(f"   Time Performance: {results['performance_metrics']}")
+    print(f"\nFinal Validation Metrics:")
+    print(f"   Permission level achieved: {results['permission_level']}")
+    print(f"   Security warnings: {len(results['security_warnings'])}")
+    print(f"   Performance: {results['performance_metrics']}")
 
 except Exception as e:
-    print(f"Error Authentication validation tutorial error: {e}")
-    print(f"Note Ensure you have valid credentials for comprehensive testing")
-print(f"Success Comprehensive authentication validation tutorial complete")
+    print(f"Error: Authentication validation tutorial error: {e}")
+    print(f"Note: Ensure you have valid credentials for comprehensive testing")
+print(f"Comprehensive authentication validation tutorial complete")
 print(f"Education Next: Learn about network timeout handling and resilience patterns")
 ```
 
@@ -600,15 +600,15 @@ class NetworkResilienceManager:
         self.connection_history: List[Dict[str, Any]] = []
         self.network_quality_score = 100  # Start with perfect score
 
-        print(f"Security Network Resilience Manager Initialized:")
-        print(f"   Time Base timeout: {base_timeout} seconds")
-        print(f"   Processing Max retries: {max_retries}")
-        print(f"   Data Network quality score: {self.network_quality_score}/100")
-        print(f"   Target Strategy: Adaptive timeout with intelligent error recovery")
+        print(f"Network Resilience Manager Initialized:")
+        print(f"   Base timeout: {base_timeout} seconds")
+        print(f"   Max retries: {max_retries}")
+        print(f"   Network quality score: {self.network_quality_score}/100")
+        print(f"   Strategy: Adaptive timeout with intelligent error recovery")
 
     async def demonstrate_robust_connection_management(self, token: str, environment: Environment = Environment.PRACTICE) -> Optional[Dict[str, Any]]:
         """Demonstrate robust connection management with comprehensive network resilience."""
-        print(f"\nSecurity Robust Connection Management Demonstration")
+        print(f"\nRobust Connection Management Demonstration")
 
         # Step 2: Initialize connection attempt tracking
         connection_start_time = time.perf_counter()
@@ -623,25 +623,25 @@ class NetworkResilienceManager:
             "performance_metrics": {}
         }
 
-        print(f"\nConfig Connection Parameters:")
-        print(f"   Target Environment: {environment.value}")
-        print(f"   Time Initial timeout: {self.adaptive_timeout} seconds")
-        print(f"   Processing Max retry attempts: {self.max_retries}")
-        print(f"   Data Network quality baseline: {self.network_quality_score}/100")
+        print(f"\nConnection Parameters:")
+        print(f"   Environment: {environment.value}")
+        print(f"   Initial timeout: {self.adaptive_timeout} seconds")
+        print(f"   Max retry attempts: {self.max_retries}")
+        print(f"   Network quality baseline: {self.network_quality_score}/100")
 
         # Step 3: Resilient connection loop with adaptive timeout
         for attempt in range(1, self.max_retries + 1):
             connection_results["total_attempts"] = attempt
 
             print(f"\nSignal Connection Attempt #{attempt}/{self.max_retries}:")
-            print(f"   Time Using timeout: {self.adaptive_timeout:.1f} seconds")
-            print(f"   Data Network quality: {self.network_quality_score}/100")
+            print(f"   Using timeout: {self.adaptive_timeout:.1f} seconds")
+            print(f"   Network quality: {self.network_quality_score}/100")
 
             attempt_start_time = time.perf_counter()
 
             try:
                 # Step 4: Create client with adaptive timeout and comprehensive monitoring
-                print(f"   Link Establishing OANDA connection...")
+                print(f"   Establishing OANDA connection...")
 
                 async with AsyncClient(
                     token=token,
@@ -666,17 +666,17 @@ class NetworkResilienceManager:
                         "final_timeout": self.adaptive_timeout
                     }
 
-                    print(f"   Success Connection established successfully!")
-                    print(f"   Time Validation time: {validation_time:.3f} seconds")
-                    print(f"   Data Total connection time: {total_connection_time:.3f} seconds")
-                    print(f"   Account Accounts discovered: {len(accounts)}")
+                    print(f"   Connection established successfully!")
+                    print(f"   Validation time: {validation_time:.3f} seconds")
+                    print(f"   Total connection time: {total_connection_time:.3f} seconds")
+                    print(f"   Accounts discovered: {len(accounts)}")
 
                     # Step 7: Update network quality based on performance
                     await self._update_network_quality_score(validation_time, True)
                     connection_results["connection_quality"] = self._assess_connection_quality(validation_time)
 
-                    print(f"   Target Connection quality: {connection_results['connection_quality'].upper()}")
-                    print(f"   Data Updated network score: {self.network_quality_score}/100")
+                    print(f"   Connection quality: {connection_results['connection_quality'].upper()}")
+                    print(f"   Updated network score: {self.network_quality_score}/100")
 
                     # Record successful connection
                     self.connection_history.append({
@@ -694,13 +694,13 @@ class NetworkResilienceManager:
                 connection_results["timeout_events"] += 1
                 attempt_time = time.perf_counter() - attempt_start_time
 
-                print(f"   Time Request timed out after {attempt_time:.1f} seconds")
-                print(f"   Data Timeout event #{connection_results['timeout_events']}")
+                print(f"   Request timed out after {attempt_time:.1f} seconds")
+                print(f"   Timeout event #{connection_results['timeout_events']}")
 
                 # Adaptive timeout strategy
                 if attempt < self.max_retries:
                     await self._handle_timeout_adaptively(attempt)
-                    print(f"   Processing Next attempt will use {self.adaptive_timeout:.1f}s timeout")
+                    print(f"   Next attempt will use {self.adaptive_timeout:.1f}s timeout")
 
                 # Record timeout event
                 self.connection_history.append({
@@ -711,7 +711,7 @@ class NetworkResilienceManager:
                     "timeout_used": self.adaptive_timeout
                 })
 
-                print(f"   Note Timeout diagnosis:")
+                print(f"   Note: Timeout diagnosis:")
                 print(f"      • Network latency may be high")
                 print(f"      • OANDA servers may be under load")
                 print(f"      • Internet connection may be unstable")
@@ -723,12 +723,12 @@ class NetworkResilienceManager:
                 attempt_time = time.perf_counter() - attempt_start_time
 
                 print(f"   Blocked Network connection failed after {attempt_time:.1f} seconds")
-                print(f"   Data Network error #{connection_results['network_errors']}")
-                print(f"   Search Error details: {str(connect_error)}")
+                print(f"   Network error #{connection_results['network_errors']}")
+                print(f"   Error: details: {str(connect_error)}")
 
                 # Network error diagnosis
                 error_msg = str(connect_error).lower()
-                print(f"   Note Network error diagnosis:")
+                print(f"   Note: Network error diagnosis:")
                 if "dns" in error_msg or "resolve" in error_msg:
                     print(f"      • DNS resolution failure - check DNS settings")
                     print(f"      • Try alternate DNS servers (8.8.8.8, 1.1.1.1)")
@@ -750,39 +750,39 @@ class NetworkResilienceManager:
                 connection_results["api_errors"] += 1
                 attempt_time = time.perf_counter() - attempt_start_time
 
-                print(f"   Display API error after {attempt_time:.1f} seconds")
-                print(f"   Data API error #{connection_results['api_errors']}")
-                print(f"   Search HTTP {api_error.status_code}: {api_error.message}")
+                print(f"   API error after {attempt_time:.1f} seconds")
+                print(f"   API error #{connection_results['api_errors']}")
+                print(f"   HTTP {api_error.status}: {api_error.message}")
 
                 # API error diagnosis
-                if api_error.status_code == 401:
-                    print(f"   Note Authentication failure - don't retry")
+                if api_error.status == 401:
+                    print(f"   Note: Authentication failure - don't retry")
                     break  # No point retrying auth errors
-                elif api_error.status_code == 403:
-                    print(f"   Note Access forbidden - check account permissions")
+                elif api_error.status == 403:
+                    print(f"   Note: Access forbidden - check account permissions")
                     break  # No point retrying access errors
-                elif api_error.status_code >= 500:
-                    print(f"   Note Server error - may be temporary, will retry")
+                elif api_error.status >= 500:
+                    print(f"   Note: Server error - may be temporary, will retry")
                 else:
-                    print(f"   Note Client error - check request parameters")
+                    print(f"   Note: Client error - check request parameters")
 
             # Step 11: Inter-attempt delay with exponential backoff
             if attempt < self.max_retries:
                 backoff_delay = min(2.0 * (2 ** (attempt - 1)), 30.0)  # Cap at 30 seconds
-                print(f"   Wait Waiting {backoff_delay:.1f} seconds before next attempt...")
+                print(f"   Waiting {backoff_delay:.1f} seconds before next attempt...")
                 await asyncio.sleep(backoff_delay)
 
         # Step 12: All attempts failed - comprehensive failure analysis
         total_time = time.perf_counter() - connection_start_time
         connection_results["final_timeout_used"] = self.adaptive_timeout
 
-        print(f"\nError Connection Failed After All Attempts:")
-        print(f"   Time Total time: {total_time:.2f} seconds")
-        print(f"   Processing Attempts made: {connection_results['total_attempts']}")
-        print(f"   Time Timeout events: {connection_results['timeout_events']}")
+        print(f"\nError: Connection Failed After All Attempts:")
+        print(f"   Total time: {total_time:.2f} seconds")
+        print(f"   Attempts made: {connection_results['total_attempts']}")
+        print(f"   Timeout events: {connection_results['timeout_events']}")
         print(f"   Blocked Network errors: {connection_results['network_errors']}")
-        print(f"   Display API errors: {connection_results['api_errors']}")
-        print(f"   Data Final network quality: {self.network_quality_score}/100")
+        print(f"   API errors: {connection_results['api_errors']}")
+        print(f"   Final network quality: {self.network_quality_score}/100")
 
         connection_results["connection_quality"] = "failed"
         return connection_results
@@ -802,10 +802,10 @@ class NetworkResilienceManager:
 
         self.adaptive_timeout = min(self.base_timeout * timeout_multiplier, 120.0)  # Cap at 2 minutes
 
-        print(f"   Config Adaptive timeout adjustment:")
-        print(f"      Data Network quality factor: {self.network_quality_score}/100")
-        print(f"      Numbers Multiplier applied: {timeout_multiplier:.2f}x")
-        print(f"      Time New timeout: {self.adaptive_timeout:.1f} seconds")
+        print(f"   Adaptive timeout adjustment:")
+        print(f"      Network quality factor: {self.network_quality_score}/100")
+        print(f"      Multiplier applied: {timeout_multiplier:.2f}x")
+        print(f"      New timeout: {self.adaptive_timeout:.1f} seconds")
 
     async def _update_network_quality_score(self, response_time: float, success: bool) -> None:
         """Update network quality score based on connection performance."""
@@ -843,7 +843,7 @@ class NetworkResilienceManager:
 # Educational demonstration function
 async def demonstrate_network_resilience_patterns(token: str) -> None:
     """Demonstrate comprehensive network resilience patterns."""
-    print(f"Security Network Resilience Patterns Demonstration")
+    print(f"Network Resilience Patterns Demonstration")
 
     # Step 16: Test different resilience configurations
     resilience_configs = [
@@ -853,30 +853,30 @@ async def demonstrate_network_resilience_patterns(token: str) -> None:
     ]
 
     for config in resilience_configs:
-        print(f"\nTarget Testing {config['name']} Configuration:")
+        print(f"\n{config['name']} Configuration:")
         manager = NetworkResilienceManager(base_timeout=config["timeout"], max_retries=config["retries"])
 
         result = await manager.demonstrate_robust_connection_management(token)
 
         if result and result["successful_connection"]:
-            print(f"   Success {config['name']} config: SUCCESS")
-            print(f"   Time Connection time: {result['performance_metrics']['total_connection_time']:.2f}s")
+            print(f"   {config['name']} config: SUCCESS")
+            print(f"   Connection time: {result['performance_metrics']['total_connection_time']:.2f}s")
             break  # Stop on first success
         else:
-            print(f"   Error {config['name']} config: FAILED")
+            print(f"   Error: {config['name']} config: FAILED")
 
 
 # Educational demonstration execution
-print(f"Security Starting Comprehensive Network Resilience Tutorial")
+print(f"Starting Comprehensive Network Resilience Tutorial")
 try:
     import asyncio
     # Replace with your actual token for testing
     demo_token = "your-practice-token-here"
     asyncio.run(demonstrate_network_resilience_patterns(demo_token))
 except Exception as e:
-    print(f"Error Network resilience tutorial error: {e}")
-    print(f"Note Network resilience requires valid credentials for testing")
-print(f"Success Network resilience and timeout management tutorial complete")
+    print(f"Error: Network resilience tutorial error: {e}")
+    print(f"Note: Network resilience requires valid credentials for testing")
+print(f"Network resilience and timeout management tutorial complete")
 print(f"Education Next: Learn about retry logic and exponential backoff strategies")
 ```
 
@@ -911,7 +911,7 @@ async def retry_with_backoff(func: Any, retry_config: RetryConfig, *args: Any, *
 
         except (TimeoutException, ConnectError) as e:
             if attempt == retry_config.max_attempts - 1:
-                print(f"Error All {retry_config.max_attempts} attempts failed")
+                print(f"Error: All {retry_config.max_attempts} attempts failed")
                 raise e
 
             # Calculate delay with jitter
@@ -922,20 +922,20 @@ async def retry_with_backoff(func: Any, retry_config: RetryConfig, *args: Any, *
             jitter = random.uniform(0.1, 1.0)
             sleep_time = delay * jitter
 
-            print(f"Wait Attempt {attempt + 1} failed, retrying in {sleep_time:.1f}s...")
+            print(f"Attempt {attempt + 1} failed, retrying in {sleep_time:.1f}s...")
             await asyncio.sleep(sleep_time)
 
         except FiveTwentyError as e:
             # Don't retry authentication errors
-            if e.status_code == 401:
-                print("Error Authentication error - not retrying")
+            if e.status == 401:
+                print("Error: Authentication error - not retrying")
                 raise e
 
             if attempt == retry_config.max_attempts - 1:
-                print(f"Error API error after {retry_config.max_attempts} attempts")
+                print(f"Error: API error after {retry_config.max_attempts} attempts")
                 raise e
 
-            print(f"Wait API error on attempt {attempt + 1}, retrying...")
+            print(f"API error on attempt {attempt + 1}, retrying...")
             await asyncio.sleep(retry_config.base_delay)
 
 async def get_accounts_with_retry(token: str) -> Any:
@@ -951,9 +951,9 @@ async def get_accounts_with_retry(token: str) -> Any:
 # Usage
 try:
     accounts = await get_accounts_with_retry("your-token")
-    print(f"Success Retrieved {len(accounts)} accounts")
+    print(f"Retrieved {len(accounts)} accounts")
 except Exception as e:
-    print(f"Error Failed to get accounts: {e}")
+    print(f"Error: Failed to get accounts: {e}")
 ```
 
 ---
@@ -977,17 +977,17 @@ async def healthcheck_connection(client: AsyncClient, account_id: str) -> bool:
 
         # Check response quality
         if account and hasattr(account, 'balance'):
-            print("Success Connection healthy")
+            print("Connection healthy")
             return True
         else:
             print("⚠️ Connection degraded")
             return False
 
     except FiveTwentyError as e:
-        print(f"Error Connection unhealthy: {e.message}")
+        print(f"Error: Connection unhealthy: {e.message}")
         return False
     except Exception as e:
-        print(f"Error Connection test failed: {e}")
+        print(f"Error: Connection test failed: {e}")
         return False
 
 async def monitor_connection_health(client: AsyncClient, account_id: str, interval: int = 30) -> Any:
@@ -1014,10 +1014,10 @@ async def monitor_connection_health(client: AsyncClient, account_id: str, interv
             await asyncio.sleep(interval)
 
         except KeyboardInterrupt:
-            print("Success Health monitoring stopped")
+            print("Health monitoring stopped")
             break
         except Exception as e:
-            print(f"Error Health monitoring error: {e}")
+            print(f"Error: Health monitoring error: {e}")
             await asyncio.sleep(interval)
 
 # Usage
@@ -1085,7 +1085,7 @@ async def handle_ssl_issues(token: str):
             accounts = await client.accounts.get_accounts()
 
     except ssl.SSLError as e:
-        print("Error SSL Error encountered:")
+        print("Error: SSL Error encountered:")
         print(f"   • Error: {e}")
         print("   • Solutions:")
         print("     - Update certificates: uv add --upgrade certifi")
@@ -1097,7 +1097,7 @@ async def handle_ssl_issues(token: str):
         # Note: Only for debugging - not recommended for production
 
     except Exception as e:
-        print(f"Error Other connection error: {e}")
+        print(f"Error: Other connection error: {e}")
 
 # Test SSL connection
 await handle_ssl_issues("your-token")
@@ -1139,9 +1139,9 @@ class ResilientClient:
                 timeout=30.0
             )
             await self.client.__aenter__()
-            print("Success Connection established")
+            print("Connection established")
         except Exception as e:
-            print(f"Error Connection failed: {e}")
+            print(f"Error: Connection failed: {e}")
             raise
 
     async def ensure_connected(self) -> Any:
@@ -1156,12 +1156,12 @@ class ResilientClient:
             return await func(*args, **kwargs)
 
         except (TimeoutException, ConnectError):
-            print("Processing Connection lost, attempting reconnection...")
+            print("Connection lost, attempting reconnection...")
             try:
                 await self.connect()
                 return await func(*args, **kwargs)
             except Exception as e:
-                print(f"Error Reconnection failed: {e}")
+                print(f"Error: Reconnection failed: {e}")
                 raise
 
 # Usage
@@ -1169,7 +1169,7 @@ async def resilient_example():
     async with ResilientClient("your-token", Environment.PRACTICE) as client:
         # Safe request with automatic reconnection
         accounts = await client.safe_request(client.client.accounts.list)
-        print(f"Success Found {len(accounts)} accounts")
+        print(f"Found {len(accounts)} accounts")
 
 # await resilient_example()
 ```
@@ -1201,18 +1201,18 @@ def check_configuration():
             missing_vars.append(var)
 
     if missing_vars:
-        print(f"Error Missing environment variables: {missing_vars}")
+        print(f"Error: Missing environment variables: {missing_vars}")
         return False
 
     # Test client creation
     try:
         client = AsyncClient()
-        print(f"Success Client created successfully")
+        print(f"Client created successfully")
         print(f"Environment: {client.config.environment.value}")
         print(f"Account: {client.account_id}")
         return True
     except Exception as e:
-        print(f"Error Client creation failed: {e}")
+        print(f"Error: Client creation failed: {e}")
         return False
 
 # Run configuration check
@@ -1233,25 +1233,25 @@ async def test_connection():
         async with AsyncClient() as client:
             # Test basic API call
             accounts = await client.accounts.get_accounts()
-            print(f"Success API connection successful: {len(accounts)} accounts")
+            print(f"API connection successful: {len(accounts)} accounts")
 
             # Test account access
             account = await client.accounts.get_account(client.account_id)
-            print(f"Success Account access successful: {account.balance} {account.currency}")
+            print(f"Account access successful: {account.balance} {account.currency}")
 
     except Exception as e:
         error_type = type(e).__name__
-        print(f"Error Connection test failed ({error_type}): {e}")
+        print(f"Error: Connection test failed ({error_type}): {e}")
 
         # Provide specific guidance based on error type
         if "401" in str(e):
-            print("Note Check your API token is valid and not expired")
+            print("Note: Check your API token is valid and not expired")
         elif "403" in str(e):
-            print("Note Verify account ID matches your OANDA account")
+            print("Note: Verify account ID matches your OANDA account")
         elif "timeout" in str(e).lower():
-            print("Note Check network connectivity and firewall settings")
+            print("Note: Check network connectivity and firewall settings")
         elif "ssl" in str(e).lower():
-            print("Note Update SSL certificates or check system time")
+            print("Note: Update SSL certificates or check system time")
 
 # Run connection test
 asyncio.run(test_connection())
@@ -1267,23 +1267,23 @@ from fivetwenty.exceptions import FiveTwentyError, FiveTwentyErrorCode
 async def connection_diagnostics(token: str, environment: Environment):
     """Run comprehensive connection diagnostics."""
 
-    print("Search Running OANDA Connection Diagnostics...\n")
+    print("Running OANDA Connection Diagnostics...\n")
 
     # 1. Token format check
     print("1. Token Format Check:")
     if len(token) < 20:
-        print("   Error Token appears too short")
+        print("   Error: Token appears too short")
     elif '-' not in token:
         print("   ⚠️ Token format may be incorrect")
     else:
-        print("   Success Token format looks valid")
+        print("   Token format looks valid")
 
     # 2. Environment check
     print(f"\n2. Environment: {environment.value}")
     if environment == Environment.LIVE:
         print("   ⚠️ LIVE environment - real money at risk")
     else:
-        print("   Success Practice environment - safe for testing")
+        print("   Practice environment - safe for testing")
 
     # 3. Connection test
     print("\n3. Connection Test:")
@@ -1293,24 +1293,24 @@ async def connection_diagnostics(token: str, environment: Environment):
             accounts = await client.accounts.get_accounts()
             response_time = asyncio.get_event_loop().time() - start_time
 
-            print(f"   Success Connection successful ({response_time:.2f}s)")
-            print(f"   Success Found {len(accounts)} accounts")
+            print(f"   Connection successful ({response_time:.2f}s)")
+            print(f"   Found {len(accounts)} accounts")
 
             if accounts:
                 account = accounts[0]
-                print(f"   Success Account balance: {account.balance} {account.currency}")
+                print(f"   Account balance: {account.balance} {account.currency}")
 
     except FiveTwentyError as e:
-        print(f"   Error API Error: {e.message}")
-        if e.status_code == 401:
-            print("   Note Check token validity and permissions")
-        elif e.status_code == 403:
-            print("   Note Check account permissions")
+        print(f"   Error: API Error: {e.message}")
+        if e.status == 401:
+            print("   Note: Check token validity and permissions")
+        elif e.status == 403:
+            print("   Note: Check account permissions")
     except Exception as e:
-        print(f"   Error Connection failed: {e}")
-        print("   Note Check internet connection and firewall")
+        print(f"   Error: Connection failed: {e}")
+        print("   Note: Check internet connection and firewall")
 
-    print("\nList Troubleshooting completed")
+    print("\nTroubleshooting completed")
 
 # Run diagnostics
 await connection_diagnostics("your-token", Environment.PRACTICE)
@@ -1338,4 +1338,4 @@ await connection_diagnostics("your-token", Environment.PRACTICE)
 - **429 errors**: Implement delays between requests (100ms minimum)
 - **Burst limits**: Use connection pooling and request queuing
 
-**Task Complete**: Your application can now diagnose authentication, network, SSL, and rate-limit failures and recover from them with retry logic.
+Your application can now diagnose authentication, network, SSL, and rate-limit failures and recover from them with retry logic.

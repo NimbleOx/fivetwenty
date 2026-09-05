@@ -1,7 +1,8 @@
 site_name: FiveTwenty Documentation
 exclude_docs: |
-  */__pycache__/*
-site_description: Comprehensive Python client for OANDA v20 REST API
+  **/__pycache__/**
+  **/*.pyc
+site_description: Typed Python client for OANDA v20 REST API
 site_author: FiveTwenty Team
 site_url: https://nimbleox.github.io/fivetwenty
 
@@ -237,50 +238,4 @@ extra:
     - icon: fontawesome/brands/python
       link: https://pypi.org/project/fivetwenty/
 
-copyright: |
-  <div class="footer-links">
-    <div class="footer-column">
-      <h4>Documentation</h4>
-      <ul>
-        <li><a href="/fivetwenty/tutorials/getting-started/installation/">Getting Started</a></li>
-        <li><a href="/fivetwenty/tutorials/">Tutorials</a></li>
-        <li><a href="/fivetwenty/guides/">Guides</a></li>
-        <li><a href="/fivetwenty/api-reference/">API Reference</a></li>
-        <li><a href="/fivetwenty/examples/">Examples</a></li>
-      </ul>
-    </div>
-    <div class="footer-column">
-      <h4>Community</h4>
-      <ul>
-        <li><a href="https://github.com/NimbleOx/fivetwenty">GitHub Repository</a></li>
-        <li><a href="https://github.com/NimbleOx/fivetwenty/issues">Issues & Bug Reports</a></li>
-        <li><a href="https://github.com/NimbleOx/fivetwenty/discussions">Discussions</a></li>
-        <li><a href="https://pypi.org/project/fivetwenty/">PyPI Package</a></li>
-      </ul>
-    </div>
-    <div class="footer-column">
-      <h4>Contributing</h4>
-      <ul>
-        <li><a href="/fivetwenty/contributing/">Contributing Guide</a></li>
-        <li><a href="/fivetwenty/contributing/development-setup/">Development Setup</a></li>
-        <li><a href="/fivetwenty/contributing/testing-guide/">Testing Guide</a></li>
-        <li><a href="/fivetwenty/contributing/code-style/">Code Style</a></li>
-      </ul>
-    </div>
-    <div class="footer-column">
-      <h4>Legal & Support</h4>
-      <ul>
-        <li><a href="https://github.com/NimbleOx/fivetwenty/security/policy">Security Policy</a></li>
-        <li><a href="https://github.com/NimbleOx/fivetwenty/blob/main/LICENSE">License (MIT)</a></li>
-        <li><a href="https://github.com/NimbleOx">Contact</a></li>
-      </ul>
-    </div>
-    <div class="footer-column">
-      <h4>OANDA Info</h4>
-      <ul>
-        <li><a href="https://www.oanda.com/us-en/">OANDA Website</a></li>
-        <li><a href="https://developer.oanda.com">Developer Portal</a></li>
-        <li><a href="https://developer.oanda.com/rest-live-v20/introduction/">OANDA v20 API</a></li>
-      </ul>
-    </div>
-  </div>
+copyright: Copyright &copy; 2026 FiveTwenty Contributors. Released under the MIT License.

@@ -71,9 +71,9 @@ async def main() -> None:
         take_profit=Decimal("1.1100"),    # Automatic TP: locks in profits at 1.1100
         stop_loss=Decimal("1.0900"),      # Automatic SL: limits losses at 1.0900
     )
-    # Success Risk management is now active automatically - no additional API calls needed
-    print("Analysis Market order placed with automatic risk management")
-    print("Target Take profit: 1.1100 | Security Stop loss: 1.0900")
+    # Good: Risk management is now active automatically - no additional API calls needed
+    print("Market order placed with automatic risk management")
+    print("Take profit: 1.1100 | Stop loss: 1.0900")
 
 
 if __name__ == "__main__":
@@ -108,13 +108,13 @@ async def post_trade_example() -> None:
         instrument="EUR_USD",      # Currency pair to trade
         units=1000,              # Position size: 1,000 units EUR long
     )
-    print("Analysis Market order executed - analyzing market conditions...")
+    print("Market order executed - analyzing market conditions...")
 
     # Step 3: Extract trade information from order response
     # Trade ID is required to attach risk management orders
     trade_info = market_response.order_fill_transaction["tradeOpened"]
     trade_id = trade_info["tradeID"]  # Unique identifier for this trade
-    print(f"Business Trade opened with ID: {trade_id}")
+    print(f"Trade opened with ID: {trade_id}")
 
     # Step 4: Add take profit order based on market analysis
     # Separate API call allows dynamic pricing based on current conditions
@@ -124,8 +124,8 @@ async def post_trade_example() -> None:
     )
     tp_response = await client.orders.post_order(account_id, tp_request)
     tp_order_id = tp_response.order_create_transaction['id']
-    print(f"Target Take profit order created: {tp_order_id}")
-    print("Success Post-trade risk management successfully applied")
+    print(f"Take profit order created: {tp_order_id}")
+    print("Post-trade risk management successfully applied")
     ```
 
     **When to Use Each:**
@@ -166,13 +166,13 @@ async def implement_post_trade_risk_management() -> None:
 
         # Step 2: Create initial trade without immediate risk management
         # This approach allows market analysis before setting protective levels
-        print("Analysis Creating initial position for risk management demonstration...")
+        print("Creating initial position for risk management demonstration...")
         market_response = await client.orders.post_market_order(
             account_id=account_id,    # Account for trade execution
             instrument="EUR_USD",      # Major currency pair with high liquidity
             units=10000,              # Position size: Buy 10,000 EUR (larger size for demo)
         )
-        print("Success Market order executed successfully")
+        print("Market order executed successfully")
 
         # Step 3: Extract trade information from order fill response
         # Trade ID is essential for linking risk management orders to specific trades
@@ -183,11 +183,11 @@ async def implement_post_trade_risk_management() -> None:
             trade_info = market_response.order_fill_transaction["tradeOpened"]
             trade_id = trade_info["tradeID"]  # Unique trade identifier from OANDA
             entry_price = trade_info["price"]  # Actual fill price for calculations
-            print(f"Business Trade opened: ID {trade_id} at price {entry_price}")
+            print(f"Trade opened: ID {trade_id} at price {entry_price}")
 
             # Step 4: Add take profit order for systematic profit capture
             # Take profit locks in gains when price reaches target level
-            print("Target Adding take profit order for profit protection...")
+            print("Adding take profit order for profit protection...")
             tp_request = TakeProfitOrderRequest(
                 tradeID=trade_id,        # Links TP to specific trade
                 price="1.1150",          # Target price: 150 pips profit (aggressive target)
@@ -198,11 +198,11 @@ async def implement_post_trade_risk_management() -> None:
             # Step 5: Execute take profit order creation
             tp_response = await client.orders.post_order(account_id, tp_request)
             tp_order_id = tp_response.order_create_transaction["id"]
-            print(f"   Success Take profit order created: {tp_order_id}")
+            print(f"   Take profit order created: {tp_order_id}")
 
             # Step 6: Add stop loss order for systematic loss limitation
             # Stop loss protects against adverse price movement beyond acceptable risk
-            print("Security Adding stop loss order for capital protection...")
+            print("Adding stop loss order for capital protection...")
             sl_request = StopLossOrderRequest(
                 tradeID=trade_id,        # Links SL to specific trade
                 price="1.0950",          # Stop price: 50 pips risk (conservative risk)
@@ -213,16 +213,16 @@ async def implement_post_trade_risk_management() -> None:
             # Step 7: Execute stop loss order creation
             sl_response = await client.orders.post_order(account_id, sl_request)
             sl_order_id = sl_response.order_create_transaction["id"]
-            print(f"   Success Stop loss order created: {sl_order_id}")
+            print(f"   Stop loss order created: {sl_order_id}")
 
             # Step 8: Confirm comprehensive risk management is now active
-            print(f"\nData Post-Trade Risk Management Summary:")
+            print(f"\nPost-Trade Risk Management Summary:")
             print(f"   Trade ID: {trade_id}")
             print(f"   Entry Price: {entry_price}")
             print(f"   Take Profit: 1.1150 (TP Order: {tp_order_id})")
             print(f"   Stop Loss: 1.0950 (SL Order: {sl_order_id})")
             print(f"   Risk-Reward: 50 pips risk / 150 pips reward = 1:3 ratio")
-            print("   Success Comprehensive protection now active")
+            print("   Comprehensive protection now active")
 ```
 
 #### Distance-Based Stop Loss
@@ -243,14 +243,14 @@ async def add_distance_based_stop_loss(client: AsyncClient, account_id: str, tra
         timeInForce="GTC",           # Good Till Cancelled: persistent protection
     )
     print(f"💯 Distance-based stop loss prepared: 50 pips for trade {trade_id}")
-    print("   Info Distance automatically adjusts with entry price")
+    print("   Distance automatically adjusts with entry price")
 
     # Step 2: Execute distance-based stop loss order
     # OANDA calculates actual stop price based on entry price + distance
     response = await client.orders.post_order(account_id, distance_sl_request)
     order_id = response.order_create_transaction["id"]
-    print(f"   Success Distance-based stop loss created: {order_id}")
-    print("   Data Stop price will be exactly 50 pips from trade entry")
+    print(f"   Distance-based stop loss created: {order_id}")
+    print("   Stop price will be exactly 50 pips from trade entry")
     return order_id
 ```
 
@@ -271,15 +271,15 @@ async def add_trailing_stop_loss(client: AsyncClient, account_id: str, trade_id:
         timeInForce="GTC",         # Good Till Cancelled: follows price indefinitely
     )
     print(f"🎏 Trailing stop loss prepared: 30 pips for trade {trade_id}")
-    print("   Info Stop will follow price upward but never move down")
+    print("   Stop will follow price upward but never move down")
 
     # Step 2: Execute trailing stop loss order
     # OANDA manages trailing automatically - stop moves up with price, never down
     response = await client.orders.post_order(account_id, tsl_request)
     order_id = response.order_create_transaction["id"]
-    print(f"   Success Trailing stop created: {order_id}")
-    print("   Data Will follow price with 30 pip buffer, locking in profits")
-    print("   Secure Provides dynamic profit protection as price moves favorably")
+    print(f"   Trailing stop created: {order_id}")
+    print("   Will follow price with 30 pip buffer, locking in profits")
+    print("   Provides dynamic profit protection as price moves favorably")
     return order_id
 ```
 
@@ -300,8 +300,8 @@ async def add_guaranteed_stop_loss(client: AsyncClient, account_id: str, trade_i
             price="1.0900",            # Guaranteed execution price (absolute protection)
             timeInForce="GTC",         # Persistent until triggered
         )
-        print(f"Security Guaranteed stop loss prepared for trade {trade_id}")
-        print("   Info GSL guarantees execution even during market gaps")
+        print(f"Guaranteed stop loss prepared for trade {trade_id}")
+        print("   GSL guarantees execution even during market gaps")
 
         # Step 2: Execute guaranteed stop loss order
         # OANDA charges premium for execution guarantee during volatile markets
@@ -312,17 +312,17 @@ async def add_guaranteed_stop_loss(client: AsyncClient, account_id: str, trade_i
         # Premium compensates OANDA for execution risk during market gaps
         if "guaranteedExecutionPremium" in response.order_create_transaction:
             premium = response.order_create_transaction["guaranteedExecutionPremium"]
-            print(f"   Balance Guaranteed execution premium: {premium}")
-            print("   Info Premium ensures execution during market volatility")
+            print(f"   Guaranteed execution premium: {premium}")
+            print("   Premium ensures execution during market volatility")
 
-        print(f"   Success Guaranteed stop loss created: {order_id}")
-        print("   Secure Absolute protection against slippage and gaps")
+        print(f"   Guaranteed stop loss created: {order_id}")
+        print("   Absolute protection against slippage and gaps")
 
     except Exception:
         # Step 4: Handle cases where guaranteed stops are not available
         # Some instruments or market conditions may not support guaranteed stops
         print("⚠️ Guaranteed stop loss not available for this instrument")
-        print("   Processing Falling back to regular stop loss protection...")
+        print("   Falling back to regular stop loss protection...")
         # Fallback to regular stop loss
         return await add_regular_stop_loss(client, account_id, trade_id)
     else:
@@ -338,14 +338,14 @@ async def add_regular_stop_loss(client: AsyncClient, account_id: str, trade_id: 
         price="1.0900",            # Stop trigger price (subject to slippage)
         timeInForce="GTC",         # Persistent protection
     )
-    print(f"Security Regular stop loss prepared for trade {trade_id}")
-    print("   Info Standard protection with potential slippage during gaps")
+    print(f"Regular stop loss prepared for trade {trade_id}")
+    print("   Standard protection with potential slippage during gaps")
 
     # Step 2: Execute regular stop loss order
     response = await client.orders.post_order(account_id, sl_request)
     order_id = response.order_create_transaction["id"]
-    print(f"   Success Regular stop loss created: {order_id}")
-    print("   Data Provides standard risk protection at no premium cost")
+    print(f"   Regular stop loss created: {order_id}")
+    print("   Provides standard risk protection at no premium cost")
     return order_id
 ```
 
@@ -371,22 +371,22 @@ async def robust_post_trade_setup(client: AsyncClient, account_id: str, trade_id
 
         tp_response = await client.orders.post_order(account_id, tp_request)
         tp_order_id = tp_response.order_create_transaction['id']
-        print(f"Success Take profit order added successfully: {tp_order_id}")
+        print(f"Take profit order added successfully: {tp_order_id}")
 
     except FiveTwentyError as e:
         error_msg = str(e)
 
         if "TRADE_DOESNT_EXIST" in error_msg:
-            print("Error Trade no longer exists - may have been closed")
+            print("Error: Trade no longer exists - may have been closed")
         elif "INSUFFICIENT_MARGIN" in error_msg:
-            print("Error Insufficient margin for risk management orders")
+            print("Error: Insufficient margin for risk management orders")
         elif "PRICE_INVALID" in error_msg:
-            print("Error Invalid price level - adjust take profit price")
+            print("Error: Invalid price level - adjust take profit price")
         else:
-            print("Error Unexpected error occurred")
+            print("Error: Unexpected error occurred")
 
     except Exception:
-        print("Error System error occurred")
+        print("Error: System error occurred")
 ```
 
 #### When to Use Post-Trade Pattern
@@ -429,7 +429,7 @@ async def place_market_order() -> None:
 
         # Example 1: Basic market order for immediate position entry
         # Market orders execute immediately at best available price when submitted
-        print("Analysis Example 1: Basic market order (immediate execution)")
+        print("Example 1: Basic market order (immediate execution)")
         response = await client.orders.post_market_order(
             account_id=AccountID("101-004-12345678"),  # Replace with your OANDA account ID
             instrument=InstrumentName("EUR_USD"),      # Major currency pair with high liquidity
@@ -437,12 +437,12 @@ async def place_market_order() -> None:
             client_request_id="market-order-001",     # Optional: for tracking/debugging purposes
         )
         order_id = response.order_create_transaction['id']
-        print(f"   Success Market order placed: {order_id}")
-        print("   Info Executed immediately at current market price")
+        print(f"   Market order placed: {order_id}")
+        print("   Executed immediately at current market price")
 
         # Example 2: Market order with built-in risk management (OnFill pattern)
         # This approach sets stop-loss and take-profit levels automatically when order fills
-        print("\nAnalysis Example 2: Market order with automatic risk management")
+        print("\nExample 2: Market order with automatic risk management")
         response = await client.orders.post_market_order(
             account_id=AccountID("101-004-12345678"),  # Replace with your OANDA account ID
             instrument=InstrumentName("EUR_USD"),      # Same currency pair for consistency
@@ -451,9 +451,9 @@ async def place_market_order() -> None:
             stop_loss=Decimal("1.0950"),              # Automatic loss-limiting at 1.0950
         )
         order_id = response.order_create_transaction['id']
-        print(f"   Success Market order executed successfully: {order_id}")
-        print("   Security Order filled at market price with protective stops active")
-        print("   Target Take Profit: 1.1050 | Stop Loss: 1.0950")
+        print(f"   Market order executed successfully: {order_id}")
+        print("   Order filled at market price with protective stops active")
+        print("   Take Profit: 1.1050 | Stop Loss: 1.0950")
         print("   ✨ Risk management activated automatically upon fill")
 ```
 
@@ -483,7 +483,7 @@ async def place_limit_order() -> None:
 
         # Step 2: Place limit order with precise entry requirements
         # Limit orders only execute when market reaches your specified price or better
-        print("Target Placing limit order for precise entry control...")
+        print("Placing limit order for precise entry control...")
         response = await client.orders.post_limit_order(
             account_id=AccountID("101-004-12345678"),  # Replace with your OANDA account ID
             instrument=InstrumentName("GBP_USD"),      # British Pound vs US Dollar pair
@@ -494,11 +494,11 @@ async def place_limit_order() -> None:
             stop_loss=Decimal("1.2400"),              # Risk limit: 100 pips below entry
         )
         order_id = response.order_create_transaction['id']
-        print(f"   Success Limit order placed successfully: {order_id}")
-        print(f"   Balance Entry Price: 1.2500 (waits for market to reach this level)")
-        print(f"   Target Take Profit: 1.2600 (100 pips target)")
-        print(f"   Security Stop Loss: 1.2400 (100 pips risk)")
-        print("   Wait Order will wait patiently until price reaches 1.2500 or better")
+        print(f"   Limit order placed successfully: {order_id}")
+        print(f"   Entry Price: 1.2500 (waits for market to reach this level)")
+        print(f"   Take Profit: 1.2600 (100 pips target)")
+        print(f"   Stop Loss: 1.2400 (100 pips risk)")
+        print("   Order will wait patiently until price reaches 1.2500 or better")
 ```
 
 ### Create Stop Orders for Breakout Trading
@@ -527,7 +527,7 @@ async def place_stop_order() -> None:
 
         # Step 2: Place buy stop order for upward breakout strategy
         # Buy stop triggers when price breaks above resistance level (momentum trading)
-        print("Starting Placing buy stop order for upward breakout strategy...")
+        print("Placing buy stop order for upward breakout strategy...")
         response = await client.orders.post_stop_order(
             account_id=AccountID("101-004-12345678"),  # Replace with your OANDA account ID
             instrument=InstrumentName("EUR_USD"),      # Major currency pair for breakout trading
@@ -540,12 +540,12 @@ async def place_stop_order() -> None:
             client_request_id="breakout-strategy-001", # Tracking ID for strategy monitoring
         )
         order_id = response.order_create_transaction['id']
-        print(f"   Success Stop order placed successfully: {order_id}")
-        print(f"   Data Breakout Trigger: 1.1100 (becomes market order when hit)")
-        print(f"   Security Price Protection: won't pay more than 1.1110 (slippage control)")
-        print(f"   Target Take Profit: 1.1150 (50 pips momentum target)")
-        print(f"   Security Stop Loss: 1.1050 (50 pips breakout failure protection)")
-        print("   Time Expires at end of trading day if not triggered")
+        print(f"   Stop order placed successfully: {order_id}")
+        print(f"   Breakout Trigger: 1.1100 (becomes market order when hit)")
+        print(f"   Price Protection: won't pay more than 1.1110 (slippage control)")
+        print(f"   Take Profit: 1.1150 (50 pips momentum target)")
+        print(f"   Stop Loss: 1.1050 (50 pips breakout failure protection)")
+        print("   Expires at end of trading day if not triggered")
 ```
 
 ### Create Market-If-Touched Orders for Support/Resistance Trading
@@ -574,7 +574,7 @@ async def place_market_if_touched_order() -> None:
 
         # Step 2: Place MIT order for support level bounce strategy
         # MIT triggers at support touch, then executes at current market price
-        print("Target Placing Market-If-Touched order for support bounce strategy...")
+        print("Placing Market-If-Touched order for support bounce strategy...")
         response = await client.orders.post_market_if_touched_order(
             account_id=AccountID("101-004-12345678"),  # Replace with your OANDA account ID
             instrument=InstrumentName("GBP_USD"),      # British Pound for support/resistance trading
@@ -587,11 +587,11 @@ async def place_market_if_touched_order() -> None:
             client_request_id="support-bounce-001",   # Strategy tracking identifier
         )
         order_id = response.order_create_transaction['id']
-        print(f"   Success MIT order placed successfully: {order_id}")
-        print(f"   Data Support Touch: 1.2400 (triggers when price reaches this level)")
-        print(f"   Security Price Protection: won't buy below 1.2390 (10 pip slippage limit)")
-        print(f"   Target Take Profit: 1.2500 (100 pips bounce target from support)")
-        print(f"   Security Stop Loss: 1.2350 (50 pips protection if support fails)")
+        print(f"   MIT order placed successfully: {order_id}")
+        print(f"   Support Touch: 1.2400 (triggers when price reaches this level)")
+        print(f"   Price Protection: won't buy below 1.2390 (10 pip slippage limit)")
+        print(f"   Take Profit: 1.2500 (100 pips bounce target from support)")
+        print(f"   Stop Loss: 1.2350 (50 pips protection if support fails)")
         print("   Infinity Perfect for support/resistance trading strategies")
 ```
 
@@ -631,7 +631,7 @@ async def create_order_by_type(order_type: str, price: Decimal | None = None) ->
 
         # Step 2: Build order request dynamically based on strategy requirements
         # Different order types serve different strategic purposes in trading
-        print(f"Config Building {order_type} order request for {instrument}...")
+        print(f"Building {order_type} order request for {instrument}...")
 
         if order_type == "market":
             # Market order for immediate execution (speed over price control)
@@ -639,7 +639,7 @@ async def create_order_by_type(order_type: str, price: Decimal | None = None) ->
                 instrument=instrument,    # Currency pair to trade
                 units=units,             # Position size
             )
-            print("   Lightning Market order: immediate execution at current price")
+            print("   Market order: immediate execution at current price")
 
         elif order_type == "limit":
             # Limit order for precise price control (price over speed)
@@ -651,7 +651,7 @@ async def create_order_by_type(order_type: str, price: Decimal | None = None) ->
                 price=str(price),            # Exact entry price requirement
                 timeInForce=TimeInForce.GTC, # Good till cancelled
             )
-            print(f"   Target Limit order: precise entry at {price}")
+            print(f"   Limit order: precise entry at {price}")
 
         elif order_type == "stop":
             # Stop order for breakout trading (momentum capture)
@@ -663,13 +663,13 @@ async def create_order_by_type(order_type: str, price: Decimal | None = None) ->
                 price=str(price),            # Breakout trigger price
                 timeInForce=TimeInForce.GTC, # Good till cancelled
             )
-            print(f"   Starting Stop order: breakout trigger at {price}")
+            print(f"   Stop order: breakout trigger at {price}")
 
         else:
             msg = f"Unsupported order type: {order_type}"
             raise ValueError(msg)
 
-        print(f"   Success {order_type.title()} order request created for {instrument}")
+        print(f"   {order_type.title()} order request created for {instrument}")
 
         # Step 3: Execute order using unified interface
         # Single interface handles all order types consistently
@@ -679,8 +679,8 @@ async def create_order_by_type(order_type: str, price: Decimal | None = None) ->
             client_request_id=f"{order_type}-order-{int(time.time())}", # Unique tracking ID
         )
         order_id = result.order_create_transaction['id']
-        print(f"   Success Unified {order_type} order created: {order_id}")
-        print(f"   Data Order processed through unified interface successfully")
+        print(f"   Unified {order_type} order created: {order_id}")
+        print(f"   Order processed through unified interface successfully")
         return result
 ```
 
@@ -810,7 +810,7 @@ async def place_validated_order(
 
         except FiveTwentyError as e:
             print("OANDA API error encountered")
-            print("Error code logged")
+            print("Error: code logged")
             raise
         except ValueError as e:
             print("Validation error occurred")
@@ -1190,7 +1190,7 @@ async def robust_order_placement(client: AsyncClient, order_params: Any, max_ret
             print(f"Order placed successfully on attempt {attempt + 1}")
             return result
         except FiveTwentyError as e:
-            if e.error_code in ["RATE_LIMIT_EXCEEDED", "SERVICE_UNAVAILABLE"]:
+            if e.code in ["RATE_LIMIT_EXCEEDED", "SERVICE_UNAVAILABLE"]:
                 BACKOFF_BASE = 2
                 wait_time = BACKOFF_BASE**attempt  # Exponential backoff
                 await asyncio.sleep(wait_time)

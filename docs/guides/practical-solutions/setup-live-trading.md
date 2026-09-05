@@ -51,7 +51,7 @@ async def get_live_accounts() -> list[Any]:
             accounts = await client.accounts.get_accounts()
 
             # Step 3: Display comprehensive account information for verification
-            print("Bank Live Trading Accounts:")
+            print("Live Trading Accounts:")
             for account in accounts:
                 print(f"   Account ID: {account.id}")                    # Unique account identifier
                 print(f"   Currency: {account.currency}")                # Base currency (USD, EUR, etc.)
@@ -64,13 +64,13 @@ async def get_live_accounts() -> list[Any]:
         except Exception as e:
             # Step 4: Handle authentication and access errors
             # Common issues: wrong token, expired credentials, network problems
-            print(f"Error Error accessing live accounts: {e}")
+            print(f"Error: accessing live accounts: {e}")
             print(f"   Check: Live token validity, network connection, account permissions")
             return []
         else:
             # Step 5: Return account data for configuration setup
-            print(f"Success Successfully retrieved {len(accounts)} live account(s)")
-            print(f"Secure Store account IDs securely for live trading configuration")
+            print(f"Successfully retrieved {len(accounts)} live account(s)")
+            print(f"Store account IDs securely for live trading configuration")
             return accounts
 
 # Get your live account details
@@ -110,18 +110,18 @@ def get_live_config() -> tuple[str, str]:
         raise ValueError("⚠️ FIVETWENTY_LIVE_ACCOUNT environment variable not set - cannot identify live account")
 
     # Step 3: Return validated credentials for secure live trading setup
-    print(f"Success Live trading credentials loaded from environment")
-    print(f"Secure Token: {live_token[:8]}... (masked for security)")
-    print(f"Bank Account: {live_account_id}")
+    print(f"Live trading credentials loaded from environment")
+    print(f"Token: {live_token[:8]}... (masked for security)")
+    print(f"Account: {live_account_id}")
 
     return live_token, live_account_id
 
 # Safely get live trading credentials
 try:
     LIVE_TOKEN, LIVE_ACCOUNT = get_live_config()
-    print("Success Live trading credentials loaded")
+    print("Live trading credentials loaded")
 except ValueError as e:
-    print(f"Error Configuration error: {e}")
+    print(f"Error: Configuration error: {e}")
 ```
 
 ### Using Configuration File
@@ -184,22 +184,22 @@ class LiveTradingValidator:
         """Initialize validator with conservative risk limits for capital protection."""
         self.max_position_size = max_position_size    # Maximum units per single trade
         self.daily_loss_limit = daily_loss_limit      # Maximum daily loss threshold
-        print(f"Security Live Trading Validator Initialized:")
+        print(f"Live Trading Validator Initialized:")
         print(f"   Max Position Size: {max_position_size:,} units")
         print(f"   Daily Loss Limit: ${daily_loss_limit}")
 
     async def validate_order(self, client: Any, account_id: str, instrument: str, units: int) -> bool:
         """Perform comprehensive pre-trade validation to prevent excessive risk exposure."""
 
-        print(f"Search Validating live order: {abs(units):,} units of {instrument}")
+        print(f"Validating live order: {abs(units):,} units of {instrument}")
 
         # Step 1: Validate position size against maximum allowed exposure
         # Position size limits prevent single trades from risking too much capital
         if abs(units) > self.max_position_size:
             msg = f"⚠️ Order size {abs(units):,} exceeds maximum {self.max_position_size:,} units"
-            print(f"Error {msg}")
+            print(f"Error: {msg}")
             raise ValueError(msg)
-        print(f"   Success Position size within limits ({abs(units):,} ≤ {self.max_position_size:,})")
+        print(f"   Position size within limits ({abs(units):,} ≤ {self.max_position_size:,})")
 
         # Step 2: Retrieve current account status for risk assessment
         account = await client.accounts.get_account(account_id)
@@ -209,9 +209,9 @@ class LiveTradingValidator:
         daily_pl = Decimal(str(account.unrealized_pl)) + Decimal(str(getattr(account, 'pl', 0)))
         if daily_pl < -self.daily_loss_limit:
             msg = f"⚠️ Daily loss limit exceeded: ${daily_pl:.2f} < -${self.daily_loss_limit}"
-            print(f"Error {msg}")
+            print(f"Error: {msg}")
             raise ValueError(msg)
-        print(f"   Success Daily P&L within limits (${daily_pl:+.2f} > -${self.daily_loss_limit})")
+        print(f"   Daily P&L within limits (${daily_pl:+.2f} > -${self.daily_loss_limit})")
 
         # Step 4: Verify adequate margin availability for safe trading
         # Margin buffer prevents margin calls and forced position closures
@@ -219,13 +219,13 @@ class LiveTradingValidator:
         min_margin_buffer = Decimal("100")  # Minimum $100 margin buffer
         if margin_available < min_margin_buffer:
             msg = f"⚠️ Insufficient margin: ${margin_available:.2f} < ${min_margin_buffer}"
-            print(f"Error {msg}")
+            print(f"Error: {msg}")
             raise ValueError(msg)
-        print(f"   Success Adequate margin available (${margin_available:.2f} > ${min_margin_buffer})")
+        print(f"   Adequate margin available (${margin_available:.2f} > ${min_margin_buffer})")
 
         # Step 5: All validations passed - order is safe to execute
-        print(f"Success All safety checks passed for {instrument} order")
-        print(f"Green Order approved for live execution")
+        print(f"All safety checks passed for {instrument} order")
+        print(f"Order approved for live execution")
         return True
 
 # Usage
@@ -253,7 +253,7 @@ async def place_live_order_safely(account_id: str, instrument: str, units: int, 
         try:
             # Step 2: Perform comprehensive pre-trade safety validation
             # Validation prevents dangerous trades from being executed
-            print(f"Security Running safety checks for live order...")
+            print(f"Running safety checks for live order...")
             validator = LiveTradingValidator()
             await validator.validate_order(client, account_id, instrument, units)
 
@@ -283,48 +283,48 @@ async def place_live_order_safely(account_id: str, instrument: str, units: int, 
             # Risk management parameters provide automatic protection
             if stop_loss:
                 order_params['stop_loss'] = Decimal(str(stop_loss))
-                print(f"   Security Stop loss protection: {stop_loss}")
+                print(f"   Stop loss protection: {stop_loss}")
             if take_profit:
                 order_params['take_profit'] = Decimal(str(take_profit))
-                print(f"   Target Profit target: {take_profit}")
+                print(f"   Profit target: {take_profit}")
 
             # Step 7: Execute live order with comprehensive error handling
-            print(f"\nStarting Executing live market order...")
+            print(f"\nExecuting live market order...")
             response = await client.orders.post_market_order(**order_params)
 
             # Step 8: Process successful order execution and display results
             if response.order_fill_transaction:
                 fill = response.order_fill_transaction
-                print(f"\nSuccess LIVE ORDER EXECUTED SUCCESSFULLY")
+                print(f"\nLIVE ORDER EXECUTED SUCCESSFULLY")
                 print(f"   Trade ID: {fill.trade_opened.trade_id}")   # Unique trade identifier
                 print(f"   Fill Price: {fill.price}")                 # Actual execution price
                 print(f"   Units: {fill.units:,}")                    # Position size filled
                 print(f"   Instrument: {fill.instrument}")            # Currency pair traded
                 print(f"   Account: {account_id}")                    # Account used
-                print(f"   Balance Real money position now active")
+                print(f"   Real money position now active")
 
                 # Step 9: Display risk management status
                 if stop_loss:
-                    print(f"   Security Stop loss active at {stop_loss}")
+                    print(f"   Stop loss active at {stop_loss}")
                 if take_profit:
-                    print(f"   Target Take profit set at {take_profit}")
+                    print(f"   Take profit set at {take_profit}")
 
                 return fill
             else:
                 # Step 10: Handle order execution failure
-                print(f"Error Live order failed to execute")
+                print(f"Error: Live order failed to execute")
                 print(f"   Check: Market hours, instrument availability, margin requirements")
                 return None
 
         except Exception as e:
             # Step 11: Handle live trading errors with detailed diagnostics
-            print(f"Error Live order execution error: {e}")
+            print(f"Error: Live order execution error: {e}")
             print(f"   Possible causes:")
             print(f"   • Market closed or instrument unavailable")
             print(f"   • Insufficient margin or account balance")
             print(f"   • Invalid order parameters or API limits")
             print(f"   • Network connectivity or authentication issues")
-            print(f"Config Review error details and account status before retrying")
+            print(f"Review error details and account status before retrying")
             return None
 
 # Usage with safety checks
@@ -355,8 +355,8 @@ async def monitor_live_account(account_id: str, check_interval: int = 30) -> Non
         token=LIVE_TOKEN,              # Live token for real account monitoring
         environment=Environment.LIVE   # Live environment for real-time data
     ) as client:
-        print(f"Data Starting live account monitoring for {account_id}")
-        print(f"Processing Update interval: {check_interval} seconds")
+        print(f"Starting live account monitoring for {account_id}")
+        print(f"Update interval: {check_interval} seconds")
         print(f"⚠️ Monitoring REAL MONEY account")
 
         monitoring_count = 0
@@ -374,7 +374,7 @@ async def monitor_live_account(account_id: str, check_interval: int = 30) -> Non
                 margin_available = Decimal(str(account.margin_available)) # Available trading capacity
 
                 # Step 4: Display comprehensive account status
-                print(f"\nBalance Live Account Status (Update #{monitoring_count}):")
+                print(f"\nLive Account Status (Update #{monitoring_count}):")
                 print(f"   Balance: ${balance:,.2f}")
                 print(f"   Unrealized P/L: ${unrealized_pl:+.2f}")
                 print(f"   Margin Used: ${margin_used:,.2f} ({(margin_used/balance)*100:.1f}% of balance)")
@@ -400,21 +400,21 @@ async def monitor_live_account(account_id: str, check_interval: int = 30) -> Non
                     alert_triggered = True
 
                 if not alert_triggered:
-                    print(f"Success Account status normal - No risk alerts")
+                    print(f"Account status normal - No risk alerts")
 
                 # Step 6: Wait before next monitoring cycle
                 await asyncio.sleep(check_interval)
 
             except KeyboardInterrupt:
                 # Step 7: Handle user-initiated monitoring stop
-                print(f"\nSuccess Live account monitoring stopped by user")
-                print(f"Data Total monitoring updates: {monitoring_count}")
+                print(f"\nLive account monitoring stopped by user")
+                print(f"Total monitoring updates: {monitoring_count}")
                 print(f"⚠️ Remember to continue monitoring your live positions")
                 break
             except Exception as e:
                 # Step 8: Handle monitoring errors with recovery
-                print(f"Error Monitoring error: {e}")
-                print(f"Processing Retrying in {check_interval} seconds...")
+                print(f"Error: Monitoring error: {e}")
+                print(f"Retrying in {check_interval} seconds...")
                 await asyncio.sleep(check_interval)
 
 # Start monitoring (run in background)
@@ -451,7 +451,7 @@ class LiveTradingRiskManager:
         max_position = int(self.account_balance * Decimal("0.1") / pip_value)  # 10% of balance max
         position_size = min(position_size, max_position)
 
-        print(f"Note Calculated position size: {position_size} units")
+        print(f"Note: Calculated position size: {position_size} units")
         print(f"   Max risk: ${max_loss_amount:.2f}")
         print(f"   Stop loss distance: {stop_loss_pips} pips")
 
@@ -485,25 +485,25 @@ async def test_live_configuration() -> None:
             # Get account info
             accounts = await client.accounts.get_accounts()
             if accounts:
-                print(f"Success Live connection successful")
+                print(f"Live connection successful")
                 print(f"   Account: {accounts[0].id}")
                 print(f"   Balance: {accounts[0].balance}")
 
             # Test market data access
             instruments = await client.accounts.get_account_instruments(accounts[0].id)
-            print(f"Success Market data access: {len(instruments)} instruments")
+            print(f"Market data access: {len(instruments)} instruments")
 
             # Test order validation (without execution)
             validator = LiveTradingValidator()
             await validator.validate_order(client, accounts[0].id, "EUR_USD", 1000)
-            print("Success Order validation system working")
+            print("Order validation system working")
 
         print("\nComplete Live trading configuration test PASSED")
-        print("Note Ready for live trading with proper risk management")
+        print("Note: Ready for live trading with proper risk management")
 
     except Exception as e:
-        print(f"Error Configuration test FAILED: {e}")
-        print("Note Fix issues before attempting live trading")
+        print(f"Error: Configuration test FAILED: {e}")
+        print("Note: Fix issues before attempting live trading")
 
 # Run configuration test
 # await test_live_configuration()
@@ -537,7 +537,7 @@ Before starting live trading:
 - [ ] Success Live token and account ID configured securely
 - [ ] Success Risk management parameters set
 - [ ] Success Position size limits implemented
-- [ ] Success Stop losses mandatory for all trades
+- [ ] Stop losses mandatory for all trades
 - [ ] Success Daily loss limits configured
 - [ ] Success Account monitoring system active
 - [ ] Success Configuration tested thoroughly
@@ -567,19 +567,20 @@ async def emergency_stop_trading(account_id: str) -> None:
         environment=Environment.LIVE,  # Live environment for real account
     ) as client:
         try:
-            print(f"\nHot STEP 1: Cancelling all pending orders...")
+            print(f"\nSTEP 1: Cancelling all pending orders...")
             # Step 2: Cancel all pending orders to prevent new positions
-            orders = await client.orders.get_pending_orders(account_id)
+            orders_response = await client.orders.get_pending_orders(account_id)
+            orders = orders_response["orders"]
             cancelled_count = 0
             for order in orders:
                 await client.orders.cancel_order(account_id, order.id)
-                print(f"   Error Cancelled: {order.id} ({order.instrument} {order.units} units)")
+                print(f"   Error: Cancelled: {order.id} ({order.instrument} {order.units} units)")
                 cancelled_count += 1
 
-            print(f"Success Cancelled {cancelled_count} pending orders")
+            print(f"Cancelled {cancelled_count} pending orders")
 
             # Step 3: Display current position status
-            print(f"\nData STEP 2: Checking current positions...")
+            print(f"\nSTEP 2: Checking current positions...")
             positions = await client.positions.get_open_positions(account_id)
             position_count = len(positions)
             print(f"Current open positions: {position_count}")
@@ -595,22 +596,22 @@ async def emergency_stop_trading(account_id: str) -> None:
             print(f"   • Uncomment position closure code if immediate exit required")
 
             # UNCOMMENT BELOW FOR AUTOMATIC POSITION CLOSURE (USE WITH EXTREME CAUTION)
-            # print(f"\nHot STEP 3: Force closing all positions...")
+            # print(f"\nSTEP 3: Force closing all positions...")
             # for position in positions:
             #     await client.positions.close_position(account_id, position.instrument)
-            #     print(f"   Secure Force closed: {position.instrument}")
+            #     print(f"   Force closed: {position.instrument}")
 
-            print(f"\nSuccess Emergency stop procedure completed")
-            print(f"Security No new orders can be placed until system is reactivated")
+            print(f"\nEmergency stop procedure completed")
+            print(f"No new orders can be placed until system is reactivated")
 
         except Exception as e:
             # Step 5: Handle emergency stop errors
-            print(f"Error CRITICAL: Emergency stop error: {e}")
+            print(f"Error: CRITICAL: Emergency stop error: {e}")
             print(f"⚠️ Manual intervention required immediately")
-            print(f"Call Contact broker if unable to stop trading activity")
+            print(f"Contact broker if unable to stop trading activity")
 
 # Keep this function readily available
 # await emergency_stop_trading(LIVE_ACCOUNT)
 ```
 
-**Task Complete**: Your live trading environment is configured with credentials, safety checks, monitoring, and an emergency stop procedure.
+Your live trading environment is configured with credentials, safety checks, monitoring, and an emergency stop procedure.

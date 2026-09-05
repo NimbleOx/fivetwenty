@@ -58,8 +58,8 @@ print(f"FiveTwenty SDK version: {fivetwenty.__version__}")
 try:
     import httpx
     import pydantic
-    print("Success Core dependencies verified: httpx and pydantic available")
-    print("Starting FiveTwenty SDK installation complete and ready for use")
+    print("Core dependencies verified: httpx and pydantic available")
+    print("FiveTwenty SDK installation complete and ready for use")
 except ImportError as e:
     print(f"⚠️ Dependency issue detected: {e}")
     print("   Run 'uv add fivetwenty' to reinstall with dependencies")

@@ -106,9 +106,9 @@ async with AsyncClient(config=config) as client:
 
     # Step 4: Display configuration summary with automatic credential masking
     # Summary method protects sensitive information while showing configuration status
-    print(f"List Using configuration: {client.config.summary()}")
-    print(f"Success Successfully retrieved {account_count} account(s)")
-    print(f"Lock Token and account ID are automatically masked for security")
+    print(f"Using configuration: {client.config.summary()}")
+    print(f"Successfully retrieved {account_count} account(s)")
+    print(f"Token and account ID are automatically masked for security")
 ```
 
 ### 3. Environment Variables
@@ -179,13 +179,13 @@ if __name__ == "__main__":
 
 Never hardcode tokens. Use environment variables:
 
-**Error Bad - Never do this:**
+**Bad - Never do this:**
 <!-- fragment: bad example - intentionally wrong -->
 ```text
 token = "abc123def456"  # NEVER hardcode tokens!
 ```
 
-**Success Good - Use environment variables:**
+**Good - Use environment variables:**
 ```python
 import os
 
@@ -206,8 +206,8 @@ if not token:
 # Step 3: Confirm token loading with secure masking
 # Display confirmation while protecting sensitive credential information
 masked_token = '*' * min(8, len(token)) + '...' if len(token) > 8 else '*' * len(token)
-print(f"Lock Token loaded from environment: {masked_token}")
-print(f"Success Environment-based authentication configured successfully")
+print(f"Token loaded from environment: {masked_token}")
+print(f"Environment-based authentication configured successfully")
 ```
 
 ### Using .env Files
@@ -241,8 +241,8 @@ async def main() -> None:
     # Step 1: Load environment variables from .env file
     # dotenv provides secure local development without hardcoding credentials
     load_dotenv()
-    print("Config Environment variables loaded from .env file")
-    print("Folder .env file should be added to .gitignore for security")
+    print("variables loaded from .env file")
+    print(".env file should be added to .gitignore for security")
 
     # Step 2: Create client using automatically loaded environment variables
     # AsyncClient seamlessly uses the variables loaded by dotenv
@@ -253,8 +253,8 @@ async def main() -> None:
         account_count = len(accounts)
 
         # Step 4: Confirm successful .env-based authentication
-        print(f"Success Authentication successful: {account_count} account(s) found")
-        print(f"Starting Local development environment configured properly")
+        print(f"Authentication successful: {account_count} account(s) found")
+        print(f"Local development environment configured properly")
 
 # Step 5: Execute the .env-based authentication test
 if __name__ == "__main__":
@@ -306,14 +306,14 @@ config = AccountConfig(
 # Step 2: Demonstrate automatic secret masking in string representation
 # repr() output masks sensitive credentials while showing configuration structure
 config_repr = repr(config)
-print(f"Lock Configuration representation: {config_repr}")
+print(f"Configuration representation: {config_repr}")
 print("   Note: Token and account ID are automatically masked with '***'")
 # Output: AccountConfig(alias='my_account', environment=practice, token=SecretStr('***'), account_id=SecretStr('***'))
 
 # Step 3: Generate safe summary for logging and monitoring
 # Summary method provides configuration info without exposing sensitive data
 summary = config.summary()
-print(f"Data Safe configuration summary: {summary}")
+print(f"Safe configuration summary: {summary}")
 print("   Safe for logs, monitoring, and display purposes")
 # Output: my_account (practice)
 ```
@@ -336,10 +336,10 @@ try:
         environment=Environment.PRACTICE,  # Valid environment
         alias="my_account",  # Valid alias
     )
-    print(f"Error Unexpected success: {config}")
+    print(f"Error: Unexpected success: {config}")
 except ValidationError as e:
-    print("Success Empty token rejected (expected): Configuration validation working")
-    print(f"   Error details: {e}")
+    print("Empty token rejected (expected): Configuration validation working")
+    print(f"   Error: details: {e}")
 
 # Step 2: Demonstrate alias validation (must follow naming rules)
 # Alias validation ensures configuration identifiers follow proper conventions
@@ -350,10 +350,10 @@ try:
         environment=Environment.PRACTICE,  # Valid environment
         alias="123invalid",  # Invalid alias - starts with number
     )
-    print(f"Error Unexpected success: {config}")
+    print(f"Error: Unexpected success: {config}")
 except ValidationError as e:
-    print("Success Invalid alias rejected (expected): Alias validation working")
-    print(f"   Error details: {e}")
+    print("Invalid alias rejected (expected): Alias validation working")
+    print(f"   Error: details: {e}")
     print("   Note: Aliases must start with a letter, not a number")
 ```
 
@@ -393,27 +393,27 @@ async def test_authentication() -> None:
             account_count = len(accounts)
 
             # Step 3: Display authentication success with configuration summary
-            print("Success Authentication successful!")
-            print(f"Config Configuration: {client.config.summary()}")
-            print(f"Data Found {account_count} account(s):")
+            print("Authentication successful!")
+            print(f"Configuration: {client.config.summary()}")
+            print(f"Found {account_count} account(s):")
 
             # Step 4: Display detailed account information for verification
             # Account details help verify correct account access and trading capacity
             for account in accounts:
                 account_info = f"{account.id}: {account.alias or 'No alias set'}"
                 balance_info = f"{account.balance} {account.currency}"
-                print(f"  Business Account: {account_info}")
-                print(f"     Balance Balance: {balance_info}")
-                print(f"     Analysis Open Trades: {account.open_trade_count}")
-                print(f"     Secure Margin Used: {account.margin_used} {account.currency}")
+                print(f"  Account: {account_info}")
+                print(f"     Balance: {balance_info}")
+                print(f"     Open Trades: {account.open_trade_count}")
+                print(f"     Margin Used: {account.margin_used} {account.currency}")
 
-            print(f"\nStarting Authentication test completed successfully")
+            print(f"\nAuthentication test completed successfully")
 
     except Exception as e:
         # Step 5: Handle authentication failures with diagnostic information
         # Detailed error handling helps identify configuration issues quickly
-        print(f"Error Authentication failed: {e}")
-        print(f"Search Troubleshooting steps:")
+        print(f"Error: Authentication failed: {e}")
+        print(f"Troubleshooting steps:")
         print(f"   • Verify FIVETWENTY_OANDA_TOKEN environment variable is set")
         print(f"   • Check token validity in OANDA account management")
         print(f"   • Ensure network connectivity to OANDA servers")
@@ -471,15 +471,15 @@ token = os.environ.get("FIVETWENTY_OANDA_TOKEN", "").strip()
 # Step 3: Validate token presence and basic format
 # Early validation catches configuration issues before runtime
 if not token:
-    print("Error Token is empty or missing")
+    print("Error: Token is empty or missing")
     print("   Set FIVETWENTY_OANDA_TOKEN environment variable")
 else:
     # Step 4: Display token confirmation with security masking
     # Show partial token for verification while protecting sensitive data
     masked_token = token[:8] + "..." if len(token) > 8 else "*" * len(token)
-    print(f"Success Token loaded: {masked_token}")
-    print(f"Ruler Token length: {len(token)} characters")
-    print("Lock Token format appears valid")
+    print(f"Token loaded: {masked_token}")
+    print(f"Token length: {len(token)} characters")
+    print("Token format appears valid")
 ```
 
 **Environment Mismatch**

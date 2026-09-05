@@ -27,7 +27,7 @@ The series picks up where the getting-started tutorials leave off. Each lesson h
 
 ### Skill Progression
 
-!!! info "Target Skill Progression Framework"
+!!! info "Skill Progression Framework"
     **Foundation**  Understand forex concepts and fundamentals
     **Market Analysis**  Analyze market data and conditions
     **Position Management**  Monitor and manage trading positions
@@ -96,7 +96,7 @@ Develop your first complete trading strategy:
 ### [Complete Trading System](complete-system.md)
 **Complete System Building**
 
-Build a production-ready automated trading system:
+Build a complete automated trading example:
 
 - Full strategy automation
 - Risk management integration

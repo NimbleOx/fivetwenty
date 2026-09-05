@@ -1,17 +1,17 @@
 # Complete Trading System
 
 !!! tip "Learning Goal"
-    Build a production-ready automated trading system with full automation, risk management, and performance tracking.
+    Build a complete automated trading example with risk controls, error handling, and performance tracking.
 
 ---
 
 ## Complete Trading Strategy Implementation
 
-Building a complete automated trading system requires orchestrating multiple components into a cohesive, production-ready workflow. This involves continuously monitoring market conditions, calculating technical indicators in real-time, managing open positions dynamically, and executing trades with proper risk management - all while handling errors gracefully and tracking performance metrics. A well-designed trading system operates autonomously within defined parameters, making decisions based on your strategy logic without requiring constant manual intervention.
+Building a complete automated trading system requires orchestrating multiple components into a cohesive workflow. This involves monitoring market conditions, calculating technical indicators in real time, managing open positions, and executing trades with risk controls while handling errors and tracking performance metrics. A well-designed trading system operates within defined parameters and makes decisions based on your strategy logic.
 
 This example demonstrates a full end-to-end trading loop that runs continuously for a specified duration. You'll see how to integrate price updates with `client.pricing.get_pricing()`, check existing positions using `client.trades.get_trades()`, execute trades with `client.orders.post_market_order()`, and implement proper error handling throughout. The code shows real-world patterns like sleep intervals to avoid API rate limits, exception handling for network issues, and performance tracking that provides visibility into your strategy's behavior.
 
-Understanding this complete system architecture prepares you to build your own automated strategies with confidence. You'll learn how all the individual components from previous tutorials (market data, position management, order execution) work together in a production environment, and see best practices for structuring long-running trading applications:
+Understanding this system architecture prepares you to build your own automated strategies. You'll learn how the components from previous tutorials (market data, position management, and order execution) work together, and see patterns for structuring long-running trading applications:
 
 <!-- fragment: Complete executable trading system with full strategy implementation -->
 ```python
@@ -40,7 +40,7 @@ load_dotenv()
 # COMPLETE AUTOMATED TRADING SYSTEM
 # ==============================================================================
 
-# This example demonstrates a production-ready automated trading system that
+# This example demonstrates an automated trading system that
 # combines all the concepts from previous tutorials into a complete workflow:
 #
 # KEY COMPONENTS:
@@ -781,7 +781,7 @@ async def main() -> None:
         print("\n" + "=" * 60)
         print("PRODUCTION ENHANCEMENT IDEAS")
         print("=" * 60)
-        print("\nTo make this strategy production-ready, consider adding:")
+        print("\nBefore using this strategy live, consider adding:")
         print("  • Volatility filters using ATR (Average True Range)")
         print("  • Time-of-day filters to avoid low liquidity periods")
         print("  • Economic calendar integration to avoid news events")
@@ -1208,16 +1208,16 @@ if __name__ == "__main__":
 
 ## What You've Learned
 
-Success **Complete System Development**: Building production-ready automated trading systems with continuous market monitoring, technical indicator calculation, position management, and automated trade execution using `client.pricing.get_pricing()`, `client.trades.get_trades()`, and `client.orders.post_market_order()`
+- **Complete System Development**: Building automated trading systems with market monitoring, technical indicator calculation, position management, and trade execution using `client.pricing.get_pricing()`, `client.trades.get_trades()`, and `client.orders.post_market_order()`
 
-Success **Advanced Strategy Features**: Market condition analysis with spread monitoring, dynamic position sizing based on volatility and account balance, and risk-based trade limits using real-time data from `client.accounts.get_account_summary()`
+- **Advanced Strategy Features**: Market condition analysis with spread monitoring, dynamic position sizing based on volatility and account balance, and risk-based trade limits using real-time data from `client.accounts.get_account_summary()`
 
-Success **Performance Monitoring**: Real-time tracking with KPI dashboards, win rate calculations, profitability metrics (P&L per hour), efficiency measures (trades per hour), and automatic status alerts for performance thresholds
+- **Performance Monitoring**: Real-time tracking with KPI dashboards, win rate calculations, profitability metrics (P&L per hour), efficiency measures (trades per hour), and status alerts for performance thresholds
 
-Success **SDK Integration Patterns**: Proper AsyncClient context manager usage, TypedDict response handling with dictionary access, Pydantic model field access with attributes, Decimal type for financial precision, InstrumentName enum for type-safe instruments, and FiveTwentyError exception handling
+- **SDK Integration Patterns**: AsyncClient context manager usage, TypedDict response handling with dictionary access, Pydantic model field access with attributes, Decimal type for financial precision, InstrumentName enum for type-safe instruments, and FiveTwentyError exception handling
 
 !!! success "Trading System Complete"
-    You've built a complete automated trading system, from concept to production deployment. You can now integrate real-time OANDA data, execute trades with risk management, and monitor performance with a dashboard.
+    You have built a complete automated trading example that integrates OANDA data, executes trades with risk controls, and reports performance metrics.
 
 ---
 
@@ -1227,21 +1227,13 @@ Success **SDK Integration Patterns**: Proper AsyncClient context manager usage, 
 
 You've completed the FiveTwenty trading tutorial series. You now have:
 
-Success **Level 1 - Foundation Knowledge**
-- Deep understanding of forex concepts, pips, spreads, and order types
-- Ability to analyze currency pair pricing and market dynamics
+- **Level 1 - Foundation Knowledge**: Understand forex concepts, pips, spreads, order types, and currency pair pricing.
 
-Success **Level 2 - Technical Proficiency**
-- Skill connecting to OANDA API safely and securely
-- Understanding of account management and margin concepts
+- **Level 2 - Technical Proficiency**: Connect to OANDA safely and work with account and margin data.
 
-Success **Level 3 - Trading Execution**
-- Practical experience placing, monitoring, and closing trades
-- Knowledge of position management and risk assessment
+- **Level 3 - Trading Execution**: Place, monitor, and close trades while applying position management and risk checks.
 
-Success **Level 4 - System Development**
-- Ability to build complete automated trading strategies
-- Understanding of strategy design, backtesting, and optimization
+- **Level 4 - System Development**: Build automated trading strategies and understand strategy design, backtesting, and optimization.
 
 ### Ready for Advanced Learning?
 

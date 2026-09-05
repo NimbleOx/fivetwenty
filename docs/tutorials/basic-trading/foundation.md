@@ -1,6 +1,6 @@
 # Foundation - FiveTwenty Trading Setup
 
-!!! tip "Target Learning Goal"
+!!! tip "Learning Goal"
     Understand the essential FiveTwenty concepts needed to start trading with OANDA.
 
 ## FiveTwenty Instrument Names
@@ -25,13 +25,13 @@ major_pairs = [
 
 # Step 3: Demonstrate proper instrument usage in trading applications
 # Enum values automatically convert to OANDA-compatible string format
-print(f"Data Trading {InstrumentName.EUR_USD}")  # Outputs: EUR_USD
+print(f"Trading {InstrumentName.EUR_USD}")  # Outputs: EUR_USD
 print(f"Feature Available major pairs: {len(major_pairs)} instruments")
 
 # Step 4: Show how enums prevent common trading errors
 # Type safety catches instrument name mistakes before they reach the API
 for pair in major_pairs:
-    print(f"   Success {pair.value} - Ready for trading")
+    print(f"   {pair.value} - Ready for trading")
 ```
 
 ## Understanding Decimal Precision in Trading
@@ -48,15 +48,15 @@ The example below demonstrates the difference between float and Decimal arithmet
 from decimal import Decimal
 
 # Step 2: Demonstrate why floats are dangerous in financial calculations
-# Error NEVER use floats for financial calculations - they introduce precision errors
+# Avoid: use floats for financial calculations - they introduce precision errors
 bad_calculation = 0.1 + 0.2  # Results in 0.30000000000000004 (imprecise!)
-print(f"Error Float precision error: {bad_calculation}")  # Shows 0.30000000000000004
+print(f"Error: Float precision error: {bad_calculation}")  # Shows 0.30000000000000004
 print("   This precision error could cost real money in trading!")
 
 # Step 3: Show correct approach using Decimal for exact calculations
-# Success ALWAYS use Decimal for financial values - guarantees exact precision
+# Good: ALWAYS use Decimal for financial values - guarantees exact precision
 good_calculation = Decimal("0.1") + Decimal("0.2")  # Exactly 0.3
-print(f"Success Decimal precision: {good_calculation}")  # Shows exactly 0.3
+print(f"Decimal precision: {good_calculation}")  # Shows exactly 0.3
 print("   Exact calculations protect your trading capital")
 
 # Step 4: Real trading example - Risk-based position sizing
@@ -64,7 +64,7 @@ print("   Exact calculations protect your trading capital")
 account_balance = Decimal("10000.00")  # $10,000 account balance
 risk_percentage = Decimal("0.02")  # 2% maximum risk per trade
 position_value = account_balance * risk_percentage
-print("\nBalance Position Sizing Example:")
+print("\nPosition Sizing Example:")
 print(f"   Account Balance: ${account_balance}")
 print(f"   Risk Per Trade: {risk_percentage * 100}%")
 print(f"   Position Size: ${position_value}")  # Exactly $200.00
@@ -87,7 +87,7 @@ position_size = Decimal("10000")  # 10,000 EUR position size
 # Price difference multiplied by position size gives precise profit
 price_difference = exit_price - entry_price  # 0.0070 (70 pips)
 profit_usd = price_difference * position_size  # Exact profit calculation
-print("\nAnalysis Profit/Loss Calculation:")
+print("\nProfit/Loss Calculation:")
 print(f"   Entry Price: {entry_price}")
 print(f"   Exit Price: {exit_price}")
 print(f"   Price Movement: {price_difference} ({price_difference * 10000:.0f} pips)")
@@ -121,13 +121,13 @@ max_risk_amount = account_equity * max_risk_percent  # $250 maximum risk
 # Position size = Risk Amount / (Stop Distance x Pip Value)
 max_position_lots = max_risk_amount / (stop_loss_pips * pip_value)
 
-print("Target Risk-Based Position Sizing:")
+print("Risk-Based Position Sizing:")
 print(f"   Account Equity: ${account_equity}")
 print(f"   Maximum Risk: {max_risk_percent * 100}% = ${max_risk_amount}")
 print(f"   Stop Loss: {stop_loss_pips} pips")
 print(f"   Pip Value: ${pip_value} per pip")
 print(f"   Maximum Position: {max_position_lots} lots")  # Exactly 12.5 lots
-print(f"   Success This position size limits loss to exactly ${max_risk_amount}")
+print(f"   This position size limits loss to exactly ${max_risk_amount}")
 ```
 
 **Profit Target Calculations**: Set precise take profit levels
@@ -157,14 +157,14 @@ reward_amount = risk_amount * risk_reward_ratio  # 0.0100 (100 pips reward)
 # Take profit = Entry + (Risk x Ratio) for long positions
 take_profit_price = entry_price + reward_amount
 
-print("Target Risk-Reward Calculation:")
+print("Risk-Reward Calculation:")
 print(f"   Entry Price: {entry_price}")
 print(f"   Stop Loss: {stop_loss_price} ({risk_amount * 10000:.0f} pips risk)")
 print(f"   Risk-Reward Ratio: {risk_reward_ratio}:1")
 print(f"   Reward Target: {reward_amount * 10000:.0f} pips")
 print(f"   Take Profit: {take_profit_price}")  # Exactly 1.1350
 print(
-    f"   Success This setup risks {risk_amount * 10000:.0f} pips to make {reward_amount * 10000:.0f} pips"
+    f"   This setup risks {risk_amount * 10000:.0f} pips to make {reward_amount * 10000:.0f} pips"
 )
 ```
 
@@ -289,14 +289,14 @@ async def test_fivetwenty_setup():
     # Step 2: Initialize AsyncClient with automatic environment-based configuration
     # Zero-config approach reads OANDA credentials from environment variables
     async with AsyncClient() as client:
-        print("Config Testing FiveTwenty Setup...")
-        print(f"List Configuration: {client.config.summary()}")
+        print("FiveTwenty Setup...")
+        print(f"Configuration: {client.config.summary()}")
 
         # Step 3: Test API authentication by retrieving account information
         # Account access confirms successful authentication and authorization
         account_response = await client.accounts.get_account(client.account_id)
         account = account_response["account"]
-        print("\nBalance Account Verification:")
+        print("\nAccount Verification:")
         print(f"   Balance: {account.balance} {account.currency}")
         print(f"   Open Trades: {account.open_trade_count}")
         print(f"   Margin Available: {account.margin_available} {account.currency}")
@@ -311,15 +311,15 @@ async def test_fivetwenty_setup():
         # Step 5: Display current market data to confirm successful data access
         # Real-time pricing validates complete API functionality
         price = pricing["prices"][0]
-        print("\nData Market Data Verification:")
+        print("\nMarket Data Verification:")
         print(f"   Instrument: {price.instrument}")
         print(f"   Bid: {price.closeout_bid} (sell price)")
         print(f"   Ask: {price.closeout_ask} (buy price)")
         print(f"   Tradeable: {price.tradeable}")
         print(f"   Time: {price.time}")
 
-        print("\nSuccess FiveTwenty setup verification complete!")
-        print("Starting Ready for live trading operations")
+        print("\nFiveTwenty setup verification complete!")
+        print("Ready for live trading operations")
 
 
 # Step 6: Execute comprehensive setup verification
@@ -327,7 +327,7 @@ async def test_fivetwenty_setup():
 if __name__ == "__main__":
     print("Test Starting FiveTwenty Setup Verification...")
     asyncio.run(test_fivetwenty_setup())
-    print("Target Setup test completed - review results above")
+    print("Setup test completed - review results above")
 ```
 
 ## What You've Learned

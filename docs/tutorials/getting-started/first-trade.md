@@ -34,7 +34,7 @@ async def main() -> None:
     async with AsyncClient() as client:
         # Step 3: Verify successful connection and display configuration summary
         # The summary shows environment, account ID, and connection status
-        print(f"Success Connected: {client.config.summary()}")
+        print(f"Connected: {client.config.summary()}")
 
 
 # Step 4: Execute the connection test
@@ -74,23 +74,23 @@ async def main() -> None:
         account = account_response["account"]
 
         # Step 4: Display comprehensive account status for trading assessment
-        print(f"\nData Account Summary: {client.config.summary()}")
+        print(f"\nAccount Summary: {client.config.summary()}")
 
         # Step 5: Show account balance (total equity including unrealized P&L)
         # Balance represents your total account value in the account's base currency
-        print(f"Balance Balance: {account.balance} {account.currency}")
+        print(f"Balance: {account.balance} {account.currency}")
 
         # Step 6: Display unrealized P&L from open positions
         # Unrealized P&L shows floating profit/loss that hasn't been locked in yet
-        print(f"Analysis Unrealized P/L: {account.unrealized_pl} {account.currency}")
+        print(f"Unrealized P/L: {account.unrealized_pl} {account.currency}")
 
         # Step 7: Show current trading activity level
         # Open trade count indicates how many active positions require monitoring
-        print(f"Processing Open Trades: {account.open_trade_count}")
+        print(f"Open Trades: {account.open_trade_count}")
 
         # Step 8: Display margin utilization for risk assessment
         # Margin used shows capital committed to maintaining open positions
-        print(f"Secure Margin Used: {account.margin_used} {account.currency}")
+        print(f"Margin Used: {account.margin_used} {account.currency}")
 
         # Step 9: Show available trading capacity
         # Margin available determines maximum new position size you can open
@@ -142,18 +142,18 @@ async def main() -> None:
         # Step 6: Show ask price (lowest price sellers are willing to accept)
         # Ask represents the price you pay when buying this currency pair
         print(
-            f"   Analysis Ask: {price.asks[0].price if price.asks else 'N/A'} (buy price)"
+            f"   Ask: {price.asks[0].price if price.asks else 'N/A'} (buy price)"
         )
 
         # Step 7: Display spread (trading cost in price terms)
         # Spread = Ask - Bid, represents the cost of entering and exiting trades
         if price.asks and price.bids:
             spread = price.asks[0].price - price.bids[0].price
-            print(f"   Balance Spread: {spread:.5f} (trading cost)")
+            print(f"   Spread: {spread:.5f} (trading cost)")
 
         # Step 8: Show pricing timestamp for data freshness verification
         # Recent timestamps ensure you're making decisions on current market conditions
-        print(f"   Time Time: {price.time} (price generation time)")
+        print(f"   Time: {price.time} (price generation time)")
 
 
 if __name__ == "__main__":
@@ -186,10 +186,10 @@ async def main() -> None:
         direction = (
             "BUY" if units > 0 else "SELL"
         )  # Determine trade direction from units sign
-        print(f"\nTarget Preparing {direction} order:")
-        print(f"   Data Instrument: {instrument}")
+        print(f"\nPreparing {direction} order:")
+        print(f"   Instrument: {instrument}")
         print(
-            f"   Ruler Units: {units} ({'long position' if units > 0 else 'short position'})"
+            f"   Units: {units} ({'long position' if units > 0 else 'short position'})"
         )
 
         # Step 3: Execute market order for immediate price execution
@@ -206,7 +206,7 @@ async def main() -> None:
             # Step 5: Extract comprehensive execution details for record keeping
             fill = order_response["orderFillTransaction"]
 
-            print("\nSuccess Order Executed Successfully!")
+            print("\nOrder Executed Successfully!")
 
             # Step 6: Display unique trade identifier for position tracking
             # Trade ID enables future position management and closing operations
@@ -214,30 +214,30 @@ async def main() -> None:
 
             # Step 7: Confirm instrument execution (verification check)
             # Ensures the correct currency pair was traded as requested
-            print(f"   Data Instrument: {fill.instrument}")
+            print(f"   Instrument: {fill.instrument}")
 
             # Step 8: Show actual units filled (should match request)
             # Confirms complete order execution without partial fills
             print(
-                f"   Ruler Units: {fill.units} ({'LONG' if int(fill.units) > 0 else 'SHORT'} position)"
+                f"   Units: {fill.units} ({'LONG' if int(fill.units) > 0 else 'SHORT'} position)"
             )
 
             # Step 9: Display actual execution price achieved
             # Fill price may differ slightly from quoted price due to market movement
             instrument_parts = instrument.value.split("_")
             print(
-                f"   Balance Fill Price: {fill.price} ({instrument_parts[1]} per {instrument_parts[0]})"
+                f"   Fill Price: {fill.price} ({instrument_parts[1]} per {instrument_parts[0]})"
             )
 
             # Step 10: Show immediate profit/loss (typically near zero for market orders)
             # P&L reflects difference between execution price and current market price
             print(
-                f"   Analysis Immediate P/L: {fill.pl} {fill.account_currency if hasattr(fill, 'account_currency') else ''}"
+                f"   Immediate P/L: {fill.pl} {fill.account_currency if hasattr(fill, 'account_currency') else ''}"
             )
 
             # Step 11: Record execution timestamp for trade history
             # Timestamp enables performance analysis and trade sequencing
-            print(f"   Time Execution Time: {fill.time}")
+            print(f"   Execution Time: {fill.time}")
 
             # Step 12: Display commission costs if applicable
             # Commission transparency helps calculate true trading costs
@@ -246,7 +246,7 @@ async def main() -> None:
         else:
             # Step 13: Handle rare case of unfilled market order
             # Market orders rarely fail but may be rejected due to market conditions
-            print("Error Order was not filled - market may be closed or halted")
+            print("Error: Order was not filled - market may be closed or halted")
 
             # Step 14: Check for order rejection or cancellation
             # Rejected orders contain details in orderReissueRejectTransaction
@@ -283,7 +283,7 @@ async def main() -> None:
     # Zero-config approach simplifies setup while maintaining security best practices
     async with AsyncClient() as client:
         try:
-            print("Starting your first trade with FiveTwenty SDK!")
+            print("your first trade with FiveTwenty SDK!")
             print(f"Configuration: {client.config.summary()}")
 
             # Step 2: Perform comprehensive account assessment for trading readiness
@@ -391,7 +391,7 @@ async def close_trade_example() -> None:
     # AsyncClient handles order execution, trade monitoring, and closure operations
     async with AsyncClient() as client:
         try:
-            print("Starting complete trade lifecycle demonstration...")
+            print("complete trade lifecycle demonstration...")
             print(f"Configuration: {client.config.summary()}\n")
 
             # Step 2: Open a new market position for demonstration

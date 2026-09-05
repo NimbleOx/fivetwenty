@@ -44,7 +44,7 @@ print(float_sum)  # Output: 0.30000000000000004 (not exactly 0.3!)
 
 # Step 2: Use Decimal arithmetic for exact financial precision
 # Python's Decimal type provides exact decimal arithmetic - no rounding errors
-decimal_sum = Decimal("0.1") + Decimal("0.2")  # Success Exact calculation
+decimal_sum = Decimal("0.1") + Decimal("0.2")  # Good: Exact calculation
 print(decimal_sum)  # Output: 0.3 (perfectly exact!)
 
 # In trading: Decimal("0.1") + Decimal("0.2") = Decimal("0.3") - Perfect!
@@ -506,7 +506,7 @@ class FiveTwentyErrorStructure:
     """Example structure of FiveTwentyError demonstrating rich error information."""
 
     # Step 1: HTTP-level error information
-    status_code: int           # HTTP status: 400, 401, 429, 500, etc.
+    status: int           # HTTP status: 400, 401, 429, 500, etc.
     # Standard HTTP codes provide initial error classification
     # 400: Bad request (parameter validation failed)
     # 401: Unauthorized (invalid token or permissions)
@@ -514,7 +514,7 @@ class FiveTwentyErrorStructure:
     # 500: Server error (OANDA infrastructure issue)
 
     # Step 2: OANDA-specific error identification
-    error_code: str           # OANDA business logic code
+    code: str | None           # OANDA business logic code
     # Examples: "INSUFFICIENT_FUNDS", "INVALID_INSTRUMENT", "MARKET_CLOSED"
     # These codes enable specific error handling strategies
     # e.g., "INSUFFICIENT_FUNDS" → reduce position size
@@ -621,7 +621,7 @@ from fivetwenty.models import MarketOrderRequest
 try:
     order = MarketOrderRequest(
         instrument="EUR_USD",       # Valid currency pair
-        units="not-a-number",      # Error Invalid - cannot convert to Decimal
+        units="not-a-number",      # Invalid - cannot convert to Decimal
     )
 except ValidationError as e:
     print(f"Validation caught error: {e}")
@@ -757,17 +757,17 @@ client = AsyncClient(
 # Step 2: Security benefits of explicit token management
 # Design prevents several security vulnerabilities:
 
-# Error No global token storage:
+# No global token storage:
 # - Prevents accidental credential exposure in logs
 # - Eliminates risk of credentials persisting across application restarts
 # - Avoids shared state that could leak between different operations
 
-# Error No automatic token discovery:
+# No automatic token discovery:
 # - Prevents scanning filesystem for credential files
 # - Eliminates risk of loading wrong credentials from multiple sources
 # - Avoids complex credential precedence that could cause confusion
 
-# Success Explicit per-client credentials:
+# Good: Explicit per-client credentials:
 # - Developer must consciously provide authentication for each client
 # - Clear visibility into which credentials are used where
 # - Easy to use different credentials for different operations
@@ -808,18 +808,18 @@ live_client = AsyncClient(
 # Step 2: Environment isolation prevents catastrophic mistakes
 # Safety mechanisms built into the design:
 
-# Success Explicit environment selection:
+# Good: Explicit environment selection:
 # - Impossible to "accidentally" trade live money
 # - Code review can easily identify live trading code
 # - Different tokens required for practice vs live
 # - Clear separation between testing and production
 
-# Success Different API endpoints:
+# Good: Different API endpoints:
 # - Practice: api-fxpractice.oanda.com (virtual money)
 # - Live: api-fxtrade.oanda.com (real money)
 # - Network-level isolation prevents cross-contamination
 
-# Success Token separation:
+# Good: Token separation:
 # - Practice tokens only work with practice accounts
 # - Live tokens only work with live accounts
 # - Impossible to use wrong token with wrong environment
@@ -1115,11 +1115,11 @@ async def main():
         pass  # Placeholder for demonstration
 
 # Step 4: Deprecation strategy benefits
-# Success Backward compatibility: Existing code continues working
-# Success Clear timeline: Developers know when removal will happen
-# Success Migration guidance: Specific instructions for updating code
-# Success Gradual transition: No forced immediate updates
-# Success Semantic versioning: Breaking changes only in major versions
+# Good: Backward compatibility: Existing code continues working
+# Good: Clear timeline: Developers know when removal will happen
+# Good: Migration guidance: Specific instructions for updating code
+# Good: Gradual transition: No forced immediate updates
+# Good: Semantic versioning: Breaking changes only in major versions
 
 # Example deprecation timeline:
 # v1.9.0: New API introduced alongside old
@@ -1340,7 +1340,7 @@ except FiveTwentyError as e:
     # Step 4: Handle known OANDA API errors with specific strategies
     # FiveTwentyError provides structured error information for decision making
 
-    if "INSUFFICIENT_FUNDS" in str(e.error_code):
+    if "INSUFFICIENT_FUNDS" in str(e.code):
         # Step 5: Implement specific recovery for insufficient funds
         logger.warning(f"Insufficient funds detected: {e.message}")
         # Trading strategy options:
@@ -1350,13 +1350,13 @@ except FiveTwentyError as e:
         # - Switch to smaller position sizing algorithm
         pass
 
-    elif "MARKET_CLOSED" in str(e.error_code):
+    elif "MARKET_CLOSED" in str(e.code):
         # Market timing error - queue order for market open
         logger.info(f"Market closed, queueing order: {e.message}")
         # Implementation: Add to pending order queue
         pass
 
-    elif "RATE_LIMITED" in str(e.error_code):
+    elif "RATE_LIMITED" in str(e.code):
         # API rate limiting - implement backoff strategy
         logger.warning(f"Rate limited, implementing backoff: {e.message}")
         # Implementation: Exponential backoff before retry
@@ -1364,7 +1364,7 @@ except FiveTwentyError as e:
 
     else:
         # Step 6: Generic OANDA error handling with detailed logging
-        logger.error(f"OANDA API error: {e.error_code} - {e.message}")
+        logger.error(f"OANDA API error: {e.code} - {e.message}")
         logger.error(f"Request details: {e.details}")
         # Log all available error context for debugging
         # Consider alerting mechanism for unknown error types
@@ -1425,20 +1425,20 @@ async with AsyncClient(...) as client:
     # - Response body: Full JSON response (truncated if very large)
 
 # Step 5: Debugging use cases for HTTP logging
-# Success API connectivity issues: See exact network errors
-# Success Authentication problems: Verify Authorization headers
-# Success Rate limiting: Monitor 429 responses and retry behavior
-# Success Performance analysis: Measure request/response times
-# Success API changes: Detect unexpected response formats
-# Success Request verification: Ensure parameters are sent correctly
+# Good: API connectivity issues: See exact network errors
+# Good: Authentication problems: Verify Authorization headers
+# Good: Rate limiting: Monitor 429 responses and retry behavior
+# Good: Performance analysis: Measure request/response times
+# Good: API changes: Detect unexpected response formats
+# Good: Request verification: Ensure parameters are sent correctly
 
 # Step 6: Security considerations for HTTP debugging
 # ⚠️ WARNING: Debug logging may expose sensitive information
 # - API tokens in Authorization headers
 # - Account IDs and financial data in responses
 # - Personal information in account details
-# Success Recommendation: Only enable in development environments
-# Success Production: Use INFO or WARNING level logging instead
+# Good: Recommendation: Only enable in development environments
+# Good: Production: Use INFO or WARNING level logging instead
 
 # Example debug output:
 # DEBUG:httpx:Sending request: GET https://api-fxpractice.oanda.com/v3/accounts
@@ -1468,7 +1468,7 @@ except ValidationError as e:
         # Step 4: Show field path and error message for each validation failure
         print(f"  Field: {error['loc']}: {error['msg']}")
         print(f"    Input value: {error['input']}")
-        print(f"    Error type: {error['type']}")
+        print(f"    Error: type: {error['type']}")
         if 'ctx' in error:
             print(f"    Context: {error['ctx']}")
         print()  # Blank line for readability
@@ -1570,7 +1570,7 @@ async def get_market_overview(client: Any, account_id: str) -> list[Any]:
     return processed_results
 
 # Step 6: Advanced concurrent patterns for trading systems
-# Success Timeout handling: Set maximum wait time for all operations
+# Good: Timeout handling: Set maximum wait time for all operations
 # async def get_market_overview_with_timeout(client, account_id: str, timeout: float = 5.0):
 #     try:
 #         results = await asyncio.wait_for(
@@ -1581,9 +1581,9 @@ async def get_market_overview(client: Any, account_id: str) -> list[Any]:
 #         # Handle timeout - critical for trading systems
 #         pass
 
-# Success Partial success handling: Use some data even if other calls fail
-# Success Priority-based execution: Get critical data first, optional data second
-# Success Rate limiting awareness: Avoid overwhelming OANDA API with concurrent requests
+# Good: Partial success handling: Use some data even if other calls fail
+# Good: Priority-based execution: Get critical data first, optional data second
+# Good: Rate limiting awareness: Avoid overwhelming OANDA API with concurrent requests
 
 # Benefits for trading applications:
 # - Faster market overview = quicker trading decisions

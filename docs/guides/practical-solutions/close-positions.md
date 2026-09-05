@@ -51,8 +51,8 @@ async def close_position(account_id: str, instrument: str) -> Any:
 
             if not position:
                 # Step 4: Handle case where no position exists for this instrument
-                print(f"Error No open position for {instrument}")
-                print(f"Note Check if position was already closed or instrument symbol is correct")
+                print(f"Error: No open position for {instrument}")
+                print(f"Note: Check if position was already closed or instrument symbol is correct")
                 return None
 
             # Step 5: Extract position details for both long and short sides
@@ -64,8 +64,8 @@ async def close_position(account_id: str, instrument: str) -> Any:
 
             if long_units == 0 and short_units == 0:
                 # Step 6: Double-check for edge case of zero net position
-                print(f"Error No net position for {instrument}")
-                print(f"Note Position may have been closed between retrieval and processing")
+                print(f"Error: No net position for {instrument}")
+                print(f"Note: Position may have been closed between retrieval and processing")
                 return None
 
             # Step 7: Calculate closing order parameters
@@ -74,7 +74,7 @@ async def close_position(account_id: str, instrument: str) -> Any:
             net_units = long_units + short_units  # Total net position (positive = long, negative = short)
             close_units = -net_units              # Opposite direction to close position
 
-            print(f"Processing Closing position for {instrument}:")
+            print(f"Closing position for {instrument}:")
             print(f"   Long units: {long_units}")
             print(f"   Short units: {short_units}")
             print(f"   Net position: {net_units} units")
@@ -94,7 +94,7 @@ async def close_position(account_id: str, instrument: str) -> Any:
                 # order_fill_transaction contains execution details when order fills
                 fill = response.order_fill_transaction
 
-                print(f"Success Position closed successfully!")
+                print(f"Position closed successfully!")
                 print(f"   Close Price: {fill.price}")
                 print(f"   Realized P/L: {fill.pl} {fill.account_currency}")
                 print(f"   Transaction ID: {fill.id}")
@@ -104,15 +104,15 @@ async def close_position(account_id: str, instrument: str) -> Any:
                 return fill
             else:
                 # Step 10: Handle case where order was created but not filled
-                print("Error Order created but not filled immediately")
-                print("Note Check order status - may be pending or partially filled")
+                print("Error: Order created but not filled immediately")
+                print("Note: Check order status - may be pending or partially filled")
                 return None
 
         except FiveTwentyError as e:
             # Step 11: Handle API-specific errors with detailed logging
-            print(f"Error OANDA API error closing position: {e.message}")
-            print(f"   Error code: {e.code}")
-            print(f"Note Common causes: insufficient margin, market closed, invalid instrument")
+            print(f"Error: OANDA API error closing position: {e.message}")
+            print(f"   Error: code: {e.code}")
+            print(f"Note: Common causes: insufficient margin, market closed, invalid instrument")
             return None
 
 # Usage
@@ -159,7 +159,7 @@ async def close_partial_position(account_id: str, instrument: str, units_to_clos
             long_units = int(position.long.units) if position.long.units != "0" else 0
             short_units = abs(int(position.short.units)) if position.short.units != "0" else 0
 
-            print(f"Data Current position analysis for {instrument}:")
+            print(f"Current position analysis for {instrument}:")
             print(f"   Long units: {long_units}")
             print(f"   Short units: {short_units}")
             print(f"   Requested closure: {units_to_close} units")
@@ -189,7 +189,7 @@ async def close_partial_position(account_id: str, instrument: str, units_to_clos
                 print(f"   Operation: Closing {units_to_close} short units")
 
             # Step 8: Execute partial closure with market order
-            print(f"Processing Executing partial closure: {abs(close_units)} units of {instrument}")
+            print(f"Executing partial closure: {abs(close_units)} units of {instrument}")
             print(f"   Market order units: {close_units}")
 
             response = await client.orders.post_market_order(
@@ -202,7 +202,7 @@ async def close_partial_position(account_id: str, instrument: str, units_to_clos
             if response.order_fill_transaction:
                 fill = response.order_fill_transaction
 
-                print(f"Success Partial position closed successfully!")
+                print(f"Partial position closed successfully!")
                 print(f"   Units closed: {abs(close_units)}")
                 print(f"   Close price: {fill.price}")
                 print(f"   Realized P/L: {fill.pl} {fill.account_currency}")
@@ -212,17 +212,17 @@ async def close_partial_position(account_id: str, instrument: str, units_to_clos
                 return fill
             else:
                 # Step 10: Handle unfilled order scenario
-                print(f"Error Partial close order created but not filled")
-                print(f"Note Check order status and market conditions")
+                print(f"Error: Partial close order created but not filled")
+                print(f"Note: Check order status and market conditions")
                 return None
 
         except (FiveTwentyError, ValueError) as e:
             # Step 11: Comprehensive error handling for both API and validation errors
-            print(f"Error Partial close error: {e}")
+            print(f"Error: Partial close error: {e}")
             if isinstance(e, ValueError):
-                print(f"Note Validation error - check position size and units_to_close parameter")
+                print(f"Note: Validation error - check position size and units_to_close parameter")
             else:
-                print(f"Note API error - check network connection and account status")
+                print(f"Note: API error - check network connection and account status")
             return None
 
 # Usage - close 500 units of long EUR_USD
@@ -255,14 +255,14 @@ async def close_multiple_positions(account_id: str, instruments: list[str]) -> d
         # Key: instrument symbol, Value: transaction result or None for failures
         results: dict[str, Any] = {}
 
-        print(f"Starting Starting batch closure for {len(instruments)} instruments...")
-        print(f"List Target instruments: {', '.join(instruments)}")
+        print(f"Starting batch closure for {len(instruments)} instruments...")
+        print(f"Target instruments: {', '.join(instruments)}")
 
         # Step 3: Process each instrument sequentially to avoid overwhelming API
         # Sequential processing prevents rate limiting and allows error isolation
         for i, instrument in enumerate(instruments, 1):
             try:
-                print(f"\nProcessing Processing {instrument} ({i}/{len(instruments)})...")
+                print(f"\nProcessing {instrument} ({i}/{len(instruments)})...")
 
                 # Step 4: Call position closure function for each instrument
                 # Reusing close_position() function ensures consistent logic
@@ -271,34 +271,34 @@ async def close_multiple_positions(account_id: str, instruments: list[str]) -> d
 
                 # Step 5: Provide immediate feedback on closure attempt
                 if result:
-                    print(f"   Success {instrument}: Successfully closed position")
+                    print(f"   {instrument}: Successfully closed position")
                 else:
-                    print(f"   Error {instrument}: No position found or closure failed")
+                    print(f"   Error: {instrument}: No position found or closure failed")
 
                 # Step 6: Rate limiting protection to avoid API throttling
                 # 100ms delay prevents exceeding OANDA's rate limits
                 # Adjust delay based on account tier and API limits
                 await asyncio.sleep(0.1)
-                print(f"   Time Rate limit delay applied (100ms)")
+                print(f"   Rate limit delay applied (100ms)")
 
             except Exception as e:
                 # Step 7: Isolate errors per instrument to prevent batch failure
                 # One failed instrument shouldn't stop processing others
-                print(f"Error Failed to close {instrument}: {e}")
-                print(f"   Note Error isolated - continuing with remaining instruments")
+                print(f"Error: Failed to close {instrument}: {e}")
+                print(f"   Note: Error isolated - continuing with remaining instruments")
                 results[instrument] = None
 
         # Step 8: Generate comprehensive batch operation summary
         successful_closes = sum(1 for r in results.values() if r is not None)
         failed_closes = len(instruments) - successful_closes
 
-        print(f"\nData Batch Closure Summary:")
-        print(f"   Success Successful closures: {successful_closes}")
-        print(f"   Error Failed closures: {failed_closes}")
-        print(f"   Analysis Success rate: {(successful_closes/len(instruments)*100):.1f}%")
+        print(f"\nBatch Closure Summary:")
+        print(f"   Successful closures: {successful_closes}")
+        print(f"   Error: Failed closures: {failed_closes}")
+        print(f"   Success: rate: {(successful_closes/len(instruments)*100):.1f}%")
 
         # Step 9: Detailed breakdown of results per instrument
-        print(f"\nList Detailed Results:")
+        print(f"\nDetailed Results:")
         for instrument, result in results.items():
             status = "Success CLOSED" if result else "Error FAILED"
             print(f"   {instrument}: {status}")
@@ -337,7 +337,7 @@ async def emergency_close_all(account_id: str) -> list[Any]:
             # Step 2: Alert operators and begin emergency closure sequence
             print("⚠️ EMERGENCY CLOSE INITIATED: Closing all positions immediately!")
             print("⚠️ This will close ALL open positions - use with extreme caution")
-            print("Notes Recommend logging this emergency event for post-incident analysis")
+            print("Note: Recommend logging this emergency event for post-incident analysis")
 
             # Step 3: Retrieve all open positions for emergency closure
             # get_open_positions() only returns positions with non-zero units
@@ -345,20 +345,20 @@ async def emergency_close_all(account_id: str) -> list[Any]:
 
             if not positions:
                 # Step 4: Handle scenario where no positions exist
-                print("Success Emergency scan complete: No open positions to close")
-                print("Note Account is already flat - no action required")
+                print("Emergency scan complete: No open positions to close")
+                print("Note: Account is already flat - no action required")
                 return []
 
             # Step 5: Prepare concurrent closure tasks for maximum speed
             # Concurrent execution minimizes time to close all positions
             close_tasks = []
-            print(f"Data Emergency closure scope: {len(positions)} positions found")
+            print(f"Emergency closure scope: {len(positions)} positions found")
 
             for position in positions:
                 # Step 6: Validate position has actual units before creating close task
                 # Both long.units and short.units must be checked
                 if (int(position.long.units) != 0 or int(position.short.units) != 0):
-                    print(f"   Target Targeting {position.instrument}: "
+                    print(f"   Targeting {position.instrument}: "
                           f"Long={position.long.units}, Short={position.short.units}")
 
                     # Step 7: Create concurrent closure task for each position
@@ -373,7 +373,7 @@ async def emergency_close_all(account_id: str) -> list[Any]:
 
             # Step 9: Execute all position closures concurrently for maximum speed
             # asyncio.gather() with return_exceptions=True prevents one failure from stopping others
-            print(f"Lightning Executing {len(close_tasks)} concurrent closures...")
+            print(f"Executing {len(close_tasks)} concurrent closures...")
 
             # Extract just the tasks for gather()
             tasks = [task for _, task in close_tasks]
@@ -384,35 +384,35 @@ async def emergency_close_all(account_id: str) -> list[Any]:
             failed_closes = len(close_tasks) - successful_closes
 
             print(f"\n⚠️ EMERGENCY CLOSE COMPLETE:")
-            print(f"   Success Successful closures: {successful_closes}")
-            print(f"   Error Failed closures: {failed_closes}")
-            print(f"   Analysis Emergency success rate: {(successful_closes/len(close_tasks)*100):.1f}%")
+            print(f"   Successful closures: {successful_closes}")
+            print(f"   Error: Failed closures: {failed_closes}")
+            print(f"   Emergency success rate: {(successful_closes/len(close_tasks)*100):.1f}%")
 
             # Step 11: Detailed emergency results for incident analysis
-            print(f"\nList Emergency Closure Details:")
+            print(f"\nEmergency Closure Details:")
             for i, (instrument, result) in enumerate(zip([inst for inst, _ in close_tasks], results)):
                 if isinstance(result, Exception):
-                    print(f"   Error {instrument}: FAILED - {result}")
+                    print(f"   Error: {instrument}: FAILED - {result}")
                 elif result is not None:
-                    print(f"   Success {instrument}: CLOSED successfully")
+                    print(f"   {instrument}: CLOSED successfully")
                 else:
                     print(f"   ⚠️ {instrument}: No position found")
 
             # Step 12: Post-emergency recommendations
             if failed_closes > 0:
                 print(f"\n⚠️ EMERGENCY ALERT: {failed_closes} positions failed to close")
-                print(f"Note Immediate action required: manually verify and close remaining positions")
-                print(f"Call Consider contacting OANDA support if issues persist")
+                print(f"Note: Immediate action required: manually verify and close remaining positions")
+                print(f"Consider contacting OANDA support if issues persist")
             else:
-                print(f"\nSuccess Emergency closure successful - all positions closed")
-                print(f"Data Recommend account reconciliation and incident documentation")
+                print(f"\nEmergency closure successful - all positions closed")
+                print(f"Recommend account reconciliation and incident documentation")
 
             return results
 
         except FiveTwentyError as e:
             # Step 13: Handle catastrophic API failure during emergency
-            print(f"Error CRITICAL EMERGENCY FAILURE: {e.message}")
-            print(f"   Error code: {e.code}")
+            print(f"Error: CRITICAL EMERGENCY FAILURE: {e.message}")
+            print(f"   Error: code: {e.code}")
             print(f"⚠️ IMMEDIATE ACTION REQUIRED:")
             print(f"   1. Check network connectivity")
             print(f"   2. Verify API token validity")
@@ -453,7 +453,7 @@ async def emergency_close_all(account_id: str) -> list[Any]:
 
 ---
 
-## Success Verification
+## Good: Verification
 
 After closing positions, verify the operation:
 
@@ -488,7 +488,7 @@ async def verify_position_closed(account_id: str, instrument: str) -> bool:
             print(f"   Current long units: {position.long.units}")
             print(f"   Current short units: {position.short.units}")
             print(f"   Net position: {int(position.long.units) + int(position.short.units)}")
-            print(f"Note Possible causes:")
+            print(f"Note: Possible causes:")
             print(f"   - Partial fill on close order")
             print(f"   - Market order rejected due to insufficient margin")
             print(f"   - New position opened after close attempt")
@@ -498,19 +498,19 @@ async def verify_position_closed(account_id: str, instrument: str) -> bool:
             # Step 6: Position successfully closed or never existed
             if position is None:
                 # Position not found in open positions list
-                print(f"Success VERIFICATION SUCCESSFUL: Position confirmed closed for {instrument}")
+                print(f"VERIFICATION SUCCESSFUL: Position confirmed closed for {instrument}")
                 print(f"   Status: No open position found (fully closed)")
             else:
                 # Position exists but with zero units (edge case)
-                print(f"Success VERIFICATION SUCCESSFUL: Position has zero units for {instrument}")
+                print(f"VERIFICATION SUCCESSFUL: Position has zero units for {instrument}")
                 print(f"   Status: Position object exists but no active units")
 
-            print(f"Note Position closure verification complete")
-            print(f"Data Account is flat for {instrument} - no exposure remaining")
+            print(f"Note: Position closure verification complete")
+            print(f"Account is flat for {instrument} - no exposure remaining")
             return True
 
 # Verify closure
 is_closed = await verify_position_closed(account_id, "EUR_USD")
 ```
 
-**Task Complete**: You can now close a single position, close partial units, batch-close multiple instruments, and verify the results.
+You can now close a single position, close partial units, batch-close multiple instruments, and verify the result.

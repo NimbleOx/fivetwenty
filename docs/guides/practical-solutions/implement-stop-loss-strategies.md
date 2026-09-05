@@ -48,7 +48,7 @@ async def place_order_with_stop_loss(instrument: str, units: int, stop_loss_pric
         try:
             # Step 2: Create market order with stop-loss attached using OnFill pattern
             # OnFill pattern applies stop-loss immediately when order executes (recommended)
-            print(f"Data Placing {units:,} units of {instrument} with stop-loss protection...")
+            print(f"Placing {units:,} units of {instrument} with stop-loss protection...")
             response = await client.orders.post_market_order(
                 account_id=client.account_id,    # Account from environment configuration
                 instrument=instrument,           # Currency pair to trade
@@ -63,39 +63,39 @@ async def place_order_with_stop_loss(instrument: str, units: int, stop_loss_pric
             if response.order_fill_transaction:
                 fill = response.order_fill_transaction
                 entry_price = fill.price
-                print(f"Success Order filled at {entry_price}")
-                print(f"Security Stop-loss activated at {stop_loss_price}")
+                print(f"Order filled at {entry_price}")
+                print(f"Stop-loss activated at {stop_loss_price}")
 
                 # Step 4: Calculate and display risk metrics
                 risk_distance = abs(Decimal(str(entry_price)) - stop_loss_price)
                 pip_size = Decimal("0.01") if "JPY" in instrument else Decimal("0.0001")
                 risk_pips = risk_distance / pip_size
-                print(f"Ruler Risk distance: {risk_pips:.1f} pips")
-                print(f"Balance Risk amount: ${float(risk_distance * abs(units)):.2f}")
+                print(f"Risk distance: {risk_pips:.1f} pips")
+                print(f"Risk amount: ${float(risk_distance * abs(units)):.2f}")
 
                 # Step 5: Return trade ID for further management
                 return fill.trade_opened.trade_id if fill.trade_opened else None
 
-            print("Error Order not filled - no execution occurred")
+            print("Error: Order not filled - no execution occurred")
             return None
 
         except Exception as e:
-            print(f"Error Error placing order with stop-loss: {e}")
-            print("Note Check account balance, instrument availability, and stop-loss price validity")
+            print(f"Error: placing order with stop-loss: {e}")
+            print("Note: Check account balance, instrument availability, and stop-loss price validity")
             return None
 
 # Step 6: Usage example demonstrating practical stop-loss implementation
 if __name__ == "__main__":
-    print("Starting Starting stop-loss implementation example...")
+    print("Starting stop-loss implementation example...")
     trade_id = asyncio.run(place_order_with_stop_loss(
         instrument="EUR_USD",                  # Major currency pair with high liquidity
         units=10000,                          # Buy 10,000 EUR (standard lot size)
         stop_loss_price=Decimal("1.0950")     # Stop at 1.0950 (adjust based on current market)
     ))
     if trade_id:
-        print(f"Success Trade {trade_id} created with stop-loss protection active")
+        print(f"Trade {trade_id} created with stop-loss protection active")
     else:
-        print("Error Failed to create protected trade")
+        print("Error: Failed to create protected trade")
 ```
 
 ---
@@ -123,18 +123,18 @@ def calculate_stop_loss_price(entry_price: Decimal, units: int, pip_distance: in
     # Step 1: Determine pip size based on instrument type
     # Most currency pairs use 0.0001 (4th decimal), JPY pairs use 0.01 (2nd decimal)
     pip_size = Decimal("0.01") if "JPY" in instrument else Decimal("0.0001")
-    print(f"Ruler Pip size for {instrument}: {pip_size}")
+    print(f"Pip size for {instrument}: {pip_size}")
 
     # Step 2: Calculate pip value in price terms
     # Multiply pip distance by pip size to get actual price movement
     pip_value = pip_distance * pip_size
-    print(f"Data {pip_distance} pips = {pip_value} price units")
+    print(f"{pip_distance} pips = {pip_value} price units")
 
     # Step 3: Calculate stop-loss price based on position direction
     # Long position: stop below entry (price goes down), Short position: stop above entry (price goes up)
     if units > 0:
         stop_price = entry_price - pip_value  # Long: stop below entry
-        print(f"Analysis Long position: stop {pip_distance} pips below entry")
+        print(f"Long position: stop {pip_distance} pips below entry")
     else:
         stop_price = entry_price + pip_value  # Short: stop above entry
         print(f"📉 Short position: stop {pip_distance} pips above entry")
@@ -151,7 +151,7 @@ async def implement_pip_based_stop_loss(account_id: str, instrument: str, units:
         environment=Environment.PRACTICE  # Practice mode for safe testing
     ) as client:
         try:
-            print(f"Target Implementing {pip_distance}-pip stop-loss for {instrument}...")
+            print(f"Implementing {pip_distance}-pip stop-loss for {instrument}...")
 
             # Step 2: Get current market pricing to determine entry point
             # Current pricing provides bid/ask spread for accurate entry calculation
@@ -163,11 +163,11 @@ async def implement_pip_based_stop_loss(account_id: str, instrument: str, units:
             # Long positions buy at ask price, short positions sell at bid price
             entry_price = current_price.asks[0].price if units > 0 else current_price.bids[0].price
             direction = "LONG" if units > 0 else "SHORT"
-            print(f"Data Expected entry price ({direction}): {entry_price}")
+            print(f"Expected entry price ({direction}): {entry_price}")
 
             # Step 4: Calculate stop-loss price using pip distance
             stop_loss_price = calculate_stop_loss_price(entry_price, units, pip_distance, instrument)
-            print(f"Security Calculated stop-loss: {stop_loss_price} ({pip_distance} pips away)")
+            print(f"Calculated stop-loss: {stop_loss_price} ({pip_distance} pips away)")
 
             # Step 5: Place market order with calculated stop-loss protection
             # OnFill pattern ensures stop-loss activates immediately upon execution
@@ -184,22 +184,22 @@ async def implement_pip_based_stop_loss(account_id: str, instrument: str, units:
             # Step 6: Verify execution and display results
             if response.order_fill_transaction:
                 actual_entry = response.order_fill_transaction.price
-                print(f"Success Order executed at {actual_entry}")
-                print(f"Security Stop-loss active at {stop_loss_price}")
-                print(f"Ruler Risk: {pip_distance} pips = ${float(abs(Decimal(str(actual_entry)) - stop_loss_price) * abs(units)):.2f}")
+                print(f"Order executed at {actual_entry}")
+                print(f"Stop-loss active at {stop_loss_price}")
+                print(f"Risk: {pip_distance} pips = ${float(abs(Decimal(str(actual_entry)) - stop_loss_price) * abs(units)):.2f}")
             else:
-                print("Error Order not executed")
+                print("Error: Order not executed")
 
             return response.order_fill_transaction
         except Exception as e:
-            print(f"Error Error implementing pip-based stop: {e}")
-            print("Note Check account balance, market hours, and instrument availability")
+            print(f"Error: implementing pip-based stop: {e}")
+            print("Note: Check account balance, market hours, and instrument availability")
             return None
 
 # Step 7: Usage example with 30-pip stop-loss for conservative risk management
 async def example_usage():
     """Example implementation of 30-pip stop-loss strategy."""
-    print("Starting Starting pip-based stop-loss example...")
+    print("Starting pip-based stop-loss example...")
     fill = await implement_pip_based_stop_loss(
         account_id="101-001-1234567-001",  # Replace with your OANDA account ID
         instrument="GBP_USD",              # British Pound vs US Dollar
@@ -207,9 +207,9 @@ async def example_usage():
         pip_distance=30                   # Conservative 30-pip stop distance
     )
     if fill:
-        print("Success Pip-based stop-loss successfully implemented")
+        print("Pip-based stop-loss successfully implemented")
     else:
-        print("Error Failed to implement pip-based stop-loss")
+        print("Error: Failed to implement pip-based stop-loss")
     return fill
 ```
 
@@ -246,7 +246,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
             account_balance = Decimal(str(account.balance))
             max_loss = account_balance * risk_percentage
 
-            print(f"Balance Account balance: ${account_balance:,.2f}")
+            print(f"Account balance: ${account_balance:,.2f}")
             print(f"⚠️ Maximum risk: ${max_loss:.2f} ({risk_percentage:.1%})")
 
             # Get current pricing
@@ -268,7 +268,7 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
             min_stop_pips = 10
             stop_distance_pips = max(max_pips_to_risk, min_stop_pips)
 
-            print(f"Ruler Stop distance: {stop_distance_pips} pips")
+            print(f"Stop distance: {stop_distance_pips} pips")
 
             # Calculate stop-loss price
             entry_price = current_price.asks[0].price if units > 0 else current_price.bids[0].price
@@ -292,12 +292,12 @@ async def percentage_based_stop_loss(account_id: str, instrument: str,
             if response.order_fill_transaction:
                 fill = response.order_fill_transaction
                 actual_risk = abs(Decimal(str(fill.price)) - stop_loss_price) * abs(units)
-                print(f"Success Order placed - Actual risk: ${actual_risk:.2f}")
+                print(f"Order placed - Actual risk: ${actual_risk:.2f}")
 
             return response.order_fill_transaction
 
         except Exception as e:
-            print(f"Error Error with percentage-based stop: {e}")
+            print(f"Error: with percentage-based stop: {e}")
             return None
 
 # Risk 1.5% of account on this trade
@@ -340,9 +340,9 @@ async def implement_trailing_stop_loss(account_id: str, instrument: str, units: 
             # Convert pip distance to actual price movement for the specific instrument
             pip_size = Decimal("0.01") if "JPY" in instrument else Decimal("0.0001")
             trail_distance = Decimal(str(trail_distance_pips)) * pip_size
-            print(f"Ruler Trail distance: {trail_distance_pips} pips = {trail_distance} price units")
+            print(f"Trail distance: {trail_distance_pips} pips = {trail_distance} price units")
 
-            print(f"Analysis Creating position with {trail_distance_pips}-pip trailing stop...")
+            print(f"Creating position with {trail_distance_pips}-pip trailing stop...")
 
             # Step 3: Place market order with trailing stop-loss using OnFill pattern
             # Trailing stop automatically moves with favorable price but never moves against you
@@ -360,9 +360,9 @@ async def implement_trailing_stop_loss(account_id: str, instrument: str, units: 
             if response.order_fill_transaction:
                 fill = response.order_fill_transaction
                 entry_price = fill.price
-                print(f"Success Order filled at {entry_price}")
-                print(f"Processing Trailing stop activated: {trail_distance_pips} pips behind price")
-                print(f"Secure Stop will follow favorable price movement automatically")
+                print(f"Order filled at {entry_price}")
+                print(f"Trailing stop activated: {trail_distance_pips} pips behind price")
+                print(f"Stop will follow favorable price movement automatically")
 
                 # Step 5: Get trade ID for monitoring and verification
                 trade_id = fill.trade_opened.trade_id if fill.trade_opened else None
@@ -372,8 +372,8 @@ async def implement_trailing_stop_loss(account_id: str, instrument: str, units: 
                     trade = await client.trades.get_trade(account_id, trade_id)
                     if trade.trailing_stop_loss_order:
                         tsl_order = trade.trailing_stop_loss_order
-                        print(f"Target Trailing stop order ID: {tsl_order.id}")
-                        print(f"Ruler Active trail distance: {tsl_order.distance}")
+                        print(f"Trailing stop order ID: {tsl_order.id}")
+                        print(f"Active trail distance: {tsl_order.distance}")
                         print(f"✨ Stop will move up with price but never down (for long positions)")
                     else:
                         print("⚠️ Warning: Trailing stop order not found")
@@ -384,22 +384,22 @@ async def implement_trailing_stop_loss(account_id: str, instrument: str, units: 
                     print(f"🔼 Long position: stop trails {trail_distance_pips} pips below highest price")
                 else:
                     print(f"🔽 Short position: stop trails {trail_distance_pips} pips above lowest price")
-                print(f"Data As price moves favorably, stop automatically adjusts to lock in profits")
+                print(f"As price moves favorably, stop automatically adjusts to lock in profits")
 
                 return trade_id
 
-            print("Error Order not filled - no execution occurred")
+            print("Error: Order not filled - no execution occurred")
             return None
 
         except Exception as e:
-            print(f"Error Error implementing trailing stop: {e}")
-            print("Note Check account balance, instrument availability, and trail distance validity")
+            print(f"Error: implementing trailing stop: {e}")
+            print("Note: Check account balance, instrument availability, and trail distance validity")
             return None
 
 # Step 8: Usage example demonstrating trailing stop for volatile pair
 async def main() -> None:
     """Example implementation of trailing stop-loss for GBP/JPY volatility."""
-    print("Starting Starting trailing stop-loss example...")
+    print("Starting trailing stop-loss example...")
     trade_id = await implement_trailing_stop_loss(
         account_id="101-001-1234567-001",  # Replace with your OANDA account ID
         instrument="GBP_JPY",              # Volatile pair ideal for trailing stops
@@ -407,10 +407,10 @@ async def main() -> None:
         trail_distance_pips=75            # 75-pip trail distance for volatility buffer
     )
     if trade_id:
-        print(f"Success Trailing stop-loss active for trade {trade_id}")
-        print("Data Stop will automatically follow favorable price movement")
+        print(f"Trailing stop-loss active for trade {trade_id}")
+        print("Stop will automatically follow favorable price movement")
     else:
-        print("Error Failed to implement trailing stop-loss")
+        print("Error: Failed to implement trailing stop-loss")
 
 # Run the example
 # asyncio.run(main())
@@ -440,8 +440,8 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
     # Zero-config approach automatically uses environment variables for credentials
     async with AsyncClient() as client:
         try:
-            print(f"Data Calculating ATR-based stop-loss for {instrument}...")
-            print(f"Ruler Parameters: {atr_period}-period ATR × {atr_multiplier} multiplier")
+            print(f"Calculating ATR-based stop-loss for {instrument}...")
+            print(f"Parameters: {atr_period}-period ATR × {atr_multiplier} multiplier")
 
             # Step 2: Get historical data for ATR calculation
             # ATR requires historical price data to calculate average volatility
@@ -450,7 +450,7 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
                 count=atr_period + 10,  # Extra candles for calculation buffer
                 granularity="H1"        # 1-hour candles for detailed volatility analysis
             )
-            print(f"Analysis Retrieved {len(candles_response.candles)} historical candles")
+            print(f"Retrieved {len(candles_response.candles)} historical candles")
 
             # Step 3: Convert candlestick data to DataFrame for ATR calculation
             # Pandas DataFrame enables efficient True Range and ATR calculations
@@ -464,7 +464,7 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
                     })
 
             df = pd.DataFrame(data)
-            print(f"List Processed {len(df)} candles for ATR calculation")
+            print(f"Processed {len(df)} candles for ATR calculation")
 
             # Step 4: Calculate True Range (TR) components
             # True Range measures actual volatility including gaps between periods
@@ -479,9 +479,9 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
             current_atr = df['tr'].rolling(window=atr_period).mean().iloc[-1]
             current_price = df['close'].iloc[-1]
 
-            print(f"Data Current ATR ({atr_period} periods): {current_atr:.5f}")
+            print(f"Current ATR ({atr_period} periods): {current_atr:.5f}")
             print(f"💹 Current market price: {current_price:.5f}")
-            print(f"Ruler Market volatility: {(current_atr/current_price)*100:.2f}% of price")
+            print(f"Market volatility: {(current_atr/current_price)*100:.2f}% of price")
 
             # Step 6: Calculate stop-loss distance based on volatility
             # Multiply ATR by multiplier to set stop distance based on market conditions
@@ -493,13 +493,13 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
             if units > 0:  # Long position
                 stop_loss_price = Decimal(str(current_price - stop_distance))
                 direction = "LONG"
-                print(f"Analysis Long position: stop {stop_distance:.5f} below current price")
+                print(f"Long position: stop {stop_distance:.5f} below current price")
             else:  # Short position
                 stop_loss_price = Decimal(str(current_price + stop_distance))
                 direction = "SHORT"
                 print(f"📉 Short position: stop {stop_distance:.5f} above current price")
 
-            print(f"Security ATR-based stop level: {stop_loss_price}")
+            print(f"ATR-based stop level: {stop_loss_price}")
             print(f"✨ Automatically adapts to market volatility conditions")
 
             # Step 8: Place order with volatility-adaptive stop-loss
@@ -518,24 +518,24 @@ async def calculate_atr_stop_loss(account_id: str, instrument: str, units: int,
             if response.order_fill_transaction:
                 actual_entry = response.order_fill_transaction.price
                 actual_distance = abs(Decimal(str(actual_entry)) - stop_loss_price)
-                print(f"Success {direction} position created at {actual_entry}")
-                print(f"Security ATR-based stop active at {stop_loss_price}")
-                print(f"Ruler Actual stop distance: {actual_distance:.5f}")
-                print(f"Data Risk adapts automatically to market volatility")
+                print(f"{direction} position created at {actual_entry}")
+                print(f"ATR-based stop active at {stop_loss_price}")
+                print(f"Actual stop distance: {actual_distance:.5f}")
+                print(f"Risk adapts automatically to market volatility")
             else:
-                print("Error Order not executed")
+                print("Error: Order not executed")
 
             return response.order_fill_transaction
 
         except Exception as e:
-            print(f"Error Error calculating ATR stop-loss: {e}")
-            print("Note Check pandas installation, historical data availability, and ATR parameters")
+            print(f"Error: calculating ATR stop-loss: {e}")
+            print("Note: Check pandas installation, historical data availability, and ATR parameters")
             return None
 
 # Step 10: Usage example with 2.5x ATR stop-loss for volatile market adaptation
 async def main() -> None:
     """Example implementation of ATR-based stop-loss for USD/JPY volatility."""
-    print("Starting Starting ATR-based stop-loss example...")
+    print("Starting ATR-based stop-loss example...")
     _fill = await calculate_atr_stop_loss(
         account_id="101-001-1234567-001",  # Replace with your OANDA account ID
         instrument="USD_JPY",              # Japanese Yen pair for volatility testing
@@ -544,10 +544,10 @@ async def main() -> None:
         atr_period=20                     # 20-period ATR for longer-term volatility
     )
     if _fill:
-        print("Success ATR-based stop-loss successfully implemented")
-        print("Data Stop automatically adapts to current market volatility")
+        print("ATR-based stop-loss successfully implemented")
+        print("Stop automatically adapts to current market volatility")
     else:
-        print("Error Failed to implement ATR-based stop-loss")
+        print("Error: Failed to implement ATR-based stop-loss")
 
 # Run the example
 # asyncio.run(main())
@@ -588,14 +588,14 @@ async def modify_stop_loss(account_id: str, trade_id: str, new_stop_price: Decim
             )
 
             if response:
-                print(f"Success Stop-loss updated to {new_stop_price}")
+                print(f"Stop-loss updated to {new_stop_price}")
                 return True
             else:
-                print("Error Failed to update stop-loss")
+                print("Error: Failed to update stop-loss")
                 return False
 
         except Exception as e:
-            print(f"Error Error modifying stop-loss: {e}")
+            print(f"Error: modifying stop-loss: {e}")
             return False
 
 # Move stop-loss to break-even
@@ -648,24 +648,24 @@ async def move_to_breakeven(account_id: str, trade_id: str, trigger_pips: int = 
             else:  # Short position
                 pip_movement = (Decimal(str(entry_price)) - Decimal(str(market_price))) / pip_size
 
-            print(f"Data Current P/L: {pip_movement:.1f} pips")
+            print(f"Current P/L: {pip_movement:.1f} pips")
 
             # Check if profitable enough to move to break-even
             if pip_movement >= trigger_pips:
-                print(f"Target Moving stop-loss to break-even (entry: {entry_price})")
+                print(f"Moving stop-loss to break-even (entry: {entry_price})")
 
                 # Move stop to break-even (entry price)
                 success = await modify_stop_loss(account_id, trade_id, entry_price)
 
                 if success:
-                    print("Success Stop-loss moved to break-even - Risk eliminated!")
+                    print("Stop-loss moved to break-even - Risk eliminated!")
                     return True
             else:
-                print(f"Wait Need {trigger_pips - pip_movement:.1f} more pips for break-even")
+                print(f"Need {trigger_pips - pip_movement:.1f} more pips for break-even")
                 return False
 
         except Exception as e:
-            print(f"Error Error moving to break-even: {e}")
+            print(f"Error: moving to break-even: {e}")
             return False
 
 # Move to break-even after 25 pips profit
@@ -714,7 +714,7 @@ async def implement_tiered_stop_loss(account_id: str, instrument: str, units: in
                 stop2 = entry_price + (40 * pip_size)
                 stop3 = entry_price + (80 * pip_size)
 
-            print(f"Target Tiered stops: {stop1} | {stop2} | {stop3}")
+            print(f"Tiered stops: {stop1} | {stop2} | {stop3}")
 
             # Place main position
             main_response = await client.orders.post_market_order(
@@ -724,7 +724,7 @@ async def implement_tiered_stop_loss(account_id: str, instrument: str, units: in
             )
 
             if main_response.order_fill_transaction:
-                print(f"Success Main position filled at {main_response.order_fill_transaction.price}")
+                print(f"Main position filled at {main_response.order_fill_transaction.price}")
 
                 # Place tiered stop-loss orders as separate stop orders
                 position_size = abs(units)
@@ -753,14 +753,14 @@ async def implement_tiered_stop_loss(account_id: str, instrument: str, units: in
                     price=stop3
                 )
 
-                print("Success Tiered stop-loss orders placed")
+                print("Tiered stop-loss orders placed")
                 return True
             else:
-                print("Error Main position not filled")
+                print("Error: Main position not filled")
                 return False
 
         except Exception as e:
-            print(f"Error Error implementing tiered stops: {e}")
+            print(f"Error: implementing tiered stops: {e}")
             return False
 
 # Implement 3-tier stop strategy
@@ -794,14 +794,14 @@ async def monitor_stop_loss_positions(account_id: str, check_interval: int = 30)
     """Monitor all positions with stop-loss orders."""
 
     async with AsyncClient(token="your-token", environment=Environment.PRACTICE) as client:
-        print("Search Starting stop-loss monitoring...")
+        print("Starting stop-loss monitoring...")
 
         try:
             while True:
                 # Get all open trades
                 trades = await client.trades.get_open_trades(account_id)
 
-                print(f"\nData Monitoring {len(trades)} open positions:")
+                print(f"\nMonitoring {len(trades)} open positions:")
 
                 for trade in trades:
                     print(f"\n🔹 Trade {trade.id} ({trade.instrument}):")
@@ -812,7 +812,7 @@ async def monitor_stop_loss_positions(account_id: str, check_interval: int = 30)
                     # Check stop-loss order
                     if trade.stop_loss_order:
                         sl_order = trade.stop_loss_order
-                        print(f"   Security Stop-Loss: {sl_order.price} (ID: {sl_order.id})")
+                        print(f"   Stop-Loss: {sl_order.price} (ID: {sl_order.id})")
 
                         # Calculate distance to stop
                         current_price = Decimal(str(trade.price))  # Simplified - should get current market
@@ -827,15 +827,15 @@ async def monitor_stop_loss_positions(account_id: str, check_interval: int = 30)
                     # Check trailing stop
                     if trade.trailing_stop_loss_order:
                         tsl_order = trade.trailing_stop_loss_order
-                        print(f"   Processing Trailing Stop: {tsl_order.distance} distance")
+                        print(f"   Trailing Stop: {tsl_order.distance} distance")
 
                 # Wait before next check
                 await asyncio.sleep(check_interval)
 
         except KeyboardInterrupt:
-            print("\nSuccess Monitoring stopped")
+            print("\nMonitoring stopped")
         except Exception as e:
-            print(f"Error Monitoring error: {e}")
+            print(f"Error: Monitoring error: {e}")
 
 # Start monitoring (run in background)
 # await monitor_stop_loss_positions("101-001-1234567-001", check_interval=60)
@@ -905,12 +905,12 @@ class StopLossRules:
     def print_validation_results(results: dict):
         """Print validation results."""
 
-        print(f"\nSearch Stop-Loss Validation:")
+        print(f"\nStop-Loss Validation:")
         print(f"   Risk: {results['risk_pips']:.1f} pips (${results['risk_amount']:.2f})")
         print(f"   Risk %: {results['risk_percentage']:.2f}% of position value")
 
         if results['errors']:
-            print(f"   Error Errors:")
+            print(f"   Error: Errors:")
             for error in results['errors']:
                 print(f"      • {error}")
 
@@ -920,9 +920,9 @@ class StopLossRules:
                 print(f"      • {warning}")
 
         if results['valid']:
-            print(f"   Success Configuration valid")
+            print(f"   Configuration valid")
         else:
-            print(f"   Error Configuration invalid")
+            print(f"   Error: Configuration invalid")
 
 # Usage
 validation = StopLossRules.validate_stop_loss_setup(
@@ -949,7 +949,7 @@ async def troubleshoot_stop_loss_issues(account_id: str) -> dict[str, Any] | Non
     """Diagnose common stop-loss problems."""
 
     async with AsyncClient(token="your-token", environment=Environment.PRACTICE) as client:
-        print("Config Diagnosing stop-loss issues...\n")
+        print("Diagnosing stop-loss issues...\n")
 
         try:
             # Check account margin
@@ -963,11 +963,11 @@ async def troubleshoot_stop_loss_issues(account_id: str) -> dict[str, Any] | Non
             trades = await client.trades.get_open_trades(account_id)
 
             for trade in trades:
-                print(f"Search Trade {trade.id}:")
+                print(f"Trade {trade.id}:")
 
                 # Check for missing stops
                 if not trade.stop_loss_order:
-                    print("   Error Missing stop-loss protection")
+                    print("   Error: Missing stop-loss protection")
 
                 # Check for wide stops
                 if trade.stop_loss_order:
@@ -986,7 +986,7 @@ async def troubleshoot_stop_loss_issues(account_id: str) -> dict[str, Any] | Non
             orders = await client.orders.get_pending_orders(account_id)
             stop_orders = [o for o in orders if o.type == "STOP"]
 
-            print(f"\nList Found {len(stop_orders)} pending stop orders")
+            print(f"\nFound {len(stop_orders)} pending stop orders")
 
             return {
                 'margin_utilization': margin_utilization,
@@ -995,7 +995,7 @@ async def troubleshoot_stop_loss_issues(account_id: str) -> dict[str, Any] | Non
             }
 
         except Exception as e:
-            print(f"Error Diagnostic error: {e}")
+            print(f"Error: Diagnostic error: {e}")
             return None
 
 # Run diagnostics
@@ -1029,7 +1029,7 @@ async def emergency_stop_all_positions(account_id: str, reason: str = "Emergency
             positions = await client.positions.get_open_positions(account_id)
 
             if not positions:
-                print("Success No positions to close")
+                print("No positions to close")
                 return []
 
             results = []
@@ -1045,14 +1045,14 @@ async def emergency_stop_all_positions(account_id: str, reason: str = "Emergency
                     )
 
                     if response:
-                        print(f"Success Emergency closed: {position.instrument}")
+                        print(f"Emergency closed: {position.instrument}")
                         results.append({'instrument': position.instrument, 'success': True})
                     else:
-                        print(f"Error Failed to close: {position.instrument}")
+                        print(f"Error: Failed to close: {position.instrument}")
                         results.append({'instrument': position.instrument, 'success': False})
 
                 except Exception as e:
-                    print(f"Error Error closing {position.instrument}: {e}")
+                    print(f"Error: closing {position.instrument}: {e}")
                     results.append({'instrument': position.instrument, 'success': False, 'error': str(e)})
 
             successful_closes = sum(1 for r in results if r['success'])
@@ -1061,11 +1061,11 @@ async def emergency_stop_all_positions(account_id: str, reason: str = "Emergency
             return results
 
         except Exception as e:
-            print(f"Error Emergency stop failed: {e}")
+            print(f"Error: Emergency stop failed: {e}")
             return []
 
 # Emergency stop all trading
 # results = await emergency_stop_all_positions("101-001-1234567-001", "Market crash detected")
 ```
 
-**Task Complete**: You can now place fixed, percentage-based, and dynamic stop losses, monitor them, and run emergency close procedures.
+You can now place fixed, percentage-based, and dynamic stop losses, monitor them, and run emergency close procedures.

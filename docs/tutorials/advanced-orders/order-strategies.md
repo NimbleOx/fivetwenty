@@ -93,7 +93,7 @@ async def main() -> None:
         # STEP 2: MONITOR PRICE FOR BREAKOUT
         # ==============================================================================
 
-        print("\nStarting conditional monitoring...")
+        print("\nconditional monitoring...")
         print(f"  Condition: IF price >= {target_price:.5f} THEN execute breakout order")
         print("  Checking every 5 seconds (max 12 checks = 60 seconds)...\n")
 
@@ -205,7 +205,7 @@ async def main() -> None:
 
         print("\n  Breakout condition was not met within monitoring period")
         print(f"  Final Price: {current_price:.5f}")
-        print(f"  Target Price: {target_price:.5f}")
+        print(f"  Price: {target_price:.5f}")
         print(f"  Distance to Target: {(target_price - current_price) * 10000:.1f} pips")
 
         print("\n  Conditional Logic Demonstration:")
@@ -221,7 +221,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this conditional logic production-ready, add:")
+        print("\nBefore using this conditional logic live, add:")
         print("  • Persistent monitoring with database state tracking")
         print("  • Multiple concurrent condition monitoring")
         print("  • Condition timeout and expiration handling")
@@ -500,7 +500,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this reversal strategy production-ready, add:")
+        print("\nBefore using this reversal strategy live, add:")
         print("  • Confirmation signals before reversing (multiple indicators)")
         print("  • Position size adjustment based on volatility")
         print("  • Partial reversal option (reverse 50% instead of 100%)")
@@ -738,7 +738,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this strategy production-ready, add:")
+        print("\nBefore using this strategy live, add:")
         print("  • Monitor fills in real-time and adjust remaining orders")
         print("  • Move stop loss to breakeven after first profit target hits")
         print("  • Cancel unfilled entry orders after significant market move")
@@ -1034,7 +1034,7 @@ async def main() -> None:
         print("\n" + "=" * 70)
         print("PRODUCTION ENHANCEMENTS TO CONSIDER")
         print("=" * 70)
-        print("\nTo make this analytics system production-ready, add:")
+        print("\nBefore using this analytics system live, add:")
         print("  • Store order history in database for persistent tracking")
         print("  • Track fill rate (percentage of limit orders that fill)")
         print("  • Monitor time-to-fill for limit orders")

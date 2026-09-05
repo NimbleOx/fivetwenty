@@ -1,6 +1,6 @@
 # Position Management
 
-!!! tip "Target Learning Goal"
+!!! tip "Learning Goal"
     Manage open positions with stop losses, take profits, and risk-to-reward ratios.
 
 ---
@@ -169,7 +169,7 @@ async def main() -> None:
 
         # Explain the ratio
         if risk_reward_ratio >= 1.5:
-            print("\n Good risk-reward ratio!")
+            print("\n risk-reward ratio!")
             print(f"  With 1:{risk_reward_ratio:.1f} R/R, you can be profitable even with <50% win rate.")
         else:
             print("\n⚠ Risk-reward ratio below 1.5:1 is suboptimal")

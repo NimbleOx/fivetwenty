@@ -221,7 +221,7 @@ async def optimized_price_callback(price: ExamplePriceData) -> Any:
     # Step 26: Real-time analysis using cached current price
     current = price_manager.get_current_price(price.instrument)
     if current and current.spread < 0.0005:  # 0.5 pip threshold
-        print(f"Target Tight spread: {price.instrument} {current.spread:.5f}")
+        print(f"Tight spread: {price.instrument} {current.spread:.5f}")
         # Tight spread detection enables:
         # - Market making opportunities
         # - Arbitrage identification
@@ -391,7 +391,7 @@ async def process_price_data(price_obj: dict[str, Any]) -> None:
 # Step 18: Demonstrate CPU optimization through function call reduction
 from typing import Any
 
-# Success EFFICIENT: Direct attribute access with minimal function call overhead
+# Good: EFFICIENT: Direct attribute access with minimal function call overhead
 def fast_spread_calculation(price: Any) -> float:
     """Ultra-fast spread calculation optimized for HFT."""
     # Single expression with direct attribute access
@@ -418,7 +418,7 @@ def calculate_spread(ask: float, bid: float) -> float:
     return ask - bid
     # Pure function: no side effects, easy to test and optimize
 
-# Error LESS EFFICIENT: Multiple function calls create overhead
+# Less efficient: Multiple function calls create overhead
 def slow_spread_calculation(price: Any) -> float:
     """Spread calculation with unnecessary function call overhead."""
     ask = get_ask_price(price)      # Function call #1
@@ -447,7 +447,7 @@ async def handle_price_update(instrument: str, bid_price: Decimal, ask_price: De
     """Handle price update processing with optimized data types."""
     print(f"Price update: {instrument} bid={bid_price:.5f} ask={ask_price:.5f} spread={spread:.5f}")
 
-# Success EFFICIENT: Cache frequently accessed attributes in local variables
+# Good: EFFICIENT: Cache frequently accessed attributes in local variables
 async def optimized_price_processing(price: Any) -> None:
     """Price processing optimized for minimal attribute access overhead."""
     # Step 20: Cache object attributes in local variables
@@ -469,7 +469,7 @@ async def optimized_price_processing(price: Any) -> None:
         # Process with all cached values - zero additional attribute lookups
         await handle_price_update(instrument, bid_price, ask_price, spread)
 
-# Error LESS EFFICIENT: Repeated attribute lookups create CPU overhead
+# Less efficient: Repeated attribute lookups create CPU overhead
 async def unoptimized_price_processing(price: Any) -> None:
     """Unoptimized processing with repeated attribute access."""
     # Step 22: Demonstrate performance anti-pattern
@@ -964,7 +964,7 @@ async def profiled_hft_operation() -> None:
 
     # Step 68: Establish baseline measurement
     memory_profiler.measure("start")
-    print("Starting HFT operation memory profiling...")
+    print("HFT operation memory profiling...")
 
     # Step 69: Simulate sustained HFT operations
     for i in range(1000):
@@ -1000,7 +1000,7 @@ async def profiled_hft_operation() -> None:
         print("\n⚠️ Warning: High memory growth rate")
         print("   Investigate: Potential memory leaks, excessive object creation")
     else:
-        print("\nSuccess Memory usage appears stable and efficient")
+        print("\nMemory usage appears stable and efficient")
 
 # Usage example:
 # await profiled_hft_operation()

@@ -2,7 +2,7 @@
 
 Learn how to monitor account health, manage multiple accounts, and track account-level metrics using FiveTwenty's account and position APIs.
 
-!!! success "Target Practical Guide - Problem-oriented solutions"
+!!! success "Practical Guide - Problem-oriented solutions"
     **Use this guide when:** You need to manage OANDA accounts and monitor account health
 
     **Learning outcome:** Effectively monitor and manage trading accounts using FiveTwenty

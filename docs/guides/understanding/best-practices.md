@@ -26,12 +26,12 @@ async def example_async():
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         # Step 3: HTTP connections and session cleanup handled automatically
         # AsyncClient manages connection pooling and graceful shutdown
-        print(f"Config AsyncClient initialized with practice environment")
-        print(f"Global HTTP session created with connection pooling")
+        print(f"AsyncClient initialized with practice environment")
+        print(f"HTTP session created with connection pooling")
 
         # Step 4: Execute API call with automatic error handling
         account = await client.accounts.get_account(account_id)
-        print(f"Success Account retrieved: {account.id}")
+        print(f"Account retrieved: {account.id}")
         return account
         # Note: Client automatically cleaned up on exit from context manager
 
@@ -42,12 +42,12 @@ def example_sync():
     with Client(token=token, environment=Environment.PRACTICE) as client:
         # Step 6: Background thread and queue management handled automatically
         # Sync client runs AsyncClient in background thread with queue-based communication
-        print(f"Config Sync Client initialized with background thread")
-        print(f"Satellite Bounded queues prevent memory overflow in sync wrapper")
+        print(f"Sync Client initialized with background thread")
+        print(f"Bounded queues prevent memory overflow in sync wrapper")
 
         # Step 7: Synchronous API call - internally queued to async thread
         account = client.accounts.get_account(account_id)
-        print(f"Success Account retrieved synchronously: {account.id}")
+        print(f"Account retrieved synchronously: {account.id}")
         return account
         # Note: Background thread and queues automatically cleaned up on exit
 ```
@@ -66,26 +66,27 @@ from fivetwenty import AsyncClient, Environment
 token = os.getenv("OANDA_TOKEN")  # API token from environment
 account_id = "101-001-0000000-001"  # Replace with your OANDA account ID
 
-# Step 2: Success Good: Reuse client for multiple operations (RECOMMENDED)
+# Step 2: Good: Reuse client for multiple operations (RECOMMENDED)
 async def good_example():
     """Optimal pattern: Single client instance for multiple operations."""
     # Single context manager for all related operations
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
-        print(f"Config Single client instance created for multiple operations")
-        print(f"Global HTTP connection pool shared across all API calls")
+        print(f"Single client instance created for multiple operations")
+        print(f"HTTP connection pool shared across all API calls")
 
         # Step 3: Execute multiple operations using same client and connections
         # Connection pooling provides significant performance benefits
         account = await client.accounts.get_account(account_id)     # Reuses connection
         positions = await client.positions.get_positions(account_id)  # Reuses connection
-        orders = await client.orders.get_orders(account_id)        # Reuses connection
+        orders_response = await client.orders.get_orders(account_id)  # Reuses connection
+        orders = orders_response["orders"]
 
-        print(f"Success Retrieved account, positions, and orders using shared connections")
-        print(f"Lightning Connection reuse eliminates handshake overhead")
+        print(f"Retrieved account, positions, and orders using shared connections")
+        print(f"Connection reuse eliminates handshake overhead")
         return account, positions, orders
         # Single cleanup for all operations
 
-# Step 4: Error Bad: Create new client for each operation (AVOID)
+# Step 4: Bad: Create new client for each operation (AVOID)
 async def get_account():
     """Anti-pattern: New client instance per operation wastes resources."""
     # New context manager creates unnecessary overhead
@@ -115,37 +116,39 @@ account_id = "101-001-0000000-001"  # Replace with your OANDA account ID
 async def concurrent_example() -> None:
     """Demonstrate concurrent vs sequential API operations for optimal performance."""
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
-        print(f"Starting Starting concurrent operations demonstration...")
+        print(f"Starting concurrent operations demonstration...")
 
         # Step 2: Success Efficient: Concurrent requests using asyncio.gather
         # Multiple API calls execute simultaneously, reducing total latency
         start_time = asyncio.get_event_loop().time()
-        account, positions, orders = await asyncio.gather(
+        account, positions, orders_response = await asyncio.gather(
             client.accounts.get_account(account_id),     # Executes concurrently
             client.positions.get_positions(account_id),  # Executes concurrently
             client.orders.get_orders(account_id)         # Executes concurrently
         )
+        orders = orders_response["orders"]
         concurrent_time = asyncio.get_event_loop().time() - start_time
-        print(f"Lightning Concurrent execution: {concurrent_time:.3f} seconds")
-        print(f"Global Three API calls executed simultaneously")
+        print(f"Concurrent execution: {concurrent_time:.3f} seconds")
+        print(f"Three API calls executed simultaneously")
 
         # Step 3: Error Inefficient: Sequential requests (for comparison)
         # Each API call waits for previous to complete - multiplies latency
         start_time = asyncio.get_event_loop().time()
         account = await client.accounts.get_account(account_id)      # Waits for completion
         positions = await client.positions.get_positions(account_id) # Waits for completion
-        orders = await client.orders.get_orders(account_id)         # Waits for completion
+        orders_response = await client.orders.get_orders(account_id)  # Waits for completion
+        orders = orders_response["orders"]
         sequential_time = asyncio.get_event_loop().time() - start_time
         print(f"🐌 Sequential execution: {sequential_time:.3f} seconds")
-        print(f"Wait Each API call blocks the next")
+        print(f"Each API call blocks the next")
 
         # Step 4: Display performance comparison
         performance_gain = (sequential_time - concurrent_time) / sequential_time * 100
-        print(f"\nData Performance Analysis:")
+        print(f"\nPerformance Analysis:")
         print(f"   Concurrent: {concurrent_time:.3f}s")
         print(f"   Sequential: {sequential_time:.3f}s")
         print(f"   Improvement: {performance_gain:.1f}% faster with concurrency")
-        print(f"Note Use asyncio.gather() for independent API calls")
+        print(f"Note: Use asyncio.gather() for independent API calls")
 
         return account, positions, orders
 ```
@@ -250,13 +253,13 @@ async def example_error_handling() -> None:
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         try:
             # Step 2: Attempt order placement with potential for various errors
-            print(f"Analysis Attempting market order placement...")
+            print(f"Attempting market order placement...")
             order = await client.orders.post_market_order(
                 account_id=account_id,
                 instrument="EUR_USD",
                 units=1000
             )
-            print(f"Success Order placed successfully: {order.id}")
+            print(f"Order placed successfully: {order.id}")
 
         # Step 3: Handle specific OANDA API errors with targeted responses
         except FiveTwentyError as e:
@@ -265,8 +268,8 @@ async def example_error_handling() -> None:
 
             # Step 4: Handle insufficient margin errors
             if "INSUFFICIENT_MARGIN" in error_message:
-                print(f"Balance Insufficient margin detected")
-                print(f"Config Reducing position size and retrying...")
+                print(f"Insufficient margin detected")
+                print(f"Reducing position size and retrying...")
                 await handle_margin_error(e)
 
             # Step 5: Handle invalid instrument errors
@@ -277,46 +280,46 @@ async def example_error_handling() -> None:
 
             # Step 6: Handle rate limiting errors
             elif "RATE_LIMIT" in error_message or "TOO_MANY_REQUESTS" in error_message:
-                print(f"Time Rate limit exceeded - respecting API limits")
+                print(f"Rate limit exceeded - respecting API limits")
                 retry_after = getattr(e, 'retry_after', 60)  # Default 60 seconds
-                print(f"Wait Waiting {retry_after} seconds before retry...")
+                print(f"Waiting {retry_after} seconds before retry...")
                 await asyncio.sleep(retry_after)
 
             # Step 7: Handle server errors with exponential backoff
             elif "INTERNAL_SERVER_ERROR" in error_message or "503" in error_message:
-                print(f"Tools OANDA server error detected")
-                print(f"Processing Implementing exponential backoff retry...")
+                print(f"OANDA server error detected")
+                print(f"Implementing exponential backoff retry...")
                 await retry_with_backoff()
 
             else:
-                print(f"Error Unhandled OANDA error: {error_message}")
+                print(f"Error: Unhandled OANDA error: {error_message}")
                 raise  # Re-raise unhandled errors
 
         # Step 8: Handle network and connection errors
         except ConnectionError as e:
-            print(f"Global Network connection error: {e}")
-            print(f"Config Check internet connectivity and retry...")
+            print(f"Network connection error: {e}")
+            print(f"Check internet connectivity and retry...")
             await asyncio.sleep(5)  # Brief pause before potential retry
 
         # Step 9: Handle authentication errors
         except PermissionError as e:
-            print(f"Secure Authentication error: {e}")
-            print(f"Note Check API token validity and permissions")
+            print(f"Authentication error: {e}")
+            print(f"Note: Check API token validity and permissions")
             raise  # Don't retry auth errors
 
         return order
 
 async def handle_margin_error(error) -> None:
     """Handle insufficient margin errors with position size reduction."""
-    print(f"Tools Implementing margin error recovery strategy...")
+    print(f"Implementing margin error recovery strategy...")
     print(f"📉 Strategy: Reduce position size by 50%")
-    print(f"Data Strategy: Check account balance and available margin")
+    print(f"Strategy: Check account balance and available margin")
     # Implementation would include account balance checks and position adjustment
 
 async def retry_with_backoff() -> None:
     """Implement exponential backoff retry for server errors."""
-    print(f"Processing Implementing exponential backoff retry strategy...")
-    print(f"Time Delay pattern: 1s, 2s, 4s, 8s, 16s...")
+    print(f"Implementing exponential backoff retry strategy...")
+    print(f"Delay pattern: 1s, 2s, 4s, 8s, 16s...")
     print(f"🎲 Adding jitter to prevent thundering herd")
     # Implementation would include actual retry logic with increasing delays
 ```
@@ -602,68 +605,68 @@ account_id = "101-001-0000000-001"  # Replace with your account ID
 async def good_pattern_example():
     """Demonstrate optimal client reuse pattern for multiple operations."""
     symbols = ["EUR_USD", "GBP_USD"]
-    print(f"Success Best Practice: Single client for multiple operations")
+    print(f"Best Practice: Single client for multiple operations")
 
     # Single client instance handles all operations efficiently
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
-        print(f"Config Client created once for {len(symbols)} operations")
+        print(f"Client created once for {len(symbols)} operations")
         for symbol in symbols:
             # Each operation reuses the same HTTP connections
             _price = await client.pricing.get_pricing(account_id, [symbol])
-            print(f"Balance Retrieved pricing for {symbol} using shared connection")
-        print(f"Lightning Connection reuse provides significant performance benefit")
+            print(f"Retrieved pricing for {symbol} using shared connection")
+        print(f"Connection reuse provides significant performance benefit")
 
 # Step 4: Success Async operations in async context for non-blocking execution
 async def good_async():
     """Demonstrate proper async sleep vs blocking sleep."""
-    print(f"Success Best Practice: Non-blocking async operations")
-    print(f"Wait Starting 1-second non-blocking delay...")
+    print(f"Best Practice: Non-blocking async operations")
+    print(f"Starting 1-second non-blocking delay...")
     await asyncio.sleep(1)  # Non-blocking - allows other coroutines to run
-    print(f"Success Non-blocking delay completed - event loop remained responsive")
+    print(f"Non-blocking delay completed - event loop remained responsive")
 
 # Step 5: Success Decimal arithmetic for financial precision
-print(f"Success Best Practice: Decimal arithmetic for financial calculations")
+print(f"Best Practice: Decimal arithmetic for financial calculations")
 profit_loss = Decimal("1234.56") + Decimal("0.1")  # Exact precision: 1234.66
-print(f"Balance Precise calculation: 1234.56 + 0.1 = {profit_loss}")
+print(f"Precise calculation: 1234.56 + 0.1 = {profit_loss}")
 print(f"✨ No floating-point precision errors with Decimal")
 
 # Step 6: Success Specific error handling for robust applications
 async def good_error_handling():
     """Demonstrate specific error handling with proper logging."""
-    print(f"Success Best Practice: Specific error handling with logging")
+    print(f"Best Practice: Specific error handling with logging")
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         try:
-            print(f"Analysis Attempting order placement with error handling...")
+            print(f"Attempting order placement with error handling...")
             _order = await client.orders.post_market_order(
                 account_id=account_id,
                 instrument="EUR_USD",
                 units=1000
             )
-            print(f"Success Order placed successfully")
+            print(f"Order placed successfully")
         except FiveTwentyError as e:
             # Structured logging with specific error details
             logger.error(f"Order placement failed: {e}")
-            print(f"Notes Error logged with specific details for debugging")
-            print(f"Config Error handling allows graceful recovery")
+            print(f"Note: Error logged with specific details for debugging")
+            print(f"Error: handling allows graceful recovery")
 
 # Step 7: Success Respect rate limits for API compliance
 async def good_rate_limit_handling():
     """Demonstrate proper rate limit handling and compliance."""
-    print(f"Success Best Practice: Respectful rate limit handling")
+    print(f"Best Practice: Respectful rate limit handling")
     async with AsyncClient(token=token, environment=Environment.PRACTICE) as client:
         try:
-            print(f"Global Making API request with rate limit awareness...")
+            print(f"Making API request with rate limit awareness...")
             await client.accounts.get_account(account_id)
-            print(f"Success API request completed successfully")
+            print(f"API request completed successfully")
         except FiveTwentyError as e:
             if not e.is_rate_limited:
                 raise
             # Honor API rate limits to maintain good standing
             retry_after = e.retry_after or 60  # Use server-specified delay or default
-            print(f"Time Rate limit hit - waiting {retry_after} seconds")
+            print(f"Rate limit hit - waiting {retry_after} seconds")
             print(f"🤝 Respecting API limits maintains good standing with OANDA")
             await asyncio.sleep(retry_after)
-            print(f"Success Rate limit delay completed - ready for next request")
+            print(f"Rate limit delay completed - ready for next request")
 ```
 
 ## Order Validation Framework
@@ -783,12 +786,12 @@ class OrderValidationFramework:
             # Get account information
             account = await self.client.accounts.get_account(account_id=self.account_id)
             positions = await self.client.positions.get_positions(account_id=self.account_id)
-            orders = await self.client.orders.get_orders(account_id=self.account_id)
+            orders_response = await self.client.orders.get_orders(account_id=self.account_id)
 
             return {
                 "account": account,
                 "positions": positions.positions,
-                "pending_orders": orders.orders,
+                "pending_orders": orders_response["orders"],
                 "current_time": datetime.utcnow(),
                 "account_balance": Decimal(account.balance),
                 "margin_available": Decimal(account.margin_available),

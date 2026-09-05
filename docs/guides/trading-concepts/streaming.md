@@ -57,7 +57,7 @@ async def demonstrate_async_streaming_architecture() -> None:
         account_id = client.account_id
         instruments = ["EUR_USD", "GBP_USD"]  # Multiple instruments for flow analysis
 
-        print(f"\nAnalysis Streaming Configuration:")
+        print(f"\nStreaming Configuration:")
         print(f" Account: {account_id}")
         print(f" Instruments: {', '.join(instruments)}")
         print(f" Stream type: Price streaming (real-time market data)")
@@ -72,7 +72,7 @@ async def demonstrate_async_streaming_architecture() -> None:
         }
 
         try:
-            print(f"\nStarting Starting Async Streaming Loop...")
+            print(f"\nStarting Async Streaming Loop...")
 
             # Step 4: Enter async iterator streaming pattern
             # This demonstrates the core async streaming architecture
@@ -86,10 +86,10 @@ async def demonstrate_async_streaming_architecture() -> None:
                         stream_stats["price_updates"] += 1
 
                         print(f" Price Update #{stream_stats['price_updates']}:")
-                        print(f"     Business Instrument: {price_data.instrument}")
-                        print(f"     Balance Bid: {price_data.bids[0].price}")
-                        print(f"     Analysis Ask: {price_data.asks[0].price}")
-                        print(f"     Time Time: {price_data.time}")
+                        print(f"     Instrument: {price_data.instrument}")
+                        print(f"     Bid: {price_data.bids[0].price}")
+                        print(f"     Ask: {price_data.asks[0].price}")
+                        print(f"     Time: {price_data.time}")
 
                         # Demonstrate architectural flow control
                         await process_price_architecturally(price_data)
@@ -103,13 +103,13 @@ async def demonstrate_async_streaming_architecture() -> None:
 
                 # Step 6: Architectural flow control - limit demo duration
                 if stream_stats["price_updates"] >= 10:  # Limit for demonstration
-                    print(f"\nRed Demo limit reached - stopping stream")
+                    print(f"\nDemo limit reached - stopping stream")
                     break
 
         except Exception as e:
             stream_stats["errors"] += 1
-            print(f"\nError Streaming error: {e}")
-            print(f"Note Architecture handles errors gracefully with reconnection")
+            print(f"\nError: Streaming error: {e}")
+            print(f"Note: Architecture handles errors gracefully with reconnection")
 
         # Step 7: Display architectural performance metrics
         print(f"\nAsync Streaming Architecture Results:")
@@ -144,12 +144,12 @@ async def process_price_architecturally(price_data) -> None:
 
 
 # Step 9: Run async streaming architecture demonstration
-print(f" Starting Async Streaming Architecture Demo")
+print(f" Async Streaming Architecture Demo")
 try:
     asyncio.run(demonstrate_async_streaming_architecture())
 except KeyboardInterrupt:
-    print(f"\nRed Demo stopped by user")
-print(f"Success Async streaming architecture demonstration complete")
+    print(f"\nDemo stopped by user")
+print(f"Async streaming architecture demonstration complete")
 ```
 
 **Benefits**:
@@ -174,8 +174,8 @@ def demonstrate_sync_streaming_architecture() -> None:
     """Demonstrate sync streaming architecture with thread management analysis."""
     # Step 1: Initialize sync client for streaming architecture
     # Sync Client wraps async operations in background thread
-    print(f"Processing Sync Streaming Architecture Demonstration")
-    print(f"   List Main thread: {current_thread().name}")
+    print(f"Sync Streaming Architecture Demonstration")
+    print(f"   Main thread: {current_thread().name}")
 
     with Client(
         environment=Environment.PRACTICE  # Use practice for demonstration
@@ -185,11 +185,11 @@ def demonstrate_sync_streaming_architecture() -> None:
         account_id = client.account_id
         instruments = ["EUR_USD"]  # Single instrument for simplicity
 
-        print(f"\nAnalysis Sync Streaming Configuration:")
+        print(f"\nSync Streaming Configuration:")
         print(f" Account: {account_id}")
         print(f" Instruments: {', '.join(instruments)}")
-        print(f"   Processing Architecture: Sync iterator with background async loop")
-        print(f"   Data Queue: Bounded queue for thread-safe communication")
+        print(f"   Architecture: Sync iterator with background async loop")
+        print(f"   Queue: Bounded queue for thread-safe communication")
 
         # Step 3: Streaming statistics for architectural analysis
         stream_stats = {
@@ -201,8 +201,8 @@ def demonstrate_sync_streaming_architecture() -> None:
         }
 
         try:
-            print(f"\nStarting Starting Sync Streaming Loop...")
-            print(f"   List Processing thread: {current_thread().name}")
+            print(f"\nStarting Sync Streaming Loop...")
+            print(f"   Processing thread: {current_thread().name}")
 
             # Step 4: Enter sync iterator streaming pattern
             # This demonstrates sync wrapper over async streaming
@@ -217,9 +217,9 @@ def demonstrate_sync_streaming_architecture() -> None:
                         stream_stats["price_updates"] += 1
 
                         print(f" Sync Price Update #{stream_stats['price_updates']}:")
-                        print(f"     Business Instrument: {price_data.instrument}")
-                        print(f"     Balance Bid: {price_data.bids[0].price}")
-                        print(f"     Analysis Ask: {price_data.asks[0].price}")
+                        print(f"     Instrument: {price_data.instrument}")
+                        print(f"     Bid: {price_data.bids[0].price}")
+                        print(f"     Ask: {price_data.asks[0].price}")
                         print(f"     🗺️ Thread: {current_thread().name}")
 
                         # Demonstrate sync processing patterns
@@ -238,12 +238,12 @@ def demonstrate_sync_streaming_architecture() -> None:
 
                 # Step 7: Architectural flow control - limit demo duration
                 if stream_stats["price_updates"] >= 8:  # Limit for demonstration
-                    print(f"\nRed Sync demo limit reached - stopping stream")
+                    print(f"\nSync demo limit reached - stopping stream")
                     break
 
         except Exception as e:
-            print(f"\nError Sync streaming error: {e}")
-            print(f"Note Sync architecture provides thread-safe error handling")
+            print(f"\nError: Sync streaming error: {e}")
+            print(f"Note: Sync architecture provides thread-safe error handling")
 
         # Step 8: Calculate architectural performance metrics
         total_runtime = time.time() - stream_stats["start_time"]
@@ -252,23 +252,23 @@ def demonstrate_sync_streaming_architecture() -> None:
             if stream_stats["messages_processed"] > 0 else 0
         )
 
-        print(f"\nAnalysis Sync Streaming Architecture Results:")
-        print(f"   Time Total runtime: {total_runtime:.2f} seconds")
-        print(f"   List Messages processed: {stream_stats['messages_processed']}")
+        print(f"\nSync Streaming Architecture Results:")
+        print(f"   Total runtime: {total_runtime:.2f} seconds")
+        print(f"   Messages processed: {stream_stats['messages_processed']}")
         print(f" Price updates: {stream_stats['price_updates']}")
         print(f"   Heart Heartbeats: {stream_stats['heartbeats_received']}")
         print(f" Avg processing time: {avg_processing_time*1000:.2f}ms per message")
 
-        print(f"\nTarget Sync Architecture Benefits:")
+        print(f"\nSync Architecture Benefits:")
         print(f"   📚 Familiar: Standard Python iterator interface")
-        print(f"   Secure Thread-safe: Background async loop handled automatically")
-        print(f"   Data Bounded: Queue prevents memory issues")
+        print(f"   Thread-safe: Background async loop handled automatically")
+        print(f"   Bounded: Queue prevents memory issues")
         print(f"   🆕 Simple: No async/await syntax required")
 
-        print(f"\nConfig Sync Architecture Internals:")
-        print(f"   Processing Background thread: Runs async event loop")
-        print(f"   Data Bounded queue: Thread-safe message passing")
-        print(f"   Secure Resource management: Automatic cleanup on context exit")
+        print(f"\nSync Architecture Internals:")
+        print(f"   Background thread: Runs async event loop")
+        print(f"   Bounded queue: Thread-safe message passing")
+        print(f"   Resource management: Automatic cleanup on context exit")
         print(f"   ⚠️ Blocking nature: Iterator blocks until next message")
 
 
@@ -291,12 +291,12 @@ def process_price_synchronously(price_data) -> None:
 
 
 # Step 10: Run sync streaming architecture demonstration
-print(f"Processing Starting Sync Streaming Architecture Demo")
+print(f"Starting Sync Streaming Architecture Demo")
 try:
     demonstrate_sync_streaming_architecture()
 except KeyboardInterrupt:
-    print(f"\nRed Demo stopped by user")
-print(f"Success Sync streaming architecture demonstration complete")
+    print(f"\nDemo stopped by user")
+print(f"Sync streaming architecture demonstration complete")
 ```
 
 **Benefits**:

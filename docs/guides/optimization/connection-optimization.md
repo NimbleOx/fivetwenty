@@ -32,14 +32,14 @@ class OptimizedTradingClient:
         self.max_connections = max_connections            # Maximum concurrent connections for pool
         self.client: AsyncClient | None = None            # FiveTwenty client instance
         self._connection_pool_initialized = False         # Pool initialization state
-        print(f"Config Configuring optimized client for {max_connections} concurrent connections")
+        print(f"Configuring optimized client for {max_connections} concurrent connections")
 
     async def initialize(self) -> Any:
         """Initialize optimized client with persistent connections for minimal latency."""
 
         # Step 2: Create AsyncClient with optimized settings for high-frequency trading
         # Persistent connections eliminate handshake overhead for subsequent requests
-        print(f"Lightning Initializing high-performance connection pool...")
+        print(f"Initializing high-performance connection pool...")
         self.client = AsyncClient(
             token=self.token,                    # API authentication
             environment=self.environment         # Environment configuration
@@ -49,24 +49,24 @@ class OptimizedTradingClient:
             # limits_max_keepalive_connections=self.max_connections,  # Persistent connections
             # limits_keepalive_expiry=300,      # Keep connections alive for 5 minutes
         )
-        print(f"Global Connection pool configured with {self.max_connections} max connections")
+        print(f"Connection pool configured with {self.max_connections} max connections")
 
         # Step 3: Enter client context to establish connection pool
         # Context manager ensures proper connection lifecycle management
         await self.client.__aenter__()
         self._connection_pool_initialized = True
-        print(f"Success Optimized client initialized - connection pool active")
-        print(f"Starting Ready for high-frequency trading operations")
+        print(f"Optimized client initialized - connection pool active")
+        print(f"Ready for high-frequency trading operations")
 
     async def close(self) -> Any:
         """Clean up connections and release pool resources."""
         # Step 4: Properly close connections to prevent resource leaks
         # Important for long-running HFT applications
         if self.client:
-            print(f"Secure Closing connection pool...")
+            print(f"Closing connection pool...")
             await self.client.__aexit__(None, None, None)
             self._connection_pool_initialized = False
-            print(f"Success Connection pool closed - resources released")
+            print(f"Connection pool closed - resources released")
 
     async def __aenter__(self) -> Any:
         """Context manager entry for automatic client initialization."""
@@ -80,14 +80,14 @@ class OptimizedTradingClient:
 # Step 5: Usage example with optimized settings for high-frequency trading
 async def setup_hft_client() -> Any:
     """Setup high-frequency trading client with optimized connection pooling."""
-    print(f"Target Setting up HFT-optimized client...")
+    print(f"Setting up HFT-optimized client...")
     async with OptimizedTradingClient(
         token="your-token",               # Replace with your OANDA API token
         environment=Environment.PRACTICE, # Use practice for testing, live for production
         max_connections=20,              # Higher connection limit for HFT (adjust based on needs)
     ) as hft_client:
-        print(f"Lightning HFT client ready with persistent connection pool")
-        print(f"Hot Optimized for minimal latency and maximum throughput")
+        print(f"HFT client ready with persistent connection pool")
+        print(f"Optimized for minimal latency and maximum throughput")
         return hft_client.client
 
 # Step 6: Initialize optimized client for high-frequency operations
@@ -124,7 +124,7 @@ class BatchRequestManager:
         # Step 2: Start performance timing for batch pricing operation
         # High-frequency trading requires sub-millisecond performance monitoring
         start_time = time.perf_counter()
-        print(f"Lightning Starting concurrent pricing for {len(instrument_batches)} instrument batches...")
+        print(f"Starting concurrent pricing for {len(instrument_batches)} instrument batches...")
 
         # Step 3: Create concurrent price request tasks
         # Concurrent execution eliminates sequential API call overhead
@@ -132,7 +132,7 @@ class BatchRequestManager:
             self.client.pricing.get_pricing(account_id, instruments)
             for instruments in instrument_batches
         ]
-        print(f"Processing Created {len(tasks)} concurrent pricing tasks")
+        print(f"Created {len(tasks)} concurrent pricing tasks")
 
         # Step 4: Execute all price requests concurrently with exception handling
         # asyncio.gather enables true parallel execution of multiple API calls
@@ -149,12 +149,12 @@ class BatchRequestManager:
         throughput = len(instrument_batches) / (end_time - start_time)
 
         # Step 7: Display detailed performance metrics for HFT optimization
-        print(f"Lightning Batch pricing results:")
-        print(f"   Success Successful: {len(successful_results)}")
-        print(f"   Error Failed: {failed_count}")
-        print(f"   Time Total time: {execution_time_ms:.1f}ms")
-        print(f"   Starting Throughput: {throughput:.1f} req/sec")
-        print(f"   Data Average per request: {execution_time_ms/len(tasks):.1f}ms")
+        print(f"Batch pricing results:")
+        print(f"   Successful: {len(successful_results)}")
+        print(f"   Error: Failed: {failed_count}")
+        print(f"   Total time: {execution_time_ms:.1f}ms")
+        print(f"   Throughput: {throughput:.1f} req/sec")
+        print(f"   Average per request: {execution_time_ms/len(tasks):.1f}ms")
 
         return successful_results
 
@@ -164,13 +164,13 @@ class BatchRequestManager:
         # Step 8: Start performance timing for batch order execution
         # Order execution timing is critical for HFT strategy success
         start_time = time.perf_counter()
-        print(f"Analysis Executing {len(order_requests)} concurrent market orders...")
+        print(f"Executing {len(order_requests)} concurrent market orders...")
 
         # Step 9: Create concurrent order execution tasks
         # Parallel order execution minimizes market impact and slippage
         tasks = []
         for i, order_req in enumerate(order_requests):
-            print(f"   Processing Task {i+1}: {order_req['instrument']} {order_req['units']} units")
+            print(f"   Task {i+1}: {order_req['instrument']} {order_req['units']} units")
             task = self.client.orders.post_market_order(
                 account_id=account_id,
                 instrument=order_req["instrument"],    # Currency pair for order
@@ -182,14 +182,14 @@ class BatchRequestManager:
         # Step 10: Execute orders concurrently with HFT-appropriate timeout
         # Timeout prevents hanging operations in fast-moving markets
         try:
-            print(f"Lightning Executing {len(tasks)} orders with 2-second timeout...")
+            print(f"Executing {len(tasks)} orders with 2-second timeout...")
             results = await asyncio.wait_for(
                 asyncio.gather(*tasks, return_exceptions=True),
                 timeout=2.0,  # 2-second timeout appropriate for HFT operations
             )
         except asyncio.TimeoutError:
             print("⚠️ Batch order timeout - some orders may have failed")
-            print("Note Consider reducing batch size or increasing timeout for volatile markets")
+            print("Note: Consider reducing batch size or increasing timeout for volatile markets")
             return []
 
         # Step 11: Calculate execution performance metrics
@@ -197,7 +197,7 @@ class BatchRequestManager:
         execution_time_ms = (end_time - start_time) * 1000
 
         # Step 12: Analyze order execution success rates
-        # Success rate analysis helps optimize batch sizes and timing
+        # Good: rate analysis helps optimize batch sizes and timing
         successful_orders = [
             r for r in results
             if not isinstance(r, Exception) and hasattr(r, "order_fill_transaction")
@@ -206,11 +206,11 @@ class BatchRequestManager:
         success_rate = (len(successful_orders) / len(order_requests)) * 100
 
         # Step 13: Display comprehensive execution metrics
-        print(f"Analysis Batch order execution results:")
-        print(f"   Success Successful: {len(successful_orders)}/{len(order_requests)}")
-        print(f"   Data Success rate: {success_rate:.1f}%")
-        print(f"   Time Execution time: {execution_time_ms:.1f}ms")
-        print(f"   Target Average per order: {execution_time_ms/len(order_requests):.1f}ms")
+        print(f"Batch order execution results:")
+        print(f"   Successful: {len(successful_orders)}/{len(order_requests)}")
+        print(f"   Success: rate: {success_rate:.1f}%")
+        print(f"   Execution time: {execution_time_ms:.1f}ms")
+        print(f"   Average per order: {execution_time_ms/len(order_requests):.1f}ms")
         if failed_orders > 0:
             print(f"   ⚠️ Failed orders: {failed_orders} (check account balance and market conditions)")
 
@@ -219,7 +219,7 @@ class BatchRequestManager:
 # Step 14: Comprehensive usage example for high-frequency trading
 async def hft_batch_example(client: AsyncClient, account_id: str):
     """Demonstrate batch processing for high-frequency trading operations."""
-    print(f"Starting Starting HFT batch processing example...")
+    print(f"Starting HFT batch processing example...")
 
     # Step 15: Initialize batch manager with HFT-optimized batch size
     batch_manager = BatchRequestManager(client, batch_size=15)
@@ -230,13 +230,13 @@ async def hft_batch_example(client: AsyncClient, account_id: str):
     minor_pairs = ["EUR_GBP", "AUD_USD", "USD_CAD"]      # Medium liquidity
     exotic_pairs = ["USD_TRY", "EUR_TRY", "GBP_TRY"]     # Lower liquidity, wider spreads
 
-    print(f"Data Instrument groups: {len(major_pairs)} major, {len(minor_pairs)} minor, {len(exotic_pairs)} exotic")
+    print(f"Instrument groups: {len(major_pairs)} major, {len(minor_pairs)} minor, {len(exotic_pairs)} exotic")
 
     # Step 17: Execute concurrent price requests across instrument groups
     price_results = await batch_manager.batch_get_prices(
         account_id, [major_pairs, minor_pairs, exotic_pairs],
     )
-    print(f"Balance Retrieved pricing data for {len(price_results)} instrument groups")
+    print(f"Retrieved pricing data for {len(price_results)} instrument groups")
 
     # Step 18: Define order batch based on market analysis
     # Order batching enables rapid execution of coordinated trading strategies
@@ -245,13 +245,13 @@ async def hft_batch_example(client: AsyncClient, account_id: str):
         {"instrument": "GBP_USD", "units": -5000},    # Short GBP position
         {"instrument": "USD_JPY", "units": 15000},    # Long USD/JPY position
     ]
-    print(f"Analysis Preparing {len(orders)} coordinated market orders...")
+    print(f"Preparing {len(orders)} coordinated market orders...")
 
     # Step 19: Execute batch orders with performance monitoring
     order_results = await batch_manager.batch_market_orders(account_id, orders)
 
     # Step 20: Return results for further analysis
-    print(f"Success Batch processing complete: {len(price_results)} price batches, {len(order_results)} orders executed")
+    print(f"Batch processing complete: {len(price_results)} price batches, {len(order_results)} orders executed")
     return price_results, order_results
 ```
 

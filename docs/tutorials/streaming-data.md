@@ -10,7 +10,7 @@ By the end of this tutorial, you will:
 - Implement price streams and account monitoring
 - Build automated trading systems with real-time data
 - Handle connection management and error recovery
-- Create production-ready streaming applications
+- Build streaming applications with reconnect and error-handling paths
 
 ## Prerequisites
 
@@ -915,7 +915,7 @@ class StreamingTradingSystem:
 
 
 async def main() -> None:
-    """Execute production-ready streaming trading system."""
+    """Execute a streaming trading system with reconnect and error handling."""
 
     # ==============================================================================
     # START TRADING SYSTEM

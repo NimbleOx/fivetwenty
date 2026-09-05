@@ -1,6 +1,6 @@
 # Strategy Building
 
-!!! tip "Target Learning Goal"
+!!! tip "Learning Goal"
     Develop your first complete trading strategy with systematic signal generation and risk management.
 
 Trading strategies turn market observations into trading decisions through systematic rules. Rather than relying on intuition, algorithmic strategies use quantifiable signals, like price movements or technical indicators, to determine when to enter and exit positions. Having a strategy is only the start: you also need to test it on historical data (backtesting), optimize its parameters, and validate its performance before risking real capital.
@@ -267,7 +267,7 @@ class SimpleMovingAverageCrossover:
 
         except Exception as e:
             # In production, you might want to use proper logging instead of print
-            print(f"Error updating prices: {e}")
+            print(f"Error: updating prices: {e}")
             return False
 
         return False
@@ -1187,11 +1187,11 @@ class StrategyOptimizer:
         # Total combinations = product of all list lengths (3 * 3 = 9)
         combinations = list(itertools.product(*param_values))
 
-        print(f"\nTesting {len(combinations)} parameter combinations...")
+        print(f"\n{len(combinations)} parameter combinations...")
         print(f"Instrument: {self.instrument.value}")
         print(f"Backtest Period: {days_back} days")
         print(
-            "Data Source: OANDA via client.instruments.get_instrument_candles()\n"
+            "Source: OANDA via client.instruments.get_instrument_candles()\n"
         )
 
         # Track best performing parameters
@@ -1400,7 +1400,7 @@ if __name__ == "__main__":
 
 ## Next Steps
 
-Continue to [Complete Trading System](complete-system.md) to build a production-ready automated trading system.
+Continue to [Complete Trading System](complete-system.md) to build a complete automated trading example.
 
 ---
 

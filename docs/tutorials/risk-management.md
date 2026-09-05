@@ -2,7 +2,7 @@
 
 Learn essential risk management techniques using FiveTwenty's stop loss orders, position monitoring, and account controls.
 
-!!! success "Target Practical Guide - Problem-oriented solutions"
+!!! success "Practical Guide - Problem-oriented solutions"
     **Use this guide when:** You need to protect trading capital and control position risk
 
     **Learning outcome:** Implement risk controls using FiveTwenty SDK features
