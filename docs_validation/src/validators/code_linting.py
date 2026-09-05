@@ -9,6 +9,7 @@ from typing import Any
 
 from ..base import BaseValidator
 from ..models import FileInfo, IssueSeverity, ValidationIssue, ValidationResult
+from .code_blocks import iter_fenced_blocks
 from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, implicit_skip_metadata, is_placeholder_code, marker_skip_metadata
 
 
@@ -26,54 +27,23 @@ class CodeLintingValidator(BaseValidator):
         """Validate code linting in file content."""
         issues: list[ValidationIssue] = []
 
-        lines = content.split("\n")
-
-        # Track code block state
-        in_code_block = False
-        code_block_lines: list[str] = []
-        code_block_start = 0
-        code_block_language = ""
+        lines = content.splitlines()
         skipped_blocks: list[dict[str, Any]] = []
-
-        for line_num, line in enumerate(lines, 1):
-            stripped = line.strip()
-
-            if stripped.startswith("```"):
-                if not in_code_block:
-                    # Starting a code block
-                    in_code_block = True
-                    code_block_start = line_num
-                    code_block_lines = []
-                    code_block_language = stripped[3:].strip().lower()
-                else:
-                    # Ending a code block
-                    in_code_block = False
-
-                    # Validate the code block if it's Python
-                    if code_block_language in ["python", "py", ""] and code_block_lines:
-                        # Check for validation skip comments before the code block
-                        skip_marker = find_fragment_marker(lines, code_block_start, FragmentTarget.LINTING)
-
-                        if skip_marker is not None:
-                            skipped_blocks.append(marker_skip_metadata(skip_marker, code_block_start))
-                        elif self._is_placeholder_code("\n".join(code_block_lines)):
-                            skipped_blocks.append(implicit_skip_metadata(code_block_start, "Standalone ellipsis marks an incomplete example"))
-                        else:
-                            issues.extend(
-                                self._lint_python_code(
-                                    code_block_lines,
-                                    code_block_start + 1,
-                                    file_info.path,
-                                    options,
-                                )
-                            )
-
-                    # Reset for next block
-                    code_block_lines = []
-                    code_block_language = ""
-            elif in_code_block:
-                # Collect code block content
-                code_block_lines.append(line)
+        for block in iter_fenced_blocks(content):
+            if not block.is_python:
+                continue
+            if not block.closed:
+                issues.append(ValidationIssue(file_path=file_info.path, line=block.fence_line, rule_id="code_linting_unclosed_block", message="Unclosed Python code fence"))
+                continue
+            if not block.code.strip():
+                continue
+            marker = find_fragment_marker(lines, block.fence_line, FragmentTarget.LINTING)
+            if marker is not None:
+                skipped_blocks.append(marker_skip_metadata(marker, block.fence_line))
+            elif self._is_placeholder_code(block.code):
+                skipped_blocks.append(implicit_skip_metadata(block.fence_line, "Standalone ellipsis marks an incomplete example"))
+            else:
+                issues.extend(self._lint_python_code(block.code.splitlines(), block.fence_line + 1, file_info.path, options))
 
         return ValidationResult(validator_name=self.name, file_path=file_info.path, passed=len(issues) == 0, issues=issues, metadata=fragment_metadata(skipped_blocks))
 

@@ -1,13 +1,13 @@
 """Validate Markdown examples using the real SDK in offline worker processes."""
 
 import math
-import re
 from pathlib import Path
 from typing import Any
 
 from ..base import BaseValidator
 from ..execution import CodeBlock, run_document
 from ..models import FileInfo, ValidationIssue, ValidationResult
+from .code_blocks import iter_fenced_blocks
 from .fragments import FragmentTarget, find_fragment_marker, fragment_metadata, implicit_skip_metadata, is_placeholder_code, marker_skip_metadata
 
 
@@ -32,33 +32,26 @@ class CodeExecutionValidator(BaseValidator):
         blocks: list[CodeBlock] = []
         skipped: list[dict[str, Any]] = []
         lines = content.splitlines()
-        opening: re.Match[str] | None = None
-        start = 0
-        for number, line in enumerate(lines, 1):
-            if opening is None:
-                opening = re.match(r"^\s*(`{3,}|~{3,})([^`~]*)$", line)
-                if opening:
-                    start = number
-            elif re.fullmatch(r"\s*" + re.escape(opening[1][0]) + "{" + str(len(opening[1])) + r",}\s*", line):
-                if opening[2].strip().lower() in {"python", "py", ""}:
-                    code = "\n".join(lines[start : number - 1])
-                    marker = find_fragment_marker(lines, start, FragmentTarget.EXECUTION)
-                    if not code.strip():
-                        pass
-                    elif not included:
-                        skipped.append(implicit_skip_metadata(start, "File is outside code_execution include_files"))
-                    elif marker:
-                        skipped.append(marker_skip_metadata(marker, start))
-                    elif is_placeholder_code(code):
-                        skipped.append(implicit_skip_metadata(start, "Standalone ellipsis marks an incomplete example"))
-                    else:
-                        blocks.append(CodeBlock(start_line=start + 1, code=code))
-                opening = None
-
         issues: list[ValidationIssue] = []
+        for block in iter_fenced_blocks(content):
+            if not block.is_python:
+                continue
+            if not block.closed:
+                issues.append(ValidationIssue(file_path=file_info.path, line=block.fence_line, rule_id="code_unclosed_block", message="Unclosed Python code fence"))
+                continue
+            if not block.code.strip():
+                continue
+            marker = find_fragment_marker(lines, block.fence_line, FragmentTarget.EXECUTION)
+            if not included:
+                skipped.append(implicit_skip_metadata(block.fence_line, "File is outside code_execution include_files"))
+            elif marker:
+                skipped.append(marker_skip_metadata(marker, block.fence_line))
+            elif is_placeholder_code(block.code):
+                skipped.append(implicit_skip_metadata(block.fence_line, "Standalone ellipsis marks an incomplete example"))
+            else:
+                blocks.append(CodeBlock(start_line=block.fence_line + 1, code=block.code))
+
         metadata: dict[str, Any] = {**fragment_metadata(skipped), "skipped": not included, "executed_block_count": 0, "execution_results": []}
-        if opening is not None and opening[2].strip().lower() in {"python", "py", ""}:
-            issues.append(ValidationIssue(file_path=file_info.path, line=start, rule_id="code_unclosed_block", message="Unclosed Python code fence"))
         if blocks:
             timeout = float(options.get("timeout_seconds", 15.0))
             if not math.isfinite(timeout) or timeout <= 0:

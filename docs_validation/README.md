@@ -109,6 +109,13 @@ This uses `validation-execution.yml` to check the project README and every Markd
 page under `docs/`. The same execution validator runs in complete validation. CI
 runs the standalone gate on Python 3.13; it makes no external link or API requests.
 
+Execution, linting, typing and Python syntax checks share fence discovery. They
+recognize `python` and `py` with titles, highlighting options and brace-style
+attributes, including a language supplied as the first `.class`. Backtick and
+tilde fences are supported, with indentation measured relative to the opening
+fence. Unclosed Python fences fail validation. Explicit skip markers still apply
+and remain visible in the report.
+
 Each document runs in a fresh Python process and temporary working directory.
 Blocks share a namespace within that document. The runner imports the real SDK,
 so configuration, enum values, model validation and request/response handling are
