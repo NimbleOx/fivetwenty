@@ -335,58 +335,10 @@ class TestTransactionEndpoints:
         with pytest.raises(ValueError, match="Count must be between 1 and 500"):
             await transactions.get_recent_transactions("101-001-123456-001", count=0)
 
-    @pytest.mark.asyncio
-    async def test_stream_basic(self, transactions, mock_client):
-        """Test basic transaction streaming setup."""
-
-        # Create a proper async generator
-        async def mock_stream_generator():
-            yield '{"type": "TRANSACTION", "id": "123"}'
-
-        # Mock the _stream method to return our generator
-        mock_client._stream = mock_stream_generator
-
-        # Test that we can call the stream method (just verify setup)
-        stream_iter = transactions.get_transactions_stream("101-001-123456-001")
-
-        # Verify it's an async iterator
-        assert hasattr(stream_iter, "__aiter__")
-
         # Note: We don't fully test the streaming here as it requires complex mocking
         # The important part is that the method is correctly set up
 
-    @pytest.mark.asyncio
-    async def test_stream_with_custom_timeout(self, transactions, mock_client):
-        """Test transaction streaming method signature."""
-        # Just test that the method can be called with custom timeout
-        # without doing full streaming which would require complex async mocking
-
-        # Mock to track calls
-        mock_client._stream = AsyncMock()
-
-        # Create the stream iterator (don't consume it)
-        stream_iter = transactions.get_transactions_stream("101-001-123456-001", stall_timeout=60.0)
-
-        # Verify it's an async iterator
-        assert hasattr(stream_iter, "__aiter__")
-
         # The actual streaming would happen when we iterate, which we skip for testing
-
-    @pytest.mark.asyncio
-    async def test_stream_json_handling(self, transactions, mock_client):
-        """Test that streaming method sets up JSON parsing correctly."""
-        # Test the JSON parsing logic without full streaming
-        # This tests that the method correctly handles JSON parsing setup
-
-        # Mock the logging method
-        mock_client._log = MagicMock()
-        mock_client._stream = AsyncMock()
-
-        # Create the stream iterator
-        stream_iter = transactions.get_transactions_stream("101-001-123456-001")
-
-        # Verify the iterator is created correctly
-        assert hasattr(stream_iter, "__aiter__")
 
         # The actual JSON parsing and error handling is tested in integration tests
         # Here we just verify the method is properly configured

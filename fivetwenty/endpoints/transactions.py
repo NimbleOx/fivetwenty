@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import builtins  # noqa: TC003
 import json
+from contextlib import aclosing
 from typing import TYPE_CHECKING, Any, TypedDict, cast
 
 from .._internal.response import ApiResponse
@@ -20,7 +21,7 @@ from ..models.transactions import (
 )
 
 if TYPE_CHECKING:
-    from collections.abc import AsyncIterator
+    from collections.abc import AsyncGenerator
     from datetime import datetime
 
     from ..client import AsyncClient
@@ -205,7 +206,7 @@ class TransactionEndpoints:
         account_id: AccountID,
         *,
         stall_timeout: float = 30.0,
-    ) -> AsyncIterator[TransactionUnion | TransactionHeartbeat]:
+    ) -> AsyncGenerator[TransactionUnion | TransactionHeartbeat, None]:
         """
         Stream live transaction events for an account.
 
@@ -224,30 +225,33 @@ class TransactionEndpoints:
             FiveTwentyError: On API errors
             StreamStall: On stream timeout or connection issues
         """
-        async for line in self._client._stream(
-            f"/accounts/{account_id}/transactions/stream",
-            params={},
-            stall_timeout=stall_timeout,
-        ):
-            try:
-                transaction_data = json.loads(line)
+        async with aclosing(
+            self._client._stream(
+                f"/accounts/{account_id}/transactions/stream",
+                params={},
+                stall_timeout=stall_timeout,
+            )
+        ) as stream:
+            async for line in stream:
+                try:
+                    transaction_data = json.loads(line)
 
-                # Check if this is a heartbeat message
-                if transaction_data.get("type") == "HEARTBEAT":
-                    yield TransactionHeartbeat.model_validate(transaction_data)
-                else:
-                    yield self._parse_transaction(transaction_data)
-            except (json.JSONDecodeError, ValueError) as e:
-                # Log malformed data but continue streaming
-                self._client._log(
-                    "warning",
-                    f"Malformed transaction stream data: {e}",
-                    extra={
-                        "line": line[:200],  # Truncate for logging
-                        "account_id": str(account_id),
-                    },
-                )
-                continue
+                    # Check if this is a heartbeat message
+                    if transaction_data.get("type") == "HEARTBEAT":
+                        yield TransactionHeartbeat.model_validate(transaction_data)
+                    else:
+                        yield self._parse_transaction(transaction_data)
+                except (json.JSONDecodeError, ValueError) as e:
+                    # Log malformed data but continue streaming
+                    self._client._log(
+                        "warning",
+                        f"Malformed transaction stream data: {e}",
+                        extra={
+                            "line": line[:200],  # Truncate for logging
+                            "account_id": str(account_id),
+                        },
+                    )
+                    continue
 
     async def get_transactions_range(
         self,

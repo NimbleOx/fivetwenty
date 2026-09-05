@@ -4,7 +4,7 @@ import asyncio
 import contextlib
 import queue
 import threading
-from collections.abc import AsyncIterator, Iterator
+from collections.abc import AsyncGenerator, Generator
 from typing import TYPE_CHECKING, Any, Optional
 
 import httpx
@@ -80,7 +80,7 @@ class AsyncClient:
             environment: API environment (practice or live)
             config: AccountConfig object with credentials
             timeout: Request timeout in seconds
-            max_retries: Maximum retry attempts
+            max_retries: Maximum retries after the initial request (zero disables retries)
             transport: Custom httpx client (optional)
             user_agent: Custom user agent (optional)
             proxies: Proxy URL (optional)
@@ -136,6 +136,8 @@ class AsyncClient:
         self._logger = logger
         self._environment = final_config.environment
         self.timeout = timeout
+        if isinstance(max_retries, bool) or not isinstance(max_retries, int) or max_retries < 0:
+            raise ValueError("max_retries must be a non-negative integer")
         self.max_retries = max_retries
         self._datetime_format = AcceptDatetimeFormat(datetime_format).value
 
@@ -168,7 +170,7 @@ class AsyncClient:
 
             # Add optional parameters if provided
             if proxies is not None:
-                client_kwargs["proxies"] = proxies
+                client_kwargs["proxy"] = proxies
             if cert is not None:
                 client_kwargs["cert"] = cert
 
@@ -246,7 +248,10 @@ class AsyncClient:
         Raises:
             FiveTwentyError: On API errors
         """
-        max_tries = retries if retries is not None else self.max_retries
+        retry_count = retries if retries is not None else self.max_retries
+        if isinstance(retry_count, bool) or not isinstance(retry_count, int) or retry_count < 0:
+            raise ValueError("retries must be a non-negative integer")
+        max_tries = retry_count + 1
         headers = kwargs.pop("headers", {})
 
         # Add standard headers (never log the token!)
@@ -257,9 +262,8 @@ class AsyncClient:
         if json_data:
             json_data = stringify_decimals(json_data, datetime_format=self._datetime_format)
 
-        # Only retry safe operations (GET requests only)
-        is_write = method in {"POST", "PUT", "PATCH", "DELETE"}
-        allow_retry = not is_write
+        # Only retry safe methods; writes must not be resubmitted automatically.
+        allow_retry = method.upper() in {"GET", "HEAD", "OPTIONS"}
 
         for attempt in range(max_tries):
             try:
@@ -350,7 +354,7 @@ class AsyncClient:
         params: dict[str, Any] | None = None,
         timeout: float | None = None,
         stall_timeout: float = 30.0,
-    ) -> AsyncIterator[str]:
+    ) -> AsyncGenerator[str, None]:
         """
         Stream data from an endpoint.
 
@@ -390,31 +394,28 @@ class AsyncClient:
         )
 
         try:
-            # Use httpx.AsyncClient directly for streaming to avoid base_url conflicts
-            async with httpx.AsyncClient(timeout=stream_timeout) as stream_client:
-                async with stream_client.stream(
-                    "GET",
-                    full_url,
-                    params=params,
-                    headers=headers,
-                ) as response:
-                    raise_for_fivetwenty(response)
+            # An absolute URL selects the streaming host while preserving the
+            # configured transport, proxy, TLS settings and default headers.
+            async with self._http.stream("GET", full_url, params=params, headers=headers, timeout=stream_timeout) as response:
+                if response.is_error:
+                    await response.aread()
+                raise_for_fivetwenty(response)
 
-                    async for line in response.aiter_lines():
-                        if not line.strip():
-                            # Empty line - check for stall
-                            if stall_timer.expired:
-                                raise StreamStall(f"No data for {stall_timeout}s")
-                            continue
+                async for line in response.aiter_lines():
+                    if not line.strip():
+                        if stall_timer.expired:
+                            raise StreamStall(f"No data for {stall_timeout}s")
+                        continue
 
-                        # Reset stall timer on data
-                        stall_timer = MonotonicTimeout(stall_timeout)
-                        yield line
+                    stall_timer = MonotonicTimeout(stall_timeout)
+                    yield line
 
         except httpx.TimeoutException:
             raise StreamStall("Stream timed out")
         except httpx.ConnectError as e:
             raise StreamStall(f"Stream connection failed: {e}")
+        except (httpx.NetworkError, httpx.RemoteProtocolError, httpx.ProxyError) as e:
+            raise StreamStall(f"Stream connection interrupted: {e}") from e
 
     async def _stream_with_retries(
         self,
@@ -423,7 +424,7 @@ class AsyncClient:
         params: dict[str, Any] | None = None,
         timeout: float | None = None,
         config: StreamingConfiguration | None = None,
-    ) -> AsyncIterator[tuple[str, StreamState]]:
+    ) -> AsyncGenerator[tuple[str, StreamState], None]:
         """
         Stream data with automatic retry logic and connection state tracking.
 
@@ -457,18 +458,18 @@ class AsyncClient:
                         await asyncio.sleep(delay)
 
                 # Try to establish stream
-                async for line in self._stream(
-                    path,
-                    params=params,
-                    timeout=timeout,
-                    stall_timeout=config.stall_timeout,
-                ):
-                    # The first line after a (re)connection is yielded with the
-                    # CONNECTING/RECONNECTING state so consumers can observe
-                    # recoveries; subsequent lines carry CONNECTED.
-                    yield line, current_state
-                    if current_state in (StreamState.CONNECTING, StreamState.RECONNECTING):
-                        current_state = StreamState.CONNECTED
+                async with contextlib.aclosing(
+                    self._stream(
+                        path,
+                        params=params,
+                        timeout=timeout,
+                        stall_timeout=config.stall_timeout,
+                    )
+                ) as stream:
+                    async for line in stream:
+                        yield line, current_state
+                        if current_state in (StreamState.CONNECTING, StreamState.RECONNECTING):
+                            current_state = StreamState.CONNECTED
 
                 # If we get here, stream ended normally
                 current_state = StreamState.DISCONNECTED
@@ -573,17 +574,26 @@ class Client:
             return
         self._closed = True
 
-        # Close async client
-        fut = asyncio.run_coroutine_threadsafe(self._async.aclose(), self._loop)
-        with contextlib.suppress(asyncio.TimeoutError):
-            fut.result(timeout=5.0)
+        async def shutdown() -> None:
+            # The wrapper owns this loop, including its active streaming pumps.
+            tasks = [task for task in asyncio.all_tasks() if task is not asyncio.current_task()]
+            for task in tasks:
+                task.cancel()
+            await asyncio.gather(*tasks, return_exceptions=True)
+            try:
+                await self._async.aclose()
+            finally:
+                await self._loop.shutdown_asyncgens()
 
-        # Stop event loop
-        self._loop.call_soon_threadsafe(self._loop.stop)
-
-        # Wait for thread to finish
-        if self._thread.is_alive():
+        fut = asyncio.run_coroutine_threadsafe(shutdown(), self._loop)
+        try:
+            with contextlib.suppress(asyncio.TimeoutError):
+                fut.result(timeout=5.0)
+        finally:
+            self._loop.call_soon_threadsafe(self._loop.stop)
             self._thread.join(timeout=5.0)
+            if not self._thread.is_alive():
+                self._loop.close()
 
     def _run(self, coro: Any) -> Any:
         """Run async coroutine in background thread."""
@@ -616,11 +626,12 @@ class _SyncPricingProxy(_SyncEndpointProxy):
     def __init__(self, client: Client) -> None:
         super().__init__(client, "pricing")
 
-    def stream_iter(self, account_id: str, instruments: list[str]) -> Iterator[ClientPrice | PricingHeartbeat]:
+    def stream_iter(self, account_id: str, instruments: list[str]) -> Generator[ClientPrice | PricingHeartbeat, None, None]:
         """
         Stream prices (blocking iterator).
 
-        Safe for slow consumers with bounded queue backpressure.
+        The queue holds 1,024 records and drops the oldest when full.
+        Close the generator explicitly when stopping iteration early.
 
         Args:
             account_id: Account to stream for
@@ -637,33 +648,43 @@ class _SyncPricingProxy(_SyncEndpointProxy):
             raise RuntimeError("Client is closed; cannot start a stream. Use a new Client or call within its context manager.")
 
         q: queue.Queue[object] = queue.Queue(maxsize=1024)
+        finished = threading.Event()
+        errors: list[Exception] = []
 
         async def _pump() -> None:
             try:
-                async for event in self._async_endpoint.get_pricing_stream(account_id, instruments):
-                    try:
-                        q.put_nowait(event)
-                    except queue.Full:
-                        # Backpressure: drop the oldest queued event so the
-                        # freshest data keeps flowing to a slow consumer.
-                        with contextlib.suppress(queue.Empty):
-                            q.get_nowait()
-                        with contextlib.suppress(queue.Full):
+                async with contextlib.aclosing(self._async_endpoint.get_pricing_stream(account_id, instruments)) as stream:
+                    async for event in stream:
+                        try:
                             q.put_nowait(event)
+                        except queue.Full:
+                            # Backpressure: drop the oldest queued event so the
+                            # freshest data keeps flowing to a slow consumer.
+                            with contextlib.suppress(queue.Empty):
+                                q.get_nowait()
+                            with contextlib.suppress(queue.Full):
+                                q.put_nowait(event)
             except Exception as e:
-                q.put(e)  # Pass exceptions to consumer
+                errors.append(e)
             finally:
-                q.put(StopIteration)
+                # Never block the event-loop thread on a full consumer queue.
+                finished.set()
 
         # Start pump task in background loop
-        self._client._loop.call_soon_threadsafe(lambda: asyncio.create_task(_pump()))
+        future = asyncio.run_coroutine_threadsafe(_pump(), self._client._loop)
 
         # Consume from thread-safe queue
-        while True:
-            item = q.get()
-            if item is StopIteration:
-                break
-            if isinstance(item, Exception):
-                raise item
-            # Type narrowing: we know this is ClientPrice or PricingHeartbeat from async stream
-            yield item  # type: ignore[misc]
+        try:
+            while True:
+                try:
+                    item = q.get(timeout=0.1)
+                except queue.Empty:
+                    if finished.is_set():
+                        if errors:
+                            raise errors[0]
+                        break
+                    continue
+                # The pump only puts parsed pricing events in the queue.
+                yield item  # type: ignore[misc]
+        finally:
+            future.cancel()

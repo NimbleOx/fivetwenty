@@ -11,14 +11,92 @@ from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError, StreamStall
 from fivetwenty.models.streaming import ReconnectionPolicy, StreamingConfiguration, StreamState
 
-# _stream opens a fresh httpx.AsyncClient internally, so tests monkeypatch the
-# httpx.AsyncClient attribute. Keep a reference to the real class for factories.
+
+class BodyStream(httpx.AsyncByteStream):
+    """An unread response body with observable cleanup."""
+
+    def __init__(self, content: bytes, failure: Exception | None = None):
+        self.content = content
+        self.failure = failure
+        self.closed = False
+
+    async def __aiter__(self):
+        yield self.content
+        if self.failure:
+            raise self.failure
+
+    async def aclose(self):
+        self.closed = True
+
+
+@pytest.mark.asyncio
+async def test_rest_and_streaming_share_supplied_client_and_headers():
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        if request.url.path.endswith("/stream"):
+            return httpx.Response(200, content=b'{"type":"HEARTBEAT","time":"2024-01-01T12:00:00Z"}\n')
+        return httpx.Response(200, json={"accounts": []})
+
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://offline.example.test/v3", headers={"User-Agent": "custom-agent", "X-Custom": "shared"})
+    async with AsyncClient(token="offline-token", account_id="offline-account", transport=transport) as client:
+        await client.accounts.get_accounts()
+        assert len([item async for item in client.pricing.get_pricing_stream("offline-account", ["EUR_USD"])]) == 1
+        assert client._http is transport
+        assert not transport.is_closed
+    assert transport.is_closed
+    assert [request.url.host for request in requests] == ["offline.example.test", "stream-fxpractice.oanda.com"]
+    assert all(request.headers["User-Agent"] == "custom-agent" and request.headers["X-Custom"] == "shared" for request in requests)
+    assert requests[1].extensions["timeout"]["connect"] == 120.0
+
+
+@pytest.mark.asyncio
+async def test_stream_http_error_reads_body_before_parsing():
+    body = BodyStream(b'{"errorCode":"INVALID_TOKEN","errorMessage":"offline token rejected"}')
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(401, stream=body, headers={"content-type": "application/json", "RequestID": "request-123"})
+
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    async with AsyncClient(token="offline-token", account_id="offline-account", transport=transport) as client:
+        with pytest.raises(FiveTwentyError) as caught:
+            await drain(client.pricing.stream_pricing_with_retries("offline-account", ["EUR_USD"], config=fast_config()))
+    assert caught.value.code == "INVALID_TOKEN"
+    assert caught.value.message == "offline token rejected"
+    assert caught.value.request_id == "request-123"
+    assert len(requests) == 1
+    assert body.closed
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("error", [httpx.ReadError, httpx.RemoteProtocolError])
+async def test_public_stream_reconnects_after_read_and_protocol_failures(error):
+    bodies = []
+
+    def handler(request):
+        failure = error("offline disconnect", request=request) if not bodies else None
+        body = BodyStream(b'{"type":"HEARTBEAT","time":"2024-01-01T12:00:00Z"}\n', failure)
+        bodies.append(body)
+        return httpx.Response(200, stream=body)
+
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(handler))
+    async with AsyncClient(token="offline-token", account_id="offline-account", transport=transport) as client:
+        updates = [item async for item in client.pricing.stream_pricing_with_retries("offline-account", ["EUR_USD"], config=fast_config(1))]
+    assert len(bodies) == 2
+    assert [state for _, state in updates] == [StreamState.CONNECTING, StreamState.RECONNECTING]
+    assert all(body.closed for body in bodies)
+
+
+# Keep a reference to the real HTTPX client while tests install offline factories.
 REAL_HTTPX_ASYNC_CLIENT = httpx.AsyncClient
 
 
 def build_client(**kwargs: Any) -> AsyncClient:
-    """Build an AsyncClient with an inert REST transport (streaming does not use it)."""
-    dummy_transport = REAL_HTTPX_ASYNC_CLIENT(transport=httpx.MockTransport(lambda request: httpx.Response(200)))
+    """Build an AsyncClient with an offline transport shared by REST and streaming."""
+    dummy_transport = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: httpx.Response(200)))
     return AsyncClient(token="secret-token", account_id="acct-1", transport=dummy_transport, **kwargs)
 
 
@@ -26,7 +104,7 @@ def install_stream_transport(
     monkeypatch: pytest.MonkeyPatch,
     handler: Any,
 ) -> list[httpx.Request]:
-    """Route the internally-created streaming httpx.AsyncClient through a MockTransport."""
+    """Route the configured HTTPX client through a recording MockTransport."""
     requests: list[httpx.Request] = []
 
     def recording_handler(request: httpx.Request) -> httpx.Response:

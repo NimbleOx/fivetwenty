@@ -12,6 +12,67 @@ from fivetwenty.exceptions import FiveTwentyError
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("retry_count", [0, 1, 3])
+@pytest.mark.parametrize("failure", ["status", "timeout", "connection"])
+async def test_retry_budget_counts_retries_after_the_initial_request(monkeypatch, retry_count, failure):
+    monkeypatch.setattr("fivetwenty.client.backoff_with_jitter", lambda attempt: 0.0)
+    requests: list[httpx.Request] = []
+
+    def handler(request):
+        requests.append(request)
+        if failure == "timeout":
+            raise httpx.ReadTimeout("offline timeout", request=request)
+        if failure == "connection":
+            raise httpx.ConnectError("offline failure", request=request)
+        return httpx.Response(503, headers={"Retry-After": "0"}, json={"errorMessage": "offline"})
+
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://offline.example.test")
+    async with AsyncClient(token="offline-token", account_id="offline-account", transport=transport, max_retries=retry_count) as client:
+        with pytest.raises((FiveTwentyError, httpx.TransportError)):
+            await client.accounts.get_accounts()
+    assert len(requests) == retry_count + 1
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("method", ["GET", "POST", "PUT", "PATCH", "DELETE", "post"])
+async def test_zero_retry_override_still_sends_one_request(method):
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(503, json={"errorMessage": "offline"})
+
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://offline.example.test")
+    async with AsyncClient(token="offline-token", account_id="offline-account", transport=transport, max_retries=3) as client:
+        with pytest.raises(FiveTwentyError):
+            await client._request(method, "/test", retries=0)
+    assert len(requests) == 1
+
+
+@pytest.mark.parametrize("value", [-1, 1.5, True])
+async def test_invalid_retry_budgets_are_rejected(value):
+    with pytest.raises(ValueError, match="non-negative integer"):
+        AsyncClient(token="offline-token", account_id="offline-account", max_retries=value)
+    requests = []
+
+    def handler(request):
+        requests.append(request)
+        return httpx.Response(200)
+
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://offline.example.test")
+    async with AsyncClient(token="offline-token", account_id="offline-account", transport=transport) as client:
+        with pytest.raises(ValueError, match="non-negative integer"):
+            await client._request("GET", "/test", retries=value)
+    assert not requests
+
+
+@pytest.mark.asyncio
+async def test_proxy_option_constructs_a_real_httpx_client():
+    async with AsyncClient(token="offline-token", account_id="offline-account", proxies="http://127.0.0.1:8080") as client:
+        assert isinstance(client._http, httpx.AsyncClient)
+
+
+@pytest.mark.asyncio
 async def test_request_redacts_credentials_in_log_records_without_changing_authentication(caplog: pytest.LogCaptureFixture) -> None:
     """Structured logging must not expose the token on any request attempt."""
     logger = logging.getLogger("fivetwenty.tests.request_redaction")
@@ -223,7 +284,7 @@ async def test_get_request_timeout_exhausts_retries_and_raises(monkeypatch: pyte
         with pytest.raises(httpx.ReadTimeout):
             await client._request("GET", "/v3/accounts/acct-1")
 
-    assert len(requests) == 2
+    assert len(requests) == 3
 
 
 @pytest.mark.asyncio

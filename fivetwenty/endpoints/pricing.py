@@ -1,7 +1,8 @@
 """Pricing and streaming endpoints."""
 
 import json
-from collections.abc import AsyncIterator
+from collections.abc import AsyncGenerator
+from contextlib import aclosing
 from datetime import datetime
 from decimal import Decimal
 from typing import TYPE_CHECKING, TypedDict, cast
@@ -119,7 +120,7 @@ class PricingEndpoints:
         snapshot: bool = True,
         include_home_conversions: bool = False,
         stall_timeout: float = 30.0,
-    ) -> AsyncIterator[ClientPrice | PricingHeartbeat]:
+    ) -> AsyncGenerator[ClientPrice | PricingHeartbeat, None]:
         """
         Stream real-time pricing data.
 
@@ -147,29 +148,32 @@ class PricingEndpoints:
         if include_home_conversions:
             params["includeHomeConversions"] = "true"
 
-        async for line in self._client._stream(
-            f"/accounts/{account_id}/pricing/stream",
-            params=params,
-            stall_timeout=stall_timeout,
-        ):
-            try:
-                data = json.loads(line)
+        async with aclosing(
+            self._client._stream(
+                f"/accounts/{account_id}/pricing/stream",
+                params=params,
+                stall_timeout=stall_timeout,
+            )
+        ) as stream:
+            async for line in stream:
+                try:
+                    data = json.loads(line)
 
-                if data.get("type") == "PRICE":
-                    yield ClientPrice.model_validate(data)
-                elif data.get("type") == "HEARTBEAT":
-                    yield PricingHeartbeat.model_validate(data)
+                    if data.get("type") == "PRICE":
+                        yield ClientPrice.model_validate(data)
+                    elif data.get("type") == "HEARTBEAT":
+                        yield PricingHeartbeat.model_validate(data)
 
-            except (json.JSONDecodeError, ValueError) as e:
-                # Log malformed data but continue streaming
-                self._client._log(
-                    "warning",
-                    f"Malformed stream data: {e}",
-                    extra={
-                        "line": line[:200],  # Truncate for logging
-                    },
-                )
-                continue
+                except (json.JSONDecodeError, ValueError) as e:
+                    # Log malformed data but continue streaming
+                    self._client._log(
+                        "warning",
+                        f"Malformed stream data: {e}",
+                        extra={
+                            "line": line[:200],  # Truncate for logging
+                        },
+                    )
+                    continue
 
     async def get_account_instrument_candles(
         self,
@@ -361,7 +365,7 @@ class PricingEndpoints:
         snapshot: bool = True,
         include_home_conversions: bool = False,
         config: StreamingConfiguration | None = None,
-    ) -> AsyncIterator[tuple[ClientPrice | PricingHeartbeat, StreamState]]:
+    ) -> AsyncGenerator[tuple[ClientPrice | PricingHeartbeat, StreamState], None]:
         """
         Stream real-time pricing data with automatic retry and connection state tracking.
 
@@ -414,37 +418,40 @@ class PricingEndpoints:
         if include_home_conversions:
             params["includeHomeConversions"] = "true"
 
-        async for line, state in self._client._stream_with_retries(
-            f"/accounts/{account_id}/pricing/stream",
-            params=params,
-            config=config,
-        ):
-            try:
-                data = json.loads(line)
-            except json.JSONDecodeError as e:
-                self._client._log(
-                    "warning",
-                    f"Malformed stream data: {e}",
-                    extra={
-                        "line": line[:200],  # Truncate for logging
-                    },
-                )
-                continue
-
-            # Parse the data based on type
-            if data.get("type") == "HEARTBEAT":
-                if not config.include_heartbeats:
+        async with aclosing(
+            self._client._stream_with_retries(
+                f"/accounts/{account_id}/pricing/stream",
+                params=params,
+                config=config,
+            )
+        ) as stream:
+            async for line, state in stream:
+                try:
+                    data = json.loads(line)
+                except json.JSONDecodeError as e:
+                    self._client._log(
+                        "warning",
+                        f"Malformed stream data: {e}",
+                        extra={
+                            "line": line[:200],  # Truncate for logging
+                        },
+                    )
                     continue
-                heartbeat = PricingHeartbeat.model_validate(data)
-                yield heartbeat, state
-            elif data.get("type") == "PRICE":
-                price = ClientPrice.model_validate(data)
-                yield price, state
-            else:
-                # Unknown message type - log and skip
-                self._client._log(
-                    "warning",
-                    f"Unknown pricing stream message type: {data.get('type')}",
-                    extra={"data": data},
-                )
-                continue
+
+                # Parse the data based on type
+                if data.get("type") == "HEARTBEAT":
+                    if not config.include_heartbeats:
+                        continue
+                    heartbeat = PricingHeartbeat.model_validate(data)
+                    yield heartbeat, state
+                elif data.get("type") == "PRICE":
+                    price = ClientPrice.model_validate(data)
+                    yield price, state
+                else:
+                    # Unknown message type - log and skip
+                    self._client._log(
+                        "warning",
+                        f"Unknown pricing stream message type: {data.get('type')}",
+                        extra={"data": data},
+                    )
+                    continue

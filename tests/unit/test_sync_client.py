@@ -1,5 +1,7 @@
 """Unit tests for the sync Client wrapper and _SyncPricingProxy.stream_iter."""
 
+import asyncio
+import threading
 from collections.abc import AsyncIterator, Callable
 
 import httpx
@@ -212,3 +214,80 @@ class TestStreamIter:
         assert len(set(indices)) == len(indices), f"duplicate events delivered: {indices}"
         assert events[-1] == prices[-1], "the most recent event must never be the one evicted"
         assert 1 <= len(events) <= len(prices)
+
+
+@pytest.mark.parametrize("close_client", [False, True])
+def test_closing_active_sync_stream_releases_the_http_response(close_client):
+    closed = threading.Event()
+
+    class LiveBody(httpx.AsyncByteStream):
+        async def __aiter__(self):
+            yield b'{"type":"HEARTBEAT","time":"2024-01-01T00:00:00Z"}\n'
+            await asyncio.Event().wait()
+
+        async def aclose(self):
+            closed.set()
+
+    client = build_client(lambda request: httpx.Response(200, stream=LiveBody()))
+    stream = client.pricing.stream_iter("acct-1", ["EUR_USD"])
+    try:
+        assert isinstance(next(stream), PricingHeartbeat)
+        if close_client:
+            client.close()
+        else:
+            stream.close()
+        assert closed.wait(timeout=1), "Closing a sync stream must close its active HTTP response"
+    finally:
+        if not client._closed:
+
+            def cancel_tasks():
+                for task in asyncio.all_tasks(client._loop):
+                    task.cancel()
+
+            client._loop.call_soon_threadsafe(cancel_tasks)
+            closed.wait(timeout=1)
+        stream.close()
+        client.close()
+    assert not client._thread.is_alive()
+    assert client._loop.is_closed()
+
+
+@pytest.mark.parametrize("stream_error", [False, True])
+def test_sync_shutdown_does_not_block_on_a_full_unconsumed_queue(monkeypatch, stream_error):
+    import queue as queue_module
+
+    class TinyQueue(queue_module.Queue):
+        def __init__(self, maxsize=0):
+            super().__init__(maxsize=2)
+
+    release = asyncio.Event()
+    produced = threading.Event()
+
+    async def fake_stream(account_id, instruments):
+        yield make_heartbeat()
+        await release.wait()
+        for _ in range(3):
+            yield make_heartbeat()
+        produced.set()
+        if stream_error:
+            raise ValueError("full-queue failure")
+
+    with build_client() as client:
+        monkeypatch.setattr(client._async.pricing, "get_pricing_stream", fake_stream)
+        monkeypatch.setattr("fivetwenty.client.queue.Queue", TinyQueue)
+        stream = client.pricing.stream_iter("acct-1", ["EUR_USD"])
+        try:
+            next(stream)
+            client._loop.call_soon_threadsafe(release.set)
+            assert produced.wait(timeout=1)
+            # The worker must remain responsive even without a queue consumer.
+            asyncio.run_coroutine_threadsafe(asyncio.sleep(0), client._loop).result(timeout=1)
+            client.close()
+            assert not client._thread.is_alive()
+            if stream_error:
+                with pytest.raises(ValueError, match="full-queue failure"):
+                    list(stream)
+            else:
+                assert len(list(stream)) == 2
+        finally:
+            stream.close()
