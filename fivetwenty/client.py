@@ -207,17 +207,15 @@ class AsyncClient:
         """Compatibility alias for aclose()."""
         await self.aclose()
 
-    def _log(self, level: str, msg: str, **extra: Any) -> None:
+    def _log(self, level: str, msg: str, *, extra: dict[str, Any] | None = None) -> None:
         """Log with token redaction."""
         if self._logger:
-            # Redact sensitive headers
-            if "headers" in extra:
-                headers = extra["headers"].copy()
-                if "Authorization" in headers:
-                    headers["Authorization"] = "Bearer ***"
-                extra["headers"] = headers
+            # Copy the logging payload so redaction never changes the request.
+            log_extra = dict(extra or {})
+            if "headers" in log_extra:
+                log_extra["headers"] = {name: "Bearer ***" if name.lower() == "authorization" else value for name, value in log_extra["headers"].items()}
 
-            getattr(self._logger, level)(msg, **extra)
+            getattr(self._logger, level)(msg, extra=log_extra)
 
     async def _request(
         self,

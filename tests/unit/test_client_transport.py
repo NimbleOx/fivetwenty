@@ -1,6 +1,7 @@
 """Client request contract tests using httpx.MockTransport."""
 
 import json
+import logging
 from decimal import Decimal
 
 import httpx
@@ -8,6 +9,52 @@ import pytest
 
 from fivetwenty import AsyncClient
 from fivetwenty.exceptions import FiveTwentyError
+
+
+@pytest.mark.asyncio
+async def test_request_redacts_credentials_in_log_records_without_changing_authentication(caplog: pytest.LogCaptureFixture) -> None:
+    """Structured logging must not expose the token on any request attempt."""
+    logger = logging.getLogger("fivetwenty.tests.request_redaction")
+    caplog.set_level(logging.DEBUG, logger=logger.name)
+    requests: list[httpx.Request] = []
+
+    def handler(request: httpx.Request) -> httpx.Response:
+        requests.append(request)
+        if len(requests) == 1:
+            return httpx.Response(503, headers={"Retry-After": "0"}, json={"errorMessage": "Retry"})
+        return httpx.Response(200, json={"accounts": []})
+
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+    async with AsyncClient(token="synthetic-redaction-token", account_id="acct-1", transport=transport_client, logger=logger, max_retries=2) as client:
+        await client.accounts.get_accounts()
+
+    records = [record for record in caplog.records if record.name == logger.name]
+    request_records = [record for record in records if "headers" in record.__dict__]
+    assert len(request_records) == 2
+    assert all(record.__dict__["headers"]["Authorization"] == "Bearer ***" for record in request_records)
+    assert all(record.__dict__["headers"]["Accept-Datetime-Format"] == "RFC3339" for record in request_records)
+    assert all("synthetic-redaction-token" not in repr(record.__dict__) for record in records)
+    assert len(requests) == 2
+    assert all(request.headers["Authorization"] == "Bearer synthetic-redaction-token" for request in requests)
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("header_name", ["authorization", "Authorization", "AUTHORIZATION"])
+async def test_logging_redacts_case_insensitive_headers_without_mutating_input(header_name: str, caplog: pytest.LogCaptureFixture) -> None:
+    logger = logging.getLogger("fivetwenty.tests.header_redaction")
+    caplog.set_level(logging.DEBUG, logger=logger.name)
+    transport_client = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: httpx.Response(200)))
+    headers = {header_name: "Bearer synthetic-header-token", "RequestID": "request-1"}
+    payload = {"headers": headers}
+
+    async with AsyncClient(token="synthetic-header-token", account_id="acct-1", transport=transport_client, logger=logger) as client:
+        client._log("debug", "Request", extra=payload)
+
+    record = next(record for record in caplog.records if record.name == logger.name)
+    assert record.__dict__["headers"] == {header_name: "Bearer ***", "RequestID": "request-1"}
+    assert "synthetic-header-token" not in repr(record.__dict__)
+    assert headers[header_name] == "Bearer synthetic-header-token"
+    assert payload["headers"] is headers
 
 
 @pytest.mark.asyncio
@@ -107,7 +154,7 @@ async def test_request_maps_json_error_payload_to_fivetwenty_error() -> None:
         return httpx.Response(
             401,
             json={"errorCode": "INVALID_TOKEN", "errorMessage": "Invalid authorization token"},
-            headers={"content-type": "application/json", "X-Request-Id": "req-123"},
+            headers={"content-type": "application/json", "RequestID": "req-123"},
         )
 
     transport_client = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
