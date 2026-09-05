@@ -31,15 +31,11 @@ from .positions import CalculatedPositionState, Position
 from .pricing import *
 from .pricing import OrderBook
 from .streaming import *
-
-# Removed streaming wrapper models - streaming endpoints return actual data models
 from .trades import *
 
 # Rebuild all models to resolve forward references
 from .trades import CalculatedTradeState, Trade, TradeSummary
 from .transactions import *
-
-# AccountChanges and AccountChangesState moved to accounts.py
 
 # Rebuild models that have forward references
 AccountChangesState.model_rebuild()

@@ -336,16 +336,3 @@ class TestApiModelSerializationAndDictCompat:
 
         dumped = model.model_dump()
         assert dumped["when"] == "2024-06-01T09:30:00-05:00"
-
-    def test_is_decimal_string(self) -> None:
-        """Test the _is_decimal_string helper across formats."""
-        assert ApiModel._is_decimal_string("123") is True
-        assert ApiModel._is_decimal_string("-123") is True
-        assert ApiModel._is_decimal_string("1.25") is True
-        assert ApiModel._is_decimal_string("-1.25") is True
-        assert ApiModel._is_decimal_string("") is False
-        assert ApiModel._is_decimal_string("abc") is False
-        assert ApiModel._is_decimal_string("1.2.3") is False
-        assert ApiModel._is_decimal_string("1.a") is False
-        assert ApiModel._is_decimal_string(".") is False
-        assert ApiModel._is_decimal_string("-") is False

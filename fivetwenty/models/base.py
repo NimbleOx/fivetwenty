@@ -40,9 +40,6 @@ class ApiModel(BaseModel):
             return [self.serialize_decimals_and_datetimes(item, info) for item in value]
         return value
 
-    # Remove the field validator for now - we'll let models handle conversion explicitly
-    # This approach is simpler and avoids accidentally converting non-financial strings
-
     @classmethod
     def _resolve_key(cls, key: str) -> str | None:
         """Resolve a field name or OANDA alias to the model's Python field name."""
@@ -88,21 +85,3 @@ class ApiModel(BaseModel):
         if resolved is not None and resolved != name:
             return getattr(self, resolved)
         return super().__getattr__(name)  # type: ignore[misc]
-
-    @staticmethod
-    def _is_decimal_string(value: str) -> bool:
-        """Check if string value represents a decimal number."""
-        # Handle negative numbers and decimal points
-        if not value:
-            return False
-
-        # Remove leading minus sign for checking
-        check_value = value[1:] if value.startswith("-") else value
-
-        # Check if it's a valid decimal format
-        if "." in check_value:
-            parts = check_value.split(".")
-            if len(parts) != 2:
-                return False
-            return parts[0].isdigit() and parts[1].isdigit()
-        return check_value.isdigit()

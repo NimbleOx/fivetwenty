@@ -31,10 +31,6 @@ class StreamingConfiguration(ApiModel):
     reconnection_policy: ReconnectionPolicy = Field(default_factory=ReconnectionPolicy, description="Reconnection settings")
 
 
-# Removed extra streaming models that are not part of official OANDA v20 API:
-# These were custom wrapper models, but OANDA streaming endpoints return
-# actual data models (ClientPrice, PricingHeartbeat, etc.) not wrapper models
-
 __all__ = [
     "ReconnectionPolicy",
     "StreamState",

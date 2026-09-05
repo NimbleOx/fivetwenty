@@ -105,15 +105,6 @@ class MonotonicTimeout:
         return monotonic() - self.start_time
 
     @property
-    def remaining(self) -> float:
-        """Get remaining time in seconds (may be negative if expired)."""
-        return self.timeout_seconds - self.elapsed
-
-    @property
     def expired(self) -> bool:
         """Check if timeout has expired."""
         return self.elapsed >= self.timeout_seconds
-
-    def sleep_remaining(self, max_sleep: float = 1.0) -> float:
-        """Get sleep time, capped at max_sleep."""
-        return min(max_sleep, max(0, self.remaining))

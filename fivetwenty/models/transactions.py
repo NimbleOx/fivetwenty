@@ -729,12 +729,6 @@ class TransactionIDRange(ApiModel):
     to: str
 
 
-# Removed extra transaction models that are not part of official OANDA v20 API:
-# - TransactionRejectDetails, TransactionSummary, TransactionBatch
-# - AccountChangesState, AccountChanges (these are now properly in accounts.py)
-# Note: TransactionHeartbeat IS part of the OANDA API (used in transaction streaming)
-
-
 # Union type for all possible transaction types
 TransactionUnion = (
     OrderFillTransaction

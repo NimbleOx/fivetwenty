@@ -1,60 +1,44 @@
-"""Tests for streaming utilities."""
+"""Streaming configuration defaults, nested parsing, and public state values."""
 
-from fivetwenty.models import (
-    ReconnectionPolicy,
-    StreamingConfiguration,
-    StreamState,
-)
+import pytest
+
+from fivetwenty.models import ReconnectionPolicy, StreamingConfiguration, StreamState
 
 
-class TestStreamingUtilities:
-    """Test streaming utilities and configuration."""
+def test_stream_states_are_strings_with_stable_values() -> None:
+    assert {state.name: state.value for state in StreamState} == {
+        "CONNECTING": "connecting",
+        "CONNECTED": "connected",
+        "RECONNECTING": "reconnecting",
+        "DISCONNECTED": "disconnected",
+    }
+    assert all(isinstance(state, str) and state == state.value for state in StreamState)
 
-    def test_stream_state_enum(self) -> None:
-        """Test StreamState enum values."""
-        assert StreamState.CONNECTING == "connecting"
-        assert StreamState.CONNECTED == "connected"
-        assert StreamState.RECONNECTING == "reconnecting"
-        assert StreamState.DISCONNECTED == "disconnected"
 
-    def test_reconnection_policy(self) -> None:
-        """Test ReconnectionPolicy model."""
-        policy_data = {
-            "max_attempts": 5,
-            "delay_seconds": 2.0,
-        }
+def test_streaming_configuration_defaults() -> None:
+    config = StreamingConfiguration()
+    assert isinstance(config.reconnection_policy, ReconnectionPolicy)
+    assert config.model_dump() == {
+        "include_heartbeats": True,
+        "stall_timeout": 30.0,
+        "reconnection_policy": {"max_attempts": 3, "delay_seconds": 1.0},
+    }
 
-        policy = ReconnectionPolicy(**policy_data)
-        assert policy.max_attempts == 5
-        assert policy.delay_seconds == 2.0
 
-    def test_reconnection_policy_defaults(self) -> None:
-        """Test ReconnectionPolicy default values."""
-        policy = ReconnectionPolicy()
-        assert policy.max_attempts == 3  # Default value
-        assert policy.delay_seconds == 1.0  # Default value
+@pytest.mark.parametrize("policy", [{"max_attempts": 5, "delay_seconds": 2.0}, ReconnectionPolicy(max_attempts=5, delay_seconds=2.0)], ids=["dictionary", "model"])
+def test_nested_configuration_survives_json_roundtrip(policy: dict[str, int | float] | ReconnectionPolicy) -> None:
+    config = StreamingConfiguration.model_validate({"include_heartbeats": False, "stall_timeout": 60.0, "reconnection_policy": policy})
+    assert isinstance(config.reconnection_policy, ReconnectionPolicy)
+    assert config.model_dump() == {
+        "include_heartbeats": False,
+        "stall_timeout": 60.0,
+        "reconnection_policy": {"max_attempts": 5, "delay_seconds": 2.0},
+    }
+    assert StreamingConfiguration.model_validate_json(config.model_dump_json()) == config
 
-    def test_streaming_configuration(self) -> None:
-        """Test StreamingConfiguration model."""
-        config_data = {
-            "include_heartbeats": False,
-            "stall_timeout": 60.0,
-            "reconnection_policy": {
-                "max_attempts": 5,
-                "delay_seconds": 2.0,
-            },
-        }
 
-        config = StreamingConfiguration(**config_data)
-        assert config.include_heartbeats is False
-        assert config.stall_timeout == 60.0
-        assert config.reconnection_policy.max_attempts == 5
-        assert config.reconnection_policy.delay_seconds == 2.0
-
-    def test_streaming_configuration_defaults(self) -> None:
-        """Test StreamingConfiguration default values."""
-        config = StreamingConfiguration()
-        assert config.include_heartbeats is True  # Default
-        assert config.stall_timeout == 30.0  # Default
-        assert isinstance(config.reconnection_policy, ReconnectionPolicy)
-        assert config.reconnection_policy.max_attempts == 3  # Default
+def test_default_policies_are_independent() -> None:
+    first = StreamingConfiguration()
+    second = StreamingConfiguration()
+    first.reconnection_policy.max_attempts = 9
+    assert second.reconnection_policy.max_attempts == 3

@@ -23,16 +23,14 @@ def test_backoff_exponential_growth_jitter_and_cap(monkeypatch, attempt, base, c
     assert backoff_with_jitter(attempt, base, cap) == expected
 
 
-@pytest.mark.parametrize(("elapsed", "remaining", "expired", "sleep"), [(0, 10, False, 1), (9.75, 0.25, False, 0.25), (10, 0, True, 0), (11, -1, True, 0)])
-def test_timeout_boundaries_use_a_monotonic_clock(monkeypatch, elapsed, remaining, expired, sleep):
+@pytest.mark.parametrize(("elapsed", "expired"), [(0, False), (9.75, False), (10, True), (11, True)])
+def test_timeout_boundaries_use_a_monotonic_clock(monkeypatch, elapsed, expired):
     now = 100.0
     monkeypatch.setattr("fivetwenty._internal.utils.monotonic", lambda: now)
     timeout = MonotonicTimeout(10)
     now += elapsed
     assert timeout.elapsed == elapsed
-    assert timeout.remaining == remaining
     assert timeout.expired is expired
-    assert timeout.sleep_remaining() == sleep
 
 
 def test_recursive_wire_conversion_does_not_mutate_input():
