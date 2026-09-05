@@ -1,7 +1,8 @@
 # Documentation Validation
 
-This directory contains the validation tools for FiveTwenty documentation. The
-system has two separate jobs:
+This directory contains the validation tools for FiveTwenty documentation. Run
+them from a repository checkout with the development dependencies installed;
+they are not included in the published SDK package. The system has two jobs:
 
 1. Validate documentation files as authored: markdown structure, Python examples,
    links, security checks, financial precision, SDK method usage, and selected

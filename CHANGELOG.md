@@ -24,6 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Negative, noninteger and boolean counts raise `ValueError`. Write requests
   are not automatically retried.
 - Minimum runtime dependencies are now **HTTPX 0.26.0** and **Pydantic 2.7.0**.
+- Release artifacts contain the SDK without the repository's documentation
+  tooling. Run `docs_validation` from a checkout with development dependencies.
 - REST calls retain the HTTP client's per-phase timeouts by default. For
   SDK-created clients, connect is 5 seconds, write is 10 seconds, and the
   constructor's `timeout` controls read and pool waits. Injected HTTP clients

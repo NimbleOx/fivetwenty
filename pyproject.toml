@@ -40,7 +40,7 @@ Documentation = "https://nimbleox.github.io/fivetwenty/"
 
 [tool.setuptools.packages.find]
 where = ["."]
-include = ["fivetwenty*", "docs_validation*"]
+include = ["fivetwenty*"]
 exclude = ["tests*"]
 
 [tool.mypy]
