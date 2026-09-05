@@ -7,7 +7,7 @@ from datetime import datetime
 from decimal import Decimal
 from enum import Enum
 from types import UnionType
-from typing import Any, Literal, Union, get_args, get_origin
+from typing import Annotated, Any, Literal, Union, get_args, get_origin
 
 import pytest
 from pydantic import BaseModel
@@ -61,6 +61,8 @@ def _all_model_classes() -> list[type[BaseModel]]:
 
 def _contains_model_annotation(annotation: Any) -> bool:
     origin = get_origin(annotation)
+    if origin is Annotated:
+        return _contains_model_annotation(get_args(annotation)[0])
     if origin in {Union, UnionType, list, dict}:
         return any(_contains_model_annotation(arg) for arg in get_args(annotation) if arg is not type(None))
     return inspect.isclass(annotation) and issubclass(annotation, BaseModel)
@@ -87,6 +89,8 @@ def _sample_payload(model_cls: type[BaseModel], seen: set[type[BaseModel]] | Non
 
 def _sample_value(field_name: str, annotation: Any, seen: set[type[BaseModel]]) -> Any:  # noqa: PLR0911
     origin = get_origin(annotation)
+    if origin is Annotated:
+        return _sample_value(field_name, get_args(annotation)[0], seen)
     if origin in {Union, UnionType}:
         for arg in get_args(annotation):
             if arg is type(None):
@@ -163,3 +167,18 @@ def test_pydantic_models_round_trip_api_payloads(model_cls: type[BaseModel]) -> 
     reparsed = model_cls.model_validate(dumped)
 
     assert reparsed.model_dump(by_alias=True, mode="json") == dumped
+
+
+@pytest.mark.parametrize(("transaction_type", "model_cls"), transaction_models._TRANSACTION_TYPE_MAP.items())
+def test_account_changes_preserve_every_transaction_subtype(transaction_type: str, model_cls: type[BaseModel]) -> None:
+    """Every supported transaction keeps its fields inside the base-typed collection."""
+    payload = {**_sample_payload(model_cls), "type": transaction_type}
+    standalone = model_cls.model_validate(payload)
+    changes = accounts_models.AccountChanges.model_validate({"transactions": [payload]})
+
+    assert type(changes.transactions[0]) is model_cls
+    dumped = changes.model_dump(by_alias=True, mode="json", exclude_none=True)
+    assert dumped["transactions"] == [standalone.model_dump(by_alias=True, mode="json", exclude_none=True)]
+    reparsed = accounts_models.AccountChanges.model_validate_json(changes.model_dump_json(by_alias=True))
+    assert type(reparsed.transactions[0]) is model_cls
+    assert reparsed.transactions[0] == standalone

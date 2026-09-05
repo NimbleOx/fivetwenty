@@ -131,6 +131,11 @@ def test_type_equivalence_normalizes_python_and_oanda_collections():
     assert _types_equivalent("OrderID", "str")
 
 
+def test_type_equivalence_preserves_serialize_as_any_contract():
+    assert _types_equivalent("Array[Transaction]", "list[SerializeAsAny[Transaction]]")
+    assert not _types_equivalent("Array[Transaction]", "list[SerializeAsAny[Order]]")
+
+
 def test_load_waivers_requires_explicit_audit_fields(tmp_path: Path) -> None:
     waiver_path = tmp_path / "waivers.yml"
     waiver_path.write_text(

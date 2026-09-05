@@ -8,47 +8,15 @@ from typing import TYPE_CHECKING, Any, TypedDict, cast
 
 from .._internal.response import ApiResponse
 from .._internal.utils import format_datetime_for_oanda
-from ..models import (
-    ClientConfigureRejectTransaction,
-    ClientConfigureTransaction,
-    CloseTransaction,
-    CreateTransaction,
-    DailyFinancingTransaction,
-    DelayedTradeClosureTransaction,
-    DividendAdjustmentTransaction,
-    FixedPriceOrderTransaction,
-    GuaranteedStopLossOrderRejectTransaction,
-    GuaranteedStopLossOrderTransaction,
-    LimitOrderRejectTransaction,
-    LimitOrderTransaction,
-    MarginCallEnterTransaction,
-    MarginCallExitTransaction,
-    MarginCallExtendTransaction,
-    MarketIfTouchedOrderRejectTransaction,
-    MarketIfTouchedOrderTransaction,
-    MarketOrderRejectTransaction,
-    MarketOrderTransaction,
-    OrderCancelRejectTransaction,
-    OrderCancelTransaction,
-    OrderClientExtensionsModifyRejectTransaction,
-    OrderClientExtensionsModifyTransaction,
-    OrderFillTransaction,
-    ReopenTransaction,
-    ResetResettablePLTransaction,
-    StopLossOrderRejectTransaction,
-    StopLossOrderTransaction,
-    StopOrderRejectTransaction,
-    StopOrderTransaction,
-    TakeProfitOrderRejectTransaction,
-    TakeProfitOrderTransaction,
-    TradeClientExtensionsModifyRejectTransaction,
-    TradeClientExtensionsModifyTransaction,
-    TrailingStopLossOrderRejectTransaction,
-    TrailingStopLossOrderTransaction,
-    TransactionFilter,
-    TransactionHeartbeat,
-    TransferFundsRejectTransaction,
-    TransferFundsTransaction,
+from ..models import TransactionFilter, TransactionHeartbeat
+from ..models.transactions import (
+    _TRANSACTION_TYPE_MAP as _TRANSACTION_TYPE_MAP,  # noqa: PLC0414 - retain existing internal import compatibility
+)
+from ..models.transactions import (
+    TransactionUnion as TransactionUnion,  # noqa: PLC0414 - preserve the endpoint type alias export
+)
+from ..models.transactions import (
+    parse_transaction,
 )
 
 if TYPE_CHECKING:
@@ -62,95 +30,9 @@ else:
 
     from ..models import AccountID
 
-# Union type for all possible transaction types
-TransactionUnion = (
-    OrderFillTransaction
-    | OrderCancelTransaction
-    | MarketOrderTransaction
-    | CreateTransaction
-    | ClientConfigureTransaction
-    | ClientConfigureRejectTransaction
-    | LimitOrderTransaction
-    | LimitOrderRejectTransaction
-    | MarketOrderRejectTransaction
-    | StopOrderTransaction
-    | StopOrderRejectTransaction
-    | TakeProfitOrderTransaction
-    | TakeProfitOrderRejectTransaction
-    | StopLossOrderTransaction
-    | StopLossOrderRejectTransaction
-    | TrailingStopLossOrderTransaction
-    | TrailingStopLossOrderRejectTransaction
-    | GuaranteedStopLossOrderTransaction
-    | GuaranteedStopLossOrderRejectTransaction
-    | MarketIfTouchedOrderTransaction
-    | MarketIfTouchedOrderRejectTransaction
-    | OrderCancelRejectTransaction
-    | OrderClientExtensionsModifyTransaction
-    | OrderClientExtensionsModifyRejectTransaction
-    | TradeClientExtensionsModifyTransaction
-    | TradeClientExtensionsModifyRejectTransaction
-    | MarginCallEnterTransaction
-    | MarginCallExitTransaction
-    | DailyFinancingTransaction
-    | DividendAdjustmentTransaction
-    | ResetResettablePLTransaction
-    | CloseTransaction
-    | ReopenTransaction
-    | TransferFundsTransaction
-    | TransferFundsRejectTransaction
-    | MarginCallExtendTransaction
-    | FixedPriceOrderTransaction
-    | DelayedTradeClosureTransaction
-)
-
 
 def _format_transaction_filters(transaction_type: builtins.list[TransactionFilter | str]) -> str:
     return ",".join(item.value if isinstance(item, TransactionFilter) else item for item in transaction_type)
-
-
-# Maps every OANDA transaction type discriminator to its model. Must stay
-# exhaustive over the official TransactionType set — verified by unit test.
-_TRANSACTION_TYPE_MAP: dict[str, type[TransactionUnion]] = {
-    "CREATE": CreateTransaction,
-    "CLOSE": CloseTransaction,
-    "REOPEN": ReopenTransaction,
-    "CLIENT_CONFIGURE": ClientConfigureTransaction,
-    "CLIENT_CONFIGURE_REJECT": ClientConfigureRejectTransaction,
-    "TRANSFER_FUNDS": TransferFundsTransaction,
-    "TRANSFER_FUNDS_REJECT": TransferFundsRejectTransaction,
-    "MARKET_ORDER": MarketOrderTransaction,
-    "MARKET_ORDER_REJECT": MarketOrderRejectTransaction,
-    "FIXED_PRICE_ORDER": FixedPriceOrderTransaction,
-    "LIMIT_ORDER": LimitOrderTransaction,
-    "LIMIT_ORDER_REJECT": LimitOrderRejectTransaction,
-    "STOP_ORDER": StopOrderTransaction,
-    "STOP_ORDER_REJECT": StopOrderRejectTransaction,
-    "MARKET_IF_TOUCHED_ORDER": MarketIfTouchedOrderTransaction,
-    "MARKET_IF_TOUCHED_ORDER_REJECT": MarketIfTouchedOrderRejectTransaction,
-    "TAKE_PROFIT_ORDER": TakeProfitOrderTransaction,
-    "TAKE_PROFIT_ORDER_REJECT": TakeProfitOrderRejectTransaction,
-    "STOP_LOSS_ORDER": StopLossOrderTransaction,
-    "STOP_LOSS_ORDER_REJECT": StopLossOrderRejectTransaction,
-    "GUARANTEED_STOP_LOSS_ORDER": GuaranteedStopLossOrderTransaction,
-    "GUARANTEED_STOP_LOSS_ORDER_REJECT": GuaranteedStopLossOrderRejectTransaction,
-    "TRAILING_STOP_LOSS_ORDER": TrailingStopLossOrderTransaction,
-    "TRAILING_STOP_LOSS_ORDER_REJECT": TrailingStopLossOrderRejectTransaction,
-    "ORDER_FILL": OrderFillTransaction,
-    "ORDER_CANCEL": OrderCancelTransaction,
-    "ORDER_CANCEL_REJECT": OrderCancelRejectTransaction,
-    "ORDER_CLIENT_EXTENSIONS_MODIFY": OrderClientExtensionsModifyTransaction,
-    "ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT": OrderClientExtensionsModifyRejectTransaction,
-    "TRADE_CLIENT_EXTENSIONS_MODIFY": TradeClientExtensionsModifyTransaction,
-    "TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT": TradeClientExtensionsModifyRejectTransaction,
-    "MARGIN_CALL_ENTER": MarginCallEnterTransaction,
-    "MARGIN_CALL_EXTEND": MarginCallExtendTransaction,
-    "MARGIN_CALL_EXIT": MarginCallExitTransaction,
-    "DELAYED_TRADE_CLOSURE": DelayedTradeClosureTransaction,
-    "DAILY_FINANCING": DailyFinancingTransaction,
-    "DIVIDEND_ADJUSTMENT": DividendAdjustmentTransaction,
-    "RESET_RESETTABLE_PL": ResetResettablePLTransaction,
-}
 
 
 class TransactionsResponse(TypedDict, total=False):
@@ -495,8 +377,4 @@ class TransactionEndpoints:
         Raises:
             ValueError: If transaction type is unknown
         """
-        transaction_type = transaction_data.get("type")
-        model = _TRANSACTION_TYPE_MAP.get(transaction_type or "")
-        if model is None:
-            raise ValueError(f"Unknown transaction type: {transaction_type}")
-        return model.model_validate(transaction_data)
+        return parse_transaction(transaction_data)

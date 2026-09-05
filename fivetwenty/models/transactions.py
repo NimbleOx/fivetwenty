@@ -8,6 +8,7 @@ These models represent the audit trail and history of all account activities.
 
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from pydantic import Field
 
@@ -732,6 +733,102 @@ class TransactionIDRange(ApiModel):
 # - TransactionRejectDetails, TransactionSummary, TransactionBatch
 # - AccountChangesState, AccountChanges (these are now properly in accounts.py)
 # Note: TransactionHeartbeat IS part of the OANDA API (used in transaction streaming)
+
+
+# Union type for all possible transaction types
+TransactionUnion = (
+    OrderFillTransaction
+    | OrderCancelTransaction
+    | MarketOrderTransaction
+    | CreateTransaction
+    | ClientConfigureTransaction
+    | ClientConfigureRejectTransaction
+    | LimitOrderTransaction
+    | LimitOrderRejectTransaction
+    | MarketOrderRejectTransaction
+    | StopOrderTransaction
+    | StopOrderRejectTransaction
+    | TakeProfitOrderTransaction
+    | TakeProfitOrderRejectTransaction
+    | StopLossOrderTransaction
+    | StopLossOrderRejectTransaction
+    | TrailingStopLossOrderTransaction
+    | TrailingStopLossOrderRejectTransaction
+    | GuaranteedStopLossOrderTransaction
+    | GuaranteedStopLossOrderRejectTransaction
+    | MarketIfTouchedOrderTransaction
+    | MarketIfTouchedOrderRejectTransaction
+    | OrderCancelRejectTransaction
+    | OrderClientExtensionsModifyTransaction
+    | OrderClientExtensionsModifyRejectTransaction
+    | TradeClientExtensionsModifyTransaction
+    | TradeClientExtensionsModifyRejectTransaction
+    | MarginCallEnterTransaction
+    | MarginCallExitTransaction
+    | DailyFinancingTransaction
+    | DividendAdjustmentTransaction
+    | ResetResettablePLTransaction
+    | CloseTransaction
+    | ReopenTransaction
+    | TransferFundsTransaction
+    | TransferFundsRejectTransaction
+    | MarginCallExtendTransaction
+    | FixedPriceOrderTransaction
+    | DelayedTradeClosureTransaction
+)
+
+
+# Maps every OANDA transaction type discriminator to its model. Must stay
+# exhaustive over the official TransactionType set — verified by unit test.
+_TRANSACTION_TYPE_MAP: dict[str, type[TransactionUnion]] = {
+    "CREATE": CreateTransaction,
+    "CLOSE": CloseTransaction,
+    "REOPEN": ReopenTransaction,
+    "CLIENT_CONFIGURE": ClientConfigureTransaction,
+    "CLIENT_CONFIGURE_REJECT": ClientConfigureRejectTransaction,
+    "TRANSFER_FUNDS": TransferFundsTransaction,
+    "TRANSFER_FUNDS_REJECT": TransferFundsRejectTransaction,
+    "MARKET_ORDER": MarketOrderTransaction,
+    "MARKET_ORDER_REJECT": MarketOrderRejectTransaction,
+    "FIXED_PRICE_ORDER": FixedPriceOrderTransaction,
+    "LIMIT_ORDER": LimitOrderTransaction,
+    "LIMIT_ORDER_REJECT": LimitOrderRejectTransaction,
+    "STOP_ORDER": StopOrderTransaction,
+    "STOP_ORDER_REJECT": StopOrderRejectTransaction,
+    "MARKET_IF_TOUCHED_ORDER": MarketIfTouchedOrderTransaction,
+    "MARKET_IF_TOUCHED_ORDER_REJECT": MarketIfTouchedOrderRejectTransaction,
+    "TAKE_PROFIT_ORDER": TakeProfitOrderTransaction,
+    "TAKE_PROFIT_ORDER_REJECT": TakeProfitOrderRejectTransaction,
+    "STOP_LOSS_ORDER": StopLossOrderTransaction,
+    "STOP_LOSS_ORDER_REJECT": StopLossOrderRejectTransaction,
+    "GUARANTEED_STOP_LOSS_ORDER": GuaranteedStopLossOrderTransaction,
+    "GUARANTEED_STOP_LOSS_ORDER_REJECT": GuaranteedStopLossOrderRejectTransaction,
+    "TRAILING_STOP_LOSS_ORDER": TrailingStopLossOrderTransaction,
+    "TRAILING_STOP_LOSS_ORDER_REJECT": TrailingStopLossOrderRejectTransaction,
+    "ORDER_FILL": OrderFillTransaction,
+    "ORDER_CANCEL": OrderCancelTransaction,
+    "ORDER_CANCEL_REJECT": OrderCancelRejectTransaction,
+    "ORDER_CLIENT_EXTENSIONS_MODIFY": OrderClientExtensionsModifyTransaction,
+    "ORDER_CLIENT_EXTENSIONS_MODIFY_REJECT": OrderClientExtensionsModifyRejectTransaction,
+    "TRADE_CLIENT_EXTENSIONS_MODIFY": TradeClientExtensionsModifyTransaction,
+    "TRADE_CLIENT_EXTENSIONS_MODIFY_REJECT": TradeClientExtensionsModifyRejectTransaction,
+    "MARGIN_CALL_ENTER": MarginCallEnterTransaction,
+    "MARGIN_CALL_EXTEND": MarginCallExtendTransaction,
+    "MARGIN_CALL_EXIT": MarginCallExitTransaction,
+    "DELAYED_TRADE_CLOSURE": DelayedTradeClosureTransaction,
+    "DAILY_FINANCING": DailyFinancingTransaction,
+    "DIVIDEND_ADJUSTMENT": DividendAdjustmentTransaction,
+    "RESET_RESETTABLE_PL": ResetResettablePLTransaction,
+}
+
+
+def parse_transaction(transaction_data: dict[str, Any]) -> TransactionUnion:
+    """Parse a concrete transaction consistently in responses and nested account data."""
+    transaction_type = transaction_data.get("type")
+    model = _TRANSACTION_TYPE_MAP.get(transaction_type or "")
+    if model is None:
+        raise ValueError(f"Unknown transaction type: {transaction_type}")
+    return model.model_validate(transaction_data)
 
 
 # Export all transaction-related models

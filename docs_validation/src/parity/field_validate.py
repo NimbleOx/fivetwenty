@@ -336,7 +336,7 @@ def _strip_optional(type_text: str) -> str:
 STRING_PRIMITIVE_ALIASES = {"InstrumentName"}
 
 
-def _normalize_type(type_text: str) -> str:
+def _normalize_type(type_text: str) -> str:  # noqa: PLR0911
     t = _strip_optional(type_text)
     if t.strip().lower() == "integer or decimal if available":
         return "Decimal"
@@ -346,6 +346,10 @@ def _normalize_type(type_text: str) -> str:
     t = t.replace("typing.", "")
     if t in PY_PRIMITIVE_MAP:
         return PY_PRIMITIVE_MAP[t]
+    # SerializeAsAny changes Pydantic serialization to retain concrete subtype
+    # fields. The wrapped type remains the validation and wire contract.
+    if t.startswith("SerializeAsAny[") and t.endswith("]"):
+        return _normalize_type(t[len("SerializeAsAny[") : -1])
     list_match = re.match(r"^(?:builtins\.)?list\[(.*)]$", t)
     if list_match:
         return f"Array[{_normalize_type(list_match.group(1))}]"

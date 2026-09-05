@@ -3,10 +3,12 @@
 from decimal import Decimal
 from unittest.mock import AsyncMock, MagicMock
 
+import httpx
 import pytest
 
+from fivetwenty import AsyncClient
 from fivetwenty.endpoints.accounts import AccountEndpoints
-from fivetwenty.models import Account, AccountProperties, AccountSummary, Instrument
+from fivetwenty.models import Account, AccountChanges, AccountProperties, AccountSummary, Instrument, OrderFillTransaction
 
 
 class TestAccountConfigurationEndpoints:
@@ -516,3 +518,106 @@ class TestAccountInstrumentEndpoints:
         await accounts.get_account_instruments("101-001-123456-001", instruments=["EUR_USD", "GBP_USD"])
 
         mock_client._request.assert_called_once_with("GET", "/accounts/101-001-123456-001/instruments", params={"instruments": "EUR_USD,GBP_USD"})
+
+
+ORDER_RESPONSE_CASES = [
+    ("MARKET", "MarketOrder", {"instrument": "EUR_USD", "units": "100"}),
+    ("LIMIT", "LimitOrder", {"instrument": "EUR_USD", "units": "100", "price": "1.20000"}),
+    ("STOP", "StopOrder", {"instrument": "EUR_USD", "units": "100", "price": "1.20000"}),
+    ("MARKET_IF_TOUCHED", "MarketIfTouchedOrder", {"instrument": "EUR_USD", "units": "100", "price": "1.20000"}),
+    ("TAKE_PROFIT", "TakeProfitOrder", {"tradeID": "2", "price": "1.20000"}),
+    ("STOP_LOSS", "StopLossOrder", {"tradeID": "2", "price": "1.10000"}),
+    ("GUARANTEED_STOP_LOSS", "GuaranteedStopLossOrder", {"tradeID": "2", "price": "1.10000", "guaranteedExecutionPremium": "0.00020"}),
+    ("TRAILING_STOP_LOSS", "TrailingStopLossOrder", {"tradeID": "2", "distance": "0.01000", "trailingStopValue": "1.10000"}),
+    ("FIXED_PRICE", "FixedPriceOrder", {"instrument": "EUR_USD", "units": "100", "price": "1.20000", "tradeState": "OPEN"}),
+]
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("collection", ["account", "ordersCreated", "ordersCancelled", "ordersFilled", "ordersTriggered"])
+@pytest.mark.parametrize(("order_type", "expected_class", "fields"), ORDER_RESPONSE_CASES, ids=[case[0] for case in ORDER_RESPONSE_CASES])
+async def test_account_endpoints_preserve_concrete_order_types(collection, order_type, expected_class, fields):
+    """Wire discriminators select the same concrete model in every account collection."""
+    order = {"id": "10", "createTime": "2024-01-15T12:00:00Z", "state": "PENDING", "type": order_type, **fields}
+    if order_type in {"MARKET", "FIXED_PRICE"}:
+        order["state"] = "FILLED"
+    if collection == "account":
+        response_body = {"account": {**ACCOUNT_PAYLOAD, "orders": [order]}, "lastTransactionID": "10"}
+    else:
+        response_body = {"changes": {collection: [order]}, "state": {}, "lastTransactionID": "10"}
+
+    def handler(request):
+        expected_path = "/accounts/101-001-123456-001" + ("" if collection == "account" else "/changes")
+        assert request.method == "GET"
+        assert request.url.path == expected_path
+        if collection != "account":
+            assert request.url.params["sinceTransactionID"] == "9"
+        return httpx.Response(200, json=response_body)
+
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(handler), base_url="https://api.example.test")
+    async with AsyncClient(token="synthetic-token", account_id="101-001-123456-001", transport=transport) as client:
+        if collection == "account":
+            response = await client.accounts.get_account("101-001-123456-001")
+            container = response["account"]
+            parsed_order = container.orders[0]
+            wire_collection = "orders"
+        else:
+            response = await client.accounts.get_account_changes("101-001-123456-001", since_transaction_id="9")
+            container = response["changes"]
+            parsed_order = getattr(container, collection)[0]
+            wire_collection = collection
+
+    assert type(parsed_order).__name__ == expected_class
+    assert parsed_order.type == order_type
+    if order_type == "GUARANTEED_STOP_LOSS":
+        assert not hasattr(parsed_order, "guaranteed")
+    dumped = container.model_dump(by_alias=True, exclude_unset=True)
+    assert dumped[wire_collection] == [order]
+    reparsed = type(container).model_validate_json(container.model_dump_json(by_alias=True))
+    assert type(getattr(reparsed, wire_collection)[0]).__name__ == expected_class
+    assert getattr(reparsed, wire_collection)[0] == parsed_order
+
+
+@pytest.mark.asyncio
+async def test_get_account_changes_preserves_fill_details_and_nested_serialization():
+    """A fill retains monetary amounts and nested trade details through the public HTTP path."""
+    transaction = {
+        "id": "6360",
+        "type": "ORDER_FILL",
+        "time": "2024-01-15T12:00:00Z",
+        "userID": 1,
+        "accountID": "101-001-123456-001",
+        "batchID": "6359",
+        "orderID": "6359",
+        "instrument": "USD_CAD",
+        "units": "-100",
+        "price": "1.28324",
+        "reason": "MARKET_ORDER",
+        "pl": "0.00000",
+        "financing": "0.00000",
+        "accountBalance": "43650.78835",
+        "tradeOpened": {"tradeID": "6360", "units": "-100", "price": "1.28324", "initialMarginRequired": "2.50"},
+    }
+    response_body = {"changes": {"transactions": [transaction]}, "state": {}, "lastTransactionID": "6360"}
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(lambda request: httpx.Response(200, json=response_body)), base_url="https://api.example.test")
+    async with AsyncClient(token="synthetic-token", account_id="101-001-123456-001", transport=transport) as client:
+        response = await client.accounts.get_account_changes("101-001-123456-001", since_transaction_id="6359")
+
+    changes = response["changes"]
+    fill = changes.transactions[0]
+    assert isinstance(fill, OrderFillTransaction)
+    assert fill.units == Decimal("-100")
+    assert fill.account_balance == Decimal("43650.78835")
+    assert fill.trade_opened.initial_margin_required == Decimal("2.50")
+    assert changes.model_dump(by_alias=True, exclude_unset=True) == {"transactions": [transaction]}
+    assert changes["transactions"][0]["tradeOpened"]["price"] == "1.28324"
+    reparsed = AccountChanges.model_validate_json(changes.model_dump_json(by_alias=True))
+    assert isinstance(reparsed.transactions[0], OrderFillTransaction)
+    assert reparsed.transactions[0] == fill
+
+
+@pytest.mark.parametrize(("collection", "invalid_type"), [("ordersCreated", "NOT_AN_ORDER"), ("transactions", "NOT_A_TRANSACTION")])
+def test_account_changes_reject_unknown_discriminators(collection, invalid_type):
+    """Unknown variants fail explicitly instead of masquerading as a known base model."""
+    with pytest.raises(ValueError, match=r"Unknown (order|transaction) type"):
+        AccountChanges.model_validate({collection: [{"type": invalid_type}]})

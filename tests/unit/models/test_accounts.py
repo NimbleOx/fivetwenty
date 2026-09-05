@@ -232,6 +232,8 @@ class TestAccountChangesModels:
                     "accountID": "101-001-123456-001",
                     "batchID": "10",
                     "type": "MARKET_ORDER",
+                    "instrument": "EUR_USD",
+                    "units": "100",
                 }
             ],
         }

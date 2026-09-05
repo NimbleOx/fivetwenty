@@ -19,21 +19,16 @@ from .._internal.utils import quantize_price
 from ..models import (
     AccountID,
     ClientExtensions,
-    FixedPriceOrder,
-    GuaranteedStopLossOrder,
     GuaranteedStopLossOrderRejectTransaction,
     GuaranteedStopLossOrderRequest,
     GuaranteedStopLossOrderTransaction,
     InstrumentName,
-    LimitOrder,
     LimitOrderRejectTransaction,
     LimitOrderRequest,
     LimitOrderTransaction,
-    MarketIfTouchedOrder,
     MarketIfTouchedOrderRejectTransaction,
     MarketIfTouchedOrderRequest,
     MarketIfTouchedOrderTransaction,
-    MarketOrder,
     MarketOrderRejectTransaction,
     MarketOrderRequest,
     MarketOrderTransaction,
@@ -42,31 +37,26 @@ from ..models import (
     OrderFillTransaction,
     OrderStateFilter,
     StopLossDetails,
-    StopLossOrder,
     StopLossOrderRejectTransaction,
     StopLossOrderRequest,
     StopLossOrderTransaction,
-    StopOrder,
     StopOrderRejectTransaction,
     StopOrderRequest,
     StopOrderTransaction,
     TakeProfitDetails,
-    TakeProfitOrder,
     TakeProfitOrderRejectTransaction,
     TakeProfitOrderRequest,
     TakeProfitOrderTransaction,
     TimeInForce,
-    TrailingStopLossOrder,
     TrailingStopLossOrderRejectTransaction,
     TrailingStopLossOrderRequest,
     TrailingStopLossOrderTransaction,
 )
+from ..models.orders import Order as Order  # noqa: PLC0414 - preserve the endpoint type alias export
+from ..models.orders import parse_order
 
 if TYPE_CHECKING:
     from ..client import AsyncClient
-
-# Union type for all possible order types returned by the API
-Order = MarketOrder | LimitOrder | StopOrder | MarketIfTouchedOrder | TakeProfitOrder | StopLossOrder | GuaranteedStopLossOrder | TrailingStopLossOrder | FixedPriceOrder
 
 # Union type for order request objects (for order creation)
 OrderRequest = MarketOrderRequest | LimitOrderRequest | StopOrderRequest | TakeProfitOrderRequest | StopLossOrderRequest | MarketIfTouchedOrderRequest | TrailingStopLossOrderRequest | GuaranteedStopLossOrderRequest
@@ -815,7 +805,7 @@ class OrderEndpoints:
         self._precision_cache[instrument] = precision
         return precision
 
-    def _parse_order(self, order_data: dict[str, Any]) -> Order:  # noqa: PLR0911
+    def _parse_order(self, order_data: dict[str, Any]) -> Order:
         """
         Parse order data into the appropriate Order model based on type discriminator.
 
@@ -828,28 +818,7 @@ class OrderEndpoints:
         Raises:
             ValueError: If order type is unknown
         """
-        order_type = order_data.get("type")
-
-        if order_type == "MARKET":
-            return MarketOrder.model_validate(order_data)
-        if order_type == "LIMIT":
-            return LimitOrder.model_validate(order_data)
-        if order_type == "STOP":
-            return StopOrder.model_validate(order_data)
-        if order_type == "MARKET_IF_TOUCHED":
-            return MarketIfTouchedOrder.model_validate(order_data)
-        if order_type == "TAKE_PROFIT":
-            return TakeProfitOrder.model_validate(order_data)
-        if order_type == "STOP_LOSS":
-            return StopLossOrder.model_validate(order_data)
-        if order_type == "GUARANTEED_STOP_LOSS":
-            return GuaranteedStopLossOrder.model_validate(order_data)
-        if order_type == "TRAILING_STOP_LOSS":
-            return TrailingStopLossOrder.model_validate(order_data)
-        if order_type == "FIXED_PRICE":
-            return FixedPriceOrder.model_validate(order_data)
-
-        raise ValueError(f"Unknown order type: {order_type}")
+        return parse_order(order_data)
 
     def _parse_order_transaction(self, transaction_data: dict[str, Any]) -> OrderCreateTransaction:  # noqa: PLR0911
         """

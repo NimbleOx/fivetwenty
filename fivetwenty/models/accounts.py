@@ -10,11 +10,12 @@ from __future__ import annotations
 # Runtime imports (not TYPE_CHECKING): pydantic resolves these annotations when
 # building the models, so moving them into a type-checking block makes every
 # model in this module fail to instantiate.
+from collections.abc import Iterable
 from datetime import datetime  # noqa: TC003
 from decimal import Decimal  # noqa: TC003
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
-from pydantic import Field
+from pydantic import Field, SerializeAsAny, field_validator
 
 from .base import ApiModel
 from .enums import (
@@ -25,25 +26,19 @@ from .enums import (
     GuaranteedStopLossOrderMutability,
     TransactionID,
 )
-from .orders import (
-    DynamicOrderState,
-    GuaranteedStopLossOrder,
-    LimitOrder,
-    MarketIfTouchedOrder,
-    MarketOrder,
-    StopLossOrder,
-    StopOrder,
-    TakeProfitOrder,
-    TrailingStopLossOrder,
-)
+from .orders import DynamicOrderState, Order, parse_order
+from .transactions import Transaction, parse_transaction
 
 if TYPE_CHECKING:
     from .positions import CalculatedPositionState, Position
     from .trades import CalculatedTradeState, TradeSummary
-    from .transactions import Transaction
 
-# Union type for all possible order types in an account
-Order = MarketOrder | LimitOrder | StopOrder | MarketIfTouchedOrder | TakeProfitOrder | StopLossOrder | GuaranteedStopLossOrder | TrailingStopLossOrder
+
+def _parse_account_orders(value: Any) -> Any:
+    """Apply shared order dispatch before Pydantic validates an order collection."""
+    if isinstance(value, Iterable) and not isinstance(value, (str, bytes, dict)):
+        return [parse_order(item) if isinstance(item, dict) else item for item in value]
+    return value
 
 
 class AccountProperties(ApiModel):
@@ -98,6 +93,8 @@ class Account(ApiModel):
     trades: list[TradeSummary] = Field(default_factory=list)
     positions: list[Position] = Field(default_factory=list)
     orders: list[Order] = Field(default_factory=list)
+
+    _parse_orders = field_validator("orders", mode="before")(_parse_account_orders)
 
 
 class GuaranteedStopLossOrderParameters(ApiModel):
@@ -210,7 +207,17 @@ class AccountChanges(ApiModel):
     trades_reduced: list[TradeSummary] = Field(default_factory=list, alias="tradesReduced")
     trades_closed: list[TradeSummary] = Field(default_factory=list, alias="tradesClosed")
     positions: list[Position] = Field(default_factory=list)
-    transactions: list[Transaction] = Field(default_factory=list)
+    transactions: list[SerializeAsAny[Transaction]] = Field(default_factory=list)
+
+    _parse_orders = field_validator("orders_created", "orders_cancelled", "orders_filled", "orders_triggered", mode="before")(_parse_account_orders)
+
+    @field_validator("transactions", mode="before")
+    @classmethod
+    def _parse_transactions(cls, value: Any) -> Any:
+        """Retain concrete transaction fields in account changes and serialization."""
+        if isinstance(value, Iterable) and not isinstance(value, (str, bytes, dict)):
+            return [parse_transaction(item) if isinstance(item, dict) else item for item in value]
+        return value
 
 
 class AccountChangesState(ApiModel):

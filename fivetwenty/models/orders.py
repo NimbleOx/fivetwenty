@@ -7,6 +7,7 @@ order details, and order responses used by the OANDA REST API.
 
 from datetime import datetime
 from decimal import Decimal
+from typing import Any
 
 from pydantic import Field
 
@@ -591,6 +592,31 @@ class TrailingStopLossOrder(ApiModel):
     cancelled_time: datetime | None = Field(None, alias="cancelledTime")
     replaces_order_id: OrderID | None = Field(None, alias="replacesOrderID")
     replaced_by_order_id: OrderID | None = Field(None, alias="replacedByOrderID")
+
+
+# All concrete order response types, including administrative fixed-price orders.
+Order = MarketOrder | LimitOrder | StopOrder | MarketIfTouchedOrder | TakeProfitOrder | StopLossOrder | GuaranteedStopLossOrder | TrailingStopLossOrder | FixedPriceOrder
+
+_ORDER_TYPE_MAP: dict[str, type[Order]] = {
+    "MARKET": MarketOrder,
+    "LIMIT": LimitOrder,
+    "STOP": StopOrder,
+    "MARKET_IF_TOUCHED": MarketIfTouchedOrder,
+    "TAKE_PROFIT": TakeProfitOrder,
+    "STOP_LOSS": StopLossOrder,
+    "GUARANTEED_STOP_LOSS": GuaranteedStopLossOrder,
+    "TRAILING_STOP_LOSS": TrailingStopLossOrder,
+    "FIXED_PRICE": FixedPriceOrder,
+}
+
+
+def parse_order(order_data: dict[str, Any]) -> Order:
+    """Select an order by its OANDA type, never by overlapping model fields."""
+    order_type = order_data.get("type")
+    model = _ORDER_TYPE_MAP.get(order_type or "")
+    if model is None:
+        raise ValueError(f"Unknown order type: {order_type}")
+    return model.model_validate(order_data)
 
 
 # Export all order-related models
