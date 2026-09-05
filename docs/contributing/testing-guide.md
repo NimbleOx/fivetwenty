@@ -16,6 +16,9 @@ uv run pytest tests/unit/test_client_transport.py
 # Quality checks
 uv run poe check-fast
 
+# Execute Markdown Python examples with the real SDK and offline HTTP fixtures
+uv run poe docs-validate-examples
+
 # Execute all six notebooks through HTTP mocks
 uv run poe docs-validate-notebooks
 ```
@@ -119,3 +122,6 @@ uv run pytest tests/unit --cov=docs_validation.src --cov-branch --cov-report=ter
 ```
 
 Actual documentation diagnostics are tracked separately from tests of the validators.
+The Markdown execution worker runs in a subprocess, so its execution is not included
+in this in-process coverage measurement. Runner regressions exercise valid examples,
+broken SDK calls, invalid responses, environment isolation and worker failures.

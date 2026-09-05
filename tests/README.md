@@ -14,6 +14,7 @@ dependency job runs the same suite on Python 3.10.
 | Retry and streaming | Controlled transport failures, split chunks, cancellation, cleanup and observable retry counts. Avoid random network timeouts. |
 | Sync client | Real background loop and HTTP mocks; close clients and iterators explicitly and verify resources are released. |
 | Documentation tooling | Small valid/invalid documents, extractor fixtures and failed-tool cases. The real documentation backlog is tracked separately. |
+| Published Markdown examples | `uv run poe docs-validate-examples` executes every Python block with the real SDK and shared HTTP fixtures; focused tests call important helper functions. |
 | Live integration | Focused server outcomes on a dedicated OANDA practice account, explicitly requested. |
 
 Do not add tests merely to execute declarations or repeat assertions made by
@@ -69,5 +70,6 @@ uv run python -m pytest tests/unit --cov=docs_validation.src --cov-branch --cov-
 ```
 
 That separate report includes developer tooling and must not be described using
-the SDK's percentage. No additional source exclusions were added to improve the
-coverage result.
+the SDK's percentage. The documentation worker runs in a separate interpreter;
+its executions are not included in this in-process measurement. No additional
+source exclusions were added to improve the coverage result.

@@ -279,14 +279,15 @@ docs-build = "python -m mkdocs build --clean"
 # `docs-validate-parity-refresh` refreshes the cached live OANDA docs before running parity.
 # `docs-validate` runs both in sequence so a single command catches everything.
 docs-validate-files = "uv run python -m docs_validation.src.cli validate --config docs_validation/config/validation-complete.yml"
+docs-validate-examples = "python -m docs_validation.src.cli validate --config docs_validation/config/validation-execution.yml"
 docs-validate-parity = "uv run python -m docs_validation.src.parity.run_all --no-fetch"
 docs-validate-parity-refresh = "uv run python -m docs_validation.src.parity.run_all --refresh"
 docs-validate = ["docs-validate-files", "docs-validate-parity"]
 
 # Local-only gate: executes docs/examples/notebooks/*.ipynb headlessly against a
 # mocked HTTP transport. Deliberately not wired into CI (a Jupyter kernel per
-# notebook exceeds the GitHub runner memory budget, same as the mypy and
-# code-execution doc validators). Uses `--with` (an ephemeral overlay) rather
+# notebook exceeds the GitHub runner memory budget). Markdown execution runs
+# separately through docs-validate-examples in CI. Uses `--with` (an ephemeral overlay) rather
 # than a dependency group: numpy's stubs use post-3.10 syntax mypy can't parse,
 # so these packages must never land in the shared dev .venv that `poe typecheck`
 # scans, or every subsequent typecheck run breaks until a clean `uv sync --group dev`.

@@ -61,6 +61,10 @@ jobs:
       - name: Unit tests
         run: uv run poe test-cov
 
+      - name: Execute Markdown examples offline
+        if: matrix.python-version == '3.13'
+        run: uv run poe docs-validate-examples
+
   minimum-dependencies:
     name: Minimum Runtime Dependencies
     runs-on: ubuntu-latest

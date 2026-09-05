@@ -69,7 +69,7 @@ validators in `docs_validation/src/validators/`:
 - `python_syntax`: syntax-check Python code blocks.
 - `code_linting`: run Ruff against extracted Python examples.
 - `code_typing`: run mypy checks against examples.
-- `code_execution`: execute selected standalone examples with mocked API calls.
+- `code_execution`: execute Python examples with the real SDK and offline HTTP fixtures.
 - `cross_references`: validate internal documentation references.
 - `external_links`: check external links.
 - `financial_precision`: catch unsafe numeric patterns in financial examples.
@@ -96,6 +96,50 @@ uv run python -m docs_validation.src.cli validate \
   --config docs_validation/config/validation-complete.yml \
   --files docs/guides/understanding/best-practices.md
 ```
+
+### Offline example execution
+
+Run the deterministic Markdown execution gate:
+
+```bash
+uv run poe docs-validate-examples
+```
+
+This uses `validation-execution.yml` to check the project README and every Markdown
+page under `docs/`. The same execution validator runs in complete validation. CI
+runs the standalone gate on Python 3.13; it makes no external link or API requests.
+
+Each document runs in a fresh Python process and temporary working directory.
+Blocks share a namespace within that document. The runner imports the real SDK,
+so configuration, enum values, model validation and request/response handling are
+exercised. `example_api.py` contains HTTP fixtures shared with the standalone
+script tests. Unsupported request methods, paths or hosts fail validation, even
+when the example catches the resulting exception. Explicit `httpx.MockTransport`
+instances in examples keep their own handlers.
+
+Workers receive synthetic default, `RESEARCH_`, `MONITOR_` and `LIVE_` credentials.
+The live prefix selects the real SDK's live environment while HTTP remains mocked.
+Parent credentials, proxy variables and Python startup settings are not inherited;
+`load_dotenv()` and `dotenv_values()` are disabled. Network connections and subprocess
+launches are blocked.
+This runner is for trusted repository examples, not hostile code: process isolation
+does not restrict all filesystem access.
+
+The per-document `timeout_seconds` option defaults to 15 seconds and includes
+worker startup and shutdown. A timeout terminates the worker and reports the active
+block. Missing workers, premature exits and incomplete reports also fail. Captured
+stdout/stderr is limited to 16,000 characters per block; result metadata records
+truncation, execution counts and fixture request counts. Reports include failed
+blocks' captured output and original document line numbers.
+
+`mock_api_calls: false` disables the shared HTTP fixtures; it never enables real
+network access. Explicit fragment markers and ellipsis stubs remain counted skips.
+Custom configurations can retain an `include_files` list, but the standard gates
+execute every Python block in their selected documents.
+
+To support a new example, add the necessary fixture route and independent wire
+payload, then test the example through the runner. Keep malformed responses and
+unexpected requests as failures. Do not recreate SDK methods or models as mocks.
 
 ### OANDA parity validation
 
@@ -401,11 +445,11 @@ Parity checks cover what their extractors recognize in the selected source cache
 review waivers, cache age and source differences alongside the result. Passing a
 mocked example does not establish account eligibility or live execution behavior.
 
-The file execution validator uses a restricted namespace and SDK test doubles.
-Defining a helper does not execute its body, and a failure can come from an
-incomplete double rather than the real SDK. Use HTTP-boundary example tests and the
-mocked notebook runner to exercise actual serialization, parsing and lifecycle
-behavior. Report those checks separately from file-validator diagnostics.
+The file execution validator runs explicit top-level code with the real SDK.
+Defining a helper does not execute its body. Keep focused tests that call published
+helpers and assert their results, requests and cleanup, alongside the mocked
+notebook runner. A missing fixture is a tooling failure to investigate; a successful
+synthetic response does not establish every server rule or account restriction.
 
 Generated reports are diagnostics, not independent reviews of prose or financial
 claims. Inspect the rule and affected content before treating a lint issue, a broken
