@@ -7,6 +7,7 @@ import json
 from typing import TYPE_CHECKING, Any, TypedDict, cast
 
 from .._internal.response import ApiResponse
+from .._internal.utils import format_datetime_for_oanda
 from ..models import (
     ClientConfigureRejectTransaction,
     ClientConfigureTransaction,
@@ -223,9 +224,9 @@ class TransactionEndpoints:
         params: dict[str, str] = {"pageSize": str(page_size)}
 
         if from_time:
-            params["from"] = from_time.isoformat()
+            params["from"] = format_datetime_for_oanda(from_time, getattr(self._client, "_datetime_format", "RFC3339"))
         if to_time:
-            params["to"] = to_time.isoformat()
+            params["to"] = format_datetime_for_oanda(to_time, getattr(self._client, "_datetime_format", "RFC3339"))
         if transaction_type:
             params["type"] = _format_transaction_filters(transaction_type)
 

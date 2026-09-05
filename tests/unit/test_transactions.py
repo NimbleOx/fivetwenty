@@ -149,6 +149,25 @@ class TestTransactionEndpoints:
         )
 
     @pytest.mark.asyncio
+    async def test_list_uses_unix_datetime_format(self, transactions, mock_client):
+        """Test transaction listing honors the client's DateTime format."""
+        mock_client._datetime_format = "UNIX"
+        from_time = datetime(2024, 1, 1, 12, 0, 0, 123456, tzinfo=timezone.utc)
+        to_time = datetime(2024, 1, 1, 12, 5, 0, 654321, tzinfo=timezone.utc)
+
+        await transactions.get_transactions("101-001-123456-001", from_time=from_time, to_time=to_time, page_size=200)
+
+        mock_client._request.assert_called_once_with(
+            "GET",
+            "/accounts/101-001-123456-001/transactions",
+            params={
+                "pageSize": "200",
+                "from": "1704110400.123456000",
+                "to": "1704110700.654321000",
+            },
+        )
+
+    @pytest.mark.asyncio
     async def test_list_with_transaction_types(self, transactions, mock_client):
         """Test transaction listing with type filtering."""
         transaction_types = ["ORDER_FILL", "MARKET_ORDER", "LIMIT_ORDER"]

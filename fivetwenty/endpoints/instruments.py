@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, TypedDict, cast
 
 from .._internal.response import ApiResponse
+from .._internal.utils import format_datetime_for_oanda
 
 if TYPE_CHECKING:
     from datetime import datetime
@@ -119,10 +120,10 @@ class InstrumentEndpoints:
             params["count"] = str(count)
 
         if from_time is not None:
-            params["from"] = from_time.isoformat()
+            params["from"] = format_datetime_for_oanda(from_time, getattr(self._client, "_datetime_format", "RFC3339"))
             params["includeFirst"] = str(include_first).lower()
         if to_time is not None:
-            params["to"] = to_time.isoformat()
+            params["to"] = format_datetime_for_oanda(to_time, getattr(self._client, "_datetime_format", "RFC3339"))
 
         response = await self._client._request(
             "GET",
@@ -177,7 +178,7 @@ class InstrumentEndpoints:
         instrument_str = instrument.value if hasattr(instrument, "value") else instrument
         params: dict[str, str] = {}
         if time is not None:
-            params["time"] = time.isoformat()
+            params["time"] = format_datetime_for_oanda(time, getattr(self._client, "_datetime_format", "RFC3339"))
 
         response = await self._client._request(
             "GET",
@@ -218,7 +219,7 @@ class InstrumentEndpoints:
         instrument_str = instrument.value if hasattr(instrument, "value") else instrument
         params: dict[str, str] = {}
         if time is not None:
-            params["time"] = time.isoformat()
+            params["time"] = format_datetime_for_oanda(time, getattr(self._client, "_datetime_format", "RFC3339"))
 
         response = await self._client._request(
             "GET",

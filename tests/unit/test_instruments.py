@@ -333,6 +333,20 @@ class TestOrderBookEndpoints:
         assert book.bucket_width == Decimal("0.00050")
 
     @pytest.mark.asyncio
+    async def test_get_order_book_uses_unix_datetime_format(self, instruments, mock_client):
+        mock_client._datetime_format = "UNIX"
+        mock_client._request.return_value.json.return_value = {"orderBook": self.BOOK_PAYLOAD}
+        snapshot_time = datetime(2024, 1, 1, 12, 0, 0, 123456, tzinfo=timezone.utc)
+
+        await instruments.get_instrument_order_book("EUR_USD", time=snapshot_time)
+
+        mock_client._request.assert_called_once_with(
+            "GET",
+            "/instruments/EUR_USD/orderBook",
+            params={"time": "1704110400.123456000"},
+        )
+
+    @pytest.mark.asyncio
     async def test_get_position_book_with_time(self, instruments, mock_client):
         from fivetwenty.models import PositionBook
 

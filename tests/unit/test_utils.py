@@ -1,6 +1,7 @@
 """Test internal utilities."""
 
 import os
+from datetime import datetime, timezone
 from decimal import Decimal
 from unittest.mock import patch
 
@@ -8,6 +9,7 @@ from fivetwenty._internal.utils import (
     MonotonicTimeout,
     backoff_with_jitter,
     build_user_agent,
+    format_datetime_for_oanda,
     quantize_price,
     stringify_decimals,
 )
@@ -64,6 +66,27 @@ def test_quantize_price() -> None:
     # Already at correct precision
     price = quantize_price(2, Decimal("1.23"))
     assert price == Decimal("1.23")
+
+
+def test_format_datetime_for_oanda_rfc3339_preserves_existing_isoformat() -> None:
+    """Test RFC3339 formatting preserves the existing isoformat behavior."""
+    value = datetime(2024, 1, 1, 12, 0, 0, 123456, tzinfo=timezone.utc)
+
+    assert format_datetime_for_oanda(value, "RFC3339") == value.isoformat()
+
+
+def test_format_datetime_for_oanda_unix_uses_nanosecond_precision() -> None:
+    """Test UNIX formatting uses OANDA's seconds.nanoseconds representation."""
+    value = datetime(2024, 1, 1, 12, 0, 0, 123456, tzinfo=timezone.utc)
+
+    assert format_datetime_for_oanda(value, "UNIX") == "1704110400.123456000"
+
+
+def test_format_datetime_for_oanda_unix_treats_naive_datetimes_as_utc() -> None:
+    """Test UNIX formatting avoids local-timezone dependent output."""
+    value = datetime(2024, 1, 1, 12, 0, 0, 123456)
+
+    assert format_datetime_for_oanda(value, "UNIX") == "1704110400.123456000"
 
 
 def test_monotonic_timeout() -> None:

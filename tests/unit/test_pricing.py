@@ -270,6 +270,31 @@ class TestEnhancedPricingEndpoints:
         )
 
     @pytest.mark.asyncio
+    async def test_get_account_candles_uses_unix_datetime_format(self, pricing, mock_client):
+        """Test account-specific candles honor the client's DateTime format."""
+        mock_client._datetime_format = "UNIX"
+        from_time = datetime(2024, 1, 1, 12, 0, 0, 123456, tzinfo=timezone.utc)
+        to_time = datetime(2024, 1, 1, 12, 5, 0, 654321, tzinfo=timezone.utc)
+
+        await pricing.get_account_instrument_candles("101-001-123456-001", "USD_JPY", from_time=from_time, to_time=to_time)
+
+        mock_client._request.assert_called_once_with(
+            "GET",
+            "/accounts/101-001-123456-001/instruments/USD_JPY/candles",
+            params={
+                "price": "M",
+                "granularity": "S5",
+                "from": "1704110400.123456000",
+                "to": "1704110700.654321000",
+                "smooth": "false",
+                "includeFirst": "true",
+                "dailyAlignment": "17",
+                "alignmentTimezone": "America/New_York",
+                "weeklyAlignment": "Friday",
+            },
+        )
+
+    @pytest.mark.asyncio
     async def test_get_account_candles_count_too_high_raises_error(self, pricing, mock_client):
         """Test that count > 5000 raises ValueError for account candles."""
         with pytest.raises(ValueError, match="Count cannot exceed 5000"):

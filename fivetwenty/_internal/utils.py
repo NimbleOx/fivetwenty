@@ -2,6 +2,7 @@
 
 import random
 import sys
+from datetime import datetime, timezone
 from decimal import Decimal
 from time import monotonic
 from typing import Any
@@ -69,6 +70,27 @@ def stringify_decimals(obj: Any) -> Any:
     if isinstance(obj, dict):
         return {key: stringify_decimals(value) for key, value in obj.items()}
     return obj
+
+
+def format_datetime_for_oanda(value: datetime, datetime_format: object = "RFC3339") -> str:
+    """
+    Format DateTime query parameters according to Accept-Datetime-Format.
+
+    OANDA applies Accept-Datetime-Format to DateTime fields in both requests and
+    responses. Naive datetimes are treated as UTC for UNIX conversion.
+    """
+    if datetime_format != "UNIX":
+        return value.isoformat()
+
+    utc_value = value
+    if utc_value.tzinfo is None:
+        utc_value = utc_value.replace(tzinfo=timezone.utc)
+    else:
+        utc_value = utc_value.astimezone(timezone.utc)
+
+    seconds = int(utc_value.timestamp())
+    nanoseconds = utc_value.microsecond * 1000
+    return f"{seconds}.{nanoseconds:09d}"
 
 
 def quantize_price(precision: int, value: Decimal) -> Decimal:

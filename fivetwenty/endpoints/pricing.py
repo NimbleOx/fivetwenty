@@ -8,6 +8,7 @@ from typing import TYPE_CHECKING, TypedDict, cast
 from typing_extensions import Required
 
 from .._internal.response import ApiResponse
+from .._internal.utils import format_datetime_for_oanda
 from ..models import AccountID, Candlestick, CandlestickGranularity, ClientPrice, HomeConversions, InstrumentName, PricingComponent, PricingHeartbeat
 from ..models.streaming import StreamingConfiguration, StreamState
 
@@ -256,11 +257,11 @@ class PricingEndpoints:
             params["count"] = str(count)
 
         if from_time is not None:
-            params["from"] = from_time.isoformat()
+            params["from"] = format_datetime_for_oanda(from_time, getattr(self._client, "_datetime_format", "RFC3339"))
             # includeFirst only makes sense with from parameter
             params["includeFirst"] = str(include_first).lower()
         if to_time is not None:
-            params["to"] = to_time.isoformat()
+            params["to"] = format_datetime_for_oanda(to_time, getattr(self._client, "_datetime_format", "RFC3339"))
 
         response = await self._client._request(
             "GET",
