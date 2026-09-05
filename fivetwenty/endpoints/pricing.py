@@ -418,6 +418,7 @@ class PricingEndpoints:
         if include_home_conversions:
             params["includeHomeConversions"] = "true"
 
+        pending_transition: StreamState | None = None
         async with aclosing(
             self._client._stream_with_retries(
                 f"/accounts/{account_id}/pricing/stream",
@@ -426,6 +427,10 @@ class PricingEndpoints:
             )
         ) as stream:
             async for line, state in stream:
+                # Filtering the first raw line must not consume the connection
+                # transition before the caller receives a record.
+                if state in (StreamState.CONNECTING, StreamState.RECONNECTING):
+                    pending_transition = state
                 try:
                     data = json.loads(line)
                 except json.JSONDecodeError as e:
@@ -442,11 +447,9 @@ class PricingEndpoints:
                 if data.get("type") == "HEARTBEAT":
                     if not config.include_heartbeats:
                         continue
-                    heartbeat = PricingHeartbeat.model_validate(data)
-                    yield heartbeat, state
+                    record: ClientPrice | PricingHeartbeat = PricingHeartbeat.model_validate(data)
                 elif data.get("type") == "PRICE":
-                    price = ClientPrice.model_validate(data)
-                    yield price, state
+                    record = ClientPrice.model_validate(data)
                 else:
                     # Unknown message type - log and skip
                     self._client._log(
@@ -455,3 +458,6 @@ class PricingEndpoints:
                         extra={"data": data},
                     )
                     continue
+
+                yield record, pending_transition or state
+                pending_transition = None

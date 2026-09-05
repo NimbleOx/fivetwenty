@@ -45,8 +45,9 @@ must still reconcile with the REST API.
 
 `get_pricing_stream()` and `get_transactions_stream()` do not automatically reconnect.
 `stream_pricing_with_retries()` adds a pricing reconnection policy and yields
-`(record, state)` pairs. The first record after connection or reconnection carries
-that transition state; subsequent records can carry `CONNECTED`.
+`(record, state)` pairs. The first record yielded after connection or reconnection
+carries that transition state, even if earlier heartbeats, malformed JSON or
+unknown record types were filtered out. Subsequent records carry `CONNECTED`.
 
 `ReconnectionPolicy.max_attempts` counts reconnections after the initial connection.
 It is separate from REST `max_retries`. There is no built-in circuit-breaker state

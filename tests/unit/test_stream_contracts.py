@@ -8,7 +8,7 @@ import httpx
 import pytest
 
 from fivetwenty import AsyncClient
-from fivetwenty.models import ClientPrice, PricingHeartbeat, TransactionHeartbeat
+from fivetwenty.models import ClientPrice, PricingHeartbeat, ReconnectionPolicy, StreamingConfiguration, StreamState, TransactionHeartbeat
 
 
 @pytest.mark.parametrize("endpoint", ["pricing", "transactions"])
@@ -109,3 +109,40 @@ async def test_closing_a_partially_consumed_stream_closes_its_body(endpoint):
         await anext(stream)
         await stream.aclose()
         assert closed.is_set(), "aclose() must complete response cleanup before returning"
+
+
+@pytest.mark.parametrize("prefix", ["heartbeat", "malformed", "unknown", "mixed", "none"])
+async def test_first_visible_prices_retain_connection_transitions(prefix):
+    heartbeat = json.dumps({"type": "HEARTBEAT", "time": "2024-01-01T00:00:00Z"})
+    unknown = json.dumps({"type": "FUTURE_MESSAGE"})
+    prefixes = {"heartbeat": [heartbeat], "malformed": ["not-json"], "unknown": [unknown], "mixed": [heartbeat, "not-json", unknown, heartbeat], "none": []}
+    price = json.dumps({"type": "PRICE", "instrument": "EUR_USD", "time": "2024-01-01T00:00:01Z", "closeoutBid": "1.1", "closeoutAsk": "1.2"})
+    bodies = []
+
+    class Body(httpx.AsyncByteStream):
+        closed = False
+
+        def __init__(self, fail):
+            self.fail = fail
+
+        async def __aiter__(self):
+            yield ("\n".join([*prefixes[prefix], price, price]) + "\n").encode()
+            if self.fail:
+                raise httpx.ReadError("offline disconnect")
+
+        async def aclose(self):
+            self.closed = True
+
+    def handle(request):
+        body = Body(fail=not bodies)
+        bodies.append(body)
+        return httpx.Response(200, stream=body)
+
+    transport = httpx.AsyncClient(transport=httpx.MockTransport(handle))
+    config = StreamingConfiguration(include_heartbeats=False, reconnection_policy=ReconnectionPolicy(max_attempts=1, delay_seconds=0))
+    async with AsyncClient(token="offline-token", account_id="offline", transport=transport) as client:
+        events = [item async for item in client.pricing.stream_pricing_with_retries("offline", ["EUR_USD"], snapshot=False, config=config)]
+    assert len(bodies) == 2
+    assert all(body.closed for body in bodies)
+    assert all(isinstance(record, ClientPrice) for record, _ in events)
+    assert [state for _, state in events] == [StreamState.CONNECTING, StreamState.CONNECTED, StreamState.RECONNECTING, StreamState.CONNECTED]
