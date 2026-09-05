@@ -1,316 +1,155 @@
-# Client API Reference
+# Client API reference
 
-Complete reference for FiveTwenty client interfaces and configuration.
+`AsyncClient` owns the HTTP connection and exposes endpoint groups. `Client` offers
+blocking calls through a background event-loop thread. Choose the interface that
+fits the application; both use the same endpoint implementation.
 
----
+## AsyncClient
 
-## Quick Reference
+The constructor accepts an optional positional `token` and the keyword arguments
+below. Create it inside an `async with` block, or call `await client.aclose()` when
+finished.
 
-### Client Creation
-| Method | Purpose | Parameters |
-|--------|---------|------------|
-| [AsyncClient](#asyncclient) | Async client | `token?`, `config?`, `account_id?`, `environment?`, `timeout?` |
-| [Client](#client) | Sync client | Same as async client |
+| Argument | Type | Default and meaning |
+| --- | --- | --- |
+| `token` | `str \| None` | `None`; direct API token |
+| `account_id` | `str \| None` | `None`; required with a direct token |
+| `environment` | `Environment` | `PRACTICE`; used with direct credentials |
+| `config` | `AccountConfig \| None` | `None`; explicit configuration object |
+| `timeout` | `float` | `30.0`; default read timeout in seconds |
+| `max_retries` | `int` | `3`; retries after the initial eligible REST request |
+| `transport` | `httpx.AsyncClient \| None` | `None`; an existing HTTP client |
+| `user_agent` | `str \| None` | `None`; use the SDK's user agent |
+| `proxies` | `str \| None` | `None`; proxy URL for an SDK-created HTTP client |
+| `verify` | `bool \| str` | `True`; TLS verification or CA path |
+| `cert` | `str \| None` | `None`; client certificate path |
+| `logger` | `logging.Logger \| None` | `None`; SDK logger |
+| `datetime_format` | `AcceptDatetimeFormat \| str` | `RFC3339`; also accepts `UNIX` |
 
-### Endpoint Groups
-| Endpoint | Purpose | Key Methods |
-|----------|---------|-------------|
-| [accounts](endpoints/accounts.md) | Account management | `get_accounts()`, `get_account()`, `get_account_summary()`, `get_account_instruments()`, `patch_account_configuration()`, `get_account_changes()` |
-| [orders](endpoints/orders.md) | Order operations | `post_market_order()`, `post_limit_order()`, `cancel_order()`, `get_pending_orders()`, `get_orders()`, `put_order()` |
-| [trades](endpoints/trades.md) | Trade management | `get_open_trades()`, `get_trade()`, `close_trade()`, `put_trade_orders()`, `get_trades()` |
-| [positions](endpoints/positions.md) | Position tracking | `get_open_positions()`, `get_position()`, `close_position()`, `get_positions()` |
-| [pricing](endpoints/pricing.md) | Market data | `get_pricing()`, `get_pricing_stream()`, `get_instrument_candles()`, `get_latest_candles()` |
-| [transactions](endpoints/transactions.md) | Transaction history | `get_transactions()`, `get_transaction()`, `get_transactions_range()`, `get_transactions_stream()`, `get_transactions_since_id()` |
+### Configuration priority
 
----
+With `config`, that object's token and environment are used; a direct `account_id`
+can override its account ID. Otherwise, providing `token` selects direct credentials
+and requires `account_id`. Without either `config` or `token`, the client loads the
+standard environment variables.
 
-## Client Classes
+In the environment-loading branch, passing only `environment` or `account_id` does
+not override the loaded values. Inspect `client.config.environment` when the
+resolved environment matters. See [configuration](configuration.md).
 
-### AsyncClient
-Primary async client for OANDA API operations. Recommended for production use.
+### Read-only example
 
-**Constructor:**
-```python
-from logging import Logger
-
-import httpx
-
-from fivetwenty import AsyncClient, AccountConfig, Environment
-
-# Constructor signature:
-def AsyncClient(
-    token: str | None = None,
-    *,
-    account_id: str | None = None,
-    environment: Environment = Environment.PRACTICE,
-    config: AccountConfig | None = None,
-    timeout: float = 30.0,
-    max_retries: int = 3,
-    transport: httpx.AsyncClient | None = None,
-    user_agent: str | None = None,
-    proxies: str | None = None,
-    verify: bool | str = True,
-    cert: str | None = None,
-    logger: Logger | None = None,
-    datetime_format: AcceptDatetimeFormat | str = AcceptDatetimeFormat.RFC3339,
-) -> AsyncClient:
-    ...
-```
-
-**Configuration Parameters (choose one approach):**
-
-### Configuration Object
-
-Recommended for applications.
-
-- `config` (AccountConfig) - Pre-configured account settings
-
-### Direct Parameters
-
-For basic scripts.
-
-- `token` (str) - OANDA API token
-- `account_id` (str) - OANDA account ID (required when token is provided)
-- `environment` (Environment) - `Environment.PRACTICE` or `Environment.LIVE`
-
-### Environment Variables
-
-For deployment.
-
-- No parameters needed - loads from `FIVETWENTY_*` environment variables
-
-**HTTP Configuration:**
-
-- `timeout` (float) - Request timeout in seconds (default: 30.0)
-- `max_retries` (int) - Maximum retry attempts (default: 3)
-- `transport` (httpx.AsyncClient, optional) - Custom HTTP client
-- `user_agent` (str, optional) - Custom user agent string
-- `proxies` (str, optional) - Proxy URL
-- `verify` (bool | str) - SSL verification (default: True)
-- `cert` (str, optional) - Client certificate path
-- `logger` (Logger, optional) - Logger instance for request logging
-- `datetime_format` (AcceptDatetimeFormat | str) - Format for DateTime fields, sent as the `Accept-Datetime-Format` header on every request and stream: `"RFC3339"` (default) or `"UNIX"`
-
-**Usage Examples:**
+This function uses credentials already present in the process environment. It does
+not load a `.env` file itself.
 
 <!-- code-block: async_client_usage_examples -->
 ```python
-from fivetwenty import AsyncClient, Environment
+from fivetwenty import AsyncClient
 
-# Environment variables (recommended for deployment)
 
-async with AsyncClient() as client:
-    accounts = await client.accounts.get_accounts()
-
-# Direct parameters (basic scripts)
-async with AsyncClient(
-    token="your-token",
-    account_id="your-account-id",
-    environment=Environment.PRACTICE
-) as client:
-    accounts = await client.accounts.get_accounts()
-
-# Configuration object (structured applications)
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig
-
-config = AccountConfig(
-    token=SecretStr("your-token"),
-    account_id=SecretStr("your-account-id"),
-    environment=Environment.PRACTICE,
-    alias="production_trading"
-)
-
-async with AsyncClient(config=config) as client:
-    print(f"Trading on: {client.config.summary()}")
-    accounts = await client.accounts.get_accounts()
+async def list_account_ids() -> list[str]:
+    async with AsyncClient() as client:
+        accounts = await client.accounts.get_accounts()
+        return [account.id for account in accounts]
 ```
 
-**Configuration Priority:**
-When multiple configuration sources are provided:
+### HTTP ownership and timeouts
 
-1. `config` parameter (highest priority)
-2. Direct parameters (`token`, `account_id`, etc.)
-3. Environment variables (lowest priority)
+REST and streaming use the same HTTP client. Streaming selects the streaming host
+and supplies a separate timeout. For an SDK-created HTTP client, connect timeout is
+5 seconds, write timeout is 10 seconds, and `timeout` supplies the default
+read and pool timeouts. An endpoint's explicit timeout override applies to that request.
 
-**Properties:**
+Despite its name, `transport` expects an `httpx.AsyncClient`, not an HTTPX transport
+object. Configure its base URL, headers, TLS, proxy and connection limits yourself;
+SDK constructor options do not rebuild it. Closing the SDK also closes the injected
+HTTP client, so give it a compatible ownership lifetime.
 
-- `account_id` (str) - Configured account ID
-- `config` (AccountConfig) - Account configuration object
-- `accounts` - [AccountEndpoints](endpoints/accounts.md)
-- `orders` - [OrderEndpoints](endpoints/orders.md)
-- `trades` - [TradeEndpoints](endpoints/trades.md)
-- `positions` - [PositionEndpoints](endpoints/positions.md)
-- `pricing` - [PricingEndpoints](endpoints/pricing.md)
-- `instruments` - Instrument-specific helper methods; current official account instrument data is documented under [AccountEndpoints](endpoints/accounts.md#get_account_instruments), and account-specific candles are documented under [PricingEndpoints](endpoints/pricing.md#get_account_instrument_candles)
-- `transactions` - [TransactionEndpoints](endpoints/transactions.md)
+### Datetime serialization
 
-### Client
-Synchronous wrapper around AsyncClient. Use for scripts and basic applications.
+`datetime_format` controls the `Accept-Datetime-Format` header and serialization of
+native datetimes in query parameters and request bodies, including nested orders.
+Datetime model attributes remain Python `datetime` objects. Standalone model dumps
+use RFC3339 unless a serialization context requests UNIX formatting. Python's
+microsecond precision does not preserve sub-microsecond timestamps.
 
-**Constructor:**
-```python
-from typing import Any
+Some envelope fields, including pricing's top-level `time`, remain wire strings;
+check the endpoint return type. A pricing `since` string is passed through as a wire
+value and must match the selected format.
 
-from fivetwenty import Client
+## Client
 
-# Constructor signature:
-def Client(**kwargs: Any) -> Client:
-    ...
-```
-
-**Parameters:**
-
-Accepts the same parameters as [AsyncClient](#asyncclient). See AsyncClient documentation for complete parameter list.
-
-**Usage Examples:**
+`Client(**kwargs)` forwards constructor arguments to `AsyncClient`. Use a `with`
+block or `client.close()` to release its HTTP resources and background thread.
+Ordinary endpoint methods return their result synchronously.
 
 <!-- code-block: client_usage_examples -->
 ```python
-# Environment variables
 from fivetwenty import Client
 
-with Client() as client:
-    accounts = client.accounts.get_accounts()
 
-# Direct parameters
-from fivetwenty import Client, Environment
-
-with Client(
-    token="your-token",
-    account_id="your-account-id",
-    environment=Environment.PRACTICE
-) as client:
-    accounts = client.accounts.get_accounts()
-
-# Configuration object
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig
-
-config = AccountConfig(
-    token=SecretStr("your-token"),
-    account_id=SecretStr("your-account-id"),
-    environment=Environment.PRACTICE,
-    alias="my_account"
-)
-with Client(config=config) as client:
-    print(f"Using: {client.config.summary()}")
-    accounts = client.accounts.get_accounts()
+def list_account_ids() -> list[str]:
+    with Client() as client:
+        accounts = client.accounts.get_accounts()
+        return [account.id for account in accounts]
 ```
 
-**Properties:**
+The special `pricing.stream_iter()` adapter provides blocking stream iteration.
+The ordinary proxy does not convert every async-generator endpoint into a blocking
+iterator. Its pricing queue holds 1,024 records and drops the oldest record when
+full; explicitly close the iterator when stopping early. See
+[async versus sync](../guides/understanding/async-vs-sync.md).
 
-- `account_id` (str) - Configured account ID
-- `config` (AccountConfig) - Account configuration object
-- Same endpoint structure as AsyncClient, but with synchronous methods
+## Properties and endpoint groups
 
----
+Both clients expose `account_id` as a string and `config` as an `AccountConfig`.
+Endpoint groups are available as attributes:
 
-## API Endpoints Documentation
+| Attribute | Operations |
+| --- | --- |
+| [accounts](endpoints/accounts.md) | Account reads, configuration and account instruments |
+| [instruments](endpoints/instruments.md) | Instrument candles and order/position books |
+| [pricing](endpoints/pricing.md) | Account prices, candles and price streams |
+| [orders](endpoints/orders.md) | Create, query, replace and cancel orders |
+| [trades](endpoints/trades.md) | Trade reads, closure and dependent orders |
+| [positions](endpoints/positions.md) | Instrument exposure and side-specific closure |
+| [transactions](endpoints/transactions.md) | Transaction queries and streams |
 
-For detailed information about specific API endpoints and their methods, please refer to the individual endpoint documentation:
+## Error handling
 
-- **[Account Management](endpoints/accounts.md)** - Account information, configuration, and instruments
-- **[Order Management](endpoints/orders.md)** - Creating, modifying, and canceling orders
-- **[Trade Management](endpoints/trades.md)** - Managing open trades and positions
-- **[Position Tracking](endpoints/positions.md)** - Position monitoring and closure
-- **[Market Data](endpoints/pricing.md)** - Real-time pricing, streaming data, and account-specific candles
-- **[Transaction History](endpoints/transactions.md)** - Transaction records and streaming
+Non-success HTTP responses raise `FiveTwentyError`. Transport errors can propagate
+as HTTPX exceptions; local validation can raise `ValueError` or Pydantic
+`ValidationError`. These failures require different recovery decisions.
 
-Each endpoint page contains complete method signatures, parameters, return types, and usage examples.
-
----
-
-## Configuration
-
-For detailed configuration documentation including `AccountConfig`, `AccountConfigLoader`, security best practices, and advanced patterns, see **[Configuration API Reference](configuration.md)**.
-
-## Error Handling
-
-For configuration errors (`ValueError`, `ValidationError`), see **[Configuration API Reference](configuration.md#error-reference)**.
-
-### API Errors
-
-All endpoint methods raise `FiveTwentyError` for API errors. The exception contains:
-
-- `status` (int) - HTTP status code
-- `code` (str | None) - OANDA error code
-- `message` (str) - Error description
-- `details` (dict) - Additional error information
-
-**Example:**
 <!-- code-block: fivetwenty_error_handling -->
 ```python
-import asyncio
-
 from fivetwenty import AsyncClient, FiveTwentyError
 
 
-async def main() -> None:
-    async with AsyncClient() as client:
-        try:
-            trade = await client.trades.get_trade(client.account_id, "invalid_id")
-            print(f"Trade: {trade}")
-        except FiveTwentyError as e:
-            print(f"Error: {e.status}: {e.message}")
-            if e.code:
-                print(f"Error: code: {e.code}")
-            # Handle specific errors
-            if e.status == 404:
-                print("Trade not found")
-
-
-asyncio.run(main())
+async def show_trade(client: AsyncClient, trade_id: str) -> None:
+    try:
+        response = await client.trades.get_trade(client.account_id, trade_id)
+        print(response["trade"].state)
+    except FiveTwentyError as error:
+        print(f"HTTP {error.status}; code={error.code}; request={error.request_id}")
+        raise
 ```
 
----
+See [exceptions](exceptions.md) for fields and [error handling](error-handling.md)
+for retry and unknown-outcome behavior.
 
-## Rate Limits
+## Rate limits
 
-OANDA API enforces rate limits:
+Reuse established connections and bound concurrency. OANDA's published
+[best practices](https://developer.oanda.com/rest-live-v20/best-practices/) recommend
+at most two new connections per second and 100 requests per second on established
+connections. These are service recommendations, not a throughput guarantee.
+Inspect rate-limit responses and allow backoff; the SDK does not reserve capacity
+across separate processes.
 
-- **REST Requests**: 120 requests per minute
-- **Streaming**: 20 concurrent connections
-- **Burst**: Short bursts allowed up to double rate
+## Environment considerations
 
-**Best Practices:**
-
-- Add delays between requests (500ms minimum recommended)
-- Use streaming for real-time data instead of polling
-- Implement exponential backoff on rate limit errors (429 status)
-- Monitor `X-RateLimit-*` headers in responses
-
----
-
-## Environment Considerations
-
-### Practice Environment
-- URL: `Environment.PRACTICE.base_url` (`https\://api-fxpractice.oanda.com/v3`)
-- Virtual money only
-- Same API functionality as live
-- Reset account balances available
-- No trading restrictions
-
-### Live Environment
-- URL: `Environment.LIVE.base_url` (`https\://api-fxtrade.oanda.com/v3`)
-- Real money trading
-- Risk management essential
-- Requires live trading account
-- Subject to margin requirements
-
-For security best practices, multi-account configuration, and environment variable setup, see **[Configuration API Reference](configuration.md)**.
-
----
-
-## Next Steps
-
-Now that you understand client configuration, explore the API endpoints:
-
-- **[Accounts](endpoints/accounts.md)** - Get account details and configuration
-- **[Pricing](endpoints/pricing.md)** - Stream real-time prices and get historical candles
-- **[Orders](endpoints/orders.md)** - Place and manage trading orders
-- **[Trades](endpoints/trades.md)** - Monitor and close open trades
-- **[Positions](endpoints/positions.md)** - Track instrument positions
-- **[Transactions](endpoints/transactions.md)** - View transaction history
+Practice and live use separate API hosts and credentials. Both can impose account
+and instrument restrictions. Practice execution does not establish expected live
+fills, liquidity or profitability. See [environments](../guides/understanding/environments.md)
+for host names and explicit environment checks.

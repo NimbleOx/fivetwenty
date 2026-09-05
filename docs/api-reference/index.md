@@ -1,32 +1,23 @@
-# API Reference - Information-Oriented Documentation
+# API reference
 
-## What is API Reference?
+Look up the Python interface, request parameters and response structures here. The
+reference describes the SDK's current surface; OANDA's linked documentation defines
+server behavior and account-specific restrictions.
 
-API Reference documentation is **information-oriented** content: accurate, quickly scannable detail about FiveTwenty's classes, methods, parameters, and return values. It's designed for quick lookup during development.
+| Reference | Contents |
+| --- | --- |
+| [Clients](client.md) | Async and synchronous interfaces, transport settings and ownership |
+| [Configuration](configuration.md) | Credentials, environment loading and local validation |
+| [Endpoints](endpoints/index.md) | Methods grouped by API resource |
+| [Models](models/index.md) | Parsed response objects, request models and enums |
+| [Exceptions](exceptions.md) | Exception attributes and classification helpers |
+| [Error handling](error-handling.md) | Retry boundaries, logging and recovery |
+| [OpenAPI compatibility specification](oanda-openapi-spec.md) | Project-maintained schema and source limitations |
 
-## When to Use API Reference
+Most methods return a dictionary containing typed models and metadata. Read the
+return description before accessing a result: a collection envelope, a single
+model and an iterator have different interfaces. `get_accounts()` returns its list
+directly. Conditional order-response fields are not present in every outcome.
 
-**Use API reference when you:**
-
-- **Need specific parameter details** for a method call
-- **Want to see all available options** for a function
-- **Need to understand return value structure**
-- **Are looking for method signatures** and type information
-- **Want to quickly scan** available functionality
-- **Need authoritative information** about SDK behavior
-
-**Don't use API reference when you:**
-
-- Want to learn how to use the SDK (use [Tutorials](../tutorials/index.md))
-- Need solutions or understanding (use [Guides](../guides/index.md))
-
-## Need More Context?
-
-If you need more than just the technical specifications:
-
-- **Learn with [Tutorials](../tutorials/index.md)** for hands-on guidance
-- **Get guidance with [Guides](../guides/index.md)** for both solutions and understanding
-
----
-
-**Ready to look something up?** Use the navigation above or search for specific methods, classes, or parameters you need.
+For a complete first script, use the [authentication tutorial](../tutorials/getting-started/authentication.md).
+The [guides](../guides/index.md) explain resource ownership and multi-step workflows.

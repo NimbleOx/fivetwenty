@@ -1,83 +1,22 @@
-# Configuration API Reference
+# Configuration API reference
 
-Complete API reference for FiveTwenty's secure configuration system.
-
----
-
-## Overview
-
-FiveTwenty's configuration system has three main components:
-
-| Component | Purpose | Key Features |
-|-----------|---------|--------------|
-| [AccountConfig](#accountconfig) | Account credentials & settings | Automatic secret masking, validation |
-| [AccountConfigLoader](#accountconfigloader) | Load configs from environment | Custom prefixes, validation |
-| [ConfigValidator](#configvalidator) | Configuration validation | Runtime validation, helpful errors |
-
----
+Configuration stores account credentials and selects an OANDA environment. Its
+validation checks local values; it does not authenticate a token or verify server
+permissions.
 
 ## AccountConfig
 
-Secure configuration object for OANDA account credentials and settings.
+All four fields are required when constructing an `AccountConfig`:
 
-### Constructor
+| Field | Type | Validation |
+| --- | --- | --- |
+| `alias` | `str` | ASCII letter first, then letters, digits or underscores |
+| `token` | `SecretStr` | Trimmed and nonempty |
+| `account_id` | `SecretStr` | Trimmed and nonempty |
+| `environment` | `Environment` | `PRACTICE` or `LIVE` |
 
-```python
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-# Constructor signature:
-def AccountConfig(
-    account_id: SecretStr,
-    alias: str,
-    token: SecretStr,
-    environment: Environment,
-) -> AccountConfig:
-    ...
-```
-
-**Parameters:**
-
-- `account_id` (SecretStr) - OANDA account ID (protected credential)
-- `alias` (str) - User-friendly identifier (must be valid Python identifier)
-- `token` (SecretStr) - OANDA API token (protected credential)
-- `environment` (Environment) - `Environment.PRACTICE` or `Environment.LIVE`
-
-**Raises:**
-
-- `ValidationError` - Invalid parameters (empty token/account_id, invalid alias format, etc.)
-
-**Examples:**
-
-```python
-import os
-
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-# Basic configuration
-config = AccountConfig(
-    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
-    alias="my_trading_account",
-    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
-    environment=Environment.PRACTICE,
-)
-
-# Live trading configuration
-live_config = AccountConfig(
-    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
-    alias="production_trading",
-    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
-    environment=Environment.LIVE,
-)
-```
-
-### Properties
-
-#### `token: SecretStr`
-Protected API token that never appears in logs or string representations.
+This example reads credentials from the process environment and does not make a
+network request:
 
 ```python
 import os
@@ -87,609 +26,107 @@ from pydantic import SecretStr
 from fivetwenty import AccountConfig, Environment
 
 config = AccountConfig(
+    alias="practice_account",
     token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
     account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
     environment=Environment.PRACTICE,
-    alias="example"
 )
-# Safe - returns SecretStr object
-token_obj = config.token
-
-# To access actual value (use with caution)
-actual_token = config.token.get_secret_value()
+print(config.summary())  # practice_account (practice)
 ```
 
-#### `account_id: SecretStr`
-Protected account ID that never appears in logs or string representations.
-
-```python
-import os
-
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-config = AccountConfig(
-    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
-    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
-    environment=Environment.PRACTICE,
-    alias="example"
-)
-# Safe - returns SecretStr object
-account_obj = config.account_id
-
-# To access actual value (use with caution)
-actual_account = config.account_id.get_secret_value()
-```
-
-#### `environment: Environment`
-Trading environment (practice or live).
-
-```python
-import os
-
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-config = AccountConfig(
-    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
-    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
-    environment=Environment.PRACTICE,
-    alias="example"
-)
-if config.environment == Environment.LIVE:
-    print("LIVE trading - real money at risk")
-else:
-    print("Practice trading - virtual money")
-```
-
-#### `alias: str`
-User-friendly identifier for the account configuration.
-
-```python
-import os
-
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-config = AccountConfig(
-    alias="my_bot",
-    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
-    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
-    environment=Environment.PRACTICE
-)
-print("Bot name:", config.alias)  # Safe to log
-```
-
-
-### Methods
-
-#### `summary() -> str`
-Returns safe summary string suitable for logging.
-
-**Returns:** `str` - Format: "{alias} ({environment})"
-
-**Usage:**
-```python
-import logging
-
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-logger = logging.getLogger(__name__)
-
-config = AccountConfig(
-    alias="my_trader",
-    environment=Environment.PRACTICE,
-    token=SecretStr("token"),
-    account_id=SecretStr("account_id"),
-)
-print(config.summary())
-logger.info("Starting trading session: %s", config.summary())
-```
-
-Expected output:
-```text
-my_trader (practice)
-```
-
-### Security Features
-
-#### Automatic Secret Masking
-All secret values are automatically masked in string representations:
-
-```python
-import os
-
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-config = AccountConfig(
-    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
-    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
-    alias="demo_account",
-    environment=Environment.PRACTICE,
-)
-
-# Secrets are masked in all representations
-print(repr(config))
-# AccountConfig(alias='demo_account', environment=practice, token=SecretStr('***'), account_id=SecretStr('***'))
-
-print(str(config))
-# Secrets never appear
-
-# Safe summary for logs
-print(config.summary())
-# demo_account (practice)
-```
-
-#### Validation
-
-The configuration validates all inputs:
-
-```python
-from pydantic import SecretStr, ValidationError
-
-from fivetwenty import AccountConfig, Environment
-
-# Invalid alias (starts with number)
-try:
-    AccountConfig(
-        alias="123invalid",  # Must be valid identifier
-        token=SecretStr("token"),
-        account_id=SecretStr("account"),
-        environment=Environment.PRACTICE,
-    )
-except ValidationError:
-    print("Alias must be valid Python identifier")
-
-# Empty token
-try:
-    AccountConfig(
-        token=SecretStr("   "),  # Whitespace-only
-        account_id=SecretStr("account"),
-        environment=Environment.PRACTICE,
-        alias="valid_alias",
-    )
-except ValidationError:
-    print("Token cannot be empty or whitespace")
-```
-
----
+`summary()` returns `"{alias} ({environment})"`. `SecretStr` masks normal display
+and serialization of the secret fields. It does not prevent a caller from exposing
+`get_secret_value()`, HTTP authorization headers, environment variables or other
+sensitive context. Do not put credentials in the alias or log raw requests.
 
 ## AccountConfigLoader
 
-Utility class for loading account configurations from environment variables.
+### load_default()
 
-### Static Methods
+`load_default() -> AccountConfig | None` reads:
 
-#### `load_default() -> AccountConfig | None`
-Load configuration from standard `FIVETWENTY_*` environment variables.
+| Variable | Meaning |
+| --- | --- |
+| `FIVETWENTY_OANDA_TOKEN` | Required token |
+| `FIVETWENTY_OANDA_ACCOUNT` | Required account ID |
+| `FIVETWENTY_OANDA_ENVIRONMENT` | `practice` or `live`; defaults to `practice` |
 
-**Environment Variables:**
+The alias is `default`. Missing token or account values return `None`; malformed
+present values can raise validation errors. There is no account-alias environment
+variable. The loader reads `os.environ` and does not load `.env` files.
 
-- `FIVETWENTY_OANDA_TOKEN` - API token (required)
-- `FIVETWENTY_OANDA_ACCOUNT` - Account ID (required)
-- `FIVETWENTY_OANDA_ENVIRONMENT` - "practice" or "live" (defaults to "practice")
+### from_env_prefix()
 
-**Returns:** `AccountConfig | None` - Configuration object or None if required variables missing
+`from_env_prefix(prefix: str) -> AccountConfig | None` prepends the exact prefix to
+the standard names. For `"RESEARCH_"`, use `RESEARCH_FIVETWENTY_OANDA_TOKEN`,
+`RESEARCH_FIVETWENTY_OANDA_ACCOUNT` and `RESEARCH_FIVETWENTY_OANDA_ENVIRONMENT`.
+The generated alias is the prefix lowercased with trailing underscores removed.
 
-**Note:** The alias is automatically set to "default" when using `load_default()`.
-
-**Usage:**
 ```python
-# Set environment variables first
-import os
 from fivetwenty import AccountConfigLoader
 
-# Load from environment (set these in your shell/deployment)
-# os.environ["FIVETWENTY_OANDA_TOKEN"] = "your-actual-token"
-os.environ["FIVETWENTY_OANDA_ACCOUNT"] = "your-account"
-os.environ["FIVETWENTY_OANDA_ENVIRONMENT"] = "practice"
-
-# Load configuration
-config = AccountConfigLoader.load_default()
-if config:
-    print("Configuration loaded:", config.summary())  # "default (practice)"
-else:
-    print("Required environment variables not found")
+config = AccountConfigLoader.from_env_prefix("RESEARCH_")
+if config is None:
+    message = "Missing research account credentials"
+    raise ValueError(message)
+print(config.summary())
 ```
 
-#### `from_env_prefix(prefix: str) -> AccountConfig | None`
-Load configuration using custom environment variable prefix.
+Check for `None` before passing the result to a client. Passing `config=None` would
+allow the client to select its default configuration source instead.
 
-**Parameters:**
+### Other loader methods
 
-- `prefix` (str) - Environment variable prefix (e.g., "STRATEGY_A_")
+`load_from_env(prefix="")` is the underlying environment loader used by both
+convenience methods above. `load_from_file(config_file)` reads a JSON object with
+an `accounts` list; each entry supplies `alias`, `token`, `account_id` and
+`environment`. It returns a list of validated configurations.
 
-**Environment Variables Pattern:**
-
-- `{prefix}FIVETWENTY_OANDA_TOKEN` - API token
-- `{prefix}FIVETWENTY_OANDA_ACCOUNT` - Account ID
-- `{prefix}FIVETWENTY_OANDA_ENVIRONMENT` - Environment (defaults to "practice")
-
-**Note:** The alias is automatically generated from the prefix (lowercased, trailing underscore removed).
-
-**Returns:** `AccountConfig | None` - Configuration object or None if required variables missing
-
-**Usage:**
-```python
-# Set custom prefixed variables
-import os
-
-from fivetwenty import AccountConfigLoader
-
-# Load from environment (set these in your shell/deployment)
-# os.environ["STRATEGY_A_FIVETWENTY_OANDA_TOKEN"] = "your-actual-token"
-os.environ["STRATEGY_A_FIVETWENTY_OANDA_ACCOUNT"] = "account-a"
-os.environ["STRATEGY_A_FIVETWENTY_OANDA_ENVIRONMENT"] = "practice"
-
-# Load with custom prefix
-config = AccountConfigLoader.from_env_prefix("STRATEGY_A_")
-if config:
-    # Alias is automatically generated as "strategy_a"
-    print("Strategy config:", config.summary())  # "strategy_a (practice)"
-```
-
-**Multi-Strategy Example:**
-```python
-# Load configurations for different strategies
-from fivetwenty import AccountConfigLoader
-
-momentum_config = AccountConfigLoader.from_env_prefix("MOMENTUM_")
-grid_config = AccountConfigLoader.from_env_prefix("GRID_")
-scalping_config = AccountConfigLoader.from_env_prefix("SCALPING_")
-
-configs = [c for c in [momentum_config, grid_config, scalping_config] if c]
-print("Loaded", len(configs), "strategy configurations")
-```
-
----
+`load_by_alias(config_file, alias)` loads that file and returns the first matching
+configuration, or `None` if no alias matches. Missing files, malformed JSON and
+invalid entries raise errors. JSON credential values are stored as plain text on
+disk; `SecretStr` masking applies after loading, not to the file itself.
 
 ## ConfigValidator
 
-Validation utility for account configurations.
-
-### Static Methods
-
-#### `validate_account_config(config: AccountConfig) -> list[str]`
-Validate an account configuration and return any errors found.
-
-**Parameters:**
-
-- `config` (AccountConfig) - Configuration to validate
-
-**Returns:** `list[str]` - List of error messages (empty if valid)
-
-**Validation Checks:**
-
-- Token is not empty or whitespace-only
-- Account ID is not empty or whitespace-only
-- Alias is not empty or whitespace-only
-
-**Usage:**
-```python
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, ConfigValidator, Environment
-
-config = AccountConfig(
-    token=SecretStr("valid-token"),
-    account_id=SecretStr("valid-account"),
-    environment=Environment.PRACTICE,
-    alias="valid_alias",
-)
-
-errors = ConfigValidator.validate_account_config(config)
-if errors:
-    print("Configuration errors:")
-    for error in errors:
-        print("  - Error:", str(error))
-else:
-    print("Configuration is valid")
-```
-
-**Note:** AccountConfig validation happens automatically via Pydantic validators. The ConfigValidator provides additional runtime checks after construction.
-
----
-
-## Environment Enum
-
-Enumeration for OANDA trading environments.
-
-### Definition
-
-```python
-from enum import Enum
-
-class Environment(Enum):
-    """OANDA trading environments."""
-    PRACTICE = "practice"
-    LIVE = "live"
-```
-
-### Values
-
-#### `Environment.PRACTICE`
-Practice trading environment with virtual money.
-
-**Properties:**
-
-- `value: "practice"`
-- `base_url` (`https\://api-fxpractice.oanda.com/v3`)
-
-#### `Environment.LIVE`
-Live trading environment with real money.
-
-**Properties:**
-
-- `value: "live"`
-- `base_url` (`https\://api-fxtrade.oanda.com/v3`)
-
-### Usage
-
-```python
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-# Create configurations for different environments
-practice_config = AccountConfig(
-    environment=Environment.PRACTICE,
-    token=SecretStr("practice_token"),
-    account_id=SecretStr("practice_account_id"),
-    alias="practice",
-)
-
-live_config = AccountConfig(
-    environment=Environment.LIVE,
-    token=SecretStr("live_token"),
-    account_id=SecretStr("live_account_id"),
-    alias="live",
-)
-
-# Check environment in code
-config = practice_config  # Use one of the configs above
-if config.environment == Environment.LIVE:
-    print("Using live environment - real money at risk")
-
-# Get base URL
-print("API URL:", config.environment.base_url)
-```
-
----
-
-## Usage Patterns
-
-### Basic Configuration
-
-```python
-import os
-
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-config = AccountConfig(
-    token=SecretStr(os.environ["FIVETWENTY_OANDA_TOKEN"]),
-    account_id=SecretStr(os.environ["FIVETWENTY_OANDA_ACCOUNT"]),
-    environment=Environment.PRACTICE,
-    alias="basic_trading"
-)
-```
-
-### Environment Variable Configuration
-
-```python
-from fivetwenty import AccountConfigLoader
-
-# Load from standard variables
-config = AccountConfigLoader.load_default()
-
-# Load from custom prefix
-strategy_config = AccountConfigLoader.from_env_prefix("STRATEGY_")
-```
-
-### Multi-Account Management
-
-```python
-from fivetwenty import AccountConfigLoader
-
-# Load multiple account configurations
-
-accounts = {
-    "momentum": AccountConfigLoader.from_env_prefix("MOMENTUM_"),
-    "grid": AccountConfigLoader.from_env_prefix("GRID_"),
-    "scalping": AccountConfigLoader.from_env_prefix("SCALPING_"),
-}
-
-# Filter out None values
-active_accounts = {name: config for name, config in accounts.items() if config}
-print("Active strategies:", list(active_accounts.keys()))
-```
-
-### Configuration Validation
-
-```python
-from typing import Any
-from fivetwenty import AccountConfig, ConfigValidator
-
-def create_safe_config(**kwargs: Any) -> AccountConfig:
-    """Create configuration with validation."""
-    config = AccountConfig(**kwargs)
-
-    errors = ConfigValidator.validate_account_config(config)
-    if errors:
-        error_message = f"Invalid configuration: {', '.join(errors)}"
-        raise ValueError(error_message)
-
-    return config
-```
-
-### Production Deployment
-
-```python
-import os
-from fivetwenty import AccountConfig, AccountConfigLoader, Environment
-
-def load_production_config() -> AccountConfig:
-    """Load production configuration with safety checks."""
-    config = AccountConfigLoader.load_default()
-
-    if not config:
-        config_error_msg = "No configuration found - check environment variables"
-        raise RuntimeError(config_error_msg)
-
-    # Ensure we're in the expected environment
-    expected_env = os.environ.get("EXPECTED_OANDA_ENVIRONMENT", "practice")
-    if config.environment.value != expected_env:
-        env_error_msg = (
-            f"Environment mismatch: expected {expected_env}, "
-            f"got {config.environment.value}"
-        )
-        raise RuntimeError(env_error_msg)
-
-    # Extra validation for live
-    if config.environment == Environment.LIVE and "practice" in config.token.get_secret_value().lower():
-        practice_error_msg = "Practice token detected in live environment"
-        raise RuntimeError(practice_error_msg)
-
-    return config
-```
-
----
-
-## Security Best Practices
-
-### 1. Never Log Secrets
-
-```python
-import logging
-
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-logger = logging.getLogger(__name__)
-# Define config for demonstration
-config = AccountConfig(
-    token=SecretStr("demo-token"),
-    account_id=SecretStr("demo-account"),
-    environment=Environment.PRACTICE,
-    alias="demo"
-)
-
-# Safe - uses automatic masking
-logger.info("Config: %s", repr(config))
-logger.info("Trading on: %s", config.summary())
-
-# Dangerous - exposes secrets
-# logger.info("Token: %s", config.token.get_secret_value())  # DON'T DO THIS - Security risk
-```
-
-### 2. Validate Before Use
-
-```python
-from fivetwenty import AccountConfig, AsyncClient, ConfigValidator
-
-def safe_client_creation(config: AccountConfig) -> AsyncClient:
-    """Create client with validation."""
-    errors = ConfigValidator.validate_account_config(config)
-    if errors:
-        error_message = f"Invalid config: {', '.join(errors)}"
-        raise ValueError(error_message)
-
-    return AsyncClient(config=config)
-```
-
-### 3. Environment Separation
-
-```python
-# Separate environment variables
-# Practice: PRACTICE_FIVETWENTY_*
-# Live: LIVE_FIVETWENTY_*
-from fivetwenty import AccountConfig, AccountConfigLoader
-
-def load_env_specific_config(env: str) -> AccountConfig:
-    """Load configuration for specific environment."""
-    prefix = f"{env.upper()}_FIVETWENTY_"
-    config = AccountConfigLoader.from_env_prefix(prefix)
-
-    if not config:
-        error_message = f"No {env} configuration found"
-        raise ValueError(error_message)
-
-    return config
-```
-
-### 4. Runtime Verification
-
-```python
-import logging
-from fivetwenty import AccountConfig, AsyncClient
-
-logger = logging.getLogger(__name__)
-
-async def verify_config_connection(config: AccountConfig) -> bool:
-    """Test configuration by connecting to API."""
-    try:
-        async with AsyncClient(config=config) as client:
-            accounts = await client.accounts.get_accounts()
-            return len(accounts) > 0
-    except Exception as e:
-        error_msg = f"Config verification failed: {e}"
-        logger.exception(error_msg)
-        return False
-```
-
----
-
-## Error Reference
-
-### ValidationError
-Raised by Pydantic when configuration parameters are invalid.
-
-**Common Causes:**
-
-- Empty or whitespace-only token/account_id
-- Invalid alias format (not a valid Python identifier)
-- Invalid environment value
-
-**Example:**
-```python
-from pydantic import ValidationError
-from pydantic import SecretStr
-
-from fivetwenty import AccountConfig, Environment
-
-try:
-    config = AccountConfig(
-        token=SecretStr(""),
-        account_id=SecretStr("123"),
-        environment=Environment.PRACTICE,
-        alias="123invalid",
-    )
-except ValidationError as e:
-    # Handle validation errors
-    for error in e.errors():
-        print("Validation error - Field:", error['loc'], "Error:", error['msg'])
-```
-
-### ValueError
-Raised by loader methods when required environment variables are missing.
-
-**Example:**
-```python
-from fivetwenty import AccountConfigLoader
-
-config = AccountConfigLoader.load_default()
-if not config:
-    error_msg = "Required environment variables not set"
-    raise ValueError(error_msg)
-```
-
----
+`validate_account_config(config: AccountConfig) -> list[str]` returns local
+configuration diagnostics. It checks that token, account ID and alias are present.
+The separate `validate_config()` dictionary helper also checks token length, account
+ID shape, alias format and environment membership. An empty list means those checks passed, not that the
+token grants access to the account.
+
+Construction already performs Pydantic field validation. The additional validator
+is useful for diagnostics before a read-only authentication check; it is not a
+complete specification of every credential OANDA may issue.
+
+## Environment
+
+| Enum member | Wire value | REST base URL |
+| --- | --- | --- |
+| `Environment.PRACTICE` | `practice` | `https://api-fxpractice.oanda.com/v3` |
+| `Environment.LIVE` | `live` | `https://api-fxtrade.oanda.com/v3` |
+
+`Environment.base_url` exposes the corresponding URL. Live mode uses real account
+funds; the SDK does not prompt before a write. Verify the resolved environment in
+code when an example or deployment requires a specific mode.
+
+## Configuration precedence
+
+`AsyncClient` first uses an explicit `config`, with an optional direct `account_id`
+override. Otherwise a direct token selects direct credentials and requires an
+account ID. Without either, it uses the environment loader. Passing only
+`environment` or `account_id` does not override that environment-loaded configuration.
+
+See the [client constructor](client.md#configuration-priority) and
+[configuration guide](../guides/understanding/configuration.md) for lifecycle examples.
+
+## Error reference
+
+Pydantic `ValidationError` reports malformed model fields. A missing `os.environ`
+key raises `KeyError`. Loader methods return `None` for missing required credentials;
+invalid environment strings can raise `ValueError`. The client raises `ValueError`
+when it cannot resolve the credentials required by its selected source.
+
+Handle the actual operation's failure instead of treating every configuration
+exception as an OANDA authentication response. A read-only account request is the
+next step for verifying access.

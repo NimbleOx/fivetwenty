@@ -2,7 +2,12 @@
 
 **OANDA Reference**: [Primitives Data Definitions](https://developer.oanda.com/rest-live-v20/primitives-df/)
 
-Models for streaming configuration, error handling, and type aliases used throughout the OANDA API.
+SDK streaming configuration, parsed error details and primitive aliases. Streaming
+policies are local SDK settings, not request objects sent to OANDA.
+
+Field names are Python attributes. Required means required at model construction;
+`None` in the type indicates a nullable value. Defaults and local validation do not
+establish server eligibility. See [reading model tables](index.md#reading-model-tables).
 
 ---
 
@@ -41,9 +46,9 @@ Structured error information from API responses.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `message` | str | ✅ | Primary error message |
-| `code` | str | ➖ | Primary error code |
+| `code` | str \| None | ➖ | Primary error code |
 | `violations` | list[[ValidationViolation](#validationviolation)] | ➖ | Field validation errors (default: empty list) |
-| `additional_fields` | dict[str, any] | ➖ | Additional error context from API response (default: empty dict) |
+| `additional_fields` | dict[str, Any] | ➖ | Additional error context from API response (default: empty dict) |
 
 ### ValidationViolation
 Specific field validation error.
@@ -54,7 +59,7 @@ Specific field validation error.
 |-------|------|----------|-------------|
 | `field` | str | ✅ | Field name with validation error |
 | `message` | str | ✅ | Validation error message |
-| `code` | str | ➖ | Machine-readable error code for the violation |
+| `code` | str \| None | ➖ | Machine-readable error code for the violation |
 
 ---
 
@@ -65,6 +70,9 @@ Specific field validation error.
 - `TransactionID` - str: Transaction identifier (positive integer assigned sequentially by OANDA)
 - `RequestID` - str: OANDA-generated request identifier returned in response headers and transaction payloads
 - `ClientRequestID` - str: Client-provided request identifier sent with write requests for support correlation
-- `PriceValue` - str: Price value encoded as string for precision
-- `AccountUnits` - str: Account currency amounts encoded as strings
-- `DateTime` - str: RFC3339 format ("YYYY-MM-DDTHH:MM:SS.nnnnnnnnnZ") or UNIX timestamp with nanosecond precision
+- `PriceValue` - `Decimal`: native price value; encoded as a string on the wire
+- `AccountUnits` - `Decimal`: native account-currency amount; encoded as a string on the wire
+- `DecimalNumber` - `Decimal`: general decimal quantity
+
+OANDA's DateTime primitive is an RFC3339 or UNIX wire value. Datetime model fields
+use Python `datetime`, with microsecond precision. `DateTime` is an alias for `datetime`.

@@ -4,6 +4,10 @@
 
 Models for market pricing, instrument specifications, and candlestick (OHLC) data.
 
+Field names are Python attributes. Required means required at model construction;
+`None` in the type indicates a nullable value. Defaults and local validation do not
+establish server eligibility. See [reading model tables](index.md#reading-model-tables).
+
 ---
 
 ## Pricing Models
@@ -18,16 +22,16 @@ Current market prices for an instrument.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `type` | str | ➖ | Price type identifier (default: "PRICE") |
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trading instrument identifier |
-| `time` | [DateTime](system-models.md#type-aliases) |✅ | Timestamp when price was created |
-| `status` | [PriceStatus](enum-models.md#pricestatus) | ➖ | Price status (deprecated but may still be present) |
-| `tradeable` | bool | ✅ | Whether the instrument is currently tradeable |
-| `bids` | list[[PriceBucket](#pricebucket)] | ✅ | Available bid prices and liquidity levels |
-| `asks` | list[[PriceBucket](#pricebucket)] | ✅ | Available ask prices and liquidity levels |
+| `instrument` | [InstrumentName](enum-models.md#instrumentname) \| str \| None | ➖ | Trading instrument identifier |
+| `time` | [DateTime](system-models.md#type-aliases) \| None | ➖ | Timestamp when price was created |
+| `status` | [PriceStatus](enum-models.md#pricestatus) \| None | ➖ | Price status (deprecated but may still be present) |
+| `tradeable` | bool \| None | ➖ | Whether the instrument is currently tradeable |
+| `bids` | list[[PriceBucket](#pricebucket)] | ➖ | Available bid prices and liquidity levels |
+| `asks` | list[[PriceBucket](#pricebucket)] | ➖ | Available ask prices and liquidity levels |
 | `closeout_bid` | [PriceValue](system-models.md#type-aliases) |✅ | Bid price used for position closeout (closing long positions) |
 | `closeout_ask` | [PriceValue](system-models.md#type-aliases) |✅ | Ask price used for position closeout (closing short positions) |
-| `quote_home_conversion_factors` | [QuoteHomeConversionFactors](#quotehomeconversionfactors) | ➖ | Currency conversion factors for quote currency calculations |
-| `units_available` | [UnitsAvailable](#unitsavailable) | ➖ | Available units for trading different order types |
+| `quote_home_conversion_factors` | [QuoteHomeConversionFactors](#quotehomeconversionfactors) \| None | ➖ | Currency conversion factors for quote currency calculations |
+| `units_available` | [UnitsAvailable](#unitsavailable) \| None | ➖ | Available units for trading different order types |
 
 ### QuoteHomeConversionFactors
 Conversion factors for quote currency calculations.
@@ -38,8 +42,8 @@ Conversion factors for quote currency calculations.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `positive_units` | Decimal | ✅ | Conversion factor for positive (long) units |
-| `negative_units` | Decimal | ✅ | Conversion factor for negative (short) units |
+| `positive_units` | Decimal | ✅ | Conversion factor for positive quote-currency amounts |
+| `negative_units` | Decimal | ✅ | Conversion factor for negative quote-currency amounts |
 
 ### HomeConversions
 Currency conversion factors for account calculations.
@@ -76,10 +80,10 @@ Representation of how many units of an Instrument are available to be traded.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `default` | dict[str, Decimal] | ✅ | Default units available by instrument |
-| `reduce_first` | dict[str, Decimal] | ✅ | Units available for reduce-first fills by instrument |
-| `reduce_only` | dict[str, Decimal] | ✅ | Units available for reduce-only fills by instrument |
-| `open_only` | dict[str, Decimal] | ✅ | Units available for open-only fills by instrument |
+| `default` | [UnitsAvailableDetails](market-data-models.md#unitsavailabledetails) | ✅ | Long and short availability under default position-fill behavior |
+| `reduce_first` | [UnitsAvailableDetails](market-data-models.md#unitsavailabledetails) | ✅ | Long and short availability for reduce-first fills |
+| `reduce_only` | [UnitsAvailableDetails](market-data-models.md#unitsavailabledetails) | ✅ | Long and short availability for reduce-only fills |
+| `open_only` | [UnitsAvailableDetails](market-data-models.md#unitsavailabledetails) | ✅ | Long and short availability for open-only fills |
 
 ### PriceBucket
 Price level with available liquidity.
@@ -103,10 +107,10 @@ OHLC candlestick data for an instrument.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `time` | [DateTime](system-models.md#type-aliases) |✅ | Start time of the candlestick period |
-| `bid` | [CandlestickData](#candlestickdata) | ➖ | Bid-based OHLC data for the time period |
-| `ask` | [CandlestickData](#candlestickdata) | ➖ | Ask-based OHLC data for the time period |
-| `mid` | [CandlestickData](#candlestickdata) | ➖ | Mid-price OHLC data ((bid+ask)/2) for the time period |
-| `volume` | int | ✅ | Number of price ticks during the time period |
+| `bid` | [CandlestickData](#candlestickdata) \| None | ➖ | Bid-based OHLC data for the time period |
+| `ask` | [CandlestickData](#candlestickdata) \| None | ➖ | Ask-based OHLC data for the time period |
+| `mid` | [CandlestickData](#candlestickdata) \| None | ➖ | Mid-price OHLC data ((bid+ask)/2) for the time period |
+| `volume` | int | ✅ | Number of prices created during the interval, not traded units |
 | `complete` | bool | ✅ | Whether the candlestick is complete (end time is not in future) |
 
 ### CandlestickData
@@ -136,7 +140,7 @@ Trading instrument information and specifications.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `name` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Unique instrument identifier (e.g., "EUR_USD") |
+| `name` | [InstrumentName](enum-models.md#instrumentname) \| str | ✅ | Unique instrument identifier (e.g., "EUR_USD") |
 | `type` | [InstrumentType](enum-models.md#instrumenttype) | ✅ | Classification of instrument (CURRENCY, CFD, METAL) |
 | `display_name` | str | ✅ | Human-readable instrument name |
 | `pip_location` | int | ✅ | Location of pip value (decimal places from right) |
@@ -148,13 +152,13 @@ Trading instrument information and specifications.
 | `maximum_position_size` | Decimal | ✅ | Maximum position size allowed for this instrument |
 | `maximum_order_units` | Decimal | ✅ | Maximum order size allowed for this instrument |
 | `margin_rate` | Decimal | ✅ | Margin requirement as decimal (e.g., "0.03333" for 30:1 leverage) |
-| `minimum_guaranteed_stop_loss_distance` | Decimal | ➖ | Minimum distance for guaranteed stop loss orders |
-| `commission` | [InstrumentCommission](#instrumentcommission) | ➖ | Commission structure for this instrument |
-| `guaranteed_stop_loss_order_mode` | [GuaranteedStopLossOrderModeForInstrument](enum-models.md#guaranteedstoplossordermodeforinstrument) | ➖ | Guaranteed stop loss availability (DISABLED, ALLOWED, REQUIRED) |
-| `guaranteed_stop_loss_order_execution_premium` | Decimal | ➖ | Premium charged for guaranteed stop loss execution |
-| `guaranteed_stop_loss_order_level_restriction` | [GuaranteedStopLossOrderLevelRestriction](#guaranteedstoplossorderlevelrestriction) | ➖ | Restrictions on guaranteed stop loss levels |
-| `financing` | [InstrumentFinancing](#instrumentfinancing) | ➖ | Daily financing rate details for long and short positions |
-| `tags` | list[[Tag](#tag)] | ✅ | Descriptive tags for instrument categorization |
+| `minimum_guaranteed_stop_loss_distance` | Decimal \| None | ➖ | Minimum distance for guaranteed stop loss orders |
+| `commission` | [InstrumentCommission](#instrumentcommission) \| None | ➖ | Commission structure for this instrument |
+| `guaranteed_stop_loss_order_mode` | [GuaranteedStopLossOrderModeForInstrument](enum-models.md#guaranteedstoplossordermodeforinstrument) \| None | ➖ | Guaranteed stop loss availability (DISABLED, ALLOWED, REQUIRED) |
+| `guaranteed_stop_loss_order_execution_premium` | Decimal \| None | ➖ | Premium charged for guaranteed stop loss execution |
+| `guaranteed_stop_loss_order_level_restriction` | [GuaranteedStopLossOrderLevelRestriction](#guaranteedstoplossorderlevelrestriction) \| None | ➖ | Restrictions on guaranteed stop loss levels |
+| `financing` | [InstrumentFinancing](#instrumentfinancing) \| None | ➖ | Daily financing rate details for long and short positions |
+| `tags` | list[[Tag](#tag)] | ➖ | Descriptive tags for instrument categorization |
 
 ### InstrumentCommission
 Commission structure for trading instruments.
@@ -215,8 +219,8 @@ Units available for both long and short orders on an instrument.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `long` | [UnitsAvailable](#unitsavailable) | ✅ | Long position units availability |
-| `short` | [UnitsAvailable](#unitsavailable) | ✅ | Short position units availability |
+| `long` | Decimal | ✅ | Long position units availability |
+| `short` | Decimal | ✅ | Short position units availability |
 
 ### OrderBookBucket
 Order book price partition with percentages of open orders on each side.
@@ -240,11 +244,11 @@ Snapshot of open orders for an instrument, partitioned into price buckets.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Instrument identifier |
+| `instrument` | [InstrumentName](enum-models.md#instrumentname) \| str | ✅ | Instrument identifier |
 | `time` | [DateTime](system-models.md#type-aliases) |✅ | Time when order book snapshot was created |
-| `unix_time` | [DateTime](system-models.md#type-aliases) |➖ | Snapshot time as a Unix timestamp |
-| `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price (midpoint) at the time of the snapshot |
-| `bucket_width` | [PriceValue](system-models.md#type-aliases) |➖ | Width of each price bucket |
+| `unix_time` | [DateTime](system-models.md#type-aliases) \| None |➖ | Snapshot time as a Unix timestamp |
+| `price` | [PriceValue](system-models.md#type-aliases) \| None |➖ | Price (midpoint) at the time of the snapshot |
+| `bucket_width` | [PriceValue](system-models.md#type-aliases) \| None |➖ | Width of each price bucket |
 | `buckets` | list[[OrderBookBucket](#orderbookbucket)] | ➖ | Partitioned order book buckets; only buckets with a non-zero count are returned |
 
 ### PositionBookBucket
@@ -269,11 +273,11 @@ Snapshot of open positions for an instrument, partitioned into price buckets.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Instrument identifier |
+| `instrument` | [InstrumentName](enum-models.md#instrumentname) \| str | ✅ | Instrument identifier |
 | `time` | [DateTime](system-models.md#type-aliases) |✅ | Time when position book snapshot was created |
-| `unix_time` | [DateTime](system-models.md#type-aliases) |➖ | Snapshot time as a Unix timestamp |
-| `price` | [PriceValue](system-models.md#type-aliases) |➖ | Price (midpoint) at the time of the snapshot |
-| `bucket_width` | [PriceValue](system-models.md#type-aliases) |➖ | Width of each price bucket |
+| `unix_time` | [DateTime](system-models.md#type-aliases) \| None |➖ | Snapshot time as a Unix timestamp |
+| `price` | [PriceValue](system-models.md#type-aliases) \| None |➖ | Price (midpoint) at the time of the snapshot |
+| `bucket_width` | [PriceValue](system-models.md#type-aliases) \| None |➖ | Width of each price bucket |
 | `buckets` | list[[PositionBookBucket](#positionbookbucket)] | ➖ | Partitioned position book buckets; only buckets with a non-zero count are returned |
 
 ### GuaranteedStopLossOrderEntryData
@@ -287,7 +291,7 @@ Details required by clients to add a Guaranteed Stop Loss Order for a specific i
 |-------|------|----------|-------------|
 | `minimum_distance` | Decimal | ✅ | Minimum distance from current price for GSL order |
 | `premium` | Decimal | ✅ | Premium charged for guaranteed execution |
-| `level_restriction` | [GuaranteedStopLossOrderLevelRestriction](#guaranteedstoplossorderlevelrestriction) | ➖ | Level restrictions for this instrument |
+| `level_restriction` | [GuaranteedStopLossOrderLevelRestriction](#guaranteedstoplossorderlevelrestriction) \| None | ➖ | Level restrictions for this instrument |
 
 ### GuaranteedStopLossOrderLevelRestriction
 Volume and price range restrictions for guaranteed stop loss orders.

@@ -4,6 +4,11 @@
 
 Order creation, modification, and management.
 
+The examples below illustrate calls and response access. Helpers run only when
+called. Examples that create, update, cancel or close resources change account
+state; use a dedicated practice account and inspect each response. Local validation
+and HTTPX transport exceptions can occur in addition to the API errors listed.
+
 ---
 
 ## post_order
@@ -72,7 +77,7 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Invalid order parameters (check `e.is_validation_error`)
+  - 400: Invalid order parameters (inspect `e.code` and `e.details`)
 
 - `ValueError` - If order_request is invalid or missing required fields
 
@@ -146,7 +151,7 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Invalid parameters or insufficient margin (check `e.is_validation_error`)
+  - 400: Invalid parameters or insufficient margin (inspect `e.code` and `e.details`)
 
 ---
 
@@ -218,7 +223,7 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Invalid parameters (check `e.is_validation_error`)
+  - 400: Invalid parameters (inspect `e.code` and `e.details`)
 
 ---
 
@@ -291,7 +296,7 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Invalid parameters (check `e.is_validation_error`)
+  - 400: Invalid parameters (inspect `e.code` and `e.details`)
 
 ---
 
@@ -364,7 +369,7 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Invalid parameters (check `e.is_validation_error`)
+  - 400: Invalid parameters (inspect `e.code` and `e.details`)
 
 ---
 
@@ -441,7 +446,7 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Invalid filter parameters (check `e.is_validation_error`)
+  - 400: Invalid filter parameters (inspect `e.code` and `e.details`)
 
 `ValueError` - If count is outside 1-500
 
@@ -568,7 +573,7 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Order or account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Order not cancellable (already filled or cancelled) (check `e.is_validation_error`)
+  - 400: Order not cancellable (already filled or cancelled) (inspect `e.code` and `e.details`)
 
 ---
 
@@ -699,7 +704,7 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Order or account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Invalid order specification or replacement failed (check `e.is_validation_error`)
+  - 400: Invalid order specification or replacement failed (inspect `e.code` and `e.details`)
 
 ---
 
@@ -767,4 +772,4 @@ if __name__ == "__main__":
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Order or account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`, use `e.retry_after`)
-  - 400: Invalid client extensions or modification failed (check `e.is_validation_error`)
+  - 400: Invalid client extensions or modification failed (inspect `e.code` and `e.details`)

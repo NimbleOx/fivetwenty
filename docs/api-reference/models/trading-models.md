@@ -4,12 +4,16 @@
 
 Models for trade lifecycle management, position tracking, and P&L calculations.
 
+Field names are Python attributes. Required means required at model construction;
+`None` in the type indicates a nullable value. Defaults and local validation do not
+establish server eligibility. See [reading model tables](index.md#reading-model-tables).
+
 ---
 
 ## Trade Models
 
 ### Trade
-Represents an open trade position.
+Individual trade record, including its open or closed state.
 
 🔗 **OANDA Definition**: [Trade](https://developer.oanda.com/rest-live-v20/trade-df/)
 
@@ -18,26 +22,25 @@ Represents an open trade position.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [TradeID](system-models.md#type-aliases) |✅ | Trade's identifier, unique within the Account (OANDA-assigned positive integer as string) |
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trade's Instrument (e.g., "EUR_USD") |
-| `price` | [PriceValue](system-models.md#type-aliases) |✅ | Execution price of the Trade (string for precision) |
+| `instrument` | [InstrumentName](enum-models.md#instrumentname) \| str | ✅ | Trade's Instrument (e.g., "EUR_USD") |
+| `price` | [PriceValue](system-models.md#type-aliases) |✅ | Execution price of the Trade (Decimal in Python; string on the wire) |
 | `open_time` | [DateTime](system-models.md#type-aliases) |✅ | Date/time when Trade was opened |
 | `state` | [TradeState](enum-models.md#tradestate) | ✅ | Current state of the Trade (OPEN, CLOSED, CLOSE_WHEN_TRADEABLE) |
 | `initial_units` | Decimal | ✅ | Initial size of the Trade (positive for long, negative for short) |
 | `initial_margin_required` | [AccountUnits](system-models.md#type-aliases) |✅ | Margin required when trade was opened |
 | `current_units` | Decimal | ✅ | Units currently open (reduces toward 0 when closed) |
 | `realized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Total profit/loss realized on closed portion of Trade (string) |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |➖ | Unrealized profit/loss on open portion using current market prices (string, not present for closed trades) |
-| `margin_used` | [AccountUnits](system-models.md#type-aliases) |➖ | Margin currently used by the Trade (string, not present for closed trades) |
-| `average_close_price` | [PriceValue](system-models.md#type-aliases) |➖ | Average price of closed portions |
-| `closing_transaction_ids` | list[[TransactionID](system-models.md#type-aliases)] |✅ | IDs of transactions that closed portions of this trade |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) \| None |➖ | Unrealized profit/loss on open portion using current market prices (string, not present for closed trades) |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) \| None |➖ | Margin currently used by the Trade (string, not present for closed trades) |
+| `average_close_price` | [PriceValue](system-models.md#type-aliases) \| None |➖ | Average price of closed portions |
+| `closing_transaction_ids` | list[[TransactionID](system-models.md#type-aliases)] | ➖ | IDs of transactions that closed portions of this trade |
 | `dividend_adjustment` | [AccountUnits](system-models.md#type-aliases) |➖ | Total dividend adjustments paid for the Trade (string, applicable to equity CFDs) |
 | `financing` | [AccountUnits](system-models.md#type-aliases) |➖ | Total financing paid/collected for the Trade (string, overnight swap charges/credits) |
-| `close_time` | [DateTime](system-models.md#type-aliases) |➖ | Date/time when Trade was fully closed (only present for CLOSED trades) |
-| `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions of the Trade |
-| `take_profit_order` | [TakeProfitOrder](order-models.md#takeprofitorder) | ➖ | Full Take Profit Order representation (if exists) |
-| `stop_loss_order` | [StopLossOrder](order-models.md#stoplossorder) | ➖ | Full Stop Loss Order representation (if exists) |
-| `guaranteed_stop_loss_order` | [GuaranteedStopLossOrder](order-models.md#guaranteedstoplossorder) | ➖ | Full Guaranteed Stop Loss Order representation (if exists) |
-| `trailing_stop_loss_order` | [TrailingStopLossOrder](order-models.md#trailingstoplossorder) | ➖ | Full Trailing Stop Loss Order representation (if exists) |
+| `close_time` | [DateTime](system-models.md#type-aliases) \| None |➖ | Date/time when Trade was fully closed (only present for CLOSED trades) |
+| `client_extensions` | [ClientExtensions](order-models.md#clientextensions) \| None | ➖ | Client extensions of the Trade |
+| `take_profit_order` | [TakeProfitOrder](order-models.md#takeprofitorder) \| None | ➖ | Full Take Profit Order representation (if exists) |
+| `stop_loss_order` | [StopLossOrder](order-models.md#stoplossorder) \| None | ➖ | Full Stop Loss Order representation (if exists) |
+| `trailing_stop_loss_order` | [TrailingStopLossOrder](order-models.md#trailingstoplossorder) \| None | ➖ | Full Trailing Stop Loss Order representation (if exists) |
 
 ### TradeSummary
 Condensed trade information for lists and overviews.
@@ -49,26 +52,26 @@ Condensed trade information for lists and overviews.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [TradeID](system-models.md#type-aliases) |✅ | Trade's identifier, unique within the Account |
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Trade's Instrument |
-| `price` | [PriceValue](system-models.md#type-aliases) |✅ | Execution price of the Trade (string for precision) |
+| `instrument` | [InstrumentName](enum-models.md#instrumentname) \| str | ✅ | Trade's Instrument |
+| `price` | [PriceValue](system-models.md#type-aliases) |✅ | Execution price of the Trade (Decimal in Python; string on the wire) |
 | `open_time` | [DateTime](system-models.md#type-aliases) |✅ | Date/time when Trade was opened |
 | `state` | [TradeState](enum-models.md#tradestate) | ✅ | Current state of the Trade (OPEN, CLOSED, CLOSE_WHEN_TRADEABLE) |
 | `initial_units` | Decimal | ✅ | Initial size of the Trade (positive for long, negative for short) |
 | `initial_margin_required` | [AccountUnits](system-models.md#type-aliases) |✅ | Margin required when trade was opened |
 | `current_units` | Decimal | ✅ | Units currently open (reduces toward 0 when closed) |
 | `realized_pl` | [AccountUnits](system-models.md#type-aliases) |✅ | Total profit/loss realized on closed portion of Trade (string) |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) |➖ | Unrealized profit/loss on open portion using current market prices (not present for closed trades) |
-| `margin_used` | [AccountUnits](system-models.md#type-aliases) |➖ | Margin currently used by the Trade (not present for closed trades) |
-| `average_close_price` | [PriceValue](system-models.md#type-aliases) |➖ | Average price of closed portions |
-| `closing_transaction_ids` | list[[TransactionID](system-models.md#type-aliases)] |✅ | IDs of transactions that closed portions of this trade |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) \| None |➖ | Unrealized profit/loss on open portion using current market prices (not present for closed trades) |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) \| None |➖ | Margin currently used by the Trade (not present for closed trades) |
+| `average_close_price` | [PriceValue](system-models.md#type-aliases) \| None |➖ | Average price of closed portions |
+| `closing_transaction_ids` | list[[TransactionID](system-models.md#type-aliases)] | ➖ | IDs of transactions that closed portions of this trade |
 | `financing` | [AccountUnits](system-models.md#type-aliases) |➖ | Total financing paid/collected for the Trade |
 | `dividend_adjustment` | [AccountUnits](system-models.md#type-aliases) |➖ | Total dividend adjustments paid for the Trade |
-| `close_time` | [DateTime](system-models.md#type-aliases) |➖ | Date/time when Trade was fully closed |
-| `client_extensions` | [ClientExtensions](order-models.md#clientextensions) | ➖ | Client extensions of the Trade |
-| `take_profit_order_id` | [OrderID](system-models.md#type-aliases) |➖ | Take Profit Order ID (if exists) |
-| `stop_loss_order_id` | [OrderID](system-models.md#type-aliases) |➖ | Stop Loss Order ID (if exists) |
-| `guaranteed_stop_loss_order_id` | [OrderID](system-models.md#type-aliases) |➖ | Guaranteed Stop Loss Order ID (if exists) |
-| `trailing_stop_loss_order_id` | [OrderID](system-models.md#type-aliases) |➖ | Trailing Stop Loss Order ID (if exists) |
+| `close_time` | [DateTime](system-models.md#type-aliases) \| None |➖ | Date/time when Trade was fully closed |
+| `client_extensions` | [ClientExtensions](order-models.md#clientextensions) \| None | ➖ | Client extensions of the Trade |
+| `take_profit_order_id` | [OrderID](system-models.md#type-aliases) \| None |➖ | Take Profit Order ID (if exists) |
+| `stop_loss_order_id` | [OrderID](system-models.md#type-aliases) \| None |➖ | Stop Loss Order ID (if exists) |
+| `guaranteed_stop_loss_order_id` | [OrderID](system-models.md#type-aliases) \| None |➖ | Guaranteed Stop Loss Order ID (if exists) |
+| `trailing_stop_loss_order_id` | [OrderID](system-models.md#type-aliases) \| None |➖ | Trailing Stop Loss Order ID (if exists) |
 
 ### TradeSpecifier
 The identification of a Trade as referred to by clients.
@@ -96,8 +99,8 @@ The dynamic (calculated) state of an open Trade.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `id` | [TradeID](system-models.md#type-aliases) |✅ | Trade's identifier |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Trade's unrealized profit/loss |
-| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ✅ | Margin currently used by the Trade |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) \| None | ➖ | Trade's unrealized profit/loss |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) \| None | ➖ | Margin currently used by the Trade |
 
 ---
 
@@ -112,12 +115,12 @@ Aggregated position information for an instrument.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Position's Instrument |
+| `instrument` | [InstrumentName](enum-models.md#instrumentname) \| str | ✅ | Position's Instrument |
 | `long` | [PositionSide](#positionside) | ✅ | Long side details (aggregation of all long trades) |
 | `short` | [PositionSide](#positionside) | ✅ | Short side details (aggregation of all short trades) |
 | `pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Lifetime realized profit/loss for the Position |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Unrealized profit/loss from all open Trades (not present for closed positions) |
-| `margin_used` | [AccountUnits](system-models.md#type-aliases) | ➖ | Margin currently used by the Position (not present for closed positions) |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) \| None | ➖ | Unrealized profit/loss from all open Trades (not present for closed positions) |
+| `margin_used` | [AccountUnits](system-models.md#type-aliases) \| None | ➖ | Margin currently used by the Position (not present for closed positions) |
 | `resettable_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Realized profit/loss since last reset |
 | `financing` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total financing paid/collected for the Position (lifetime) |
 | `commission` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total commission paid for the Position (lifetime) |
@@ -134,10 +137,10 @@ One side (long or short) of a position.
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
 | `units` | Decimal | ✅ | Position units (positive for long, negative for short) |
-| `average_price` | [PriceValue](system-models.md#type-aliases) |➖ | Volume-weighted average open price for this side |
-| `trade_ids` | list[[TradeID](system-models.md#type-aliases)] |✅ | Open Trade IDs contributing to this position side |
+| `average_price` | [PriceValue](system-models.md#type-aliases) \| None |➖ | Volume-weighted average open price for this side |
+| `trade_ids` | list[[TradeID](system-models.md#type-aliases)] | ➖ | Open Trade IDs contributing to this position side |
 | `pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Lifetime realized profit/loss for this side |
-| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ➖ | Unrealized profit/loss from open Trades on this side (not present for closed positions) |
+| `unrealized_pl` | [AccountUnits](system-models.md#type-aliases) \| None | ➖ | Unrealized profit/loss from open Trades on this side (not present for closed positions) |
 | `resettable_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Realized profit/loss since last reset for this side |
 | `financing` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total financing for this side (lifetime) |
 | `dividend_adjustment` | [AccountUnits](system-models.md#type-aliases) | ➖ | Total dividend adjustments for this side |
@@ -152,7 +155,7 @@ Dynamic calculated state of a position with real-time P&L calculations.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `instrument` | [InstrumentName](enum-models.md#instrumentname) | ✅ | Position's instrument identifier |
+| `instrument` | [InstrumentName](enum-models.md#instrumentname) \| str | ✅ | Position's instrument identifier |
 | `net_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Net unrealized profit/loss for the entire position |
 | `long_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Unrealized profit/loss for the long position side |
 | `short_unrealized_pl` | [AccountUnits](system-models.md#type-aliases) | ✅ | Unrealized profit/loss for the short position side |

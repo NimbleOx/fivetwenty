@@ -2,7 +2,8 @@
 
 **OANDA Reference**: [OANDA v20 REST API](https://developer.oanda.com/rest-live-v20/introduction/)
 
-Complete reference for all FiveTwenty endpoint implementations.
+Methods grouped by the resource available on the client. Convenience methods can
+perform more than one HTTP request; they are not additional OANDA API routes.
 
 ---
 
@@ -21,28 +22,12 @@ Complete reference for all FiveTwenty endpoint implementations.
 
 ---
 
-## Endpoint Organization
+## Read the return type
 
-### **Account Management**
-- **[Accounts Endpoint](accounts.md)** - Account information, configuration, and instruments
+Collection methods usually return dictionaries with lists of parsed models and
+metadata such as `lastTransactionID`. `get_accounts()` returns the account-property
+list directly. Order outcomes contain conditional transaction fields, so inspect
+what was returned before assuming an order filled.
 
-### **Trading Operations**
-- **[Orders Endpoint](orders.md)** - Order placement, modification, and cancellation
-- **[Trades Endpoint](trades.md)** - Trade management and monitoring
-- **[Positions Endpoint](positions.md)** - Position tracking and management
-
-### **Market Data**
-- **[Pricing Endpoint](pricing.md)** - Real-time prices, account-specific candlesticks, and latest candle data
-- **[Instruments Endpoint](instruments.md)** - Instrument candlestick data and order/position book snapshots (3 methods on `client.instruments`)
-
-### **History & Monitoring**
-- **[Transactions Endpoint](transactions.md)** - Transaction history and real-time streaming
-
----
-
-## Need More Context?
-
-- **Learn with [Tutorials](../../tutorials/index.md)** for hands-on guidance
-- **Get guidance with [Guides](../../guides/index.md)** for both solutions and understanding
-
-**Ready to explore?** Choose an endpoint above or browse the complete [Client API Reference](../client.md) for setup and configuration details.
+Use the [client reference](../client.md) for setup and resource ownership, or the
+[tutorials](../../tutorials/index.md) for complete workflows.

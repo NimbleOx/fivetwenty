@@ -4,11 +4,18 @@
 
 Transaction history and monitoring.
 
+The examples below illustrate calls and response access. Helpers run only when
+called. Examples that create, update, cancel or close resources change account
+state; use a dedicated practice account and inspect each response. Local validation
+and HTTPX transport exceptions can occur in addition to the API errors listed.
+
 ---
 
 ## get_transactions
 
-Get transaction history for account.
+Get a transaction-page index for an account. This response contains page URLs,
+not the transaction records themselves. Retrieve the corresponding ID ranges to
+read the records. The returned `from_` key maps OANDA's wire field `from`.
 
 **OANDA Endpoint**: `GET /v3/accounts/{accountID}/transactions`
 
@@ -55,7 +62,7 @@ asyncio.run(main())
 | `from_time` | datetime \| None | ➖ | Start time for transaction range |
 | `to_time` | datetime \| None | ➖ | End time for transaction range |
 | `page_size` | int | ➖ | Number of transactions per page (default: 100, max: 1000) |
-| `transaction_type` | list[str] \| None | ➖ | Filter by transaction types |
+| `transaction_type` | list[TransactionFilter \| str] \| None | ➖ | Filter by transaction types |
 
 **Returns:** `TransactionsResponse` - TypedDict containing transaction history with pagination info (from_, to, pageSize, type, count, pages, lastTransactionID)
 
@@ -63,12 +70,12 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-  - 400: Invalid request parameters (check `e.is_bad_request`)
+  - 400: Invalid request parameters (check `e.status == 400`)
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`)
 
-`ValueError` - If page_size exceeds 1000
+`ValueError` - If page_size is outside 1–1000
 
 ---
 
@@ -122,7 +129,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Transaction not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -176,7 +183,7 @@ asyncio.run(main())
 | `account_id` | AccountID | ✅ | Account identifier |
 | `transaction_id` | str | ✅ | Starting transaction ID |
 | `*` | | | **Keyword-only parameters below** |
-| `transaction_type` | list[str] \| None | ➖ | Filter by transaction types |
+| `transaction_type` | list[TransactionFilter \| str] \| None | ➖ | Filter by transaction types |
 
 **Returns:** `TransactionsSinceIdResponse` - TypedDict containing transactions since ID (transactions: list[TransactionUnion], lastTransactionID: str)
 
@@ -184,7 +191,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Account or transaction not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -246,12 +253,12 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-  - 400: Invalid request parameters (check `e.is_bad_request`)
+  - 400: Invalid request parameters (check `e.status == 400`)
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`)
 
-`StreamStall` - On stream timeout or connection issues
+`StreamStall` - On a detected stream stall; HTTPX transport errors can also propagate
 
 ---
 
@@ -303,7 +310,7 @@ asyncio.run(main())
 | `from_transaction_id` | str | ✅ | Starting transaction ID (inclusive) |
 | `to_transaction_id` | str | ✅ | Ending transaction ID (inclusive) |
 | `*` | | | **Keyword-only parameters below** |
-| `transaction_type` | list[str] \| None | ➖ | Filter by transaction types |
+| `transaction_type` | list[TransactionFilter \| str] \| None | ➖ | Filter by transaction types |
 
 **Returns:** `TransactionsRangeResponse` - TypedDict containing transactions in range (transactions: list[TransactionUnion], lastTransactionID: str)
 
@@ -311,7 +318,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-  - 400: Invalid request parameters (check `e.is_bad_request`)
+  - 400: Invalid request parameters (check `e.status == 400`)
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -367,7 +374,7 @@ asyncio.run(main())
 | `account_id` | AccountID | ✅ | Account identifier |
 | `*` | | | **Keyword-only parameters below** |
 | `count` | int | ➖ | Number of most recent transaction IDs to cover (default: 50, max: 500). With a type filter, fewer transactions may be returned |
-| `transaction_type` | list[str] \| None | ➖ | Filter by transaction types |
+| `transaction_type` | list[TransactionFilter \| str] \| None | ➖ | Filter by transaction types |
 
 **Returns:** `TransactionsRangeResponse` - TypedDict containing recent transactions (transactions: list[TransactionUnion], lastTransactionID: str)
 
@@ -375,7 +382,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-  - 400: Invalid request parameters (check `e.is_bad_request`)
+  - 400: Invalid request parameters (check `e.status == 400`)
   - 401/403: Authentication failed (check `e.is_authentication_error`)
   - 404: Account not found (check `e.is_not_found`)
   - 429: Rate limit exceeded (check `e.is_rate_limited`)

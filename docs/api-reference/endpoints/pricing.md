@@ -2,7 +2,15 @@
 
 **OANDA Reference**: [Pricing Endpoints](https://developer.oanda.com/rest-live-v20/pricing-ep/)
 
-Real-time pricing data and streaming.
+Account pricing snapshots, sampled price streams and account-specific candles.
+The top-level pricing `time` and `since` parameter are wire strings; nested price
+and candle time attributes are Python datetimes. Supply a `since` value in the
+client's selected datetime format.
+
+The examples below illustrate calls and response access. Helpers run only when
+called. Examples that create, update, cancel or close resources change account
+state; use a dedicated practice account and inspect each response. Local validation
+and HTTPX transport exceptions can occur in addition to the API errors listed.
 
 ---
 
@@ -61,7 +69,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -95,7 +103,7 @@ async def main() -> None:
             instruments=["EUR_USD", "GBP_USD"],  # Change to your instruments
             snapshot=True,
         )
-        async with aclosing(stream):  # type: ignore[type-var]
+        async with aclosing(stream):
             async for price in stream:
                 print(f"Price update: {price}")
                 count += 1
@@ -127,12 +135,12 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
 
-`StreamStall` - On stream timeout or connection issues
+`StreamStall` - On a detected stream stall; HTTPX transport errors can also propagate
 
 ---
 
@@ -160,7 +168,7 @@ async def main() -> None:
             account_id=client.account_id,
             instrument="EUR_USD",  # Change to your instrument
             granularity="H1",  # Change to desired granularity (S5, M1, H1, D, etc.)
-            count=100,  # Number of candles to retrieve (use count OR from_time/to_time)
+            count=100,  # Number of candles to retrieve (omit count when both time boundaries are supplied)
         )
         print(f"Got {len(candles['candles'])} candles for {candles['instrument']}")
 
@@ -189,6 +197,7 @@ asyncio.run(main())
 | `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) |
 | `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") |
 | `weekly_alignment` | str | ➖ | Weekly alignment day (default: "Friday") |
+| `units` | Decimal \| int \| str | ➖ | Position size for volume-weighted bid/ask prices (default: 1) |
 
 **Returns:** `CandlesResponse` - Dictionary containing instrument, granularity, and list of candlesticks
 
@@ -196,12 +205,12 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Instrument or account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
 
-`ValueError` - If both count and time range are specified
+`ValueError` - If count and both from_time and to_time are specified
 
 ---
 
@@ -229,7 +238,7 @@ async def main() -> None:
             account_id=client.account_id,
             # Format: instrument:granularity:price_type
             candle_specifications=["EUR_USD:S5:BM", "GBP_USD:M1:BM"],
-            units=50,  # Number of candles per specification
+            units=50,  # Position size used for volume-weighted bid/ask prices
         )
         for candle_data in result["latestCandles"]:
             print(f"{candle_data['instrument']}: {len(candle_data['candles'])} candles")
@@ -249,7 +258,7 @@ asyncio.run(main())
 | `account_id` | AccountID | ✅ | Account ID |
 | `candle_specifications` | list[str] | ✅ | List of candle specifications (instrument:granularity:price) |
 | `*` | | | **Keyword-only parameters below** |
-| `units` | int | ➖ | Number of units for each candle spec (1-5000, default: 1) |
+| `units` | Decimal \| int \| str | ➖ | Position size for volume-weighted bid/ask prices (default: 1) |
 | `smooth` | bool | ➖ | Smooth candles (default: False) |
 | `daily_alignment` | int | ➖ | Daily alignment hour (default: 17) |
 | `alignment_timezone` | str | ➖ | Timezone for alignment (default: "America/New_York") |
@@ -261,7 +270,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -310,7 +319,7 @@ async def main() -> None:
             instruments=["EUR_USD", "GBP_USD"],  # Change to your instruments
             config=config,
         )
-        async with aclosing(stream):  # type: ignore[type-var]
+        async with aclosing(stream):
             async for price_data, state in stream:
                 if state == StreamState.RECONNECTING:
                     print("Connection lost, retrying...")
@@ -345,9 +354,9 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
 
-`StreamStall` - If all retry attempts are exhausted
+The final stream or transport exception propagates when the retry budget is exhausted

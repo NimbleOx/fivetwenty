@@ -1,17 +1,32 @@
 # Data Models Reference
 
-Complete API reference for FiveTwenty's data models, covering all OANDA v20 API data structures.
+Reference for FiveTwenty's request models, parsed API objects and supporting enums.
+These models represent the SDK surface; their presence does not establish support
+for every OANDA route or account-specific feature.
+
+## Reading model tables
+
+Field names are Python attribute names; serialization uses OANDA aliases. Financial
+attributes use `Decimal`, and datetime attributes use Python `datetime`. Enum-typed
+fields can store wire strings because the shared model configuration uses enum
+values. Models are mutable with assignment validation; local edits do not update
+the account.
+
+The Required column describes construction requirements for the SDK model. Defaults
+and optional response fields do not prove the server will supply a value in every
+context. Use the linked source for the full model definition and validators.
 
 ---
 
 ## Model Categories
 
-FiveTwenty provides 130+ Pydantic models and 41 enums organized into logical categories:
+Models and enums are organized by resource below.
 
 ### Enum Models
 [**Enumerations & Constants →**](enum-models.md)
 
-Type-safe enumerations for all OANDA API parameters and values.
+Convenience enums for known API values. Instrument and currency availability must
+be checked against the account; an enum member is not an availability guarantee.
 
 | Enum | Purpose |
 |------|---------|
@@ -65,7 +80,7 @@ Models for trade lifecycle, position management, and P&L tracking.
 
 | Model | Purpose |
 |-------|---------|
-| [Trade](trading-models.md#trade) | Represents an open trade position with full lifecycle details |
+| [Trade](trading-models.md#trade) | Individual trade record, including open or closed state |
 | [TradeSummary](trading-models.md#tradesummary) | Condensed trade information for lists and overviews |
 | [TradeSpecifier](trading-models.md#tradespecifier) | Trade identification format for API requests |
 | [CalculatedTradeState](trading-models.md#calculatedtradestate) | Dynamic trade state with real-time P&L calculations |
@@ -79,7 +94,7 @@ Order creation, management, and execution models.
 
 | Model | Purpose |
 |-------|---------|
-| [MarketOrderRequest](order-models.md#marketorderrequest) | Request to create a market order for immediate execution at current market price |
+| [MarketOrderRequest](order-models.md#marketorderrequest) | Request immediate execution subject to its fill policy and available liquidity |
 | [LimitOrderRequest](order-models.md#limitorderrequest) | Request to create a limit order for execution at specific price or better |
 | [StopOrderRequest](order-models.md#stoporderrequest) | Request to create a stop order triggered when price reaches stop level |
 | [TakeProfitOrderRequest](order-models.md#takeprofitorderrequest) | Request to create a take profit order to close trade at profit target |
@@ -105,10 +120,10 @@ Models for real-time pricing, historical data, and instrument specifications.
 
 | Model | Purpose |
 |-------|---------|
-| [ClientPrice](market-data-models.md#clientprice) | Real-time tradeable prices with bid/ask spreads and closeout rates for immediate trading decisions |
+| [ClientPrice](market-data-models.md#clientprice) | Instrument pricing, liquidity buckets, status and observation time |
 | [QuoteHomeConversionFactors](market-data-models.md#quotehomeconversionfactors) | Currency conversion factors for calculating quote currency amounts in account home currency |
 | [HomeConversions](market-data-models.md#homeconversions) | Pre-calculated conversion factors for converting instrument P&L to account home currency |
-| [PricingHeartbeat](market-data-models.md#pricingheartbeat) | Streaming heartbeat message to confirm active price stream connection and prevent timeouts |
+| [PricingHeartbeat](market-data-models.md#pricingheartbeat) | Heartbeat record used to observe price-stream activity |
 | [UnitsAvailable](market-data-models.md#unitsavailable) | Maximum tradeable units available for different order scenarios and position states |
 | [PriceBucket](market-data-models.md#pricebucket) | Market depth information showing available liquidity at specific price levels |
 | [Candlestick](market-data-models.md#candlestick) | Historical OHLC price data with volume for technical analysis and charting |
@@ -142,6 +157,6 @@ Models for streaming configuration, error handling, and type aliases.
 | Model | Purpose |
 |-------|---------|
 | [StreamingConfiguration](system-models.md#streamingconfiguration) | Configuration for real-time price streaming including heartbeat and timeout settings |
-| [ReconnectionPolicy](system-models.md#reconnectionpolicy) | Automated reconnection strategy with exponential backoff for resilient streaming connections |
+| [ReconnectionPolicy](system-models.md#reconnectionpolicy) | Reconnection attempt budget and configured delay |
 | [ErrorDetails](system-models.md#errordetails) | Structured API error information with codes and messages for error handling and debugging |
 | [ValidationViolation](system-models.md#validationviolation) | Field-level validation error details showing rejected values and constraint violations |

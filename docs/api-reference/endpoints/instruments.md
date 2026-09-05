@@ -4,13 +4,18 @@
 
 Instrument-level candlestick data and order/position book snapshots, accessed via `client.instruments`.
 
-> **Note**: OANDA's public documentation no longer publishes the instrument endpoints page, but the endpoints remain live. The orderBook and positionBook endpoints return buckets of `{price, longCountPercent, shortCountPercent}`.
+> **Note**: OANDA's public documentation no longer publishes the instrument endpoints page, but these endpoints remain in OANDA's official v20 OpenAPI repository. The orderBook and positionBook endpoints describe client order/position distributions, not executable exchange depth. Their buckets contain `{price, longCountPercent, shortCountPercent}`.
 
 | Method | Purpose |
 |--------|---------|
 | [get_instrument_candles](#get_instrument_candles) | Candlestick data for an instrument |
 | [get_instrument_order_book](#get_instrument_order_book) | Order book snapshot for an instrument |
 | [get_instrument_position_book](#get_instrument_position_book) | Position book snapshot for an instrument |
+
+The examples below illustrate calls and response access. Helpers run only when
+called. Examples that create, update, cancel or close resources change account
+state; use a dedicated practice account and inspect each response. Local validation
+and HTTPX transport exceptions can occur in addition to the API errors listed.
 
 ---
 
@@ -37,7 +42,7 @@ async def main() -> None:
         candles = await client.instruments.get_instrument_candles(
             "EUR_USD",  # Change to your instrument
             granularity="H1",  # Change to desired granularity (S5, M1, H1, D, etc.)
-            count=100,  # Number of candles to retrieve (use count OR from_time/to_time)
+            count=100,  # Number of candles to retrieve (omit count when both time boundaries are supplied)
         )
         print(f"Got {len(candles['candles'])} candles for {candles['instrument']}")
 
@@ -55,7 +60,7 @@ asyncio.run(main())
 | `*` | | | **Keyword-only parameters below** |
 | `price` | PricingComponent | ➖ | Price component(s) - "M", "B", "A", "BA", "BM", "AM", or "BAM" (default: "M") |
 | `granularity` | CandlestickGranularity \| str | ➖ | Candlestick granularity enum or string (default: "S5") |
-| `count` | int \| None | ➖ | Number of candlesticks to return (max 5000, conflicts with time range) |
+| `count` | int \| None | ➖ | Number of candlesticks to return (max 5000, omit when both time boundaries are supplied) |
 | `from_time` | datetime \| None | ➖ | Start of time range for candlesticks |
 | `to_time` | datetime \| None | ➖ | End of time range for candlesticks |
 | `smooth` | bool | ➖ | Use previous candle's close as open price (default: False) |
@@ -70,12 +75,12 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Instrument not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
 
-`ValueError` - If both count and time range are specified
+`ValueError` - If count and both from_time and to_time are specified
 
 ---
 
@@ -130,7 +135,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Instrument or snapshot not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -184,7 +189,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Instrument or snapshot not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)

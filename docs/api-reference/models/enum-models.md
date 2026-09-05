@@ -1,12 +1,15 @@
 # Enum Models
 
-This page documents all enumeration types used throughout FiveTwenty. These enums provide type-safe constants for OANDA API parameters and values.
+Reference tables for SDK enums. Some larger enums show representative values; use
+the linked source for the full set. Request models and accounts can restrict which
+values are allowed.
 
 ## Core Trading Enums
 
 ### InstrumentName
 
-Available trading instruments supported by OANDA.
+Known instrument names provided as a convenience. The account instruments endpoint
+is the authority for current availability; applicable SDK fields also accept strings.
 
 🔗 **OANDA Definition**: [InstrumentName](https://developer.oanda.com/rest-live-v20/primitives-df/#collapse_definition_5)
 
@@ -610,7 +613,7 @@ The reason that an Order was filled.
 
 ### OrderCancelReason
 
-The reason that an Order was cancelled. This enum defines 65 values; the table below shows representative examples - see the source for the complete value set.
+The reason that an Order was cancelled. The table shows representative values; see the source for the complete set.
 
 🔗 **OANDA Definition**: [OrderCancelReason](https://developer.oanda.com/rest-live-v20/transaction-df/#OrderCancelReason)
 
@@ -660,7 +663,7 @@ How positions are aggregated in the account.
 
 ### GuaranteedStopLossOrderMode
 
-Guaranteed stop loss order modes for instruments.
+Account-level guaranteed stop loss order modes.
 
 🔗 **OANDA Definition**: [GuaranteedStopLossOrderMode](https://developer.oanda.com/rest-live-v20/account-df/#collapse_definition_6)
 
@@ -684,7 +687,7 @@ Actions that can be performed on guaranteed Stop Loss Orders.
 |-------|-------------|
 | `FIXED` | Once created, guaranteed stop loss orders cannot be replaced or cancelled |
 | `REPLACEABLE` | An existing guaranteed stop loss order can only be replaced, not cancelled |
-| `CANCELABLE` | Once trading is disabled, guaranteed stop loss orders can be cancelled but not replaced |
+| `CANCELABLE` | An existing guaranteed stop loss order can be replaced or cancelled |
 | `PRICE_WIDEN_ONLY` | An existing guaranteed stop loss order can only be replaced to widen the gap from the current price, not cancelled |
 
 ### GuaranteedStopLossOrderModeForInstrument
@@ -705,7 +708,7 @@ Guaranteed stop loss order modes specific to instruments.
 
 ### TransactionFilter
 
-Transaction type filters accepted by OANDA transaction list endpoints. This enum defines 42 values covering every transaction type plus aggregate filters; the table below shows representative examples - see the source for the complete value set.
+Transaction type filters accepted by OANDA transaction list endpoints. The table shows representative values; see the source for the complete set.
 
 🔗 **OANDA Definition**: [TransactionFilter](https://developer.oanda.com/rest-live-v20/transaction-df/#TransactionFilter)
 
@@ -725,7 +728,7 @@ Transaction type filters accepted by OANDA transaction list endpoints. This enum
 
 ### TransactionRejectReason
 
-Reasons why a transaction may be rejected. This enum defines 198 values; the table below shows representative examples - see the source for the complete value set.
+Reasons why a transaction may be rejected. The table shows representative values; see the source for the complete set.
 
 🔗 **OANDA Definition**: [TransactionRejectReason](https://developer.oanda.com/rest-live-v20/transaction-df/#TransactionRejectReason)
 
@@ -792,7 +795,8 @@ Filter for trade queries by state.
 
 ### TradePL
 
-The classification of a trade's profit/loss, used when filtering trade queries.
+A positive, negative or zero profit/loss classification. This enum is not a
+`get_trades()` filter parameter.
 
 🔗 **OANDA Definition**: [TradePL](https://developer.oanda.com/rest-live-v20/trade-df/#TradePL)
 
@@ -804,4 +808,5 @@ The classification of a trade's profit/loss, used when filtering trade queries.
 | `NEGATIVE` | An open trade currently in a negative (losing) state |
 | `ZERO` | An open trade currently at break-even |
 
-All enums are string-based and can be used directly with OANDA API endpoints or for type validation in your trading applications.
+These enums represent known values. Use each endpoint's accepted parameter type;
+an enum member is not necessarily allowed by every request model or account.

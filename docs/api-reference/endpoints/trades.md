@@ -4,6 +4,11 @@
 
 Trade monitoring and management.
 
+The examples below illustrate calls and response access. Helpers run only when
+called. Examples that create, update, cancel or close resources change account
+state; use a dedicated practice account and inspect each response. Local validation
+and HTTPX transport exceptions can occur in addition to the API errors listed.
+
 ---
 
 ## get_trades
@@ -62,7 +67,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -116,7 +121,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -173,7 +178,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Trade not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -225,13 +230,13 @@ asyncio.run(main())
 | `*` | | | **Keyword-only parameters below** |
 | `units` | str \| None | ➖ | Number of units to close (default: ALL for full closure) |
 
-**Returns:** `CloseTradeResponse` - Dictionary containing orderCreateTransaction, orderFillTransaction, orderCancelTransaction, relatedTransactionIDs, and lastTransactionID
+**Returns:** `CloseTradeResponse` - Dictionary containing lastTransactionID and conditional creation, fill, cancellation and related-transaction fields
 
 **Raises:**
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Trade not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -292,7 +297,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Trade not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
@@ -301,7 +306,29 @@ asyncio.run(main())
 
 ## put_trade_orders
 
-Update trade-dependent orders (take profit, stop loss, etc.).
+Create, modify, or cancel trade-dependent orders.
+
+Omit an argument to leave that dependent order unchanged. Passing `None` cancels
+that order. Detail models send only fields explicitly supplied by the caller.
+For a partial update that inherits an existing price or distance, pass a dictionary
+using OANDA field names:
+
+```python
+from fivetwenty import AsyncClient
+
+async def update_exit_orders(client: AsyncClient, account_id: str, trade_id: str) -> None:
+    await client.trades.put_trade_orders(
+        account_id,
+        trade_id,
+        take_profit={"clientExtensions": {"tag": "updated-exit"}},
+        trailing_stop_loss=None,
+    )
+```
+
+This updates the take-profit tag and cancels the trailing stop. Other dependent
+orders and omitted take-profit fields are inherited. For creation, supply the
+price or distance required by OANDA. Dictionary strings are treated as wire
+values; native Python datetimes and Decimals are serialized by the client.
 
 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/trades/{tradeSpecifier}/orders`
 
@@ -345,10 +372,10 @@ asyncio.run(main())
 | `account_id` | AccountID | ✅ | Target account identifier |
 | `trade_specifier` | str | ✅ | Trade identifier to modify |
 | `*` | | | **Keyword-only parameters below** |
-| `take_profit` | TakeProfitDetails \| None | ➖ | Take profit order specification |
-| `stop_loss` | StopLossDetails \| None | ➖ | Stop loss order specification |
-| `trailing_stop_loss` | TrailingStopLossDetails \| None | ➖ | Trailing stop loss order specification |
-| `guaranteed_stop_loss` | GuaranteedStopLossDetails \| None | ➖ | Guaranteed stop loss order specification |
+| `take_profit` | TakeProfitDetails \| dict \| None | ➖ | Take profit order specification |
+| `stop_loss` | StopLossDetails \| dict \| None | ➖ | Stop loss order specification |
+| `trailing_stop_loss` | TrailingStopLossDetails \| dict \| None | ➖ | Trailing stop loss order specification |
+| `guaranteed_stop_loss` | GuaranteedStopLossDetails \| dict \| None | ➖ | Guaranteed stop loss order specification |
 
 **Returns:** `TradeOrdersResponse` - Dictionary containing order transaction details (takeProfitOrderCancelTransaction, takeProfitOrderTransaction, stopLossOrderTransaction, etc.), relatedTransactionIDs, and lastTransactionID
 
@@ -356,7 +383,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Trade not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)

@@ -4,6 +4,11 @@
 
 Account management and information retrieval.
 
+The examples below illustrate calls and response access. Helpers run only when
+called. Examples that create, update, cancel or close resources change account
+state; use a dedicated practice account and inspect each response. Local validation
+and HTTPX transport exceptions can occur in addition to the API errors listed.
+
 ---
 
 ## get_accounts
@@ -258,7 +263,7 @@ asyncio.run(main())
 `FiveTwentyError` - API errors:
 
 - 401/403: Authentication failed (check `e.is_authentication_error`)
-- 400: Invalid parameters (check `e.is_validation_error`)
+- 400: Invalid parameters (inspect `e.code` and `e.details`)
 - 404: Account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
 
@@ -313,6 +318,6 @@ asyncio.run(main())
 `FiveTwentyError` - API errors:
 
 - 401/403: Authentication failed (check `e.is_authentication_error`)
-- 400: Invalid transaction ID (check `e.is_validation_error`)
+- 400: Invalid transaction ID (inspect `e.code` and `e.details`)
 - 404: Account not found (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)

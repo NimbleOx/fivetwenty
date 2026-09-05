@@ -1,236 +1,65 @@
-# Exceptions API Reference
+# Exceptions API reference
 
-!!! note "📚 Reference - Information-oriented content"
-    **Use this reference when:** You need to look up exception types, error codes, or error handling patterns
+The SDK defines `FiveTwentyError` for non-success HTTP responses and `StreamStall`
+for detected stream stalls. They both inherit directly from Python's `Exception`;
+`StreamStall` is not a subclass of `FiveTwentyError`.
 
-    **Content type:** Comprehensive technical specifications for SDK exception handling
+## FiveTwentyError
 
-    **Assumed knowledge:** Basic Python exception handling and FiveTwenty usage
+The constructor is keyword-only. `status` and `message` are required; the other
+fields below are optional.
 
-Complete reference for FiveTwenty exception types and error handling patterns.
+| Attribute | Type | Meaning |
+| --- | --- | --- |
+| `status` | `int` | HTTP status code |
+| `message` | `str` | API message or response-text fallback |
+| `code` | `str \| None` | Returned OANDA error code |
+| `request_id` | `str \| None` | Request identifier from response headers |
+| `retryable` | `bool` | Classification hint; defaults to `False` |
+| `response` | `httpx.Response \| None` | Original response |
+| `details` | `ErrorDetails \| None` | Parsed structured error details |
 
----
+The HTTP error parser marks selected temporary statuses and rate-limit codes as
+retryable. That hint does not establish that repeating a write is safe. The SDK
+restricts automatic REST retries to eligible read methods.
 
-## Exception Hierarchy
+### Classification properties
 
-```text
-Exception
-├── FiveTwentyError
-└── StreamStall
-```
+| Property | Result |
+| --- | --- |
+| `is_client_error` | Whether status is in 400–499 |
+| `is_server_error` | Whether status is in 500–599 |
+| `is_authentication_error` | Status 401/403 or a recognized authentication/authorization category |
+| `is_validation_error` | Recognized validation category or structured violations |
+| `is_rate_limited` | Status 429 or recognized rate-limit category |
+| `is_not_found` | Status 404 or recognized not-found category |
+| `error_category` | Mapped category, or `None` for an unrecognized code |
+| `error_severity` | Mapped severity with the SDK's fallback |
+| `retry_after` | Integer seconds from `Retry-After`, or `None` |
 
----
+There is no `is_bad_request` property; compare `status == 400`. A 400 response does
+not necessarily have a recognized validation category. `retry_after` parses integer
+seconds only, not an HTTP-date header value.
 
-## Core Exceptions
+### Detail methods
 
-### `FiveTwentyError`
+`get_validation_errors()` groups known violations by field and returns an empty
+dictionary when none are available. `get_remediation_message()` returns a suggestion
+for certain known codes, or `None`. These mappings are conveniences, not an exhaustive
+list of all OANDA errors or instructions to change account exposure automatically.
 
-Enhanced exception for all OANDA API errors with comprehensive error information.
+## StreamStall
 
-**Constructor Parameters:**
+Raised when stream timeout handling detects a stall. Network failures can also
+propagate as HTTPX exceptions, and API rejection at stream startup can raise
+`FiveTwentyError`. The final error after retries depends on the failure encountered.
 
-- `status` *(int)* - HTTP status code
-- `code` *(str | None)* - OANDA API error code
-- `message` *(str)* - Human-readable error description
-- `request_id` *(str | None)* - Request ID from response headers
-- `retryable` *(bool)* - Whether the error is retryable (default: False)
-- `response` *(httpx.Response | None)* - Original HTTP response
-- `details` *(ErrorDetails | None)* - Structured error details with validation errors
+## Other exceptions
 
-**Properties:**
-
-- `status` *(int)* - HTTP status code
-- `code` *(str | None)* - OANDA API error code
-- `message` *(str)* - Human-readable error description
-- `request_id` *(str | None)* - Request ID for debugging
-- `retryable` *(bool)* - Whether this error can be retried
-- `response` *(httpx.Response | None)* - Original HTTP response
-- `details` *(ErrorDetails | None)* - Structured error details
-
-**Computed Properties:**
-
-- `error_category` *(ErrorCategory | None)* - Error category (AUTHENTICATION, VALIDATION, etc.)
-- `error_severity` *(ErrorSeverity)* - Error severity (INFO, WARNING, ERROR, CRITICAL)
-- `is_client_error` *(bool)* - True if 4xx status code
-- `is_server_error` *(bool)* - True if 5xx status code
-- `is_authentication_error` *(bool)* - True if authentication/authorization error
-- `is_validation_error` *(bool)* - True if validation error
-- `is_rate_limited` *(bool)* - True if rate limiting error
-- `is_not_found` *(bool)* - True if 404 or not found error
-- `retry_after` *(int | None)* - Seconds to wait before retrying (from Retry-After header)
-
-**Methods:**
-
-- `get_validation_errors() -> dict[str, list[str]]` - Get validation errors grouped by field
-- `get_remediation_message() -> str | None` - Get suggested fix for common errors
-
-**Example:**
-```python
-import asyncio
-
-from fivetwenty import AsyncClient, FiveTwentyError
-from fivetwenty.models import InstrumentName
-
-
-async def main() -> None:
-    async with AsyncClient() as client:
-        try:
-            await client.orders.post_market_order(
-                account_id=client.account_id,
-                instrument=InstrumentName.EUR_USD,
-                units=10000,
-            )
-        except FiveTwentyError as e:
-            print(f"Status: {e.status}")
-            print(f"Code: {e.code}")
-            print(f"Message: {e.message}")
-            print(f"Request ID: {e.request_id}")
-
-            # Check error type
-            if e.is_authentication_error:
-                print("Authentication issue")
-            elif e.is_validation_error:
-                print("Validation errors:", e.get_validation_errors())
-            elif e.is_rate_limited:
-                print(f"Rate limited - retry after {e.retry_after}s")
-
-            # Get remediation advice
-            if remediation := e.get_remediation_message():
-                print(f"Fix: {remediation}")
-
-
-asyncio.run(main())
-```
-
-### `StreamStall`
-
-Exception raised when a stream stalls (no data received within timeout period).
-
-**Inheritance:** Inherits from `Exception` (not `FiveTwentyError`)
-
-**Example:**
-```python
-import asyncio
-
-from fivetwenty import AsyncClient, StreamStall
-
-
-async def main() -> None:
-    async with AsyncClient() as client:
-        try:
-            async for price in client.pricing.get_pricing_stream(
-                account_id=client.account_id,
-                instruments=["EUR_USD"],
-                stall_timeout=30.0,
-            ):
-                print(f"Price: {price}")
-        except StreamStall as e:
-            print(f"Stream stalled: {e}")
-            # Implement reconnection logic here
-            print("Reconnecting in 5 seconds...")
-            await asyncio.sleep(5)
-
-
-asyncio.run(main())
-```
-
-
----
-
-## Common Error Codes
-
-### Account Errors
-| Error Code | Description |
-|------------|-------------|
-| `ACCOUNT_NOT_EXIST` | Account doesn't exist |
-| `ACCOUNT_NOT_TRADEABLE` | Account cannot trade |
-| `INSUFFICIENT_AUTHORIZATION` | Lack permissions |
-
-### Order Errors
-| Error Code | Description |
-|------------|-------------|
-| `INSUFFICIENT_MARGIN` | Not enough margin |
-| `INSTRUMENT_NOT_TRADEABLE` | Cannot trade instrument |
-| `ORDER_DOESNT_EXIST` | Order not found |
-| `PRICE_OUT_OF_BOUNDS` | Price too far from market |
-
-### Trade Errors
-| Error Code | Description |
-|------------|-------------|
-| `TRADE_DOESNT_EXIST` | Trade not found |
-| `CLOSEOUT_POSITION_DOESNT_EXIST` | No position to close |
-| `INSUFFICIENT_LIQUIDITY` | Market liquidity issues |
-
----
-
-## Error Handling Patterns
-
-### Basic Error Handling
-```python
-from typing import Any
-
-from fivetwenty import AsyncClient, FiveTwentyError
-
-
-async def safe_api_call(client: AsyncClient, account_id: str) -> Any:
-    """Safely call API with error handling."""
-    try:
-        return await client.accounts.get_account_summary(account_id)
-    except FiveTwentyError as e:
-        # Check specific error types using properties
-        if e.is_authentication_error:
-            print(f"Authentication failed: {e.message}")
-            return None
-        if e.is_not_found:
-            print(f"Account not found: {account_id}")
-            return None
-        print(f"OANDA API error: {e.code} - {e.message}")
-        return None
-```
-
-### Retry with Exponential Backoff
-```python
-import asyncio
-from collections.abc import Awaitable, Callable
-from secrets import SystemRandom
-from typing import TypeVar
-
-from fivetwenty import FiveTwentyError
-
-T = TypeVar("T")
-_random = SystemRandom()
-
-
-async def retry_api_call(
-    func: Callable[[], Awaitable[T]], max_retries: int = 3
-) -> T | None:
-    """Retry API call with exponential backoff."""
-
-    for attempt in range(max_retries + 1):
-        try:
-            return await func()
-        except FiveTwentyError as e:  # noqa: PERF203
-            # Don't retry non-retryable errors
-            if not e.retryable:
-                raise
-
-            # Don't retry client errors (4xx)
-            if e.is_client_error and not e.is_rate_limited:
-                raise
-
-            if attempt == max_retries:
-                raise
-
-            # Use retry_after for rate limiting, otherwise exponential backoff
-            delay = float(e.retry_after) if e.retry_after else 2**attempt + _random.uniform(0, 1)
-
-            print(f"Retry attempt {attempt + 1}/{max_retries} after {delay:.1f}s")
-            await asyncio.sleep(delay)
-
-    return None
-```
-
----
+Local argument checks can raise `ValueError`; model parsing can raise Pydantic
+`ValidationError`; transport failures can raise `httpx.HTTPError` subclasses.
+Catching only `FiveTwentyError` does not cover these paths. See
+[error handling](error-handling.md) for recovery boundaries and logging examples.
 
 ::: fivetwenty.exceptions
     options:

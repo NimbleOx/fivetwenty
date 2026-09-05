@@ -8,6 +8,15 @@ It is not OANDA's official OpenAPI specification and should not be treated as co
 
 📁 **Download**: [openapi.yaml](openapi.yaml) - FiveTwenty SDK compatibility specification
 
+## Streaming Responses
+
+Streaming endpoints return `application/octet-stream` containing newline-delimited
+JSON records. The response body schema describes a binary stream; the
+`x-oanda-record-schema` extension describes each JSON line. Transaction records
+are bare transaction objects with their concrete OANDA type, interspersed with
+heartbeats. Generated clients must decode these lines; there is no enclosing
+`transaction` property.
+
 ## Known Source Difference
 
 The current OANDA REST-v20 navigation publishes Instrument definitions but no longer publishes a live `instrument-ep` page. FiveTwenty keeps the instrument candle, order book, and position book methods because those endpoints remain part of OANDA's official v20 OpenAPI repository and are still represented in the cached parity source.

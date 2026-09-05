@@ -4,6 +4,11 @@
 
 Position monitoring and management.
 
+The examples below illustrate calls and response access. Helpers run only when
+called. Examples that create, update, cancel or close resources change account
+state; use a dedicated practice account and inspect each response. Local validation
+and HTTPX transport exceptions can occur in addition to the API errors listed.
+
 ---
 
 ## get_positions
@@ -182,7 +187,11 @@ asyncio.run(main())
 
 ## close_position
 
-Close the open position for a specific instrument.
+Close selected sides of an instrument position. Specify `"ALL"`, `"NONE"`, or a
+positive quantity for each side you intend to control; short-side closure also
+uses a positive quantity. Omitting a side does not explicitly request its closure.
+Inspect both requested sides' transaction results. Closing exposure does not cancel
+unrelated pending entry orders.
 
 **OANDA Endpoint**: `PUT /v3/accounts/{accountID}/positions/{instrument}/close`
 
@@ -240,7 +249,7 @@ asyncio.run(main())
 
 `FiveTwentyError` - API errors:
 
-- 400: Invalid request parameters (check `e.is_bad_request`)
+- 400: Invalid request parameters (check `e.status == 400`)
 - 401/403: Authentication failed (check `e.is_authentication_error`)
 - 404: Position not found or already closed (check `e.is_not_found`)
 - 429: Rate limit exceeded (check `e.is_rate_limited`)
