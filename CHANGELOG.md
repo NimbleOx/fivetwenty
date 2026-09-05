@@ -6,6 +6,101 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html)
 (pre-1.0: minor versions may contain breaking changes, called out explicitly below).
 
+## [Unreleased]
+
+### Changed
+
+- **Breaking — order-list response:** `orders.get_orders()` now returns a
+  dictionary containing `orders` and `lastTransactionID`, preserving the API's
+  transaction cursor. Select `response["orders"]` where you previously used the
+  returned list. This applies to both async and sync clients.
+- **Breaking — dependent-order cancellation:** explicitly passing `None` to
+  `trades.put_trade_orders()` now cancels that dependent order. Omit an argument
+  to leave its existing order unchanged. Review generic update code that passed
+  `None` as a placeholder: it can now cancel an existing stop loss, take profit,
+  trailing stop or guaranteed stop.
+- REST `max_retries` counts retries after the initial eligible request:
+  `max_retries=3` permits up to four attempts and `max_retries=0` makes one attempt.
+  Negative, noninteger and boolean counts raise `ValueError`. Write requests
+  are not automatically retried.
+- Minimum runtime dependencies are now **HTTPX 0.26.0** and **Pydantic 2.7.0**.
+- REST calls retain the HTTP client's per-phase timeouts by default. For
+  SDK-created clients, connect is 5 seconds, write is 10 seconds, and the
+  constructor's `timeout` controls read and pool waits. Injected HTTP clients
+  retain their own settings. An explicit endpoint timeout replaces all four
+  phase limits for that request only; `None` means use the HTTP client's defaults.
+
+### Migration examples
+
+For an async client, replace direct iteration over the order-list result:
+
+```python
+# Before
+orders = await client.orders.get_orders(account_id)
+for order in orders:
+    print(order.id)
+
+# After
+response = await client.orders.get_orders(account_id)
+for order in response["orders"]:
+    print(order.id)
+last_transaction_id = response["lastTransactionID"]
+```
+
+For a dependent-order update, omit fields that should remain unchanged:
+
+```python
+# Before: None was ignored, so this did not change the existing stop loss.
+await client.trades.put_trade_orders(
+    account_id, trade_id, take_profit=new_take_profit, stop_loss=None
+)
+
+# After: omit stop_loss to keep it unchanged.
+await client.trades.put_trade_orders(
+    account_id, trade_id, take_profit=new_take_profit
+)
+
+# Explicit cancellation: use only when you intend to remove the stop loss.
+await client.trades.put_trade_orders(account_id, trade_id, stop_loss=None)
+```
+
+For the sync client, use the same response keys and update arguments without
+`await`. Partial dependent-order dictionaries use OANDA's camelCase field names;
+omitted subfields retain the existing order's settings during modification.
+
+### Fixed
+
+- Datetime query parameters and request bodies honor `datetime_format`, including
+  nested order details. Model attributes remain Python datetimes. Python retains
+  microsecond precision; already formatted strings in dictionaries pass through.
+- Account responses retain concrete order and transaction models and their fields.
+- Dependent-order updates send only explicitly supplied model fields and accept
+  partial dictionaries. Candle pagination accepts `count` with either time
+  boundary; account candles expose decimal `units`, and latest candles no longer
+  impose a candle-count limit on that position quantity.
+- Order-extension responses accept independent order and trade extension changes.
+  API errors retain the server's `RequestID` header; SDK request logs redact
+  authorization headers.
+- Proxy configuration uses HTTPX's supported argument. Streams share the configured
+  HTTP client, recover from read/protocol failures when retries are enabled, and
+  preserve structured HTTP errors. Closing streams and sync clients releases
+  active responses without blocking on a full pricing queue.
+- Pricing connection transitions remain visible on the first yielded record
+  when preceding heartbeats, malformed JSON or unknown record types are filtered.
+- Position-closure examples use explicit close endpoints. Risk-sizing examples
+  use price distance and quote-to-account conversion consistently.
+- Documentation examples, model tables and the compatibility OpenAPI schema match
+  the corrected SDK contracts. Code validation reports missing tools and failures;
+  titled Python fences receive the same checks as plain Python fences.
+
+### Added
+
+- Isolated, offline Markdown execution with the real SDK and shared HTTP fixtures,
+  enforced in CI. Focused regression tests cover request/response contracts,
+  streaming cleanup, example behavior and validator failures.
+- A 99% combined SDK line/branch coverage gate and a CI job for the minimum
+  runtime dependencies on Python 3.10.
+
 ## [0.4.1] — 2026-08-17
 
 Deep documentation execution-validation follow-up to 0.4.0: live tutorial
