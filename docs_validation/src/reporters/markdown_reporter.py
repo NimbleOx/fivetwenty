@@ -57,6 +57,8 @@ class MarkdownReporter:
         # Explicit validation skips
         content.extend(self._generate_fragment_marker_section(summary))
 
+        content.extend(self._generate_execution_section(summary))
+
         # File-level analysis
         content.extend(self._generate_file_analysis(issues_by_file))
 
@@ -74,6 +76,31 @@ class MarkdownReporter:
         content.extend(self._generate_appendices(summary))
 
         return "\n".join(content)
+
+    def _generate_execution_section(self, summary: ValidationSummary) -> list[str]:
+        """Distinguish executed blocks from helpers that were only defined."""
+        results = [result for result in summary.results if result.validator_name == "code_execution" and "executed_block_count" in result.metadata]
+        if not results:
+            return []
+        executed = sum(result.metadata["executed_block_count"] for result in results)
+        requests = sum(result.metadata.get("http_request_count", 0) for result in results)
+        content = [
+            "## Example execution",
+            "",
+            f"- **Executed Python blocks:** {executed}",
+            f"- **HTTP requests served by shared fixtures:** {requests}",
+            "",
+            "Examples use the real SDK in separate offline processes. Function definitions are compiled; their bodies run only when called. Focused behavioral tests remain necessary.",
+            "",
+        ]
+        for result in results:
+            for block in result.metadata.get("execution_results", []):
+                if block["issues"] and block["output"]:
+                    # Indented code cannot be closed by backticks in captured output.
+                    content.extend([f"Output from `{result.file_path}` at line {block['start_line']}:", "", *[f"    {line}" for line in block["output"].splitlines()], ""])
+                    if block["output_truncated"]:
+                        content.extend(["Output truncated to 16,000 characters.", ""])
+        return content
 
     def _generate_header(self, summary: ValidationSummary) -> list[str]:
         """Generate report header with metadata."""
@@ -603,7 +630,7 @@ class MarkdownReporter:
             "",
             "| Validator | Purpose | Technology |",
             "|-----------|---------|------------|",
-            "| `code_execution` | Executes code examples to verify runtime behavior | exec() with mocking |",
+            "| `code_execution` | Executes examples with the real SDK and offline HTTP fixtures | Per-document subprocess |",
             "| `code_linting` | Validates code style and best practices | Ruff linter |",
             "| `code_typing` | Checks type safety and annotations | MyPy type checker |",
             "| `cross_references` | Validates internal links and references | Link resolution |",
@@ -698,7 +725,7 @@ class MarkdownReporter:
         insights = {
             "code_linting": f"Found {len(issues)} style/best practice violations. Focus on import organization and code formatting.",
             "code_typing": f"Identified {len(issues)} type-related issues. Consider adding type annotations to improve code clarity.",
-            "code_execution": f"Detected {len(issues)} runtime errors. Fix code examples that fail when executed.",
+            "code_execution": f"Detected {len(issues)} execution errors. Inspect the example, fixture coverage and worker diagnostics.",
             "cross_references": f"Found {len(issues)} broken internal links. Verify all documentation cross-references are valid.",
             "financial_precision": f"Located {len(issues)} financial precision issues. Use Decimal type for all monetary calculations.",
             "markdown_syntax": f"Discovered {len(issues)} markdown formatting issues. Review documentation structure.",

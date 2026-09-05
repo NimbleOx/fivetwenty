@@ -102,7 +102,7 @@ class ValidatorRegistry:
         all_results: list[ValidationResult] = []
 
         # Split validators into parallel-safe and sequential-only
-        # code_execution uses signal handlers and I/O redirection which don't work well in threads
+        # Run one example subprocess at a time to bound memory and CPU use.
         sequential_validators = {"code_execution"}
         parallel_validators = [v for v in enabled_validators if v not in sequential_validators]
         sequential_only = [v for v in enabled_validators if v in sequential_validators]

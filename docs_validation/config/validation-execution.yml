@@ -1,0 +1,11 @@
+# Deterministic execution gate: no external link checks or live API access.
+file_patterns:
+  - "/README.md"
+  - "docs/**/*.md"
+
+validators:
+  code_execution:
+    enabled: true
+    options:
+      mock_api_calls: true
+      timeout_seconds: 15

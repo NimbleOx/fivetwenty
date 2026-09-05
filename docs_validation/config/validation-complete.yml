@@ -139,58 +139,13 @@ validators:
   security:
     enabled: true
 
-  # Code execution - runtime validation (slower, catches runtime errors)
-  # Note: Runs sequentially even in parallel mode due to signal handlers and I/O redirection
+  # Each document runs in a fresh offline process with the real SDK.
   code_execution:
     enabled: true
     options:
-      # Include list: Only these files will be executed
-      # Empty list = execute all files (use with caution!)
-      include_files:
-        - "README.md"
-        - "docs/api-reference/"
-        - "docs/index.md"
-        - "docs/tutorials/getting-started/installation.md"
-        - "docs/tutorials/getting-started/authentication.md"
-        - "docs/tutorials/getting-started/first-trade.md"
-        - "docs/tutorials/basic-trading/index.md"
-        - "docs/tutorials/basic-trading/foundation.md"
-        - "docs/tutorials/basic-trading/market-data.md"
-        - "docs/tutorials/basic-trading/position-management.md"
-        - "docs/tutorials/basic-trading/strategy-building.md"
-        - "docs/tutorials/basic-trading/complete-system.md"
-        - "docs/tutorials/advanced-orders/index.md"
-        - "docs/tutorials/advanced-orders/dynamic-management.md"
-        - "docs/tutorials/advanced-orders/order-strategies.md"
-        - "docs/tutorials/advanced-orders/stop-orders-mit.md"
-        - "docs/tutorials/account-management.md"
-        - "docs/tutorials/index.md"
-        - "docs/tutorials/risk-management.md"
-        - "docs/tutorials/streaming-data.md"
-        - "docs/guides/optimization/connection-optimization.md"
-        - "docs/guides/optimization/latency-optimization.md"
-        - "docs/guides/optimization/memory-cpu-optimization.md"
-        - "docs/guides/optimization/streaming-optimization.md"
-        - "docs/guides/practical-solutions/close-positions.md"
-        - "docs/guides/practical-solutions/handle-connection-failures.md"
-        - "docs/guides/practical-solutions/implement-stop-loss-strategies.md"
-        - "docs/guides/practical-solutions/manage-orders-effectively.md"
-        - "docs/guides/practical-solutions/multi-account-configuration.md"
-        - "docs/guides/practical-solutions/setup-live-trading.md"
-        - "docs/guides/trading-concepts/forex-trading-concepts.md"
-        - "docs/guides/trading-concepts/order-types.md"
-        - "docs/guides/trading-concepts/streaming.md"
-        - "docs/guides/understanding/async-vs-sync.md"
-        - "docs/guides/understanding/best-practices.md"
-        - "docs/guides/understanding/configuration.md"
-        - "docs/guides/understanding/environments.md"
-        - "docs/guides/understanding/sdk-architecture.md"
-        # docs/guides/index.md and docs/guides/optimization/index.md excluded: nav pages
-        # with no Python code blocks to execute.
-        # Add more files as they become fully standalone/executable
-
-      # Mock API calls when executing code (prevents real API calls)
+      # Execute every Python block; explicit fragment markers remain auditable.
       mock_api_calls: true
+      timeout_seconds: 15
 
   # External link validation (slower)
   external_links:
