@@ -646,6 +646,7 @@ Financing mode for an account.
 | `NO_FINANCING` | No financing charges applied |
 | `SECOND_BY_SECOND` | Financing applied second by second |
 | `DAILY` | Financing applied daily |
+| `DAILY_INSTRUMENT` | Financing applied daily, per instrument; the mode the API reports on each position in a `DAILY_FINANCING` transaction, though OANDA's definition omits it |
 
 ### PositionAggregationMode
 

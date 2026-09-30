@@ -3,4 +3,34 @@
 # Waivers are intentionally exact: `code` and `target` must match one generated
 # field-validation issue. Use this file only for reviewed drift that cannot be
 # fixed immediately. Expired or unused waivers are reported as validation issues.
-waivers: []
+#
+# The three below are the API running ahead of OANDA's published definitions:
+# each value or field is sent by the live API (seen in a practice account's
+# transaction history, September 2026) and absent from the definition pages, so
+# the SDK follows the API. Review them when the definitions next change.
+waivers:
+  - code: extra_enum_values
+    target: AccountFinancingMode
+    severity: P3
+    reason: >-
+      Every DAILY_FINANCING transaction's positionFinancings carry accountFinancingMode
+      DAILY_INSTRUMENT; without it no daily financing record parses.
+    source_url: https://developer.oanda.com/rest-live-v20/account-df/
+    expires: 2027-09-30
+  - code: extra_field
+    target: TakeProfitDetails.distance
+    severity: P3
+    reason: >-
+      OANDA accepts and records takeProfitOnFill as a distance from the fill, as for
+      stopLossOnFill; orders placed that way return it with no price.
+    source_url: https://developer.oanda.com/rest-live-v20/transaction-df/
+    expires: 2027-09-30
+  - code: extra_enum_values
+    target: TransactionRejectReason
+    severity: P3
+    reason: >-
+      MARKET_ORDER_REJECT and MARKET_IF_TOUCHED_ORDER_REJECT carry
+      TAKE_PROFIT_ON_FILL_DISTANCE_PRECISION_EXCEEDED when a take-profit distance is too
+      precise for the instrument.
+    source_url: https://developer.oanda.com/rest-live-v20/transaction-df/
+    expires: 2027-09-30

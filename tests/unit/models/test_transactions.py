@@ -1080,10 +1080,12 @@ class TestTransactionEnumCompleteness:
     """Exact member counts for the large transaction enums."""
 
     def test_transaction_reject_reason_members(self) -> None:
-        """TransactionRejectReason has the full official member set."""
+        """TransactionRejectReason has the full official member set (198), and the
+        one reason the API sends that the definitions omit."""
         values = [member.value for member in TransactionRejectReason]
-        assert len(values) == 198
-        assert len(set(values)) == 198
+        assert len(values) == 199
+        assert len(set(values)) == 199
+        assert "TAKE_PROFIT_ON_FILL_DISTANCE_PRECISION_EXCEEDED" in values
         assert TransactionRejectReason("INSTRUMENT_MISSING") is TransactionRejectReason.INSTRUMENT_MISSING
         assert TransactionRejectReason("TRADE_DOESNT_EXIST") is TransactionRejectReason.TRADE_DOESNT_EXIST
         assert TransactionRejectReason("PRICE_DISTANCE_MINIMUM_NOT_MET") is TransactionRejectReason.PRICE_DISTANCE_MINIMUM_NOT_MET
@@ -1095,3 +1097,99 @@ class TestTransactionEnumCompleteness:
         assert len(set(values)) == 42
         assert TransactionFilter("DAILY_FINANCING") is TransactionFilter.DAILY_FINANCING
         assert TransactionFilter("ONE_CANCELS_ALL_ORDER_TRIGGERED") is TransactionFilter.ONE_CANCELS_ALL_ORDER_TRIGGERED
+
+
+class TestObservedApiPayloads:
+    """Transactions exactly as OANDA returned them from a practice account's
+    history (account and user ids replaced), where the API sends more than its
+    published definitions describe. Each once failed to parse, and failed the
+    whole page of transactions it arrived in."""
+
+    def test_market_order_with_take_profit_as_a_distance(self) -> None:
+        from fivetwenty.models.transactions import parse_transaction
+
+        payload = {
+            "id": "6",
+            "accountID": "101-001-1234567-001",
+            "userID": 1234567,
+            "batchID": "6",
+            "requestID": "97379789267864910",
+            "time": "2025-03-18T16:15:10.595419742Z",
+            "type": "MARKET_ORDER",
+            "instrument": "USD_JPY",
+            "units": "139196",
+            "timeInForce": "FOK",
+            "positionFill": "DEFAULT",
+            "takeProfitOnFill": {"distance": "0.215", "timeInForce": "GTC"},
+            "stopLossOnFill": {"distance": "0.215", "timeInForce": "GTC", "triggerMode": "TOP_OF_BOOK"},
+            "reason": "CLIENT_ORDER",
+        }
+        order = parse_transaction(payload)
+        assert isinstance(order, MarketOrderTransaction)
+        assert order.take_profit_on_fill is not None
+        assert order.take_profit_on_fill.distance == Decimal("0.215")
+        assert order.take_profit_on_fill.price is None
+
+    def test_take_profit_details_send_a_distance_without_a_price(self) -> None:
+        from fivetwenty.models import TakeProfitDetails
+
+        details = TakeProfitDetails(distance=Decimal("0.0050"))
+        assert details.model_dump(by_alias=True, exclude_none=True, mode="json") == {"distance": "0.0050", "timeInForce": "GTC"}
+
+    def test_daily_financing_per_instrument(self) -> None:
+        from fivetwenty.models import AccountFinancingMode
+        from fivetwenty.models.transactions import parse_transaction
+
+        payload = {
+            "id": "22",
+            "accountID": "101-001-1234567-001",
+            "userID": 1234567,
+            "batchID": "22",
+            "time": "2025-03-18T21:00:00.000000000Z",
+            "type": "DAILY_FINANCING",
+            "financing": "5.2247",
+            "accountBalance": "100003.8018",
+            "positionFinancings": [
+                {
+                    "instrument": "USD_CAD",
+                    "financing": "5.2247",
+                    "baseFinancing": "5.22468493150685",
+                    "accountFinancingMode": "DAILY_INSTRUMENT",
+                    "homeConversionFactors": {"gainQuoteHome": None, "lossQuoteHome": None, "gainBaseHome": {"factor": "1"}, "lossBaseHome": {"factor": "1"}},
+                    "openTradeFinancings": [{"tradeID": "19", "financing": "5.2247", "baseFinancing": "5.22468493150685", "financingRate": "0.007", "baseHomeConversionCost": "0.00000000000000", "homeConversionCost": "0.00000000000000"}],
+                    "baseHomeConversionCost": "0.00000000000000",
+                    "homeConversionCost": "0.00000000000000",
+                }
+            ],
+            "baseHomeConversionCost": "0.00000000000000",
+            "homeConversionCost": "0.00000000000000",
+        }
+        financing = parse_transaction(payload)
+        assert isinstance(financing, DailyFinancingTransaction)
+        assert financing.position_financings is not None
+        assert financing.position_financings[0].account_financing_mode == AccountFinancingMode.DAILY_INSTRUMENT
+
+    def test_reject_for_a_take_profit_distance_too_precise(self) -> None:
+        from fivetwenty.models.transactions import parse_transaction
+
+        payload = {
+            "id": "5022",
+            "accountID": "101-001-1234567-001",
+            "userID": 1234567,
+            "batchID": "5022",
+            "requestID": "79406110322007995",
+            "time": "2025-07-09T01:00:10.377034033Z",
+            "type": "MARKET_ORDER_REJECT",
+            "rejectReason": "TAKE_PROFIT_ON_FILL_DISTANCE_PRECISION_EXCEEDED",
+            "instrument": "USD_CHF",
+            "units": "292155",
+            "timeInForce": "FOK",
+            "positionFill": "DEFAULT",
+            "takeProfitOnFill": {"distance": "0.000768", "timeInForce": "GTC"},
+            "stopLossOnFill": {"distance": "0.000768", "timeInForce": "GTC", "triggerMode": "TOP_OF_BOOK"},
+            "reason": "CLIENT_ORDER",
+            "clientExtensions": {"id": "3d4129e9-688b-42de-b15e-bc3b932293ff"},
+        }
+        reject = parse_transaction(payload)
+        assert isinstance(reject, MarketOrderRejectTransaction)
+        assert reject.reject_reason == TransactionRejectReason.TAKE_PROFIT_ON_FILL_DISTANCE_PRECISION_EXCEEDED

@@ -302,8 +302,9 @@ class TestAccountEnums:
         assert actual_mutabilities == expected_mutabilities
 
     def test_account_financing_mode(self):
-        """Test AccountFinancingMode values."""
-        expected_modes = {"NO_FINANCING", "SECOND_BY_SECOND", "DAILY"}
+        """Test AccountFinancingMode values: OANDA's three, and DAILY_INSTRUMENT,
+        which the API sends in daily financing records though the definitions omit it."""
+        expected_modes = {"NO_FINANCING", "SECOND_BY_SECOND", "DAILY", "DAILY_INSTRUMENT"}
         actual_modes = {mode.value for mode in AccountFinancingMode}
         assert actual_modes == expected_modes
 

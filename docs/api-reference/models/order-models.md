@@ -504,7 +504,8 @@ Details for creating a Take Profit Order on fill.
 
 | Field | Type | Required | Description |
 |-------|------|----------|-------------|
-| `price` | [PriceValue](system-models.md#type-aliases) | ✅ | Take profit trigger price |
+| `price` | [PriceValue](system-models.md#type-aliases) \| None |➖ | Take profit trigger price (either price or distance required) |
+| `distance` | Decimal \| None | ➖ | Distance from fill price (either price or distance required); sent and accepted by the API though OANDA's definition lists only `price` |
 | `time_in_force` | [TimeInForce](enum-models.md#timeinforce) | ➖ | Order duration policy (default: GTC) |
 | `gtd_time` | [DateTime](system-models.md#type-aliases) \| None |➖ | Good-till-date expiration timestamp (when time_in_force is "GTD") |
 | `client_extensions` | [ClientExtensions](#clientextensions) \| None | ➖ | Client extensions for the take profit order |

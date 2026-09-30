@@ -8,6 +8,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Transaction history parses again.** A single record the models rejected
+  failed the whole page of transactions it arrived in, so accounts with daily
+  financing, or orders placed with a take-profit distance, could not read their
+  history at all. Three places where OANDA's API sends more than its published
+  definitions describe:
+  - `TakeProfitDetails` takes a `distance` from the fill, as `StopLossDetails`
+    does, and `price` is optional (OANDA's definition already marks it so).
+    Orders can now set a take profit by distance as well.
+  - `AccountFinancingMode.DAILY_INSTRUMENT`, which every `DAILY_FINANCING`
+    transaction's position financings carry.
+  - `TransactionRejectReason.TAKE_PROFIT_ON_FILL_DISTANCE_PRECISION_EXCEEDED`.
+
+  Checked against a practice account's full history: 18,079 transactions, all
+  now parse. The additions are recorded as reviewed parity waivers.
+
 ## [0.5.0] — 2026-09-05
 
 ### Changed

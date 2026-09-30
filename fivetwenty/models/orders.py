@@ -36,9 +36,15 @@ class ClientExtensions(ApiModel):
 
 
 class TakeProfitDetails(ApiModel):
-    """Take Profit order details for on-fill orders."""
+    """Take Profit order details for on-fill orders.
 
-    price: PriceValue
+    OANDA accepts and records either a ``price`` or a ``distance`` from the
+    fill, as for a stop loss; its definitions list only ``price``, and mark it
+    optional.
+    """
+
+    price: PriceValue | None = None
+    distance: Decimal | None = None
     time_in_force: TimeInForce = Field(alias="timeInForce", default=TimeInForce.GTC)
     gtd_time: datetime | None = Field(alias="gtdTime", default=None)
     client_extensions: ClientExtensions | None = Field(alias="clientExtensions", default=None)
